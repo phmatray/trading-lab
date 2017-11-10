@@ -56,12 +56,11 @@ namespace Info.Blockchain.API.Client
 			}
 			HttpResponseMessage response = await httpClient.GetAsync(route);
 			string responseString = await ValidateResponse(response);
-		    // 10,590.93
 
-            if (!(responseString.StartsWith("{") || responseString.StartsWith("[")))
-		    {
-                responseString = $"\"result\":{responseString}";
-		    }
+            // phmatray
+		    if (typeof(T) == typeof(double))
+		        responseString = responseString.Replace(",", "");
+            // end of phmatray
 
 		    var responseObject = customDeserialization == null
 				? JsonConvert.DeserializeObject<T>(responseString)

@@ -31,7 +31,7 @@ namespace Botzilla
             //Compute(List<IStrategy> strategies);
             //Serve();
 
-            
+            Console.ReadLine();
         }
 
         private void Init()
@@ -41,18 +41,18 @@ namespace Botzilla
 
             BittrexDefaults.SetDefaultApiCredentials(key, secret);
             BittrexDefaults.SetDefaultLogOutput(Console.Out);
-            BittrexDefaults.SetDefaultLogVerbosity(LogVerbosity.Debug);
+            BittrexDefaults.SetDefaultLogVerbosity(LogVerbosity.Warning);
 
+            var now = DateTime.Now;
             var balanceBTC = GetBalance();
 
             var exchangeRateExplorer = new ExchangeRateExplorer();
-            double result = exchangeRateExplorer
+            double balanceUSD = exchangeRateExplorer
                 .FromBtcAsync(new BitcoinValue(balanceBTC), "USD")
                 .GetAwaiter()
                 .GetResult();
 
-
-            //_watchList = new List<string> { "BTC-PAY", "BTC-RADS" };
+            Console.WriteLine($"{now:G} | {balanceBTC} BTC | {balanceUSD} USD");
         }
 
         private static decimal GetBalance()
