@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using Info.Blockchain.API.Models;
 
 namespace Botzilla.Models
@@ -20,9 +21,13 @@ namespace Botzilla.Models
         public ReportLine(string line)
         {
             var list = line.Split('|').ToList();
-            DateTime = DateTime.Parse(list[0]);
-            BalanceBTC = new BitcoinValue(Convert.ToDecimal(list[1].TrimEnd(' ', 'B', 'T', 'C')));
-            BalanceUSD = Convert.ToDecimal(list[2].TrimEnd(' ', 'U', 'S', 'D'));
+            var sDateTime = list[0].Trim();
+            var sBalanceBTC = list[1].TrimEnd(' ', 'B', 'T', 'C');
+            var sBalanceUSD = list[2].TrimEnd(' ', 'U', 'S', 'D');
+
+            DateTime = DateTime.Parse(sDateTime);
+            BalanceBTC = new BitcoinValue(Convert.ToDecimal(sBalanceBTC));
+            BalanceUSD = Convert.ToDecimal(sBalanceUSD);
         }
 
         public override string ToString()

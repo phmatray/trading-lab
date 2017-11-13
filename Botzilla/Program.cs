@@ -135,7 +135,7 @@ namespace Botzilla
         private void UpdateReport()
         {
             Report.Add(CurrentLine);
-            File.AppendAllText(FileName, CurrentLine.ToString());
+            File.AppendAllLines(FileName, new List<string> {CurrentLine.ToString()});
             Console.WriteLine($"{CurrentLine}  {Difference}");
         }
     }
