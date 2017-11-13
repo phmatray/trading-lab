@@ -40,34 +40,8 @@ namespace Botzilla
         {
             Init();
             Watch();
-            //Compute(List<IStrategy> strategies);
-            //Serve();
 
             Console.ReadLine();
-        }
-
-        private void Watch()
-        {
-            while (true)
-            {
-                try
-                {
-                    var now = DateTime.Now;
-                    var balanceBTC = BittrexHelper.GetBalanceBTC();
-                    var balanceUSD = BittrexHelper.GetBalanceUSD(balanceBTC);
-
-                    PreviousLine = CurrentLine;
-                    CurrentLine = new ReportLine(now, balanceBTC, balanceUSD);
-                    
-                    UpdateReport();
-                    Thread.Sleep(TimeSpan.FromMinutes(5));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-            }
         }
 
         private void Init()
@@ -76,6 +50,31 @@ namespace Botzilla
             BittrexDefaults.SetDefaultLogOutput(Console.Out);
             BittrexDefaults.SetDefaultLogVerbosity(LogVerbosity.Warning);
             LoadReport();
+        }
+
+        private void Watch()
+        {
+            var timer = new Timer(CheckStatus, new AutoResetEvent(false), 0, 1000);
+        }
+
+        private void CheckStatus(Object stateInfo)
+        {
+            AutoResetEvent autoEvent = (AutoResetEvent)stateInfo;
+
+            var now = DateTime.Now;
+            int totalSeconds = now.Minute * 60 + now.Second;
+
+            if (totalSeconds % 300 == 0)
+            {
+                var balanceBTC = BittrexHelper.GetBalanceBTC();
+                var balanceUSD = BittrexHelper.GetBalanceUSD(balanceBTC);
+
+                PreviousLine = CurrentLine;
+                CurrentLine = new ReportLine(now, balanceBTC, balanceUSD);
+
+                UpdateReport();
+                Thread.Sleep(TimeSpan.FromMinutes(5));
+            }
         }
 
         private void LoadReport()

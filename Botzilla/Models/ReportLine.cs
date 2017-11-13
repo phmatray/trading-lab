@@ -22,8 +22,8 @@ namespace Botzilla.Models
         {
             var list = line.Split('|').ToList();
             var sDateTime = list[0].Trim();
-            var sBalanceBTC = list[1].TrimEnd(' ', 'B', 'T', 'C');
-            var sBalanceUSD = list[2].TrimEnd(' ', 'U', 'S', 'D');
+            var sBalanceBTC = list[1].Trim().TrimEnd(' ', 'B', 'T', 'C');
+            var sBalanceUSD = list[2].Trim().TrimEnd(' ', 'U', 'S', 'D');
 
             DateTime = DateTime.Parse(sDateTime);
             BalanceBTC = new BitcoinValue(Convert.ToDecimal(sBalanceBTC));
