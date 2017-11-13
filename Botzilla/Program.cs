@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TicTacTec.TA.Library;
+using System.Threading;
 using Bittrex.Net;
 using Bittrex.Net.Logging;
-using Info.Blockchain.API.ExchangeRates;
-using Info.Blockchain.API.Models;
+using Botzilla.Helpers;
+using Botzilla.Models;
 
 namespace Botzilla
 {
@@ -22,74 +22,121 @@ namespace Botzilla
 
     public class Bot
     {
-        private List<string> _watchList;
+        private const string Key = "c72dc5afff514f6e9b6a09a835aa7eed";
+        private const string Secret = "6b2aa822edb2429db35a83aa0ca805ab";
+        private const string FileName = "bittrex.txt";
+
+        public List<ReportLine> Report;
+        public ReportLine CurrentLine;
+        public ReportLine PreviousLine;
+
+        public List<string> ReportLines
+            => Report?.Select(x => x.ToString()).ToList();
+
+        public string Difference
+            => GetDifference(CurrentLine, PreviousLine);
 
         public void Process()
         {
             Init();
-            //Watch();
+            Watch();
             //Compute(List<IStrategy> strategies);
             //Serve();
 
             Console.ReadLine();
         }
 
-        private void Init()
+        private void Watch()
         {
-            var key = "c72dc5afff514f6e9b6a09a835aa7eed";
-            var secret = "6b2aa822edb2429db35a83aa0ca805ab";
-
-            BittrexDefaults.SetDefaultApiCredentials(key, secret);
-            BittrexDefaults.SetDefaultLogOutput(Console.Out);
-            BittrexDefaults.SetDefaultLogVerbosity(LogVerbosity.Warning);
-
-            var now = DateTime.Now;
-            var balanceBTC = GetBalance();
-
-            var exchangeRateExplorer = new ExchangeRateExplorer();
-            double balanceUSD = exchangeRateExplorer
-                .FromBtcAsync(new BitcoinValue(balanceBTC), "USD")
-                .GetAwaiter()
-                .GetResult();
-
-            Console.WriteLine($"{now:G} | {balanceBTC} BTC | {balanceUSD} USD");
-        }
-
-        private static decimal GetBalance()
-        {
-            using (var client = new BittrexClient())
+            while (true)
             {
-                var myBalances = client.GetBalances()
-                    .Result
-                    .Where(x => x.Balance > 0)
-                    .ToList();
-
-                decimal result = 0;
-                foreach (var b in myBalances)
+                try
                 {
-                    if (b.Currency == "BTC")
-                        result += (decimal) b.Balance;
-                    else
-                    {
-                        var ticker = client.GetTicker($"BTC-{b.Currency}");
-                        result += (decimal) (ticker.Result.Bid * b.Balance);
-                    }
-                }
+                    var now = DateTime.Now;
+                    var balanceBTC = BittrexHelper.GetBalanceBTC();
+                    var balanceUSD = BittrexHelper.GetBalanceUSD(balanceBTC);
 
-                return result;
+                    PreviousLine = CurrentLine;
+                    CurrentLine = new ReportLine(now, balanceBTC, balanceUSD);
+                    
+                    UpdateReport();
+                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
         }
-    }
 
-    public interface IStrategy
-    {
-        
-    }
+        private void Init()
+        {
+            BittrexDefaults.SetDefaultApiCredentials(Key, Secret);
+            BittrexDefaults.SetDefaultLogOutput(Console.Out);
+            BittrexDefaults.SetDefaultLogVerbosity(LogVerbosity.Warning);
+            LoadReport();
+        }
 
-    public class DMAC
-        : IStrategy
-    {
-        
-    }
+        private void LoadReport()
+        {
+            if (!File.Exists(FileName))
+                File.Create(FileName).Close();
 
+            Report = File
+                .ReadAllLines(FileName)
+                .Select(x => new ReportLine(x))
+                .ToList();
+
+            PreviousLine = null;
+            foreach (ReportLine line in Report)
+            {
+                CurrentLine = line;
+                Console.WriteLine($"{CurrentLine}  {Difference}");
+                PreviousLine = CurrentLine;
+            }
+        }
+
+        private string GetDifference(ReportLine current, ReportLine previous)
+        {
+            var sb = new StringBuilder();
+
+            if (previous != null)
+            {
+                decimal currentBTC = current.BalanceBTC.GetBtc();
+                decimal previousBTC = previous.BalanceBTC.GetBtc();
+                decimal currentUSD = current.BalanceUSD;
+                decimal previousUSD = previous.BalanceUSD;
+
+                sb.Append('(');
+
+                if (currentBTC > previousBTC)
+                    sb.Append('+');
+                else if (currentBTC < previousBTC)
+                    sb.Append('-');
+                else
+                    sb.Append('=');
+
+                sb.Append('/');
+
+                if (currentUSD > previousUSD)
+                    sb.Append('+');
+                else if (currentUSD < previousUSD)
+                    sb.Append('-');
+                else
+                    sb.Append('=');
+
+                sb.Append(')');
+            }
+
+            return sb.ToString();
+        }
+
+        private void UpdateReport()
+        {
+            Report.Add(CurrentLine);
+            File.AppendAllText(FileName, CurrentLine.ToString());
+            Console.WriteLine($"{CurrentLine}  {Difference}");
+        }
+    }
 }
