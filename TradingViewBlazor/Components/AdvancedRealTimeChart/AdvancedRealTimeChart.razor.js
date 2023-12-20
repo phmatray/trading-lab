@@ -1,16 +1,3 @@
-export function initializeTradingViewWidget(contcontainerainer, settings) {
-  const script = document.createElement("script");
-  script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-  script.type = "text/javascript";
-  script.async = true;
-  script.innerHTML = JSON.stringify(settings);
-  container.appendChild(script);
-}
-
-export function showPrompt(message) {
-  return prompt(message, 'Type anything here');
-}
-
 export function initAdvancedRealTimeChart(reference, settings) {
   const script = document.createElement("script");
   script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
@@ -34,5 +21,4 @@ export function initAdvancedRealTimeChart(reference, settings) {
   });
   
   reference.appendChild(script);
-  // return alert(JSON.stringify(settings, null, 2));
 }

@@ -1,7 +1,94 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>NASDAQ:MSFT</h1>
+<AdvancedRealTimeChart Settings="@settings" />
 
-Welcome to your new app.
+<h1>NASDAQ:AAPL</h1>
+<AdvancedRealTimeChart Settings="@settings2" />
+
+<EditForm Model="@settings">
+    <div class="row">
+        <div class="col">
+            <label>Width</label>
+            <InputText @bind-Value="@settings!.Width" class="form-control"/>
+        </div>
+        <div class="col">
+            <label>Height</label>
+            <InputText @bind-Value="@settings.Height" class="form-control"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+    <div class="form-group">
+        <label>Theme</label>
+        <InputSelect @bind-Value="@settings.Theme" class="form-control">
+            <option value="TradingViewTheme.Light">Light</option>
+            <option value="TradingViewTheme.Dark">Dark</option>
+        </InputSelect>
+    </div>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Default Interval</label>
+        <InputText @bind-Value="@settings.Interval" class="form-control"/>
+    </div>
+    @* <div class="form-group"> *@
+    @*     <label> *@
+    @*         Timezone *@
+    @*         <InputSelect @bind-Value="@settings.Timezone" class="form-control"> *@
+    @*             <option value="TimeZoneInfo.Utc">UTC</option> *@
+    @*             <option value="TimeZoneInfo.Local">Local</option> *@
+    @*         </InputSelect> *@
+    @*     </label> *@
+    @* </div> *@
+    <div class="form-group">
+        <label>
+            Locale:
+            <InputText @bind-Value="@settings.Locale" class="form-control"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Enable Publishing:
+            <InputCheckbox @bind-Value="@settings.EnablePublishing"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Allow Symbol Change:
+            <InputCheckbox @bind-Value="@settings.AllowSymbolChange"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            With Date Ranges:
+            <InputCheckbox @bind-Value="@settings.WithDateRanges"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Hide Side Toolbar:
+            <InputCheckbox @bind-Value="@settings.HideSideToolbar"/>
+        </label>
+    </div>
+    <FluentButton Appearance="@Appearance.Accent" Type="ButtonType.Reset">Reset</FluentButton>
+    <FluentButton Appearance="@Appearance.Accent" Type="ButtonType.Submit">Apply</FluentButton>
+</EditForm>
+
+@code
+{
+    [SupplyParameterFromForm] 
+    public AdvancedRealTimeChartSettings? settings { get; set; }
+    public AdvancedRealTimeChartSettings? settings2 { get; set; }
+
+    protected override void OnInitialized()
+    {
+        settings ??= new AdvancedRealTimeChartSettings();
+        settings2 ??= new AdvancedRealTimeChartSettings {Symbol = "NASDAQ:AAPL"};
+    }
+}

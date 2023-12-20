@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components;
+namespace TradingViewBlazor.Models;
 
 public enum TradingViewTheme
 {

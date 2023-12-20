@@ -5,7 +5,7 @@ namespace TradingViewBlazor.Components.AdvancedRealTimeChart;
 
 public partial class AdvancedRealTimeChart
 {
-    private const string JavaScriptFileName = "./_content/TradingViewBlazor/Components/AdvancedRealTimeChart/AdvancedRealTimeChart.js";
+    private const string JavaScriptFileName = "./_content/TradingViewBlazor/Components/AdvancedRealTimeChart/AdvancedRealTimeChart.razor.js";
     
     [Inject]
     private IJSRuntime JsRuntime { get; set; } = default!;

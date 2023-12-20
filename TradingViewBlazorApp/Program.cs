@@ -1,3 +1,4 @@
+using Microsoft.FluentUI.AspNetCore.Components;
 using TradingViewBlazorApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Add FluentUI Blazor
+builder.Services.AddFluentUIComponents();
 
 var app = builder.Build();
 
