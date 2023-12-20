@@ -1,4 +1,4 @@
-export function initAdvancedRealTimeChart(reference, settings) {
+export function initTradingViewComponent(reference, settings) {
   const script = document.createElement("script");
   script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
   script.type = "text/javascript";

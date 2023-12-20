@@ -1,5 +1,7 @@
+@inherits TradingViewBlazor.Abstractions.TradingViewComponentBase<TradingViewBlazor.Components.AdvancedRealTimeChart.AdvancedRealTimeChartSettings>
+
 <div
-    @ref="@_advancedRealTimeWidgetReference"
+    @ref="@WrapperReference"
     class="tradingview-widget-container"
     style="height: 100%; width: 100%;">
     <div class="tradingview-widget-container__widget" style="height: calc(100% - 32px); width: 100%;"></div>
@@ -9,3 +11,8 @@
     @*     </a> *@
     @* </div> *@
 </div>
+
+@code {
+    protected override string JavaScriptFileName
+        => "./_content/TradingViewBlazor/Components/AdvancedRealTimeChart/AdvancedRealTimeChart.razor.js";
+}
