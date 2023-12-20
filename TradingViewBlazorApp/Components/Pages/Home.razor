@@ -1,11 +1,13 @@
 ﻿@page "/"
-@using TradingViewBlazor.Components.TechnicalAnalysis
 @using TradingViewBlazor.Components.FundamentalData
+@using TradingViewBlazor.Components.MiniChart
+@using TradingViewBlazor.Components.TechnicalAnalysis
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
 <h1>NASDAQ:MSFT</h1>
+<MiniChart Settings="@SettingsMiniChart" />
 <FundamentalData Settings="@SettingsFundamentalData" />
 <AdvancedRealTimeChart Settings="@Settings" />
 <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis" />
@@ -86,14 +88,16 @@
     [SupplyParameterFromForm] 
     public AdvancedRealTimeChartSettings? Settings { get; set; }
     
-    public TechnicalAnalysisSettings? SettingsTechnicalAnalysis { get; set; }
     public FundamentalDataSettings? SettingsFundamentalData { get; set; }
+    public MiniChartSettings? SettingsMiniChart { get; set; }
+    public TechnicalAnalysisSettings? SettingsTechnicalAnalysis { get; set; }
     
     protected override void OnInitialized()
     {
         const string symbol = "NASDAQ:MSFT";
         Settings ??= new AdvancedRealTimeChartSettings { Symbol = symbol };
-        SettingsTechnicalAnalysis ??= new TechnicalAnalysisSettings { Symbol = symbol };
         SettingsFundamentalData ??= new FundamentalDataSettings { Symbol = symbol };
+        SettingsMiniChart ??= new MiniChartSettings { Symbol = symbol };
+        SettingsTechnicalAnalysis ??= new TechnicalAnalysisSettings { Symbol = symbol };
     }
 }
