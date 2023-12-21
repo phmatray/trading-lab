@@ -3,6 +3,6 @@ namespace TradingViewBlazor.Components;
 public class Ticker
     : TradingViewComponentBase<TickerSettings>
 {
-    protected override string JavaScriptFileName
-        => "./_content/TradingViewBlazor/js/ticker.js";
+    protected override string TradingViewScriptUrl
+        => "https://s3.tradingview.com/external-embedding/embed-widget-tickers.js";
 }

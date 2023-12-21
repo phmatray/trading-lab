@@ -3,9 +3,20 @@ using Microsoft.AspNetCore.Components.Rendering;
 
 namespace TradingViewBlazor.Abstractions;
 
+/// <summary>
+/// The base class for all TradingView components.
+/// </summary>
+/// <typeparam name="TSettings">The type of the settings.</typeparam>
 public abstract class TradingViewComponentBase<TSettings>
     : ComponentBase, IAsyncDisposable
 {
+    /// <summary>
+    /// The path to the JavaScript file that contains the helper functions to load the TradingView script.
+    /// </summary>
+    private const string JavaScriptFileName = "./_content/TradingViewBlazor/js/helpers.js";
+    
+    private ElementReference WrapperReference { get; set; }
+
     [Inject]
     private IJSRuntime JSRuntime { get; set; } = default!;
     
@@ -18,16 +29,13 @@ public abstract class TradingViewComponentBase<TSettings>
     
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? WrapperAttributes { get; set; }
-    
-    protected abstract string JavaScriptFileName { get; }
-    
-    protected ElementReference WrapperReference { get; set; }
+
+    protected abstract string TradingViewScriptUrl { get; }
 
     private Lazy<Task<IJSObjectReference>> ModuleTask
         => new(() => JSRuntime
             .InvokeAsync<IJSObjectReference>("import", JavaScriptFileName)
             .AsTask());
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -40,7 +48,7 @@ public abstract class TradingViewComponentBase<TSettings>
     private async Task InitTradingViewComponent()
     {
         var module = await ModuleTask.Value;
-        await module.InvokeVoidAsync("initTradingViewComponent", WrapperReference, Settings);
+        await module.InvokeVoidAsync("loadTradingViewScript", WrapperReference, Settings, TradingViewScriptUrl);
     }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
