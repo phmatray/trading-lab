@@ -32,6 +32,8 @@ public abstract class TradingViewComponentBase<TSettings>
 
     protected abstract string TradingViewScriptUrl { get; }
 
+    protected abstract string SerializeSettings(TSettings settings);
+
     private Lazy<Task<IJSObjectReference>> ModuleTask
         => new(() => JSRuntime
             .InvokeAsync<IJSObjectReference>("import", JavaScriptFileName)
@@ -48,7 +50,8 @@ public abstract class TradingViewComponentBase<TSettings>
     private async Task InitTradingViewComponent()
     {
         var module = await ModuleTask.Value;
-        await module.InvokeVoidAsync("loadTradingViewScript", WrapperReference, Settings, TradingViewScriptUrl);
+        var settingsJson = SerializeSettings(Settings);
+        await module.InvokeVoidAsync("loadTradingViewScript", WrapperReference, settingsJson, TradingViewScriptUrl);
     }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)

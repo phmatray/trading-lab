@@ -1,11 +1,10 @@
-using System.Text.Json.Serialization;
-using TradingViewBlazor.Components;
-
 namespace TradingViewBlazor;
 
 [JsonSerializable(typeof(AdvancedRealTimeChartSettings))]
+[JsonSerializable(typeof(CryptoCoinsHeatmapSettings))]
 [JsonSerializable(typeof(FundamentalDataSettings))]
 [JsonSerializable(typeof(MiniChartSettings))]
+[JsonSerializable(typeof(StockHeatmapSettings))]
 [JsonSerializable(typeof(TechnicalAnalysisSettings))]
 [JsonSerializable(typeof(TickerSettings))]
 [JsonSourceGenerationOptions(
