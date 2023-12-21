@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components.Ticker;
+namespace TradingViewBlazor.Components;
 
 public class TickerSettings
 {

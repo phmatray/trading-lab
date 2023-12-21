@@ -15,4 +15,12 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\js\advanced-real-time-chart.js" />
+      <None Include="wwwroot\js\fundamental-data.js" />
+      <None Include="wwwroot\js\mini-chart.js" />
+      <None Include="wwwroot\js\technical-analysis.js" />
+      <None Include="wwwroot\js\Ticker.js" />
+    </ItemGroup>
+
 </Project>

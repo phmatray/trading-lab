@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components.TechnicalAnalysis;
+namespace TradingViewBlazor.Components;
 
 public class TechnicalAnalysisSettings
 {

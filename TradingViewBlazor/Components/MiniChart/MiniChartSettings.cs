@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components.MiniChart;
+namespace TradingViewBlazor.Components;
 
 public class MiniChartSettings
 {

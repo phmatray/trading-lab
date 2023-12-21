@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components.AdvancedRealTimeChart;
+namespace TradingViewBlazor.Components;
 
 public class AdvancedRealTimeChartSettings
 {

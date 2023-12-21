@@ -1,4 +1,4 @@
-namespace TradingViewBlazor.Components.FundamentalData;
+namespace TradingViewBlazor.Components;
 
 public class FundamentalDataSettings
 {
