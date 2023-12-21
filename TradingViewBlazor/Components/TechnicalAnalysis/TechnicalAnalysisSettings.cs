@@ -1,5 +1,3 @@
-using TradingViewBlazor.Models;
-
 namespace TradingViewBlazor.Components.TechnicalAnalysis;
 
 public class TechnicalAnalysisSettings

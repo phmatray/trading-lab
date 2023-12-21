@@ -1,5 +1,3 @@
-using TradingViewBlazor.Models;
-
 namespace TradingViewBlazor.Components.AdvancedRealTimeChart;
 
 public class AdvancedRealTimeChartSettings

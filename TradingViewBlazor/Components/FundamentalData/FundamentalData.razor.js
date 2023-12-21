@@ -13,6 +13,6 @@ export function initTradingViewComponent(reference, settings) {
     symbol: settings.symbol,
     locale: settings.locale
   });
-  
+
   reference.appendChild(script);
 }

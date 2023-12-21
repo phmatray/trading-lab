@@ -1,0 +1,13 @@
+@inherits TradingViewBlazor.Abstractions.TradingViewComponentBase<TickerSettings>
+
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <WidgetCopyright/>
+</div>
+
+@code {
+  
+  protected override string JavaScriptFileName
+    => "./_content/TradingViewBlazor/Components/Ticker/Ticker.razor.js";
+  
+}

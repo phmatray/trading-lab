@@ -1,7 +1,4 @@
 ﻿@page "/"
-@using TradingViewBlazor.Components.FundamentalData
-@using TradingViewBlazor.Components.MiniChart
-@using TradingViewBlazor.Components.TechnicalAnalysis
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -9,47 +6,58 @@
 <h1>NASDAQ:MSFT</h1>
 
 <FluentGrid>
-    <FluentGridItem xs="12" md="6">
-        <FundamentalData Settings="@SettingsFundamentalData"/>
+    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <Ticker Settings="@SettingsTicker"/>
+        </ErrorBoundary>
     </FluentGridItem>
     <FluentGridItem xs="12" md="6">
-        <MiniChart Settings="@SettingsMiniChart"/>
-        <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis"/>
+        <ErrorBoundary>
+            <FundamentalData Settings="@SettingsFundamentalData"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12" md="6">
+        <ErrorBoundary>
+            <MiniChart Settings="@SettingsMiniChart"/>
+        </ErrorBoundary>
+        <ErrorBoundary>
+            <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis"/>
+        </ErrorBoundary>
     </FluentGridItem>
     <FluentGridItem xs="12">
-        <AdvancedRealTimeChart Settings="@Settings"/>
-    </FluentGridItem>
-    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <AdvancedRealTimeChart Settings="@SettingsAdvancedRealTimeChart"/>
+        </ErrorBoundary>
     </FluentGridItem>
 </FluentGrid>
 
-<EditForm Model="@Settings">
+<EditForm Model="@SettingsAdvancedRealTimeChart">
     <div class="row">
         <div class="col">
             <label>Width</label>
-            <InputText @bind-Value="@Settings!.Width" class="form-control"/>
+            <InputText @bind-Value="@SettingsAdvancedRealTimeChart!.Width" class="form-control"/>
         </div>
         <div class="col">
             <label>Height</label>
-            <InputText @bind-Value="@Settings.Height" class="form-control"/>
+            <InputText @bind-Value="@SettingsAdvancedRealTimeChart.Height" class="form-control"/>
         </div>
     </div>
     <div class="row">
         <div class="col">
-    <div class="form-group">
-        <label>Theme</label>
-        <InputSelect @bind-Value="@Settings.Theme" class="form-control">
-            <option value="TradingViewTheme.Light">Light</option>
-            <option value="TradingViewTheme.Dark">Dark</option>
-        </InputSelect>
-    </div>
+            <div class="form-group">
+                <label>Theme</label>
+                <InputSelect @bind-Value="@SettingsAdvancedRealTimeChart.Theme" class="form-control">
+                    <option value="TradingViewTheme.Light">Light</option>
+                    <option value="TradingViewTheme.Dark">Dark</option>
+                </InputSelect>
+            </div>
         </div>
         <div class="col">
         </div>
     </div>
     <div class="form-group">
         <label>Default Interval</label>
-        <InputText @bind-Value="@Settings.Interval" class="form-control"/>
+        <InputText @bind-Value="@SettingsAdvancedRealTimeChart.Interval" class="form-control"/>
     </div>
     @* <div class="form-group"> *@
     @*     <label> *@
@@ -63,31 +71,31 @@
     <div class="form-group">
         <label>
             Locale:
-            <InputText @bind-Value="@Settings.Locale" class="form-control"/>
+            <InputText @bind-Value="@SettingsAdvancedRealTimeChart.Locale" class="form-control"/>
         </label>
     </div>
     <div class="form-group">
         <label>
             Enable Publishing:
-            <InputCheckbox @bind-Value="@Settings.EnablePublishing"/>
+            <InputCheckbox @bind-Value="@SettingsAdvancedRealTimeChart.EnablePublishing"/>
         </label>
     </div>
     <div class="form-group">
         <label>
             Allow Symbol Change:
-            <InputCheckbox @bind-Value="@Settings.AllowSymbolChange"/>
+            <InputCheckbox @bind-Value="@SettingsAdvancedRealTimeChart.AllowSymbolChange"/>
         </label>
     </div>
     <div class="form-group">
         <label>
             With Date Ranges:
-            <InputCheckbox @bind-Value="@Settings.WithDateRanges"/>
+            <InputCheckbox @bind-Value="@SettingsAdvancedRealTimeChart.WithDateRanges"/>
         </label>
     </div>
     <div class="form-group">
         <label>
             Hide Side Toolbar:
-            <InputCheckbox @bind-Value="@Settings.HideSideToolbar"/>
+            <InputCheckbox @bind-Value="@SettingsAdvancedRealTimeChart.HideSideToolbar"/>
         </label>
     </div>
     <FluentButton Appearance="@Appearance.Accent" Type="ButtonType.Reset">Reset</FluentButton>
@@ -97,18 +105,21 @@
 @code
 {
     [SupplyParameterFromForm] 
-    public AdvancedRealTimeChartSettings? Settings { get; set; }
-    
-    public FundamentalDataSettings? SettingsFundamentalData { get; set; }
-    public MiniChartSettings? SettingsMiniChart { get; set; }
-    public TechnicalAnalysisSettings? SettingsTechnicalAnalysis { get; set; }
+    public AdvancedRealTimeChartSettings? SettingsAdvancedRealTimeChart { get; set; }
+
+    private FundamentalDataSettings? SettingsFundamentalData { get; set; }
+    private MiniChartSettings? SettingsMiniChart { get; set; }
+    private TechnicalAnalysisSettings? SettingsTechnicalAnalysis { get; set; }
+    private TickerSettings? SettingsTicker { get; set; }
     
     protected override void OnInitialized()
     {
         const string symbol = "NASDAQ:MSFT";
-        Settings ??= new AdvancedRealTimeChartSettings { Symbol = symbol, Width = "100%" };
-        SettingsFundamentalData ??= new FundamentalDataSettings { Symbol = symbol, Width = "100%" };
-        SettingsMiniChart ??= new MiniChartSettings { Symbol = symbol, Width = "100%" };
-        SettingsTechnicalAnalysis ??= new TechnicalAnalysisSettings { Symbol = symbol, Width = "100%" };
+        
+        SettingsAdvancedRealTimeChart ??= new AdvancedRealTimeChartSettings { Symbol = symbol, Width = "100%" };
+        SettingsFundamentalData       ??= new FundamentalDataSettings       { Symbol = symbol, Width = "100%" };
+        SettingsMiniChart             ??= new MiniChartSettings             { Symbol = symbol, Width = "100%" };
+        SettingsTechnicalAnalysis     ??= new TechnicalAnalysisSettings     { Symbol = symbol, Width = "100%" };
+        SettingsTicker                ??= new TickerSettings();
     }
 }

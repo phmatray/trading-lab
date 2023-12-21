@@ -19,6 +19,6 @@ export function initTradingViewComponent(reference, settings) {
     allowSymbolChange: settings.allowSymbolChange,
     "support_host": "https://www.tradingview.com"
   });
-  
+
   reference.appendChild(script);
 }

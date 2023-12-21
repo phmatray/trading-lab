@@ -12,8 +12,8 @@ export function initTradingViewComponent(reference, settings) {
     "showIntervalTabs": settings.showIntervalTabs,
     "displayMode": settings.displayMode,
     "locale": settings.locale,
-    "colorTheme": settings.colorTheme
+    "colorTheme": settings.colorTheme.toString()
   });
-  
+
   reference.appendChild(script);
 }

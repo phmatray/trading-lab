@@ -1,5 +1,3 @@
-using TradingViewBlazor.Models;
-
 namespace TradingViewBlazor.Components.FundamentalData;
 
 public class FundamentalDataSettings
