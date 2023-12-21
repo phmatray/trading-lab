@@ -7,10 +7,21 @@
 <PageTitle>Home</PageTitle>
 
 <h1>NASDAQ:MSFT</h1>
-<MiniChart Settings="@SettingsMiniChart" />
-<FundamentalData Settings="@SettingsFundamentalData" />
-<AdvancedRealTimeChart Settings="@Settings" />
-<TechnicalAnalysis Settings="@SettingsTechnicalAnalysis" />
+
+<FluentGrid>
+    <FluentGridItem xs="12" md="6">
+        <FundamentalData Settings="@SettingsFundamentalData"/>
+    </FluentGridItem>
+    <FluentGridItem xs="12" md="6">
+        <MiniChart Settings="@SettingsMiniChart"/>
+        <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis"/>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <AdvancedRealTimeChart Settings="@Settings"/>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+    </FluentGridItem>
+</FluentGrid>
 
 <EditForm Model="@Settings">
     <div class="row">
@@ -95,9 +106,9 @@
     protected override void OnInitialized()
     {
         const string symbol = "NASDAQ:MSFT";
-        Settings ??= new AdvancedRealTimeChartSettings { Symbol = symbol };
-        SettingsFundamentalData ??= new FundamentalDataSettings { Symbol = symbol };
-        SettingsMiniChart ??= new MiniChartSettings { Symbol = symbol };
-        SettingsTechnicalAnalysis ??= new TechnicalAnalysisSettings { Symbol = symbol };
+        Settings ??= new AdvancedRealTimeChartSettings { Symbol = symbol, Width = "100%" };
+        SettingsFundamentalData ??= new FundamentalDataSettings { Symbol = symbol, Width = "100%" };
+        SettingsMiniChart ??= new MiniChartSettings { Symbol = symbol, Width = "100%" };
+        SettingsTechnicalAnalysis ??= new TechnicalAnalysisSettings { Symbol = symbol, Width = "100%" };
     }
 }
