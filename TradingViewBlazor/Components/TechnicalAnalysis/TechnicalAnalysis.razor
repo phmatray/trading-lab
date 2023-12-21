@@ -1,10 +1,10 @@
-@inherits TradingViewBlazor.Abstractions.TradingViewComponentBase<TechnicalAnalysisSettings>
+@inherits TradingViewComponentBase<TechnicalAnalysisSettings>
 
-<div
-  @ref="@WrapperReference"
-  class="tradingview-widget-container">
-  <div class="tradingview-widget-container__widget"></div>
-  <WidgetCopyright/>
+<div @attributes="@WrapperAttributes">
+  <div @ref="@WrapperReference" class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+    <WidgetCopyright ShowCopyright="@ShowCopyright" />
+  </div>
 </div>
 
 @code {

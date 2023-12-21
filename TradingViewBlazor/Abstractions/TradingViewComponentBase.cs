@@ -12,6 +12,12 @@ public abstract class TradingViewComponentBase<TSettings>
     [Parameter]
     [EditorRequired]
     public required TSettings Settings { get; set; }
+
+    [Parameter]
+    public bool ShowCopyright { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? WrapperAttributes { get; set; }
     
     protected abstract string JavaScriptFileName { get; }
     

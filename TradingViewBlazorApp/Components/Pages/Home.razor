@@ -3,13 +3,14 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>NASDAQ:MSFT</h1>
-
 <FluentGrid>
     <FluentGridItem xs="12">
         <ErrorBoundary>
             <Ticker Settings="@SettingsTicker"/>
         </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <h1>NASDAQ:MSFT</h1>
     </FluentGridItem>
     <FluentGridItem xs="12" md="6">
         <ErrorBoundary>
@@ -21,7 +22,7 @@
             <MiniChart Settings="@SettingsMiniChart"/>
         </ErrorBoundary>
         <ErrorBoundary>
-            <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis"/>
+            <TechnicalAnalysis Settings="@SettingsTechnicalAnalysis" style="margin-top: 24px;"/>
         </ErrorBoundary>
     </FluentGridItem>
     <FluentGridItem xs="12">

@@ -1,11 +1,10 @@
-@inherits TradingViewComponentBase<TradingViewBlazor.Components.AdvancedRealTimeChart.AdvancedRealTimeChartSettings>
+@inherits TradingViewComponentBase<AdvancedRealTimeChartSettings>
 
-<div
-  @ref="@WrapperReference"
-  class="tradingview-widget-container"
-  style="height: 100%; width: 100%;">
-  <div class="tradingview-widget-container__widget" style="height: calc(100% - 32px); width: 100%;"></div>
-  <WidgetCopyright/>
+<div @attributes="@WrapperAttributes">
+  <div @ref="@WrapperReference" class="tradingview-widget-container" style="height: 100%; width: 100%;">
+    <div class="tradingview-widget-container__widget" style="height: calc(100% - 32px); width: 100%;"></div>
+    <WidgetCopyright ShowCopyright="@ShowCopyright" />
+  </div>
 </div>
 
 @code {
