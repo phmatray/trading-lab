@@ -1,0 +1,7 @@
+is_global = true
+
+# SA1636: File header copyright text should match
+dotnet_diagnostic.SA1636.severity = none
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = warning
