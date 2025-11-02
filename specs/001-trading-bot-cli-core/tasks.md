@@ -31,12 +31,12 @@ Tasks are organized by:
 Create the complete solution structure with all projects, configure central package management, and set up build configuration.
 
 **Acceptance Criteria**:
-- [ ] Solution file created with all 12 projects
-- [ ] Directory.Packages.props configured with all package versions
-- [ ] Directory.Build.props configured with common properties
-- [ ] All projects reference correct dependencies
-- [ ] Solution builds successfully on Windows, macOS, and Linux
-- [ ] No build warnings or errors
+- [X] Solution file created with all 12 projects
+- [X] Directory.Packages.props configured with all package versions
+- [X] Directory.Build.props configured with common properties
+- [X] All projects reference correct dependencies
+- [X] Solution builds successfully on Windows, macOS, and Linux
+- [X] No build warnings or errors
 
 **Implementation Steps**:
 1. Run solution creation commands from .speckit.plan
@@ -65,14 +65,14 @@ dotnet build --no-restore
 Set up Roslyn analyzers, EditorConfig, and code quality enforcement to ensure consistent code style and catch issues early.
 
 **Acceptance Criteria**:
-- [ ] .editorconfig created with C# style rules
-- [ ] .globalconfig created for Roslyn analyzer configuration
-- [ ] StyleCop.Analyzers configured
-- [ ] Roslynator.Analyzers configured
-- [ ] Microsoft.CodeAnalysis.NetAnalyzers enabled
-- [ ] SonarAnalyzer.CSharp configured
-- [ ] TreatWarningsAsErrors enabled
-- [ ] All projects pass analyzer checks
+- [X] .editorconfig created with C# style rules
+- [X] .globalconfig created for Roslyn analyzer configuration
+- [X] StyleCop.Analyzers configured
+- [X] Roslynator.Analyzers configured
+- [X] Microsoft.CodeAnalysis.NetAnalyzers enabled
+- [X] SonarAnalyzer.CSharp configured
+- [X] TreatWarningsAsErrors enabled
+- [X] All projects pass analyzer checks
 
 **Files to Create**:
 - `.editorconfig`
@@ -136,17 +136,17 @@ Create GitHub Actions workflows for continuous integration, testing, and code qu
 Implement all core domain models for market data, trading, portfolio, and backtesting.
 
 **Acceptance Criteria**:
-- [ ] Quote record implemented with XML docs
-- [ ] Candle record implemented with XML docs
-- [ ] Order class implemented with all properties
-- [ ] Position class implemented
-- [ ] Trade class implemented
-- [ ] Signal class implemented
-- [ ] Account class implemented
-- [ ] PerformanceMetrics class implemented
-- [ ] All enums implemented (OrderType, OrderSide, OrderStatus, SignalType)
-- [ ] All models use required properties where appropriate
-- [ ] All models use nullable reference types correctly
+- [X] Quote record implemented with XML docs
+- [X] Candle record implemented with XML docs
+- [X] Order class implemented with all properties
+- [X] Position class implemented
+- [X] Trade class implemented
+- [X] Signal class implemented
+- [X] Account class implemented
+- [X] PerformanceMetrics class implemented
+- [X] All enums implemented (OrderType, OrderSide, OrderStatus, SignalType)
+- [X] All models use required properties where appropriate
+- [X] All models use nullable reference types correctly
 - [ ] Unit tests written for all models (80%+ coverage)
 
 **Models to Implement** (in `TradingBot.Core/Models/`):
@@ -184,18 +184,18 @@ Implement all core domain models for market data, trading, portfolio, and backte
 Define all core service interfaces that will be implemented in later phases.
 
 **Acceptance Criteria**:
-- [ ] IMarketDataService interface defined with XML docs
-- [ ] IStrategy interface defined
+- [X] IMarketDataService interface defined with XML docs
+- [X] IStrategy interface defined
 - [ ] IStrategyEngine interface defined
 - [ ] IOrderExecutionService interface defined
 - [ ] IPortfolioManager interface defined
 - [ ] IRiskManager interface defined
 - [ ] IBacktestingEngine interface defined
-- [ ] IEncryptionService interface defined
+- [X] IEncryptionService interface defined
 - [ ] IHistoricalDataCache interface defined
-- [ ] All methods have clear XML documentation
-- [ ] All async methods return Task or Task<T>
-- [ ] All methods include CancellationToken parameters
+- [X] All methods have clear XML documentation
+- [X] All async methods return Task or Task<T>
+- [X] All methods include CancellationToken parameters
 
 **Interfaces to Define** (in `TradingBot.Core/Interfaces/`):
 - IMarketDataService.cs
@@ -251,14 +251,14 @@ Create initial project documentation including README, contributing guidelines, 
 Implement Entity Framework Core 9 database context with SQLite support and entity configurations.
 
 **Acceptance Criteria**:
-- [ ] TradingBotDbContext class implemented
-- [ ] DbSet properties for all entities
-- [ ] OnModelCreating configured
-- [ ] SQLite-specific configurations applied (decimal conversion)
-- [ ] Entity configurations created for all entities
-- [ ] Indexes defined for query optimization
-- [ ] Foreign key relationships configured
-- [ ] Default values set where appropriate
+- [X] TradingBotDbContext class implemented
+- [X] DbSet properties for all entities
+- [X] OnModelCreating configured
+- [X] SQLite-specific configurations applied (decimal conversion)
+- [X] Entity configurations created for all entities
+- [X] Indexes defined for query optimization
+- [X] Foreign key relationships configured
+- [X] Default values set where appropriate
 
 **Entity Configurations to Create** (in `TradingBot.Infrastructure/Persistence/Configurations/`):
 - OrderConfiguration.cs
@@ -288,13 +288,13 @@ Implement Entity Framework Core 9 database context with SQLite support and entit
 Generate initial EF Core migration and verify database schema.
 
 **Acceptance Criteria**:
-- [ ] Initial migration generated
-- [ ] Migration creates all tables
-- [ ] Migration creates all indexes
-- [ ] Migration creates all foreign keys
-- [ ] Migration can be applied successfully
-- [ ] Migration can be reverted successfully
-- [ ] Database schema matches specification
+- [X] Initial migration generated
+- [X] Migration creates all tables
+- [X] Migration creates all indexes
+- [X] Migration creates all foreign keys
+- [X] Migration can be applied successfully
+- [X] Migration can be reverted successfully
+- [X] Database schema matches specification
 
 **Commands**:
 ```bash
@@ -357,13 +357,13 @@ Implement repository classes for data access abstraction.
 Implement AES-256 encryption service for securing API keys and secrets.
 
 **Acceptance Criteria**:
-- [ ] EncryptionService class implemented
-- [ ] AES-256 encryption used
-- [ ] CBC mode with PKCS7 padding
-- [ ] Key derivation using Rfc2898DeriveBytes (100,000 iterations)
-- [ ] Machine-specific key generation
-- [ ] Encrypt method implemented
-- [ ] Decrypt method implemented
+- [X] EncryptionService class implemented
+- [X] AES-256 encryption used
+- [X] CBC mode with PKCS7 padding
+- [X] Key derivation using Rfc2898DeriveBytes (100,000 iterations)
+- [X] Machine-specific key generation
+- [X] Encrypt method implemented
+- [X] Decrypt method implemented
 - [ ] Unit tests for encryption/decryption
 - [ ] Test round-trip encryption
 - [ ] Test error handling for invalid ciphertext
