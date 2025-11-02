@@ -1,0 +1,6 @@
+[*.cs]
+# Disable StyleCop for auto-generated migration files
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1413.severity = none
+dotnet_diagnostic.SA0001.severity = none
+generated_code = true
