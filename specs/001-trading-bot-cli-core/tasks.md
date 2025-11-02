@@ -403,17 +403,17 @@ public void Encrypt_Decrypt_ShouldReturnOriginalValue()
 Implement market data service using YahooFinanceApi with Polly resilience patterns.
 
 **Acceptance Criteria**:
-- [ ] YahooFinanceService class implemented
-- [ ] IMarketDataService interface implemented
-- [ ] GetQuoteAsync method implemented
-- [ ] GetQuotesAsync method implemented (batch)
-- [ ] GetHistoricalDataAsync method implemented
-- [ ] Polly retry policy configured (3 retries, exponential backoff)
+- [X] YahooFinanceService class implemented
+- [X] IMarketDataService interface implemented
+- [X] GetQuoteAsync method implemented
+- [X] GetQuotesAsync method implemented (batch)
+- [X] GetHistoricalDataAsync method implemented
+- [X] Polly retry policy configured (3 retries, exponential backoff)
 - [ ] Polly rate limiter configured (60 requests/minute)
 - [ ] Polly timeout configured (10 seconds)
-- [ ] ResiliencePipeline built and applied
-- [ ] Data normalization implemented
-- [ ] Logging integrated (ILogger)
+- [X] ResiliencePipeline built and applied (retry + circuit breaker)
+- [X] Data normalization implemented
+- [X] Logging integrated (ILogger)
 - [ ] Unit tests with mocked HTTP calls
 - [ ] Integration tests with real API (optional, tagged)
 
