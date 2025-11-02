@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TradingBot.Core\TradingBot.Core.csproj" />
+    <ProjectReference Include="..\TradingBot.Engine\TradingBot.Engine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +17,11 @@
     <PackageReference Include="Polly.Extensions" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
   <PropertyGroup>

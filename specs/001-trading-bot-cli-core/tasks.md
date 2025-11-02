@@ -10,6 +10,7 @@
 
 ## Task Organization
 
+
 Tasks are organized by:
 - **Phase**: Major development phase (1-8)
 - **Priority**: Critical, High, Medium, Low
@@ -554,15 +555,15 @@ public class ConfigurationService
 Configure dependency injection container with all services, repositories, and infrastructure components.
 
 **Acceptance Criteria**:
-- [ ] ServiceCollectionExtensions class created
-- [ ] AddTradingBotServices extension method implemented
-- [ ] Database context registered with correct lifetime (Scoped)
-- [ ] Repositories registered (Scoped)
-- [ ] Services registered (Singleton for stateless, Scoped for stateful)
-- [ ] Configuration registered
-- [ ] Logging configured with Serilog
-- [ ] All interfaces mapped to implementations
-- [ ] Service resolution tested
+- [X] ServiceCollectionExtensions class created
+- [X] AddTradingBotServices extension method implemented
+- [X] Database context registered with correct lifetime (Scoped)
+- [ ] Repositories registered (Scoped) - pending repository implementation
+- [X] Services registered (Singleton for stateless, Scoped for stateful)
+- [X] Configuration registered
+- [X] Logging configured with Serilog
+- [X] All interfaces mapped to implementations (for implemented services)
+- [ ] Service resolution tested - pending
 
 **Extension Method Structure**:
 ```csharp
@@ -1189,15 +1190,15 @@ Log & Update State
 Implement main program entry point with Spectre.Cli command routing and dependency injection integration.
 
 **Acceptance Criteria**:
-- [ ] Program.cs created with Spectre.Cli setup
-- [ ] TypeRegistrar implemented (DI adapter for Spectre.Cli)
-- [ ] All command branches configured
-- [ ] Command examples added
-- [ ] Help text configured
-- [ ] Version command implemented
-- [ ] Global exception handling
-- [ ] Exit codes defined
-- [ ] Integration tests for CLI routing
+- [X] Program.cs created with Spectre.Cli setup
+- [X] TypeRegistrar implemented (DI adapter for Spectre.Cli)
+- [ ] All command branches configured - partial (version only)
+- [X] Command examples added
+- [X] Help text configured
+- [X] Version command implemented
+- [X] Global exception handling
+- [X] Exit codes defined
+- [ ] Integration tests for CLI routing - pending
 
 **Command Structure**:
 ```
@@ -1226,17 +1227,17 @@ tradingbot
 Implement all strategy management CLI commands.
 
 **Acceptance Criteria**:
-- [ ] StrategyListCommand implemented
-- [ ] StrategyEnableCommand implemented
-- [ ] StrategyDisableCommand implemented
-- [ ] StrategyConfigureCommand implemented
-- [ ] StrategyAddCommand implemented
-- [ ] StrategyRemoveCommand implemented (optional)
-- [ ] All commands use Spectre.Console for output
-- [ ] Validation attributes on command settings
-- [ ] Error handling with user-friendly messages
-- [ ] Success confirmations
-- [ ] Unit tests for each command
+- [X] StrategyListCommand implemented
+- [X] StrategyEnableCommand implemented
+- [X] StrategyDisableCommand implemented
+- [ ] StrategyConfigureCommand implemented - pending
+- [ ] StrategyAddCommand implemented - pending
+- [ ] StrategyRemoveCommand implemented (optional) - pending
+- [X] All commands use Spectre.Console for output
+- [X] Validation attributes on command settings
+- [X] Error handling with user-friendly messages
+- [X] Success confirmations
+- [ ] Unit tests for each command - pending
 
 **Example: StrategyListCommand**:
 ```csharp
@@ -1392,13 +1393,13 @@ Implement backtesting CLI commands.
 Implement configuration management commands.
 
 **Acceptance Criteria**:
-- [ ] ConfigShowCommand implemented
-- [ ] ConfigSetCommand implemented
-- [ ] ConfigSetApiKeyCommand implemented (interactive, masked)
-- [ ] Configuration validation before saving
-- [ ] Sensitive values masked in display
-- [ ] Backup before changes
-- [ ] Unit tests for each command
+- [X] ConfigShowCommand implemented
+- [X] ConfigSetCommand implemented
+- [X] ConfigSetApiKeyCommand implemented (interactive, masked)
+- [X] Configuration validation before saving
+- [X] Sensitive values masked in display
+- [X] Backup before changes
+- [ ] Unit tests for each command - pending
 
 **ConfigSetApiKeyCommand**:
 ```csharp

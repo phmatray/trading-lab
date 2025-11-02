@@ -66,13 +66,47 @@ public static class Program
                         .WithDescription("Display version information")
                         .WithExample(["version"]);
 
+                    // Config commands
+                    config.AddBranch("config", configBranch =>
+                    {
+                        configBranch.SetDescription("Manage application configuration");
+
+                        configBranch.AddCommand<Commands.Config.ConfigShowCommand>("show")
+                            .WithDescription("Display current configuration")
+                            .WithExample(["config", "show"]);
+
+                        configBranch.AddCommand<Commands.Config.ConfigSetCommand>("set")
+                            .WithDescription("Set a configuration value")
+                            .WithExample(["config", "set", "DefaultSymbols", "SPY,QQQ,AAPL"]);
+
+                        configBranch.AddCommand<Commands.Config.ConfigSetApiKeyCommand>("set-api-key")
+                            .WithDescription("Set an API key (interactive, encrypted)")
+                            .WithExample(["config", "set-api-key", "yahoo"]);
+                    });
+
+                    // Strategy commands
+                    config.AddBranch("strategy", strategyBranch =>
+                    {
+                        strategyBranch.SetDescription("Manage trading strategies");
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyListCommand>("list")
+                            .WithDescription("List all registered strategies")
+                            .WithExample(["strategy", "list"]);
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyEnableCommand>("enable")
+                            .WithDescription("Enable a strategy")
+                            .WithExample(["strategy", "enable", "momentum-spy"]);
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyDisableCommand>("disable")
+                            .WithDescription("Disable a strategy")
+                            .WithExample(["strategy", "disable", "momentum-spy"]);
+                    });
+
                     // Placeholder for other commands
-                    // config.AddBranch("strategy", strategy => { ... });
                     // config.AddBranch("risk", risk => { ... });
                     // config.AddBranch("portfolio", portfolio => { ... });
                     // config.AddBranch("performance", performance => { ... });
                     // config.AddBranch("backtest", backtest => { ... });
-                    // config.AddBranch("config", configCmd => { ... });
                     // config.AddCommand<DashboardCommand>("dashboard");
                 });
 
