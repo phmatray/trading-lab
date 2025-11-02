@@ -102,6 +102,27 @@ public static class Program
                             .WithExample(["strategy", "disable", "momentum-spy"]);
                     });
 
+                    // Portfolio commands
+                    config.AddBranch("portfolio", portfolioBranch =>
+                    {
+                        portfolioBranch.SetDescription("View and manage portfolio");
+
+                        portfolioBranch.AddCommand<Commands.Portfolio.PortfolioShowCommand>("show")
+                            .WithDescription("Display current portfolio positions")
+                            .WithExample(["portfolio", "show"]);
+
+                        portfolioBranch.AddCommand<Commands.Portfolio.PortfolioHistoryCommand>("history")
+                            .WithDescription("Display trade history")
+                            .WithExample(["portfolio", "history"])
+                            .WithExample(["portfolio", "history", "--symbol", "SPY"])
+                            .WithExample(["portfolio", "history", "--start-date", "2025-01-01", "--limit", "50"]);
+
+                        portfolioBranch.AddCommand<Commands.Portfolio.PortfolioCloseCommand>("close")
+                            .WithDescription("Close one or all positions")
+                            .WithExample(["portfolio", "close", "--symbol", "SPY"])
+                            .WithExample(["portfolio", "close", "--all"]);
+                    });
+
                     // Placeholder for other commands
                     // config.AddBranch("risk", risk => { ... });
                     // config.AddBranch("portfolio", portfolio => { ... });
