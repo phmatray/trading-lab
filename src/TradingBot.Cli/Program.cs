@@ -123,9 +123,41 @@ public static class Program
                             .WithExample(["portfolio", "close", "--all"]);
                     });
 
+                    // Risk commands
+                    config.AddBranch("risk", riskBranch =>
+                    {
+                        riskBranch.SetDescription("Manage risk settings");
+
+                        riskBranch.AddCommand<Commands.Risk.RiskShowCommand>("show")
+                            .WithDescription("Display current risk settings")
+                            .WithExample(["risk", "show"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskSetLeverageCommand>("set-leverage")
+                            .WithDescription("Set account leverage")
+                            .WithExample(["risk", "set-leverage", "2.0"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskSetStopLossCommand>("set-stop-loss")
+                            .WithDescription("Set default stop-loss percentage")
+                            .WithExample(["risk", "set-stop-loss", "2.5"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskSetTakeProfitCommand>("set-take-profit")
+                            .WithDescription("Set default take-profit percentage")
+                            .WithExample(["risk", "set-take-profit", "5.0"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskSetDailyLossCommand>("set-daily-loss")
+                            .WithDescription("Set maximum daily loss limit")
+                            .WithExample(["risk", "set-daily-loss", "1000"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskSetMaxDrawdownCommand>("set-max-drawdown")
+                            .WithDescription("Set maximum drawdown percentage")
+                            .WithExample(["risk", "set-max-drawdown", "15.0"]);
+
+                        riskBranch.AddCommand<Commands.Risk.RiskResetCommand>("reset")
+                            .WithDescription("Reset risk settings to defaults")
+                            .WithExample(["risk", "reset"]);
+                    });
+
                     // Placeholder for other commands
-                    // config.AddBranch("risk", risk => { ... });
-                    // config.AddBranch("portfolio", portfolio => { ... });
                     // config.AddBranch("performance", performance => { ... });
                     // config.AddBranch("backtest", backtest => { ... });
                     // config.AddCommand<DashboardCommand>("dashboard");

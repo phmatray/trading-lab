@@ -189,7 +189,7 @@ Define all core service interfaces that will be implemented in later phases.
 - [x] IStrategyEngine interface defined
 - [ ] IOrderExecutionService interface defined
 - [x] IPortfolioManager interface defined
-- [ ] IRiskManager interface defined
+- [x] IRiskManager interface defined
 - [ ] IBacktestingEngine interface defined
 - [x] IEncryptionService interface defined
 - [ ] IHistoricalDataCache interface defined
@@ -999,25 +999,25 @@ public class Account
 Implement risk management system with position sizing, stop-loss, take-profit, and risk limits.
 
 **Acceptance Criteria**:
-- [ ] RiskManager class created
-- [ ] IRiskManager interface implemented
-- [ ] ValidateOrderAsync method (pre-trade risk check)
-- [ ] CalculatePositionSizeAsync method (Kelly, Fixed, Risk %)
-- [ ] GetRiskParametersAsync method
-- [ ] UpdateRiskParametersAsync method
-- [ ] GetRiskStatusAsync method
-- [ ] CheckRiskLimitsAsync method
-- [ ] HaltTradingAsync method (when limits breached)
-- [ ] ResumeTradingAsync method
-- [ ] Stop-loss order creation
-- [ ] Take-profit order creation
-- [ ] Trailing stop management
-- [ ] Daily loss limit enforcement
-- [ ] Max drawdown limit enforcement
-- [ ] Leverage limit enforcement
-- [ ] RiskLimitBreached event
-- [ ] Unit tests for all risk calculations
-- [ ] Integration tests with portfolio manager
+- [x] RiskManager class created
+- [x] IRiskManager interface implemented
+- [ ] ValidateOrderAsync method (pre-trade risk check) - Deferred
+- [ ] CalculatePositionSizeAsync method (Kelly, Fixed, Risk %) - Deferred
+- [x] GetRiskParametersAsync method - Implemented as GetRiskSettingsAsync
+- [x] UpdateRiskParametersAsync method - Implemented as individual setters
+- [ ] GetRiskStatusAsync method - Deferred
+- [ ] CheckRiskLimitsAsync method - Deferred
+- [ ] HaltTradingAsync method (when limits breached) - Deferred
+- [ ] ResumeTradingAsync method - Deferred
+- [ ] Stop-loss order creation - Deferred
+- [ ] Take-profit order creation - Deferred
+- [ ] Trailing stop management - Deferred
+- [x] Daily loss limit enforcement - Implemented IsDailyLossLimitExceededAsync
+- [ ] Max drawdown limit enforcement - Deferred
+- [x] Leverage limit enforcement - Validation in SetLeverageAsync
+- [ ] RiskLimitBreached event - Deferred
+- [ ] Unit tests for all risk calculations - Deferred
+- [ ] Integration tests with portfolio manager - Deferred
 
 **Position Sizing Algorithms**:
 ```csharp
@@ -1283,16 +1283,16 @@ public class StrategyListCommand : AsyncCommand
 Implement all risk management CLI commands.
 
 **Acceptance Criteria**:
-- [ ] RiskShowCommand implemented
-- [ ] RiskSetLeverageCommand implemented
-- [ ] RiskSetStopLossCommand implemented
-- [ ] RiskSetTakeProfitCommand implemented
-- [ ] RiskSetDailyLossCommand implemented
-- [ ] RiskSetMaxDrawdownCommand implemented
-- [ ] RiskResetLimitsCommand implemented
-- [ ] All commands validate input ranges
-- [ ] Confirmation prompts for destructive operations
-- [ ] Unit tests for each command
+- [x] RiskShowCommand implemented
+- [x] RiskSetLeverageCommand implemented
+- [x] RiskSetStopLossCommand implemented
+- [x] RiskSetTakeProfitCommand implemented
+- [x] RiskSetDailyLossCommand implemented
+- [x] RiskSetMaxDrawdownCommand implemented
+- [x] RiskResetLimitsCommand implemented - Implemented as RiskResetCommand
+- [x] All commands validate input ranges - Validation in RiskManager
+- [x] Confirmation prompts for destructive operations - Reset command has confirmation
+- [ ] Unit tests for each command - Deferred
 
 ---
 
