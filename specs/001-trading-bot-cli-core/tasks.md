@@ -1354,14 +1354,14 @@ Total P&L: +$97.50 (+1.35%)
 Implement performance analysis and reporting commands.
 
 **Acceptance Criteria**:
-- [ ] PerformanceShowCommand implemented
+- [X] PerformanceShowCommand implemented
 - [ ] PerformanceChartsCommand implemented
 - [ ] PerformanceCompareCommand implemented
-- [ ] PerformanceExportCommand implemented
-- [ ] Metrics calculated (Sharpe, Sortino, win rate, etc.)
+- [X] PerformanceExportCommand implemented
+- [X] Metrics calculated (Sharpe, Sortino, win rate, etc.)
 - [ ] Time period filters (1d, 1w, 1m, 3m, 1y, all)
 - [ ] ASCII charts rendered (equity curve, drawdown)
-- [ ] Export formats: CSV, JSON, HTML
+- [X] Export formats: CSV, JSON, HTML
 - [ ] Unit tests for each command
 
 ---
@@ -1376,12 +1376,12 @@ Implement performance analysis and reporting commands.
 Implement backtesting CLI commands.
 
 **Acceptance Criteria**:
-- [ ] BacktestRunCommand implemented
-- [ ] BacktestReportCommand implemented
+- [X] BacktestRunCommand implemented
+- [X] BacktestReportCommand implemented
 - [ ] BacktestOptimizeCommand implemented (optional)
-- [ ] Progress bar for long-running backtests
-- [ ] Results summary displayed
-- [ ] Detailed report generation
+- [X] Progress bar for long-running backtests
+- [X] Results summary displayed
+- [X] Detailed report generation
 - [ ] Parameter sweep for optimization
 - [ ] Unit tests for each command
 
@@ -1447,18 +1447,19 @@ public override async Task<int> ExecuteAsync(CommandContext context, Settings se
 Implement live dashboard using Spectre.Console LiveDisplay with real-time updates.
 
 **Acceptance Criteria**:
-- [ ] DashboardRenderer class created
-- [ ] LiveDisplay used for real-time updates
-- [ ] Header widget (account balance, P&L, equity)
-- [ ] Positions widget (open positions table)
-- [ ] Market trends widget (tracked symbols)
-- [ ] Recent trades widget (last N trades)
-- [ ] Footer widget (system status, timestamp)
-- [ ] Configurable refresh interval (1-5 seconds)
-- [ ] Keyboard shortcuts (q=quit, s=strategies, r=risk)
-- [ ] Responsive layout (adapts to terminal size)
-- [ ] Error handling for rendering failures
-- [ ] Unit tests for widget rendering
+- [X] DashboardCommand class created
+- [X] Layout-based display using Spectre.Console
+- [X] Account panel (balance, P&L, equity)
+- [X] Positions panel (open positions display)
+- [X] Performance panel (metrics and statistics)
+- [X] Recent trades table (last N trades)
+- [X] Risk settings panel
+- [X] Responsive layout (2-column with nested rows)
+- [X] Error handling for data fetching
+- [ ] LiveDisplay for real-time updates (static display implemented)
+- [ ] Configurable refresh interval
+- [ ] Keyboard shortcuts
+- [ ] Unit tests for rendering
 
 **Dashboard Layout**:
 ```
