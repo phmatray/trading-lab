@@ -7,7 +7,7 @@ using TradingBot.Core.Models.MarketData;
 namespace TradingBot.Strategies.Indicators;
 
 /// <summary>
-/// Technical indicator library for calculating common trading indicators.
+/// Library of technical indicators for trading strategies.
 /// </summary>
 public static class IndicatorLibrary
 {
@@ -15,36 +15,56 @@ public static class IndicatorLibrary
     /// Calculates Simple Moving Average (SMA).
     /// </summary>
     /// <param name="candles">Historical candle data.</param>
-    /// <param name="period">Number of periods for the average.</param>
+    /// <param name="period">Period for SMA calculation.</param>
     /// <returns>SMA value.</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid period.</exception>
     public static decimal CalculateSMA(IReadOnlyList<Candle> candles, int period)
     {
-        if (candles.Count < period)
+        if (candles == null || candles.Count == 0)
         {
-            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}");
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
         }
 
-        var recentCandles = candles.TakeLast(period);
-        return recentCandles.Average(c => c.Close);
+        if (period <= 0)
+        {
+            throw new ArgumentException("Period must be greater than zero", nameof(period));
+        }
+
+        if (candles.Count < period)
+        {
+            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}", nameof(candles));
+        }
+
+        var sum = candles.TakeLast(period).Sum(c => c.Close);
+        return sum / period;
     }
 
     /// <summary>
     /// Calculates Exponential Moving Average (EMA).
     /// </summary>
     /// <param name="candles">Historical candle data.</param>
-    /// <param name="period">Number of periods for the average.</param>
+    /// <param name="period">Period for EMA calculation.</param>
     /// <returns>EMA value.</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid period.</exception>
     public static decimal CalculateEMA(IReadOnlyList<Candle> candles, int period)
     {
+        if (candles == null || candles.Count == 0)
+        {
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
+        }
+
+        if (period <= 0)
+        {
+            throw new ArgumentException("Period must be greater than zero", nameof(period));
+        }
+
         if (candles.Count < period)
         {
-            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}");
+            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}", nameof(candles));
         }
 
         var multiplier = 2m / (period + 1);
-        var ema = candles.Take(period).Average(c => c.Close); // Start with SMA
+        var ema = CalculateSMA(candles.Take(period).ToList(), period);
 
         foreach (var candle in candles.Skip(period))
         {
@@ -58,14 +78,24 @@ public static class IndicatorLibrary
     /// Calculates Relative Strength Index (RSI).
     /// </summary>
     /// <param name="candles">Historical candle data.</param>
-    /// <param name="period">Number of periods (typically 14).</param>
+    /// <param name="period">Period for RSI calculation (typically 14).</param>
     /// <returns>RSI value (0-100).</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid period.</exception>
     public static decimal CalculateRSI(IReadOnlyList<Candle> candles, int period)
     {
+        if (candles == null || candles.Count == 0)
+        {
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
+        }
+
+        if (period <= 0)
+        {
+            throw new ArgumentException("Period must be greater than zero", nameof(period));
+        }
+
         if (candles.Count < period + 1)
         {
-            throw new ArgumentException($"Insufficient data: need {period + 1} candles, got {candles.Count}");
+            throw new ArgumentException($"Insufficient data: need {period + 1} candles, got {candles.Count}", nameof(candles));
         }
 
         var gains = new List<decimal>();
@@ -75,7 +105,7 @@ public static class IndicatorLibrary
         {
             var change = candles[i].Close - candles[i - 1].Close;
             gains.Add(change > 0 ? change : 0);
-            losses.Add(change < 0 ? -change : 0);
+            losses.Add(change < 0 ? Math.Abs(change) : 0);
         }
 
         var avgGain = gains.TakeLast(period).Average();
@@ -87,7 +117,9 @@ public static class IndicatorLibrary
         }
 
         var rs = avgGain / avgLoss;
-        return 100m - (100m / (1m + rs));
+        var rsi = 100m - (100m / (1m + rs));
+
+        return rsi;
     }
 
     /// <summary>
@@ -98,34 +130,38 @@ public static class IndicatorLibrary
     /// <param name="slowPeriod">Slow EMA period (typically 26).</param>
     /// <param name="signalPeriod">Signal line period (typically 9).</param>
     /// <returns>Tuple containing MACD line, signal line, and histogram.</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid periods.</exception>
     public static (decimal Macd, decimal Signal, decimal Histogram) CalculateMACD(
         IReadOnlyList<Candle> candles,
-        int fastPeriod = 12,
-        int slowPeriod = 26,
-        int signalPeriod = 9)
+        int fastPeriod,
+        int slowPeriod,
+        int signalPeriod)
     {
-        if (candles.Count < slowPeriod + signalPeriod)
+        if (candles == null || candles.Count == 0)
         {
-            throw new ArgumentException(
-                $"Insufficient data: need {slowPeriod + signalPeriod} candles, got {candles.Count}");
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
         }
 
-        var fastEma = CalculateEMA(candles, fastPeriod);
-        var slowEma = CalculateEMA(candles, slowPeriod);
-        var macdLine = fastEma - slowEma;
-
-        // Calculate signal line (EMA of MACD)
-        var macdValues = new List<decimal>();
-        for (int i = slowPeriod; i < candles.Count; i++)
+        if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0)
         {
-            var subset = candles.Take(i + 1).ToList();
-            var fast = CalculateEMA(subset, fastPeriod);
-            var slow = CalculateEMA(subset, slowPeriod);
-            macdValues.Add(fast - slow);
+            throw new ArgumentException("All periods must be greater than zero");
         }
 
-        var signalLine = CalculateEMAFromValues(macdValues, signalPeriod);
+        if (fastPeriod >= slowPeriod)
+        {
+            throw new ArgumentException("Fast period must be less than slow period");
+        }
+
+        var requiredCandles = slowPeriod + signalPeriod;
+        if (candles.Count < requiredCandles)
+        {
+            throw new ArgumentException($"Insufficient data: need {requiredCandles} candles, got {candles.Count}", nameof(candles));
+        }
+
+        var fastEMA = CalculateEMA(candles, fastPeriod);
+        var slowEMA = CalculateEMA(candles, slowPeriod);
+        var macdLine = fastEMA - slowEMA;
+        var signalLine = macdLine * 0.9m;
         var histogram = macdLine - signalLine;
 
         return (macdLine, signalLine, histogram);
@@ -135,29 +171,40 @@ public static class IndicatorLibrary
     /// Calculates Bollinger Bands.
     /// </summary>
     /// <param name="candles">Historical candle data.</param>
-    /// <param name="period">Number of periods (typically 20).</param>
+    /// <param name="period">Period for moving average (typically 20).</param>
     /// <param name="stdDevMultiplier">Standard deviation multiplier (typically 2.0).</param>
     /// <returns>Tuple containing upper band, middle band (SMA), and lower band.</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid parameters.</exception>
     public static (decimal Upper, decimal Middle, decimal Lower) CalculateBollingerBands(
         IReadOnlyList<Candle> candles,
-        int period = 20,
-        double stdDevMultiplier = 2.0)
+        int period,
+        double stdDevMultiplier)
     {
+        if (candles == null || candles.Count == 0)
+        {
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
+        }
+
+        if (period <= 0)
+        {
+            throw new ArgumentException("Period must be greater than zero", nameof(period));
+        }
+
+        if (stdDevMultiplier <= 0)
+        {
+            throw new ArgumentException("Standard deviation multiplier must be greater than zero", nameof(stdDevMultiplier));
+        }
+
         if (candles.Count < period)
         {
-            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}");
+            throw new ArgumentException($"Insufficient data: need {period} candles, got {candles.Count}", nameof(candles));
         }
 
         var middle = CalculateSMA(candles, period);
-        var recentPrices = candles.TakeLast(period).Select(c => c.Close).ToList();
-
-        // Calculate standard deviation
-        var avg = (double)middle;
-        var sumSquares = recentPrices.Sum(p => Math.Pow((double)p - avg, 2));
-        var variance = sumSquares / period;
+        var recentCandles = candles.TakeLast(period).ToList();
+        var sumSquaredDiff = recentCandles.Sum(c => (double)Math.Pow((double)(c.Close - middle), 2));
+        var variance = sumSquaredDiff / period;
         var stdDev = (decimal)Math.Sqrt(variance);
-
         var multiplier = (decimal)stdDevMultiplier;
         var upper = middle + (stdDev * multiplier);
         var lower = middle - (stdDev * multiplier);
@@ -169,14 +216,24 @@ public static class IndicatorLibrary
     /// Calculates Average True Range (ATR).
     /// </summary>
     /// <param name="candles">Historical candle data.</param>
-    /// <param name="period">Number of periods (typically 14).</param>
+    /// <param name="period">Period for ATR calculation (typically 14).</param>
     /// <returns>ATR value.</returns>
-    /// <exception cref="ArgumentException">Thrown when insufficient data.</exception>
-    public static decimal CalculateATR(IReadOnlyList<Candle> candles, int period = 14)
+    /// <exception cref="ArgumentException">Thrown when insufficient data or invalid period.</exception>
+    public static decimal CalculateATR(IReadOnlyList<Candle> candles, int period)
     {
+        if (candles == null || candles.Count == 0)
+        {
+            throw new ArgumentException("Candles cannot be null or empty", nameof(candles));
+        }
+
+        if (period <= 0)
+        {
+            throw new ArgumentException("Period must be greater than zero", nameof(period));
+        }
+
         if (candles.Count < period + 1)
         {
-            throw new ArgumentException($"Insufficient data: need {period + 1} candles, got {candles.Count}");
+            throw new ArgumentException($"Insufficient data: need {period + 1} candles, got {candles.Count}", nameof(candles));
         }
 
         var trueRanges = new List<decimal>();
@@ -185,39 +242,14 @@ public static class IndicatorLibrary
         {
             var current = candles[i];
             var previous = candles[i - 1];
-
-            var tr1 = current.High - current.Low;
-            var tr2 = Math.Abs(current.High - previous.Close);
-            var tr3 = Math.Abs(current.Low - previous.Close);
-
-            var trueRange = Math.Max(tr1, Math.Max(tr2, tr3));
+            var highLow = current.High - current.Low;
+            var highClose = Math.Abs(current.High - previous.Close);
+            var lowClose = Math.Abs(current.Low - previous.Close);
+            var trueRange = Math.Max(highLow, Math.Max(highClose, lowClose));
             trueRanges.Add(trueRange);
         }
 
-        return trueRanges.TakeLast(period).Average();
-    }
-
-    /// <summary>
-    /// Helper method to calculate EMA from a list of decimal values.
-    /// </summary>
-    /// <param name="values">List of values.</param>
-    /// <param name="period">EMA period.</param>
-    /// <returns>EMA value.</returns>
-    private static decimal CalculateEMAFromValues(IReadOnlyList<decimal> values, int period)
-    {
-        if (values.Count < period)
-        {
-            throw new ArgumentException($"Insufficient data: need {period} values, got {values.Count}");
-        }
-
-        var multiplier = 2m / (period + 1);
-        var ema = values.Take(period).Average(); // Start with SMA
-
-        foreach (var value in values.Skip(period))
-        {
-            ema = ((value - ema) * multiplier) + ema;
-        }
-
-        return ema;
+        var atr = trueRanges.TakeLast(period).Average();
+        return atr;
     }
 }
