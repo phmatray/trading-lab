@@ -22,7 +22,8 @@ Tasks are organized by:
 
 ## Phase 1: Foundation (Weeks 1-2)
 
-### TASK-001: Initialize Solution Structure
+### TASK-001: Initialize Solut
+ion Structure
 **Priority**: Critical
 **Effort**: 3
 **Owner**: TBD
@@ -821,8 +822,8 @@ Implement strategy engine that orchestrates multiple strategies and generates tr
 - [X] Comprehensive logging and error handling
 - [X] Signal emission through events
 - [ ] Strategy parameter updates
-- [ ] Background signal generation loop
-- [ ] Graceful start/stop
+- [X] Background signal generation loop
+- [X] Graceful start/stop
 - [ ] Unit tests with mocked strategies
 - [ ] Integration tests with real strategies
 
@@ -1241,6 +1242,9 @@ Implement all strategy management CLI commands.
 - [X] StrategyListCommand implemented
 - [X] StrategyEnableCommand implemented
 - [X] StrategyDisableCommand implemented
+- [X] StrategyStartCommand implemented (start engine)
+- [X] StrategyStopCommand implemented (stop engine)
+- [X] StrategyStatusCommand implemented (engine status)
 - [ ] StrategyConfigureCommand implemented - pending
 - [ ] StrategyAddCommand implemented - pending
 - [ ] StrategyRemoveCommand implemented (optional) - pending
@@ -1295,15 +1299,15 @@ public class StrategyListCommand : AsyncCommand
 Implement all risk management CLI commands.
 
 **Acceptance Criteria**:
-- [ ] RiskShowCommand implemented
-- [ ] RiskSetLeverageCommand implemented
-- [ ] RiskSetStopLossCommand implemented
-- [ ] RiskSetTakeProfitCommand implemented
-- [ ] RiskSetDailyLossCommand implemented
-- [ ] RiskSetMaxDrawdownCommand implemented
-- [ ] RiskResetLimitsCommand implemented
-- [ ] All commands validate input ranges
-- [ ] Confirmation prompts for destructive operations
+- [X] RiskShowCommand implemented
+- [X] RiskSetLeverageCommand implemented
+- [X] RiskSetStopLossCommand implemented
+- [X] RiskSetTakeProfitCommand implemented
+- [X] RiskSetDailyLossCommand implemented
+- [X] RiskSetMaxDrawdownCommand implemented
+- [X] RiskResetCommand implemented
+- [X] All commands validate input ranges
+- [X] Confirmation prompts for destructive operations
 - [ ] Unit tests for each command
 
 ---
@@ -1318,12 +1322,12 @@ Implement all risk management CLI commands.
 Implement portfolio viewing and management commands.
 
 **Acceptance Criteria**:
-- [ ] PortfolioShowCommand implemented (displays positions)
-- [ ] PortfolioHistoryCommand implemented (displays trades)
-- [ ] PortfolioCloseCommand implemented (close positions)
-- [ ] Filters supported (date range, strategy, symbol)
-- [ ] Sorting supported (by P&L, date, symbol)
-- [ ] Pagination for large result sets
+- [X] PortfolioShowCommand implemented (displays positions)
+- [X] PortfolioHistoryCommand implemented (displays trades)
+- [X] PortfolioCloseCommand implemented (close positions)
+- [X] Filters supported (date range, strategy, symbol)
+- [X] Sorting supported (by P&L, date, symbol)
+- [X] Pagination for large result sets (via --limit option)
 - [ ] Export to CSV option
 - [ ] Unit tests for each command
 
