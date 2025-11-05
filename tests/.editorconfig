@@ -24,3 +24,6 @@ dotnet_diagnostic.SA1202.severity = none
 
 # Allow comments without preceding blank lines
 dotnet_diagnostic.SA1515.severity = none
+
+# Allow multiple whitespace for alignment in tests
+dotnet_diagnostic.SA1025.severity = none
