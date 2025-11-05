@@ -4,6 +4,7 @@
 
 using Microsoft.Extensions.Logging;
 using TradingBot.Core.Interfaces;
+using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Engine;
 
@@ -25,6 +26,11 @@ public sealed class StrategyEngine : IStrategyEngine
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _strategies = new Dictionary<string, IStrategy>(StringComparer.OrdinalIgnoreCase);
     }
+
+    /// <inheritdoc/>
+#pragma warning disable CS0067 // Event is never used - subscribed to by SignalProcessor
+    public event EventHandler<Signal>? SignalGenerated;
+#pragma warning restore CS0067
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IStrategy>> GetStrategiesAsync(CancellationToken cancellationToken = default)

@@ -2,6 +2,8 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using TradingBot.Core.Models.Trading;
+
 namespace TradingBot.Core.Interfaces;
 
 /// <summary>
@@ -9,6 +11,11 @@ namespace TradingBot.Core.Interfaces;
 /// </summary>
 public interface IStrategyEngine
 {
+    /// <summary>
+    /// Event raised when a strategy generates a trading signal.
+    /// </summary>
+    event EventHandler<Signal>? SignalGenerated;
+
     /// <summary>
     /// Gets all registered strategies.
     /// </summary>

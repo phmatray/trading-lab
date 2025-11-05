@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOrderExecutionService, OrderExecutionService>();
         services.AddSingleton<IPortfolioManager, PortfolioManager>();
         services.AddSingleton<IRiskManager, RiskManager>();
+        services.AddSingleton<SignalProcessor>();
         services.AddSingleton<IBacktestingEngine, BacktestingEngine>();
 
         // Logging with Serilog
