@@ -2137,10 +2137,10 @@ Write comprehensive unit and integration tests to achieve 80%+ code coverage acr
 - [X] TradingBot.Core: 85%+ coverage - Completed (19 tests: Order, Position)
 - [ ] TradingBot.Infrastructure: 80%+ coverage
 - [X] TradingBot.Strategies: 85%+ coverage - Completed (24 tests: All indicators)
-- [ ] TradingBot.Engine: 85%+ coverage
+- [ ] TradingBot.Engine: 85%+ coverage - In progress (30 tests: RiskManager)
 - [ ] TradingBot.Analytics: 80%+ coverage
 - [ ] TradingBot.Cli: 75%+ coverage (commands are harder to test)
-- [ ] All critical paths have 100% coverage - In progress (43 tests written)
+- [ ] All critical paths have 100% coverage - In progress (73 tests written)
 - [X] Edge cases tested - Input validation, null checks, boundaries
 - [X] Error handling tested - Invalid parameters, insufficient data
 - [X] Async code tested properly - Mock async dependencies
