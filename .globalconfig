@@ -14,9 +14,3 @@ dotnet_diagnostic.SA1309.severity = none
 
 # SA1413: Use trailing comma in multi-line initializers (disabled for EF migrations)
 dotnet_diagnostic.SA1413.severity = none
-
-# Disable all StyleCop rules for auto-generated files
-[**/Migrations/*.cs]
-generated_code = true
-dotnet_diagnostic.SA0001.severity = none
-dotnet_diagnostic.SA1633.severity = none
