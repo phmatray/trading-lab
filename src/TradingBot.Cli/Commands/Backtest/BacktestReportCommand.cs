@@ -27,7 +27,7 @@ public sealed class BacktestReportCommand : AsyncCommand<BacktestReportCommand.S
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var backtestId = settings.BacktestId ?? "latest";
 

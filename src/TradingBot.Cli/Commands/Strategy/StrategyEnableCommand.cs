@@ -26,7 +26,7 @@ public sealed class StrategyEnableCommand : AsyncCommand<StrategyEnableCommand.S
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var success = await _engine.EnableStrategyAsync(settings.Name);
 

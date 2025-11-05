@@ -27,7 +27,7 @@ public sealed class BacktestRunCommand : AsyncCommand<BacktestRunCommand.Setting
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         AnsiConsole.Write(
             new FigletText("Backtest Run")

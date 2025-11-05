@@ -25,7 +25,7 @@ public sealed class RiskResetCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         // Confirm before resetting
         if (!AnsiConsole.Confirm("Reset [bold red]ALL[/] risk settings to defaults?", defaultValue: false))

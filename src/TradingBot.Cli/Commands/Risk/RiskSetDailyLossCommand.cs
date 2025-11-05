@@ -26,7 +26,7 @@ public sealed class RiskSetDailyLossCommand : AsyncCommand<RiskSetDailyLossComma
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         try
         {

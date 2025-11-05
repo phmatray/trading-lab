@@ -25,7 +25,7 @@ public sealed class StrategyListCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         var strategies = await _engine.GetStrategiesAsync();
 

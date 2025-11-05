@@ -26,7 +26,7 @@ public sealed class RiskSetStopLossCommand : AsyncCommand<RiskSetStopLossCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         try
         {

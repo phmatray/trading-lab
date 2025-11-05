@@ -31,7 +31,7 @@ public sealed class ConfigSetApiKeyCommand : AsyncCommand<ConfigSetApiKeyCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         try
         {

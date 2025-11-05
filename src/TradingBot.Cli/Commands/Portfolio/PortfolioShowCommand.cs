@@ -25,7 +25,7 @@ public sealed class PortfolioShowCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         var (account, positions) = await AnsiConsole.Status()
             .StartAsync("Loading portfolio...", async ctx =>

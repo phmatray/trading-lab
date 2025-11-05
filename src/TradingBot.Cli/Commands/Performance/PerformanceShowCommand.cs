@@ -25,7 +25,7 @@ public sealed class PerformanceShowCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         var metrics = await AnsiConsole.Status()
             .StartAsync("Calculating performance metrics...", async ctx =>

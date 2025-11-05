@@ -26,7 +26,7 @@ public sealed class PortfolioHistoryCommand : AsyncCommand<PortfolioHistoryComma
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         DateTime? startDate = null;
         DateTime? endDate = null;

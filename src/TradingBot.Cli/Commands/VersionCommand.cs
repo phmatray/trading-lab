@@ -15,7 +15,7 @@ namespace TradingBot.Cli.Commands;
 public sealed class VersionCommand : Command
 {
     /// <inheritdoc/>
-    public override int Execute(CommandContext context)
+    public override int Execute(CommandContext context, CancellationToken cancellationToken)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version?.ToString() ?? "1.0.0";

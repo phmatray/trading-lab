@@ -27,7 +27,7 @@ public sealed class PerformanceExportCommand : AsyncCommand<PerformanceExportCom
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var metrics = await _portfolioManager.GetPerformanceMetricsAsync();
         var account = await _portfolioManager.GetAccountAsync();

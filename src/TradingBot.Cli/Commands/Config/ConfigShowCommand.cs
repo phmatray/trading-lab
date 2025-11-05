@@ -25,7 +25,7 @@ public sealed class ConfigShowCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         var config = await _configService.GetAllAsync();
 

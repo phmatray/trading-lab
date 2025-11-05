@@ -30,7 +30,7 @@ public sealed class DashboardCommand : AsyncCommand
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context)
+    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
         // Fetch all data
         var (account, positions, trades, metrics, riskSettings) = await AnsiConsole.Status()
