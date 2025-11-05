@@ -157,10 +157,41 @@ public static class Program
                             .WithExample(["risk", "reset"]);
                     });
 
-                    // Placeholder for other commands
-                    // config.AddBranch("performance", performance => { ... });
-                    // config.AddBranch("backtest", backtest => { ... });
-                    // config.AddCommand<DashboardCommand>("dashboard");
+                    // Performance commands
+                    config.AddBranch("performance", performanceBranch =>
+                    {
+                        performanceBranch.SetDescription("View performance metrics");
+
+                        performanceBranch.AddCommand<Commands.Performance.PerformanceShowCommand>("show")
+                            .WithDescription("Display performance metrics and statistics")
+                            .WithExample(["performance", "show"]);
+
+                        performanceBranch.AddCommand<Commands.Performance.PerformanceExportCommand>("export")
+                            .WithDescription("Export performance data to file")
+                            .WithExample(["performance", "export"])
+                            .WithExample(["performance", "export", "--output", "perf-report.json"]);
+                    });
+
+                    // Backtest commands
+                    config.AddBranch("backtest", backtestBranch =>
+                    {
+                        backtestBranch.SetDescription("Run and analyze backtests");
+
+                        backtestBranch.AddCommand<Commands.Backtest.BacktestRunCommand>("run")
+                            .WithDescription("Run a strategy backtest")
+                            .WithExample(["backtest", "run", "momentum"])
+                            .WithExample(["backtest", "run", "momentum", "--symbol", "SPY", "--start-date", "2024-01-01"]);
+
+                        backtestBranch.AddCommand<Commands.Backtest.BacktestReportCommand>("report")
+                            .WithDescription("Display backtest report")
+                            .WithExample(["backtest", "report", "latest"])
+                            .WithExample(["backtest", "report", "abc123"]);
+                    });
+
+                    // Dashboard command
+                    config.AddCommand<DashboardCommand>("dashboard")
+                        .WithDescription("Display trading dashboard with overview")
+                        .WithExample(["dashboard"]);
                 });
 
                 return app.Run(args);
