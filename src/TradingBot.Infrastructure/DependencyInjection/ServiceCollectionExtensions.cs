@@ -12,6 +12,8 @@ using TradingBot.Engine;
 using TradingBot.Infrastructure.Configuration;
 using TradingBot.Infrastructure.MarketData;
 using TradingBot.Infrastructure.Persistence;
+using TradingBot.Infrastructure.Persistence.Repositories;
+using TradingBot.Infrastructure.Services;
 
 namespace TradingBot.Infrastructure.DependencyInjection;
 
@@ -45,9 +47,17 @@ public static class ServiceCollectionExtensions
             }
         });
 
+        // Repositories (Scoped - tied to DbContext lifetime)
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<ITradeRepository, TradeRepository>();
+        services.AddScoped<ICandleRepository, CandleRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+
         // Infrastructure services
         services.AddSingleton<IEncryptionService, EncryptionService>();
         services.AddSingleton<IMarketDataService, YahooFinanceService>();
+        services.AddScoped<IHistoricalDataCache, HistoricalDataCache>();
         services.AddSingleton<IConfigurationService, Configuration.ConfigurationService>();
 
         // Engine services
