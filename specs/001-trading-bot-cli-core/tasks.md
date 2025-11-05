@@ -2134,17 +2134,17 @@ public class DrawdownPeriod
 Write comprehensive unit and integration tests to achieve 80%+ code coverage across all projects.
 
 **Acceptance Criteria**:
-- [ ] TradingBot.Core: 85%+ coverage
+- [ ] TradingBot.Core: 85%+ coverage - In progress (18 tests: Order, Position)
 - [ ] TradingBot.Infrastructure: 80%+ coverage
-- [ ] TradingBot.Strategies: 85%+ coverage
-- [ ] TradingBot.Engine: 85%+ coverage
+- [ ] TradingBot.Strategies: 85%+ coverage - In progress (12 tests: All indicators)
+- [ ] TradingBot.Engine: 85%+ coverage - In progress (17 tests: RiskManager)
 - [ ] TradingBot.Analytics: 80%+ coverage
 - [ ] TradingBot.Cli: 75%+ coverage (commands are harder to test)
-- [ ] All critical paths have 100% coverage
-- [ ] Edge cases tested
-- [ ] Error handling tested
-- [ ] Async code tested properly
-- [ ] Coverage report generated in CI
+- [ ] All critical paths have 100% coverage - Partial (47 tests written)
+- [X] Edge cases tested - Input validation, null checks, boundaries
+- [X] Error handling tested - Invalid parameters, insufficient data
+- [X] Async code tested properly - Mock async dependencies
+- [ ] Coverage report generated in CI - Test framework configured
 
 **Testing Priorities**:
 1. Critical: Order execution, position management, risk checks
