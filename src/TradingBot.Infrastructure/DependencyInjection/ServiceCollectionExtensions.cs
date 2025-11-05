@@ -54,6 +54,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IStrategyEngine, StrategyEngine>();
         services.AddSingleton<IPortfolioManager, PortfolioManager>();
         services.AddSingleton<IRiskManager, RiskManager>();
+        services.AddSingleton<IBacktestingEngine, BacktestingEngine>();
 
         // Logging with Serilog
         services.AddLogging(builder =>
