@@ -100,6 +100,19 @@ public static class Program
                         strategyBranch.AddCommand<Commands.Strategy.StrategyDisableCommand>("disable")
                             .WithDescription("Disable a strategy")
                             .WithExample(["strategy", "disable", "momentum-spy"]);
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyStartCommand>("start")
+                            .WithDescription("Start the strategy engine")
+                            .WithExample(["strategy", "start"])
+                            .WithExample(["strategy", "start", "--interval", "30"]);
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyStopCommand>("stop")
+                            .WithDescription("Stop the strategy engine")
+                            .WithExample(["strategy", "stop"]);
+
+                        strategyBranch.AddCommand<Commands.Strategy.StrategyStatusCommand>("status")
+                            .WithDescription("Show strategy engine status")
+                            .WithExample(["strategy", "status"]);
                     });
 
                     // Portfolio commands
