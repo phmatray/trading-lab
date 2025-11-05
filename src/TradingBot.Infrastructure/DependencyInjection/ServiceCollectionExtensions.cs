@@ -62,6 +62,7 @@ public static class ServiceCollectionExtensions
 
         // Engine services
         services.AddSingleton<IStrategyEngine, StrategyEngine>();
+        services.AddScoped<IOrderExecutionService, OrderExecutionService>();
         services.AddSingleton<IPortfolioManager, PortfolioManager>();
         services.AddSingleton<IRiskManager, RiskManager>();
         services.AddSingleton<IBacktestingEngine, BacktestingEngine>();
