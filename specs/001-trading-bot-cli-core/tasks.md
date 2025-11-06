@@ -473,8 +473,8 @@ Implement local caching for historical market data to reduce API calls and impro
 - [X] Time-based expiration (configurable)
 - [X] ClearAsync method implemented
 - [X] Registered in DI container
-- [ ] Unit tests written
-- [ ] Integration tests with database
+- [X] Unit tests written (17 tests passing)
+- [X] Integration tests with database (EF Core InMemory)
 
 **Cache Strategy**:
 - Historical data (> 1 day old): Cache indefinitely
