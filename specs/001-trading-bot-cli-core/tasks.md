@@ -233,8 +233,8 @@ Create initial project documentation including README, contributing guidelines, 
 - [X] CONTRIBUTING.md created
 - [X] CODE_OF_CONDUCT.md created
 - [X] LICENSE file added
-- [ ] docs/ARCHITECTURE.md (detailed architecture) - deferred
-- [ ] docs/GETTING_STARTED.md (tutorials) - deferred
+- [X] docs/ARCHITECTURE.md (detailed architecture)
+- [X] docs/GETTING_STARTED.md (tutorials)
 
 **Files to Create**:
 - README.md
