@@ -59,18 +59,22 @@ public class TradeRepository : Repository<Trade>, ITradeRepository
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Trade>> GetWinningTradesAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        // Get all trades and filter in memory since RealizedPnL is a computed property
+        var allTrades = await DbSet.ToListAsync(cancellationToken);
+        return allTrades
             .Where(t => t.RealizedPnL > 0)
             .OrderByDescending(t => t.RealizedPnL)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Trade>> GetLosingTradesAsync(CancellationToken cancellationToken = default)
     {
-        return await DbSet
+        // Get all trades and filter in memory since RealizedPnL is a computed property
+        var allTrades = await DbSet.ToListAsync(cancellationToken);
+        return allTrades
             .Where(t => t.RealizedPnL < 0)
             .OrderBy(t => t.RealizedPnL)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 }

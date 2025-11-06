@@ -334,8 +334,8 @@ Implement repository classes for data access abstraction.
 - [X] CandleRepository implemented
 - [X] All repositories use async/await
 - [X] Repositories include filtering and sorting
-- [ ] Unit tests written (mocking DbContext)
-- [ ] Integration tests written (using in-memory database)
+- [X] Unit tests written (mocking DbContext) - 48 tests passing!
+- [X] Integration tests written (using in-memory database) - EF Core InMemory used
 
 **Repositories to Implement** (in `TradingBot.Infrastructure/Persistence/Repositories/`):
 - OrderRepository.cs

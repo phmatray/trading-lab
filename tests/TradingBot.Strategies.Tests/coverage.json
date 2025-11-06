@@ -1,0 +1,4497 @@
+{
+  "TradingBot.Core.dll": {
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Order.cs": {
+      "TradingBot.Core.Models.Trading.Order": {
+        "System.Guid TradingBot.Core.Models.Trading.Order::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Order::get_Symbol()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderType TradingBot.Core.Models.Trading.Order::get_Type()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Order::get_Side()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_Quantity()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Order::get_LimitPrice()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Order::get_StopPrice()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderStatus TradingBot.Core.Models.Trading.Order::get_Status()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Order::get_CreatedAt()": {
+          "Lines": {
+            "57": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Trading.Order::get_SubmittedAt()": {
+          "Lines": {
+            "62": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Trading.Order::get_FilledAt()": {
+          "Lines": {
+            "67": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_FilledQuantity()": {
+          "Lines": {
+            "72": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_AverageFillPrice()": {
+          "Lines": {
+            "77": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_Commission()": {
+          "Lines": {
+            "82": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Order::get_StrategyName()": {
+          "Lines": {
+            "87": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Guid> TradingBot.Core.Models.Trading.Order::get_SignalId()": {
+          "Lines": {
+            "92": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Position.cs": {
+      "TradingBot.Core.Models.Trading.Position": {
+        "System.Guid TradingBot.Core.Models.Trading.Position::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Position::get_Symbol()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Position::get_Side()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_Quantity()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_EntryPrice()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_CurrentPrice()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Position::get_OpenedAt()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Position::get_StopLoss()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Position::get_TakeProfit()": {
+          "Lines": {
+            "57": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Position::get_StrategyName()": {
+          "Lines": {
+            "62": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_UnrealizedPnL()": {
+          "Lines": {
+            "68": 0,
+            "69": 0,
+            "70": 0
+          },
+          "Branches": [
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 38,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_UnrealizedPnLPercent()": {
+          "Lines": {
+            "76": 0,
+            "77": 0,
+            "78": 0
+          },
+          "Branches": [
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 50,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_PositionValue()": {
+          "Lines": {
+            "83": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Signal.cs": {
+      "TradingBot.Core.Models.Trading.Signal": {
+        "System.Guid TradingBot.Core.Models.Trading.Signal::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Signal::get_StrategyName()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Signal::get_Symbol()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.SignalType TradingBot.Core.Models.Trading.Signal::get_Type()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Signal::get_Timestamp()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Signal::get_Confidence()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Signal::get_SuggestedPrice()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.Object> TradingBot.Core.Models.Trading.Signal::get_Metadata()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Trade.cs": {
+      "TradingBot.Core.Models.Trading.Trade": {
+        "System.Guid TradingBot.Core.Models.Trading.Trade::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Trade::get_Symbol()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Trade::get_Side()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_Quantity()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_EntryPrice()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_ExitPrice()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Trade::get_EntryTime()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Trade::get_ExitTime()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_Commission()": {
+          "Lines": {
+            "57": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Trade::get_StrategyName()": {
+          "Lines": {
+            "62": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_RealizedPnL()": {
+          "Lines": {
+            "68": 0,
+            "69": 0,
+            "70": 0
+          },
+          "Branches": [
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 49,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_RealizedPnLPercent()": {
+          "Lines": {
+            "76": 0,
+            "77": 0,
+            "78": 0
+          },
+          "Branches": [
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 50,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.TimeSpan TradingBot.Core.Models.Trading.Trade::get_Duration()": {
+          "Lines": {
+            "83": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Trading.Trade::get_IsWinner()": {
+          "Lines": {
+            "88": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/TrailingStop.cs": {
+      "TradingBot.Core.Models.Trading.TrailingStop": {
+        "System.Guid TradingBot.Core.Models.Trading.TrailingStop::get_PositionId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Guid TradingBot.Core.Models.Trading.TrailingStop::get_StopOrderId()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_TrailingPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_CurrentStopPrice()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_HighestPrice()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_LowestPrice()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Trading.TrailingStop::get_IsLong()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.TrailingStop::get_CreatedAt()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.TrailingStop::get_LastUpdated()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Strategy/StrategyConfig.cs": {
+      "TradingBot.Core.Models.Strategy.StrategyConfig": {
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Name()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Type()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Strategy.StrategyConfig::get_Enabled()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyList`1<System.String> TradingBot.Core.Models.Strategy.StrategyConfig::get_Symbols()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Timeframe()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.Object> TradingBot.Core.Models.Strategy.StrategyConfig::get_Parameters()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Risk/RiskParameters.cs": {
+      "TradingBot.Core.Models.Risk.RiskParameters": {
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxLeverage()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxPositionSizePercent()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_DefaultStopLossPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_DefaultTakeProfitPercent()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxDailyLossPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Risk/RiskSettings.cs": {
+      "TradingBot.Core.Models.Risk.RiskSettings": {
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_Leverage()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_StopLossPercent()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_TakeProfitPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_DailyLossLimit()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_MaxPositionSizePercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Risk.RiskSettings::get_RiskLimitsEnabled()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Risk.RiskSettings::get_LastUpdated()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/Account.cs": {
+      "TradingBot.Core.Models.Portfolio.Account": {
+        "System.String TradingBot.Core.Models.Portfolio.Account::get_AccountId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Cash()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_PositionValue()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_BuyingPower()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Leverage()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_UnrealizedPnL()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_RealizedPnL()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_TotalPnL()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/EquityPoint.cs": {
+      "TradingBot.Core.Models.Portfolio.EquityPoint": {
+        "System.DateTime TradingBot.Core.Models.Portfolio.EquityPoint::get_Timestamp()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.EquityPoint::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.EquityPoint::get_CumulativeReturn()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/PerformanceMetrics.cs": {
+      "TradingBot.Core.Models.Portfolio.PerformanceMetrics": {
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_TotalReturn()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AnnualizedReturn()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_SharpeRatio()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_SortinoRatio()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_CalmarRatio()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_MaxDrawdown()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_TotalTrades()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_WinningTrades()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_LosingTrades()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_WinRate()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": [
+            {
+              "Line": 60,
+              "Offset": 7,
+              "EndOffset": 9,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 60,
+              "Offset": 7,
+              "EndOffset": 16,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AverageWin()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AverageLoss()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_ProfitFactor()": {
+          "Lines": {
+            "75": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/Candle.cs": {
+      "TradingBot.Core.Models.MarketData.Candle": {
+        "System.String TradingBot.Core.Models.MarketData.Candle::get_Symbol()": {
+          "Lines": {
+            "15": 875
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.MarketData.Candle::get_Timestamp()": {
+          "Lines": {
+            "20": 890
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Open()": {
+          "Lines": {
+            "25": 875
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_High()": {
+          "Lines": {
+            "30": 969
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Low()": {
+          "Lines": {
+            "35": 969
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Close()": {
+          "Lines": {
+            "40": 1300
+          },
+          "Branches": []
+        },
+        "System.Int64 TradingBot.Core.Models.MarketData.Candle::get_Volume()": {
+          "Lines": {
+            "45": 875
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.Candle::get_Timeframe()": {
+          "Lines": {
+            "50": 875
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.MarketData.Candle::get_IsBullish()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_BodySize()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Range()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_TypicalPrice()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/Quote.cs": {
+      "TradingBot.Core.Models.MarketData.Quote": {
+        "System.String TradingBot.Core.Models.MarketData.Quote::get_Symbol()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.MarketData.Quote::get_Timestamp()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Price()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Bid()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Ask()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Int64 TradingBot.Core.Models.MarketData.Quote::get_Volume()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Change()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_ChangePercent()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Spread()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_MidPrice()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/SymbolInfo.cs": {
+      "TradingBot.Core.Models.MarketData.SymbolInfo": {
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Symbol()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Name()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Exchange()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_AssetType()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Currency()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.SymbolInfo::get_TickSize()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.SymbolInfo::get_LotSize()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.MarketData.SymbolInfo::get_IsTradable()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/BacktestConfiguration.cs": {
+      "TradingBot.Core.Models.Backtest.BacktestConfiguration": {
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_BacktestId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_StrategyName()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_Symbol()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestConfiguration::get_StartDate()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestConfiguration::get_EndDate()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_InitialCapital()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_CommissionPerTrade()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_SlippagePercent()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Backtest.BacktestConfiguration::get_EnableTransactionCosts()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/BacktestResult.cs": {
+      "TradingBot.Core.Models.Backtest.BacktestResult": {
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_BacktestId()": {
+          "Lines": {
+            "18": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_StrategyName()": {
+          "Lines": {
+            "23": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_Symbol()": {
+          "Lines": {
+            "28": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_StartDate()": {
+          "Lines": {
+            "33": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_EndDate()": {
+          "Lines": {
+            "38": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_InitialCapital()": {
+          "Lines": {
+            "43": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_FinalEquity()": {
+          "Lines": {
+            "48": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_TotalReturn()": {
+          "Lines": {
+            "53": 0,
+            "54": 0,
+            "55": 0
+          },
+          "Branches": [
+            {
+              "Line": 53,
+              "Offset": 16,
+              "EndOffset": 18,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 53,
+              "Offset": 16,
+              "EndOffset": 25,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_TotalPnL()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<TradingBot.Core.Models.Trading.Trade> TradingBot.Core.Models.Backtest.BacktestResult::get_Trades()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<System.ValueTuple`2<System.DateTime,System.Decimal>> TradingBot.Core.Models.Backtest.BacktestResult::get_EquityCurve()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Models.Portfolio.PerformanceMetrics TradingBot.Core.Models.Backtest.BacktestResult::get_Performance()": {
+          "Lines": {
+            "75": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_CreatedAt()": {
+          "Lines": {
+            "80": 0
+          },
+          "Branches": []
+        },
+        "System.TimeSpan TradingBot.Core.Models.Backtest.BacktestResult::get_Duration()": {
+          "Lines": {
+            "85": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/TransactionCostBreakdown.cs": {
+      "TradingBot.Core.Models.Backtest.TransactionCostBreakdown": {
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Commission()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Slippage()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Spread()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_TotalCost()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/TransactionCostModel.cs": {
+      "TradingBot.Core.Models.Backtest.TransactionCostModel": {
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_CommissionPerTrade()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_CommissionPerShare()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_SlippagePercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_SpreadPercent()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Backtest.TransactionCostModel::get_Enabled()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Analytics/DrawdownPeriod.cs": {
+      "TradingBot.Core.Models.Analytics.DrawdownPeriod": {
+        "System.DateTime TradingBot.Core.Models.Analytics.DrawdownPeriod::get_StartDate()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Analytics.DrawdownPeriod::get_EndDate()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Analytics.DrawdownPeriod::get_RecoveryDate()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_PeakEquity()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_TroughEquity()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Analytics.DrawdownPeriod::get_DurationDays()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Int32> TradingBot.Core.Models.Analytics.DrawdownPeriod::get_RecoveryDays()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Analytics.DrawdownPeriod::get_IsRecovered()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Analytics/EquityPoint.cs": {
+      "TradingBot.Core.Models.Analytics.EquityPoint": {
+        "System.DateTime TradingBot.Core.Models.Analytics.EquityPoint::get_Timestamp()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Drawdown()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Peak()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_ReturnPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        }
+      }
+    }
+  },
+  "TradingBot.Strategies.dll": {
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Strategies/BaseStrategy.cs": {
+      "TradingBot.Strategies.Strategies.BaseStrategy": {
+        "System.String TradingBot.Strategies.Strategies.BaseStrategy::get_Name()": {
+          "Lines": {
+            "38": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyList`1<System.String> TradingBot.Strategies.Strategies.BaseStrategy::get_Symbols()": {
+          "Lines": {
+            "44": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Strategies.Strategies.BaseStrategy::get_Timeframe()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Strategies.Strategies.BaseStrategy::get_IsEnabled()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "Microsoft.Extensions.Logging.ILogger TradingBot.Strategies.Strategies.BaseStrategy::get_Logger()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task TradingBot.Strategies.Strategies.BaseStrategy::InitializeAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "59": 0,
+            "60": 0,
+            "61": 0,
+            "62": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Strategies.BaseStrategy::Enable()": {
+          "Lines": {
+            "75": 0,
+            "76": 0,
+            "77": 0,
+            "78": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Strategies.BaseStrategy::Disable()": {
+          "Lines": {
+            "82": 0,
+            "83": 0,
+            "84": 0,
+            "85": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Strategies.BaseStrategy::ValidateDataSufficiency(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32,System.String)": {
+          "Lines": {
+            "98": 0,
+            "99": 0,
+            "100": 0,
+            "101": 0,
+            "104": 0,
+            "105": 0,
+            "106": 0,
+            "107": 0,
+            "108": 0,
+            "110": 0
+          },
+          "Branches": [
+            {
+              "Line": 99,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 99,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 99,
+              "Offset": 18,
+              "EndOffset": 20,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 99,
+              "Offset": 18,
+              "EndOffset": 43,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 104,
+              "Offset": 54,
+              "EndOffset": 56,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 104,
+              "Offset": 54,
+              "EndOffset": 156,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            }
+          ]
+        },
+        "TradingBot.Core.Models.Trading.Signal TradingBot.Strategies.Strategies.BaseStrategy::CreateSignal(System.String,TradingBot.Core.Enums.SignalType,System.Decimal,System.Nullable`1<System.Decimal>,System.Collections.Generic.Dictionary`2<System.String,System.Object>)": {
+          "Lines": {
+            "127": 0,
+            "128": 0,
+            "129": 0,
+            "130": 0,
+            "131": 0,
+            "132": 0,
+            "134": 0,
+            "135": 0,
+            "136": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0,
+            "140": 0,
+            "142": 0,
+            "143": 0,
+            "144": 0,
+            "145": 0,
+            "146": 0,
+            "147": 0,
+            "148": 0,
+            "149": 0,
+            "150": 0,
+            "151": 0,
+            "152": 0,
+            "154": 0,
+            "155": 0,
+            "156": 0,
+            "157": 0,
+            "158": 0,
+            "160": 0,
+            "161": 0
+          },
+          "Branches": [
+            {
+              "Line": 134,
+              "Offset": 50,
+              "EndOffset": 52,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 136,
+              "Offset": 103,
+              "EndOffset": 64,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 136,
+              "Offset": 103,
+              "EndOffset": 105,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 134,
+              "Offset": 50,
+              "EndOffset": 123,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Void TradingBot.Strategies.Strategies.BaseStrategy::.ctor(System.String,System.Collections.Generic.IReadOnlyList`1<System.String>,System.String,Microsoft.Extensions.Logging.ILogger)": {
+          "Lines": {
+            "25": 0,
+            "26": 0,
+            "27": 0,
+            "28": 0,
+            "29": 0,
+            "30": 0,
+            "31": 0,
+            "32": 0,
+            "33": 0,
+            "34": 0,
+            "35": 0
+          },
+          "Branches": [
+            {
+              "Line": 31,
+              "Offset": 11,
+              "EndOffset": 13,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 31,
+              "Offset": 11,
+              "EndOffset": 25,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 32,
+              "Offset": 33,
+              "EndOffset": 35,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 32,
+              "Offset": 33,
+              "EndOffset": 47,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 55,
+              "EndOffset": 57,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 55,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 34,
+              "Offset": 78,
+              "EndOffset": 80,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 34,
+              "Offset": 78,
+              "EndOffset": 92,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Strategies/MeanReversionStrategy.cs": {
+      "TradingBot.Strategies.Strategies.MeanReversionStrategy": {
+        "System.String TradingBot.Strategies.Strategies.MeanReversionStrategy::get_Type()": {
+          "Lines": {
+            "97": 0
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task`1<System.Boolean> TradingBot.Strategies.Strategies.MeanReversionStrategy::ValidateParametersAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "229": 0,
+            "230": 0,
+            "231": 0,
+            "232": 0,
+            "233": 0,
+            "234": 0,
+            "235": 0,
+            "236": 0,
+            "237": 0,
+            "238": 0,
+            "239": 0,
+            "241": 0,
+            "242": 0,
+            "243": 0,
+            "244": 0,
+            "245": 0,
+            "246": 0,
+            "247": 0,
+            "248": 0,
+            "249": 0,
+            "250": 0,
+            "251": 0,
+            "252": 0,
+            "253": 0,
+            "255": 0,
+            "256": 0
+          },
+          "Branches": [
+            {
+              "Line": 230,
+              "Offset": 8,
+              "EndOffset": 13,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 28,
+              "EndOffset": 33,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 40,
+              "EndOffset": 45,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 61,
+              "EndOffset": 63,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 81,
+              "EndOffset": 83,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 99,
+              "EndOffset": 101,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 119,
+              "EndOffset": 121,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 138,
+              "EndOffset": 140,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 156,
+              "EndOffset": 158,
+              "Path": 0,
+              "Ordinal": 16,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 8,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 28,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 40,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 61,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 81,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 99,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 119,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 138,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 0
+            },
+            {
+              "Line": 230,
+              "Offset": 156,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 17,
+              "Hits": 0
+            },
+            {
+              "Line": 241,
+              "Offset": 184,
+              "EndOffset": 186,
+              "Path": 0,
+              "Ordinal": 18,
+              "Hits": 0
+            },
+            {
+              "Line": 241,
+              "Offset": 184,
+              "EndOffset": 295,
+              "Path": 1,
+              "Ordinal": 19,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Void TradingBot.Strategies.Strategies.MeanReversionStrategy::.ctor(System.String,System.Collections.Generic.IReadOnlyList`1<System.String>,System.String,Microsoft.Extensions.Logging.ILogger`1<TradingBot.Strategies.Strategies.MeanReversionStrategy>,System.Int32,System.Double,System.Int32,System.Decimal,System.Decimal,System.Decimal)": {
+          "Lines": {
+            "51": 0,
+            "52": 0,
+            "53": 0,
+            "54": 0,
+            "55": 0,
+            "58": 0,
+            "59": 0,
+            "60": 0,
+            "63": 0,
+            "64": 0,
+            "65": 0,
+            "68": 0,
+            "69": 0,
+            "70": 0,
+            "73": 0,
+            "74": 0,
+            "75": 0,
+            "78": 0,
+            "79": 0,
+            "80": 0,
+            "83": 0,
+            "84": 0,
+            "85": 0,
+            "88": 0,
+            "89": 0,
+            "90": 0,
+            "91": 0,
+            "92": 0,
+            "93": 0,
+            "94": 0
+          },
+          "Branches": [
+            {
+              "Line": 53,
+              "Offset": 23,
+              "EndOffset": 25,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 53,
+              "Offset": 23,
+              "EndOffset": 42,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 58,
+              "Offset": 60,
+              "EndOffset": 62,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 58,
+              "Offset": 60,
+              "EndOffset": 79,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 63,
+              "Offset": 89,
+              "EndOffset": 91,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 63,
+              "Offset": 89,
+              "EndOffset": 108,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 120,
+              "EndOffset": 122,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 120,
+              "EndOffset": 138,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 141,
+              "EndOffset": 143,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 141,
+              "EndOffset": 160,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            },
+            {
+              "Line": 73,
+              "Offset": 172,
+              "EndOffset": 174,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 0
+            },
+            {
+              "Line": 73,
+              "Offset": 172,
+              "EndOffset": 190,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 0
+            },
+            {
+              "Line": 73,
+              "Offset": 195,
+              "EndOffset": 197,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 0
+            },
+            {
+              "Line": 73,
+              "Offset": 195,
+              "EndOffset": 214,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 0
+            },
+            {
+              "Line": 78,
+              "Offset": 227,
+              "EndOffset": 229,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 0
+            },
+            {
+              "Line": 78,
+              "Offset": 227,
+              "EndOffset": 246,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 0
+            },
+            {
+              "Line": 83,
+              "Offset": 258,
+              "EndOffset": 260,
+              "Path": 0,
+              "Ordinal": 16,
+              "Hits": 0
+            },
+            {
+              "Line": 83,
+              "Offset": 258,
+              "EndOffset": 274,
+              "Path": 1,
+              "Ordinal": 17,
+              "Hits": 0
+            },
+            {
+              "Line": 83,
+              "Offset": 279,
+              "EndOffset": 281,
+              "Path": 0,
+              "Ordinal": 18,
+              "Hits": 0
+            },
+            {
+              "Line": 83,
+              "Offset": 279,
+              "EndOffset": 298,
+              "Path": 1,
+              "Ordinal": 19,
+              "Hits": 0
+            }
+          ]
+        }
+      },
+      "TradingBot.Strategies.Strategies.MeanReversionStrategy/<GenerateSignalAsync>d__9": {
+        "System.Void TradingBot.Strategies.Strategies.MeanReversionStrategy/<GenerateSignalAsync>d__9::MoveNext()": {
+          "Lines": {
+            "104": 0,
+            "106": 0,
+            "107": 0,
+            "110": 0,
+            "112": 0,
+            "113": 0,
+            "114": 0,
+            "117": 0,
+            "118": 0,
+            "119": 0,
+            "120": 0,
+            "121": 0,
+            "124": 0,
+            "127": 0,
+            "129": 0,
+            "130": 0,
+            "131": 0,
+            "139": 0,
+            "140": 0,
+            "142": 0,
+            "143": 0,
+            "144": 0,
+            "145": 0,
+            "147": 0,
+            "148": 0,
+            "149": 0,
+            "150": 0,
+            "151": 0,
+            "152": 0,
+            "153": 0,
+            "154": 0,
+            "155": 0,
+            "156": 0,
+            "157": 0,
+            "158": 0,
+            "160": 0,
+            "161": 0,
+            "162": 0,
+            "163": 0,
+            "164": 0,
+            "165": 0,
+            "166": 0,
+            "168": 0,
+            "170": 0,
+            "171": 0,
+            "172": 0,
+            "173": 0,
+            "175": 0,
+            "176": 0,
+            "177": 0,
+            "178": 0,
+            "179": 0,
+            "180": 0,
+            "181": 0,
+            "182": 0,
+            "183": 0,
+            "184": 0,
+            "185": 0,
+            "186": 0,
+            "188": 0,
+            "189": 0,
+            "190": 0,
+            "191": 0,
+            "192": 0,
+            "193": 0,
+            "194": 0,
+            "197": 0,
+            "200": 0,
+            "201": 0,
+            "202": 0,
+            "203": 0,
+            "204": 0,
+            "205": 0,
+            "206": 0,
+            "207": 0,
+            "211": 0,
+            "212": 0,
+            "213": 0,
+            "214": 0,
+            "215": 0,
+            "216": 0,
+            "218": 0,
+            "220": 0,
+            "221": 0,
+            "222": 0,
+            "223": 0,
+            "225": 0
+          },
+          "Branches": [
+            {
+              "Line": 120,
+              "Offset": 321,
+              "EndOffset": 323,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 120,
+              "Offset": 321,
+              "EndOffset": 330,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 121,
+              "Offset": 381,
+              "EndOffset": 383,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 121,
+              "Offset": 381,
+              "EndOffset": 390,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 124,
+              "Offset": 443,
+              "EndOffset": 445,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 124,
+              "Offset": 443,
+              "EndOffset": 469,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 127,
+              "Offset": 494,
+              "EndOffset": 496,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 127,
+              "Offset": 494,
+              "EndOffset": 520,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 129,
+              "Offset": 532,
+              "EndOffset": 534,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 129,
+              "Offset": 532,
+              "EndOffset": 545,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            },
+            {
+              "Line": 129,
+              "Offset": 548,
+              "EndOffset": 550,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 0
+            },
+            {
+              "Line": 129,
+              "Offset": 548,
+              "EndOffset": 665,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 0
+            },
+            {
+              "Line": 139,
+              "Offset": 675,
+              "EndOffset": 680,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 0
+            },
+            {
+              "Line": 139,
+              "Offset": 675,
+              "EndOffset": 1162,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 0
+            },
+            {
+              "Line": 200,
+              "Offset": 1709,
+              "EndOffset": 1714,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 0
+            },
+            {
+              "Line": 200,
+              "Offset": 1709,
+              "EndOffset": 1902,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Strategies/MomentumStrategy.cs": {
+      "TradingBot.Strategies.Strategies.MomentumStrategy": {
+        "System.String TradingBot.Strategies.Strategies.MomentumStrategy::get_Type()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task`1<System.Boolean> TradingBot.Strategies.Strategies.MomentumStrategy::ValidateParametersAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "162": 0,
+            "163": 0,
+            "164": 0,
+            "165": 0,
+            "166": 0,
+            "167": 0,
+            "169": 0,
+            "170": 0,
+            "171": 0,
+            "172": 0,
+            "173": 0,
+            "174": 0,
+            "175": 0,
+            "176": 0,
+            "178": 0,
+            "179": 0
+          },
+          "Branches": [
+            {
+              "Line": 163,
+              "Offset": 8,
+              "EndOffset": 10,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 17,
+              "EndOffset": 19,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 31,
+              "EndOffset": 33,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 49,
+              "EndOffset": 51,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 8,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 17,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 31,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 49,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 169,
+              "Offset": 77,
+              "EndOffset": 79,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 169,
+              "Offset": 77,
+              "EndOffset": 146,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Void TradingBot.Strategies.Strategies.MomentumStrategy::.ctor(System.String,System.Collections.Generic.IReadOnlyList`1<System.String>,System.String,Microsoft.Extensions.Logging.ILogger`1<TradingBot.Strategies.Strategies.MomentumStrategy>,System.Int32,System.Int32,System.Decimal)": {
+          "Lines": {
+            "42": 0,
+            "43": 0,
+            "44": 0,
+            "45": 0,
+            "46": 0,
+            "49": 0,
+            "50": 0,
+            "51": 0,
+            "54": 0,
+            "55": 0,
+            "56": 0,
+            "59": 0,
+            "60": 0,
+            "61": 0,
+            "64": 0,
+            "65": 0,
+            "66": 0,
+            "67": 0
+          },
+          "Branches": [
+            {
+              "Line": 44,
+              "Offset": 23,
+              "EndOffset": 25,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 44,
+              "Offset": 23,
+              "EndOffset": 42,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 49,
+              "Offset": 52,
+              "EndOffset": 54,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 49,
+              "Offset": 52,
+              "EndOffset": 71,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 54,
+              "Offset": 82,
+              "EndOffset": 84,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 54,
+              "Offset": 82,
+              "EndOffset": 101,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 59,
+              "Offset": 113,
+              "EndOffset": 115,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 59,
+              "Offset": 113,
+              "EndOffset": 129,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 59,
+              "Offset": 132,
+              "EndOffset": 134,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 59,
+              "Offset": 132,
+              "EndOffset": 151,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            }
+          ]
+        }
+      },
+      "TradingBot.Strategies.Strategies.MomentumStrategy/<GenerateSignalAsync>d__6": {
+        "System.Void TradingBot.Strategies.Strategies.MomentumStrategy/<GenerateSignalAsync>d__6::MoveNext()": {
+          "Lines": {
+            "77": 0,
+            "79": 0,
+            "82": 0,
+            "84": 0,
+            "85": 0,
+            "88": 0,
+            "89": 0,
+            "90": 0,
+            "91": 0,
+            "92": 0,
+            "95": 0,
+            "96": 0,
+            "99": 0,
+            "100": 0,
+            "102": 0,
+            "103": 0,
+            "104": 0,
+            "108": 0,
+            "109": 0,
+            "110": 0,
+            "111": 0,
+            "114": 0,
+            "115": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "119": 0,
+            "120": 0,
+            "121": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "128": 0,
+            "129": 0,
+            "130": 0,
+            "131": 0,
+            "132": 0,
+            "133": 0,
+            "134": 0,
+            "135": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0,
+            "140": 0,
+            "141": 0,
+            "142": 0,
+            "144": 0,
+            "145": 0,
+            "146": 0,
+            "147": 0,
+            "148": 0,
+            "149": 0,
+            "151": 0,
+            "153": 0,
+            "154": 0,
+            "155": 0,
+            "156": 0,
+            "158": 0
+          },
+          "Branches": [
+            {
+              "Line": 89,
+              "Offset": 216,
+              "EndOffset": 221,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 89,
+              "Offset": 216,
+              "EndOffset": 373,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 99,
+              "Offset": 447,
+              "EndOffset": 449,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 99,
+              "Offset": 447,
+              "EndOffset": 468,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 492,
+              "EndOffset": 494,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 492,
+              "EndOffset": 513,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 102,
+              "Offset": 525,
+              "EndOffset": 527,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 102,
+              "Offset": 525,
+              "EndOffset": 538,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 102,
+              "Offset": 543,
+              "EndOffset": 545,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 102,
+              "Offset": 543,
+              "EndOffset": 663,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            },
+            {
+              "Line": 114,
+              "Offset": 836,
+              "EndOffset": 841,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 0
+            },
+            {
+              "Line": 114,
+              "Offset": 836,
+              "EndOffset": 1029,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 0
+            },
+            {
+              "Line": 125,
+              "Offset": 1036,
+              "EndOffset": 1038,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 0
+            },
+            {
+              "Line": 125,
+              "Offset": 1036,
+              "EndOffset": 1041,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 0
+            },
+            {
+              "Line": 144,
+              "Offset": 1311,
+              "EndOffset": 1313,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 0
+            },
+            {
+              "Line": 144,
+              "Offset": 1311,
+              "EndOffset": 1320,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Indicators/IndicatorLibrary.cs": {
+      "TradingBot.Strategies.Indicators.IndicatorLibrary": {
+        "System.Decimal TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateSMA(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32)": {
+          "Lines": {
+            "22": 12,
+            "23": 12,
+            "24": 2,
+            "25": 2,
+            "28": 10,
+            "29": 1,
+            "30": 1,
+            "33": 9,
+            "34": 1,
+            "35": 1,
+            "38": 121,
+            "39": 8,
+            "40": 8
+          },
+          "Branches": [
+            {
+              "Line": 23,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 11
+            },
+            {
+              "Line": 23,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 23,
+              "Offset": 18,
+              "EndOffset": 20,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 2
+            },
+            {
+              "Line": 23,
+              "Offset": 18,
+              "EndOffset": 37,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 10
+            },
+            {
+              "Line": 28,
+              "Offset": 46,
+              "EndOffset": 48,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 1
+            },
+            {
+              "Line": 28,
+              "Offset": 46,
+              "EndOffset": 65,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 9
+            },
+            {
+              "Line": 33,
+              "Offset": 76,
+              "EndOffset": 78,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 1
+            },
+            {
+              "Line": 33,
+              "Offset": 76,
+              "EndOffset": 156,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 8
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateEMA(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32)": {
+          "Lines": {
+            "50": 5,
+            "51": 5,
+            "52": 1,
+            "53": 1,
+            "56": 4,
+            "57": 0,
+            "58": 0,
+            "61": 4,
+            "62": 1,
+            "63": 1,
+            "66": 3,
+            "67": 3,
+            "69": 173,
+            "70": 82,
+            "71": 82,
+            "72": 82,
+            "74": 3,
+            "75": 3
+          },
+          "Branches": [
+            {
+              "Line": 51,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 4
+            },
+            {
+              "Line": 51,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 51,
+              "Offset": 18,
+              "EndOffset": 20,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 1
+            },
+            {
+              "Line": 51,
+              "Offset": 18,
+              "EndOffset": 37,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 4
+            },
+            {
+              "Line": 56,
+              "Offset": 46,
+              "EndOffset": 48,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 56,
+              "Offset": 46,
+              "EndOffset": 65,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 4
+            },
+            {
+              "Line": 61,
+              "Offset": 78,
+              "EndOffset": 80,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 1
+            },
+            {
+              "Line": 61,
+              "Offset": 78,
+              "EndOffset": 158,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 3
+            },
+            {
+              "Line": 69,
+              "Offset": 258,
+              "EndOffset": 214,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 82
+            },
+            {
+              "Line": 69,
+              "Offset": 258,
+              "EndOffset": 260,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 3
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateRSI(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32)": {
+          "Lines": {
+            "85": 4,
+            "86": 4,
+            "87": 1,
+            "88": 1,
+            "91": 3,
+            "92": 0,
+            "93": 0,
+            "96": 3,
+            "97": 1,
+            "98": 1,
+            "101": 2,
+            "102": 2,
+            "104": 70,
+            "105": 33,
+            "106": 33,
+            "107": 33,
+            "108": 33,
+            "109": 33,
+            "111": 2,
+            "112": 2,
+            "114": 2,
+            "115": 1,
+            "116": 1,
+            "119": 1,
+            "120": 1,
+            "122": 1,
+            "123": 2
+          },
+          "Branches": [
+            {
+              "Line": 86,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 3
+            },
+            {
+              "Line": 86,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 86,
+              "Offset": 20,
+              "EndOffset": 22,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 1
+            },
+            {
+              "Line": 86,
+              "Offset": 20,
+              "EndOffset": 39,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 3
+            },
+            {
+              "Line": 91,
+              "Offset": 50,
+              "EndOffset": 52,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 91,
+              "Offset": 50,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 3
+            },
+            {
+              "Line": 96,
+              "Offset": 84,
+              "EndOffset": 86,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 1
+            },
+            {
+              "Line": 96,
+              "Offset": 84,
+              "EndOffset": 166,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 2
+            },
+            {
+              "Line": 104,
+              "Offset": 305,
+              "EndOffset": 183,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 33
+            },
+            {
+              "Line": 107,
+              "Offset": 232,
+              "EndOffset": 234,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 7
+            },
+            {
+              "Line": 107,
+              "Offset": 232,
+              "EndOffset": 241,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 26
+            },
+            {
+              "Line": 108,
+              "Offset": 262,
+              "EndOffset": 264,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 26
+            },
+            {
+              "Line": 108,
+              "Offset": 262,
+              "EndOffset": 271,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 7
+            },
+            {
+              "Line": 104,
+              "Offset": 305,
+              "EndOffset": 307,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 2
+            },
+            {
+              "Line": 114,
+              "Offset": 348,
+              "EndOffset": 350,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 1
+            },
+            {
+              "Line": 114,
+              "Offset": 348,
+              "EndOffset": 362,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 1
+            }
+          ]
+        },
+        "System.ValueTuple`3<System.Decimal,System.Decimal,System.Decimal> TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateMACD(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32,System.Int32,System.Int32)": {
+          "Lines": {
+            "139": 4,
+            "140": 4,
+            "141": 1,
+            "142": 1,
+            "145": 3,
+            "146": 0,
+            "147": 0,
+            "150": 3,
+            "151": 1,
+            "152": 1,
+            "155": 2,
+            "156": 2,
+            "157": 1,
+            "158": 1,
+            "161": 1,
+            "162": 1,
+            "163": 1,
+            "164": 1,
+            "165": 1,
+            "167": 1,
+            "168": 1
+          },
+          "Branches": [
+            {
+              "Line": 140,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 3
+            },
+            {
+              "Line": 140,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 140,
+              "Offset": 20,
+              "EndOffset": 22,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 1
+            },
+            {
+              "Line": 140,
+              "Offset": 20,
+              "EndOffset": 39,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 3
+            },
+            {
+              "Line": 145,
+              "Offset": 41,
+              "EndOffset": 43,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 3
+            },
+            {
+              "Line": 145,
+              "Offset": 45,
+              "EndOffset": 47,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 3
+            },
+            {
+              "Line": 145,
+              "Offset": 41,
+              "EndOffset": 56,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 145,
+              "Offset": 45,
+              "EndOffset": 56,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 145,
+              "Offset": 61,
+              "EndOffset": 63,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 145,
+              "Offset": 61,
+              "EndOffset": 75,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 3
+            },
+            {
+              "Line": 150,
+              "Offset": 86,
+              "EndOffset": 88,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 1
+            },
+            {
+              "Line": 150,
+              "Offset": 86,
+              "EndOffset": 100,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 2
+            },
+            {
+              "Line": 156,
+              "Offset": 117,
+              "EndOffset": 119,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 1
+            },
+            {
+              "Line": 156,
+              "Offset": 117,
+              "EndOffset": 197,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 1
+            }
+          ]
+        },
+        "System.ValueTuple`3<System.Decimal,System.Decimal,System.Decimal> TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateBollingerBands(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32,System.Double)": {
+          "Lines": {
+            "182": 4,
+            "183": 4,
+            "184": 1,
+            "185": 1,
+            "188": 3,
+            "189": 0,
+            "190": 0,
+            "193": 3,
+            "194": 1,
+            "195": 1,
+            "198": 2,
+            "199": 0,
+            "200": 0,
+            "203": 2,
+            "204": 2,
+            "205": 32,
+            "206": 2,
+            "207": 2,
+            "208": 2,
+            "209": 2,
+            "210": 2,
+            "212": 2,
+            "213": 2
+          },
+          "Branches": [
+            {
+              "Line": 183,
+              "Offset": 8,
+              "EndOffset": 10,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 3
+            },
+            {
+              "Line": 183,
+              "Offset": 8,
+              "EndOffset": 21,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 183,
+              "Offset": 26,
+              "EndOffset": 28,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 1
+            },
+            {
+              "Line": 183,
+              "Offset": 26,
+              "EndOffset": 45,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 3
+            },
+            {
+              "Line": 188,
+              "Offset": 56,
+              "EndOffset": 58,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 188,
+              "Offset": 56,
+              "EndOffset": 75,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 3
+            },
+            {
+              "Line": 193,
+              "Offset": 94,
+              "EndOffset": 96,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 1
+            },
+            {
+              "Line": 193,
+              "Offset": 94,
+              "EndOffset": 113,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 2
+            },
+            {
+              "Line": 198,
+              "Offset": 126,
+              "EndOffset": 128,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 198,
+              "Offset": 126,
+              "EndOffset": 206,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 2
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Strategies.Indicators.IndicatorLibrary::CalculateATR(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32)": {
+          "Lines": {
+            "223": 5,
+            "224": 5,
+            "225": 1,
+            "226": 1,
+            "229": 4,
+            "230": 0,
+            "231": 0,
+            "234": 4,
+            "235": 1,
+            "236": 1,
+            "239": 3,
+            "241": 100,
+            "242": 47,
+            "243": 47,
+            "244": 47,
+            "245": 47,
+            "246": 47,
+            "247": 47,
+            "248": 47,
+            "249": 47,
+            "250": 47,
+            "252": 3,
+            "253": 3,
+            "254": 3
+          },
+          "Branches": [
+            {
+              "Line": 224,
+              "Offset": 2,
+              "EndOffset": 4,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 4
+            },
+            {
+              "Line": 224,
+              "Offset": 2,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            },
+            {
+              "Line": 224,
+              "Offset": 18,
+              "EndOffset": 20,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 1
+            },
+            {
+              "Line": 224,
+              "Offset": 18,
+              "EndOffset": 37,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 4
+            },
+            {
+              "Line": 229,
+              "Offset": 46,
+              "EndOffset": 48,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 229,
+              "Offset": 46,
+              "EndOffset": 65,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 4
+            },
+            {
+              "Line": 234,
+              "Offset": 80,
+              "EndOffset": 82,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 1
+            },
+            {
+              "Line": 234,
+              "Offset": 80,
+              "EndOffset": 162,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 3
+            },
+            {
+              "Line": 241,
+              "Offset": 320,
+              "EndOffset": 176,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 47
+            },
+            {
+              "Line": 241,
+              "Offset": 320,
+              "EndOffset": 325,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 3
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Implementations/MeanReversionConfig.cs": {
+      "TradingBot.Strategies.Implementations.MeanReversionConfig": {
+        "System.String TradingBot.Strategies.Implementations.MeanReversionConfig::get_Name()": {
+          "Lines": {
+            "15": 37
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Strategies.Implementations.MeanReversionConfig::get_Enabled()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<System.String> TradingBot.Strategies.Implementations.MeanReversionConfig::get_Symbols()": {
+          "Lines": {
+            "25": 39
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Strategies.Implementations.MeanReversionConfig::get_Timeframe()": {
+          "Lines": {
+            "30": 37
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MeanReversionConfig::get_LookbackPeriod()": {
+          "Lines": {
+            "35": 40
+          },
+          "Branches": []
+        },
+        "System.Double TradingBot.Strategies.Implementations.MeanReversionConfig::get_StdMultiplier()": {
+          "Lines": {
+            "40": 39
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Strategies.Implementations.MeanReversionConfig::get_ExitAtMean()": {
+          "Lines": {
+            "45": 36
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Implementations/MeanReversionStrategy.cs": {
+      "TradingBot.Strategies.Implementations.MeanReversionStrategy": {
+        "System.String TradingBot.Strategies.Implementations.MeanReversionStrategy::get_Type()": {
+          "Lines": {
+            "34": 1
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task`1<System.Boolean> TradingBot.Strategies.Implementations.MeanReversionStrategy::ValidateParametersAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "38": 4,
+            "39": 4,
+            "40": 4,
+            "41": 4,
+            "43": 4,
+            "44": 3,
+            "45": 3,
+            "46": 3,
+            "48": 4,
+            "49": 4
+          },
+          "Branches": [
+            {
+              "Line": 39,
+              "Offset": 13,
+              "EndOffset": 15,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 35,
+              "EndOffset": 37,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 13,
+              "EndOffset": 58,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 35,
+              "EndOffset": 58,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 2
+            },
+            {
+              "Line": 43,
+              "Offset": 66,
+              "EndOffset": 68,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 3
+            },
+            {
+              "Line": 43,
+              "Offset": 66,
+              "EndOffset": 102,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 4
+            }
+          ]
+        },
+        "System.Threading.Tasks.Task`1<TradingBot.Core.Models.Trading.Signal> TradingBot.Strategies.Implementations.MeanReversionStrategy::GenerateSignalInternalAsync(System.String,System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Threading.CancellationToken)": {
+          "Lines": {
+            "56": 0,
+            "58": 0,
+            "59": 0,
+            "60": 0,
+            "61": 0,
+            "62": 0,
+            "63": 0,
+            "67": 0,
+            "68": 0,
+            "69": 0,
+            "70": 0,
+            "71": 0,
+            "73": 0,
+            "74": 0,
+            "75": 0,
+            "76": 0,
+            "77": 0,
+            "78": 0,
+            "79": 0,
+            "82": 0,
+            "83": 0,
+            "84": 0,
+            "88": 0,
+            "89": 0,
+            "90": 0,
+            "92": 0,
+            "93": 0,
+            "94": 0,
+            "95": 0,
+            "96": 0,
+            "97": 0,
+            "99": 0,
+            "100": 0,
+            "101": 0,
+            "102": 0,
+            "103": 0,
+            "104": 0,
+            "105": 0,
+            "106": 0,
+            "107": 0,
+            "109": 0,
+            "114": 0,
+            "115": 0,
+            "116": 0,
+            "118": 0,
+            "119": 0,
+            "120": 0,
+            "121": 0,
+            "122": 0,
+            "123": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "128": 0,
+            "129": 0,
+            "130": 0,
+            "131": 0,
+            "132": 0,
+            "133": 0,
+            "135": 0,
+            "140": 0,
+            "141": 0,
+            "142": 0,
+            "144": 0,
+            "145": 0,
+            "146": 0,
+            "147": 0,
+            "148": 0,
+            "149": 0,
+            "150": 0,
+            "152": 0,
+            "153": 0,
+            "154": 0,
+            "155": 0,
+            "156": 0,
+            "157": 0,
+            "158": 0,
+            "159": 0,
+            "161": 0,
+            "163": 0,
+            "166": 0,
+            "167": 0
+          },
+          "Branches": [
+            {
+              "Line": 88,
+              "Offset": 209,
+              "EndOffset": 214,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 88,
+              "Offset": 209,
+              "EndOffset": 422,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 114,
+              "Offset": 433,
+              "EndOffset": 438,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 114,
+              "Offset": 433,
+              "EndOffset": 646,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 140,
+              "Offset": 661,
+              "EndOffset": 666,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 144,
+              "Offset": 708,
+              "EndOffset": 713,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 144,
+              "Offset": 708,
+              "EndOffset": 884,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 140,
+              "Offset": 661,
+              "EndOffset": 885,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MeanReversionStrategy::CalculateBuyConfidence(System.Decimal,System.Decimal,System.Decimal)": {
+          "Lines": {
+            "177": 0,
+            "180": 0,
+            "181": 0,
+            "186": 0,
+            "187": 0,
+            "189": 0,
+            "191": 0,
+            "192": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MeanReversionStrategy::CalculateSellConfidence(System.Decimal,System.Decimal,System.Decimal)": {
+          "Lines": {
+            "202": 0,
+            "205": 0,
+            "206": 0,
+            "209": 0,
+            "210": 0,
+            "212": 0,
+            "214": 0,
+            "215": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Implementations.MeanReversionStrategy::.ctor(Microsoft.Extensions.Logging.ILogger`1<TradingBot.Strategies.Implementations.MeanReversionStrategy>,TradingBot.Strategies.Implementations.MeanReversionConfig)": {
+          "Lines": {
+            "28": 20,
+            "29": 18,
+            "30": 18,
+            "31": 18
+          },
+          "Branches": [
+            {
+              "Line": 30,
+              "Offset": 30,
+              "EndOffset": 32,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 30,
+              "Offset": 30,
+              "EndOffset": 44,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 18
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Implementations/MomentumConfig.cs": {
+      "TradingBot.Strategies.Implementations.MomentumConfig": {
+        "System.String TradingBot.Strategies.Implementations.MomentumConfig::get_Name()": {
+          "Lines": {
+            "15": 29
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Strategies.Implementations.MomentumConfig::get_Enabled()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<System.String> TradingBot.Strategies.Implementations.MomentumConfig::get_Symbols()": {
+          "Lines": {
+            "25": 30
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Strategies.Implementations.MomentumConfig::get_Timeframe()": {
+          "Lines": {
+            "30": 29
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MomentumConfig::get_RsiPeriod()": {
+          "Lines": {
+            "35": 31
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MomentumConfig::get_RsiOversold()": {
+          "Lines": {
+            "40": 37
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MomentumConfig::get_RsiOverbought()": {
+          "Lines": {
+            "45": 37
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MomentumConfig::get_MacdFast()": {
+          "Lines": {
+            "50": 32
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MomentumConfig::get_MacdSlow()": {
+          "Lines": {
+            "55": 30
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MomentumConfig::get_MacdSignal()": {
+          "Lines": {
+            "60": 29
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Strategies.Implementations.MomentumConfig::get_SmaPeriod()": {
+          "Lines": {
+            "65": 29
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Implementations/MomentumStrategy.cs": {
+      "TradingBot.Strategies.Implementations.MomentumStrategy": {
+        "System.String TradingBot.Strategies.Implementations.MomentumStrategy::get_Type()": {
+          "Lines": {
+            "34": 1
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task`1<System.Boolean> TradingBot.Strategies.Implementations.MomentumStrategy::ValidateParametersAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "38": 3,
+            "39": 3,
+            "40": 3,
+            "41": 3,
+            "42": 3,
+            "43": 3,
+            "44": 3,
+            "45": 3,
+            "46": 3,
+            "47": 3,
+            "48": 3,
+            "49": 3,
+            "51": 3,
+            "52": 2,
+            "53": 2,
+            "54": 2,
+            "56": 3,
+            "57": 3
+          },
+          "Branches": [
+            {
+              "Line": 39,
+              "Offset": 13,
+              "EndOffset": 18,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 39,
+              "EndOffset": 44,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 67,
+              "EndOffset": 72,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 93,
+              "EndOffset": 98,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 121,
+              "EndOffset": 123,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 3
+            },
+            {
+              "Line": 39,
+              "Offset": 150,
+              "EndOffset": 152,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 164,
+              "EndOffset": 166,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 188,
+              "EndOffset": 190,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 1
+            },
+            {
+              "Line": 39,
+              "Offset": 202,
+              "EndOffset": 204,
+              "Path": 0,
+              "Ordinal": 16,
+              "Hits": 1
+            },
+            {
+              "Line": 39,
+              "Offset": 216,
+              "EndOffset": 218,
+              "Path": 0,
+              "Ordinal": 18,
+              "Hits": 1
+            },
+            {
+              "Line": 39,
+              "Offset": 13,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 39,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 67,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 93,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 121,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 150,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 164,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 188,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 202,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 17,
+              "Hits": 2
+            },
+            {
+              "Line": 39,
+              "Offset": 216,
+              "EndOffset": 239,
+              "Path": 1,
+              "Ordinal": 19,
+              "Hits": 2
+            },
+            {
+              "Line": 51,
+              "Offset": 247,
+              "EndOffset": 249,
+              "Path": 0,
+              "Ordinal": 20,
+              "Hits": 2
+            },
+            {
+              "Line": 51,
+              "Offset": 247,
+              "EndOffset": 283,
+              "Path": 1,
+              "Ordinal": 21,
+              "Hits": 3
+            }
+          ]
+        },
+        "System.Threading.Tasks.Task`1<TradingBot.Core.Models.Trading.Signal> TradingBot.Strategies.Implementations.MomentumStrategy::GenerateSignalInternalAsync(System.String,System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Threading.CancellationToken)": {
+          "Lines": {
+            "64": 0,
+            "66": 0,
+            "69": 0,
+            "70": 0,
+            "71": 0,
+            "72": 0,
+            "73": 0,
+            "74": 0,
+            "78": 0,
+            "79": 0,
+            "80": 0,
+            "81": 0,
+            "82": 0,
+            "83": 0,
+            "84": 0,
+            "85": 0,
+            "87": 0,
+            "88": 0,
+            "89": 0,
+            "90": 0,
+            "91": 0,
+            "92": 0,
+            "93": 0,
+            "94": 0,
+            "100": 0,
+            "101": 0,
+            "102": 0,
+            "103": 0,
+            "105": 0,
+            "106": 0,
+            "107": 0,
+            "109": 0,
+            "110": 0,
+            "111": 0,
+            "112": 0,
+            "113": 0,
+            "114": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "119": 0,
+            "120": 0,
+            "121": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "126": 0,
+            "133": 0,
+            "134": 0,
+            "135": 0,
+            "136": 0,
+            "138": 0,
+            "139": 0,
+            "140": 0,
+            "142": 0,
+            "143": 0,
+            "144": 0,
+            "145": 0,
+            "146": 0,
+            "147": 0,
+            "149": 0,
+            "150": 0,
+            "151": 0,
+            "152": 0,
+            "153": 0,
+            "154": 0,
+            "155": 0,
+            "156": 0,
+            "157": 0,
+            "159": 0,
+            "163": 0,
+            "164": 0
+          },
+          "Branches": [
+            {
+              "Line": 100,
+              "Offset": 295,
+              "EndOffset": 297,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 309,
+              "EndOffset": 311,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 319,
+              "EndOffset": 321,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 295,
+              "EndOffset": 331,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 309,
+              "EndOffset": 331,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            },
+            {
+              "Line": 100,
+              "Offset": 319,
+              "EndOffset": 331,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 0
+            },
+            {
+              "Line": 105,
+              "Offset": 340,
+              "EndOffset": 345,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 105,
+              "Offset": 340,
+              "EndOffset": 558,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 575,
+              "EndOffset": 577,
+              "Path": 0,
+              "Ordinal": 8,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 589,
+              "EndOffset": 591,
+              "Path": 0,
+              "Ordinal": 10,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 599,
+              "EndOffset": 601,
+              "Path": 0,
+              "Ordinal": 12,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 575,
+              "EndOffset": 611,
+              "Path": 1,
+              "Ordinal": 9,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 589,
+              "EndOffset": 611,
+              "Path": 1,
+              "Ordinal": 11,
+              "Hits": 0
+            },
+            {
+              "Line": 133,
+              "Offset": 599,
+              "EndOffset": 611,
+              "Path": 1,
+              "Ordinal": 13,
+              "Hits": 0
+            },
+            {
+              "Line": 138,
+              "Offset": 620,
+              "EndOffset": 625,
+              "Path": 0,
+              "Ordinal": 14,
+              "Hits": 0
+            },
+            {
+              "Line": 138,
+              "Offset": 620,
+              "EndOffset": 835,
+              "Path": 1,
+              "Ordinal": 15,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MomentumStrategy::CalculateBuyConfidence(System.Decimal,System.Decimal,System.Decimal,System.Decimal)": {
+          "Lines": {
+            "175": 0,
+            "177": 0,
+            "180": 0,
+            "183": 0,
+            "186": 0,
+            "188": 0,
+            "189": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Strategies.Implementations.MomentumStrategy::CalculateSellConfidence(System.Decimal,System.Decimal,System.Decimal,System.Decimal)": {
+          "Lines": {
+            "200": 0,
+            "202": 0,
+            "205": 0,
+            "208": 0,
+            "211": 0,
+            "213": 0,
+            "214": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Implementations.MomentumStrategy::.ctor(Microsoft.Extensions.Logging.ILogger`1<TradingBot.Strategies.Implementations.MomentumStrategy>,TradingBot.Strategies.Implementations.MomentumConfig)": {
+          "Lines": {
+            "28": 16,
+            "29": 14,
+            "30": 14,
+            "31": 14
+          },
+          "Branches": [
+            {
+              "Line": 30,
+              "Offset": 30,
+              "EndOffset": 32,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 30,
+              "Offset": 30,
+              "EndOffset": 44,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 14
+            }
+          ]
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Strategies/Base/BaseStrategy.cs": {
+      "TradingBot.Strategies.Base.BaseStrategy": {
+        "System.String TradingBot.Strategies.Base.BaseStrategy::get_Name()": {
+          "Lines": {
+            "40": 18
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyList`1<System.String> TradingBot.Strategies.Base.BaseStrategy::get_Symbols()": {
+          "Lines": {
+            "46": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Strategies.Base.BaseStrategy::get_Timeframe()": {
+          "Lines": {
+            "49": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Strategies.Base.BaseStrategy::get_IsEnabled()": {
+          "Lines": {
+            "52": 13
+          },
+          "Branches": []
+        },
+        "Microsoft.Extensions.Logging.ILogger TradingBot.Strategies.Base.BaseStrategy::get_Logger()": {
+          "Lines": {
+            "57": 18
+          },
+          "Branches": []
+        },
+        "System.Threading.Tasks.Task TradingBot.Strategies.Base.BaseStrategy::InitializeAsync(System.Threading.CancellationToken)": {
+          "Lines": {
+            "61": 0,
+            "62": 0,
+            "63": 0,
+            "64": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Base.BaseStrategy::Enable()": {
+          "Lines": {
+            "100": 0,
+            "101": 0,
+            "102": 0,
+            "103": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Base.BaseStrategy::Disable()": {
+          "Lines": {
+            "107": 0,
+            "108": 0,
+            "109": 0,
+            "110": 0
+          },
+          "Branches": []
+        },
+        "System.Void TradingBot.Strategies.Base.BaseStrategy::ValidateDataSufficiency(System.Collections.Generic.IReadOnlyList`1<TradingBot.Core.Models.MarketData.Candle>,System.Int32,System.String)": {
+          "Lines": {
+            "135": 0,
+            "136": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0,
+            "140": 0,
+            "141": 0,
+            "142": 0,
+            "144": 0,
+            "145": 0,
+            "147": 0
+          },
+          "Branches": [
+            {
+              "Line": 136,
+              "Offset": 12,
+              "EndOffset": 17,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 136,
+              "Offset": 12,
+              "EndOffset": 162,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "TradingBot.Core.Models.Trading.Signal TradingBot.Strategies.Base.BaseStrategy::CreateBuySignal(System.String,System.Decimal,System.Decimal,System.Collections.Generic.Dictionary`2<System.String,System.Object>)": {
+          "Lines": {
+            "162": 0,
+            "163": 0,
+            "164": 0,
+            "165": 0,
+            "166": 0,
+            "167": 0,
+            "168": 0,
+            "169": 0,
+            "170": 0,
+            "171": 0,
+            "172": 0,
+            "173": 0,
+            "174": 0
+          },
+          "Branches": [
+            {
+              "Line": 163,
+              "Offset": 84,
+              "EndOffset": 86,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 163,
+              "Offset": 84,
+              "EndOffset": 92,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "TradingBot.Core.Models.Trading.Signal TradingBot.Strategies.Base.BaseStrategy::CreateSellSignal(System.String,System.Decimal,System.Decimal,System.Collections.Generic.Dictionary`2<System.String,System.Object>)": {
+          "Lines": {
+            "189": 0,
+            "190": 0,
+            "191": 0,
+            "192": 0,
+            "193": 0,
+            "194": 0,
+            "195": 0,
+            "196": 0,
+            "197": 0,
+            "198": 0,
+            "199": 0,
+            "200": 0,
+            "201": 0
+          },
+          "Branches": [
+            {
+              "Line": 190,
+              "Offset": 84,
+              "EndOffset": 86,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 190,
+              "Offset": 84,
+              "EndOffset": 92,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "TradingBot.Core.Models.Trading.Signal TradingBot.Strategies.Base.BaseStrategy::CreateCloseSignal(System.String,System.Decimal,System.Decimal,System.Collections.Generic.Dictionary`2<System.String,System.Object>)": {
+          "Lines": {
+            "216": 0,
+            "217": 0,
+            "218": 0,
+            "219": 0,
+            "220": 0,
+            "221": 0,
+            "222": 0,
+            "223": 0,
+            "224": 0,
+            "225": 0,
+            "226": 0,
+            "227": 0,
+            "228": 0
+          },
+          "Branches": [
+            {
+              "Line": 217,
+              "Offset": 84,
+              "EndOffset": 86,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 217,
+              "Offset": 84,
+              "EndOffset": 92,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Void TradingBot.Strategies.Base.BaseStrategy::.ctor(Microsoft.Extensions.Logging.ILogger,System.String,System.Collections.Generic.IReadOnlyList`1<System.String>,System.String)": {
+          "Lines": {
+            "26": 34,
+            "27": 34,
+            "28": 34,
+            "29": 34,
+            "30": 34,
+            "31": 34,
+            "32": 34,
+            "33": 32,
+            "34": 32,
+            "35": 32,
+            "36": 32,
+            "37": 32
+          },
+          "Branches": [
+            {
+              "Line": 32,
+              "Offset": 11,
+              "EndOffset": 13,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 2
+            },
+            {
+              "Line": 32,
+              "Offset": 11,
+              "EndOffset": 25,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 32
+            },
+            {
+              "Line": 33,
+              "Offset": 33,
+              "EndOffset": 35,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 33,
+              "Offset": 33,
+              "EndOffset": 47,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 32
+            },
+            {
+              "Line": 34,
+              "Offset": 55,
+              "EndOffset": 57,
+              "Path": 0,
+              "Ordinal": 4,
+              "Hits": 0
+            },
+            {
+              "Line": 34,
+              "Offset": 55,
+              "EndOffset": 69,
+              "Path": 1,
+              "Ordinal": 5,
+              "Hits": 32
+            },
+            {
+              "Line": 35,
+              "Offset": 78,
+              "EndOffset": 80,
+              "Path": 0,
+              "Ordinal": 6,
+              "Hits": 0
+            },
+            {
+              "Line": 35,
+              "Offset": 78,
+              "EndOffset": 92,
+              "Path": 1,
+              "Ordinal": 7,
+              "Hits": 32
+            }
+          ]
+        }
+      },
+      "TradingBot.Strategies.Base.BaseStrategy/<GenerateSignalAsync>d__19": {
+        "System.Void TradingBot.Strategies.Base.BaseStrategy/<GenerateSignalAsync>d__19::MoveNext()": {
+          "Lines": {
+            "71": 13,
+            "72": 13,
+            "73": 13,
+            "74": 13,
+            "75": 13,
+            "78": 0,
+            "79": 0,
+            "80": 0,
+            "81": 0,
+            "85": 0,
+            "86": 0,
+            "88": 0,
+            "89": 0,
+            "90": 0,
+            "91": 0,
+            "93": 13
+          },
+          "Branches": [
+            {
+              "Line": 72,
+              "Offset": 34,
+              "EndOffset": 36,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 13
+            },
+            {
+              "Line": 72,
+              "Offset": 34,
+              "EndOffset": 86,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            },
+            {
+              "Line": 78,
+              "Offset": 113,
+              "EndOffset": 115,
+              "Path": 0,
+              "Ordinal": 2,
+              "Hits": 0
+            },
+            {
+              "Line": 78,
+              "Offset": 113,
+              "EndOffset": 174,
+              "Path": 1,
+              "Ordinal": 3,
+              "Hits": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}
