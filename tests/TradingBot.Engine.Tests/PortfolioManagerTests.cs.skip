@@ -1,0 +1,223 @@
+// <copyright file="PortfolioManagerTests.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
+using Shouldly;
+using TradingBot.Core.Enums;
+using TradingBot.Core.Interfaces;
+using TradingBot.Core.Models.MarketData;
+using TradingBot.Core.Models.Portfolio;
+using TradingBot.Core.Models.Trading;
+
+namespace TradingBot.Engine.Tests;
+
+public sealed class PortfolioManagerTests
+{
+    private readonly ILogger<PortfolioManager> _logger;
+    private readonly IMarketDataService _marketDataService;
+    private readonly PortfolioManager _portfolioManager;
+
+    public PortfolioManagerTests()
+    {
+        _logger = A.Fake<ILogger<PortfolioManager>>();
+        _marketDataService = A.Fake<IMarketDataService>();
+        _portfolioManager = new PortfolioManager(_logger, _marketDataService);
+    }
+
+    [Fact]
+    public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new PortfolioManager(null!, _marketDataService));
+    }
+
+    [Fact]
+    public void Constructor_WithNullMarketDataService_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new PortfolioManager(_logger, null!));
+    }
+
+    [Fact]
+    public async Task GetAccountAsync_WhenCalled_ShouldReturnAccount()
+    {
+        // Act
+        var account = await _portfolioManager.GetAccountAsync();
+
+        // Assert
+        account.ShouldNotBeNull();
+        account.AccountId.ShouldBe("demo-account");
+        account.Equity.ShouldBe(100000m);
+        account.Cash.ShouldBe(100000m);
+        account.PositionValue.ShouldBe(0m);
+        account.BuyingPower.ShouldBe(100000m);
+        account.Leverage.ShouldBe(1m);
+        account.UnrealizedPnL.ShouldBe(0m);
+        account.RealizedPnL.ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task GetPositionsAsync_WithNoPositions_ShouldReturnEmptyList()
+    {
+        // Act
+        var positions = await _portfolioManager.GetPositionsAsync();
+
+        // Assert
+        positions.ShouldNotBeNull();
+        positions.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task GetPositionAsync_WithNonExistentSymbol_ShouldReturnNull()
+    {
+        // Act
+        var position = await _portfolioManager.GetPositionAsync("AAPL");
+
+        // Assert
+        position.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithNoTrades_ShouldReturnEmptyList()
+    {
+        // Act
+        var trades = await _portfolioManager.GetTradeHistoryAsync();
+
+        // Assert
+        trades.ShouldNotBeNull();
+        trades.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task ClosePositionAsync_WithNonExistentPosition_ShouldReturnFalse()
+    {
+        // Act
+        var result = await _portfolioManager.ClosePositionAsync("AAPL");
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task CloseAllPositionsAsync_WithNoPositions_ShouldReturnZero()
+    {
+        // Act
+        var count = await _portfolioManager.CloseAllPositionsAsync();
+
+        // Assert
+        count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task GetPerformanceMetricsAsync_WithNoTrades_ShouldReturnZeroMetrics()
+    {
+        // Act
+        var metrics = await _portfolioManager.GetPerformanceMetricsAsync();
+
+        // Assert
+        metrics.ShouldNotBeNull();
+        metrics.TotalReturn.ShouldBe(0m);
+        metrics.ProfitFactor.ShouldBe(0m);
+        metrics.TotalTrades.ShouldBe(0);
+        metrics.WinningTrades.ShouldBe(0);
+        metrics.LosingTrades.ShouldBe(0);
+        metrics.AverageWin.ShouldBe(0m);
+        metrics.AverageLoss.ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task GetAccountAsync_WithCancellationToken_ShouldHandleCancellation()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+            await _portfolioManager.GetAccountAsync(cts.Token));
+    }
+
+    [Fact]
+    public async Task GetPositionsAsync_WithCancellationToken_ShouldHandleCancellation()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+            await _portfolioManager.GetPositionsAsync(cts.Token));
+    }
+
+    [Fact]
+    public async Task GetPositionAsync_WithCancellationToken_ShouldHandleCancellation()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // Act & Assert
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+            await _portfolioManager.GetPositionAsync("AAPL", cts.Token));
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithStartDateFilter_ShouldFilterTrades()
+    {
+        // Arrange
+        var startDate = DateTime.UtcNow.AddDays(-7);
+
+        // Act
+        var trades = await _portfolioManager.GetTradeHistoryAsync(startDate: startDate);
+
+        // Assert
+        trades.ShouldNotBeNull();
+        trades.All(t => t.EntryTime >= startDate).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithEndDateFilter_ShouldFilterTrades()
+    {
+        // Arrange
+        var endDate = DateTime.UtcNow.AddDays(-1);
+
+        // Act
+        var trades = await _portfolioManager.GetTradeHistoryAsync(endDate: endDate);
+
+        // Assert
+        trades.ShouldNotBeNull();
+        trades.All(t => t.ExitTime <= endDate).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithSymbolFilter_ShouldFilterTrades()
+    {
+        // Arrange
+        var symbol = "SPY";
+
+        // Act
+        var trades = await _portfolioManager.GetTradeHistoryAsync(symbol: symbol);
+
+        // Assert
+        trades.ShouldNotBeNull();
+        trades.All(t => t.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task GetTradeHistoryAsync_WithStrategyFilter_ShouldFilterTrades()
+    {
+        // Arrange
+        var strategyName = "MomentumStrategy";
+
+        // Act
+        var trades = await _portfolioManager.GetTradeHistoryAsync(strategyName: strategyName);
+
+        // Assert
+        trades.ShouldNotBeNull();
+        trades.All(t => t.StrategyName.Equals(strategyName, StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
+    }
+}

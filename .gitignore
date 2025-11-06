@@ -78,4 +78,4 @@ Desktop.ini
 # Temp files
 *.tmp
 *.swp
-*.swo
+*.swocoverage.*.xml
