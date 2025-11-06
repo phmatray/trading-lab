@@ -63,61 +63,82 @@ public sealed class BacktestReportCommand : AsyncCommand<BacktestReportCommand.S
 
     private static void DisplayBacktestReport(BacktestResult result)
     {
-        // Header Info
-        var headerPanel = new Panel(
-            new Markup($"[cyan]Backtest ID:[/] {result.BacktestId}\n" +
-                       $"[cyan]Strategy:[/] {result.StrategyName}\n" +
-                       $"[cyan]Symbol:[/] {result.Symbol}\n" +
-                       $"[cyan]Period:[/] {result.StartDate:yyyy-MM-dd} to {result.EndDate:yyyy-MM-dd}\n" +
-                       $"[cyan]Duration:[/] {result.Duration.TotalSeconds:F2}s"))
+        // Create main layout
+        var mainLayout = new Layout("Root")
+            .SplitRows(
+                new Layout("Header").MinimumSize(8),
+                new Layout("Body").MinimumSize(15),
+                new Layout("Trades"));
+
+        // Header Info with aligned grid
+        var headerGrid = new Grid()
+            .AddColumn(new GridColumn().Width(15).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        headerGrid.AddRow("[cyan]Backtest ID:[/]", $"{result.BacktestId}");
+        headerGrid.AddRow("[cyan]Strategy:[/]", $"{result.StrategyName}");
+        headerGrid.AddRow("[cyan]Symbol:[/]", $"{result.Symbol}");
+        headerGrid.AddRow("[cyan]Period:[/]", $"{result.StartDate:yyyy-MM-dd} to {result.EndDate:yyyy-MM-dd}");
+        headerGrid.AddRow("[cyan]Duration:[/]", $"{result.Duration.TotalSeconds:F2}s");
+
+        var headerPanel = new Panel(headerGrid)
         {
             Header = new PanelHeader("[yellow]Backtest Information[/]"),
             Border = BoxBorder.Rounded,
             BorderStyle = new Style(Color.Blue),
         };
+        headerPanel.Expand();
+        mainLayout["Header"].Update(headerPanel);
 
-        AnsiConsole.Write(headerPanel);
-        AnsiConsole.WriteLine();
+        // Body with side-by-side layout
+        var bodyLayout = mainLayout["Body"]
+            .SplitColumns(
+                new Layout("Performance").Ratio(1),
+                new Layout("Statistics").Ratio(1));
 
-        // Performance Summary
-        var perfTable = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Green)
-            .Title("[yellow]Performance Summary[/]");
+        // Performance Summary with aligned grid
+        var perfGrid = new Grid()
+            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
-        perfTable.AddColumn("[bold]Metric[/]");
-        perfTable.AddColumn("[bold]Value[/]");
+        perfGrid.AddRow("[bold]Initial Capital:[/]", $"[cyan]${result.InitialCapital:N2}[/]");
+        perfGrid.AddRow("[bold]Final Equity:[/]", $"[cyan]${result.FinalEquity:N2}[/]");
+        perfGrid.AddRow("[bold]Total P&L:[/]", FormatPnL(result.TotalPnL));
+        perfGrid.AddRow("[bold]Total Return:[/]", FormatReturn(result.TotalReturn));
 
-        perfTable.AddRow("Initial Capital", $"[cyan]${result.InitialCapital:N2}[/]");
-        perfTable.AddRow("Final Equity", $"[cyan]${result.FinalEquity:N2}[/]");
-        perfTable.AddRow("Total P&L", FormatPnL(result.TotalPnL));
-        perfTable.AddRow("Total Return", FormatReturn(result.TotalReturn));
+        var perfPanel = new Panel(perfGrid)
+        {
+            Header = new PanelHeader("[green]Performance Summary[/]"),
+            Border = BoxBorder.Rounded,
+            BorderStyle = new Style(Color.Green),
+        };
+        perfPanel.Expand();
+        bodyLayout["Performance"].Update(perfPanel);
 
-        AnsiConsole.Write(perfTable);
-        AnsiConsole.WriteLine();
-
-        // Trading Statistics
-        var statsTable = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Blue)
-            .Title("[yellow]Trading Statistics[/]");
-
-        statsTable.AddColumn("[bold]Statistic[/]");
-        statsTable.AddColumn("[bold]Value[/]");
-
+        // Trading Statistics with aligned grid
         var perf = result.Performance;
-        statsTable.AddRow("Total Trades", $"[cyan]{perf.TotalTrades}[/]");
-        statsTable.AddRow("Winning Trades", $"[green]{perf.WinningTrades}[/]");
-        statsTable.AddRow("Losing Trades", $"[red]{perf.LosingTrades}[/]");
-        statsTable.AddRow("Win Rate", $"[cyan]{perf.WinRate:F2}%[/]");
-        statsTable.AddRow("Profit Factor", $"[cyan]{perf.ProfitFactor:F2}[/]");
-        statsTable.AddRow("Average Win", $"[green]${perf.AverageWin:N2}[/]");
-        statsTable.AddRow("Average Loss", $"[red]${perf.AverageLoss:N2}[/]");
+        var statsGrid = new Grid()
+            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
-        AnsiConsole.Write(statsTable);
-        AnsiConsole.WriteLine();
+        statsGrid.AddRow("[bold]Total Trades:[/]", $"[cyan]{perf.TotalTrades}[/]");
+        statsGrid.AddRow("[bold]Winning Trades:[/]", $"[green]{perf.WinningTrades}[/]");
+        statsGrid.AddRow("[bold]Losing Trades:[/]", $"[red]{perf.LosingTrades}[/]");
+        statsGrid.AddRow("[bold]Win Rate:[/]", $"[cyan]{perf.WinRate:F2}%[/]");
+        statsGrid.AddRow("[bold]Profit Factor:[/]", $"[cyan]{perf.ProfitFactor:F2}[/]");
+        statsGrid.AddRow("[bold]Average Win:[/]", $"[green]${perf.AverageWin:N2}[/]");
+        statsGrid.AddRow("[bold]Average Loss:[/]", $"[red]${perf.AverageLoss:N2}[/]");
 
-        // Top Trades
+        var statsPanel = new Panel(statsGrid)
+        {
+            Header = new PanelHeader("[cyan]Trading Statistics[/]"),
+            Border = BoxBorder.Rounded,
+            BorderStyle = new Style(Color.Blue),
+        };
+        statsPanel.Expand();
+        bodyLayout["Statistics"].Update(statsPanel);
+
+        // Top Trades - Side by side layout
         if (result.Trades.Count > 0)
         {
             var topWins = result.Trades
@@ -132,73 +153,128 @@ public sealed class BacktestReportCommand : AsyncCommand<BacktestReportCommand.S
                 .Take(5)
                 .ToList();
 
-            if (topWins.Count > 0)
+            if (topWins.Count > 0 || topLosses.Count > 0)
             {
-                var winsTable = new Table()
-                    .Border(TableBorder.Rounded)
-                    .BorderColor(Color.Green)
-                    .Title("[yellow]Top 5 Winning Trades[/]");
+                var tradesLayout = mainLayout["Trades"]
+                    .SplitColumns(
+                        new Layout("WinningTrades").Ratio(1),
+                        new Layout("LosingTrades").Ratio(1));
 
-                winsTable.AddColumn("[bold]Date[/]");
-                winsTable.AddColumn("[bold]Symbol[/]");
-                winsTable.AddColumn("[bold]Quantity[/]");
-                winsTable.AddColumn("[bold]Entry[/]");
-                winsTable.AddColumn("[bold]Exit[/]");
-                winsTable.AddColumn("[bold]P&L[/]");
-
-                foreach (var trade in topWins)
+                // Winning trades table
+                if (topWins.Count > 0)
                 {
-                    winsTable.AddRow(
-                        trade.ExitTime.ToString("yyyy-MM-dd"),
-                        trade.Symbol,
-                        trade.Quantity.ToString("N2"),
-                        $"${trade.EntryPrice:N2}",
-                        $"${trade.ExitPrice:N2}",
-                        $"[green]+${trade.RealizedPnL:N2}[/]");
+                    var winsTable = new Table()
+                        .Border(TableBorder.Rounded)
+                        .BorderColor(Color.Green)
+                        .AddColumn("[bold]Date[/]")
+                        .AddColumn("[bold]Symbol[/]")
+                        .AddColumn("[bold]Qty[/]", c => c.RightAligned())
+                        .AddColumn("[bold]Entry[/]", c => c.RightAligned())
+                        .AddColumn("[bold]Exit[/]", c => c.RightAligned())
+                        .AddColumn("[bold]P&L[/]", c => c.RightAligned());
+
+                    foreach (var trade in topWins)
+                    {
+                        winsTable.AddRow(
+                            trade.ExitTime.ToString("MM/dd"),
+                            trade.Symbol,
+                            trade.Quantity.ToString("N0"),
+                            $"${trade.EntryPrice:N2}",
+                            $"${trade.ExitPrice:N2}",
+                            $"[green]+${trade.RealizedPnL:N2}[/]");
+                    }
+
+                    var winsPanel = new Panel(winsTable)
+                    {
+                        Header = new PanelHeader("[green]Top 5 Winning Trades[/]"),
+                        Border = BoxBorder.Rounded,
+                        BorderStyle = new Style(Color.Green),
+                    };
+                    winsPanel.Expand();
+                    tradesLayout["WinningTrades"].Update(winsPanel);
+                }
+                else
+                {
+                    var noWinsPanel = new Panel(
+                        Align.Center(
+                            new Markup("[dim]No winning trades[/]"),
+                            VerticalAlignment.Middle))
+                    {
+                        Header = new PanelHeader("[green]Top 5 Winning Trades[/]"),
+                        Border = BoxBorder.Rounded,
+                        BorderStyle = new Style(Color.Green),
+                    };
+                    noWinsPanel.Expand();
+                    tradesLayout["WinningTrades"].Update(noWinsPanel);
                 }
 
-                AnsiConsole.Write(winsTable);
-                AnsiConsole.WriteLine();
-            }
-
-            if (topLosses.Count > 0)
-            {
-                var lossesTable = new Table()
-                    .Border(TableBorder.Rounded)
-                    .BorderColor(Color.Red)
-                    .Title("[yellow]Top 5 Losing Trades[/]");
-
-                lossesTable.AddColumn("[bold]Date[/]");
-                lossesTable.AddColumn("[bold]Symbol[/]");
-                lossesTable.AddColumn("[bold]Quantity[/]");
-                lossesTable.AddColumn("[bold]Entry[/]");
-                lossesTable.AddColumn("[bold]Exit[/]");
-                lossesTable.AddColumn("[bold]P&L[/]");
-
-                foreach (var trade in topLosses)
+                // Losing trades table
+                if (topLosses.Count > 0)
                 {
-                    lossesTable.AddRow(
-                        trade.ExitTime.ToString("yyyy-MM-dd"),
-                        trade.Symbol,
-                        trade.Quantity.ToString("N2"),
-                        $"${trade.EntryPrice:N2}",
-                        $"${trade.ExitPrice:N2}",
-                        $"[red]${trade.RealizedPnL:N2}[/]");
-                }
+                    var lossesTable = new Table()
+                        .Border(TableBorder.Rounded)
+                        .BorderColor(Color.Red)
+                        .AddColumn("[bold]Date[/]")
+                        .AddColumn("[bold]Symbol[/]")
+                        .AddColumn("[bold]Qty[/]", c => c.RightAligned())
+                        .AddColumn("[bold]Entry[/]", c => c.RightAligned())
+                        .AddColumn("[bold]Exit[/]", c => c.RightAligned())
+                        .AddColumn("[bold]P&L[/]", c => c.RightAligned());
 
-                AnsiConsole.Write(lossesTable);
-                AnsiConsole.WriteLine();
+                    foreach (var trade in topLosses)
+                    {
+                        lossesTable.AddRow(
+                            trade.ExitTime.ToString("MM/dd"),
+                            trade.Symbol,
+                            trade.Quantity.ToString("N0"),
+                            $"${trade.EntryPrice:N2}",
+                            $"${trade.ExitPrice:N2}",
+                            $"[red]${trade.RealizedPnL:N2}[/]");
+                    }
+
+                    var lossesPanel = new Panel(lossesTable)
+                    {
+                        Header = new PanelHeader("[red]Top 5 Losing Trades[/]"),
+                        Border = BoxBorder.Rounded,
+                        BorderStyle = new Style(Color.Red),
+                    };
+                    lossesPanel.Expand();
+                    tradesLayout["LosingTrades"].Update(lossesPanel);
+                }
+                else
+                {
+                    var noLossesPanel = new Panel(
+                        Align.Center(
+                            new Markup("[dim]No losing trades[/]"),
+                            VerticalAlignment.Middle))
+                    {
+                        Header = new PanelHeader("[red]Top 5 Losing Trades[/]"),
+                        Border = BoxBorder.Rounded,
+                        BorderStyle = new Style(Color.Red),
+                    };
+                    noLossesPanel.Expand();
+                    tradesLayout["LosingTrades"].Update(noLossesPanel);
+                }
             }
         }
 
-        // Equity Curve Summary
+        // Render the main layout
+        AnsiConsole.Write(mainLayout);
+        AnsiConsole.WriteLine();
+
+        // Equity Curve Summary (below the layout)
         if (result.EquityCurve.Count > 0)
         {
-            var curvePanel = new Panel(
-                new Markup($"[cyan]Start Equity:[/] ${result.EquityCurve.First().Equity:N2}\n" +
-                           $"[cyan]End Equity:[/] ${result.EquityCurve.Last().Equity:N2}\n" +
-                           $"[cyan]Peak Equity:[/] ${result.EquityCurve.Max(e => e.Equity):N2}\n" +
-                           $"[cyan]Data Points:[/] {result.EquityCurve.Count}"))
+            var curveGrid = new Grid()
+                .AddColumn(new GridColumn().Width(15).LeftAligned())
+                .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+            curveGrid.AddRow("[cyan]Start Equity:[/]", $"${result.EquityCurve.First().Equity:N2}");
+            curveGrid.AddRow("[cyan]End Equity:[/]", $"${result.EquityCurve.Last().Equity:N2}");
+            curveGrid.AddRow("[cyan]Peak Equity:[/]", $"${result.EquityCurve.Max(e => e.Equity):N2}");
+            curveGrid.AddRow("[cyan]Data Points:[/]", $"{result.EquityCurve.Count}");
+
+            var curvePanel = new Panel(curveGrid)
             {
                 Header = new PanelHeader("[yellow]Equity Curve Summary[/]"),
                 Border = BoxBorder.Rounded,

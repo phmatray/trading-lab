@@ -37,13 +37,14 @@ public sealed class PerformanceWidget : IWidget
         var drawdownColor = metrics.MaxDrawdown <= 10 ? "green" : metrics.MaxDrawdown <= 20 ? "yellow" : "red";
 
         var grid = new Grid()
-            .AddColumn()
-            .AddColumn();
+            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
         grid.AddRow("[bold]Total Return:[/]", $"[{returnColor}]{returnSign}{metrics.TotalReturn:F2}%[/]");
         grid.AddRow("[bold]Win Rate:[/]", $"{metrics.WinRate:F1}%");
         grid.AddRow("[bold]Total Trades:[/]", metrics.TotalTrades.ToString());
-        grid.AddRow("[bold]Winning/Losing:[/]", $"[green]{metrics.WinningTrades}[/] / [red]{metrics.LosingTrades}[/]");
+        grid.AddRow("[bold]Winning Trades:[/]", $"[green]{metrics.WinningTrades}[/]");
+        grid.AddRow("[bold]Losing Trades:[/]", $"[red]{metrics.LosingTrades}[/]");
         grid.AddRow("[bold]Sharpe Ratio:[/]", $"{metrics.SharpeRatio:F2}");
         grid.AddRow("[bold]Sortino Ratio:[/]", $"{metrics.SortinoRatio:F2}");
         grid.AddRow("[bold]Max Drawdown:[/]", $"[{drawdownColor}]{metrics.MaxDrawdown:F2}%[/]");

@@ -103,14 +103,23 @@ public sealed class DashboardRenderer
         var riskWidget = new RiskWidget(_riskManager);
         var tradesWidget = new RecentTradesWidget(_portfolioManager, maxTrades: 5);
 
-        // Render widgets
+        // Render widgets with proper expansion
         var accountPanel = await CreatePanelAsync(accountWidget, Color.Green, cancellationToken);
-        var positionsPanel = await CreatePanelAsync(positionsWidget, Color.Cyan1, cancellationToken);
-        var performancePanel = await CreatePanelAsync(performanceWidget, Color.Yellow3, cancellationToken);
-        var riskPanel = await CreatePanelAsync(riskWidget, Color.Red, cancellationToken);
-        var tradesPanel = await CreatePanelAsync(tradesWidget, Color.Blue, cancellationToken);
+        accountPanel.Expand();
 
-        // Create layout
+        var positionsPanel = await CreatePanelAsync(positionsWidget, Color.Cyan1, cancellationToken);
+        positionsPanel.Expand();
+
+        var performancePanel = await CreatePanelAsync(performanceWidget, Color.Yellow3, cancellationToken);
+        performancePanel.Expand();
+
+        var riskPanel = await CreatePanelAsync(riskWidget, Color.Red, cancellationToken);
+        riskPanel.Expand();
+
+        var tradesPanel = await CreatePanelAsync(tradesWidget, Color.Blue, cancellationToken);
+        tradesPanel.Expand();
+
+        // Create main layout with proper structure
         var layout = new Layout("Root")
             .SplitRows(
                 new Layout("Header").Size(3),
@@ -123,28 +132,28 @@ public sealed class DashboardRenderer
             .Color(Color.Yellow);
         layout["Header"].Update(title);
 
-        // Body with 2 columns
+        // Body with 2 columns (60/40 ratio for better proportions)
         var body = layout["Body"]
             .SplitColumns(
-                new Layout("Left"),
-                new Layout("Right"));
+                new Layout("Left").Ratio(3),
+                new Layout("Right").Ratio(2));
 
-        // Left column: Account, Performance, Risk
+        // Left column: Account, Performance, Risk with minimum sizes
         body["Left"]
             .SplitRows(
-                new Layout("Account").Size(10),
-                new Layout("Performance").Size(12),
-                new Layout("Risk").Size(10));
+                new Layout("Account").MinimumSize(10),
+                new Layout("Performance").MinimumSize(12),
+                new Layout("Risk").MinimumSize(10));
 
         body["Left"]["Account"].Update(accountPanel);
         body["Left"]["Performance"].Update(performancePanel);
         body["Left"]["Risk"].Update(riskPanel);
 
-        // Right column: Positions and Trades
+        // Right column: Positions and Trades with minimum sizes
         body["Right"]
             .SplitRows(
-                new Layout("Positions"),
-                new Layout("Trades"));
+                new Layout("Positions").MinimumSize(8),
+                new Layout("Trades").MinimumSize(8));
 
         body["Right"]["Positions"].Update(positionsPanel);
         body["Right"]["Trades"].Update(tradesPanel);

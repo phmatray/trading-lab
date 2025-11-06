@@ -38,11 +38,11 @@ public sealed class AccountWidget : IWidget
         var realizedSign = account.RealizedPnL >= 0 ? "+" : string.Empty;
 
         var grid = new Grid()
-            .AddColumn()
-            .AddColumn();
+            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
-        grid.AddRow("[bold]Account ID:[/]", $"[cyan]{account.AccountId}[/]");
-        grid.AddRow("[bold]Equity:[/]", $"[bold cyan]${account.Equity:N2}[/]");
+        grid.AddRow("[bold]Account ID:[/]", $"{account.AccountId}");
+        grid.AddRow("[bold]Equity:[/]", $"[cyan]${account.Equity:N2}[/]");
         grid.AddRow("[bold]Cash:[/]", $"${account.Cash:N2}");
         grid.AddRow("[bold]Position Value:[/]", $"${account.PositionValue:N2}");
         grid.AddRow("[bold]Buying Power:[/]", $"${account.BuyingPower:N2}");

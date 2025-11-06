@@ -36,8 +36,8 @@ public sealed class RiskWidget : IWidget
         var statusText = settings.RiskLimitsEnabled ? "ENABLED" : "DISABLED";
 
         var grid = new Grid()
-            .AddColumn()
-            .AddColumn();
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
         grid.AddRow("[bold]Status:[/]", $"[{statusColor}]{statusText}[/]");
         grid.AddRow("[bold]Leverage:[/]", $"{settings.Leverage:F1}x");

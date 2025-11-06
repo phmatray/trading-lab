@@ -92,53 +92,66 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         _console.Write(rule);
         _console.WriteLine();
 
-        // Create layout with 2 columns
+        // Create layout with 2 columns (60/40 split for better proportions)
         var layout = new Layout("Root")
             .SplitColumns(
-                new Layout("Left"),
-                new Layout("Right"));
+                new Layout("Left").Ratio(3),
+                new Layout("Right").Ratio(2));
 
-        // Left column: Account & Performance
+        // Left column: Account & Performance with minimum sizes
         var leftLayout = layout["Left"]
             .SplitRows(
-                new Layout("Account"),
-                new Layout("Performance"));
+                new Layout("Account").MinimumSize(10),
+                new Layout("Performance").MinimumSize(10));
 
-        // Account Panel
-        var accountPanel = new Panel(new Markup(
-            $"[bold]Account ID:[/] {account.AccountId}\n" +
-            $"[bold]Equity:[/] [cyan]${account.Equity:N2}[/]\n" +
-            $"[bold]Cash:[/] ${account.Cash:N2}\n" +
-            $"[bold]Position Value:[/] ${account.PositionValue:N2}\n" +
-            $"[bold]Buying Power:[/] ${account.BuyingPower:N2}\n" +
-            $"[bold]Unrealized P&L:[/] {FormatPnL(account.UnrealizedPnL)}\n" +
-            $"[bold]Realized P&L:[/] {FormatPnL(account.RealizedPnL)}"))
+        // Account Panel with aligned grid
+        var accountGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        accountGrid.AddRow("[bold]Account ID:[/]", $"{account.AccountId}");
+        accountGrid.AddRow("[bold]Equity:[/]", $"[cyan]${account.Equity:N2}[/]");
+        accountGrid.AddRow("[bold]Cash:[/]", $"${account.Cash:N2}");
+        accountGrid.AddRow("[bold]Position Value:[/]", $"${account.PositionValue:N2}");
+        accountGrid.AddRow("[bold]Buying Power:[/]", $"${account.BuyingPower:N2}");
+        accountGrid.AddRow("[bold]Unrealized P&L:[/]", FormatPnL(account.UnrealizedPnL));
+        accountGrid.AddRow("[bold]Realized P&L:[/]", FormatPnL(account.RealizedPnL));
+
+        var accountPanel = new Panel(accountGrid)
         {
             Header = new PanelHeader("[bold green]ACCOUNT[/]"),
             Border = BoxBorder.Rounded,
         };
+        accountPanel.Expand();
         leftLayout["Account"].Update(accountPanel);
 
-        // Performance Panel
-        var performancePanel = new Panel(new Markup(
-            $"[bold]Total Return:[/] {FormatReturn(metrics.TotalReturn)}\n" +
-            $"[bold]Win Rate:[/] {metrics.WinRate:F1}%\n" +
-            $"[bold]Total Trades:[/] {metrics.TotalTrades}\n" +
-            $"[bold]Winning:[/] [green]{metrics.WinningTrades}[/] | [bold]Losing:[/] [red]{metrics.LosingTrades}[/]\n" +
-            $"[bold]Sharpe Ratio:[/] {metrics.SharpeRatio:F2}\n" +
-            $"[bold]Max Drawdown:[/] {FormatPercent(metrics.MaxDrawdown)}\n" +
-            $"[bold]Profit Factor:[/] {metrics.ProfitFactor:F2}"))
+        // Performance Panel with aligned grid
+        var performanceGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        performanceGrid.AddRow("[bold]Total Return:[/]", FormatReturn(metrics.TotalReturn));
+        performanceGrid.AddRow("[bold]Win Rate:[/]", $"{metrics.WinRate:F1}%");
+        performanceGrid.AddRow("[bold]Total Trades:[/]", $"{metrics.TotalTrades}");
+        performanceGrid.AddRow("[bold]Winning Trades:[/]", $"[green]{metrics.WinningTrades}[/]");
+        performanceGrid.AddRow("[bold]Losing Trades:[/]", $"[red]{metrics.LosingTrades}[/]");
+        performanceGrid.AddRow("[bold]Sharpe Ratio:[/]", $"{metrics.SharpeRatio:F2}");
+        performanceGrid.AddRow("[bold]Max Drawdown:[/]", FormatPercent(metrics.MaxDrawdown));
+        performanceGrid.AddRow("[bold]Profit Factor:[/]", $"{metrics.ProfitFactor:F2}");
+
+        var performancePanel = new Panel(performanceGrid)
         {
             Header = new PanelHeader("[bold yellow]PERFORMANCE[/]"),
             Border = BoxBorder.Rounded,
         };
+        performancePanel.Expand();
         leftLayout["Performance"].Update(performancePanel);
 
-        // Right column: Positions & Risk
+        // Right column: Positions & Risk with minimum sizes
         var rightLayout = layout["Right"]
             .SplitRows(
-                new Layout("Positions"),
-                new Layout("Risk"));
+                new Layout("Positions").MinimumSize(10),
+                new Layout("Risk").MinimumSize(10));
 
         // Positions Panel
         string positionsMarkup;
@@ -173,20 +186,27 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         };
         rightLayout["Positions"].Update(positionsPanel);
 
-        // Risk Panel
+        // Risk Panel with aligned grid
         var riskStatusColor = riskSettings.RiskLimitsEnabled ? "green" : "red";
         var riskStatusText = riskSettings.RiskLimitsEnabled ? "ENABLED" : "DISABLED";
-        var riskPanel = new Panel(new Markup(
-            $"[bold]Leverage:[/] {riskSettings.Leverage:F1}x\n" +
-            $"[bold]Stop-Loss:[/] {riskSettings.StopLossPercent:F1}%\n" +
-            $"[bold]Take-Profit:[/] {riskSettings.TakeProfitPercent:F1}%\n" +
-            $"[bold]Daily Loss Limit:[/] ${riskSettings.DailyLossLimit:N0}\n" +
-            $"[bold]Max Drawdown:[/] {riskSettings.MaxDrawdownPercent:F1}%\n" +
-            $"[bold]Status:[/] [{riskStatusColor}]{riskStatusText}[/]"))
+
+        var riskGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        riskGrid.AddRow("[bold]Leverage:[/]", $"{riskSettings.Leverage:F1}x");
+        riskGrid.AddRow("[bold]Stop-Loss:[/]", $"{riskSettings.StopLossPercent:F1}%");
+        riskGrid.AddRow("[bold]Take-Profit:[/]", $"{riskSettings.TakeProfitPercent:F1}%");
+        riskGrid.AddRow("[bold]Daily Loss Limit:[/]", $"${riskSettings.DailyLossLimit:N0}");
+        riskGrid.AddRow("[bold]Max Drawdown:[/]", $"{riskSettings.MaxDrawdownPercent:F1}%");
+        riskGrid.AddRow("[bold]Status:[/]", $"[{riskStatusColor}]{riskStatusText}[/]");
+
+        var riskPanel = new Panel(riskGrid)
         {
             Header = new PanelHeader("[bold red]RISK SETTINGS[/]"),
             Border = BoxBorder.Rounded,
         };
+        riskPanel.Expand();
         rightLayout["Risk"].Update(riskPanel);
 
         // Render the layout

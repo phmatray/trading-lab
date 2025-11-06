@@ -38,66 +38,93 @@ public sealed class PortfolioShowCommand : AsyncCommand
                 return (acc, pos);
             });
 
-        // Account Summary
-        var accountPanel = new Panel(new Markup(
-            $"[bold]Account ID:[/] {account.AccountId}\n" +
-            $"[bold]Equity:[/] [cyan]${account.Equity:N2}[/]\n" +
-            $"[bold]Cash:[/] ${account.Cash:N2}\n" +
-            $"[bold]Position Value:[/] ${account.PositionValue:N2}\n" +
-            $"[bold]Buying Power:[/] ${account.BuyingPower:N2}\n" +
-            $"[bold]Unrealized P&L:[/] {FormatPnL(account.UnrealizedPnL)}\n" +
-            $"[bold]Realized P&L:[/] {FormatPnL(account.RealizedPnL)}"))
+        // Create layout with rows
+        var layout = new Layout("Root")
+            .SplitRows(
+                new Layout("Account").MinimumSize(12),
+                new Layout("Positions"));
+
+        // Account Summary with aligned grid
+        var accountGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        accountGrid.AddRow("[bold]Account ID:[/]", $"{account.AccountId}");
+        accountGrid.AddRow("[bold]Equity:[/]", $"[cyan]${account.Equity:N2}[/]");
+        accountGrid.AddRow("[bold]Cash:[/]", $"${account.Cash:N2}");
+        accountGrid.AddRow("[bold]Position Value:[/]", $"${account.PositionValue:N2}");
+        accountGrid.AddRow("[bold]Buying Power:[/]", $"${account.BuyingPower:N2}");
+        accountGrid.AddRow("[bold]Unrealized P&L:[/]", FormatPnL(account.UnrealizedPnL));
+        accountGrid.AddRow("[bold]Realized P&L:[/]", FormatPnL(account.RealizedPnL));
+
+        var accountPanel = new Panel(accountGrid)
         {
             Header = new PanelHeader("[bold yellow]ACCOUNT SUMMARY[/]"),
             Border = BoxBorder.Rounded,
         };
-
-        AnsiConsole.Write(accountPanel);
-        AnsiConsole.WriteLine();
+        accountPanel.Expand();
+        layout["Account"].Update(accountPanel);
 
         // Positions Table
         if (positions.Count == 0)
         {
-            AnsiConsole.MarkupLine("[yellow]No open positions.[/]");
-            return 0;
+            var noPositionsPanel = new Panel(
+                Align.Center(
+                    new Markup("[yellow]No open positions[/]"),
+                    VerticalAlignment.Middle))
+            {
+                Header = new PanelHeader("[bold cyan]POSITIONS[/]"),
+                Border = BoxBorder.Rounded,
+            };
+            noPositionsPanel.Expand();
+            layout["Positions"].Update(noPositionsPanel);
         }
-
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .AddColumn("[bold]Symbol[/]")
-            .AddColumn("[bold]Side[/]", c => c.Centered())
-            .AddColumn("[bold]Quantity[/]", c => c.RightAligned())
-            .AddColumn("[bold]Entry Price[/]", c => c.RightAligned())
-            .AddColumn("[bold]Current Price[/]", c => c.RightAligned())
-            .AddColumn("[bold]P&L[/]", c => c.RightAligned())
-            .AddColumn("[bold]Strategy[/]");
-
-        foreach (var position in positions.OrderBy(p => p.Symbol))
+        else
         {
-            var sideMarkup = position.Side.ToString() == "Buy"
-                ? "[green]BUY[/]"
-                : "[red]SELL[/]";
+            var table = new Table()
+                .Border(TableBorder.Rounded)
+                .AddColumn("[bold]Symbol[/]")
+                .AddColumn("[bold]Side[/]", c => c.Centered())
+                .AddColumn("[bold]Quantity[/]", c => c.RightAligned())
+                .AddColumn("[bold]Entry Price[/]", c => c.RightAligned())
+                .AddColumn("[bold]Current Price[/]", c => c.RightAligned())
+                .AddColumn("[bold]P&L[/]", c => c.RightAligned())
+                .AddColumn("[bold]Strategy[/]");
 
-            var pnlPercent = position.EntryPrice > 0
-                ? ((position.CurrentPrice - position.EntryPrice) / position.EntryPrice) * 100m
-                : 0m;
+            foreach (var position in positions.OrderBy(p => p.Symbol))
+            {
+                var sideMarkup = position.Side.ToString() == "Buy"
+                    ? "[green]BUY[/]"
+                    : "[red]SELL[/]";
 
-            table.AddRow(
-                position.Symbol,
-                sideMarkup,
-                position.Quantity.ToString("F2"),
-                $"${position.EntryPrice:F2}",
-                $"${position.CurrentPrice:F2}",
-                $"{FormatPnL(position.UnrealizedPnL)} ({FormatPnLPercent(pnlPercent)})",
-                position.StrategyName);
+                var pnlPercent = position.EntryPrice > 0
+                    ? ((position.CurrentPrice - position.EntryPrice) / position.EntryPrice) * 100m
+                    : 0m;
+
+                table.AddRow(
+                    position.Symbol,
+                    sideMarkup,
+                    position.Quantity.ToString("F2"),
+                    $"${position.EntryPrice:F2}",
+                    $"${position.CurrentPrice:F2}",
+                    $"{FormatPnL(position.UnrealizedPnL)} ({FormatPnLPercent(pnlPercent)})",
+                    position.StrategyName);
+            }
+
+            var totalPnL = positions.Sum(p => p.UnrealizedPnL);
+            table.Caption($"[dim]Total Unrealized P&L: {FormatPnL(totalPnL)}[/]");
+
+            var positionsPanel = new Panel(table)
+            {
+                Header = new PanelHeader("[bold cyan]POSITIONS[/]"),
+                Border = BoxBorder.Rounded,
+            };
+            positionsPanel.Expand();
+            layout["Positions"].Update(positionsPanel);
         }
 
-        AnsiConsole.Write(table);
-        AnsiConsole.WriteLine();
-
-        // Summary
-        var totalPnL = positions.Sum(p => p.UnrealizedPnL);
-        AnsiConsole.MarkupLine($"[dim]Total Unrealized P&L: {FormatPnL(totalPnL)}[/]");
+        // Render the layout
+        AnsiConsole.Write(layout);
 
         return 0;
     }

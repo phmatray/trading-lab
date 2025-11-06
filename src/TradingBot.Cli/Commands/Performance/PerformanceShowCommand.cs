@@ -36,21 +36,32 @@ public sealed class PerformanceShowCommand : AsyncCommand
                 return await _portfolioManager.GetPerformanceMetricsAsync();
             });
 
-        // Performance Summary Panel
-        var summaryPanel = new Panel(new Markup(
-            $"[bold]Total Return:[/] {FormatReturn(metrics.TotalReturn)}\n" +
-            $"[bold]Sharpe Ratio:[/] {metrics.SharpeRatio:F2}\n" +
-            $"[bold]Sortino Ratio:[/] {metrics.SortinoRatio:F2}\n" +
-            $"[bold]Calmar Ratio:[/] {metrics.CalmarRatio:F2}\n" +
-            $"[bold]Max Drawdown:[/] {FormatPercent(metrics.MaxDrawdown)}\n" +
-            $"[bold]Profit Factor:[/] {metrics.ProfitFactor:F2}"))
+        // Create layout with proper structure
+        var layout = new Layout("Root")
+            .SplitRows(
+                new Layout("Summary").MinimumSize(10),
+                new Layout("Statistics").MinimumSize(8),
+                new Layout("RiskAdjusted").MinimumSize(6));
+
+        // Performance Summary Panel with aligned grid
+        var summaryGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
+
+        summaryGrid.AddRow("[bold]Total Return:[/]", FormatReturn(metrics.TotalReturn));
+        summaryGrid.AddRow("[bold]Sharpe Ratio:[/]", $"{metrics.SharpeRatio:F2}");
+        summaryGrid.AddRow("[bold]Sortino Ratio:[/]", $"{metrics.SortinoRatio:F2}");
+        summaryGrid.AddRow("[bold]Calmar Ratio:[/]", $"{metrics.CalmarRatio:F2}");
+        summaryGrid.AddRow("[bold]Max Drawdown:[/]", FormatPercent(metrics.MaxDrawdown));
+        summaryGrid.AddRow("[bold]Profit Factor:[/]", $"{metrics.ProfitFactor:F2}");
+
+        var summaryPanel = new Panel(summaryGrid)
         {
             Header = new PanelHeader("[bold yellow]PERFORMANCE SUMMARY[/]"),
             Border = BoxBorder.Rounded,
         };
-
-        AnsiConsole.Write(summaryPanel);
-        AnsiConsole.WriteLine();
+        summaryPanel.Expand();
+        layout["Summary"].Update(summaryPanel);
 
         // Trading Statistics Table
         var table = new Table()
@@ -88,30 +99,41 @@ public sealed class PerformanceShowCommand : AsyncCommand
             $"[{expectancyColor}]${expectancy:N2}[/]",
             "Expected profit per trade");
 
-        AnsiConsole.Write(table);
-        AnsiConsole.WriteLine();
+        var statsPanel = new Panel(table)
+        {
+            Header = new PanelHeader("[bold cyan]TRADING STATISTICS[/]"),
+            Border = BoxBorder.Rounded,
+        };
+        statsPanel.Expand();
+        layout["Statistics"].Update(statsPanel);
 
-        // Risk-Adjusted Returns
-        AnsiConsole.MarkupLine("[bold underline]Risk-Adjusted Performance:[/]");
-        AnsiConsole.WriteLine();
+        // Risk-Adjusted Performance with aligned grid
+        var riskGrid = new Grid()
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
+            .AddColumn(new GridColumn().NoWrap().RightAligned());
 
-        var sharpeGrid = new Grid()
-            .AddColumn(new GridColumn().Width(20))
-            .AddColumn();
-
-        sharpeGrid.AddRow(
-            "[dim]Sharpe Ratio:[/]",
+        riskGrid.AddRow(
+            "[bold]Sharpe Ratio:[/]",
             FormatRatio(metrics.SharpeRatio, "Excellent", "Good", "Poor"));
 
-        sharpeGrid.AddRow(
-            "[dim]Sortino Ratio:[/]",
+        riskGrid.AddRow(
+            "[bold]Sortino Ratio:[/]",
             FormatRatio(metrics.SortinoRatio, "Excellent", "Good", "Poor"));
 
-        sharpeGrid.AddRow(
-            "[dim]Calmar Ratio:[/]",
+        riskGrid.AddRow(
+            "[bold]Calmar Ratio:[/]",
             FormatRatio(metrics.CalmarRatio, "Excellent", "Good", "Poor"));
 
-        AnsiConsole.Write(sharpeGrid);
+        var riskPanel = new Panel(riskGrid)
+        {
+            Header = new PanelHeader("[bold green]RISK-ADJUSTED PERFORMANCE[/]"),
+            Border = BoxBorder.Rounded,
+        };
+        riskPanel.Expand();
+        layout["RiskAdjusted"].Update(riskPanel);
+
+        // Render the layout
+        AnsiConsole.Write(layout);
 
         return 0;
     }
