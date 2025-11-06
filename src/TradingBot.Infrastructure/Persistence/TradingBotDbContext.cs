@@ -3,9 +3,12 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using TradingBot.Core.Common;
+using TradingBot.Core.Enums;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
+using TradingBot.Infrastructure.Persistence.Converters;
 
 namespace TradingBot.Infrastructure.Persistence;
 
@@ -66,6 +69,9 @@ public sealed class TradingBotDbContext : DbContext
         // Apply all configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TradingBotDbContext).Assembly);
 
+        // Configure SmartEnum value converters
+        ConfigureSmartEnumConverters(modelBuilder);
+
         // SQLite-specific configuration
         if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
         {
@@ -78,6 +84,36 @@ public sealed class TradingBotDbContext : DbContext
                     {
                         property.SetColumnType("TEXT");
                     }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Configures SmartEnum value converters for all properties.
+    /// </summary>
+    /// <param name="modelBuilder">The model builder.</param>
+    private static void ConfigureSmartEnumConverters(ModelBuilder modelBuilder)
+    {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(SignalType))
+                {
+                    property.SetValueConverter(new SmartEnumConverter<SignalType, int>());
+                }
+                else if (property.ClrType == typeof(OrderType))
+                {
+                    property.SetValueConverter(new SmartEnumConverter<OrderType, int>());
+                }
+                else if (property.ClrType == typeof(OrderSide))
+                {
+                    property.SetValueConverter(new SmartEnumConverter<OrderSide, int>());
+                }
+                else if (property.ClrType == typeof(OrderStatus))
+                {
+                    property.SetValueConverter(new SmartEnumConverter<OrderStatus, int>());
                 }
             }
         }

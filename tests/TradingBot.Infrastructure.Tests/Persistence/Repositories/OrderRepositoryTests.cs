@@ -255,7 +255,7 @@ public class OrderRepositoryTests : IDisposable
 
     private static Order CreateSampleOrder(
         string symbol = "SPY",
-        OrderStatus status = OrderStatus.Pending,
+        OrderStatus? status = null,
         decimal quantity = 10m,
         DateTime? createdAt = null)
     {
@@ -266,7 +266,7 @@ public class OrderRepositoryTests : IDisposable
             Type = OrderType.Market,
             Side = OrderSide.Buy,
             Quantity = quantity,
-            Status = status,
+            Status = status ?? OrderStatus.Pending,
             CreatedAt = createdAt ?? DateTime.UtcNow,
             FilledQuantity = 0m,
             AverageFillPrice = 0m,

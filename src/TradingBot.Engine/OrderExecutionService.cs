@@ -194,9 +194,9 @@ public class OrderExecutionService : IOrderExecutionService
                 filtered = filtered.Where(o => o.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (status.HasValue)
+            if (status is not null)
             {
-                filtered = filtered.Where(o => o.Status == status.Value);
+                filtered = filtered.Where(o => o.Status == status);
             }
 
             if (startDate.HasValue)
@@ -349,12 +349,16 @@ public class OrderExecutionService : IOrderExecutionService
         var slippage = marketPrice * _slippagePercent;
 
         // Apply slippage based on order side
-        return order.Side switch
+        if (order.Side == OrderSide.Buy)
         {
-            OrderSide.Buy => marketPrice + slippage, // Buying costs more with slippage
-            OrderSide.Sell => marketPrice - slippage, // Selling gets less with slippage
-            _ => marketPrice,
-        };
+            return marketPrice + slippage; // Buying costs more with slippage
+        }
+        else if (order.Side == OrderSide.Sell)
+        {
+            return marketPrice - slippage; // Selling gets less with slippage
+        }
+
+        return marketPrice;
     }
 
     /// <summary>

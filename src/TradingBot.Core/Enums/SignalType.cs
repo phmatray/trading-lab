@@ -2,30 +2,37 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using TradingBot.Core.Common;
+
 namespace TradingBot.Core.Enums;
 
 /// <summary>
 /// Defines the type of trading signal.
 /// </summary>
-public enum SignalType
+public sealed class SignalType : SmartEnum<SignalType, int>
 {
     /// <summary>
     /// Buy signal - open long position or close short position.
     /// </summary>
-    Buy = 0,
+    public static readonly SignalType Buy = new(nameof(Buy), 0);
 
     /// <summary>
     /// Sell signal - open short position or close long position.
     /// </summary>
-    Sell = 1,
+    public static readonly SignalType Sell = new(nameof(Sell), 1);
 
     /// <summary>
     /// Hold signal - maintain current positions, no action required.
     /// </summary>
-    Hold = 2,
+    public static readonly SignalType Hold = new(nameof(Hold), 2);
 
     /// <summary>
     /// Close signal - close all positions for this symbol.
     /// </summary>
-    Close = 3,
+    public static readonly SignalType Close = new(nameof(Close), 3);
+
+    private SignalType(string name, int value)
+        : base(name, value)
+    {
+    }
 }

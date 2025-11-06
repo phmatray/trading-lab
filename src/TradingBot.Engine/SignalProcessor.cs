@@ -226,12 +226,19 @@ public class SignalProcessor : IDisposable
     /// <returns>Created order.</returns>
     private Order CreateOrderFromSignal(Signal signal, decimal quantity)
     {
-        var orderSide = signal.Type switch
+        OrderSide orderSide;
+        if (signal.Type == SignalType.Buy)
         {
-            SignalType.Buy => OrderSide.Buy,
-            SignalType.Sell => OrderSide.Sell,
-            _ => throw new ArgumentException($"Unsupported signal type: {signal.Type}"),
-        };
+            orderSide = OrderSide.Buy;
+        }
+        else if (signal.Type == SignalType.Sell)
+        {
+            orderSide = OrderSide.Sell;
+        }
+        else
+        {
+            throw new ArgumentException($"Unsupported signal type: {signal.Type}");
+        }
 
         return new Order
         {
