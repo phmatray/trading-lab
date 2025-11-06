@@ -1126,8 +1126,8 @@ Implement position size calculator with multiple algorithms.
 - [X] CalculateVolatilityBased method (ATR-based)
 - [X] Account for leverage
 - [X] Input validation enforces limits
-- [ ] Unit tests for all algorithms
-- [ ] Edge case testing (zero balance, extreme volatility)
+- [X] Unit tests for all algorithms (30 tests passing)
+- [X] Edge case testing (zero balance, extreme volatility, negative values)
 
 **Algorithm Implementations**:
 
