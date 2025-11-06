@@ -10,8 +10,4 @@
     <PackageReference Include="Ardalis.SmartEnum" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Common\" />
-  </ItemGroup>
-
 </Project>
