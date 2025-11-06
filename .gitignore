@@ -56,6 +56,7 @@ TestResults/
 *.coverage
 *.coveragexml
 coverage/
+coverage.cobertura.xml
 
 # NuGet
 *.nupkg
