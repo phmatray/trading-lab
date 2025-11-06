@@ -2,8 +2,10 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using TradingBot.Cli.Dashboard;
 using TradingBot.Core.Interfaces;
 
 namespace TradingBot.Cli.Commands;
@@ -11,39 +13,69 @@ namespace TradingBot.Cli.Commands;
 /// <summary>
 /// Command to display the trading dashboard.
 /// </summary>
-public sealed class DashboardCommand : AsyncCommand
+public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
 {
     private readonly IPortfolioManager _portfolioManager;
     private readonly IRiskManager _riskManager;
+    private readonly DashboardRenderer _renderer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashboardCommand"/> class.
     /// </summary>
     /// <param name="portfolioManager">Portfolio manager.</param>
     /// <param name="riskManager">Risk manager.</param>
+    /// <param name="renderer">Dashboard renderer.</param>
     public DashboardCommand(
         IPortfolioManager portfolioManager,
-        IRiskManager riskManager)
+        IRiskManager riskManager,
+        DashboardRenderer renderer)
     {
         _portfolioManager = portfolioManager ?? throw new ArgumentNullException(nameof(portfolioManager));
         _riskManager = riskManager ?? throw new ArgumentNullException(nameof(riskManager));
+        _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
     }
 
     /// <inheritdoc/>
-    public override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        // Fetch all data
+        if (settings.Live)
+        {
+            // Live mode with auto-refresh
+            AnsiConsole.MarkupLine("[yellow]Starting live dashboard...[/]");
+            AnsiConsole.MarkupLine($"[dim]Refresh interval: {settings.RefreshSeconds}s | Press Ctrl+C to exit[/]");
+            AnsiConsole.WriteLine();
+
+            var cts = new CancellationTokenSource();
+            Console.CancelKeyPress += (s, e) =>
+            {
+                e.Cancel = true;
+                cts.Cancel();
+            };
+
+            try
+            {
+                await _renderer.StartAsync(TimeSpan.FromSeconds(settings.RefreshSeconds), cts.Token);
+                return 0;
+            }
+            catch (OperationCanceledException)
+            {
+                AnsiConsole.MarkupLine("\n[yellow]Dashboard stopped[/]");
+                return 0;
+            }
+        }
+
+        // Static mode (original implementation)
         var (account, positions, trades, metrics, riskSettings) = await AnsiConsole.Status()
             .StartAsync("Loading dashboard...", async ctx =>
             {
                 ctx.Spinner(Spinner.Known.Dots);
                 ctx.SpinnerStyle(Style.Parse("green"));
 
-                var acc = await _portfolioManager.GetAccountAsync();
-                var pos = await _portfolioManager.GetPositionsAsync();
-                var trd = await _portfolioManager.GetTradeHistoryAsync();
-                var met = await _portfolioManager.GetPerformanceMetricsAsync();
-                var risk = await _riskManager.GetRiskSettingsAsync();
+                var acc = await _portfolioManager.GetAccountAsync(cancellationToken);
+                var pos = await _portfolioManager.GetPositionsAsync(cancellationToken);
+                var trd = await _portfolioManager.GetTradeHistoryAsync(cancellationToken: cancellationToken);
+                var met = await _portfolioManager.GetPerformanceMetricsAsync(cancellationToken);
+                var risk = await _riskManager.GetRiskSettingsAsync(cancellationToken);
 
                 return (acc, pos, trd, met, risk);
             });
@@ -211,5 +243,27 @@ public sealed class DashboardCommand : AsyncCommand
     {
         var color = percent <= 10 ? "green" : percent <= 20 ? "yellow" : "red";
         return $"[{color}]{percent:F2}%[/]";
+    }
+
+    /// <summary>
+    /// Dashboard command settings.
+    /// </summary>
+    public sealed class Settings : CommandSettings
+    {
+        /// <summary>
+        /// Gets or sets the refresh interval in seconds.
+        /// </summary>
+        [Description("Refresh interval in seconds")]
+        [CommandOption("--refresh")]
+        [DefaultValue(2)]
+        public int RefreshSeconds { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to use live mode.
+        /// </summary>
+        [Description("Enable live updates")]
+        [CommandOption("--live")]
+        [DefaultValue(true)]
+        public bool Live { get; set; }
     }
 }

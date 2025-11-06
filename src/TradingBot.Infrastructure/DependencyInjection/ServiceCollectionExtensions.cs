@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<SignalProcessor>();
 
         // Analytics services
-        services.AddSingleton<IBacktestingEngine, BacktestingEngine>();
+        services.AddSingleton<IBacktestingEngine, Analytics.BacktestingEngine>();
 
         // Logging with Serilog
         services.AddLogging(builder =>

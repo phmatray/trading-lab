@@ -47,6 +47,9 @@ public static class Program
                 services.AddSingleton<IConfiguration>(configuration);
                 services.AddTradingBotServices(configuration);
 
+                // CLI-specific services
+                services.AddTransient<Dashboard.DashboardRenderer>();
+
                 // Create and configure command app
                 var registrar = new TypeRegistrar(services);
                 var app = new CommandApp(registrar);
@@ -203,8 +206,11 @@ public static class Program
 
                     // Dashboard command
                     config.AddCommand<DashboardCommand>("dashboard")
-                        .WithDescription("Display trading dashboard with overview")
-                        .WithExample(["dashboard"]);
+                        .WithDescription("Display trading dashboard with real-time updates")
+                        .WithExample(["dashboard"])
+                        .WithExample(["dashboard", "--live"])
+                        .WithExample(["dashboard", "--refresh", "5"])
+                        .WithExample(["dashboard", "--live=false"]);
                 });
 
                 return app.Run(args);

@@ -182,45 +182,6 @@ public sealed class BacktestingEngine : IBacktestingEngine
         return Task.FromResult(latest);
     }
 
-    private async Task<IReadOnlyList<Candle>> LoadHistoricalDataAsync(
-        string symbol,
-        DateTime startDate,
-        DateTime endDate,
-        CancellationToken cancellationToken)
-    {
-        // Try to load from cache first
-        var cachedData = await _cache.GetAsync(
-            symbol,
-            startDate,
-            endDate,
-            "1d",
-            cancellationToken);
-
-        if (cachedData != null && cachedData.Count > 0)
-        {
-            _logger.LogDebug("Loaded {Count} candles from cache", cachedData.Count);
-            return cachedData;
-        }
-
-        // Load from market data service
-        _logger.LogDebug("Loading historical data from market data service");
-        var data = await _marketDataService.GetHistoricalDataAsync(
-            symbol,
-            startDate,
-            endDate,
-            "1d",
-            cancellationToken);
-
-        // Cache for future use
-        if (data != null && data.Count > 0)
-        {
-            await _cache.SetAsync(symbol, startDate, endDate, "1d", data, cancellationToken);
-            return data;
-        }
-
-        return Array.Empty<Candle>();
-    }
-
     private static void UpdateOpenPositions(
         Dictionary<string, SimulatedPosition> positions,
         decimal currentPrice)
@@ -337,6 +298,45 @@ public sealed class BacktestingEngine : IBacktestingEngine
         // RealizedPnL is a computed property, so we use it after creation
         trades.Add(trade);
         equity += trade.RealizedPnL;
+    }
+
+    private async Task<IReadOnlyList<Candle>> LoadHistoricalDataAsync(
+        string symbol,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        // Try to load from cache first
+        var cachedData = await _cache.GetAsync(
+            symbol,
+            startDate,
+            endDate,
+            "1d",
+            cancellationToken);
+
+        if (cachedData != null && cachedData.Count > 0)
+        {
+            _logger.LogDebug("Loaded {Count} candles from cache", cachedData.Count);
+            return cachedData;
+        }
+
+        // Load from market data service
+        _logger.LogDebug("Loading historical data from market data service");
+        var data = await _marketDataService.GetHistoricalDataAsync(
+            symbol,
+            startDate,
+            endDate,
+            "1d",
+            cancellationToken);
+
+        // Cache for future use
+        if (data != null && data.Count > 0)
+        {
+            await _cache.SetAsync(symbol, startDate, endDate, "1d", data, cancellationToken);
+            return data;
+        }
+
+        return Array.Empty<Candle>();
     }
 
     private sealed class SimulatedPosition
