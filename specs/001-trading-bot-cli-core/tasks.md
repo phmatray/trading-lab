@@ -922,8 +922,9 @@ return null;
 ### TASK-021: Implement Order Execution Service
 **Priority**: Critical
 **Effort**: 8
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-009, TASK-019
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement order execution service that submits, tracks, and manages orders.
@@ -967,8 +968,9 @@ Implement order execution service that submits, tracks, and manages orders.
 ### TASK-022: Implement Portfolio Manager
 **Priority**: Critical
 **Effort**: 8
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-021
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement portfolio manager that tracks positions, calculates P&L, and manages account state.
@@ -1015,8 +1017,9 @@ public class Account
 ### TASK-023: Implement Risk Manager
 **Priority**: Critical
 **Effort**: 8
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-022
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement risk management system with position sizing, stop-loss, take-profit, and risk limits.
@@ -1065,8 +1068,9 @@ public enum PositionSizingMethod
 ### TASK-024: Implement Stop-Loss Manager
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-023
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement stop-loss management system with fixed and trailing stops.
@@ -1106,8 +1110,9 @@ Price falls to $109 → Stop triggers at $109.25, exit trade
 ### TASK-025: Implement Position Size Calculator
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-023
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement position size calculator with multiple algorithms.
@@ -1156,8 +1161,9 @@ PositionSize = Risk / (ATR * VolatilityMultiplier)
 ### TASK-026: Implement Signal-to-Order Pipeline
 **Priority**: Critical
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-021, TASK-023
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement pipeline that converts strategy signals into validated orders.
