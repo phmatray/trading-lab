@@ -230,11 +230,11 @@ Create initial project documentation including README, contributing guidelines, 
 - [X] Technology stack documented
 - [X] Development setup instructions
 - [X] Risk warning included
-- [ ] CONTRIBUTING.md created
-- [ ] CODE_OF_CONDUCT.md created
-- [ ] LICENSE file added
-- [ ] docs/ARCHITECTURE.md (detailed architecture)
-- [ ] docs/GETTING_STARTED.md (tutorials)
+- [X] CONTRIBUTING.md created
+- [X] CODE_OF_CONDUCT.md created
+- [X] LICENSE file added
+- [ ] docs/ARCHITECTURE.md (detailed architecture) - deferred
+- [ ] docs/GETTING_STARTED.md (tutorials) - deferred
 
 **Files to Create**:
 - README.md
