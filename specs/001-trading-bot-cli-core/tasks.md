@@ -1213,8 +1213,9 @@ Log & Update State
 ### TASK-027: Implement CLI Program Entry Point
 **Priority**: Critical
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-014
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement main program entry point with Spectre.Cli command routing and dependency injection integration.
@@ -1250,8 +1251,9 @@ tradingbot
 ### TASK-028: Implement Strategy Commands
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement all strategy management CLI commands.
@@ -1310,8 +1312,9 @@ public class StrategyListCommand : AsyncCommand
 ### TASK-029: Implement Risk Commands
 **Priority**: High
 **Effort**: 3
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement all risk management CLI commands.
@@ -1333,8 +1336,9 @@ Implement all risk management CLI commands.
 ### TASK-030: Implement Portfolio Commands
 **Priority**: High
 **Effort**: 3
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement portfolio viewing and management commands.
@@ -1365,8 +1369,9 @@ Total P&L: +$97.50 (+1.35%)
 ### TASK-031: Implement Performance Commands
 **Priority**: Medium
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement performance analysis and reporting commands.
@@ -1387,8 +1392,9 @@ Implement performance analysis and reporting commands.
 ### TASK-032: Implement Backtest Commands
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement backtesting CLI commands.
@@ -1419,8 +1425,9 @@ Implement backtesting CLI commands.
 ### TASK-033: Implement Config Commands
 **Priority**: Medium
 **Effort**: 3
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-027
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement configuration management commands.
@@ -1458,8 +1465,9 @@ public override async Task<int> ExecuteAsync(CommandContext context, Settings se
 ### TASK-034: Implement Dashboard Renderer
 **Priority**: Critical
 **Effort**: 8
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-022
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement live dashboard using Spectre.Console LiveDisplay with real-time updates.
