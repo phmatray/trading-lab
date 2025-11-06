@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using TradingBot.Analytics;
 using TradingBot.Core.Interfaces;
 using TradingBot.Engine;
 using TradingBot.Infrastructure.Configuration;
@@ -69,7 +70,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPositionSizeCalculator, PositionSizeCalculator>();
         services.AddSingleton<SignalProcessor>();
 
-        // services.AddSingleton<IBacktestingEngine, BacktestingEngine>(); // TODO: Implement backtesting engine
+        // Analytics services
+        services.AddSingleton<IBacktestingEngine, BacktestingEngine>();
 
         // Logging with Serilog
         services.AddLogging(builder =>
