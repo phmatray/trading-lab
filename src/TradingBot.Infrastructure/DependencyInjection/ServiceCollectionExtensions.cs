@@ -73,6 +73,15 @@ public static class ServiceCollectionExtensions
         // Analytics services
         services.AddSingleton<IBacktestingEngine, Analytics.BacktestingEngine>();
 
+        // Background Jobs
+        services.AddSingleton<BackgroundJobs.MarketDataRefreshJob>();
+        services.AddSingleton<BackgroundJobs.RiskMonitoringJob>();
+        services.AddSingleton<BackgroundJobs.EndOfDayJob>();
+
+        services.AddHostedService<BackgroundJobs.MarketDataRefreshJobScheduler>();
+        services.AddHostedService<BackgroundJobs.RiskMonitoringJobScheduler>();
+        services.AddHostedService<BackgroundJobs.EndOfDayJobScheduler>();
+
         // Logging with Serilog
         services.AddLogging(builder =>
         {
