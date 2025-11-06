@@ -38,7 +38,7 @@ public sealed class AccountWidget : IWidget
         var realizedSign = account.RealizedPnL >= 0 ? "+" : string.Empty;
 
         var grid = new Grid()
-            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
             .AddColumn(new GridColumn().NoWrap().RightAligned());
 
         grid.AddRow("[bold]Account ID:[/]", $"{account.AccountId}");

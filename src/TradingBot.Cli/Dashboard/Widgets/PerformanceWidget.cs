@@ -37,7 +37,7 @@ public sealed class PerformanceWidget : IWidget
         var drawdownColor = metrics.MaxDrawdown <= 10 ? "green" : metrics.MaxDrawdown <= 20 ? "yellow" : "red";
 
         var grid = new Grid()
-            .AddColumn(new GridColumn().Width(18).LeftAligned())
+            .AddColumn(new GridColumn().Width(20).LeftAligned())
             .AddColumn(new GridColumn().NoWrap().RightAligned());
 
         grid.AddRow("[bold]Total Return:[/]", $"[{returnColor}]{returnSign}{metrics.TotalReturn:F2}%[/]");

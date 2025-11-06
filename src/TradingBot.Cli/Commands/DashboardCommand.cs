@@ -92,11 +92,11 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         _console.Write(rule);
         _console.WriteLine();
 
-        // Create layout with 2 columns (60/40 split for better proportions)
+        // Create layout with 2 columns (fixed left column width of 50 characters)
         var layout = new Layout("Root")
             .SplitColumns(
-                new Layout("Left").Ratio(3),
-                new Layout("Right").Ratio(2));
+                new Layout("Left").Size(50),
+                new Layout("Right"));
 
         // Left column: Account & Performance with minimum sizes
         var leftLayout = layout["Left"]

@@ -132,11 +132,11 @@ public sealed class DashboardRenderer
             .Color(Color.Yellow);
         layout["Header"].Update(title);
 
-        // Body with 2 columns (60/40 ratio for better proportions)
+        // Body with 2 columns (fixed left column width of 50 characters)
         var body = layout["Body"]
             .SplitColumns(
-                new Layout("Left").Ratio(3),
-                new Layout("Right").Ratio(2));
+                new Layout("Left").Size(50),
+                new Layout("Right"));
 
         // Left column: Account, Performance, Risk with minimum sizes
         body["Left"]
