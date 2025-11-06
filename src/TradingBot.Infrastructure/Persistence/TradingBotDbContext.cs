@@ -3,12 +3,11 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using TradingBot.Core.Common;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
-using TradingBot.Infrastructure.Persistence.Converters;
 
 namespace TradingBot.Infrastructure.Persistence;
 
@@ -69,7 +68,7 @@ public sealed class TradingBotDbContext : DbContext
         // Apply all configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TradingBotDbContext).Assembly);
 
-        // Configure SmartEnum value converters
+        // Configure SmartEnum value converters manually
         ConfigureSmartEnumConverters(modelBuilder);
 
         // SQLite-specific configuration
@@ -95,25 +94,41 @@ public sealed class TradingBotDbContext : DbContext
     /// <param name="modelBuilder">The model builder.</param>
     private static void ConfigureSmartEnumConverters(ModelBuilder modelBuilder)
     {
+        var signalTypeConverter = new ValueConverter<SignalType, int>(
+            v => v.Value,
+            v => SignalType.FromValue(v));
+
+        var orderTypeConverter = new ValueConverter<OrderType, int>(
+            v => v.Value,
+            v => OrderType.FromValue(v));
+
+        var orderSideConverter = new ValueConverter<OrderSide, int>(
+            v => v.Value,
+            v => OrderSide.FromValue(v));
+
+        var orderStatusConverter = new ValueConverter<OrderStatus, int>(
+            v => v.Value,
+            v => OrderStatus.FromValue(v));
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.GetProperties())
             {
                 if (property.ClrType == typeof(SignalType))
                 {
-                    property.SetValueConverter(new SmartEnumConverter<SignalType, int>());
+                    property.SetValueConverter(signalTypeConverter);
                 }
                 else if (property.ClrType == typeof(OrderType))
                 {
-                    property.SetValueConverter(new SmartEnumConverter<OrderType, int>());
+                    property.SetValueConverter(orderTypeConverter);
                 }
                 else if (property.ClrType == typeof(OrderSide))
                 {
-                    property.SetValueConverter(new SmartEnumConverter<OrderSide, int>());
+                    property.SetValueConverter(orderSideConverter);
                 }
                 else if (property.ClrType == typeof(OrderStatus))
                 {
-                    property.SetValueConverter(new SmartEnumConverter<OrderStatus, int>());
+                    property.SetValueConverter(orderStatusConverter);
                 }
             }
         }

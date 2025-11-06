@@ -29,7 +29,7 @@ public sealed class SmartEnumTypesTests
     public void OrderSide_GetAll_ShouldReturnAllValues()
     {
         // Act
-        var all = OrderSide.GetAll().ToList();
+        var all = OrderSide.List.ToList();
 
         // Assert
         all.Count.ShouldBe(2);
@@ -42,7 +42,7 @@ public sealed class SmartEnumTypesTests
     {
         // Act
         var buy = OrderSide.FromName("Buy");
-        var sell = OrderSide.FromName("sell");
+        var sell = OrderSide.FromName("Sell");
 
         // Assert
         buy.ShouldBe(OrderSide.Buy);
@@ -71,7 +71,7 @@ public sealed class SmartEnumTypesTests
     public void OrderStatus_GetAll_ShouldReturnAllValues()
     {
         // Act
-        var all = OrderStatus.GetAll().ToList();
+        var all = OrderStatus.List.ToList();
 
         // Assert
         all.Count.ShouldBe(7);
@@ -117,7 +117,7 @@ public sealed class SmartEnumTypesTests
     public void OrderType_GetAll_ShouldReturnAllValues()
     {
         // Act
-        var all = OrderType.GetAll().ToList();
+        var all = OrderType.List.ToList();
 
         // Assert
         all.Count.ShouldBe(5);
@@ -158,7 +158,7 @@ public sealed class SmartEnumTypesTests
     public void SignalType_GetAll_ShouldReturnAllValues()
     {
         // Act
-        var all = SignalType.GetAll().ToList();
+        var all = SignalType.List.ToList();
 
         // Assert
         all.Count.ShouldBe(4);

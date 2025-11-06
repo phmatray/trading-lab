@@ -2,14 +2,14 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using TradingBot.Core.Common;
+using Ardalis.SmartEnum;
 
 namespace TradingBot.Core.Enums;
 
 /// <summary>
 /// Defines the side of the order.
 /// </summary>
-public sealed class OrderSide : SmartEnum<OrderSide, int>
+public sealed class OrderSide : SmartEnum<OrderSide>
 {
     /// <summary>
     /// Buy order - opens long position or closes short position.

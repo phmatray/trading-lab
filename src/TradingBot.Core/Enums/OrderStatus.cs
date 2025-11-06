@@ -2,14 +2,14 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using TradingBot.Core.Common;
+using Ardalis.SmartEnum;
 
 namespace TradingBot.Core.Enums;
 
 /// <summary>
 /// Defines the status of an order.
 /// </summary>
-public sealed class OrderStatus : SmartEnum<OrderStatus, int>
+public sealed class OrderStatus : SmartEnum<OrderStatus>
 {
     /// <summary>
     /// Order created but not yet submitted.

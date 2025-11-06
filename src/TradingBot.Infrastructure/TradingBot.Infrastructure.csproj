@@ -39,4 +39,12 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
+  <ItemGroup Label="SmartEnum">
+    <PackageReference Include="Ardalis.SmartEnum.EFCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Persistence\Converters\" />
+  </ItemGroup>
+
 </Project>

@@ -2,8 +2,8 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SmartEnum;
 using Shouldly;
-using TradingBot.Core.Common;
 
 namespace TradingBot.Core.Tests.Common;
 
@@ -26,7 +26,7 @@ public sealed class SmartEnumTests
     public void GetAll_ShouldReturnAllEnumValues()
     {
         // Act
-        var all = TestEnum.GetAll().ToList();
+        var all = TestEnum.List.ToList();
 
         // Assert
         all.Count.ShouldBe(3);
@@ -50,8 +50,7 @@ public sealed class SmartEnumTests
     public void FromValue_WithInvalidValue_ShouldThrowException()
     {
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => TestEnum.FromValue(999))
-            .Message.ShouldContain("No TestEnum with value 999 found");
+        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromValue(999));
     }
 
     [Fact]
@@ -88,25 +87,24 @@ public sealed class SmartEnumTests
     }
 
     [Fact]
-    public void FromName_IsCaseInsensitive()
+    public void FromName_IsCaseSensitive()
     {
         // Act
-        var result1 = TestEnum.FromName("SECOND");
-        var result2 = TestEnum.FromName("second");
-        var result3 = TestEnum.FromName("Second");
+        var result = TestEnum.FromName("Second");
 
         // Assert
-        result1.ShouldBe(TestEnum.Second);
-        result2.ShouldBe(TestEnum.Second);
-        result3.ShouldBe(TestEnum.Second);
+        result.ShouldBe(TestEnum.Second);
+
+        // Case-sensitive - these should throw
+        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("SECOND"));
+        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("second"));
     }
 
     [Fact]
     public void FromName_WithInvalidName_ShouldThrowException()
     {
         // Act & Assert
-        Should.Throw<InvalidOperationException>(() => TestEnum.FromName("Invalid"))
-            .Message.ShouldContain("No TestEnum with name 'Invalid' found");
+        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("Invalid"));
     }
 
     [Fact]
@@ -291,13 +289,10 @@ public sealed class SmartEnumTests
     }
 
     [Fact]
-    public void CompareTo_WithNull_ShouldReturnPositive()
+    public void CompareTo_WithNull_ShouldThrowNullReferenceException()
     {
-        // Act
-        var result = TestEnum.First.CompareTo(null);
-
-        // Assert
-        result.ShouldBeGreaterThan(0);
+        // Act & Assert - Ardalis.SmartEnum throws when comparing to null
+        Should.Throw<NullReferenceException>(() => TestEnum.First.CompareTo(null!));
     }
 
     [Fact]
@@ -372,7 +367,7 @@ public sealed class SmartEnumTests
         StringEnum.FromName("Gamma").Value.ShouldBe("C");
     }
 
-    private sealed class TestEnum : SmartEnum<TestEnum, int>
+    private sealed class TestEnum : SmartEnum<TestEnum>
     {
         public static readonly TestEnum First = new(nameof(First), 1);
         public static readonly TestEnum Second = new(nameof(Second), 2);

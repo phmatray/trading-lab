@@ -2,14 +2,14 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using TradingBot.Core.Common;
+using Ardalis.SmartEnum;
 
 namespace TradingBot.Core.Enums;
 
 /// <summary>
 /// Defines the type of order.
 /// </summary>
-public sealed class OrderType : SmartEnum<OrderType, int>
+public sealed class OrderType : SmartEnum<OrderType>
 {
     /// <summary>
     /// Market order - executes immediately at current market price.

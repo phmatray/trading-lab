@@ -2,14 +2,14 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using TradingBot.Core.Common;
+using Ardalis.SmartEnum;
 
 namespace TradingBot.Core.Enums;
 
 /// <summary>
 /// Defines the type of trading signal.
 /// </summary>
-public sealed class SignalType : SmartEnum<SignalType, int>
+public sealed class SignalType : SmartEnum<SignalType>
 {
     /// <summary>
     /// Buy signal - open long position or close short position.
