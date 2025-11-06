@@ -21,4 +21,14 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TradingBot.Analytics\TradingBot.Analytics.csproj" />
+    <ProjectReference Include="..\..\src\TradingBot.Core\TradingBot.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="FakeItEasy" />
+  </ItemGroup>
+
 </Project>
