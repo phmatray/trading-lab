@@ -72,6 +72,9 @@ public static class ServiceCollectionExtensions
 
         // Analytics services
         services.AddSingleton<IBacktestingEngine, Analytics.BacktestingEngine>();
+        services.AddSingleton<Analytics.EquityCurveGenerator>();
+        services.AddSingleton<Analytics.DrawdownAnalyzer>();
+        services.AddSingleton<Analytics.MetricsCalculator>();
 
         // Background Jobs
         services.AddSingleton<BackgroundJobs.MarketDataRefreshJob>();
