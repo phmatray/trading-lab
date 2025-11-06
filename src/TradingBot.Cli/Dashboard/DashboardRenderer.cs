@@ -74,7 +74,7 @@ public sealed class DashboardRenderer
     {
         return new Layout("Root")
             .SplitRows(
-                new Layout("Header").Size(3),
+                new Layout("Header").Size(5),
                 new Layout("Body"),
                 new Layout("Footer").Size(1));
     }
@@ -122,7 +122,7 @@ public sealed class DashboardRenderer
         // Create main layout with proper structure
         var layout = new Layout("Root")
             .SplitRows(
-                new Layout("Header").Size(3),
+                new Layout("Header").Size(5),
                 new Layout("Body"),
                 new Layout("Footer").Size(1));
 
