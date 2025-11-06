@@ -507,8 +507,9 @@ Task InvalidateAsync(string symbol, CancellationToken cancellationToken);
 ### TASK-013: Implement Configuration Service
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-010
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement configuration loading from appsettings.json and strategies.yaml with encryption support.
@@ -560,8 +561,9 @@ public class ConfigurationService
 ### TASK-014: Set Up Dependency Injection
 **Priority**: Critical
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-007, TASK-010, TASK-011, TASK-012, TASK-013
+**Status**: ✅ COMPLETED
 
 **Description**:
 Configure dependency injection container with all services, repositories, and infrastructure components.
@@ -570,7 +572,7 @@ Configure dependency injection container with all services, repositories, and in
 - [X] ServiceCollectionExtensions class created
 - [X] AddTradingBotServices extension method implemented
 - [X] Database context registered with correct lifetime (Scoped)
-- [ ] Repositories registered (Scoped) - pending repository implementation
+- [X] Repositories registered (Scoped) - All 5 repositories registered
 - [X] Services registered (Singleton for stateless, Scoped for stateful)
 - [X] Configuration registered
 - [X] Logging configured with Serilog
