@@ -48,6 +48,7 @@ public static class Program
                 services.AddTradingBotServices(configuration);
 
                 // CLI-specific services
+                services.AddSingleton<IAnsiConsole>(AnsiConsole.Console);
                 services.AddTransient<Dashboard.DashboardRenderer>();
 
                 // Create and configure command app

@@ -21,4 +21,15 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="FakeItEasy" />
+    <PackageReference Include="Spectre.Console.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TradingBot.Cli\TradingBot.Cli.csproj" />
+    <ProjectReference Include="..\..\src\TradingBot.Core\TradingBot.Core.csproj" />
+  </ItemGroup>
+
 </Project>

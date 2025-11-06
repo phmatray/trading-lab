@@ -15,18 +15,22 @@ public sealed class DashboardRenderer
 {
     private readonly IPortfolioManager _portfolioManager;
     private readonly IRiskManager _riskManager;
+    private readonly IAnsiConsole _console;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashboardRenderer"/> class.
     /// </summary>
     /// <param name="portfolioManager">Portfolio manager.</param>
     /// <param name="riskManager">Risk manager.</param>
+    /// <param name="console">Console for rendering output.</param>
     public DashboardRenderer(
         IPortfolioManager portfolioManager,
-        IRiskManager riskManager)
+        IRiskManager riskManager,
+        IAnsiConsole console)
     {
         _portfolioManager = portfolioManager ?? throw new ArgumentNullException(nameof(portfolioManager));
         _riskManager = riskManager ?? throw new ArgumentNullException(nameof(riskManager));
+        _console = console ?? throw new ArgumentNullException(nameof(console));
     }
 
     /// <summary>
@@ -37,9 +41,9 @@ public sealed class DashboardRenderer
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task StartAsync(TimeSpan refreshInterval, CancellationToken cancellationToken = default)
     {
-        AnsiConsole.Clear();
+        _console.Clear();
 
-        await AnsiConsole.Live(CreateInitialLayout())
+        await _console.Live(CreateInitialLayout())
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
@@ -59,7 +63,7 @@ public sealed class DashboardRenderer
                     }
                     catch (Exception ex)
                     {
-                        AnsiConsole.MarkupLine($"[red]Error updating dashboard: {ex.Message}[/]");
+                        _console.MarkupLine($"[red]Error updating dashboard: {ex.Message}[/]");
                         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     }
                 }

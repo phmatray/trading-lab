@@ -18,6 +18,7 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
     private readonly IPortfolioManager _portfolioManager;
     private readonly IRiskManager _riskManager;
     private readonly DashboardRenderer _renderer;
+    private readonly IAnsiConsole _console;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DashboardCommand"/> class.
@@ -25,14 +26,17 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
     /// <param name="portfolioManager">Portfolio manager.</param>
     /// <param name="riskManager">Risk manager.</param>
     /// <param name="renderer">Dashboard renderer.</param>
+    /// <param name="console">Console for rendering output.</param>
     public DashboardCommand(
         IPortfolioManager portfolioManager,
         IRiskManager riskManager,
-        DashboardRenderer renderer)
+        DashboardRenderer renderer,
+        IAnsiConsole console)
     {
         _portfolioManager = portfolioManager ?? throw new ArgumentNullException(nameof(portfolioManager));
         _riskManager = riskManager ?? throw new ArgumentNullException(nameof(riskManager));
         _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
+        _console = console ?? throw new ArgumentNullException(nameof(console));
     }
 
     /// <inheritdoc/>
@@ -41,9 +45,9 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         if (settings.Live)
         {
             // Live mode with auto-refresh
-            AnsiConsole.MarkupLine("[yellow]Starting live dashboard...[/]");
-            AnsiConsole.MarkupLine($"[dim]Refresh interval: {settings.RefreshSeconds}s | Press Ctrl+C to exit[/]");
-            AnsiConsole.WriteLine();
+            _console.MarkupLine("[yellow]Starting live dashboard...[/]");
+            _console.MarkupLine($"[dim]Refresh interval: {settings.RefreshSeconds}s | Press Ctrl+C to exit[/]");
+            _console.WriteLine();
 
             var cts = new CancellationTokenSource();
             Console.CancelKeyPress += (s, e) =>
@@ -59,13 +63,13 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
             }
             catch (OperationCanceledException)
             {
-                AnsiConsole.MarkupLine("\n[yellow]Dashboard stopped[/]");
+                _console.MarkupLine("\n[yellow]Dashboard stopped[/]");
                 return 0;
             }
         }
 
         // Static mode (original implementation)
-        var (account, positions, trades, metrics, riskSettings) = await AnsiConsole.Status()
+        var (account, positions, trades, metrics, riskSettings) = await _console.Status()
             .StartAsync("Loading dashboard...", async ctx =>
             {
                 ctx.Spinner(Spinner.Known.Dots);
@@ -85,8 +89,8 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         {
             Justification = Justify.Center,
         };
-        AnsiConsole.Write(rule);
-        AnsiConsole.WriteLine();
+        _console.Write(rule);
+        _console.WriteLine();
 
         // Create layout with 2 columns
         var layout = new Layout("Root")
@@ -186,8 +190,8 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
         rightLayout["Risk"].Update(riskPanel);
 
         // Render the layout
-        AnsiConsole.Write(layout);
-        AnsiConsole.WriteLine();
+        _console.Write(layout);
+        _console.WriteLine();
 
         // Recent Trades (bottom section)
         if (trades.Count > 0)
@@ -215,11 +219,11 @@ public sealed class DashboardCommand : AsyncCommand<DashboardCommand.Settings>
                     $"[{pnlColor}]{pnlSign}${trade.RealizedPnL:N2}[/]");
             }
 
-            AnsiConsole.Write(tradesTable);
+            _console.Write(tradesTable);
         }
         else
         {
-            AnsiConsole.MarkupLine("[dim]No trades yet[/]");
+            _console.MarkupLine("[dim]No trades yet[/]");
         }
 
         return 0;
