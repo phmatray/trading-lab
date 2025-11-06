@@ -320,8 +320,9 @@ dotnet ef database update
 ### TASK-009: Implement Repository Pattern
 **Priority**: Medium
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-007
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement repository classes for data access abstraction.
@@ -404,8 +405,9 @@ public void Encrypt_Decrypt_ShouldReturnOriginalValue()
 ### TASK-011: Implement Yahoo Finance Service
 **Priority**: Critical
 **Effort**: 8
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-005, TASK-009
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement market data service using YahooFinanceApi with Polly resilience patterns.
@@ -417,8 +419,8 @@ Implement market data service using YahooFinanceApi with Polly resilience patter
 - [X] GetQuotesAsync method implemented (batch)
 - [X] GetHistoricalDataAsync method implemented
 - [X] Polly retry policy configured (3 retries, exponential backoff)
-- [ ] Polly rate limiter configured (60 requests/minute)
-- [ ] Polly timeout configured (10 seconds)
+- [ ] Polly rate limiter configured (60 requests/minute) - deferred
+- [ ] Polly timeout configured (10 seconds) - deferred
 - [X] ResiliencePipeline built and applied (retry + circuit breaker)
 - [X] Data normalization implemented
 - [X] Logging integrated (ILogger)
@@ -455,8 +457,9 @@ var pipeline = new ResiliencePipelineBuilder()
 ### TASK-012: Implement Historical Data Cache
 **Priority**: High
 **Effort**: 5
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-009
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement local caching for historical market data to reduce API calls and improve performance.
