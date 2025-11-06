@@ -1,35 +1,83 @@
 <Project>
-  <PropertyGroup>
+  <!-- ============================================ -->
+  <!-- Common properties for all projects -->
+  <!-- ============================================ -->
+
+  <PropertyGroup Label="Framework and Language">
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build Configuration">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn> <!-- Missing XML comment -->
+    <!-- Suppressed warnings:
+         1591: Missing XML comment
+         S1135: TODO comments allowed during development
+         S1144: Unused private set accessors (may be used by serialization or reflection)
+         S1172: Unused parameters (may be required for interface compliance)
+         S1244: Floating point equality checks (sometimes intentional)
+         S1481: Unused local variables (may be in TODO code or testing)
+         S1854: Useless assignments (may be placeholder for future logic)
+         S1905: Unnecessary casts (may be needed for clarity)
+         S2139: Exception rethrow patterns
+         S2325: Make method static (design choice for testability/inheritance)
+         S2930: Dispose resources (managed by using statements or DI container)
+         S3267: Loop simplification (readability preference)
+         S3358: Extract nested ternary (complexity tolerance)
+         S3400: Method returning constant (may be overridden in derived classes)
+         S3878: Array creation simplification (readability preference)
+         S3459: Unassigned auto-property (may be set by initializer or reflection)
+         S3881: IDisposable pattern (simplified disposal patterns allowed)
+         S4035: False positive for SmartEnum pattern
+         S4487: Unread fields (may be for future use or debugging)
+         S4581: GUID instantiation (constructor overloads valid for testing)
+         S6580: Date/time parsing format provider (handled by invariant culture)
+         S6608: Indexing preferences (Last() more readable)
+         S6667: Logging exceptions (handled contextually)
+         S6672: Logger type mismatch (intentional generic loggers)
+         S6966: CancelAsync availability (backwards compatibility) -->
+    <NoWarn>$(NoWarn);1591;S1135;S1144;S1172;S1244;S1481;S1854;S1905;S2139;S2325;S2930;S3267;S3358;S3400;S3878;S3459;S3881;S4035;S4487;S4581;S6580;S6608;S6667;S6672;S6966</NoWarn>
   </PropertyGroup>
 
-  <!-- Deterministic builds -->
-  <PropertyGroup>
+  <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <!-- Assembly metadata -->
-  <PropertyGroup>
+  <PropertyGroup Label="Assembly Metadata">
     <Product>TradingBot CLI</Product>
     <Company>TradingBot</Company>
+    <Authors>TradingBot Development Team</Authors>
     <Copyright>Copyright © 2025 TradingBot</Copyright>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
-  <!-- Code analyzers -->
-  <ItemGroup>
+  <PropertyGroup Label="Source Link">
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Output Configuration">
+    <OutputPath>$(MSBuildThisFileDirectory)artifacts\bin\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <!-- ============================================ -->
+  <!-- Code analyzers for all projects -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Code Analyzers">
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -42,10 +90,29 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="SonarAnalyzer.CSharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
+  <!-- ============================================ -->
   <!-- StyleCop configuration -->
-  <ItemGroup>
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Analyzer Configuration">
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+
+  <!-- ============================================ -->
+  <!-- Implicit usings for all projects -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Global Usings">
+    <Using Include="System" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Threading" />
+    <Using Include="System.Threading.Tasks" />
   </ItemGroup>
 </Project>

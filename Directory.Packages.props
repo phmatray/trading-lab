@@ -1,58 +1,142 @@
 <Project>
-  <PropertyGroup>
+  <!-- ============================================ -->
+  <!-- Central Package Management -->
+  <!-- ============================================ -->
+
+  <PropertyGroup Label="Package Management">
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <EnablePackageVersionOverride>false</EnablePackageVersionOverride>
   </PropertyGroup>
-  <ItemGroup>
-    <!-- CLI and Console -->
+
+  <!-- ============================================ -->
+  <!-- Package Versions -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="CLI and Console">
     <PackageVersion Include="Spectre.Console" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.53.0" />
-    <!-- Data Access -->
+  </ItemGroup>
+
+  <ItemGroup Label="Data Access - Entity Framework Core">
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
-    <!-- Configuration -->
+  </ItemGroup>
+
+  <ItemGroup Label="Configuration">
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
     <PackageVersion Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-    <!-- Dependency Injection -->
+  </ItemGroup>
+
+  <ItemGroup Label="Dependency Injection and Hosting">
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
-    <!-- Logging -->
+  </ItemGroup>
+
+  <ItemGroup Label="Logging - Serilog">
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
-    <!-- Market Data -->
+  </ItemGroup>
+
+  <ItemGroup Label="Domain - SmartEnum">
+    <PackageVersion Include="Ardalis.SmartEnum" Version="8.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Market Data Providers">
     <PackageVersion Include="YahooFinanceApi" Version="2.3.3" />
-    <!-- Resilience -->
+  </ItemGroup>
+
+  <ItemGroup Label="Resilience and Rate Limiting">
     <PackageVersion Include="Polly" Version="8.6.4" />
     <PackageVersion Include="Polly.Extensions" Version="8.6.4" />
     <PackageVersion Include="Polly.RateLimiting" Version="8.4.0" />
-    <!-- Math and Statistics -->
+  </ItemGroup>
+
+  <ItemGroup Label="Math and Statistics">
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
-    <!-- Background Jobs -->
+  </ItemGroup>
+
+  <ItemGroup Label="Background Jobs">
     <PackageVersion Include="TickerQ" Version="2.5.3" />
-    <!-- Testing -->
+  </ItemGroup>
+
+  <ItemGroup Label="Source Link for Debugging">
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+  </ItemGroup>
+
+  <!-- ============================================ -->
+  <!-- Testing Packages -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Testing - Framework">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <PackageVersion Include="xunit.v3" Version="3.2.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+  </ItemGroup>
+
+  <ItemGroup Label="Testing - Assertions and Mocking">
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="FakeItEasy" Version="8.3.0" />
-    <PackageVersion Include="FakeItEasy.Analyzer.CSharp" Version="6.1.1" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="coverlet.msbuild" Version="6.0.4" />
-    <!-- Code Analysis -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.1" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.15.0.120848" />
+    <PackageVersion Include="FakeItEasy.Analyzer.CSharp" Version="6.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
     <PackageVersion Include="Moq" Version="4.20.72" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing - Code Coverage">
+    <PackageVersion Include="coverlet.collector" Version="6.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="coverlet.msbuild" Version="6.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+  </ItemGroup>
+
+  <!-- ============================================ -->
+  <!-- Code Analysis and Quality -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Code Analyzers">
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
   </ItemGroup>
 </Project>

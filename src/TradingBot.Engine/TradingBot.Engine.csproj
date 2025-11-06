@@ -1,10 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
+  <!-- ============================================ -->
+  <!-- Trading Engine Project -->
+  <!-- Order execution, portfolio management, risk management -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Project References">
     <ProjectReference Include="..\TradingBot.Core\TradingBot.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="Logging">
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
