@@ -21,4 +21,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TradingBot.Core\TradingBot.Core.csproj" />
+    <ProjectReference Include="..\..\src\TradingBot.Infrastructure\TradingBot.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
