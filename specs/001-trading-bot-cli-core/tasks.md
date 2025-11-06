@@ -357,8 +357,9 @@ Implement repository classes for data access abstraction.
 ### TASK-010: Implement Encryption Service
 **Priority**: High
 **Effort**: 3
-**Owner**: TBD
+**Owner**: Claude
 **Dependencies**: TASK-005
+**Status**: ✅ COMPLETED
 
 **Description**:
 Implement AES-256 encryption service for securing API keys and secrets.
@@ -371,9 +372,9 @@ Implement AES-256 encryption service for securing API keys and secrets.
 - [X] Machine-specific key generation
 - [X] Encrypt method implemented
 - [X] Decrypt method implemented
-- [ ] Unit tests for encryption/decryption
-- [ ] Test round-trip encryption
-- [ ] Test error handling for invalid ciphertext
+- [X] Unit tests for encryption/decryption (21 tests)
+- [X] Test round-trip encryption
+- [X] Test error handling for invalid ciphertext
 
 **Security Requirements**:
 - Use System.Security.Cryptography
