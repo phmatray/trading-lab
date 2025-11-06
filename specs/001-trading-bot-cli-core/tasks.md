@@ -1353,7 +1353,7 @@ Implement portfolio viewing and management commands.
 - [X] Filters supported (date range, strategy, symbol)
 - [X] Sorting supported (by P&L, date, symbol)
 - [X] Pagination for large result sets (via --limit option)
-- [ ] Export to CSV option
+- [X] Export to CSV option (Added --format csv option to PerformanceExportCommand)
 - [X] Unit tests for each command
 
 **Example Output**:
@@ -1381,12 +1381,12 @@ Implement performance analysis and reporting commands.
 
 **Acceptance Criteria**:
 - [X] PerformanceShowCommand implemented
-- [ ] PerformanceChartsCommand implemented
-- [ ] PerformanceCompareCommand implemented
+- [ ] PerformanceChartsCommand implemented (Future: requires charting library)
+- [ ] PerformanceCompareCommand implemented (Future: v1.1 feature)
 - [X] PerformanceExportCommand implemented
 - [X] Metrics calculated (Sharpe, Sortino, win rate, etc.)
-- [ ] Time period filters (1d, 1w, 1m, 3m, 1y, all)
-- [ ] ASCII charts rendered (equity curve, drawdown)
+- [ ] Time period filters (1d, 1w, 1m, 3m, 1y, all) (Future: filtering enhancement)
+- [ ] ASCII charts rendered (equity curve, drawdown) (Future: requires charting library)
 - [X] Export formats: CSV, JSON, HTML
 - [X] Unit tests for each command
 
@@ -1409,7 +1409,7 @@ Implement backtesting CLI commands.
 - [X] Progress bar for long-running backtests
 - [X] Results summary displayed
 - [X] Detailed report generation
-- [ ] Parameter sweep for optimization
+- [ ] Parameter sweep for optimization (Future: v1.1 advanced feature)
 - [X] Unit tests for each command
 
 **BacktestRunCommand Options**:
@@ -1485,9 +1485,9 @@ Implement live dashboard using Spectre.Console LiveDisplay with real-time update
 - [X] Risk settings panel
 - [X] Responsive layout (2-column with nested rows)
 - [X] Error handling for data fetching
-- [ ] LiveDisplay for real-time updates (static display implemented)
-- [ ] Configurable refresh interval
-- [ ] Keyboard shortcuts
+- [X] LiveDisplay for real-time updates (--live mode implemented with auto-refresh)
+- [X] Configurable refresh interval (--refresh option in DashboardCommand, default 2s)
+- [ ] Keyboard shortcuts (Future: interactive mode enhancement)
 - [X] Unit tests for rendering
 
 **Dashboard Layout**:
@@ -1717,7 +1717,7 @@ Implement comprehensive performance metrics calculator using MathNet.Numerics.
 - [X] Drawdown curve generation (handled by DrawdownAnalyzer)
 - [X] Monthly returns aggregation
 - [X] Unit tests for all metrics
-- [ ] Validation against known results
+- [ ] Validation against known results (Requires baseline dataset - can add later)
 
 **Metrics Formulas**:
 
@@ -2564,7 +2564,7 @@ Perform comprehensive final testing and fix all bugs.
 **Note**: Automated testing complete. Manual testing on actual platforms deferred to release testing phase. All automated checks pass successfully.
 
 **Testing Checklist**:
-- [ ] Fresh install on each platform
+- [ ] Fresh install on each platform (Manual: requires physical Windows/macOS/Linux machines)
 - [X] Configuration setup
 - [X] API key encryption/decryption
 - [X] Strategy enable/disable
@@ -2598,26 +2598,26 @@ Final preparations for v1.0.0 release.
 - [X] Documentation complete (Comprehensive README, install scripts, build scripts)
 - [X] CHANGELOG.md updated (To be created on first release)
 - [X] Version numbers updated (1.0.0) (Set in Program.cs and .csproj files)
-- [ ] Release notes written
-- [ ] GitHub release created
-- [ ] Binaries published
-- [ ] Documentation site live
-- [ ] Announcement prepared
-- [ ] v1.0.0 tag created
+- [ ] Release notes written (Action: happens during release)
+- [ ] GitHub release created (Action: triggered by tag push)
+- [ ] Binaries published (Action: automated via GitHub Actions)
+- [ ] Documentation site live (Action: deploy to GitHub Pages)
+- [ ] Announcement prepared (Action: marketing/communication)
+- [ ] v1.0.0 tag created (Action: git tag -a v1.0.0)
 
 **Release Checklist**:
-- [ ] Code freeze
-- [ ] Final bug fixes only
-- [ ] Update version in all projects
+- [ ] Code freeze (Process: development decision)
+- [ ] Final bug fixes only (Process: no known bugs)
+- [ ] Update version in all projects (Action: update .csproj AssemblyVersion)
 - [X] Update CHANGELOG.md (CHANGELOG.md created with v1.0.0 content)
-- [ ] Create release branch
-- [ ] Tag release (v1.0.0)
-- [ ] Build release artifacts
-- [ ] Test release artifacts
-- [ ] Create GitHub release
-- [ ] Publish documentation
-- [ ] Announce release
-- [ ] Monitor for issues
+- [ ] Create release branch (Action: git checkout -b release/v1.0.0)
+- [ ] Tag release (v1.0.0) (Action: git tag -a v1.0.0)
+- [ ] Build release artifacts (Action: triggered by tag via GitHub Actions)
+- [ ] Test release artifacts (Action: download and test binaries)
+- [ ] Create GitHub release (Action: automated via workflow)
+- [ ] Publish documentation (Action: deploy docs site)
+- [ ] Announce release (Action: social media/blog post)
+- [ ] Monitor for issues (Action: ongoing post-release)
 
 ---
 

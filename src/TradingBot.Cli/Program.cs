@@ -185,7 +185,9 @@ public static class Program
                         performanceBranch.AddCommand<Commands.Performance.PerformanceExportCommand>("export")
                             .WithDescription("Export performance data to file")
                             .WithExample(["performance", "export"])
-                            .WithExample(["performance", "export", "--output", "perf-report.json"]);
+                            .WithExample(["performance", "export", "--output", "perf-report.json"])
+                            .WithExample(["performance", "export", "--format", "csv"])
+                            .WithExample(["performance", "export", "--format", "csv", "--output", "report.csv"]);
                     });
 
                     // Backtest commands

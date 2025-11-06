@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.ComponentModel;
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -74,18 +76,31 @@ public sealed class PerformanceExportCommand : AsyncCommand<PerformanceExportCom
             }),
         };
 
-        var outputPath = settings.OutputPath ?? $"performance-export-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
+        // Determine format and default file extension
+        var format = settings.Format?.ToLowerInvariant() ?? "json";
+        var extension = format == "csv" ? ".csv" : ".json";
+        var outputPath = settings.OutputPath ?? $"performance-export-{DateTime.UtcNow:yyyyMMdd-HHmmss}{extension}";
 
         try
         {
-            var json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions
+            string content;
+
+            if (format == "csv")
             {
-                WriteIndented = true,
-            });
+                content = ExportToCsv(account, metrics, trades);
+            }
+            else
+            {
+                var json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                });
+                content = json;
+            }
 
-            await File.WriteAllTextAsync(outputPath, json);
+            await File.WriteAllTextAsync(outputPath, content);
 
-            AnsiConsole.MarkupLine($"[green]✓[/] Performance data exported to [cyan]{outputPath}[/]");
+            AnsiConsole.MarkupLine($"[green]✓[/] Performance data exported to [cyan]{outputPath}[/] ([yellow]{format.ToUpperInvariant()}[/])");
             AnsiConsole.WriteLine();
 
             var fileInfo = new FileInfo(outputPath);
@@ -101,6 +116,61 @@ public sealed class PerformanceExportCommand : AsyncCommand<PerformanceExportCom
         }
     }
 
+    private static string ExportToCsv(
+        Core.Models.Portfolio.Account account,
+        Core.Models.Portfolio.PerformanceMetrics metrics,
+        IReadOnlyList<Core.Models.Trading.Trade> trades)
+    {
+        var csv = new StringBuilder();
+
+        // Account summary
+        csv.AppendLine("ACCOUNT SUMMARY");
+        csv.AppendLine("Metric,Value");
+        csv.AppendLine($"Account ID,{account.AccountId}");
+        csv.AppendLine($"Equity,{account.Equity:F2}");
+        csv.AppendLine($"Cash,{account.Cash:F2}");
+        csv.AppendLine($"Realized P&L,{account.RealizedPnL:F2}");
+        csv.AppendLine($"Unrealized P&L,{account.UnrealizedPnL:F2}");
+        csv.AppendLine();
+
+        // Performance metrics
+        csv.AppendLine("PERFORMANCE METRICS");
+        csv.AppendLine("Metric,Value");
+        csv.AppendLine($"Total Return,{metrics.TotalReturn:P2}");
+        csv.AppendLine($"Sharpe Ratio,{metrics.SharpeRatio:F2}");
+        csv.AppendLine($"Sortino Ratio,{metrics.SortinoRatio:F2}");
+        csv.AppendLine($"Calmar Ratio,{metrics.CalmarRatio:F2}");
+        csv.AppendLine($"Max Drawdown,{metrics.MaxDrawdown:P2}");
+        csv.AppendLine($"Profit Factor,{metrics.ProfitFactor:F2}");
+        csv.AppendLine($"Total Trades,{metrics.TotalTrades}");
+        csv.AppendLine($"Winning Trades,{metrics.WinningTrades}");
+        csv.AppendLine($"Losing Trades,{metrics.LosingTrades}");
+        csv.AppendLine($"Win Rate,{metrics.WinRate:P2}");
+        csv.AppendLine($"Average Win,{metrics.AverageWin:F2}");
+        csv.AppendLine($"Average Loss,{metrics.AverageLoss:F2}");
+        csv.AppendLine();
+
+        // Trades
+        csv.AppendLine("TRADE HISTORY");
+        csv.AppendLine("Symbol,Side,Quantity,Entry Price,Exit Price,Entry Time,Exit Time,P&L,Commission,Strategy");
+
+        foreach (var trade in trades)
+        {
+            csv.AppendLine($"{trade.Symbol}," +
+                          $"{trade.Side}," +
+                          $"{trade.Quantity}," +
+                          $"{trade.EntryPrice:F2}," +
+                          $"{trade.ExitPrice:F2}," +
+                          $"{trade.EntryTime:yyyy-MM-dd HH:mm:ss}," +
+                          $"{trade.ExitTime:yyyy-MM-dd HH:mm:ss}," +
+                          $"{trade.RealizedPnL:F2}," +
+                          $"{trade.Commission:F2}," +
+                          $"{trade.StrategyName}");
+        }
+
+        return csv.ToString();
+    }
+
     /// <summary>
     /// Settings for the performance export command.
     /// </summary>
@@ -110,7 +180,14 @@ public sealed class PerformanceExportCommand : AsyncCommand<PerformanceExportCom
         /// Gets or sets the output file path.
         /// </summary>
         [CommandOption("--output|-o")]
-        [Description("Output file path (default: performance-export-{timestamp}.json)")]
+        [Description("Output file path (default: performance-export-{timestamp}.{format})")]
         public string? OutputPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the export format (json or csv).
+        /// </summary>
+        [CommandOption("--format|-f")]
+        [Description("Export format: json or csv (default: json)")]
+        public string? Format { get; set; }
     }
 }
