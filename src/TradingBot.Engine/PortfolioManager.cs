@@ -255,8 +255,8 @@ public sealed class PortfolioManager : IPortfolioManager
         await _lock.WaitAsync(cancellationToken);
         try
         {
-            var positions = await GetPositionsAsync(cancellationToken);
-            var totalPnL = _account.RealizedPnL + positions.Sum(p => p.UnrealizedPnL);
+            // Calculate position P&L directly without calling GetPositionsAsync to avoid deadlock
+            var totalPnL = _account.RealizedPnL + _positions.Sum(p => p.UnrealizedPnL);
             var totalReturn = _account.Equity > 0 ? (totalPnL / 100000m) * 100m : 0m;
 
             var winningTrades = _tradeHistory.Count(t => t.RealizedPnL > 0);
