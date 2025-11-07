@@ -50,23 +50,23 @@ This project follows the existing TradingBot repository structure:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T016 Create view model classes: DashboardViewModel, PortfolioHistoryFilter, PortfolioHistoryResult, EquityCurveDataPoint, ConnectionStatusViewModel in src/TradingBot.Web/Models/
-- [ ] T017 Create service interfaces: IDashboardService, IPortfolioService, IPerformanceService, IStrategyManagementService, IRiskSettingsService, IBacktestService in src/TradingBot.Web/Services/
-- [ ] T018 Create ITradingClient interface with SignalR callback methods (ReceiveAccountUpdate, ReceivePositionUpdate, ReceiveTradeUpdate, ReceiveConnectionStatus) in src/TradingBot.Web/Hubs/
-- [ ] T019 Implement TradingHub with strongly-typed ITradingClient, lifecycle events (OnConnectedAsync, OnDisconnectedAsync), and client-to-server methods in src/TradingBot.Web/Hubs/TradingHub.cs
-- [ ] T020 Implement DashboardService with GetDashboardDataAsync method aggregating data from all sources in src/TradingBot.Web/Services/DashboardService.cs
-- [ ] T021 Implement PortfolioService with GetTradeHistoryAsync, ClosePositionAsync, and ExportTradeHistoryAsync methods in src/TradingBot.Web/Services/PortfolioService.cs
-- [ ] T022 Implement PerformanceService with GetCurrentMetricsAsync and GetEquityCurveAsync methods in src/TradingBot.Web/Services/PerformanceService.cs
-- [ ] T023 Implement StrategyManagementService with GetAllStrategiesAsync, EnableStrategyAsync, and DisableStrategyAsync methods in src/TradingBot.Web/Services/StrategyManagementService.cs
-- [ ] T024 Implement RiskSettingsService with GetCurrentSettingsAsync and UpdateSettingsAsync (with validation) in src/TradingBot.Web/Services/RiskSettingsService.cs
-- [ ] T025 Implement BacktestService with GetBacktestResultsAsync and GetBacktestByIdAsync methods in src/TradingBot.Web/Services/BacktestService.cs
-- [ ] T026 Create RealtimeUpdateService as IHostedService broadcasting account/position/trade updates every 100ms in src/TradingBot.Web/Services/RealtimeUpdateService.cs
-- [ ] T027 Update Program.cs with Blazor Server configuration, SignalR registration with performance tuning, and all service registrations in src/TradingBot.Web/Program.cs
-- [ ] T028 Create base layout component MainLayout.razor with navigation, header, and connection status indicator in src/TradingBot.Web/Components/Layout/MainLayout.razor
-- [ ] T029 Create NavMenu.razor component with links to all pages (Dashboard, Portfolio, Performance, Strategies, Risk Settings, Backtest) in src/TradingBot.Web/Components/Layout/NavMenu.razor
-- [ ] T030 Create shared UI components: Card.razor, Table.razor, Button.razor, Modal.razor with Tailwind CSS styling in src/TradingBot.Web/Components/Shared/
-- [ ] T031 Update App.razor with Blazor Server reconnection configuration and route configuration in src/TradingBot.Web/App.razor
-- [ ] T032 Create CSS custom component classes (card-trading, stat-positive, stat-negative) in Tailwind @layer components in src/TradingBot.Web/Styles/app.css
+- [X] T016 Create view model classes: DashboardViewModel, PortfolioHistoryFilter, PortfolioHistoryResult, EquityCurveDataPoint, ConnectionStatusViewModel in src/TradingBot.Web/Models/
+- [X] T017 Create service interfaces: IDashboardService, IPortfolioService, IPerformanceService, IStrategyManagementService, IRiskSettingsService, IBacktestService in src/TradingBot.Web/Services/
+- [X] T018 Create ITradingClient interface with SignalR callback methods (ReceiveAccountUpdate, ReceivePositionUpdate, ReceiveTradeUpdate, ReceiveConnectionStatus) in src/TradingBot.Web/Hubs/
+- [X] T019 Implement TradingHub with strongly-typed ITradingClient, lifecycle events (OnConnectedAsync, OnDisconnectedAsync), and client-to-server methods in src/TradingBot.Web/Hubs/TradingHub.cs
+- [X] T020 Implement DashboardService with GetDashboardDataAsync method aggregating data from all sources in src/TradingBot.Web/Services/DashboardService.cs
+- [X] T021 Implement PortfolioService with GetTradeHistoryAsync, ClosePositionAsync, and ExportTradeHistoryAsync methods in src/TradingBot.Web/Services/PortfolioService.cs
+- [X] T022 Implement PerformanceService with GetCurrentMetricsAsync and GetEquityCurveAsync methods in src/TradingBot.Web/Services/PerformanceService.cs
+- [X] T023 Implement StrategyManagementService with GetAllStrategiesAsync, EnableStrategyAsync, and DisableStrategyAsync methods in src/TradingBot.Web/Services/StrategyManagementService.cs
+- [X] T024 Implement RiskSettingsService with GetCurrentSettingsAsync and UpdateSettingsAsync (with validation) in src/TradingBot.Web/Services/RiskSettingsService.cs
+- [X] T025 Implement BacktestService with GetBacktestResultsAsync and GetBacktestByIdAsync methods in src/TradingBot.Web/Services/BacktestService.cs
+- [X] T026 Create RealtimeUpdateService as IHostedService broadcasting account/position/trade updates every 100ms in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T027 Update Program.cs with Blazor Server configuration, SignalR registration with performance tuning, and all service registrations in src/TradingBot.Web/Program.cs
+- [X] T028 Create base layout component MainLayout.razor with navigation, header, and connection status indicator in src/TradingBot.Web/Components/Layout/MainLayout.razor
+- [X] T029 Create NavMenu.razor component with links to all pages (Dashboard, Portfolio, Performance, Strategies, Risk Settings, Backtest) in src/TradingBot.Web/Components/Layout/NavMenu.razor
+- [X] T030 Create shared UI components: Card.razor, Table.razor, Button.razor, Modal.razor with Tailwind CSS styling in src/TradingBot.Web/Components/Shared/
+- [X] T031 Update App.razor with Blazor Server reconnection configuration and route configuration in src/TradingBot.Web/App.razor
+- [X] T032 Create CSS custom component classes (card-trading, stat-positive, stat-negative) in Tailwind @layer components in src/TradingBot.Web/Styles/app.css
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
