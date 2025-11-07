@@ -46,4 +46,19 @@
   .btn-danger {
     @apply bg-trading-red text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors;
   }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 }

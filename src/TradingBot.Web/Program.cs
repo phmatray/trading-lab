@@ -53,6 +53,7 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IStrategyManagementService, StrategyManagementService>();
 builder.Services.AddSingleton<IRiskSettingsService, RiskSettingsService>();
 builder.Services.AddScoped<IBacktestService, BacktestService>();
+builder.Services.AddSingleton<IToastService, ToastService>();
 
 // Add real-time update service as hosted service
 builder.Services.AddHostedService<RealtimeUpdateService>();
