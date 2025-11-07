@@ -27,14 +27,14 @@ This is a Blazor Server web application with clean architecture:
 
 **Purpose**: Project initialization and Tailwind/Heroicons configuration
 
-- [ ] T001 Update tailwind.config.js to enable class-based dark mode and add custom theme colors
-- [ ] T002 Update src/TradingBot.Web/Styles/app.css with CSS variables for light/dark themes
-- [ ] T003 [P] Run npm install in src/TradingBot.Web to ensure Tailwind dependencies are current
-- [ ] T004 [P] Build Tailwind CSS with `npm run css:build` to generate wwwroot/css/app.css
-- [ ] T005 [P] Create src/TradingBot.Web/Components/Atoms/ directory structure
-- [ ] T006 [P] Create src/TradingBot.Web/Components/Molecules/ directory structure
-- [ ] T007 [P] Create src/TradingBot.Web/Components/Organisms/ directory structure
-- [ ] T008 [P] Create tests/TradingBot.Web.Tests/ project and add bUnit package reference
+- [X] T001 Update tailwind.config.js to enable class-based dark mode and add custom theme colors
+- [X] T002 Update src/TradingBot.Web/Styles/app.css with CSS variables for light/dark themes
+- [X] T003 [P] Run npm install in src/TradingBot.Web to ensure Tailwind dependencies are current
+- [X] T004 [P] Build Tailwind CSS with `npm run css:build` to generate wwwroot/css/app.css
+- [X] T005 [P] Create src/TradingBot.Web/Components/Atoms/ directory structure
+- [X] T006 [P] Create src/TradingBot.Web/Components/Molecules/ directory structure
+- [X] T007 [P] Create src/TradingBot.Web/Components/Organisms/ directory structure
+- [X] T008 [P] Create tests/TradingBot.Web.Tests/ project and add bUnit package reference
 
 ---
 
