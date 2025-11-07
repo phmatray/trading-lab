@@ -136,16 +136,16 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 3
 
-- [ ] T063 [P] [US3] Create Performance.razor page layout with metrics grid and equity curve chart in src/TradingBot.Web/Pages/Performance.razor
-- [ ] T064 [P] [US3] Create PerformanceMetricsGrid.razor component displaying all key metrics (total return, win rate, Sharpe/Sortino/Calmar ratios, max drawdown, profit factor) in src/TradingBot.Web/Components/Performance/PerformanceMetricsGrid.razor
-- [ ] T065 [P] [US3] Create TradingStatistics.razor component displaying total trades, winning/losing counts, average win/loss, expectancy in src/TradingBot.Web/Components/Performance/TradingStatistics.razor
-- [ ] T066 [P] [US3] Create EquityCurveChart.razor component using ApexCharts to display portfolio value over time in src/TradingBot.Web/Components/Charts/EquityCurveChart.razor
-- [ ] T067 [US3] Integrate PerformanceService.GetCurrentMetricsAsync in Performance.razor to load performance data in src/TradingBot.Web/Pages/Performance.razor
-- [ ] T068 [US3] Integrate PerformanceService.GetEquityCurveAsync in Performance.razor to load equity curve data in src/TradingBot.Web/Pages/Performance.razor
-- [ ] T069 [US3] Implement color coding: green for positive metrics, red for negative metrics in PerformanceMetricsGrid.razor in src/TradingBot.Web/Components/Performance/PerformanceMetricsGrid.razor
-- [ ] T070 [US3] Add date range filter for equity curve chart in Performance.razor in src/TradingBot.Web/Pages/Performance.razor
-- [ ] T071 [US3] Configure ApexCharts with responsive design and Tailwind CSS theming in EquityCurveChart.razor in src/TradingBot.Web/Components/Charts/EquityCurveChart.razor
-- [ ] T072 [US3] Implement empty state handling: "No trading data available" when no trades exist in Performance.razor in src/TradingBot.Web/Pages/Performance.razor
+- [X] T063 [P] [US3] Create Performance.razor page layout with metrics grid and equity curve chart in src/TradingBot.Web/Pages/Performance.razor
+- [X] T064 [P] [US3] Create PerformanceMetricsGrid.razor component displaying all key metrics (total return, win rate, Sharpe/Sortino/Calmar ratios, max drawdown, profit factor) in src/TradingBot.Web/Components/Performance/PerformanceMetricsGrid.razor
+- [X] T065 [P] [US3] Create TradingStatistics.razor component displaying total trades, winning/losing counts, average win/loss, expectancy in src/TradingBot.Web/Components/Performance/TradingStatistics.razor
+- [X] T066 [P] [US3] Create EquityCurveChart.razor component using ApexCharts to display portfolio value over time in src/TradingBot.Web/Components/Charts/EquityCurveChart.razor
+- [X] T067 [US3] Integrate PerformanceService.GetCurrentMetricsAsync in Performance.razor to load performance data in src/TradingBot.Web/Pages/Performance.razor
+- [X] T068 [US3] Integrate PerformanceService.GetEquityCurveAsync in Performance.razor to load equity curve data in src/TradingBot.Web/Pages/Performance.razor
+- [X] T069 [US3] Implement color coding: green for positive metrics, red for negative metrics in PerformanceMetricsGrid.razor in src/TradingBot.Web/Components/Performance/PerformanceMetricsGrid.razor
+- [X] T070 [US3] Add date range filter for equity curve chart in Performance.razor in src/TradingBot.Web/Pages/Performance.razor
+- [X] T071 [US3] Configure ApexCharts with responsive design and Tailwind CSS theming in EquityCurveChart.razor in src/TradingBot.Web/Components/Charts/EquityCurveChart.razor
+- [X] T072 [US3] Implement empty state handling: "No trading data available" when no trades exist in Performance.razor in src/TradingBot.Web/Pages/Performance.razor
 
 **Checkpoint**: All three user stories (Dashboard, Portfolio, Performance) should now be independently functional with rich visualizations
 
