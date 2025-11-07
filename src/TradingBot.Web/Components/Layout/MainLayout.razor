@@ -1,37 +1,55 @@
+@using TradingBot.Web.Components.Organisms
+@using TradingBot.Web.Services
 @inherits LayoutComponentBase
+@inject UIStateService UIState
+@implements IDisposable
 
 <ToastContainer />
 
-<div class="min-h-screen bg-gray-50">
+<!-- Navigation Sidebar -->
+<NavigationSidebar />
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">TradingBot</h1>
-                    <span class="ml-3 text-sm text-gray-500">Web Dashboard</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Web Dashboard</span>
                 </div>
 
                 <!-- Connection Status Indicator -->
                 <div class="flex items-center space-x-2">
                     <div id="connection-status" class="flex items-center">
                         <span class="inline-flex h-3 w-3 rounded-full bg-green-500"></span>
-                        <span class="ml-2 text-sm text-gray-600">Connected</span>
+                        <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Connected</span>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="flex">
-        <!-- Navigation Sidebar -->
-        <NavMenu />
-
-        <!-- Main Content -->
-        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto">
-                @Body
-            </div>
-        </main>
-    </div>
+    <!-- Main Content -->
+    <main class="px-4 py-6 sm:px-6 lg:px-8 transition-all duration-300">
+        <div class="max-w-7xl mx-auto">
+            @Body
+        </div>
+    </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        UIState.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        UIState.OnStateChanged -= StateHasChanged;
+    }
+
+    private string GetContentMarginClass()
+    {
+        return UIState.SidebarCollapsed ? "ml-16" : "ml-64";
+    }
+}

@@ -10,11 +10,10 @@ Copyright (c) TradingBot. All rights reserved.
 
 <PageTitle>Portfolio - TradingBot</PageTitle>
 
-<div class="container mx-auto px-4 py-6">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Portfolio Management</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-2">View trade history, manage positions, and export data</p>
-    </div>
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Portfolio Management</h1>
+    <p class="text-gray-600 dark:text-gray-400 mt-2">View trade history, manage positions, and export data</p>
+</div>
 
     @* Trade History Filter Section *@
     <div class="mb-6">
@@ -107,7 +106,6 @@ Copyright (c) TradingBot. All rights reserved.
             OnConfirm="HandleClosePosition"
             OnCancel="HideClosePositionModal" />
     }
-</div>
 
 @code {
     private List<Trade> tradeHistory = new();

@@ -86,24 +86,24 @@ This is a Blazor Server web application with clean architecture:
 
 ### Atomic Components for US1
 
-- [ ] T030 [P] [US1] Create src/TradingBot.Web/Components/Atoms/Icon.razor with Heroicons SVG support (Home, ChartBar, Briefcase, Cog, Beaker, ChartLine, Bars3, XMark, ChevronLeft, ChevronRight)
-- [ ] T031 [P] [US1] Write tests/TradingBot.Web.Tests/Components/Atoms/IconTests.cs (renders correct SVG, applies CSS classes)
+- [X] T030 [P] [US1] Create src/TradingBot.Web/Components/Atoms/Icon.razor with Heroicons SVG support (Home, ChartBar, Briefcase, Cog, Beaker, ChartLine, Bars3, XMark, ChevronLeft, ChevronRight)
+- [X] T031 [P] [US1] Write tests/TradingBot.Web.Tests/Components/Atoms/IconTests.cs (renders correct SVG, applies CSS classes)
 
 ### Molecular Components for US1
 
-- [ ] T032 [US1] Create src/TradingBot.Web/Components/Molecules/MenuItem.razor (Icon + Label, supports collapsed mode, active state highlighting)
-- [ ] T033 [US1] Write tests/TradingBot.Web.Tests/Components/Molecules/MenuItemTests.cs (collapsed/expanded states, active highlighting)
+- [X] T032 [US1] Create src/TradingBot.Web/Components/Molecules/MenuItem.razor (Icon + Label, supports collapsed mode, active state highlighting)
+- [X] T033 [US1] Write tests/TradingBot.Web.Tests/Components/Molecules/MenuItemTests.cs (collapsed/expanded states, active highlighting)
 
 ### Organism Components for US1
 
-- [ ] T034 [US1] Create src/TradingBot.Web/Components/Organisms/NavigationSidebar.razor (uses UIStateService, NavigationService, MenuItem molecules)
-- [ ] T035 [US1] Write tests/TradingBot.Web.Tests/Components/Organisms/NavigationSidebarTests.cs (toggle collapse, navigation, active route detection)
+- [X] T034 [US1] Create src/TradingBot.Web/Components/Organisms/NavigationSidebar.razor (uses UIStateService, NavigationService, MenuItem molecules)
+- [X] T035 [US1] Write tests/TradingBot.Web.Tests/Components/Organisms/NavigationSidebarTests.cs (toggle collapse, navigation, active route detection)
 
 ### Layout Integration for US1
 
-- [ ] T036 [US1] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to replace NavMenu with NavigationSidebar
-- [ ] T037 [US1] Add transition classes for sidebar collapse/expand animation in MainLayout
-- [ ] T038 [US1] Adjust main content area margin based on sidebar state (ml-64 expanded, ml-16 collapsed)
+- [X] T036 [US1] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to replace NavMenu with NavigationSidebar
+- [X] T037 [US1] Add transition classes for sidebar collapse/expand animation in MainLayout
+- [X] T038 [US1] Adjust main content area margin based on sidebar state (ml-64 expanded, ml-16 collapsed)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Navigation menu is persistent, collapsible, and highlights active page.
 

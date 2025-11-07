@@ -1,0 +1,73 @@
+@* <copyright file="MenuItem.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+
+@namespace TradingBot.Web.Components.Molecules
+@using TradingBot.Web.Components.Atoms
+@inject NavigationManager Navigation
+
+<NavLink href="@Href"
+         class="@GetClasses()"
+         ActiveClass="@GetActiveClass()"
+         Match="@MatchMode">
+    <Icon Name="@IconName"
+          Class="@GetIconClasses()"
+          AriaLabel="@(IsCollapsed ? Label : null)" />
+    @if (!IsCollapsed)
+    {
+        <span class="ml-3 text-sm font-medium">@Label</span>
+    }
+</NavLink>
+
+@code {
+    /// <summary>
+    /// Gets or sets the navigation href.
+    /// </summary>
+    [Parameter]
+    public string Href { get; set; } = "/";
+
+    /// <summary>
+    /// Gets or sets the menu item label.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "";
+
+    /// <summary>
+    /// Gets or sets the icon name to display.
+    /// </summary>
+    [Parameter]
+    public IconName IconName { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the sidebar is collapsed.
+    /// </summary>
+    [Parameter]
+    public bool IsCollapsed { get; set; }
+
+    /// <summary>
+    /// Gets or sets the NavLink match mode.
+    /// </summary>
+    [Parameter]
+    public NavLinkMatch MatchMode { get; set; } = NavLinkMatch.Prefix;
+
+    private string GetClasses()
+    {
+        var baseClasses = "flex items-center px-3 py-2 rounded-lg transition-colors duration-200 " +
+                          "hover:bg-gray-100 dark:hover:bg-gray-800 " +
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
+
+        var collapsedClasses = IsCollapsed ? "justify-center" : "";
+
+        return $"{baseClasses} {collapsedClasses}".Trim();
+    }
+
+    private string GetActiveClass()
+    {
+        return "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-100 font-semibold";
+    }
+
+    private string GetIconClasses()
+    {
+        return IsCollapsed ? "w-6 h-6" : "w-5 h-5";
+    }
+}
