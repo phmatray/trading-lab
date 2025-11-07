@@ -80,22 +80,22 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 1
 
-- [ ] T033 [P] [US1] Create AccountSummary.razor component displaying equity, cash, position value, buying power, unrealized/realized P&L in src/TradingBot.Web/Components/Dashboard/AccountSummary.razor
-- [ ] T034 [P] [US1] Create PositionList.razor component displaying open positions with symbol, quantity, entry/current price, P&L, strategy in src/TradingBot.Web/Components/Dashboard/PositionList.razor
-- [ ] T035 [P] [US1] Create RecentTrades.razor component displaying last 5 trades with date, symbol, side, quantity, realized P&L in src/TradingBot.Web/Components/Dashboard/RecentTrades.razor
-- [ ] T036 [P] [US1] Create PerformanceMetrics.razor component displaying total return, win rate, Sharpe/Sortino/Calmar ratios, max drawdown, profit factor in src/TradingBot.Web/Components/Dashboard/PerformanceMetrics.razor
-- [ ] T037 [P] [US1] Create RiskSettingsCard.razor component displaying current risk settings (read-only) in src/TradingBot.Web/Components/Dashboard/RiskSettingsCard.razor
-- [ ] T038 [P] [US1] Create ActiveStrategies.razor component displaying enabled strategies with their status in src/TradingBot.Web/Components/Dashboard/ActiveStrategies.razor
-- [ ] T039 [US1] Create Index.razor (Dashboard page) integrating all dashboard components and establishing SignalR connection in src/TradingBot.Web/Pages/Index.razor
-- [ ] T040 [US1] Add SignalR client-side handlers for ReceiveAccountUpdate in Index.razor to update AccountSummary component in src/TradingBot.Web/Pages/Index.razor
-- [ ] T041 [US1] Add SignalR client-side handlers for ReceivePositionUpdate in Index.razor to update PositionList component in src/TradingBot.Web/Pages/Index.razor
-- [ ] T042 [US1] Add SignalR client-side handlers for ReceiveTradeUpdate in Index.razor to update RecentTrades component in src/TradingBot.Web/Pages/Index.razor
-- [ ] T043 [US1] Implement automatic reconnection logic with exponential backoff in Index.razor in src/TradingBot.Web/Pages/Index.razor
-- [ ] T044 [US1] Add connection status indicator showing connected/reconnecting/disconnected states in Index.razor in src/TradingBot.Web/Pages/Index.razor
-- [ ] T045 [US1] Implement color coding: green for positive P&L, red for negative, yellow for warnings across all dashboard components in src/TradingBot.Web/Components/Dashboard/
-- [ ] T046 [US1] Add last updated timestamps to dashboard data displays in src/TradingBot.Web/Components/Dashboard/
-- [ ] T047 [US1] Implement empty state handling: "No open positions" message when positions list is empty in src/TradingBot.Web/Components/Dashboard/PositionList.razor
-- [ ] T048 [US1] Implement empty state handling: "No recent trades" message when trades list is empty in src/TradingBot.Web/Components/Dashboard/RecentTrades.razor
+- [X] T033 [P] [US1] Create AccountSummary.razor component displaying equity, cash, position value, buying power, unrealized/realized P&L in src/TradingBot.Web/Components/Dashboard/AccountSummary.razor
+- [X] T034 [P] [US1] Create PositionList.razor component displaying open positions with symbol, quantity, entry/current price, P&L, strategy in src/TradingBot.Web/Components/Dashboard/PositionList.razor
+- [X] T035 [P] [US1] Create RecentTrades.razor component displaying last 5 trades with date, symbol, side, quantity, realized P&L in src/TradingBot.Web/Components/Dashboard/RecentTrades.razor
+- [X] T036 [P] [US1] Create PerformanceMetrics.razor component displaying total return, win rate, Sharpe/Sortino/Calmar ratios, max drawdown, profit factor in src/TradingBot.Web/Components/Dashboard/PerformanceMetrics.razor
+- [X] T037 [P] [US1] Create RiskSettingsCard.razor component displaying current risk settings (read-only) in src/TradingBot.Web/Components/Dashboard/RiskSettingsCard.razor
+- [X] T038 [P] [US1] Create ActiveStrategies.razor component displaying enabled strategies with their status in src/TradingBot.Web/Components/Dashboard/ActiveStrategies.razor
+- [X] T039 [US1] Create Index.razor (Dashboard page) integrating all dashboard components and establishing SignalR connection in src/TradingBot.Web/Pages/Index.razor
+- [X] T040 [US1] Add SignalR client-side handlers for ReceiveAccountUpdate in Index.razor to update AccountSummary component in src/TradingBot.Web/Pages/Index.razor
+- [X] T041 [US1] Add SignalR client-side handlers for ReceivePositionUpdate in Index.razor to update PositionList component in src/TradingBot.Web/Pages/Index.razor
+- [X] T042 [US1] Add SignalR client-side handlers for ReceiveTradeUpdate in Index.razor to update RecentTrades component in src/TradingBot.Web/Pages/Index.razor
+- [X] T043 [US1] Implement automatic reconnection logic with exponential backoff in Index.razor in src/TradingBot.Web/Pages/Index.razor
+- [X] T044 [US1] Add connection status indicator showing connected/reconnecting/disconnected states in Index.razor in src/TradingBot.Web/Pages/Index.razor
+- [X] T045 [US1] Implement color coding: green for positive P&L, red for negative, yellow for warnings across all dashboard components in src/TradingBot.Web/Components/Dashboard/
+- [X] T046 [US1] Add last updated timestamps to dashboard data displays in src/TradingBot.Web/Components/Dashboard/
+- [X] T047 [US1] Implement empty state handling: "No open positions" message when positions list is empty in src/TradingBot.Web/Components/Dashboard/PositionList.razor
+- [X] T048 [US1] Implement empty state handling: "No recent trades" message when trades list is empty in src/TradingBot.Web/Components/Dashboard/RecentTrades.razor
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - dashboard displays real-time data with automatic updates
 
@@ -109,20 +109,20 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 2
 
-- [ ] T049 [P] [US2] Create Portfolio.razor page with trade history table and filter controls in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T050 [P] [US2] Create TradeHistoryFilter.razor component with date range, symbol, and strategy filters in src/TradingBot.Web/Components/Portfolio/TradeHistoryFilter.razor
-- [ ] T051 [P] [US2] Create TradeHistoryTable.razor component displaying paginated trade list with all trade details in src/TradingBot.Web/Components/Portfolio/TradeHistoryTable.razor
-- [ ] T052 [P] [US2] Create PositionCard.razor component with position details and "Close Position" button in src/TradingBot.Web/Components/Portfolio/PositionCard.razor
-- [ ] T053 [P] [US2] Create ClosePositionModal.razor confirmation dialog showing position details and estimated proceeds in src/TradingBot.Web/Components/Portfolio/ClosePositionModal.razor
-- [ ] T054 [US2] Implement filter logic in Portfolio.razor calling PortfolioService.GetTradeHistoryAsync with PortfolioHistoryFilter in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T055 [US2] Implement pagination controls (previous/next, page numbers) in TradeHistoryTable.razor in src/TradingBot.Web/Components/Portfolio/TradeHistoryTable.razor
-- [ ] T056 [US2] Implement "Close Position" handler invoking ClosePositionModal and calling PortfolioService.ClosePositionAsync in src/TradingBot.Web/Components/Portfolio/PositionCard.razor
-- [ ] T057 [US2] Add success notification when position closed successfully in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T058 [US2] Add error handling and user-friendly error messages for close position failures in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T059 [US2] Implement real-time position removal via SignalR when position closed in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T060 [US2] Implement CSV export button calling PortfolioService.ExportTradeHistoryAsync in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
-- [ ] T061 [US2] Create JavaScript helper function for downloading exported file in wwwroot/js/download.js in src/TradingBot.Web/wwwroot/js/download.js
-- [ ] T062 [US2] Add client-side validation to filter inputs (date range validation, valid symbols) in TradeHistoryFilter.razor in src/TradingBot.Web/Components/Portfolio/TradeHistoryFilter.razor
+- [X] T049 [P] [US2] Create Portfolio.razor page with trade history table and filter controls in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T050 [P] [US2] Create TradeHistoryFilter.razor component with date range, symbol, and strategy filters in src/TradingBot.Web/Components/Portfolio/TradeHistoryFilter.razor
+- [X] T051 [P] [US2] Create TradeHistoryTable.razor component displaying paginated trade list with all trade details in src/TradingBot.Web/Components/Portfolio/TradeHistoryTable.razor
+- [X] T052 [P] [US2] Create PositionCard.razor component with position details and "Close Position" button in src/TradingBot.Web/Components/Portfolio/PositionCard.razor
+- [X] T053 [P] [US2] Create ClosePositionModal.razor confirmation dialog showing position details and estimated proceeds in src/TradingBot.Web/Components/Portfolio/ClosePositionModal.razor
+- [X] T054 [US2] Implement filter logic in Portfolio.razor calling PortfolioService.GetTradeHistoryAsync with PortfolioHistoryFilter in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T055 [US2] Implement pagination controls (previous/next, page numbers) in TradeHistoryTable.razor in src/TradingBot.Web/Components/Portfolio/TradeHistoryTable.razor
+- [X] T056 [US2] Implement "Close Position" handler invoking ClosePositionModal and calling PortfolioService.ClosePositionAsync in src/TradingBot.Web/Components/Portfolio/PositionCard.razor
+- [X] T057 [US2] Add success notification when position closed successfully in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T058 [US2] Add error handling and user-friendly error messages for close position failures in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T059 [US2] Implement real-time position removal via SignalR when position closed in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T060 [US2] Implement CSV export button calling PortfolioService.ExportTradeHistoryAsync in Portfolio.razor in src/TradingBot.Web/Pages/Portfolio.razor
+- [X] T061 [US2] Create JavaScript helper function for downloading exported file in wwwroot/js/download.js in src/TradingBot.Web/wwwroot/js/download.js
+- [X] T062 [US2] Add client-side validation to filter inputs (date range validation, valid symbols) in TradeHistoryFilter.razor in src/TradingBot.Web/Components/Portfolio/TradeHistoryFilter.razor
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - dashboard shows live data, portfolio page shows history and allows position closure
 

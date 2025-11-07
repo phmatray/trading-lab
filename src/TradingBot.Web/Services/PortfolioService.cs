@@ -5,7 +5,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using TradingBot.Core.Interfaces;
-using TradingBot.Web.Models;
+using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Web.Services;
 
@@ -31,70 +31,32 @@ public sealed class PortfolioService : IPortfolioService
     }
 
     /// <inheritdoc/>
-    public async Task<PortfolioHistoryResult> GetTradeHistoryAsync(
-        PortfolioHistoryFilter filter,
+    public async Task<IEnumerable<Trade>> GetTradeHistoryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? symbol = null,
+        string? strategy = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation(
-                "Loading trade history with filter: StartDate={StartDate}, EndDate={EndDate}, Symbol={Symbol}, Strategy={Strategy}",
-                filter.StartDate,
-                filter.EndDate,
-                filter.Symbol,
-                filter.StrategyName);
+                "Loading trade history: StartDate={StartDate}, EndDate={EndDate}, Symbol={Symbol}, Strategy={Strategy}",
+                startDate,
+                endDate,
+                symbol,
+                strategy);
 
-            // Get all trades matching the filter criteria
-            var allTrades = await _portfolioManager.GetTradeHistoryAsync(
-                filter.StartDate,
-                filter.EndDate,
-                filter.Symbol,
-                filter.StrategyName,
+            var trades = await _portfolioManager.GetTradeHistoryAsync(
+                startDate,
+                endDate,
+                symbol,
+                strategy,
                 cancellationToken);
 
-            // Apply additional filters (P&L, Side)
-            var filteredTrades = allTrades.AsEnumerable();
+            _logger.LogInformation("Trade history loaded: {Count} trades", trades.Count());
 
-            if (filter.MinPnL.HasValue)
-            {
-                filteredTrades = filteredTrades.Where(t => t.RealizedPnL >= filter.MinPnL.Value);
-            }
-
-            if (filter.MaxPnL.HasValue)
-            {
-                filteredTrades = filteredTrades.Where(t => t.RealizedPnL <= filter.MaxPnL.Value);
-            }
-
-            if (filter.Side != null)
-            {
-                filteredTrades = filteredTrades.Where(t => t.Side == filter.Side);
-            }
-
-            var tradesList = filteredTrades.ToList();
-            var totalCount = tradesList.Count;
-
-            // Apply pagination
-            var paginatedTrades = tradesList
-                .OrderByDescending(t => t.ExitTime)
-                .Skip((filter.PageNumber - 1) * filter.PageSize)
-                .Take(filter.PageSize)
-                .ToList();
-
-            var result = new PortfolioHistoryResult
-            {
-                Trades = paginatedTrades,
-                TotalCount = totalCount,
-                PageNumber = filter.PageNumber,
-                PageSize = filter.PageSize,
-            };
-
-            _logger.LogInformation(
-                "Trade history loaded: {Count} trades, page {PageNumber}/{TotalPages}",
-                totalCount,
-                result.PageNumber,
-                result.TotalPages);
-
-            return result;
+            return trades;
         }
         catch (Exception ex)
         {
@@ -104,85 +66,110 @@ public sealed class PortfolioService : IPortfolioService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ClosePositionAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Position>> GetOpenPositionsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Closing position for symbol: {Symbol}", symbol);
+            _logger.LogInformation("Loading open positions");
 
-            var result = await _portfolioManager.ClosePositionAsync(symbol, cancellationToken);
+            var positions = await _portfolioManager.GetPositionsAsync(cancellationToken);
+
+            _logger.LogInformation("Open positions loaded: {Count} positions", positions.Count);
+
+            return positions;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading open positions");
+            throw;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ClosePositionAsync(Guid positionId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Closing position: {PositionId}", positionId);
+
+            // Get the position to find its symbol
+            var positions = await _portfolioManager.GetPositionsAsync(cancellationToken);
+            var position = positions.FirstOrDefault(p => p.Id == positionId);
+
+            if (position == null)
+            {
+                _logger.LogWarning("Position not found: {PositionId}", positionId);
+                return false;
+            }
+
+            var result = await _portfolioManager.ClosePositionAsync(position.Symbol, cancellationToken);
 
             if (result)
             {
-                _logger.LogInformation("Position closed successfully: {Symbol}", symbol);
+                _logger.LogInformation("Position closed successfully: {PositionId} ({Symbol})", positionId, position.Symbol);
             }
             else
             {
-                _logger.LogWarning("Position not found for symbol: {Symbol}", symbol);
+                _logger.LogWarning("Failed to close position: {PositionId} ({Symbol})", positionId, position.Symbol);
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error closing position: {Symbol}", symbol);
+            _logger.LogError(ex, "Error closing position: {PositionId}", positionId);
             throw;
         }
     }
 
     /// <inheritdoc/>
-    public async Task<byte[]> ExportTradeHistoryAsync(
-        PortfolioHistoryFilter filter,
+    public async Task<string> ExportTradeHistoryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? symbol = null,
+        string? strategy = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Exporting trade history to CSV");
 
-            // Get all trades matching the filter (no pagination for export)
-            var historyResult = await GetTradeHistoryAsync(
-                new PortfolioHistoryFilter
-                {
-                    StartDate = filter.StartDate,
-                    EndDate = filter.EndDate,
-                    Symbol = filter.Symbol,
-                    StrategyName = filter.StrategyName,
-                    MinPnL = filter.MinPnL,
-                    MaxPnL = filter.MaxPnL,
-                    Side = filter.Side,
-                    PageNumber = 1,
-                    PageSize = int.MaxValue, // Get all trades
-                },
+            var trades = await GetTradeHistoryAsync(
+                startDate,
+                endDate,
+                symbol,
+                strategy,
                 cancellationToken);
-
-            var trades = historyResult.Trades;
 
             // Build CSV content
             var csv = new StringBuilder();
-            csv.AppendLine("Symbol,Side,Quantity,Entry Price,Exit Price,Entry Time,Exit Time,Duration,Realized P&L,Realized P&L %,Commission,Strategy");
+            csv.AppendLine("Symbol,Side,Quantity,Entry Price,Exit Price,Entry Time,Exit Time,Duration (days),Realized P&L,P&L %,Commission,Strategy");
 
-            foreach (var trade in trades)
+            foreach (var trade in trades.OrderByDescending(t => t.ExitTime))
             {
+                var duration = (trade.ExitTime - trade.EntryTime).TotalDays;
+                var pnlPercent = trade.EntryPrice != 0
+                    ? ((trade.ExitPrice - trade.EntryPrice) / trade.EntryPrice) * 100m
+                    : 0m;
+
                 csv.AppendLine(
-                    $"{trade.Symbol}," +
-                    $"{trade.Side}," +
-                    $"{trade.Quantity}," +
+                    $"\"{trade.Symbol}\"," +
+                    $"\"{trade.Side.Name}\"," +
+                    $"{trade.Quantity:F2}," +
                     $"{trade.EntryPrice:F2}," +
                     $"{trade.ExitPrice:F2}," +
-                    $"{trade.EntryTime:yyyy-MM-dd HH:mm:ss}," +
-                    $"{trade.ExitTime:yyyy-MM-dd HH:mm:ss}," +
-                    $"{trade.Duration}," +
+                    $"\"{trade.EntryTime:yyyy-MM-dd HH:mm:ss}\"," +
+                    $"\"{trade.ExitTime:yyyy-MM-dd HH:mm:ss}\"," +
+                    $"{duration:F2}," +
                     $"{trade.RealizedPnL:F2}," +
-                    $"{trade.RealizedPnLPercent:F2}," +
+                    $"{pnlPercent:F2}," +
                     $"{trade.Commission:F2}," +
-                    $"{trade.StrategyName}");
+                    $"\"{trade.StrategyName}\"");
             }
 
-            var csvBytes = Encoding.UTF8.GetBytes(csv.ToString());
+            _logger.LogInformation("Trade history exported: {Count} trades", trades.Count());
 
-            _logger.LogInformation("Trade history exported: {Count} trades", trades.Count);
-
-            return csvBytes;
+            return csv.ToString();
         }
         catch (Exception ex)
         {

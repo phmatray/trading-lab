@@ -2,6 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using TradingBot.Core.Models.Trading;
 using TradingBot.Web.Models;
 
 namespace TradingBot.Web.Services;
@@ -12,30 +13,49 @@ namespace TradingBot.Web.Services;
 public interface IPortfolioService
 {
     /// <summary>
-    /// Gets filtered and paginated trade history.
+    /// Gets trade history with optional filters.
     /// </summary>
-    /// <param name="filter">Filter criteria for trade history.</param>
+    /// <param name="startDate">Optional start date filter.</param>
+    /// <param name="endDate">Optional end date filter.</param>
+    /// <param name="symbol">Optional symbol filter.</param>
+    /// <param name="strategy">Optional strategy name filter.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Paginated trade history result.</returns>
-    Task<PortfolioHistoryResult> GetTradeHistoryAsync(
-        PortfolioHistoryFilter filter,
+    /// <returns>List of trades matching the filters.</returns>
+    Task<IEnumerable<Trade>> GetTradeHistoryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? symbol = null,
+        string? strategy = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Closes an open position by symbol.
+    /// Gets all open positions.
     /// </summary>
-    /// <param name="symbol">Trading symbol of the position to close.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>True if position was closed successfully, false if position not found.</returns>
-    Task<bool> ClosePositionAsync(string symbol, CancellationToken cancellationToken = default);
+    /// <returns>List of open positions.</returns>
+    Task<IEnumerable<Position>> GetOpenPositionsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Closes an open position by ID.
+    /// </summary>
+    /// <param name="positionId">ID of the position to close.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if position was closed successfully.</returns>
+    Task<bool> ClosePositionAsync(Guid positionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Exports trade history to CSV format.
     /// </summary>
-    /// <param name="filter">Filter criteria for trades to export.</param>
+    /// <param name="startDate">Optional start date filter.</param>
+    /// <param name="endDate">Optional end date filter.</param>
+    /// <param name="symbol">Optional symbol filter.</param>
+    /// <param name="strategy">Optional strategy name filter.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>CSV file content as byte array.</returns>
-    Task<byte[]> ExportTradeHistoryAsync(
-        PortfolioHistoryFilter filter,
+    /// <returns>CSV file content as string.</returns>
+    Task<string> ExportTradeHistoryAsync(
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? symbol = null,
+        string? strategy = null,
         CancellationToken cancellationToken = default);
 }
