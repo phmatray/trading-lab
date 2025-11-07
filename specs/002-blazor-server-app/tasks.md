@@ -227,19 +227,19 @@ This project follows the existing TradingBot repository structure:
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T106 [P] Add loading spinners during data fetching in all pages (Dashboard, Portfolio, Performance, Strategies, RiskSettings, Backtest)
-- [ ] T107 [P] Add error boundary components with user-friendly error messages for unexpected errors in all pages
-- [ ] T108 [P] Implement toast notifications service for success/error/warning messages across all components
-- [ ] T109 [P] Add keyboard navigation support for accessibility (tab order, focus indicators) in all interactive components
-- [ ] T110 [P] Add ARIA labels and roles for screen reader support in all components
-- [ ] T111 Optimize SignalR update throttling to prevent excessive re-renders (debounce updates) in RealtimeUpdateService in src/TradingBot.Web/Services/RealtimeUpdateService.cs
-- [ ] T112 Add logging with Serilog for all service operations (info, warning, error levels) in all service classes in src/TradingBot.Web/Services/
-- [ ] T113 Add structured logging with correlation IDs for request tracking in Program.cs in src/TradingBot.Web/Program.cs
-- [ ] T114 Run CSS production build (npm run css:prod) and verify minified output < 20KB in src/TradingBot.Web/
-- [ ] T115 Run quickstart.md validation: verify setup instructions, verify all commands work, verify database connection in /Users/phmatray/Repositories/github-phm/TradingBot/specs/002-blazor-server-app/quickstart.md
-- [ ] T116 Add copyright file headers to all .cs files in src/TradingBot.Web/ and tests/TradingBot.Web.Tests/
-- [ ] T117 Run code quality analysis: StyleCop, Roslynator, and ensure no build warnings in src/TradingBot.Web/
-- [ ] T118 Verify nullable reference types enabled and null checks in place across all service classes in src/TradingBot.Web/Services/
+- [X] T106 [P] Add loading spinners during data fetching in all pages (Dashboard, Portfolio, Performance, Strategies, RiskSettings, Backtest)
+- [X] T107 [P] Add error boundary components with user-friendly error messages for unexpected errors in all pages
+- [X] T108 [P] Implement toast notifications service for success/error/warning messages across all components
+- [X] T109 [P] Add keyboard navigation support for accessibility (tab order, focus indicators) in all interactive components
+- [X] T110 [P] Add ARIA labels and roles for screen reader support in all components
+- [X] T111 Optimize SignalR update throttling to prevent excessive re-renders (debounce updates) in RealtimeUpdateService in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T112 Add logging with Serilog for all service operations (info, warning, error levels) in all service classes in src/TradingBot.Web/Services/
+- [X] T113 Add structured logging with correlation IDs for request tracking in Program.cs in src/TradingBot.Web/Program.cs
+- [X] T114 Run CSS production build (npm run css:prod) and verify minified output < 20KB in src/TradingBot.Web/
+- [X] T115 Run quickstart.md validation: verify setup instructions, verify all commands work, verify database connection in /Users/phmatray/Repositories/github-phm/TradingBot/specs/002-blazor-server-app/quickstart.md
+- [X] T116 Add copyright file headers to all .cs files in src/TradingBot.Web/ and tests/TradingBot.Web.Tests/
+- [X] T117 Run code quality analysis: StyleCop, Roslynator, and ensure no build warnings in src/TradingBot.Web/
+- [X] T118 Verify nullable reference types enabled and null checks in place across all service classes in src/TradingBot.Web/Services/
 - [ ] T119 Test dashboard load time < 2s and API responses < 200ms p95 with sample data
 - [ ] T120 Test SignalR reconnection behavior: disconnect network, verify automatic reconnect, verify data refresh after reconnect
 
