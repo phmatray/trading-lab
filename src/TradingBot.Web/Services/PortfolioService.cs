@@ -143,7 +143,8 @@ public sealed class PortfolioService : IPortfolioService
 
             // Build CSV content
             var csv = new StringBuilder();
-            csv.AppendLine("Symbol,Side,Quantity,Entry Price,Exit Price,Entry Time,Exit Time,Duration (days),Realized P&L,P&L %,Commission,Strategy");
+            csv.AppendLine(
+                "Symbol,Side,Quantity,Entry Price,Exit Price,Entry Time,Exit Time,Duration (days),Realized P&L,P&L %,Commission,Strategy");
 
             foreach (var trade in trades.OrderByDescending(t => t.ExitTime))
             {

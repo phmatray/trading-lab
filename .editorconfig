@@ -50,7 +50,7 @@ insert_final_newline = true
 # Organize usings
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
-file_header_template = <copyright file="{fileName}" company="TradingBot">\nCopyright (c) TradingBot. All rights reserved.\n</copyright>
+file_header_template = <copyright file = "{fileName}" company = "TradingBot">\nCopyright (c) TradingBot.All rights reserved.\n</copyright>
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false:warning
@@ -123,7 +123,7 @@ csharp_style_conditional_delegate_call = true:suggestion
 
 # Modifier preferences
 csharp_prefer_static_local_function = true:suggestion
-csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:silent
+csharp_preferred_modifier_order = public, private, protected, internal, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, volatile, async:silent
 
 # Code-block preferences
 csharp_prefer_braces = true:warning

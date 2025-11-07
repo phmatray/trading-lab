@@ -17,10 +17,7 @@ public sealed class ToastService : IToastService
     {
         var toast = new ToastMessage
         {
-            Type = ToastType.Success,
-            Title = title ?? "Success",
-            Message = message,
-            DurationMs = durationMs,
+            Type = ToastType.Success, Title = title ?? "Success", Message = message, DurationMs = durationMs,
         };
 
         OnToastAdded?.Invoke(this, toast);
@@ -31,10 +28,7 @@ public sealed class ToastService : IToastService
     {
         var toast = new ToastMessage
         {
-            Type = ToastType.Error,
-            Title = title ?? "Error",
-            Message = message,
-            DurationMs = durationMs,
+            Type = ToastType.Error, Title = title ?? "Error", Message = message, DurationMs = durationMs,
         };
 
         OnToastAdded?.Invoke(this, toast);
@@ -45,10 +39,7 @@ public sealed class ToastService : IToastService
     {
         var toast = new ToastMessage
         {
-            Type = ToastType.Warning,
-            Title = title ?? "Warning",
-            Message = message,
-            DurationMs = durationMs,
+            Type = ToastType.Warning, Title = title ?? "Warning", Message = message, DurationMs = durationMs,
         };
 
         OnToastAdded?.Invoke(this, toast);
@@ -59,10 +50,7 @@ public sealed class ToastService : IToastService
     {
         var toast = new ToastMessage
         {
-            Type = ToastType.Info,
-            Title = title ?? "Info",
-            Message = message,
-            DurationMs = durationMs,
+            Type = ToastType.Info, Title = title ?? "Info", Message = message, DurationMs = durationMs,
         };
 
         OnToastAdded?.Invoke(this, toast);

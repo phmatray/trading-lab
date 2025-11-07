@@ -11,18 +11,24 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Risk Management</span>
                 @if (Settings.RiskLimitsEnabled)
                 {
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            <path fill-rule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clip-rule="evenodd"></path>
                         </svg>
                         Enabled
                     </span>
                 }
                 else
                 {
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            <path fill-rule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clip-rule="evenodd"></path>
                         </svg>
                         Disabled
                     </span>
@@ -30,10 +36,13 @@
             </div>
             @if (!Settings.RiskLimitsEnabled)
             {
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+                <div
+                    class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
                     <div class="flex">
-                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
                         <p class="text-sm text-yellow-800 dark:text-yellow-300">
                             Risk limits are currently disabled. Your account is not protected against excessive losses.
@@ -48,42 +57,48 @@
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Leverage</span>
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.Leverage.ToString("F1")x</span>
+                    <span
+                        class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.Leverage.ToString("F1")x</span>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Stop Loss</span>
-                    <span class="text-sm font-semibold text-red-600 dark:text-red-400">@Settings.StopLossPercent.ToString("F1")%</span>
+                    <span
+                        class="text-sm font-semibold text-red-600 dark:text-red-400">@Settings.StopLossPercent.ToString("F1")%</span>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Take Profit</span>
-                    <span class="text-sm font-semibold text-green-600 dark:text-green-400">@Settings.TakeProfitPercent.ToString("F1")%</span>
+                    <span
+                        class="text-sm font-semibold text-green-600 dark:text-green-400">@Settings.TakeProfitPercent.ToString("F1")%</span>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Daily Loss Limit</span>
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">$@Settings.DailyLossLimit.ToString("N0")</span>
+                    <span
+                        class="text-sm font-semibold text-gray-900 dark:text-white">$@Settings.DailyLossLimit.ToString("N0")</span>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Max Drawdown</span>
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.MaxDrawdownPercent.ToString("F1")%</span>
+                    <span
+                        class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.MaxDrawdownPercent.ToString("F1")%</span>
                 </div>
             </div>
 
             <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-600 dark:text-gray-400">Max Position Size</span>
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.MaxPositionSizePercent.ToString("F1")%</span>
+                    <span
+                        class="text-sm font-semibold text-gray-900 dark:text-white">@Settings.MaxPositionSizePercent.ToString("F1")%</span>
                 </div>
             </div>
         </div>
@@ -92,7 +107,8 @@
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 Last updated: @Settings.LastUpdated.ToString("MMM dd, yyyy HH:mm:ss")
             </div>
@@ -107,19 +123,22 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Risk Level</span>
                 @if (riskLevel == "Low")
                 {
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         Low
                     </span>
                 }
                 else if (riskLevel == "Medium")
                 {
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                         Medium
                     </span>
                 }
                 else
                 {
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                         High
                     </span>
                 }
@@ -133,7 +152,8 @@
     {
         <div class="text-center py-6">
             <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
             <p class="text-sm text-gray-500 dark:text-gray-400">No risk settings available</p>
         </div>
@@ -141,8 +161,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public RiskSettings? Settings { get; set; }
+    [Parameter] public RiskSettings? Settings { get; set; }
 
     private string CalculateRiskLevel(RiskSettings settings)
     {
@@ -194,4 +213,5 @@
             _ => ""
         };
     }
+
 }

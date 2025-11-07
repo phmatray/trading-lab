@@ -99,8 +99,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public PerformanceMetrics Metrics { get; set; } = null!;
+    [Parameter] public PerformanceMetrics Metrics { get; set; } = null!;
 
     private string GetColorClass(decimal value)
     {
@@ -117,4 +116,5 @@
             return "text-gray-600";
         }
     }
+
 }

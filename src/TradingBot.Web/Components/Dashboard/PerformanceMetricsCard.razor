@@ -89,11 +89,9 @@ Copyright (c) TradingBot. All rights reserved.
 </div>
 
 @code {
-    [Parameter]
-    public PerformanceMetrics? Metrics { get; set; }
+    [Parameter] public PerformanceMetrics? Metrics { get; set; }
 
-    [Parameter]
-    public DateTime? LastUpdated { get; set; }
+    [Parameter] public DateTime? LastUpdated { get; set; }
 
     private string GetPnLColorClass(decimal value)
     {
@@ -134,4 +132,5 @@ Copyright (c) TradingBot. All rights reserved.
             _ => "stat-negative"
         };
     }
+
 }

@@ -28,8 +28,11 @@
                                 </h3>
                                 @if (isInComparison)
                                 {
-                                    <svg class="w-4 h-4 ml-2 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    <svg class="w-4 h-4 ml-2 text-blue-600 dark:text-blue-400" fill="currentColor"
+                                         viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                              clip-rule="evenodd"></path>
                                     </svg>
                                 }
                             </div>
@@ -84,23 +87,17 @@
 </div>
 
 @code {
-    [Parameter]
-    public List<BacktestResult> Results { get; set; } = new();
+    [Parameter] public List<BacktestResult> Results { get; set; } = new();
 
-    [Parameter]
-    public string? SelectedBacktestId { get; set; }
+    [Parameter] public string? SelectedBacktestId { get; set; }
 
-    [Parameter]
-    public EventCallback<string> OnBacktestSelected { get; set; }
+    [Parameter] public EventCallback<string> OnBacktestSelected { get; set; }
 
-    [Parameter]
-    public bool ComparisonMode { get; set; }
+    [Parameter] public bool ComparisonMode { get; set; }
 
-    [Parameter]
-    public HashSet<string> SelectedForComparison { get; set; } = new();
+    [Parameter] public HashSet<string> SelectedForComparison { get; set; } = new();
 
-    [Parameter]
-    public EventCallback<string> OnToggleComparison { get; set; }
+    [Parameter] public EventCallback<string> OnToggleComparison { get; set; }
 
     private async Task HandleSelect(string backtestId)
     {
@@ -120,4 +117,5 @@
             SelectedForComparison.Clear();
         }
     }
+
 }

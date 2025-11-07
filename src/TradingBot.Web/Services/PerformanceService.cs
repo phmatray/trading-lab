@@ -83,29 +83,17 @@ public sealed class PerformanceService : IPerformanceService
 
             // Add starting point
             var firstTradeDate = trades.Any() ? trades.Min(t => t.EntryTime) : DateTime.UtcNow;
-            equityCurve.Add(new EquityCurveDataPoint
-            {
-                Timestamp = firstTradeDate,
-                EquityValue = currentEquity,
-            });
+            equityCurve.Add(new EquityCurveDataPoint { Timestamp = firstTradeDate, EquityValue = currentEquity, });
 
             // Add a point for each closed trade
             foreach (var trade in trades.OrderBy(t => t.ExitTime))
             {
                 currentEquity += trade.RealizedPnL;
-                equityCurve.Add(new EquityCurveDataPoint
-                {
-                    Timestamp = trade.ExitTime,
-                    EquityValue = currentEquity,
-                });
+                equityCurve.Add(new EquityCurveDataPoint { Timestamp = trade.ExitTime, EquityValue = currentEquity, });
             }
 
             // Add current equity as the last point
-            equityCurve.Add(new EquityCurveDataPoint
-            {
-                Timestamp = DateTime.UtcNow,
-                EquityValue = account.Equity,
-            });
+            equityCurve.Add(new EquityCurveDataPoint { Timestamp = DateTime.UtcNow, EquityValue = account.Equity, });
 
             _logger.LogInformation("Equity curve loaded: {Count} data points", equityCurve.Count);
 

@@ -101,7 +101,7 @@
   <!-- ============================================ -->
 
   <ItemGroup Label="Analyzer Configuration">
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json"/>
   </ItemGroup>
 
   <!-- ============================================ -->
@@ -109,10 +109,10 @@
   <!-- ============================================ -->
 
   <ItemGroup Label="Global Usings">
-    <Using Include="System" />
-    <Using Include="System.Collections.Generic" />
-    <Using Include="System.Linq" />
-    <Using Include="System.Threading" />
-    <Using Include="System.Threading.Tasks" />
+    <Using Include="System"/>
+    <Using Include="System.Collections.Generic"/>
+    <Using Include="System.Linq"/>
+    <Using Include="System.Threading"/>
+    <Using Include="System.Threading.Tasks"/>
   </ItemGroup>
 </Project>

@@ -24,7 +24,7 @@
                     class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     aria-label="@GetToggleAriaLabel()"
                     type="button">
-                <Icon Name="@GetToggleIcon()" Class="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                <Icon Name="@GetToggleIcon()" Class="w-6 h-6 text-gray-600 dark:text-gray-400"/>
             </button>
         </div>
 
@@ -36,13 +36,14 @@
                           Label="@item.Label"
                           IconName="@item.Icon"
                           IsCollapsed="@UIState.SidebarCollapsed"
-                          MatchMode="@item.MatchMode" />
+                          MatchMode="@item.MatchMode"/>
             }
         </nav>
     </div>
 </aside>
 
 @code {
+
     private sealed record MenuItemInfo(
         string Label,
         string Href,
@@ -98,4 +99,5 @@
     {
         return UIState.SidebarCollapsed ? "Expand sidebar" : "Collapse sidebar";
     }
+
 }

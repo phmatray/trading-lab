@@ -22,7 +22,8 @@
             <div class="text-sm font-medium text-gray-400">Winning Trades</div>
             <div class="text-2xl font-bold text-green-500">@Metrics.WinningTrades</div>
             <div class="text-xs text-gray-500">
-                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.WinningTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))% of total
+                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.WinningTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))%
+                of total
             </div>
         </div>
 
@@ -31,7 +32,8 @@
             <div class="text-sm font-medium text-gray-400">Losing Trades</div>
             <div class="text-2xl font-bold text-red-500">@Metrics.LosingTrades</div>
             <div class="text-xs text-gray-500">
-                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.LosingTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))% of total
+                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.LosingTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))%
+                of total
             </div>
         </div>
 
@@ -85,6 +87,7 @@
                             }
                         </div>
                     }
+
                     @if (lossPercentage > 0)
                     {
                         <div class="bg-red-500 flex items-center justify-center text-white text-sm font-medium"
@@ -112,8 +115,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public PerformanceMetrics Metrics { get; set; } = null!;
+    [Parameter] public PerformanceMetrics Metrics { get; set; } = null!;
 
     private decimal GetWinLossRatio()
     {
@@ -124,4 +126,5 @@
 
         return Math.Abs(Metrics.AverageWin / Metrics.AverageLoss);
     }
+
 }

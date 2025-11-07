@@ -12,7 +12,7 @@
          Match="@MatchMode">
     <Icon Name="@IconName"
           Class="@GetIconClasses()"
-          AriaLabel="@(IsCollapsed ? Label : null)" />
+          AriaLabel="@(IsCollapsed ? Label : null)"/>
     @if (!IsCollapsed)
     {
         <span class="ml-3 text-sm font-medium">@Label</span>
@@ -20,6 +20,7 @@
 </NavLink>
 
 @code {
+
     /// <summary>
     /// Gets or sets the navigation href.
     /// </summary>
@@ -71,4 +72,5 @@
     {
         return IsCollapsed ? "w-6 h-6" : "w-5 h-5";
     }
+
 }

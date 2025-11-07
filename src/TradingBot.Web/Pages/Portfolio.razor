@@ -15,97 +15,98 @@ Copyright (c) TradingBot. All rights reserved.
     <p class="text-gray-600 dark:text-gray-400 mt-2">View trade history, manage positions, and export data</p>
 </div>
 
-    @* Trade History Filter Section *@
-    <div class="mb-6">
-        <TradeHistoryFilter OnFilterChanged="HandleFilterChanged" />
+@* Trade History Filter Section *@
+<div class="mb-6">
+    <TradeHistoryFilter OnFilterChanged="HandleFilterChanged"/>
+</div>
+
+@* Trade History Table Section *@
+<div class="card-trading mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Trade History</h2>
+        <button
+            @onclick="ExportTradeHistory"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled="@isExporting">
+            @if (isExporting)
+            {
+                <span>Exporting...</span>
+            }
+            else
+            {
+                <span>📥 Export CSV</span>
+            }
+        </button>
     </div>
 
-    @* Trade History Table Section *@
-    <div class="card-trading mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Trade History</h2>
-            <button
-                @onclick="ExportTradeHistory"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled="@isExporting">
-                @if (isExporting)
-                {
-                    <span>Exporting...</span>
-                }
-                else
-                {
-                    <span>📥 Export CSV</span>
-                }
-            </button>
-        </div>
-
-        @if (isLoadingTrades)
-        {
-            <div class="flex items-center justify-center py-12">
-                <div class="text-gray-500 dark:text-gray-400">Loading trade history...</div>
-            </div>
-        }
-        else if (tradeHistory != null && tradeHistory.Any())
-        {
-            <TradeHistoryTable
-                Trades="@tradeHistory"
-                CurrentPage="@currentPage"
-                TotalPages="@totalPages"
-                OnPageChanged="HandlePageChanged" />
-        }
-        else
-        {
-            <div class="flex items-center justify-center py-12">
-                <p class="text-gray-500 dark:text-gray-400">No trade history found for the selected filters.</p>
-            </div>
-        }
-    </div>
-
-    @* Open Positions Section *@
-    <div class="card-trading">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Open Positions</h2>
-
-        @if (isLoadingPositions)
-        {
-            <div class="flex items-center justify-center py-8">
-                <div class="text-gray-500 dark:text-gray-400">Loading positions...</div>
-            </div>
-        }
-        else if (openPositions != null && openPositions.Any())
-        {
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach (var position in openPositions)
-                {
-                    <PositionCard
-                        Position="@position"
-                        OnCloseRequested="() => ShowClosePositionModal(position)" />
-                }
-            </div>
-        }
-        else
-        {
-            <div class="flex items-center justify-center py-8">
-                <p class="text-gray-500 dark:text-gray-400">No open positions</p>
-            </div>
-        }
-    </div>
-
-    @* Success/Error Notifications *@
-    @if (!string.IsNullOrEmpty(notificationMessage))
+    @if (isLoadingTrades)
     {
-        <div class="fixed bottom-4 right-4 @(notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
-            @notificationMessage
+        <div class="flex items-center justify-center py-12">
+            <div class="text-gray-500 dark:text-gray-400">Loading trade history...</div>
         </div>
     }
-
-    @* Close Position Modal *@
-    @if (showCloseModal && selectedPosition != null)
+    else if (tradeHistory != null && tradeHistory.Any())
     {
-        <ClosePositionModal
-            Position="@selectedPosition"
-            OnConfirm="HandleClosePosition"
-            OnCancel="HideClosePositionModal" />
+        <TradeHistoryTable
+            Trades="@tradeHistory"
+            CurrentPage="@currentPage"
+            TotalPages="@totalPages"
+            OnPageChanged="HandlePageChanged"/>
     }
+    else
+    {
+        <div class="flex items-center justify-center py-12">
+            <p class="text-gray-500 dark:text-gray-400">No trade history found for the selected filters.</p>
+        </div>
+    }
+</div>
+
+@* Open Positions Section *@
+<div class="card-trading">
+    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Open Positions</h2>
+
+    @if (isLoadingPositions)
+    {
+        <div class="flex items-center justify-center py-8">
+            <div class="text-gray-500 dark:text-gray-400">Loading positions...</div>
+        </div>
+    }
+    else if (openPositions != null && openPositions.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var position in openPositions)
+            {
+                <PositionCard
+                    Position="@position"
+                    OnCloseRequested="() => ShowClosePositionModal(position)"/>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="flex items-center justify-center py-8">
+            <p class="text-gray-500 dark:text-gray-400">No open positions</p>
+        </div>
+    }
+</div>
+
+@* Success/Error Notifications *@
+@if (!string.IsNullOrEmpty(notificationMessage))
+{
+    <div
+        class="fixed bottom-4 right-4 @(notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
+        @notificationMessage
+    </div>
+}
+
+@* Close Position Modal *@
+@if (showCloseModal && selectedPosition != null)
+{
+    <ClosePositionModal
+        Position="@selectedPosition"
+        OnConfirm="HandleClosePosition"
+        OnCancel="HideClosePositionModal"/>
+}
 
 @code {
     private List<Trade> tradeHistory = new();
@@ -264,4 +265,5 @@ Copyright (c) TradingBot. All rights reserved.
             InvokeAsync(StateHasChanged);
         });
     }
+
 }

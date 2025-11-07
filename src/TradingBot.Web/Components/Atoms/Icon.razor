@@ -5,6 +5,7 @@
 @namespace TradingBot.Web.Components.Atoms
 
 @code {
+
     /// <summary>
     /// Gets or sets the icon name to display.
     /// </summary>
@@ -29,17 +30,20 @@
     /// </summary>
     [Parameter]
     public string? AriaLabel { get; set; }
+
 }
 
 @if (AriaLabel != null)
 {
-    <svg class="@Class" fill="@GetFill()" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-label="@AriaLabel" role="img">
+    <svg class="@Class" fill="@GetFill()" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+         aria-label="@AriaLabel" role="img">
         @GetIconPath()
     </svg>
 }
 else
 {
-    <svg class="@Class" fill="@GetFill()" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+    <svg class="@Class" fill="@GetFill()" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+         aria-hidden="true">
         @GetIconPath()
     </svg>
 }
@@ -73,4 +77,5 @@ else
 
         _ => (MarkupString)""
     };
+
 }

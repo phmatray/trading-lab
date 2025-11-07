@@ -19,7 +19,7 @@
                              SeriesType="SeriesType.Area"
                              XValue="@(e => e.Timestamp)"
                              YValue="@(e => (decimal)e.EquityValue)"
-                             OrderBy="e => e.X" />
+                             OrderBy="e => e.X"/>
         </ApexChart>
     }
     else
@@ -31,8 +31,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public List<EquityCurveDataPoint> Data { get; set; } = new();
+    [Parameter] public List<EquityCurveDataPoint> Data { get; set; } = new();
 
     private ApexChartOptions<EquityCurveDataPoint> _chartOptions = null!;
 
@@ -163,4 +162,5 @@
             }
         };
     }
+
 }

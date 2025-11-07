@@ -12,88 +12,95 @@
     <p class="mt-2 text-gray-600 dark:text-gray-400">View and analyze historical strategy performance</p>
 </div>
 
-    @if (isLoading)
-    {
-        <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-    }
-    else if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <div class="flex">
-                <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p class="text-red-800 dark:text-red-300">@errorMessage</p>
-            </div>
-        </div>
-    }
-    else if (backtestResults is null || !backtestResults.Any())
-    {
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+@if (isLoading)
+{
+    <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex">
+            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No backtest results available</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the CLI to see results here</p>
-            <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4 text-left inline-block">
-                <code class="text-sm text-gray-800 dark:text-gray-200">
-                    dotnet run --project src/TradingBot.Cli -- backtest --strategy momentum --symbol AAPL
-                </code>
-            </div>
+            <p class="text-red-800 dark:text-red-300">@errorMessage</p>
         </div>
-    }
-    else
-    {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Backtest Results List -->
-            <div class="lg:col-span-1">
-                <BacktestResultsList
-                    Results="@backtestResults"
-                    SelectedBacktestId="@selectedBacktestId"
-                    OnBacktestSelected="@HandleBacktestSelected"
-                    ComparisonMode="@comparisonMode"
-                    SelectedForComparison="@selectedForComparison"
-                    OnToggleComparison="@HandleToggleComparison" />
-            </div>
-
-            <!-- Backtest Detail -->
-            <div class="lg:col-span-2">
-                @if (selectedBacktest is not null)
-                {
-                    <BacktestDetail
-                        Backtest="@selectedBacktest"
-                        ShowComparison="@ShowComparisonTable"
-                        ComparisonResults="@GetComparisonResults()" />
-                }
-                else
-                {
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-                        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
-                        </svg>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Select a backtest to view details</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Choose a backtest from the list on the left</p>
-                    </div>
-                }
-            </div>
+    </div>
+}
+else if (backtestResults is null || !backtestResults.Any())
+{
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No backtest results available</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the CLI to see results here</p>
+        <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4 text-left inline-block">
+            <code class="text-sm text-gray-800 dark:text-gray-200">
+                dotnet run --project src/TradingBot.Cli -- backtest --strategy momentum --symbol AAPL
+            </code>
+        </div>
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Backtest Results List -->
+        <div class="lg:col-span-1">
+            <BacktestResultsList
+                Results="@backtestResults"
+                SelectedBacktestId="@selectedBacktestId"
+                OnBacktestSelected="@HandleBacktestSelected"
+                ComparisonMode="@comparisonMode"
+                SelectedForComparison="@selectedForComparison"
+                OnToggleComparison="@HandleToggleComparison"/>
         </div>
 
-        @if (comparisonMode && selectedForComparison.Count > 1)
-        {
-            <div class="mt-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Comparison (@selectedForComparison.Count selected)</h2>
-                    <button @onclick="@ClearComparison"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
-                        Clear Selection
-                    </button>
+        <!-- Backtest Detail -->
+        <div class="lg:col-span-2">
+            @if (selectedBacktest is not null)
+            {
+                <BacktestDetail
+                    Backtest="@selectedBacktest"
+                    ShowComparison="@ShowComparisonTable"
+                    ComparisonResults="@GetComparisonResults()"/>
+            }
+            else
+            {
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Select a backtest to view
+                        details</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Choose a backtest from the list on the left</p>
                 </div>
-                <!-- Comparison table will be rendered by BacktestDetail when ShowComparison is true -->
+            }
+        </div>
+    </div>
+
+    @if (comparisonMode && selectedForComparison.Count > 1)
+    {
+        <div class="mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Comparison
+                    (@selectedForComparison.Count selected)</h2>
+                <button @onclick="@ClearComparison"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                    Clear Selection
+                </button>
             </div>
-        }
+            <!-- Comparison table will be rendered by BacktestDetail when ShowComparison is true -->
+        </div>
     }
+}
 
 @code {
     private List<BacktestResult>? backtestResults;
@@ -179,4 +186,5 @@
             .Where(b => selectedForComparison.Contains(b.BacktestId))
             .ToList();
     }
+
 }

@@ -20,56 +20,58 @@ Copyright (c) TradingBot. All rights reserved.
     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Trading Dashboard</h1>
 </div>
 
-        <!-- Loading State -->
-        @if (_isLoading)
-        {
-            <div class="flex items-center justify-center h-64">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p class="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
-                </div>
-            </div>
-        }
-        else if (_dashboardData is not null)
-        {
-            <!-- Dashboard Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Account Summary -->
-                <AccountSummary Account="@_dashboardData.Account" LastUpdated="@_lastUpdated" />
+<!-- Loading State -->
+@if (_isLoading)
+{
+    <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+        </div>
+    </div>
+}
+else if (_dashboardData is not null)
+{
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Account Summary -->
+        <AccountSummary Account="@_dashboardData.Account" LastUpdated="@_lastUpdated"/>
 
-                <!-- Performance Metrics -->
-                <PerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated" />
-            </div>
+        <!-- Performance Metrics -->
+        <PerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated"/>
+    </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Risk Settings -->
-                <RiskSettingsCard Settings="@_dashboardData.RiskSettings" />
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Risk Settings -->
+        <RiskSettingsCard Settings="@_dashboardData.RiskSettings"/>
 
-                <!-- Active Strategies -->
-                <ActiveStrategies Strategies="@_dashboardData.ActiveStrategies" />
-            </div>
+        <!-- Active Strategies -->
+        <ActiveStrategies Strategies="@_dashboardData.ActiveStrategies"/>
+    </div>
 
-            <!-- Positions List -->
-            <div class="mb-6">
-                <PositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated" />
-            </div>
+    <!-- Positions List -->
+    <div class="mb-6">
+        <PositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated"/>
+    </div>
 
-            <!-- Recent Trades -->
-            <div class="mb-6">
-                <RecentTrades Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated" />
-            </div>
-        }
-        else if (_errorMessage is not null)
-        {
-            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <div class="flex items-center">
-                    <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                    <p class="text-red-800 dark:text-red-200">@_errorMessage</p>
-                </div>
-            </div>
-        }
+    <!-- Recent Trades -->
+    <div class="mb-6">
+        <RecentTrades Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated"/>
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex items-center">
+            <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <p class="text-red-800 dark:text-red-200">@_errorMessage</p>
+        </div>
+    </div>
+}
 
 @code {
     private HubConnection? _hubConnection;
@@ -111,7 +113,8 @@ Copyright (c) TradingBot. All rights reserved.
 
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
-                .WithAutomaticReconnect(new[] {
+                .WithAutomaticReconnect(new[]
+                {
                     TimeSpan.FromSeconds(0),
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(5),
@@ -189,4 +192,5 @@ Copyright (c) TradingBot. All rights reserved.
             await _hubConnection.DisposeAsync();
         }
     }
+
 }
