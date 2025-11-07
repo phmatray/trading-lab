@@ -159,16 +159,16 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 4
 
-- [ ] T073 [P] [US4] Create Strategies.razor page with strategy list table in src/TradingBot.Web/Pages/Strategies.razor
-- [ ] T074 [P] [US4] Create StrategyCard.razor component displaying strategy name, type, symbols, timeframe, and status in src/TradingBot.Web/Components/Strategy/StrategyCard.razor
-- [ ] T075 [P] [US4] Create StrategyStatusToggle.razor component with enable/disable button in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
-- [ ] T076 [US4] Integrate StrategyManagementService.GetAllStrategiesAsync in Strategies.razor to load strategy list in src/TradingBot.Web/Pages/Strategies.razor
-- [ ] T077 [US4] Implement "Enable" button handler calling StrategyManagementService.EnableStrategyAsync in StrategyStatusToggle.razor in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
-- [ ] T078 [US4] Implement "Disable" button handler calling StrategyManagementService.DisableStrategyAsync in StrategyStatusToggle.razor in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
-- [ ] T079 [US4] Add visual indicator showing active/disabled status with color coding (green for active, red for disabled) in StrategyCard.razor in src/TradingBot.Web/Components/Strategy/StrategyCard.razor
-- [ ] T080 [US4] Add success notification when strategy status changed in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
-- [ ] T081 [US4] Add error handling for strategy enable/disable failures in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
-- [ ] T082 [US4] Implement empty state handling: "No strategies configured" when strategy list is empty in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
+- [X] T073 [P] [US4] Create Strategies.razor page with strategy list table in src/TradingBot.Web/Pages/Strategies.razor
+- [X] T074 [P] [US4] Create StrategyCard.razor component displaying strategy name, type, symbols, timeframe, and status in src/TradingBot.Web/Components/Strategy/StrategyCard.razor
+- [X] T075 [P] [US4] Create StrategyStatusToggle.razor component with enable/disable button in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
+- [X] T076 [US4] Integrate StrategyManagementService.GetAllStrategiesAsync in Strategies.razor to load strategy list in src/TradingBot.Web/Pages/Strategies.razor
+- [X] T077 [US4] Implement "Enable" button handler calling StrategyManagementService.EnableStrategyAsync in StrategyStatusToggle.razor in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
+- [X] T078 [US4] Implement "Disable" button handler calling StrategyManagementService.DisableStrategyAsync in StrategyStatusToggle.razor in src/TradingBot.Web/Components/Strategy/StrategyStatusToggle.razor
+- [X] T079 [US4] Add visual indicator showing active/disabled status with color coding (green for active, red for disabled) in StrategyCard.razor in src/TradingBot.Web/Components/Strategy/StrategyCard.razor
+- [X] T080 [US4] Add success notification when strategy status changed in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
+- [X] T081 [US4] Add error handling for strategy enable/disable failures in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
+- [X] T082 [US4] Implement empty state handling: "No strategies configured" when strategy list is empty in Strategies.razor in src/TradingBot.Web/Pages/Strategies.razor
 
 **Checkpoint**: User Story 4 complete - strategies can be managed through web interface
 
