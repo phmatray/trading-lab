@@ -117,36 +117,36 @@ This is a Blazor Server web application with clean architecture:
 
 ### Atomic Components for US2
 
-- [ ] T039 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Input.razor (text, number types, with Tailwind styling, ARIA labels)
-- [ ] T040 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Select.razor (dropdown with options, Tailwind styling)
-- [ ] T041 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Toggle.razor (checkbox styled as toggle switch for boolean settings)
-- [ ] T042 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Button.razor (Primary, Secondary, Danger, Ghost variants with Tailwind classes)
-- [ ] T043 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/InputTests.cs (renders, binds value, shows validation errors)
-- [ ] T044 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/SelectTests.cs (renders options, binds value)
-- [ ] T045 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ToggleTests.cs (toggles state, binds value)
-- [ ] T046 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ButtonTests.cs (renders variants, invokes onClick)
+- [X] T039 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Input.razor (text, number types, with Tailwind styling, ARIA labels)
+- [X] T040 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Select.razor (dropdown with options, Tailwind styling)
+- [X] T041 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Toggle.razor (checkbox styled as toggle switch for boolean settings)
+- [X] T042 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Button.razor (Primary, Secondary, Danger, Ghost variants with Tailwind classes)
+- [X] T043 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/InputTests.cs (renders, binds value, shows validation errors)
+- [X] T044 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/SelectTests.cs (renders options, binds value)
+- [X] T045 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ToggleTests.cs (toggles state, binds value)
+- [X] T046 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ButtonTests.cs (renders variants, invokes onClick)
 
 ### Molecular Components for US2
 
-- [ ] T047 [US2] Create src/TradingBot.Web/Components/Molecules/FormField.razor (Label + Input/Select/Toggle + Error message display)
-- [ ] T048 [US2] Write tests/TradingBot.Web.Tests/Components/Molecules/FormFieldTests.cs (renders label, input, error message)
+- [X] T047 [US2] Create src/TradingBot.Web/Components/Molecules/FormField.razor (Label + Input/Select/Toggle + Error message display)
+- [X] T048 [US2] Write tests/TradingBot.Web.Tests/Components/Molecules/FormFieldTests.cs (renders label, input, error message)
 
 ### Organism Components for US2
 
-- [ ] T049 [US2] Create src/TradingBot.Web/Components/Organisms/SettingsForm.razor (EditForm with UserPreferences model, validation, Save/Reset buttons, NavigationLock for unsaved changes)
-- [ ] T050 [US2] Implement theme toggle in SettingsForm (Light/Dark options, immediate application via ThemeProvider)
-- [ ] T051 [US2] Implement dashboard refresh interval input (1-300 range validation, help text)
-- [ ] T052 [US2] Implement notification duration input (2-10 range validation, help text)
-- [ ] T053 [US2] Implement notification type toggles (Success, Error, Info, Warning switches)
-- [ ] T054 [US2] Implement Save Changes button handler (validate, call UserPreferencesService, show success toast)
-- [ ] T055 [US2] Implement Reset to Defaults button with confirmation modal
-- [ ] T056 [US2] Implement NavigationLock to warn on unsaved changes
+- [X] T049 [US2] Create src/TradingBot.Web/Components/Organisms/SettingsForm.razor (EditForm with UserPreferences model, validation, Save/Reset buttons, NavigationLock for unsaved changes)
+- [X] T050 [US2] Implement theme toggle in SettingsForm (Light/Dark options, immediate application via ThemeProvider)
+- [X] T051 [US2] Implement dashboard refresh interval input (1-300 range validation, help text)
+- [X] T052 [US2] Implement notification duration input (2-10 range validation, help text)
+- [X] T053 [US2] Implement notification type toggles (Success, Error, Info, Warning switches)
+- [X] T054 [US2] Implement Save Changes button handler (validate, call UserPreferencesService, show success toast)
+- [X] T055 [US2] Implement Reset to Defaults button with confirmation modal
+- [X] T056 [US2] Implement NavigationLock to warn on unsaved changes
 - [ ] T057 [US2] Write tests/TradingBot.Web.Tests/Components/Organisms/SettingsFormTests.cs (save, reset, validation, unsaved warning)
 
 ### Page Implementation for US2
 
-- [ ] T058 [US2] Create src/TradingBot.Web/Components/Pages/Settings.razor (uses SettingsForm organism, loads preferences from UserPreferencesService)
-- [ ] T059 [US2] Add Settings route (@page "/settings") and add Settings menu item to NavigationSidebar
+- [X] T058 [US2] Create src/TradingBot.Web/Components/Pages/Settings.razor (uses SettingsForm organism, loads preferences from UserPreferencesService)
+- [X] T059 [US2] Add Settings route (@page "/settings") and add Settings menu item to NavigationSidebar
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Settings page is accessible, settings save/persist, and navigation works.
 
