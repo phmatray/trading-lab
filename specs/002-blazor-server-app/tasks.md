@@ -207,17 +207,17 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 6
 
-- [ ] T095 [P] [US6] Create Backtest.razor page with backtest results list in src/TradingBot.Web/Pages/Backtest.razor
-- [ ] T096 [P] [US6] Create BacktestResultsList.razor component displaying all backtest runs with strategy, symbol, date range, return in src/TradingBot.Web/Components/Backtest/BacktestResultsList.razor
-- [ ] T097 [P] [US6] Create BacktestDetail.razor component showing detailed backtest information, performance summary, and trading statistics in src/TradingBot.Web/Components/Backtest/BacktestDetail.razor
-- [ ] T098 [P] [US6] Create BacktestTradesList.razor component displaying top 5 winning and top 5 losing trades in src/TradingBot.Web/Components/Backtest/BacktestTradesList.razor
-- [ ] T099 [P] [US6] Create BacktestEquityCurveChart.razor component using ApexCharts to display backtest equity curve in src/TradingBot.Web/Components/Charts/BacktestEquityCurveChart.razor
-- [ ] T100 [US6] Integrate BacktestService.GetBacktestResultsAsync in Backtest.razor to load backtest list in src/TradingBot.Web/Pages/Backtest.razor
-- [ ] T101 [US6] Implement backtest selection logic calling BacktestService.GetBacktestByIdAsync for detailed view in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
-- [ ] T102 [US6] Add performance metrics display (initial capital, final equity, total P&L, return %) in BacktestDetail.razor in src/TradingBot.Web/Components/Backtest/BacktestDetail.razor
-- [ ] T103 [US6] Configure BacktestEquityCurveChart.razor with backtest equity curve data in src/TradingBot.Web/Components/Charts/BacktestEquityCurveChart.razor
-- [ ] T104 [US6] Implement backtest comparison table for multiple selected results in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
-- [ ] T105 [US6] Implement empty state handling: "No backtest results available" when no backtests exist in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
+- [X] T095 [P] [US6] Create Backtest.razor page with backtest results list in src/TradingBot.Web/Pages/Backtest.razor
+- [X] T096 [P] [US6] Create BacktestResultsList.razor component displaying all backtest runs with strategy, symbol, date range, return in src/TradingBot.Web/Components/Backtest/BacktestResultsList.razor
+- [X] T097 [P] [US6] Create BacktestDetail.razor component showing detailed backtest information, performance summary, and trading statistics in src/TradingBot.Web/Components/Backtest/BacktestDetail.razor
+- [X] T098 [P] [US6] Create BacktestTradesList.razor component displaying top 5 winning and top 5 losing trades in src/TradingBot.Web/Components/Backtest/BacktestTradesList.razor
+- [X] T099 [P] [US6] Create BacktestEquityCurveChart.razor component using ApexCharts to display backtest equity curve in src/TradingBot.Web/Components/Charts/BacktestEquityCurveChart.razor
+- [X] T100 [US6] Integrate BacktestService.GetBacktestResultsAsync in Backtest.razor to load backtest list in src/TradingBot.Web/Pages/Backtest.razor
+- [X] T101 [US6] Implement backtest selection logic calling BacktestService.GetBacktestByIdAsync for detailed view in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
+- [X] T102 [US6] Add performance metrics display (initial capital, final equity, total P&L, return %) in BacktestDetail.razor in src/TradingBot.Web/Components/Backtest/BacktestDetail.razor
+- [X] T103 [US6] Configure BacktestEquityCurveChart.razor with backtest equity curve data in src/TradingBot.Web/Components/Charts/BacktestEquityCurveChart.razor
+- [X] T104 [US6] Implement backtest comparison table for multiple selected results in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
+- [X] T105 [US6] Implement empty state handling: "No backtest results available" when no backtests exist in Backtest.razor in src/TradingBot.Web/Pages/Backtest.razor
 
 **Checkpoint**: All six user stories complete - full web application functionality implemented
 

@@ -1,0 +1,123 @@
+@using TradingBot.Web.Models
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Backtest Results</h2>
+        @if (ComparisonMode)
+        {
+            <span class="text-sm text-blue-600 dark:text-blue-400">
+                Comparison Mode (@SelectedForComparison.Count selected)
+            </span>
+        }
+    </div>
+
+    <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        @foreach (var result in Results)
+        {
+            var isSelected = SelectedBacktestId == result.BacktestId;
+            var isInComparison = SelectedForComparison.Contains(result.BacktestId);
+            var bgClass = isSelected ? "bg-blue-50 dark:bg-blue-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-700";
+
+            <div class="@bgClass cursor-pointer transition-colors duration-150">
+                <div class="px-4 py-3" @onclick="@(() => HandleSelect(result.BacktestId))">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                                    @result.StrategyName
+                                </h3>
+                                @if (isInComparison)
+                                {
+                                    <svg class="w-4 h-4 ml-2 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                }
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                @result.Symbol
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                @result.StartDate.ToString("MMM dd, yyyy") - @result.EndDate.ToString("MMM dd, yyyy")
+                            </p>
+                        </div>
+
+                        <div class="text-right ml-4">
+                            @{
+                                var returnClass = result.TotalReturn >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
+                            }
+                            <p class="text-sm font-semibold @returnClass">
+                                @result.TotalReturn.ToString("F2")%
+                            </p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                @((result.FinalEquity - result.InitialCapital).ToString("C0"))
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (ComparisonMode)
+                    {
+                        <div class="mt-3 flex items-center justify-between">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                @result.Trades.Count trades
+                            </span>
+                            <button @onclick="@(() => HandleToggleComparison(result.BacktestId))"
+                                    @onclick:stopPropagation="true"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                                @(isInComparison ? "Remove" : "Add to comparison")
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Results.Count > 0)
+    {
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <button @onclick="@ToggleComparisonMode"
+                    class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                @(ComparisonMode ? "Exit Comparison Mode" : "Compare Results")
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<BacktestResult> Results { get; set; } = new();
+
+    [Parameter]
+    public Guid? SelectedBacktestId { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnBacktestSelected { get; set; }
+
+    [Parameter]
+    public bool ComparisonMode { get; set; }
+
+    [Parameter]
+    public HashSet<Guid> SelectedForComparison { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Guid> OnToggleComparison { get; set; }
+
+    private async Task HandleSelect(Guid backtestId)
+    {
+        await OnBacktestSelected.InvokeAsync(backtestId);
+    }
+
+    private async Task HandleToggleComparison(Guid backtestId)
+    {
+        await OnToggleComparison.InvokeAsync(backtestId);
+    }
+
+    private void ToggleComparisonMode()
+    {
+        ComparisonMode = !ComparisonMode;
+        if (!ComparisonMode)
+        {
+            SelectedForComparison.Clear();
+        }
+    }
+}

@@ -1,0 +1,172 @@
+@using TradingBot.Web.Models
+
+<div class="space-y-6">
+    <!-- Performance Summary Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Performance Summary</h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Initial Capital</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.InitialCapital.ToString("C0")
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Final Equity</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.FinalEquity.ToString("C0")
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total P&L</p>
+                @{
+                    var pnl = Backtest.TotalPnL;
+                    var pnlClass = pnl >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
+                }
+                <p class="text-lg font-semibold @pnlClass">
+                    @pnl.ToString("C0")
+                </p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Return</p>
+                @{
+                    var returnClass = Backtest.TotalReturn >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
+                }
+                <p class="text-lg font-semibold @returnClass">
+                    @Backtest.TotalReturn.ToString("F2")%
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>@Backtest.StrategyName on @Backtest.Symbol</span>
+                <span>@Backtest.Duration.Days days (@Backtest.StartDate.ToString("MMM dd, yyyy") - @Backtest.EndDate.ToString("MMM dd, yyyy"))</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Trading Statistics</h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Total Trades</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.Metrics.TotalTrades
+                </p>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Win Rate</p>
+                <p class="text-lg font-semibold text-green-600 dark:text-green-400">
+                    @Backtest.Metrics.WinRate.ToString("F1")%
+                </p>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Profit Factor</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.Metrics.ProfitFactor.ToString("F2")
+                </p>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Sharpe Ratio</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.Metrics.SharpeRatio.ToString("F2")
+                </p>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Max Drawdown</p>
+                <p class="text-lg font-semibold text-red-600 dark:text-red-400">
+                    @Backtest.Metrics.MaxDrawdownPercent.ToString("F2")%
+                </p>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+                <p class="text-xs text-gray-600 dark:text-gray-400">Avg Win / Loss</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                    @Backtest.Metrics.AverageWin.ToString("C0") / @Backtest.Metrics.AverageLoss.ToString("C0")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equity Curve Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Equity Curve</h2>
+        <BacktestEquityCurveChart EquityCurve="@Backtest.EquityCurve" />
+    </div>
+
+    <!-- Top Trades -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Top Trades</h2>
+        <BacktestTradesList Trades="@Backtest.Trades" />
+    </div>
+
+    @if (ShowComparison && ComparisonResults is not null && ComparisonResults.Count > 1)
+    {
+        <!-- Comparison Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Comparison</h2>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Strategy</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Symbol</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Return %</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total P&L</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Win Rate</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sharpe</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Max DD %</th>
+                            <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Trades</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach (var result in ComparisonResults.OrderByDescending(r => r.TotalReturn))
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                    @result.StrategyName
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                    @result.Symbol
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-semibold @(result.TotalReturn >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                                    @result.TotalReturn.ToString("F2")%
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right @(result.TotalPnL >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                                    @result.TotalPnL.ToString("C0")
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
+                                    @result.Metrics.WinRate.ToString("F1")%
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
+                                    @result.Metrics.SharpeRatio.ToString("F2")
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-red-600 dark:text-red-400">
+                                    @result.Metrics.MaxDrawdownPercent.ToString("F2")%
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
+                                    @result.Metrics.TotalTrades
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public BacktestResult Backtest { get; set; } = null!;
+
+    [Parameter]
+    public bool ShowComparison { get; set; }
+
+    [Parameter]
+    public List<BacktestResult>? ComparisonResults { get; set; }
+}
