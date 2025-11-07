@@ -141,7 +141,7 @@ This is a Blazor Server web application with clean architecture:
 - [X] T054 [US2] Implement Save Changes button handler (validate, call UserPreferencesService, show success toast)
 - [X] T055 [US2] Implement Reset to Defaults button with confirmation modal
 - [X] T056 [US2] Implement NavigationLock to warn on unsaved changes
-- [ ] T057 [US2] Write tests/TradingBot.Web.Tests/Components/Organisms/SettingsFormTests.cs (save, reset, validation, unsaved warning)
+- [X] T057 [US2] Write tests/TradingBot.Web.Tests/Components/Organisms/SettingsFormTests.cs (save, reset, validation, unsaved warning)
 
 ### Page Implementation for US2
 
