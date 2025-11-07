@@ -1,507 +1,635 @@
-# Quickstart Guide: UX/UI Enhancement - Navigation & Settings
+# Quickstart: UX/UI Enhancement Development Guide
 
-**Feature**: 003-ux-ui-enhancement | **Date**: 2025-11-07
+**Feature**: 003-ux-ui-enhancement
+**Branch**: `003-ux-ui-enhancement`
+**Date**: 2025-11-07
 
 ## Overview
 
-This quickstart guide provides step-by-step instructions for developers to understand, build, test, and deploy the UX/UI enhancements to the TradingBot Blazor Server dashboard.
+This guide provides developers with everything needed to start implementing the UX/UI Enhancement feature for the TradingBot Blazor web application.
+
+---
 
 ## Prerequisites
 
-- Completed implementation of spec 002 (Blazor Server Trading Dashboard)
-- .NET 9 SDK installed
-- Node.js 18+ and npm installed (for Tailwind CSS and DaisyUI)
-- SQLite database with existing TradingBot schema
-- IDE with C# support (Visual Studio 2022, Rider, or VS Code with C# extension)
-- Basic understanding of Blazor Server, Tailwind CSS, and Entity Framework Core
+### Required Tools
+- .NET 9 SDK
+- Node.js 18+ (for Tailwind CSS build)
+- npm or yarn
+- Your preferred IDE (Visual Studio 2022, Rider, or VS Code)
+- SQLite browser (optional, for database inspection)
 
-## Quick Start (5 Minutes)
+### Existing Codebase
+This feature builds on the existing Blazor Server application from spec `002-blazor-server-app`:
+- **Project**: `src/TradingBot.Web`
+- **Architecture**: Blazor Server with SignalR
+- **Database**: SQLite via Entity Framework Core 9
+- **Styling**: Tailwind CSS (already configured)
 
-### 1. Install DaisyUI
+---
 
-```bash
-cd src/TradingBot.Web
-npm install daisyui@latest
+## Project Structure
+
+```
+TradingBot/
+├── src/
+│   └── TradingBot.Web/                    # Main Blazor Server project
+│       ├── Components/                     # Blazor components
+│       │   ├── Atoms/                     # NEW: Basic UI elements
+│       │   │   ├── Button.razor
+│       │   │   ├── Input.razor
+│       │   │   ├── Icon.razor
+│       │   │   └── Badge.razor
+│       │   ├── Molecules/                 # NEW: Composite components
+│       │   │   ├── FormField.razor
+│       │   │   ├── MenuItem.razor
+│       │   │   ├── Toast.razor
+│       │   │   └── Tooltip.razor
+│       │   ├── Organisms/                 # NEW: Complex components
+│       │   │   ├── NavigationSidebar.razor
+│       │   │   ├── SettingsForm.razor
+│       │   │   └── ThemeProvider.razor
+│       │   ├── Layout/
+│       │   │   ├── MainLayout.razor       # UPDATE: Add sidebar + theme
+│       │   │   └── NavMenu.razor          # DEPRECATED: Replace with NavigationSidebar
+│       │   ├── Pages/                     # Blazor pages
+│       │   │   ├── Settings.razor         # NEW: Settings page
+│       │   │   └── ...
+│       │   └── Shared/
+│       │       └── ToastContainer.razor   # UPDATE: Use new Toast atoms
+│       ├── Services/                       # Application services
+│       │   ├── UIStateService.cs          # NEW: Client UI state
+│       │   ├── UserPreferencesService.cs  # NEW: Preferences business logic
+│       │   └── ToastService.cs            # UPDATE: Use preferences
+│       ├── Models/                         # View models
+│       │   └── ToastNotification.cs       # UPDATE: From data-model.md
+│       ├── Styles/
+│       │   └── app.css                    # UPDATE: Add theme CSS variables
+│       ├── wwwroot/
+│       │   └── css/
+│       │       └── app.css                # Built Tailwind CSS (generated)
+│       └── tailwind.config.js             # UPDATE: Add dark mode, theme colors
+├── src/TradingBot.Core/
+│   ├── Entities/
+│   │   └── UserPreferences.cs             # NEW: From data-model.md
+│   ├── ValueObjects/
+│   │   └── Theme.cs                       # NEW: SmartEnum
+│   ├── Interfaces/
+│   │   ├── IUserPreferencesRepository.cs  # NEW
+│   │   └── IUserPreferencesService.cs     # NEW
+│   └── Validators/
+│       └── UserPreferencesValidator.cs    # NEW
+└── src/TradingBot.Infrastructure/
+    ├── Persistence/
+    │   ├── Configurations/
+    │   │   └── UserPreferencesConfiguration.cs  # NEW: EF config
+    │   └── Repositories/
+    │       └── UserPreferencesRepository.cs     # NEW
+    └── Services/
+        └── UserPreferencesService.cs            # NEW: Implementation
 ```
 
-### 2. Update Tailwind Configuration
+---
 
-**File**: `src/TradingBot.Web/tailwind.config.js`
+## Setup Steps
+
+### 1. Branch Setup
+
+```bash
+# Ensure you're on the feature branch
+git checkout 003-ux-ui-enhancement
+
+# Pull latest changes
+git pull origin 003-ux-ui-enhancement
+
+# If starting fresh, create from main
+git checkout -b 003-ux-ui-enhancement main
+```
+
+### 2. Install Dependencies
+
+```bash
+# Navigate to Web project
+cd src/TradingBot.Web
+
+# Install npm packages (Tailwind CSS tooling)
+npm install
+
+# Restore .NET packages
+dotnet restore
+```
+
+### 3. Tailwind CSS Configuration
+
+The Web project already has Tailwind configured. You'll need to update the config for dark mode support:
+
+**Update `src/TradingBot.Web/tailwind.config.js`**:
 
 ```javascript
+/** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class', // Enable class-based dark mode
   content: [
-    './Components/**/*.{razor,html,cs}',
-    './Pages/**/*.{razor,html,cs}'
+    './Components/**/*.{razor,html,cshtml}',
+    './Pages/**/*.{razor,html,cshtml}'
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        // Custom color palette using CSS variables
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        primary: 'rgb(var(--color-primary) / <alpha-value>)',
+        success: 'rgb(var(--color-success) / <alpha-value>)',
+        warning: 'rgb(var(--color-warning) / <alpha-value>)',
+        danger: 'rgb(var(--color-danger) / <alpha-value>)',
+      },
+      // Smooth transitions for theme switching
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      }
+    },
   },
-  plugins: [
-    require('daisyui'),
-  ],
-  daisyui: {
-    themes: ["light", "dark"],
-  },
+  plugins: [],
 }
 ```
 
-### 3. Create Database Migration
+**Update `src/TradingBot.Web/Styles/app.css`**:
 
-```bash
-cd src/TradingBot.Infrastructure
-dotnet ef migrations add AddUserPreferences --startup-project ../TradingBot.Web
-dotnet ef database update --startup-project ../TradingBot.Web
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme CSS Variables */
+@layer base {
+  :root {
+    /* Light theme (default) */
+    --color-background: 255 255 255;
+    --color-foreground: 0 0 0;
+    --color-primary: 59 130 246;      /* blue-500 */
+    --color-success: 34 197 94;       /* green-500 */
+    --color-warning: 234 179 8;       /* yellow-500 */
+    --color-danger: 239 68 68;        /* red-500 */
+  }
+
+  .dark {
+    /* Dark theme */
+    --color-background: 17 24 39;     /* gray-900 */
+    --color-foreground: 243 244 246;  /* gray-100 */
+    --color-primary: 96 165 250;      /* blue-400 */
+    --color-success: 74 222 128;      /* green-400 */
+    --color-warning: 250 204 21;      /* yellow-400 */
+    --color-danger: 248 113 113;      /* red-400 */
+  }
+
+  /* Smooth theme transitions */
+  * {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* Custom component styles (if needed beyond Tailwind utilities) */
+@layer components {
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .toast-slide-in {
+    animation: slideInRight 0.3s ease-out;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
 ```
 
-### 4. Run the Application
+### 4. Build Tailwind CSS
 
 ```bash
-cd src/TradingBot.Web
-dotnet run
+# From src/TradingBot.Web directory
+npm run css:build
+
+# For development with watch mode (optional)
+npm run css:watch
 ```
 
-Navigate to: `https://localhost:5001`
+### 5. Database Migration
+
+Create and apply the migration for UserPreferences:
+
+```bash
+# From repository root
+cd /Users/phmatray/Repositories/github-phm/TradingBot
+
+# Create migration
+dotnet ef migrations add AddUserPreferences \
+  --project src/TradingBot.Infrastructure \
+  --startup-project src/TradingBot.Web
+
+# Apply migration
+dotnet ef database update \
+  --project src/TradingBot.Infrastructure \
+  --startup-project src/TradingBot.Web
+```
+
+**Expected Migration File** (auto-generated):
+```csharp
+public partial class AddUserPreferences : Migration
+{
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.CreateTable(
+            name: "UserPreferences",
+            columns: table => new
+            {
+                Id = table.Column<int>(nullable: false)
+                    .Annotation("Sqlite:Autoincrement", true),
+                UserId = table.Column<string>(maxLength: 100, nullable: false, defaultValue: "default"),
+                Theme = table.Column<string>(maxLength: 20, nullable: false, defaultValue: "Light"),
+                DashboardRefreshInterval = table.Column<int>(nullable: false, defaultValue: 5),
+                NotificationDuration = table.Column<int>(nullable: false, defaultValue: 5),
+                ShowSuccessNotifications = table.Column<bool>(nullable: false, defaultValue: true),
+                ShowErrorNotifications = table.Column<bool>(nullable: false, defaultValue: true),
+                ShowInfoNotifications = table.Column<bool>(nullable: false, defaultValue: true),
+                ShowWarningNotifications = table.Column<bool>(nullable: false, defaultValue: true),
+                CustomSettings = table.Column<string>(type: "TEXT", nullable: true),
+                CreatedAt = table.Column<DateTime>(nullable: false),
+                UpdatedAt = table.Column<DateTime>(nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_UserPreferences", x => x.Id);
+            });
+
+        migrationBuilder.CreateIndex(
+            name: "IX_UserPreferences_UserId",
+            table: "UserPreferences",
+            column: "UserId",
+            unique: true);
+
+        // Seed default preferences
+        migrationBuilder.InsertData(
+            table: "UserPreferences",
+            columns: new[] { "UserId", "Theme", "DashboardRefreshInterval", "NotificationDuration", "CreatedAt", "UpdatedAt" },
+            values: new object[] { "default", "Light", 5, 5, DateTime.UtcNow, DateTime.UtcNow });
+    }
+
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(name: "UserPreferences");
+    }
+}
+```
+
+### 6. Dependency Injection Setup
+
+**Update `src/TradingBot.Web/Program.cs`**:
+
+```csharp
+// Add new services
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
+builder.Services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
+builder.Services.AddScoped<UIStateService>();
+builder.Services.AddScoped<ToastService>();
+```
+
+---
 
 ## Development Workflow
 
-### Phase 1: Core Entities & Services (Day 1)
+### Component Development Pattern
 
-#### Step 1: Create UserPreferences Entity
+Follow the **Atomic Design** hierarchy when creating new components:
 
-**File**: `src/TradingBot.Core/Models/UserPreferences.cs`
+#### 1. Atoms (Basic Building Blocks)
 
-```csharp
-namespace TradingBot.Core.Models;
-
-public class UserPreferences
-{
-    public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public string Theme { get; set; } = "light";
-    public int DashboardRefreshInterval { get; set; } = 10;
-    public string NotificationTypesEnabled { get; set; } = "{\"success\":true,\"error\":true,\"info\":true,\"warning\":true}";
-    public int NotificationDuration { get; set; } = 5;
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-}
-```
-
-#### Step 2: Create Repository Interface
-
-**File**: `src/TradingBot.Core/Interfaces/IUserPreferencesRepository.cs`
-
-```csharp
-namespace TradingBot.Core.Interfaces;
-
-public interface IUserPreferencesRepository
-{
-    Task<UserPreferences?> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
-    Task<UserPreferences> CreateAsync(UserPreferences preferences, CancellationToken cancellationToken = default);
-    Task<UserPreferences> UpdateAsync(UserPreferences preferences, CancellationToken cancellationToken = default);
-    Task<UserPreferences> GetOrCreateDefaultAsync(string userId, CancellationToken cancellationToken = default);
-}
-```
-
-#### Step 3: Implement Repository
-
-**File**: `src/TradingBot.Infrastructure/Persistence/Repositories/UserPreferencesRepository.cs`
-
-See `data-model.md` for complete implementation.
-
-#### Step 4: Configure Entity Framework
-
-**File**: `src/TradingBot.Infrastructure/Persistence/Configurations/UserPreferencesConfiguration.cs`
-
-See `data-model.md` for complete configuration.
-
-**Register in DbContext**:
-
-```csharp
-// In TradingBotDbContext.cs
-public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
-
-protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    base.OnModelCreating(modelBuilder);
-    modelBuilder.ApplyConfiguration(new UserPreferencesConfiguration());
-}
-```
-
-### Phase 2: Theme Service (Day 2)
-
-#### Step 1: Create Theme Service
-
-**File**: `src/TradingBot.Web/Services/ThemeService.cs`
-
-```csharp
-namespace TradingBot.Web.Services;
-
-public class ThemeService : IThemeService
-{
-    private readonly IJSRuntime _jsRuntime;
-    private readonly IUserPreferencesRepository _preferencesRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public ThemeService(
-        IJSRuntime jsRuntime,
-        IUserPreferencesRepository preferencesRepository,
-        IHttpContextAccessor httpContextAccessor)
-    {
-        _jsRuntime = jsRuntime;
-        _preferencesRepository = preferencesRepository;
-        _httpContextAccessor = httpContextAccessor;
-    }
-
-    public async Task LoadUserThemeAsync()
-    {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return;
-
-        var preferences = await _preferencesRepository.GetOrCreateDefaultAsync(userId);
-        await SetThemeAsync(preferences.Theme);
-    }
-
-    public async Task SetThemeAsync(string theme)
-    {
-        await _jsRuntime.InvokeVoidAsync("setTheme", theme);
-    }
-}
-```
-
-#### Step 2: Add JavaScript Theme Switcher
-
-**File**: `src/TradingBot.Web/wwwroot/js/theme-switcher.js`
-
-```javascript
-window.setTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-};
-
-window.getTheme = () => {
-    return document.documentElement.getAttribute('data-theme') || 'light';
-};
-```
-
-### Phase 3: Left Sidebar Navigation (Day 3)
-
-#### Step 1: Create LeftSidebar Component
-
-**File**: `src/TradingBot.Web/Components/Layout/LeftSidebar.razor`
+Example: `Components/Atoms/Button.razor`
 
 ```razor
+@* Simple, reusable button component *@
+<button type="@Type"
+        class="@GetClasses()"
+        disabled="@IsDisabled"
+        @onclick="OnClick">
+    @ChildContent
+</button>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Type { get; set; } = "button";
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private string GetClasses() => $"btn btn-{Variant.ToString().ToLower()}";
+}
+
+public enum ButtonVariant { Primary, Secondary, Danger, Ghost }
+```
+
+#### 2. Molecules (Component Combinations)
+
+Example: `Components/Molecules/FormField.razor`
+
+```razor
+@* Combines label, input, and error message *@
+<div class="form-field">
+    <label for="@InputId" class="block text-sm font-medium mb-1">
+        @Label
+    </label>
+    <Input Id="@InputId"
+           @bind-Value="Value"
+           Type="@InputType"
+           Placeholder="@Placeholder"
+           Class="@InputClass" />
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p class="text-red-600 text-sm mt-1">@ErrorMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string InputType { get; set; } = "text";
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+
+    private string InputId => $"input-{Guid.NewGuid()}";
+    private string InputClass => !string.IsNullOrEmpty(ErrorMessage) ? "border-red-500" : "";
+}
+```
+
+#### 3. Organisms (Complex Components)
+
+Example: `Components/Organisms/NavigationSidebar.razor`
+
+```razor
+@inject UIStateService UIState
 @inject NavigationManager Navigation
+@implements IDisposable
 
-<aside class="@SidebarClass">
-    <nav class="menu p-4 w-64 min-h-screen bg-base-200">
-        <button @onclick="ToggleSidebar"
-                class="btn btn-ghost btn-sm mb-4"
-                aria-label="Toggle sidebar">
-            <span class="text-xl">☰</span>
+<aside class="@SidebarClasses">
+    <div class="flex items-center justify-between p-4">
+        @if (!UIState.SidebarCollapsed)
+        {
+            <h1 class="text-xl font-bold">TradingBot</h1>
+        }
+        <button @onclick="UIState.ToggleSidebar" class="p-2">
+            <Icon Name="@ToggleIcon" Class="w-6 h-6" />
         </button>
+    </div>
 
-        <ul class="space-y-2">
-            <li>
-                <a href="/" class="@GetMenuItemClass("/")">
-                    <span class="icon">📊</span>
-                    @if (!IsCollapsed) { <span>Dashboard</span> }
-                </a>
-            </li>
-            <li>
-                <a href="/portfolio" class="@GetMenuItemClass("/portfolio")">
-                    <span class="icon">💼</span>
-                    @if (!IsCollapsed) { <span>Portfolio</span> }
-                </a>
-            </li>
-            <!-- Add remaining menu items -->
-        </ul>
+    <nav class="mt-4">
+        @foreach (var item in MenuItems)
+        {
+            <MenuItem Href="@item.Href"
+                      Icon="@item.Icon"
+                      Label="@item.Label"
+                      IsCollapsed="@UIState.SidebarCollapsed"
+                      IsActive="@IsActive(item.Href)" />
+        }
     </nav>
 </aside>
 
 @code {
-    [Parameter] public bool IsCollapsed { get; set; }
-    [Parameter] public EventCallback<bool> IsCollapsedChanged { get; set; }
-
-    private string SidebarClass => IsCollapsed ? "sidebar-collapsed" : "sidebar-expanded";
-
-    private void ToggleSidebar()
-    {
-        IsCollapsed = !IsCollapsed;
-        IsCollapsedChanged.InvokeAsync(IsCollapsed);
-    }
-
-    private string GetMenuItemClass(string href)
-    {
-        var currentPath = new Uri(Navigation.Uri).PathAndQuery;
-        return currentPath == href ? "menu-item active" : "menu-item";
-    }
+    // Component implementation...
 }
 ```
 
-#### Step 2: Integrate into MainLayout
+### Icon Setup
 
-**File**: `src/TradingBot.Web/Components/Layout/MainLayout.razor`
+Download Heroicons SVG files or integrate via inline SVG in the Icon component:
+
+**`Components/Atoms/Icon.razor`**:
 
 ```razor
-@inherits LayoutComponentBase
+@code {
+    [Parameter] public IconName Name { get; set; }
+    [Parameter] public string Class { get; set; } = "w-6 h-6";
+}
 
-<div class="flex min-h-screen">
-    <LeftSidebar IsCollapsed="@_sidebarCollapsed"
-                 IsCollapsedChanged="@OnSidebarCollapsedChanged" />
-
-    <main class="flex-1 p-6">
-        @Body
-    </main>
-</div>
+<svg class="@Class" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    @(GetIconPath(Name))
+</svg>
 
 @code {
-    private bool _sidebarCollapsed = false;
-
-    private void OnSidebarCollapsedChanged(bool isCollapsed)
+    private MarkupString GetIconPath(IconName name) => name switch
     {
-        _sidebarCollapsed = isCollapsed;
-        StateHasChanged();
-    }
+        IconName.Home => (MarkupString)@"<path stroke-linecap=""round"" stroke-linejoin=""round"" d=""M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"" />",
+        IconName.Cog => (MarkupString)@"<path stroke-linecap=""round"" stroke-linejoin=""round"" d=""M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"" /><path stroke-linecap=""round"" stroke-linejoin=""round"" d=""M15 12a3 3 0 11-6 0 3 3 0 016 0z"" />",
+        // Add more icons as needed...
+        _ => (MarkupString)""
+    };
 }
-```
 
-### Phase 4: Settings Page (Day 4-5)
-
-#### Step 1: Create Settings Components
-
-See `plan.md` Project Structure for complete component list.
-
-#### Step 2: Create Preferences Service
-
-**File**: `src/TradingBot.Web/Services/PreferencesService.cs`
-
-```csharp
-public class PreferencesService
+public enum IconName
 {
-    private readonly IUserPreferencesRepository _repository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IMemoryCache _cache;
-
-    // Load, Save, Reset methods...
+    Home,
+    Cog,
+    ChartBar,
+    Briefcase,
+    // ... more icons
 }
 ```
 
-### Phase 5: Testing (Day 6)
+### Testing Components
 
-#### Unit Tests
-
-```bash
-cd tests/TradingBot.Web.Tests
-dotnet test
-```
-
-**Example Component Test**:
+Use bUnit for Blazor component testing:
 
 ```csharp
-public class LeftSidebarTests : TestContext
+// tests/TradingBot.Web.Tests/Components/Atoms/ButtonTests.cs
+public class ButtonTests : TestContext
 {
     [Fact]
-    public void LeftSidebar_WhenCollapsed_ShowsIconsOnly()
+    public void Button_RendersWithCorrectClasses()
     {
         // Arrange
-        var cut = RenderComponent<LeftSidebar>(parameters => parameters
-            .Add(p => p.IsCollapsed, true));
+        var cut = RenderComponent<Button>(parameters => parameters
+            .Add(p => p.Variant, ButtonVariant.Primary)
+            .Add(p => p.ChildContent, "Click Me"));
 
         // Act
-        var menuItems = cut.FindAll(".menu-item span:not(.icon)");
+        var button = cut.Find("button");
 
         // Assert
-        menuItems.Should().BeEmpty();
+        button.ClassList.Should().Contain("btn-primary");
+        button.TextContent.Should().Be("Click Me");
+    }
+
+    [Fact]
+    public async Task Button_InvokesOnClick()
+    {
+        // Arrange
+        var clicked = false;
+        var cut = RenderComponent<Button>(parameters => parameters
+            .Add(p => p.OnClick, EventCallback.Factory.Create<MouseEventArgs>(this, () => clicked = true))
+            .Add(p => p.ChildContent, "Click Me"));
+
+        // Act
+        await cut.Find("button").ClickAsync(new MouseEventArgs());
+
+        // Assert
+        clicked.Should().BeTrue();
     }
 }
 ```
 
-#### Integration Tests
+---
 
-```csharp
-[Fact]
-public async Task UserPreferences_SaveAndLoad_PersistsCorrectly()
-{
-    // Arrange
-    var preferences = new UserPreferences { /* ... */ };
+## Running the Application
 
-    // Act
-    await _repository.CreateAsync(preferences);
-    var loaded = await _repository.GetByUserIdAsync(preferences.UserId);
-
-    // Assert
-    loaded.Should().NotBeNull();
-    loaded!.Theme.Should().Be(preferences.Theme);
-}
-```
-
-## Common Commands
-
-### Database Operations
+### Development Server
 
 ```bash
-# Create migration
-dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
+# From repository root
+dotnet run --project src/TradingBot.Web
 
-# Apply migration
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
-
-# Rollback migration
-dotnet ef database update PreviousMigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
-
-# Remove last migration (if not applied)
-dotnet ef migrations remove --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
+# Or with watch mode (auto-reload on changes)
+dotnet watch --project src/TradingBot.Web
 ```
 
-### CSS Build
+Navigate to: `http://localhost:5000`
+
+### Build for Production
 
 ```bash
-# Development build (watch mode)
+# Build Tailwind CSS for production (minified)
 cd src/TradingBot.Web
-npm run css:watch
+npm run css:build -- --minify
 
-# Production build
-npm run css:build
+# Build the .NET application
+cd ../..
+dotnet build --configuration Release
 ```
 
-### Testing
-
-```bash
-# Run all tests
-dotnet test
-
-# Run specific test project
-dotnet test tests/TradingBot.Web.Tests
-
-# Run tests with coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# Run specific test
-dotnet test --filter "FullyQualifiedName~LeftSidebarTests"
-```
-
-### Code Quality
-
-```bash
-# Run analyzers
-dotnet build /p:RunAnalyzers=true
-
-# Format code
-dotnet format
-```
+---
 
 ## Debugging Tips
 
-### Blazor Component Debugging
+### Blazor Server Debugging
 
-1. Use browser DevTools (F12)
-2. Check Blazor Server reconnection in Console tab
-3. Inspect SignalR network traffic for real-time updates
-4. Use `@key` directive to identify component re-rendering issues
+1. **Browser DevTools**: Use F12 to inspect elements and check Tailwind classes
+2. **Blazor DevTools**: Install Blazor WASM DevTools browser extension
+3. **Hot Reload**: Use `dotnet watch` for instant feedback on changes
+4. **SignalR Connection**: Monitor browser console for WebSocket errors
 
-### Database Debugging
+### Common Issues
+
+**Issue**: Tailwind classes not applying
+- **Solution**: Ensure `npm run css:build` has been run and `wwwroot/css/app.css` exists
+
+**Issue**: Dark mode not working
+- **Solution**: Check that `class="dark"` is applied to root element in `ThemeProvider.razor`
+
+**Issue**: Database migration fails
+- **Solution**: Ensure `TradingBotDbContext` has been updated with `DbSet<UserPreferences>`
+
+**Issue**: Services not injected
+- **Solution**: Verify services are registered in `Program.cs` with correct lifetime
+
+---
+
+## Code Quality
+
+### Before Committing
 
 ```bash
-# Connect to SQLite database
-sqlite3 tradingbot.db
+# Format code
+dotnet format
 
-# View UserPreferences table
-.schema UserPreferences
-SELECT * FROM UserPreferences;
+# Run analyzers
+dotnet build /p:RunAnalyzers=true
+
+# Run tests
+dotnet test
+
+# Check Tailwind build
+npm run css:build
 ```
 
-### CSS Debugging
+### StyleCop Compliance
 
-- Use browser DevTools Elements tab to inspect applied classes
-- Check if Tailwind/DaisyUI classes are being purged incorrectly
-- Verify `tailwind.config.js` content paths include all Razor files
-
-## Performance Optimization
-
-### Caching User Preferences
+All C# files must have copyright headers:
 
 ```csharp
-// In PreferencesService.cs
-public async Task<UserPreferences> GetPreferencesAsync(string userId)
+// <copyright file="FileName.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+```
+
+Use the following script to add headers to new files:
+
+```bash
+# Add copyright headers to all .cs files without them
+find src -name "*.cs" -exec sed -i '' '1i\
+// <copyright file="$(basename {})" company="TradingBot">\
+// Copyright (c) TradingBot. All rights reserved.\
+// </copyright>\
+' {} \;
+```
+
+---
+
+## Documentation
+
+### Component Documentation
+
+Document each component with XML comments:
+
+```csharp
+/// <summary>
+/// A reusable button component with variant support.
+/// </summary>
+/// <example>
+/// <code>
+/// &lt;Button Variant="ButtonVariant.Primary" OnClick="HandleClick"&gt;
+///     Click Me
+/// &lt;/Button&gt;
+/// </code>
+/// </example>
+public class Button : ComponentBase
 {
-    var cacheKey = $"preferences_{userId}";
-
-    if (!_cache.TryGetValue(cacheKey, out UserPreferences? preferences))
-    {
-        preferences = await _repository.GetOrCreateDefaultAsync(userId);
-
-        var cacheOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
-        _cache.Set(cacheKey, preferences, cacheOptions);
-    }
-
-    return preferences!;
+    /// <summary>
+    /// Gets or sets the button variant (Primary, Secondary, Danger, Ghost).
+    /// </summary>
+    [Parameter]
+    public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
 }
 ```
 
-### Debouncing Settings Saves
-
-```razor
-@code {
-    private System.Timers.Timer? _saveTimer;
-
-    private void OnSettingChanged()
-    {
-        _saveTimer?.Stop();
-        _saveTimer = new System.Timers.Timer(1000); // 1 second debounce
-        _saveTimer.Elapsed += async (s, e) => await SavePreferencesAsync();
-        _saveTimer.AutoReset = false;
-        _saveTimer.Start();
-    }
-}
-```
-
-## Deployment Checklist
-
-- [ ] Run full test suite (`dotnet test`)
-- [ ] Apply all migrations (`dotnet ef database update`)
-- [ ] Build CSS for production (`npm run css:build`)
-- [ ] Run code analyzers (`dotnet build /p:RunAnalyzers=true`)
-- [ ] Test keyboard navigation on all pages
-- [ ] Test screen reader compatibility (NVDA/VoiceOver)
-- [ ] Verify theme switching works correctly
-- [ ] Test settings persistence across sessions
-- [ ] Check performance metrics (< 1s settings save, < 100ms visual feedback)
-- [ ] Review security (input validation, authorization)
-
-## Troubleshooting
-
-### Issue: Theme not applying
-
-**Solution**: Check browser console for JavaScript errors, verify `theme-switcher.js` is loaded
-
-### Issue: Sidebar not collapsing
-
-**Solution**: Inspect CSS classes, check if Tailwind transitions are working
-
-### Issue: Settings not saving
-
-**Solution**: Check database connection, verify UserPreferences table exists, check logs for errors
-
-### Issue: Keyboard shortcuts not working
-
-**Solution**: Verify JSInterop calls, check for conflicting browser shortcuts, ensure event listeners registered
+---
 
 ## Next Steps
 
-After completing this feature:
-1. Run `/speckit.tasks` to generate detailed implementation tasks
-2. Review generated `tasks.md` for step-by-step implementation plan
-3. Begin implementation following the phased approach in `plan.md`
-4. Use this quickstart guide as reference during development
+1. **Implement Core Entities**: Create `UserPreferences` entity and SmartEnum `Theme`
+2. **Build Atomic Components**: Start with Button, Input, Icon atoms
+3. **Create Services**: Implement `UIStateService` and `UserPreferencesService`
+4. **Build Navigation**: Implement `NavigationSidebar` organism
+5. **Settings Page**: Create settings form with theme toggle
+6. **Test**: Write bUnit tests for all components
+
+---
 
 ## Resources
 
-- [DaisyUI Documentation](https://daisyui.com/)
-- [Blazor Server Documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [bUnit Documentation](https://bunit.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Heroicons](https://heroicons.com/)
+- [Blazor Documentation](https://learn.microsoft.com/en-us/aspnet/core/blazor)
+- [bUnit Testing](https://bunit.dev/)
 - [EF Core Migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+
+---
+
+**Ready to Start**: You now have everything needed to begin implementation. Follow the task list generated by `/speckit.tasks` for step-by-step execution.

@@ -1,32 +1,40 @@
 # Tasks: UX/UI Enhancement - Navigation & Settings
 
 **Input**: Design documents from `/specs/003-ux-ui-enhancement/`
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/user-preferences-api.yaml
 
-**Tests**: Test tasks are included throughout based on constitution requirements (80% coverage minimum, 100% for critical paths).
+**Tests**: Tests are included per project constitution requirement (80% coverage minimum, 100% for critical paths).
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[Story]**: Which user story this task belongs to (US1-US6)
 - Include exact file paths in descriptions
 
 ## Path Conventions
 
-- **Project Structure**: Enhancing existing `src/TradingBot.Web/`, `src/TradingBot.Core/`, `src/TradingBot.Infrastructure/`
+This is a Blazor Server web application with clean architecture:
+- **Web**: `src/TradingBot.Web/` (Blazor components, pages, services)
+- **Core**: `src/TradingBot.Core/` (domain entities, interfaces, validators)
+- **Infrastructure**: `src/TradingBot.Infrastructure/` (repositories, EF config, migrations)
 - **Tests**: `tests/TradingBot.Web.Tests/`, `tests/TradingBot.Core.Tests/`, `tests/TradingBot.Infrastructure.Tests/`
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Project initialization, DaisyUI integration, and database preparation
+**Purpose**: Project initialization and Tailwind/Heroicons configuration
 
-- [ ] T001 Install DaisyUI via npm in src/TradingBot.Web: `npm install daisyui@latest`
-- [ ] T002 [P] Update Tailwind configuration in src/TradingBot.Web/tailwind.config.js to include DaisyUI plugin and themes
-- [ ] T003 [P] Create Styles directory structure: src/TradingBot.Web/Styles/components/, src/TradingBot.Web/Styles/utilities/
-- [ ] T004 [P] Add theme CSS files: src/TradingBot.Web/wwwroot/css/themes/light.css and dark.css
-- [ ] T005 [P] Create JavaScript utilities: src/TradingBot.Web/wwwroot/js/theme-switcher.js and keyboard-shortcuts.js
+- [ ] T001 Update tailwind.config.js to enable class-based dark mode and add custom theme colors
+- [ ] T002 Update src/TradingBot.Web/Styles/app.css with CSS variables for light/dark themes
+- [ ] T003 [P] Run npm install in src/TradingBot.Web to ensure Tailwind dependencies are current
+- [ ] T004 [P] Build Tailwind CSS with `npm run css:build` to generate wwwroot/css/app.css
+- [ ] T005 [P] Create src/TradingBot.Web/Components/Atoms/ directory structure
+- [ ] T006 [P] Create src/TradingBot.Web/Components/Molecules/ directory structure
+- [ ] T007 [P] Create src/TradingBot.Web/Components/Organisms/ directory structure
+- [ ] T008 [P] Create tests/TradingBot.Web.Tests/ project and add bUnit package reference
 
 ---
 
@@ -38,42 +46,33 @@
 
 ### Database & Domain Layer
 
-- [ ] T006 Create UserPreferences entity in src/TradingBot.Core/Models/UserPreferences.cs with all fields per data-model.md
-- [ ] T007 [P] Create NotificationTypesEnabled value object in src/TradingBot.Core/ValueObjects/NotificationTypesEnabled.cs
-- [ ] T008 [P] Create IUserPreferencesRepository interface in src/TradingBot.Core/Interfaces/IUserPreferencesRepository.cs
-- [ ] T009 Create UserPreferencesConfiguration for EF Core in src/TradingBot.Infrastructure/Persistence/Configurations/UserPreferencesConfiguration.cs
-- [ ] T010 Implement UserPreferencesRepository in src/TradingBot.Infrastructure/Persistence/Repositories/UserPreferencesRepository.cs
-- [ ] T011 Add UserPreferences DbSet to TradingBotDbContext in src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs
-- [ ] T012 Create EF Core migration: `dotnet ef migrations add AddUserPreferences --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
-- [ ] T013 Apply migration: `dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
+- [ ] T009 Create src/TradingBot.Core/ValueObjects/Theme.cs SmartEnum (Light, Dark)
+- [ ] T010 Create src/TradingBot.Core/Entities/UserPreferences.cs entity per data-model.md
+- [ ] T011 Create src/TradingBot.Core/Interfaces/IUserPreferencesRepository.cs interface
+- [ ] T012 [P] Create src/TradingBot.Core/Interfaces/IUserPreferencesService.cs interface
+- [ ] T013 [P] Create src/TradingBot.Core/Validators/UserPreferencesValidator.cs with range validation
+- [ ] T014 Create src/TradingBot.Infrastructure/Persistence/Configurations/UserPreferencesConfiguration.cs for EF Core
+- [ ] T015 Create src/TradingBot.Infrastructure/Persistence/Repositories/UserPreferencesRepository.cs implementation
+- [ ] T016 Create src/TradingBot.Infrastructure/Services/UserPreferencesService.cs implementation
+- [ ] T017 Create EF migration: `dotnet ef migrations add AddUserPreferences --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
+- [ ] T018 Apply migration: `dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
+- [ ] T019 Update src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs to add DbSet<UserPreferences>
+- [ ] T020 Register IUserPreferencesRepository and IUserPreferencesService in src/TradingBot.Web/Program.cs
 
-### Services Layer
+### Client-Side Services
 
-- [ ] T014 [P] Create IThemeService interface in src/TradingBot.Web/Services/IThemeService.cs
-- [ ] T015 [P] Create INotificationService interface in src/TradingBot.Web/Services/INotificationService.cs
-- [ ] T016 [P] Create IKeyboardShortcutService interface in src/TradingBot.Web/Services/IKeyboardShortcutService.cs
-- [ ] T017 Implement ThemeService in src/TradingBot.Web/Services/ThemeService.cs with JSInterop for theme switching
-- [ ] T018 Implement NotificationService in src/TradingBot.Web/Services/NotificationService.cs with observable collection
-- [ ] T019 Implement KeyboardShortcutService in src/TradingBot.Web/Services/KeyboardShortcutService.cs with JSInterop
-- [ ] T020 Implement PreferencesService in src/TradingBot.Web/Components/Settings/PreferencesService.cs for CRUD operations
-- [ ] T021 Register all services in Program.cs dependency injection container
-
-### Shared Components
-
-- [ ] T022 [P] Create Toast.razor component in src/TradingBot.Web/Components/Shared/Toast.razor with DaisyUI alert styling
-- [ ] T023 [P] Create Modal.razor component in src/TradingBot.Web/Components/Shared/Modal.razor with focus trap
-- [ ] T024 [P] Create Tooltip.razor component in src/TradingBot.Web/Components/Shared/Tooltip.razor with DaisyUI tooltip
-- [ ] T025 [P] Create LoadingIndicator.razor component in src/TradingBot.Web/Components/Shared/LoadingIndicator.razor
-- [ ] T026 [P] Create HelpIcon.razor component in src/TradingBot.Web/Components/Shared/HelpIcon.razor with tooltip integration
+- [ ] T021 [P] Create src/TradingBot.Web/Services/UIStateService.cs for sidebar collapse state
+- [ ] T022 [P] Create src/TradingBot.Web/Services/NavigationService.cs for active route detection
+- [ ] T023 [P] Create src/TradingBot.Web/Models/ToastNotification.cs per data-model.md
+- [ ] T024 [P] Create src/TradingBot.Web/Services/ToastService.cs for notification management
+- [ ] T025 Register UIStateService, NavigationService, ToastService in src/TradingBot.Web/Program.cs
 
 ### Foundational Tests
 
-- [ ] T027 [P] Unit test for UserPreferences entity validation in tests/TradingBot.Core.Tests/Models/UserPreferencesTests.cs
-- [ ] T028 [P] Repository tests for UserPreferencesRepository in tests/TradingBot.Infrastructure.Tests/Repositories/UserPreferencesRepositoryTests.cs
-- [ ] T029 [P] Service tests for ThemeService in tests/TradingBot.Web.Tests/Services/ThemeServiceTests.cs
-- [ ] T030 [P] Service tests for NotificationService in tests/TradingBot.Web.Tests/Services/NotificationServiceTests.cs
-- [ ] T031 [P] Component tests for Toast in tests/TradingBot.Web.Tests/Components/Shared/ToastTests.cs
-- [ ] T032 [P] Component tests for Modal accessibility in tests/TradingBot.Web.Tests/Components/Shared/ModalTests.cs
+- [ ] T026 [P] Write tests/TradingBot.Core.Tests/Validators/UserPreferencesValidatorTests.cs (test range validation 1-300, 2-10)
+- [ ] T027 [P] Write tests/TradingBot.Infrastructure.Tests/Repositories/UserPreferencesRepositoryTests.cs (CRUD operations)
+- [ ] T028 [P] Write tests/TradingBot.Infrastructure.Tests/Services/UserPreferencesServiceTests.cs (100% coverage - critical path)
+- [ ] T029 [P] Write tests/TradingBot.Web.Tests/Services/UIStateServiceTests.cs (toggle sidebar state)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -81,239 +80,252 @@
 
 ## Phase 3: User Story 1 - Persistent Navigation Menu (Priority: P1) 🎯 MVP
 
-**Goal**: Implement left sidebar navigation menu that allows users to navigate between all main sections with persistent visibility and collapsible state
+**Goal**: Implement a persistent left sidebar navigation with collapsible icon-only mode, showing all main sections with active page highlighting.
 
-**Independent Test**: Navigate through all main sections (Dashboard, Portfolio, Performance, Strategies, Risk Settings, Backtesting) using the left sidebar menu. Verify current page is highlighted. Collapse sidebar and verify icon-only mode works. Expand sidebar and verify labels return.
+**Independent Test**: Navigate through all main sections (Dashboard, Portfolio, Performance, Strategies, Risk Settings, Backtesting) using the menu. Verify current page is highlighted. Collapse sidebar to icon-only mode and expand. Confirm navigation works from any page.
 
-### Tests for User Story 1
+### Atomic Components for US1
 
-- [ ] T033 [P] [US1] Component test for LeftSidebar rendering in tests/TradingBot.Web.Tests/Components/Layout/LeftSidebarTests.cs
-- [ ] T034 [P] [US1] Component test for LeftSidebar collapse/expand behavior in tests/TradingBot.Web.Tests/Components/Layout/LeftSidebarTests.cs
-- [ ] T035 [P] [US1] Component test for LeftSidebar active page highlighting in tests/TradingBot.Web.Tests/Components/Layout/LeftSidebarTests.cs
+- [ ] T030 [P] [US1] Create src/TradingBot.Web/Components/Atoms/Icon.razor with Heroicons SVG support (Home, ChartBar, Briefcase, Cog, Beaker, ChartLine, Bars3, XMark, ChevronLeft, ChevronRight)
+- [ ] T031 [P] [US1] Write tests/TradingBot.Web.Tests/Components/Atoms/IconTests.cs (renders correct SVG, applies CSS classes)
 
-### Implementation for User Story 1
+### Molecular Components for US1
 
-- [ ] T036 [US1] Create LeftSidebar.razor component in src/TradingBot.Web/Components/Layout/LeftSidebar.razor with DaisyUI drawer component
-- [ ] T037 [US1] Add navigation items (Dashboard, Portfolio, Performance, Strategies, Risk Settings, Backtesting) with icons to LeftSidebar.razor
-- [ ] T038 [US1] Implement collapse/expand toggle logic in LeftSidebar.razor component code
-- [ ] T039 [US1] Add active page highlighting logic using NavigationManager in LeftSidebar.razor
-- [ ] T040 [US1] Create sidebar CSS styles in src/TradingBot.Web/Styles/components/sidebar.css with transitions
-- [ ] T041 [US1] Create TopHeader.razor component in src/TradingBot.Web/Components/Layout/TopHeader.razor for settings access
-- [ ] T042 [US1] Modify MainLayout.razor in src/TradingBot.Web/Components/Layout/MainLayout.razor to integrate LeftSidebar and TopHeader
-- [ ] T043 [US1] Update MainLayout.razor to handle sidebar collapsed state management
-- [ ] T044 [US1] Add responsive behavior for sidebar at minimum 1024px width in sidebar.css
+- [ ] T032 [US1] Create src/TradingBot.Web/Components/Molecules/MenuItem.razor (Icon + Label, supports collapsed mode, active state highlighting)
+- [ ] T033 [US1] Write tests/TradingBot.Web.Tests/Components/Molecules/MenuItemTests.cs (collapsed/expanded states, active highlighting)
 
-**Checkpoint**: At this point, User Story 1 should be fully functional - users can navigate between all sections using the left sidebar
+### Organism Components for US1
+
+- [ ] T034 [US1] Create src/TradingBot.Web/Components/Organisms/NavigationSidebar.razor (uses UIStateService, NavigationService, MenuItem molecules)
+- [ ] T035 [US1] Write tests/TradingBot.Web.Tests/Components/Organisms/NavigationSidebarTests.cs (toggle collapse, navigation, active route detection)
+
+### Layout Integration for US1
+
+- [ ] T036 [US1] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to replace NavMenu with NavigationSidebar
+- [ ] T037 [US1] Add transition classes for sidebar collapse/expand animation in MainLayout
+- [ ] T038 [US1] Adjust main content area margin based on sidebar state (ml-64 expanded, ml-16 collapsed)
+
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Navigation menu is persistent, collapsible, and highlights active page.
 
 ---
 
-## Phase 4: User Story 2 - User Settings & Preferences (Priority: P1)
+## Phase 4: User Story 2 - User Settings & Preferences (Priority: P1) 🎯 MVP
 
-**Goal**: Implement settings page where users can configure theme, dashboard refresh interval, notification preferences, and other display settings with persistence across sessions
+**Goal**: Implement a dedicated settings page where users can configure theme (light/dark), dashboard refresh interval (1-300s), notification duration (2-10s), and notification type toggles. Settings persist across sessions.
 
-**Independent Test**: Access settings page from navigation. Modify theme (light/dark), dashboard refresh interval (1-300s), notification types (success/error/info/warning toggles), and notification duration (2-10s). Click "Save Changes" and verify confirmation. Logout and login again to verify settings persisted.
+**Independent Test**: Access settings page from navigation menu. Change theme from light to dark and verify immediate application. Modify refresh interval to 30 seconds and notification duration to 8 seconds. Toggle off "Info" notifications. Click "Save Changes" and verify confirmation toast. Refresh browser and confirm all settings persisted. Click "Reset to Defaults" and confirm reset with dialog.
 
-### Tests for User Story 2
+### Atomic Components for US2
 
-- [ ] T045 [P] [US2] Component test for SettingsPage rendering in tests/TradingBot.Web.Tests/Components/Settings/SettingsPageTests.cs
-- [ ] T046 [P] [US2] Component test for DisplaySettings in tests/TradingBot.Web.Tests/Components/Settings/DisplaySettingsTests.cs
-- [ ] T047 [P] [US2] Component test for NotificationSettings in tests/TradingBot.Web.Tests/Components/Settings/NotificationSettingsTests.cs
-- [ ] T048 [P] [US2] Service test for PreferencesService CRUD operations in tests/TradingBot.Web.Tests/Services/PreferencesServiceTests.cs
-- [ ] T049 [P] [US2] Integration test for settings persistence in tests/TradingBot.Web.Tests/Integration/SettingsPersistenceTests.cs
+- [ ] T039 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Input.razor (text, number types, with Tailwind styling, ARIA labels)
+- [ ] T040 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Select.razor (dropdown with options, Tailwind styling)
+- [ ] T041 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Toggle.razor (checkbox styled as toggle switch for boolean settings)
+- [ ] T042 [P] [US2] Create src/TradingBot.Web/Components/Atoms/Button.razor (Primary, Secondary, Danger, Ghost variants with Tailwind classes)
+- [ ] T043 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/InputTests.cs (renders, binds value, shows validation errors)
+- [ ] T044 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/SelectTests.cs (renders options, binds value)
+- [ ] T045 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ToggleTests.cs (toggles state, binds value)
+- [ ] T046 [P] [US2] Write tests/TradingBot.Web.Tests/Components/Atoms/ButtonTests.cs (renders variants, invokes onClick)
 
-### Implementation for User Story 2
+### Molecular Components for US2
 
-- [ ] T050 [P] [US2] Create Settings.razor page in src/TradingBot.Web/Pages/Settings.razor with route @page "/settings"
-- [ ] T051 [P] [US2] Create SettingsPage.razor component in src/TradingBot.Web/Components/Settings/SettingsPage.razor as main container
-- [ ] T052 [P] [US2] Create DisplaySettings.razor component in src/TradingBot.Web/Components/Settings/DisplaySettings.razor for theme and refresh interval
-- [ ] T053 [P] [US2] Create NotificationSettings.razor component in src/TradingBot.Web/Components/Settings/NotificationSettings.razor for notification preferences
-- [ ] T054 [US2] Implement theme dropdown with light/dark options in DisplaySettings.razor using DaisyUI select component
-- [ ] T055 [US2] Implement dashboard refresh interval input (1-300 seconds) with validation in DisplaySettings.razor
-- [ ] T056 [US2] Implement notification type toggles (success/error/info/warning) in NotificationSettings.razor
-- [ ] T057 [US2] Implement notification duration input (2-10 seconds) with validation in NotificationSettings.razor
-- [ ] T058 [US2] Add "Save Changes" button with loading state in SettingsPage.razor
-- [ ] T059 [US2] Add "Reset to Defaults" button with confirmation dialog in SettingsPage.razor
-- [ ] T060 [US2] Implement save operation in SettingsPage.razor calling PreferencesService
-- [ ] T061 [US2] Implement reset operation in SettingsPage.razor calling PreferencesService
-- [ ] T062 [US2] Add unsaved changes warning when navigating away from Settings page
-- [ ] T063 [US2] Display success toast notification on settings save using NotificationService
-- [ ] T064 [US2] Display error toast notification on settings save failure using NotificationService
-- [ ] T065 [US2] Load user preferences on SettingsPage initialization from PreferencesService
-- [ ] T066 [US2] Apply theme change immediately on save using ThemeService
+- [ ] T047 [US2] Create src/TradingBot.Web/Components/Molecules/FormField.razor (Label + Input/Select/Toggle + Error message display)
+- [ ] T048 [US2] Write tests/TradingBot.Web.Tests/Components/Molecules/FormFieldTests.cs (renders label, input, error message)
 
-**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - users can navigate AND configure their preferences
+### Organism Components for US2
+
+- [ ] T049 [US2] Create src/TradingBot.Web/Components/Organisms/SettingsForm.razor (EditForm with UserPreferences model, validation, Save/Reset buttons, NavigationLock for unsaved changes)
+- [ ] T050 [US2] Implement theme toggle in SettingsForm (Light/Dark options, immediate application via ThemeProvider)
+- [ ] T051 [US2] Implement dashboard refresh interval input (1-300 range validation, help text)
+- [ ] T052 [US2] Implement notification duration input (2-10 range validation, help text)
+- [ ] T053 [US2] Implement notification type toggles (Success, Error, Info, Warning switches)
+- [ ] T054 [US2] Implement Save Changes button handler (validate, call UserPreferencesService, show success toast)
+- [ ] T055 [US2] Implement Reset to Defaults button with confirmation modal
+- [ ] T056 [US2] Implement NavigationLock to warn on unsaved changes
+- [ ] T057 [US2] Write tests/TradingBot.Web.Tests/Components/Organisms/SettingsFormTests.cs (save, reset, validation, unsaved warning)
+
+### Page Implementation for US2
+
+- [ ] T058 [US2] Create src/TradingBot.Web/Components/Pages/Settings.razor (uses SettingsForm organism, loads preferences from UserPreferencesService)
+- [ ] T059 [US2] Add Settings route (@page "/settings") and add Settings menu item to NavigationSidebar
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Settings page is accessible, settings save/persist, and navigation works.
 
 ---
 
 ## Phase 5: User Story 3 - Enhanced Visual Design & Polish (Priority: P2)
 
-**Goal**: Apply consistent styling, proper spacing, visual feedback (hover states, transitions), loading indicators, success/error notifications, and professional appearance across all pages
+**Goal**: Apply consistent Tailwind-based styling, smooth transitions, loading indicators, success/error toasts, and polished visual feedback across all components.
 
-**Independent Test**: Navigate through all pages and verify consistent spacing, typography, and color scheme. Hover over buttons, links, and menu items to verify visual feedback appears within 100ms. Trigger actions (save settings, close position) and verify loading indicators appear and success notifications display. Trigger errors and verify error messages display with clear messaging.
+**Independent Test**: Navigate through all pages and verify consistent spacing, typography, and color scheme. Hover over buttons and menu items to confirm visual feedback. Submit settings form and verify loading spinner + success toast. Trigger an error (e.g., invalid input) and verify error toast with clear message. Check data tables for alternating row colors and hover states.
 
-### Tests for User Story 3
+### Theme System
 
-- [ ] T067 [P] [US3] Visual regression tests for all pages in tests/TradingBot.Web.Tests/Visual/VisualRegressionTests.cs
-- [ ] T068 [P] [US3] Performance tests for hover feedback timing in tests/TradingBot.Web.Tests/Performance/VisualFeedbackTests.cs
-- [ ] T069 [P] [US3] Component tests for LoadingIndicator in tests/TradingBot.Web.Tests/Components/Shared/LoadingIndicatorTests.cs
+- [ ] T060 [P] [US3] Create src/TradingBot.Web/Components/Organisms/ThemeProvider.razor (wraps content with `dark` class based on UserPreferences.Theme)
+- [ ] T061 [P] [US3] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to wrap content with ThemeProvider
+- [ ] T062 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/ThemeProviderTests.cs (applies dark class correctly)
 
-### Implementation for User Story 3
+### Visual Feedback Components
 
-- [ ] T070 [P] [US3] Apply DaisyUI component classes to all existing Dashboard components in src/TradingBot.Web/Components/Dashboard/
-- [ ] T071 [P] [US3] Apply DaisyUI component classes to all Portfolio components in src/TradingBot.Web/Components/Portfolio/
-- [ ] T072 [P] [US3] Apply DaisyUI component classes to all Performance components in src/TradingBot.Web/Components/Performance/
-- [ ] T073 [P] [US3] Apply DaisyUI component classes to all Strategy components in src/TradingBot.Web/Components/Strategy/
-- [ ] T074 [P] [US3] Apply DaisyUI component classes to all Risk components in src/TradingBot.Web/Components/Risk/
-- [ ] T075 [US3] Implement consistent button styling using DaisyUI btn classes across all components
-- [ ] T076 [US3] Implement consistent card styling using DaisyUI card classes for all data containers
-- [ ] T077 [US3] Implement consistent table styling using DaisyUI table classes with hover states
-- [ ] T078 [US3] Add hover transitions (< 100ms) to all interactive elements in src/TradingBot.Web/wwwroot/css/app.css
-- [ ] T079 [US3] Add loading indicators to all async operations (save settings, close position, load data) using LoadingIndicator component
-- [ ] T080 [US3] Add success toast notifications to all successful operations using NotificationService
-- [ ] T081 [US3] Add error toast notifications to all error scenarios with clear messaging using NotificationService
-- [ ] T082 [US3] Implement consistent spacing using Tailwind utility classes (p-4, m-2, gap-4) across all components
-- [ ] T083 [US3] Implement consistent typography using Tailwind text classes (text-xl, font-bold) across all components
-- [ ] T084 [US3] Apply color coding (green for positive P&L, red for negative, yellow for warnings) in all financial displays
-- [ ] T085 [US3] Add smooth theme transition animations in src/TradingBot.Web/Styles/components/themes.css
+- [ ] T063 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Spinner.razor (loading indicator with Tailwind animation)
+- [ ] T064 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Badge.razor (status badges with color variants: success, error, warning, info)
+- [ ] T065 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Label.razor (form labels with consistent Tailwind styling)
+- [ ] T066 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/SpinnerTests.cs (renders, applies size classes)
+- [ ] T067 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/BadgeTests.cs (renders variants correctly)
 
-**Checkpoint**: All pages should now have consistent, polished visual design with proper feedback
+### Toast Notification System
+
+- [ ] T068 [P] [US3] Create src/TradingBot.Web/Components/Molecules/Toast.razor (single toast with icon, message, dismiss button, auto-dismiss after duration)
+- [ ] T069 [US3] Create src/TradingBot.Web/Components/Organisms/NotificationCenter.razor (ToastContainer using ToastService, renders Toast molecules with slide-in animation)
+- [ ] T070 [US3] Add NotificationCenter to src/TradingBot.Web/Components/Layout/MainLayout.razor (fixed top-right position)
+- [ ] T071 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Molecules/ToastTests.cs (renders message, dismisses on click, auto-dismiss after duration)
+- [ ] T072 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/NotificationCenterTests.cs (renders multiple toasts, respects user preferences for notification types)
+
+### Styling Updates
+
+- [ ] T073 [P] [US3] Update existing src/TradingBot.Web/Components/Shared/Card.razor to use consistent Tailwind classes (border, shadow, padding, dark mode)
+- [ ] T074 [P] [US3] Update existing src/TradingBot.Web/Components/Shared/Table.razor to add alternating row colors and hover states
+- [ ] T075 [P] [US3] Add transition-colors utility class to interactive elements (buttons, links, menu items) for smooth hover effects
+- [ ] T076 [P] [US3] Verify all color usage follows constitution standards (green=success, red=error, yellow=warning, blue=info)
+
+**Checkpoint**: All components now have polished visual design, consistent styling, smooth transitions, and proper feedback mechanisms.
 
 ---
 
 ## Phase 6: User Story 4 - Keyboard Navigation & Accessibility (Priority: P2)
 
-**Goal**: Implement full keyboard navigation with shortcuts, ARIA labels, screen reader compatibility, and WCAG 2.1 Level AA compliance for color contrast and focus indicators
+**Goal**: Enable full keyboard navigation (Tab, Enter, Escape, arrow keys), visible focus indicators, ARIA labels, and WCAG 2.1 Level AA compliance.
 
-**Independent Test**: Navigate through the entire application using only keyboard (Tab, Shift+Tab, Enter, Escape, arrow keys). Verify all interactive elements are accessible, focus indicators are visible, and tab order is logical. Use keyboard shortcuts (Alt+D, Alt+P, Alt+F, Alt+S, Alt+T) to navigate quickly. Test with screen reader (NVDA/VoiceOver) and verify all content is properly announced.
+**Independent Test**: Navigate entire application using only keyboard. Verify Tab moves through elements in logical order with visible focus rings. Press Enter on menu items to navigate. Open settings modal (if exists) and press Escape to close, confirming focus returns. Use screen reader (NVDA/VoiceOver) to verify all content is announced. Test keyboard shortcuts (Alt+D for Dashboard, Alt+P for Portfolio, etc.).
 
-### Tests for User Story 4
+### Keyboard Navigation Infrastructure
 
-- [ ] T086 [P] [US4] Keyboard navigation integration tests in tests/TradingBot.Web.Tests/Accessibility/KeyboardNavigationTests.cs
-- [ ] T087 [P] [US4] Tab order tests for all pages in tests/TradingBot.Web.Tests/Accessibility/TabOrderTests.cs
-- [ ] T088 [P] [US4] Focus trap tests for modals in tests/TradingBot.Web.Tests/Components/Shared/ModalFocusTrapTests.cs
-- [ ] T089 [P] [US4] ARIA label tests in tests/TradingBot.Web.Tests/Accessibility/AriaLabelTests.cs
-- [ ] T090 [P] [US4] Color contrast tests using axe-core in tests/TradingBot.Web.Tests/Accessibility/ColorContrastTests.cs
+- [ ] T077 [P] [US4] Add global keyboard shortcut handler in src/TradingBot.Web/Components/Layout/MainLayout.razor (Alt+D, Alt+P, Alt+R, Alt+S, Alt+G, Alt+B)
+- [ ] T078 [P] [US4] Update Icon.razor to ensure SVGs have proper aria-hidden or aria-label attributes
+- [ ] T079 [P] [US4] Update Button.razor to support keyboard events (Enter/Space), ensure type="button" for non-submit buttons
+- [ ] T080 [P] [US4] Update MenuItem.razor to support Enter key navigation and arrow key navigation within menu
+- [ ] T081 [P] [US4] Update NavigationSidebar.razor with keyboard focus management (focus trap when expanded, Escape to collapse)
 
-### Implementation for User Story 4
+### Accessibility Enhancements
 
-- [ ] T091 [P] [US4] Add ARIA labels to all buttons in all components throughout src/TradingBot.Web/Components/
-- [ ] T092 [P] [US4] Add ARIA labels to all form inputs in all components throughout src/TradingBot.Web/Components/
-- [ ] T093 [P] [US4] Add ARIA roles to all navigation elements in src/TradingBot.Web/Components/Layout/
-- [ ] T094 [US4] Register keyboard shortcuts (Alt+D, Alt+P, Alt+F, Alt+S, Alt+T) in MainLayout.razor using KeyboardShortcutService
-- [ ] T095 [US4] Implement global keydown listener in src/TradingBot.Web/wwwroot/js/keyboard-shortcuts.js
-- [ ] T096 [US4] Implement focus trap for Modal component in src/TradingBot.Web/Components/Shared/Modal.razor
-- [ ] T097 [US4] Ensure modal closes on Escape key and returns focus to triggering element
-- [ ] T098 [US4] Add visible focus indicators (:focus-visible) with sufficient contrast in src/TradingBot.Web/Styles/utilities/accessibility.css
-- [ ] T099 [US4] Verify and fix tab order across all pages (top-to-bottom, left-to-right logical flow)
-- [ ] T100 [US4] Add aria-describedby to all help tooltips in components with HelpIcon
-- [ ] T101 [US4] Ensure all form fields support keyboard-only interaction (dropdowns, toggles, date pickers)
-- [ ] T102 [US4] Test color contrast ratios (4.5:1 for normal text, 3:1 for large text) and fix any failures
-- [ ] T103 [US4] Add keyboard shortcut documentation to help section or tooltip
+- [ ] T082 [P] [US4] Add visible focus ring styles to all interactive elements using `focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`
+- [ ] T083 [P] [US4] Add ARIA labels to icon-only buttons (collapse sidebar, dismiss toast, help icons)
+- [ ] T084 [P] [US4] Add aria-current="page" to active MenuItem in NavigationSidebar
+- [ ] T085 [P] [US4] Update FormField.razor to link error messages with aria-describedby
+- [ ] T086 [P] [US4] Update Input/Select/Toggle to generate unique IDs for label association
+- [ ] T087 [P] [US4] Add role="dialog" and aria-modal="true" to modals (if any confirmation dialogs exist)
 
-**Checkpoint**: Application should be fully keyboard accessible and WCAG 2.1 Level AA compliant
+### Accessibility Testing
+
+- [ ] T088 [P] [US4] Run axe-core or pa11y automated accessibility scan on all pages
+- [ ] T089 [P] [US4] Manual keyboard navigation test: verify logical tab order on all pages
+- [ ] T090 [P] [US4] Verify color contrast ratios meet WCAG AA (4.5:1 for text, 3:1 for UI elements) using browser DevTools
+- [ ] T091 [P] [US4] Screen reader test: navigate Settings page with NVDA (Windows) or VoiceOver (Mac) and verify all labels are announced
+
+**Checkpoint**: Application is fully keyboard-navigable and meets WCAG 2.1 Level AA standards.
 
 ---
 
 ## Phase 7: User Story 5 - Responsive Layouts & Component Consistency (Priority: P3)
 
-**Goal**: Ensure all pages and components have consistent layouts, headers, footers, navigation placement, and work well across different desktop screen sizes (1024px to ultra-wide)
+**Goal**: Ensure all pages use consistent layouts, components maintain styling across pages, and layouts adapt gracefully to screen widths down to 1024px minimum.
 
-**Independent Test**: View all pages at different screen resolutions (1024px, 1280px, 1920px, 2560px). Verify layouts adapt smoothly without horizontal scrolling or broken layouts down to 1024px width. Compare pages and verify consistent header, footer, navigation placement, and content area structure. Verify all data cards, forms, charts have consistent styling.
+**Independent Test**: View all pages (Dashboard, Portfolio, Performance, Strategies, Settings, Backtesting) and compare layouts. Verify consistent header placement, sidebar navigation, and content area structure. Resize browser window from 1920px down to 1024px and confirm no horizontal scrolling or broken layouts. Verify data cards, form elements, charts, and buttons have identical styling across pages.
 
-### Tests for User Story 5
+### Responsive Layout
 
-- [ ] T104 [P] [US5] Responsive layout tests for all pages at 1024px, 1280px, 1920px in tests/TradingBot.Web.Tests/Responsive/ResponsiveLayoutTests.cs
-- [ ] T105 [P] [US5] Component consistency tests comparing styling across pages in tests/TradingBot.Web.Tests/Visual/ConsistencyTests.cs
+- [ ] T092 [P] [US5] Update tailwind.config.js breakpoints to focus on lg (1024px) as minimum width
+- [ ] T093 [P] [US5] Add responsive classes to NavigationSidebar (sidebar-transition, sidebar width adjustments at lg breakpoint)
+- [ ] T094 [P] [US5] Update MainLayout content area with responsive margin classes (ml-64 default, ml-16 when sidebar collapsed, responsive adjustments at lg)
+- [ ] T095 [P] [US5] Test all pages at 1920px, 1440px, 1280px, and 1024px widths to verify no horizontal scroll
 
-### Implementation for User Story 5
+### Component Consistency
 
-- [ ] T106 [P] [US5] Implement max-width constraint (max-w-7xl) for main content area in MainLayout.razor
-- [ ] T107 [P] [US5] Add responsive breakpoint classes (lg:) for sidebar behavior at 1024px in sidebar.css
-- [ ] T108 [US5] Ensure consistent header structure across all pages in src/TradingBot.Web/Pages/
-- [ ] T109 [US5] Ensure consistent footer structure across all pages (if applicable)
-- [ ] T110 [US5] Standardize data card component styling across Dashboard, Portfolio, Performance pages
-- [ ] T111 [US5] Standardize form element styling (inputs, buttons, labels, validation) across Settings and Risk pages
-- [ ] T112 [US5] Standardize chart styling across Performance and Backtest pages
-- [ ] T113 [US5] Test and fix any horizontal scrolling issues at 1024px width
-- [ ] T114 [US5] Test and fix any layout breaking at ultra-wide resolutions (2560px+)
-- [ ] T115 [US5] Document responsive behavior and breakpoints in quickstart.md
+- [ ] T096 [P] [US5] Audit all Button usages across pages and ensure consistent variant usage (Primary for main actions, Secondary for cancel, Danger for destructive)
+- [ ] T097 [P] [US5] Audit all Card usages and ensure consistent border, shadow, and padding classes
+- [ ] T098 [P] [US5] Audit all form Input/Select/Toggle usages and ensure consistent sizing and spacing
+- [ ] T099 [P] [US5] Audit all chart components and verify consistent color schemes and fonts (inherit from theme CSS variables)
+- [ ] T100 [P] [US5] Update existing pages (Home, Portfolio, Performance, Strategies, Backtesting) to use new atomic Button components instead of inline HTML buttons
 
-**Checkpoint**: All pages should have consistent layout and work well across desktop screen sizes
+### Maximum Width Handling
+
+- [ ] T101 [P] [US5] Add max-width and centering utilities to main content area for widescreen monitors (e.g., max-w-7xl mx-auto)
+- [ ] T102 [P] [US5] Verify data tables use overflow-x-auto wrapper for horizontal scroll on smaller screens (1024px)
+
+**Checkpoint**: All pages have consistent component styling and layouts adapt gracefully to supported screen widths (1024px-1920px+).
 
 ---
 
 ## Phase 8: User Story 6 - Contextual Help & User Guidance (Priority: P3)
 
-**Goal**: Add helpful tooltips, explanations, and guidance throughout the application to help users understand features and metrics without consulting external documentation
+**Goal**: Add helpful tooltips, explanations, and guidance throughout the application. Provide inline help for metrics, settings explanations, empty state guidance, and form validation errors.
 
-**Independent Test**: Navigate through all pages and identify complex metrics (Sharpe Ratio, Sortino, risk settings). Hover over or click help icons next to these metrics and verify clear, concise explanations appear in tooltips. Encounter empty states (no positions, no trades) and verify helpful guidance is displayed. Trigger form validation errors and verify specific guidance on how to correct input is provided.
+**Independent Test**: Hover over unfamiliar metrics (e.g., Sharpe Ratio on Performance page) to see tooltip explanations. View Risk Settings page and confirm help text explains each setting. Navigate to Portfolio page with no positions and verify empty state message provides guidance. Enter invalid value in settings form (e.g., refresh interval 400s) and verify error message explains valid range.
 
-### Tests for User Story 6
+### Tooltip Component
 
-- [ ] T116 [P] [US6] Component tests for HelpIcon with tooltip in tests/TradingBot.Web.Tests/Components/Shared/HelpIconTests.cs
-- [ ] T117 [P] [US6] Tooltip content tests verifying clarity in tests/TradingBot.Web.Tests/Components/Shared/TooltipContentTests.cs
+- [ ] T103 [P] [US6] Create src/TradingBot.Web/Components/Molecules/Tooltip.razor (hover tooltip with positioning, Tailwind styling)
+- [ ] T104 [P] [US6] Write tests/TradingBot.Web.Tests/Components/Molecules/TooltipTests.cs (shows on hover, hides on leave, correct positioning)
 
-### Implementation for User Story 6
+### Help Text Integration
 
-- [ ] T118 [P] [US6] Add HelpIcon with tooltip to Sharpe Ratio metric in src/TradingBot.Web/Components/Performance/PerformanceMetrics.razor
-- [ ] T119 [P] [US6] Add HelpIcon with tooltip to Sortino Ratio metric in src/TradingBot.Web/Components/Performance/PerformanceMetrics.razor
-- [ ] T120 [P] [US6] Add HelpIcon with tooltip to Calmar Ratio metric in src/TradingBot.Web/Components/Performance/PerformanceMetrics.razor
-- [ ] T121 [P] [US6] Add HelpIcon with tooltip to Max Drawdown metric in src/TradingBot.Web/Components/Performance/PerformanceMetrics.razor
-- [ ] T122 [P] [US6] Add HelpIcon with tooltip to each risk setting in src/TradingBot.Web/Components/Risk/RiskSettings.razor
-- [ ] T123 [US6] Add helpful empty state message to PositionList when no positions in src/TradingBot.Web/Components/Dashboard/PositionList.razor
-- [ ] T124 [US6] Add helpful empty state message to TradeHistory when no trades in src/TradingBot.Web/Components/Portfolio/TradeHistory.razor
-- [ ] T125 [US6] Add specific guidance to all form validation errors in Settings and Risk components
-- [ ] T126 [US6] Create help section or FAQ page in src/TradingBot.Web/Pages/Help.razor with common tasks
-- [ ] T127 [US6] Add help section to navigation menu in LeftSidebar.razor
-- [ ] T128 [US6] Create tooltip content resource file for easy maintenance in src/TradingBot.Web/Resources/TooltipContent.resx
-- [ ] T129 [US6] Implement dynamic tooltip positioning (top/bottom/left/right) based on available space in Tooltip.razor
+- [ ] T105 [P] [US6] Add tooltip help icons next to complex metrics on existing Performance page (Sharpe Ratio, Max Drawdown, etc.)
+- [ ] T106 [P] [US6] Add help text descriptions to each setting in SettingsForm (theme explanation, refresh interval recommendation, notification duration purpose)
+- [ ] T107 [P] [US6] Update FormField.razor to support optional help text parameter (displayed below input in text-sm text-gray-600)
+- [ ] T108 [P] [US6] Add empty state messages to existing pages (Portfolio: "No open positions. Execute a trading strategy to see positions here.", Trades: "No trade history yet.")
 
-**Checkpoint**: All complex metrics, settings, and empty states should have clear, helpful guidance
+### Form Validation Guidance
+
+- [ ] T109 [P] [US6] Update UserPreferencesValidator to return specific error messages with corrective guidance (e.g., "Refresh interval must be between 1 and 300 seconds. Please enter a value in this range.")
+- [ ] T110 [P] [US6] Ensure all form validation errors in SettingsForm display with clear, actionable messages
+
+### Help Page (Optional Enhancement)
+
+- [ ] T111 [P] [US6] Create src/TradingBot.Web/Components/Pages/Help.razor with FAQ and common task guides (OPTIONAL - can defer to future iteration)
+
+**Checkpoint**: Application provides contextual help throughout, reducing learning curve and support burden.
 
 ---
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final improvements, optimization, and validation that affect multiple user stories
+**Purpose**: Final improvements that affect multiple user stories
+
+### Code Quality
+
+- [ ] T112 [P] Run `dotnet format` to ensure all C# files follow formatting standards
+- [ ] T113 [P] Add copyright headers to all new C# files (use .specify script if available)
+- [ ] T114 [P] Run `dotnet build /p:RunAnalyzers=true` and fix any StyleCop/Roslynator warnings
+- [ ] T115 [P] Verify all public components and services have XML documentation comments
+
+### Testing & Coverage
+
+- [ ] T116 [P] Run `dotnet test --collect:"XPlat Code Coverage"` to verify 80% code coverage minimum
+- [ ] T117 [P] Ensure UserPreferencesService has 100% test coverage (critical path per constitution)
+- [ ] T118 Run all bUnit component tests and verify they pass
 
 ### Performance Optimization
 
-- [ ] T130 [P] Implement caching for UserPreferences in memory using IMemoryCache in PreferencesService
-- [ ] T131 [P] Implement debouncing for settings save operations (1 second delay) in SettingsPage.razor
-- [ ] T132 [P] Lazy load theme CSS (only active theme) in MainLayout.razor
-- [ ] T133 [P] Minimize JSInterop calls by batching theme and keyboard shortcut registrations
+- [ ] T119 [P] Run Tailwind CSS production build with minification: `npm run css:build -- --minify`
+- [ ] T120 [P] Verify SignalR throttling is maintained at 500ms (should be unchanged from spec 002)
+- [ ] T121 [P] Test dashboard refresh interval configuration (set to 10s and verify refresh occurs every 10s)
+- [ ] T122 [P] Add browser localStorage caching for UserPreferences in UserPreferencesService to avoid repeated DB queries
 
 ### Security & Validation
 
-- [ ] T134 [P] Verify input validation on all settings (refresh interval 1-300s, notification duration 2-10s) with error messages
-- [ ] T135 [P] Verify authorization ensures users can only access their own preferences (UserId filter in repository)
-- [ ] T136 [P] Add logging for all settings changes with user ID and timestamp using Serilog
-
-### Testing & Quality Assurance
-
-- [ ] T137 [P] Run full test suite: `dotnet test`
-- [ ] T138 [P] Verify code coverage meets 80% minimum using `dotnet test --collect:"XPlat Code Coverage"`
-- [ ] T139 [P] Verify critical path coverage is 100% (settings persistence, theme switching, navigation) using coverage report
-- [ ] T140 [P] Run code analyzers: `dotnet build /p:RunAnalyzers=true`
-- [ ] T141 [P] Test keyboard navigation on all pages manually
-- [ ] T142 [P] Test screen reader compatibility using NVDA (Windows) or VoiceOver (macOS)
-- [ ] T143 [P] Verify WCAG 2.1 Level AA compliance using axe DevTools or Lighthouse
-- [ ] T144 [P] Performance testing: verify settings save < 1s, visual feedback < 100ms, theme change instant
+- [ ] T123 [P] Verify input validation prevents XSS attacks (all user inputs are sanitized by Blazor)
+- [ ] T124 [P] Verify UserPreferences validation prevents SQL injection (using parameterized EF queries)
+- [ ] T125 [P] Test settings save with invalid values (out of range, null) and confirm proper error handling
 
 ### Documentation
 
-- [ ] T145 [P] Update quickstart.md with any implementation changes or new patterns discovered
-- [ ] T146 [P] Add inline XML documentation comments to all public APIs (services, repositories)
-- [ ] T147 [P] Update CLAUDE.md Active Technologies section with DaisyUI and user preferences implementation
+- [ ] T126 [P] Update project README with new features (navigation sidebar, settings page, theme system)
+- [ ] T127 [P] Run quickstart.md validation to ensure developer setup instructions are accurate
+- [ ] T128 [P] Create screenshot or demo GIF showing navigation, theme switching, settings page
 
-### Final Validation
+### Constitution Compliance
 
-- [ ] T148 Run quickstart.md validation by following 5-minute quick start guide
-- [ ] T149 Validate all user stories work independently (US1 through US6)
-- [ ] T150 Validate settings persistence across sessions (logout/login test)
-- [ ] T151 Validate theme switching works correctly without page reload
-- [ ] T152 Validate all keyboard shortcuts (Alt+D, Alt+P, Alt+F, Alt+S, Alt+T) work correctly
-- [ ] T153 Final deployment checklist verification from quickstart.md
+- [ ] T129 Update .specify/memory/constitution.md section 3.1 (UX/UI Principles) to reflect Tailwind-only approach and desktop-first responsive design
+- [ ] T130 Final code review checklist per constitution section 7.1 (style guidelines, tests pass, coverage met, no vulnerabilities, performance, docs, error handling, logging)
 
 ---
 
@@ -324,184 +336,183 @@
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
 - **User Stories (Phase 3-8)**: All depend on Foundational phase completion
-  - User stories can then proceed in parallel (if staffed)
-  - Or sequentially in priority order (P1 → P1 → P2 → P2 → P3 → P3)
+  - **US1 (Navigation)** can start after Foundational - No dependencies on other stories
+  - **US2 (Settings)** can start after Foundational - No dependencies on other stories
+  - **US3 (Visual Polish)** depends on US1 and US2 (needs components to style)
+  - **US4 (Accessibility)** can run in parallel with US3 (enhances existing components)
+  - **US5 (Responsive)** can run in parallel with US3/US4 (layout adjustments)
+  - **US6 (Help)** depends on US1-US5 (adds help to existing components)
 - **Polish (Phase 9)**: Depends on all desired user stories being complete
 
 ### User Story Dependencies
 
-- **User Story 1 (P1 - Navigation)**: Can start after Foundational - No dependencies on other stories
-- **User Story 2 (P1 - Settings)**: Can start after Foundational - No dependencies on other stories, but integrates with US1 (uses navigation)
-- **User Story 3 (P2 - Visual Polish)**: Depends on US1 and US2 being complete to apply styling to existing components
-- **User Story 4 (P2 - Accessibility)**: Can start after Foundational - Enhances all stories but independently testable
-- **User Story 5 (P3 - Responsive)**: Depends on US1-4 to ensure consistency across all components
-- **User Story 6 (P3 - Help)**: Depends on US1-5 to add tooltips to all existing metrics and components
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - Independent, no other story dependencies
+- **User Story 2 (P1)**: Can start after Foundational (Phase 2) - Independent, no other story dependencies
+- **User Story 3 (P2)**: Depends on US1 (Navigation components) and US2 (Settings components) to apply styling
+- **User Story 4 (P2)**: Can start after US1-US3 complete (adds accessibility to all components)
+- **User Story 5 (P3)**: Can start after US1-US3 complete (ensures consistency across all components)
+- **User Story 6 (P3)**: Depends on US1-US5 complete (adds help to finalized components)
 
 ### Within Each User Story
 
-- Tests MUST be written and PASS before marking story complete
-- Shared components (Toast, Modal, Tooltip) before story-specific components
-- Domain entities (UserPreferences) before repositories before services
-- Services before page components
-- Core implementation before integration with other stories
-- Story complete before moving to next priority
+**General Pattern**:
+1. Atoms before Molecules (molecules use atoms)
+2. Molecules before Organisms (organisms use molecules)
+3. Organisms before Pages (pages use organisms)
+4. Tests can run in parallel with implementation or after (marked [P] if different files)
+
+**Specific Dependencies**:
+- US1: Icon (T030) → MenuItem (T032) → NavigationSidebar (T034) → MainLayout update (T036)
+- US2: Input/Select/Toggle (T039-T041) → FormField (T047) → SettingsForm (T049) → Settings page (T058)
+- US3: Spinner/Badge/Label (T063-T065) → Toast (T068) → NotificationCenter (T069) → MainLayout (T070)
 
 ### Parallel Opportunities
 
-**Foundational Phase (T006-T032)**: Can be split into parallel streams:
-- Stream 1: Database layer (T006-T013)
-- Stream 2: Services interfaces and implementations (T014-T021)
-- Stream 3: Shared components (T022-T026)
-- Stream 4: Tests for above (T027-T032)
+**Setup Phase (Phase 1)**:
+- T003, T004, T005-T007, T008 can all run in parallel
 
-**User Story 1 (T033-T044)**: Tests (T033-T035) can run in parallel, then components can be built in parallel (LeftSidebar, TopHeader)
+**Foundational Phase (Phase 2)**:
+- T012 (IUserPreferencesService), T013 (Validator), T021-T024 (Client services) can run in parallel
+- T026-T029 (Tests) can run in parallel
 
-**User Story 2 (T045-T066)**: Tests (T045-T049) in parallel, then components (T050-T053) in parallel, then integration
+**User Story 1**:
+- T030-T031 (Icon + tests) can run in parallel
 
-**User Story 3 (T067-T085)**: Applying DaisyUI classes to different component directories (T070-T074) can all run in parallel
+**User Story 2**:
+- T039-T046 (Input/Select/Toggle/Button + tests) can all run in parallel (8 tasks)
 
-**User Story 4 (T086-T103)**: Tests (T086-T090) in parallel, ARIA labels across different directories (T091-T093) in parallel
+**User Story 3**:
+- T063-T067 (Spinner/Badge/Label + tests) can run in parallel
+- T073-T076 (Styling updates to existing components) can run in parallel
 
-**User Story 5 (T104-T115)**: Tests in parallel, responsive fixes across different pages can run in parallel
+**User Story 4**:
+- T077-T087 (All accessibility enhancements) can run in parallel (11 tasks)
+- T088-T091 (All accessibility tests) can run in parallel
 
-**User Story 6 (T116-T129)**: Adding HelpIcons to different components (T118-T122, T123-T124) can run in parallel
+**User Story 5**:
+- T092-T095 (Responsive layout tasks) can run in parallel
+- T096-T100 (Component consistency audits) can run in parallel
 
-**Polish Phase (T130-T153)**: Performance tasks, security tasks, testing tasks, and documentation tasks can all run in parallel
+**User Story 6**:
+- T105-T110 (All help text additions) can run in parallel
+
+**Polish Phase**:
+- T112-T115 (Code quality), T119-T122 (Performance), T123-T125 (Security), T126-T128 (Docs) can all run in parallel
 
 ---
 
-## Parallel Example: Foundational Phase
+## Parallel Example: User Story 1 (Navigation)
 
 ```bash
-# Stream 1: Database layer
-Task: "Create UserPreferences entity in src/TradingBot.Core/Models/UserPreferences.cs"
-Task: "Create NotificationTypesEnabled value object"
-Task: "Create IUserPreferencesRepository interface"
-→ Then: "Create UserPreferencesConfiguration for EF Core"
-→ Then: "Implement UserPreferencesRepository"
-→ Then: "Add DbSet to TradingBotDbContext"
-→ Then: "Create and apply EF Core migration"
-
-# Stream 2: Services (parallel with Stream 1)
-Task: "Create IThemeService interface"
-Task: "Create INotificationService interface"
-Task: "Create IKeyboardShortcutService interface"
-→ Then: "Implement ThemeService"
-→ Then: "Implement NotificationService"
-→ Then: "Implement KeyboardShortcutService"
-→ Then: "Register services in DI"
-
-# Stream 3: Shared Components (parallel with Streams 1 & 2)
-Task: "Create Toast.razor component"
-Task: "Create Modal.razor component"
-Task: "Create Tooltip.razor component"
-Task: "Create LoadingIndicator.razor component"
-Task: "Create HelpIcon.razor component"
-
-# Stream 4: Tests (parallel with Streams 1, 2, & 3)
-Task: "Unit test for UserPreferences validation"
-Task: "Repository tests for UserPreferencesRepository"
-Task: "Service tests for ThemeService"
-Task: "Service tests for NotificationService"
-Task: "Component tests for Toast"
-Task: "Component tests for Modal accessibility"
+# Launch Icon atom + tests together:
+Task: "Create src/TradingBot.Web/Components/Atoms/Icon.razor with Heroicons SVG support"
+Task: "Write tests/TradingBot.Web.Tests/Components/Atoms/IconTests.cs"
 ```
 
----
-
-## Parallel Example: User Story 3 (Visual Polish)
+## Parallel Example: User Story 2 (Settings)
 
 ```bash
-# Apply DaisyUI classes to different component directories in parallel:
-Task: "Apply DaisyUI to Dashboard components in src/TradingBot.Web/Components/Dashboard/"
-Task: "Apply DaisyUI to Portfolio components in src/TradingBot.Web/Components/Portfolio/"
-Task: "Apply DaisyUI to Performance components in src/TradingBot.Web/Components/Performance/"
-Task: "Apply DaisyUI to Strategy components in src/TradingBot.Web/Components/Strategy/"
-Task: "Apply DaisyUI to Risk components in src/TradingBot.Web/Components/Risk/"
+# Launch all atomic components + tests for US2 together:
+Task: "Create src/TradingBot.Web/Components/Atoms/Input.razor"
+Task: "Create src/TradingBot.Web/Components/Atoms/Select.razor"
+Task: "Create src/TradingBot.Web/Components/Atoms/Toggle.razor"
+Task: "Create src/TradingBot.Web/Components/Atoms/Button.razor"
+Task: "Write tests/TradingBot.Web.Tests/Components/Atoms/InputTests.cs"
+Task: "Write tests/TradingBot.Web.Tests/Components/Atoms/SelectTests.cs"
+Task: "Write tests/TradingBot.Web.Tests/Components/Atoms/ToggleTests.cs"
+Task: "Write tests/TradingBot.Web.Tests/Components/Atoms/ButtonTests.cs"
 ```
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (User Stories 1 & 2 Only - Both P1)
+### MVP First (User Stories 1 + 2 Only)
 
-1. Complete Phase 1: Setup (T001-T005)
-2. Complete Phase 2: Foundational (T006-T032) - CRITICAL - blocks all stories
-3. Complete Phase 3: User Story 1 - Navigation (T033-T044)
-4. Complete Phase 4: User Story 2 - Settings (T045-T066)
-5. **STOP and VALIDATE**: Test US1 and US2 independently and together
-6. Run tests, verify 80% coverage minimum
-7. Deploy/demo if ready - Users can navigate and configure preferences
+**Recommended approach for quickest value delivery**:
 
-**MVP Delivered**: Users can navigate the application using a left sidebar menu and configure their personal preferences (theme, refresh intervals, notifications) with persistence.
+1. Complete Phase 1: Setup (T001-T008)
+2. Complete Phase 2: Foundational (T009-T029) - CRITICAL, blocks all stories
+3. Complete Phase 3: User Story 1 - Navigation (T030-T038)
+4. **STOP and VALIDATE**: Test navigation independently (navigate all pages, collapse/expand sidebar, verify active highlighting)
+5. Complete Phase 4: User Story 2 - Settings (T039-T059)
+6. **STOP and VALIDATE**: Test settings independently (change theme, modify intervals, save/reset, verify persistence)
+7. **MVP COMPLETE**: Deploy/demo navigation + settings functionality
 
-### Incremental Delivery
+**At this point you have a fully functional MVP with**:
+- Persistent left sidebar navigation (US1)
+- User settings page with theme, intervals, notification preferences (US2)
+- Database-persisted user preferences
+- Independently tested and verified features
 
-1. Complete Setup + Foundational (T001-T032) → Foundation ready
-2. Add User Story 1 (T033-T044) → Test independently → Navigation works!
-3. Add User Story 2 (T045-T066) → Test independently → Settings work!
-4. **MVP Complete** - Deploy if desired
-5. Add User Story 3 (T067-T085) → Test independently → Visual polish applied!
-6. Add User Story 4 (T086-T103) → Test independently → Fully accessible!
-7. Add User Story 5 (T104-T115) → Test independently → Consistent layouts!
-8. Add User Story 6 (T116-T129) → Test independently → Helpful guidance!
-9. Complete Polish (T130-T153) → Full validation → Production ready!
+### Incremental Delivery (Add Stories Gradually)
 
-Each story adds value without breaking previous stories.
+After MVP (US1 + US2):
+
+1. Add User Story 3: Visual Polish (T060-T076) → Deploy polished UI
+2. Add User Story 4: Accessibility (T077-T091) → Deploy WCAG AA compliant UI
+3. Add User Story 5: Responsive (T092-T102) → Deploy consistent responsive layouts
+4. Add User Story 6: Help (T103-T111) → Deploy contextual help system
+5. Complete Polish phase (T112-T130) → Final production-ready release
+
+**Each iteration adds value without breaking previous functionality.**
 
 ### Parallel Team Strategy
 
-With multiple developers:
+With multiple developers (2-3 people):
 
-1. **Week 1**: Team completes Setup + Foundational together (T001-T032)
-2. **Week 2**: Once Foundational is done:
-   - Developer A: User Story 1 - Navigation (T033-T044)
-   - Developer B: User Story 2 - Settings (T045-T066)
-3. **Week 3**: Once US1 & US2 are done:
-   - Developer A: User Story 3 - Visual Polish (T067-T085)
-   - Developer B: User Story 4 - Accessibility (T086-T103)
-4. **Week 4**: Final stories and polish:
-   - Developer A: User Story 5 - Responsive (T104-T115)
-   - Developer B: User Story 6 - Help (T116-T129)
-5. **Week 5**: Both developers on Polish & Validation (T130-T153)
+1. **All team members**: Complete Setup (Phase 1) + Foundational (Phase 2) together
+2. **Once Foundational is done**:
+   - **Developer A**: User Story 1 (Navigation) - T030-T038
+   - **Developer B**: User Story 2 (Settings) - T039-T059
+   - These are independent and can be developed in parallel
+3. **After US1 + US2 complete**:
+   - **Developer A**: User Story 3 (Visual Polish) - T060-T076
+   - **Developer B**: User Story 4 (Accessibility) - T077-T091
+   - **Developer C** (if available): User Story 5 (Responsive) - T092-T102
+4. **Final**: All team members collaborate on Polish (Phase 9)
 
-Stories complete and integrate independently. MVP can be deployed after Week 2.
+---
+
+## Task Summary
+
+- **Total Tasks**: 130
+- **Setup**: 8 tasks
+- **Foundational**: 21 tasks (BLOCKING - must complete before user stories)
+- **User Story 1 (Navigation)**: 9 tasks
+- **User Story 2 (Settings)**: 21 tasks
+- **User Story 3 (Visual Polish)**: 17 tasks
+- **User Story 4 (Accessibility)**: 15 tasks
+- **User Story 5 (Responsive)**: 11 tasks
+- **User Story 6 (Help)**: 9 tasks
+- **Polish**: 19 tasks
+
+**Parallel Opportunities**: 85+ tasks can run in parallel (marked with [P])
+
+**MVP Scope (US1 + US2)**: 59 tasks (Setup + Foundational + US1 + US2)
+
+**Estimated Time**:
+- Setup + Foundational: 6-8 hours
+- US1 (Navigation): 4-6 hours
+- US2 (Settings): 8-10 hours
+- US3 (Visual Polish): 6-8 hours
+- US4 (Accessibility): 4-6 hours
+- US5 (Responsive): 3-4 hours
+- US6 (Help): 3-4 hours
+- Polish: 4-6 hours
+- **Total**: ~38-52 hours (full feature)
+- **MVP Only (US1+US2)**: ~18-24 hours
 
 ---
 
 ## Notes
 
-- [P] tasks = different files, no dependencies - can run in parallel
+- [P] tasks = different files, no dependencies, can run in parallel
 - [Story] label maps task to specific user story for traceability
-- Each user story should be independently completable and testable
+- Each user story is independently completable and testable
+- Tests are written alongside implementation (not strictly TDD, but comprehensive coverage)
+- Verify tests pass after each phase before moving to next
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- Tests are included throughout (constitution requires 80% coverage, 100% for critical paths)
-- US3 (Visual Polish) is the first story with dependencies on US1 & US2 as it applies styling to their components
-- US5 (Responsive) and US6 (Help) depend on previous stories to ensure consistency
-- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-- Database migrations must be created and applied in Foundational phase before any user story work begins
-- DaisyUI components should be used throughout for consistency and accessibility
-- All keyboard shortcuts must be documented for users
-- Theme switching must be instant without page reload
-- Settings must persist across sessions (logout/login test is critical)
-
----
-
-## Task Count Summary
-
-- **Phase 1 (Setup)**: 5 tasks
-- **Phase 2 (Foundational)**: 27 tasks (T006-T032)
-- **Phase 3 (US1 - Navigation)**: 12 tasks (T033-T044)
-- **Phase 4 (US2 - Settings)**: 22 tasks (T045-T066)
-- **Phase 5 (US3 - Visual Polish)**: 19 tasks (T067-T085)
-- **Phase 6 (US4 - Accessibility)**: 18 tasks (T086-T103)
-- **Phase 7 (US5 - Responsive)**: 12 tasks (T104-T115)
-- **Phase 8 (US6 - Help)**: 14 tasks (T116-T129)
-- **Phase 9 (Polish)**: 24 tasks (T130-T153)
-
-**Total**: 153 tasks
-
-**MVP Scope** (US1 + US2): 66 tasks (T001-T066)
-**Full Implementation**: 153 tasks
+- **MVP strategy**: Focus on US1 + US2 first for quickest value delivery
+- **Avoid**: Vague tasks, same-file conflicts, cross-story dependencies that break independence

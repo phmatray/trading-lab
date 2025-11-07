@@ -1,38 +1,42 @@
 openapi: 3.0.3
 info:
   title: TradingBot User Preferences API
-  description: API endpoints for managing user UI preferences and settings
+  description: |
+    API contract for managing user preferences in the TradingBot web application.
+
+    **Note**: This API is for internal Blazor Server communication only.
+    The application uses a single-user model with UserId = "default".
   version: 1.0.0
   contact:
-    name: TradingBot Development Team
+    name: TradingBot Team
 
 servers:
-  - url: https://localhost:5001/api
-    description: Development server
+  - url: http://localhost:5000
+    description: Local development server
 
 tags:
-  - name: Preferences
-    description: User preferences management endpoints
+  - name: preferences
+    description: User preferences management
 
 paths:
-  /preferences:
+  /api/preferences:
     get:
       tags:
-        - Preferences
-      summary: Get current user preferences
-      description: Retrieves the authenticated user's UI preferences. Creates default preferences if none exist.
-      operationId: getUserPreferences
-      security:
-        - BearerAuth: []
+        - preferences
+      summary: Get user preferences
+      description: |
+        Retrieves the current user's preferences. For single-user systems,
+        this returns the preferences for UserId = "default".
+      operationId: getPreferences
       responses:
         '200':
-          description: User preferences retrieved successfully
+          description: Preferences retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserPreferencesResponse'
-        '401':
-          description: Unauthorized - user not authenticated
+                $ref: '#/components/schemas/UserPreferences'
+        '404':
+          description: Preferences not found (should not occur - default preferences are seeded)
           content:
             application/json:
               schema:
@@ -46,37 +50,37 @@ paths:
 
     put:
       tags:
-        - Preferences
+        - preferences
       summary: Update user preferences
-      description: Updates the authenticated user's UI preferences. All fields are required.
-      operationId: updateUserPreferences
-      security:
-        - BearerAuth: []
+      description: |
+        Updates the current user's preferences. Validates input ranges:
+        - DashboardRefreshInterval: 1-300 seconds
+        - NotificationDuration: 2-10 seconds
+      operationId: updatePreferences
       requestBody:
+        description: Updated preferences
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserPreferencesRequest'
+              $ref: '#/components/schemas/UserPreferencesUpdate'
       responses:
         '200':
           description: Preferences updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserPreferencesResponse'
+                $ref: '#/components/schemas/UserPreferences'
         '400':
-          description: Bad request - validation failed
+          description: Validation error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized - user not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - "Dashboard refresh interval must be between 1 and 300 seconds."
+                  - "Notification duration must be between 2 and 10 seconds."
         '500':
           description: Internal server error
           content:
@@ -84,28 +88,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /preferences/reset:
+  /api/preferences/reset:
     post:
       tags:
-        - Preferences
+        - preferences
       summary: Reset preferences to defaults
-      description: Resets the authenticated user's preferences to system defaults
-      operationId: resetUserPreferences
-      security:
-        - BearerAuth: []
+      description: |
+        Resets user preferences to default values:
+        - Theme: Light
+        - DashboardRefreshInterval: 5 seconds
+        - NotificationDuration: 5 seconds
+        - All notifications enabled
+      operationId: resetPreferences
       responses:
         '200':
           description: Preferences reset successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserPreferencesResponse'
-        '401':
-          description: Unauthorized - user not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/UserPreferences'
         '500':
           description: Internal server error
           content:
@@ -115,165 +116,149 @@ paths:
 
 components:
   schemas:
-    UserPreferencesResponse:
+    UserPreferences:
       type: object
+      description: User preferences entity
       required:
         - id
         - userId
         - theme
         - dashboardRefreshInterval
-        - notificationTypesEnabled
         - notificationDuration
+        - showSuccessNotifications
+        - showErrorNotifications
+        - showInfoNotifications
+        - showWarningNotifications
         - createdAt
         - updatedAt
       properties:
         id:
           type: integer
-          description: Unique identifier for the preferences record
+          description: Unique identifier
           example: 1
         userId:
           type: string
-          description: User ID associated with these preferences
-          example: "abc123-def456-ghi789"
+          description: User identifier (always "default" for single-user systems)
+          example: "default"
         theme:
           type: string
-          enum: [light, dark]
           description: UI theme preference
-          example: "light"
+          enum: [Light, Dark]
+          example: "Dark"
         dashboardRefreshInterval:
           type: integer
+          description: Dashboard auto-refresh interval in seconds
           minimum: 1
           maximum: 300
-          description: Dashboard refresh interval in seconds
           example: 10
-        notificationTypesEnabled:
-          $ref: '#/components/schemas/NotificationTypesEnabled'
         notificationDuration:
           type: integer
+          description: Toast notification display duration in seconds
           minimum: 2
           maximum: 10
-          description: Toast notification display duration in seconds
           example: 5
+        showSuccessNotifications:
+          type: boolean
+          description: Whether to show success toast notifications
+          example: true
+        showErrorNotifications:
+          type: boolean
+          description: Whether to show error toast notifications
+          example: true
+        showInfoNotifications:
+          type: boolean
+          description: Whether to show info toast notifications
+          example: true
+        showWarningNotifications:
+          type: boolean
+          description: Whether to show warning toast notifications
+          example: true
+        customSettings:
+          type: string
+          nullable: true
+          description: JSON blob for extensible custom settings
+          example: '{"chartType": "candlestick", "timezone": "America/New_York"}'
         createdAt:
           type: string
           format: date-time
-          description: Timestamp when preferences were created
-          example: "2025-11-07T12:00:00Z"
+          description: Record creation timestamp (ISO 8601)
+          example: "2025-11-07T10:00:00Z"
         updatedAt:
           type: string
           format: date-time
-          description: Timestamp when preferences were last updated
+          description: Last update timestamp (ISO 8601)
           example: "2025-11-07T14:30:00Z"
 
-    UpdateUserPreferencesRequest:
+    UserPreferencesUpdate:
       type: object
-      required:
-        - theme
-        - dashboardRefreshInterval
-        - notificationTypesEnabled
-        - notificationDuration
+      description: Request payload for updating user preferences
       properties:
         theme:
           type: string
-          enum: [light, dark]
           description: UI theme preference
-          example: "dark"
+          enum: [Light, Dark]
+          example: "Dark"
         dashboardRefreshInterval:
           type: integer
+          description: Dashboard auto-refresh interval in seconds
           minimum: 1
           maximum: 300
-          description: Dashboard refresh interval in seconds (1-300)
-          example: 30
-        notificationTypesEnabled:
-          $ref: '#/components/schemas/NotificationTypesEnabled'
+          example: 10
         notificationDuration:
           type: integer
+          description: Toast notification display duration in seconds
           minimum: 2
           maximum: 10
-          description: Toast notification display duration in seconds (2-10)
-          example: 7
-
-    NotificationTypesEnabled:
-      type: object
-      required:
-        - success
-        - error
-        - info
-        - warning
-      properties:
-        success:
+          example: 5
+        showSuccessNotifications:
           type: boolean
-          description: Enable success notifications
+          description: Whether to show success toast notifications
           example: true
-        error:
+        showErrorNotifications:
           type: boolean
-          description: Enable error notifications
+          description: Whether to show error toast notifications
           example: true
-        info:
+        showInfoNotifications:
           type: boolean
-          description: Enable informational notifications
+          description: Whether to show info toast notifications
           example: false
-        warning:
+        showWarningNotifications:
           type: boolean
-          description: Enable warning notifications
+          description: Whether to show warning toast notifications
           example: true
+        customSettings:
+          type: string
+          nullable: true
+          description: JSON blob for extensible custom settings
+          example: '{"chartType": "line"}'
 
     ErrorResponse:
       type: object
+      description: Generic error response
       required:
-        - error
         - message
       properties:
-        error:
-          type: string
-          description: Error code or type
-          example: "Unauthorized"
         message:
           type: string
-          description: Human-readable error message
-          example: "User is not authenticated"
-        timestamp:
+          description: Error message
+          example: "An unexpected error occurred."
+        details:
           type: string
-          format: date-time
-          description: Timestamp when error occurred
-          example: "2025-11-07T12:00:00Z"
+          nullable: true
+          description: Additional error details (dev mode only)
+          example: "NullReferenceException at UserPreferencesService.cs:42"
 
     ValidationErrorResponse:
       type: object
+      description: Validation error response
       required:
-        - error
-        - message
         - errors
       properties:
-        error:
-          type: string
-          description: Error type
-          example: "ValidationError"
-        message:
-          type: string
-          description: General validation error message
-          example: "One or more validation errors occurred"
         errors:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-          description: Field-specific validation errors
+          type: array
+          description: List of validation error messages
+          items:
+            type: string
           example:
-            dashboardRefreshInterval:
-              - "Dashboard refresh interval must be between 1 and 300 seconds"
-            theme:
-              - "Theme must be either 'light' or 'dark'"
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp when error occurred
-          example: "2025-11-07T12:00:00Z"
-
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: JWT bearer token authentication (provided by ASP.NET Core Identity)
+            - "Dashboard refresh interval must be between 1 and 300 seconds."
+            - "Notification duration must be between 2 and 10 seconds."

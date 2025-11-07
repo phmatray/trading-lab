@@ -1,385 +1,745 @@
-# Data Model: UX/UI Enhancement - Navigation & Settings
+# Data Model: UX/UI Enhancement
 
-**Feature**: 003-ux-ui-enhancement | **Date**: 2025-11-07
+**Feature**: 003-ux-ui-enhancement
+**Date**: 2025-11-07
 
 ## Overview
 
-This document defines the data entities and their relationships for the UX/UI enhancement feature, primarily focused on user preferences storage and management.
+This document defines the data entities, their relationships, and validation rules for the UX/UI Enhancement feature. The primary focus is on user preferences storage and UI state management.
+
+---
+
+## Entity Diagram
+
+```
+┌─────────────────────────────┐
+│    UserPreferences          │
+├─────────────────────────────┤
+│ PK  Id: int                 │
+│     UserId: string          │ ← "default" (single user, future-proof)
+│     Theme: Theme            │ ← SmartEnum (Light, Dark)
+│     DashboardRefreshInterval│ ← 1-300 seconds
+│     NotificationDuration    │ ← 2-10 seconds
+│     ShowSuccessNotifs: bool │
+│     ShowErrorNotifs: bool   │
+│     ShowInfoNotifs: bool    │
+│     ShowWarningNotifs: bool │
+│     CustomSettings: string? │ ← JSON for future extensions
+│     CreatedAt: DateTime     │
+│     UpdatedAt: DateTime     │
+└─────────────────────────────┘
+           │
+           │ (future: FK to User)
+           ▼
+     [No User table yet]
+     (Single user = "default")
+```
+
+---
 
 ## Entities
 
-### UserPreferences
+### 1. UserPreferences
 
-**Purpose**: Stores user-specific UI preferences and settings for the Blazor Server dashboard.
+**Purpose**: Store user-specific settings for UI customization and application behavior.
 
-**Location**: `TradingBot.Core.Models.UserPreferences`
+**Table**: `UserPreferences`
 
-**Fields**:
+**Columns**:
 
-| Field Name | Type | Constraints | Description |
-|-----------|------|-------------|-------------|
-| Id | int | PK, Identity | Unique identifier for the preference record |
-| UserId | string | FK (AspNetUsers.Id), Required, Unique | Links preferences to a specific user account |
-| Theme | string | Required, MaxLength(20), Default="light" | UI theme preference: "light" or "dark" |
-| DashboardRefreshInterval | int | Required, Range(1-300), Default=10 | Dashboard refresh interval in seconds (1-300) |
-| NotificationTypesEnabled | string (JSON) | Required | JSON object storing enabled notification types: `{"success": true, "error": true, "info": true, "warning": true}` |
-| NotificationDuration | int | Required, Range(2-10), Default=5 | Toast notification display duration in seconds (2-10) |
-| CreatedAt | DateTime | Required | Timestamp when preferences were created |
-| UpdatedAt | DateTime | Required | Timestamp when preferences were last updated |
-
-**Relationships**:
-- Many-to-One with `AspNetUsers` (one user has one set of preferences)
-
-**Validation Rules**:
-- UserId must exist in AspNetUsers table
-- Theme must be either "light" or "dark"
-- DashboardRefreshInterval must be between 1 and 300 seconds
-- NotificationDuration must be between 2 and 10 seconds
-- NotificationTypesEnabled must be valid JSON with boolean values for: success, error, info, warning
-- UpdatedAt must be >= CreatedAt
-
-**State Transitions**: None (simple CRUD entity)
+| Column | Type | Constraints | Default | Description |
+|--------|------|-------------|---------|-------------|
+| `Id` | INTEGER | PK, AUTOINCREMENT | - | Unique identifier |
+| `UserId` | TEXT | NOT NULL, UNIQUE | `'default'` | User identifier (future-proof for multi-user) |
+| `Theme` | TEXT | NOT NULL, CHECK IN ('Light', 'Dark') | `'Light'` | UI theme preference |
+| `DashboardRefreshInterval` | INTEGER | NOT NULL, CHECK (1-300) | `5` | Dashboard auto-refresh interval in seconds |
+| `NotificationDuration` | INTEGER | NOT NULL, CHECK (2-10) | `5` | Toast notification display duration in seconds |
+| `ShowSuccessNotifications` | INTEGER | NOT NULL | `1` | Show success toasts (SQLite boolean as int) |
+| `ShowErrorNotifications` | INTEGER | NOT NULL | `1` | Show error toasts |
+| `ShowInfoNotifications` | INTEGER | NOT NULL | `1` | Show info toasts |
+| `ShowWarningNotifications` | INTEGER | NOT NULL | `1` | Show warning toasts |
+| `CustomSettings` | TEXT | NULL | `NULL` | JSON blob for extensible settings |
+| `CreatedAt` | TEXT | NOT NULL | `CURRENT_TIMESTAMP` | Record creation timestamp (ISO 8601) |
+| `UpdatedAt` | TEXT | NOT NULL | `CURRENT_TIMESTAMP` | Last update timestamp (ISO 8601) |
 
 **Indexes**:
-- Unique index on UserId (one preference record per user)
-- Clustered index on Id (primary key)
+- `UNIQUE INDEX IX_UserPreferences_UserId ON UserPreferences(UserId)`
 
-**Default Values**:
-```json
-{
-  "Theme": "light",
-  "DashboardRefreshInterval": 10,
-  "NotificationTypesEnabled": {
-    "success": true,
-    "error": true,
-    "info": true,
-    "warning": true
-  },
-  "NotificationDuration": 5
-}
-```
-
-### NotificationTypesEnabled (Value Object)
-
-**Purpose**: Represents which types of toast notifications are enabled for display.
-
-**Location**: `TradingBot.Core.ValueObjects.NotificationTypesEnabled`
-
-**Structure**:
-```csharp
-public record NotificationTypesEnabled
-{
-    public bool Success { get; init; } = true;
-    public bool Error { get; init; } = true;
-    public bool Info { get; init; } = true;
-    public bool Warning { get; init; } = true;
-}
-```
-
-**Validation**:
-- No additional validation needed (boolean values are inherently valid)
-
-**Serialization**: Stored as JSON string in UserPreferences.NotificationTypesEnabled column
-
-## Entity Relationships
-
-```text
-AspNetUsers (Identity)
-    ↓ 1:1
-UserPreferences
-```
-
-**Cardinality**:
-- One AspNetUser has exactly zero or one UserPreferences record
-- One UserPreferences record belongs to exactly one AspNetUser
-
-## Database Schema (SQLite)
-
-### UserPreferences Table
-
+**Seed Data**:
 ```sql
-CREATE TABLE UserPreferences (
-    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    UserId TEXT NOT NULL UNIQUE,
-    Theme TEXT NOT NULL DEFAULT 'light' CHECK(Theme IN ('light', 'dark')),
-    DashboardRefreshInterval INTEGER NOT NULL DEFAULT 10 CHECK(DashboardRefreshInterval BETWEEN 1 AND 300),
-    NotificationTypesEnabled TEXT NOT NULL DEFAULT '{"success":true,"error":true,"info":true,"warning":true}',
-    NotificationDuration INTEGER NOT NULL DEFAULT 5 CHECK(NotificationDuration BETWEEN 2 AND 10),
-    CreatedAt TEXT NOT NULL,
-    UpdatedAt TEXT NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE CASCADE
-);
-
-CREATE UNIQUE INDEX IX_UserPreferences_UserId ON UserPreferences(UserId);
+INSERT INTO UserPreferences (UserId, Theme, DashboardRefreshInterval, NotificationDuration)
+VALUES ('default', 'Light', 5, 5);
 ```
 
-## EF Core Configuration
-
-### UserPreferences Entity Configuration
-
-**Location**: `TradingBot.Infrastructure.Persistence.Configurations.UserPreferencesConfiguration`
+**C# Entity Model**:
 
 ```csharp
+// <copyright file="UserPreferences.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Core.Entities;
+
+/// <summary>
+/// Represents user-specific preferences for UI customization.
+/// </summary>
+public class UserPreferences
+{
+    /// <summary>
+    /// Gets or sets the unique identifier.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the user identifier.
+    /// For single-user systems, this defaults to "default".
+    /// </summary>
+    public string UserId { get; set; } = "default";
+
+    /// <summary>
+    /// Gets or sets the UI theme preference (Light or Dark).
+    /// </summary>
+    public Theme Theme { get; set; } = Theme.Light;
+
+    /// <summary>
+    /// Gets or sets the dashboard refresh interval in seconds (1-300).
+    /// </summary>
+    public int DashboardRefreshInterval { get; set; } = 5;
+
+    /// <summary>
+    /// Gets or sets the notification display duration in seconds (2-10).
+    /// </summary>
+    public int NotificationDuration { get; set; } = 5;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether success notifications are displayed.
+    /// </summary>
+    public bool ShowSuccessNotifications { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether error notifications are displayed.
+    /// </summary>
+    public bool ShowErrorNotifications { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether info notifications are displayed.
+    /// </summary>
+    public bool ShowInfoNotifications { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether warning notifications are displayed.
+    /// </summary>
+    public bool ShowWarningNotifications { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets custom settings as JSON for future extensibility.
+    /// </summary>
+    public string? CustomSettings { get; set; }
+
+    /// <summary>
+    /// Gets or sets the record creation timestamp.
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Gets or sets the last update timestamp.
+    /// </summary>
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+```
+
+**EF Core Configuration**:
+
+```csharp
+// <copyright file="UserPreferencesConfiguration.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Infrastructure.Persistence.Configurations;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TradingBot.Core.Entities;
+using TradingBot.Core.ValueObjects;
+
+/// <summary>
+/// EF Core configuration for UserPreferences entity.
+/// </summary>
 public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPreferences>
 {
+    /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<UserPreferences> builder)
     {
         builder.ToTable("UserPreferences");
 
-        builder.HasKey(up => up.Id);
+        builder.HasKey(p => p.Id);
 
-        builder.Property(up => up.UserId)
-            .IsRequired()
-            .HasMaxLength(450); // AspNetUsers.Id max length
-
-        builder.HasIndex(up => up.UserId)
+        builder.HasIndex(p => p.UserId)
             .IsUnique();
 
-        builder.Property(up => up.Theme)
+        builder.Property(p => p.UserId)
             .IsRequired()
-            .HasMaxLength(20)
-            .HasDefaultValue("light");
+            .HasMaxLength(100);
 
-        builder.Property(up => up.DashboardRefreshInterval)
-            .IsRequired()
-            .HasDefaultValue(10);
-
-        builder.Property(up => up.NotificationTypesEnabled)
-            .IsRequired()
-            .HasColumnType("TEXT")
+        builder.Property(p => p.Theme)
             .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                v => JsonSerializer.Deserialize<NotificationTypesEnabled>(v, (JsonSerializerOptions)null))
-            .HasDefaultValue(new NotificationTypesEnabled());
-
-        builder.Property(up => up.NotificationDuration)
+                v => v.Name,
+                v => Theme.FromName(v, ignoreCase: false))
             .IsRequired()
-            .HasDefaultValue(5);
+            .HasMaxLength(20);
 
-        builder.Property(up => up.CreatedAt)
+        builder.Property(p => p.DashboardRefreshInterval)
             .IsRequired();
 
-        builder.Property(up => up.UpdatedAt)
+        builder.Property(p => p.NotificationDuration)
             .IsRequired();
 
-        // Relationship with AspNetUsers
-        builder.HasOne<IdentityUser>()
-            .WithOne()
-            .HasForeignKey<UserPreferences>(up => up.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(p => p.ShowSuccessNotifications)
+            .IsRequired();
+
+        builder.Property(p => p.ShowErrorNotifications)
+            .IsRequired();
+
+        builder.Property(p => p.ShowInfoNotifications)
+            .IsRequired();
+
+        builder.Property(p => p.ShowWarningNotifications)
+            .IsRequired();
+
+        builder.Property(p => p.CustomSettings)
+            .HasColumnType("TEXT");
+
+        builder.Property(p => p.CreatedAt)
+            .IsRequired();
+
+        builder.Property(p => p.UpdatedAt)
+            .IsRequired();
     }
 }
 ```
 
-## Data Access
+---
 
-### IUserPreferencesRepository Interface
+### 2. Theme (SmartEnum)
 
-**Location**: `TradingBot.Core.Interfaces.IUserPreferencesRepository`
+**Purpose**: Type-safe enumeration for theme values.
 
-```csharp
-public interface IUserPreferencesRepository
-{
-    Task<UserPreferences?> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
-    Task<UserPreferences> CreateAsync(UserPreferences preferences, CancellationToken cancellationToken = default);
-    Task<UserPreferences> UpdateAsync(UserPreferences preferences, CancellationToken cancellationToken = default);
-    Task DeleteAsync(string userId, CancellationToken cancellationToken = default);
-    Task<UserPreferences> GetOrCreateDefaultAsync(string userId, CancellationToken cancellationToken = default);
-}
-```
-
-### UserPreferencesRepository Implementation
-
-**Location**: `TradingBot.Infrastructure.Persistence.Repositories.UserPreferencesRepository`
-
-**Key Operations**:
-
-1. **GetByUserIdAsync**: Retrieves preferences for a specific user
-   - Returns null if no preferences exist
-   - Uses AsNoTracking for read-only operations
-
-2. **CreateAsync**: Creates new preferences record
-   - Sets CreatedAt and UpdatedAt to current UTC time
-   - Returns created entity with Id populated
-
-3. **UpdateAsync**: Updates existing preferences
-   - Updates UpdatedAt to current UTC time
-   - Uses entity tracking for change detection
-
-4. **DeleteAsync**: Deletes preferences for a user
-   - Cascade delete handled by database constraint
-
-5. **GetOrCreateDefaultAsync**: Gets existing preferences or creates default
-   - Convenience method for initialization
-   - Creates with default values if not found
-
-## Data Validation
-
-### Domain-Level Validation
-
-**Location**: `TradingBot.Core.Models.UserPreferences`
+**File**: `TradingBot.Core/ValueObjects/Theme.cs`
 
 ```csharp
-public class UserPreferences
-{
-    // ... properties ...
+// <copyright file="Theme.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
 
-    public void Validate()
+namespace TradingBot.Core.ValueObjects;
+
+using Ardalis.SmartEnum;
+
+/// <summary>
+/// Represents the UI theme options.
+/// </summary>
+public sealed class Theme : SmartEnum<Theme>
+{
+    /// <summary>
+    /// Light theme.
+    /// </summary>
+    public static readonly Theme Light = new(0, nameof(Light));
+
+    /// <summary>
+    /// Dark theme.
+    /// </summary>
+    public static readonly Theme Dark = new(1, nameof(Dark));
+
+    private Theme(int value, string name)
+        : base(value, name)
     {
-        if (string.IsNullOrWhiteSpace(UserId))
-            throw new ArgumentException("UserId is required", nameof(UserId));
-
-        if (Theme != "light" && Theme != "dark")
-            throw new ArgumentException("Theme must be 'light' or 'dark'", nameof(Theme));
-
-        if (DashboardRefreshInterval < 1 || DashboardRefreshInterval > 300)
-            throw new ArgumentOutOfRangeException(nameof(DashboardRefreshInterval),
-                "Dashboard refresh interval must be between 1 and 300 seconds");
-
-        if (NotificationDuration < 2 || NotificationDuration > 10)
-            throw new ArgumentOutOfRangeException(nameof(NotificationDuration),
-                "Notification duration must be between 2 and 10 seconds");
-
-        if (UpdatedAt < CreatedAt)
-            throw new InvalidOperationException("UpdatedAt cannot be earlier than CreatedAt");
     }
 }
 ```
 
-### Service-Level Validation
+---
 
-**Location**: `TradingBot.Web.Services.PreferencesService`
+## Client-Side State Models
 
-- Validates input before calling repository
-- Returns validation errors to UI layer
-- Ensures consistency between domain and database constraints
+These models exist only in the Blazor application and are NOT persisted to the database.
 
-## Migration
+### 3. UIState (Client Service)
 
-### EF Core Migration Command
+**Purpose**: Manage transient UI state (sidebar collapsed, modals open, etc.)
 
-```bash
-dotnet ef migrations add AddUserPreferences --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
-```
-
-### Migration File (Sample)
+**File**: `TradingBot.Web/Services/UIStateService.cs`
 
 ```csharp
-public partial class AddUserPreferences : Migration
+// <copyright file="UIStateService.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Web.Services;
+
+/// <summary>
+/// Manages transient UI state for the application.
+/// State does NOT persist across sessions.
+/// </summary>
+public class UIStateService
 {
-    protected override void Up(MigrationBuilder migrationBuilder)
+    private bool _sidebarCollapsed = false;
+
+    /// <summary>
+    /// Occurs when UI state changes.
+    /// </summary>
+    public event Action? OnStateChanged;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the sidebar is collapsed.
+    /// Note: This state does NOT persist across sessions per FR-003a.
+    /// </summary>
+    public bool SidebarCollapsed
     {
-        migrationBuilder.CreateTable(
-            name: "UserPreferences",
-            columns: table => new
-            {
-                Id = table.Column<int>(type: "INTEGER", nullable: false)
-                    .Annotation("Sqlite:Autoincrement", true),
-                UserId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: false),
-                Theme = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "light"),
-                DashboardRefreshInterval = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 10),
-                NotificationTypesEnabled = table.Column<string>(type: "TEXT", nullable: false,
-                    defaultValue: "{\"success\":true,\"error\":true,\"info\":true,\"warning\":true}"),
-                NotificationDuration = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 5),
-                CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_UserPreferences", x => x.Id);
-                table.ForeignKey(
-                    name: "FK_UserPreferences_AspNetUsers_UserId",
-                    column: x => x.UserId,
-                    principalTable: "AspNetUsers",
-                    principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
-                table.CheckConstraint("CK_UserPreferences_Theme", "Theme IN ('light', 'dark')");
-                table.CheckConstraint("CK_UserPreferences_DashboardRefreshInterval",
-                    "DashboardRefreshInterval BETWEEN 1 AND 300");
-                table.CheckConstraint("CK_UserPreferences_NotificationDuration",
-                    "NotificationDuration BETWEEN 2 AND 10");
-            });
-
-        migrationBuilder.CreateIndex(
-            name: "IX_UserPreferences_UserId",
-            table: "UserPreferences",
-            column: "UserId",
-            unique: true);
-    }
-
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.DropTable(name: "UserPreferences");
-    }
-}
-```
-
-## Data Seeding (Optional)
-
-### Default Preferences for Existing Users
-
-**Location**: `TradingBot.Infrastructure.Persistence.TradingBotDbContextSeed`
-
-```csharp
-public static class TradingBotDbContextSeed
-{
-    public static async Task SeedDefaultPreferencesAsync(TradingBotDbContext context)
-    {
-        // Get all users without preferences
-        var usersWithoutPreferences = await context.Users
-            .Where(u => !context.UserPreferences.Any(up => up.UserId == u.Id))
-            .ToListAsync();
-
-        foreach (var user in usersWithoutPreferences)
+        get => _sidebarCollapsed;
+        set
         {
-            var preferences = new UserPreferences
+            if (_sidebarCollapsed == value)
             {
-                UserId = user.Id,
-                Theme = "light",
-                DashboardRefreshInterval = 10,
-                NotificationTypesEnabled = new NotificationTypesEnabled(),
-                NotificationDuration = 5,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                return;
+            }
 
-            context.UserPreferences.Add(preferences);
+            _sidebarCollapsed = value;
+            NotifyStateChanged();
+        }
+    }
+
+    /// <summary>
+    /// Toggles the sidebar collapsed state.
+    /// </summary>
+    public void ToggleSidebar()
+    {
+        SidebarCollapsed = !SidebarCollapsed;
+    }
+
+    private void NotifyStateChanged()
+    {
+        OnStateChanged?.Invoke();
+    }
+}
+```
+
+### 4. Toast Notification Models
+
+**Purpose**: Manage toast notification display and lifecycle.
+
+**File**: `TradingBot.Web/Models/ToastNotification.cs`
+
+```csharp
+// <copyright file="ToastNotification.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Web.Models;
+
+/// <summary>
+/// Represents a toast notification.
+/// </summary>
+public class ToastNotification
+{
+    /// <summary>
+    /// Gets or sets the unique identifier.
+    /// </summary>
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets or sets the notification type.
+    /// </summary>
+    public ToastType Type { get; set; }
+
+    /// <summary>
+    /// Gets or sets the message to display.
+    /// </summary>
+    public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the duration in seconds to display the toast.
+    /// </summary>
+    public int DurationSeconds { get; set; } = 5;
+
+    /// <summary>
+    /// Gets or sets the timestamp when the toast was created.
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// Toast notification types.
+/// </summary>
+public enum ToastType
+{
+    /// <summary>
+    /// Success notification (green).
+    /// </summary>
+    Success,
+
+    /// <summary>
+    /// Error notification (red).
+    /// </summary>
+    Error,
+
+    /// <summary>
+    /// Warning notification (yellow).
+    /// </summary>
+    Warning,
+
+    /// <summary>
+    /// Information notification (blue).
+    /// </summary>
+    Info,
+}
+```
+
+**File**: `TradingBot.Web/Services/ToastService.cs`
+
+```csharp
+// <copyright file="ToastService.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Web.Services;
+
+using TradingBot.Web.Models;
+
+/// <summary>
+/// Service for managing toast notifications.
+/// </summary>
+public class ToastService
+{
+    private readonly List<ToastNotification> _toasts = new();
+    private readonly IUserPreferencesService _preferencesService;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ToastService"/> class.
+    /// </summary>
+    /// <param name="preferencesService">User preferences service.</param>
+    public ToastService(IUserPreferencesService preferencesService)
+    {
+        _preferencesService = preferencesService;
+    }
+
+    /// <summary>
+    /// Occurs when toasts change.
+    /// </summary>
+    public event Action? OnToastsChanged;
+
+    /// <summary>
+    /// Gets the current list of toasts.
+    /// </summary>
+    public IReadOnlyList<ToastNotification> Toasts => _toasts.AsReadOnly();
+
+    /// <summary>
+    /// Shows a toast notification if the type is enabled in user preferences.
+    /// </summary>
+    public async Task ShowAsync(ToastType type, string message)
+    {
+        var preferences = await _preferencesService.GetPreferencesAsync();
+
+        var shouldShow = type switch
+        {
+            ToastType.Success => preferences.ShowSuccessNotifications,
+            ToastType.Error => preferences.ShowErrorNotifications,
+            ToastType.Warning => preferences.ShowWarningNotifications,
+            ToastType.Info => preferences.ShowInfoNotifications,
+            _ => true
+        };
+
+        if (!shouldShow)
+        {
+            return;
         }
 
-        await context.SaveChangesAsync();
+        var toast = new ToastNotification
+        {
+            Type = type,
+            Message = message,
+            DurationSeconds = preferences.NotificationDuration
+        };
+
+        _toasts.Add(toast);
+        NotifyStateChanged();
+
+        // Auto-dismiss after duration
+        _ = Task.Delay(TimeSpan.FromSeconds(toast.DurationSeconds))
+            .ContinueWith(_ => Dismiss(toast.Id));
+    }
+
+    /// <summary>
+    /// Dismisses a toast by ID.
+    /// </summary>
+    public void Dismiss(Guid id)
+    {
+        var toast = _toasts.FirstOrDefault(t => t.Id == id);
+        if (toast != null)
+        {
+            _toasts.Remove(toast);
+            NotifyStateChanged();
+        }
+    }
+
+    /// <summary>
+    /// Dismisses all toasts.
+    /// </summary>
+    public void DismissAll()
+    {
+        _toasts.Clear();
+        NotifyStateChanged();
+    }
+
+    private void NotifyStateChanged()
+    {
+        OnToastsChanged?.Invoke();
     }
 }
 ```
 
-**Execution**: Call during app startup in Program.cs for development/staging environments only
+---
 
-## Data Volume Estimates
+## Validation Rules
 
-- **UserPreferences**: One record per user
-- **Average Record Size**: ~200 bytes (including JSON serialization)
-- **Growth Rate**: Linear with user base growth
-- **Expected Volume**: 1-10,000 records (small dataset)
+### UserPreferences Validation
 
-## Performance Considerations
+**Validation Class**: `TradingBot.Core/Validators/UserPreferencesValidator.cs`
 
-- **Indexing**: Unique index on UserId ensures fast lookups (O(1) time complexity)
-- **Caching**: Preferences loaded once per session and cached in memory (IMemoryCache)
-- **Writes**: Debounced save operations prevent excessive database writes
-- **JSON Column**: NotificationTypesEnabled stored as JSON for flexibility (minimal overhead for small objects)
+```csharp
+// <copyright file="UserPreferencesValidator.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
 
-## Data Privacy & Security
+namespace TradingBot.Core.Validators;
 
-- **PII**: User preferences contain no personally identifiable information (PII)
-- **Encryption**: No encryption needed (non-sensitive UI preferences)
-- **Access Control**: Users can only read/write their own preferences (enforced by UserId filter)
-- **Audit Trail**: CreatedAt and UpdatedAt provide basic audit information
-- **GDPR Compliance**: Cascade delete ensures preferences removed when user account deleted
+using TradingBot.Core.Entities;
 
-## Future Extensions (Out of Scope)
+/// <summary>
+/// Validator for UserPreferences entity.
+/// </summary>
+public class UserPreferencesValidator
+{
+    /// <summary>
+    /// Validates a UserPreferences instance.
+    /// </summary>
+    /// <param name="preferences">The preferences to validate.</param>
+    /// <returns>A validation result.</returns>
+    public ValidationResult Validate(UserPreferences preferences)
+    {
+        var errors = new List<string>();
 
-- Custom theme colors (user-defined color schemes)
-- Layout preferences (widget positions, column widths)
-- Keyboard shortcut customization
-- Notification sound preferences
-- Advanced accessibility settings (font size, contrast adjustments)
+        if (string.IsNullOrWhiteSpace(preferences.UserId))
+        {
+            errors.Add("User ID is required.");
+        }
+
+        if (preferences.DashboardRefreshInterval < 1 || preferences.DashboardRefreshInterval > 300)
+        {
+            errors.Add("Dashboard refresh interval must be between 1 and 300 seconds.");
+        }
+
+        if (preferences.NotificationDuration < 2 || preferences.NotificationDuration > 10)
+        {
+            errors.Add("Notification duration must be between 2 and 10 seconds.");
+        }
+
+        if (preferences.Theme == null)
+        {
+            errors.Add("Theme is required.");
+        }
+
+        return errors.Any()
+            ? ValidationResult.Error(errors)
+            : ValidationResult.Success();
+    }
+}
+
+/// <summary>
+/// Represents a validation result.
+/// </summary>
+public class ValidationResult
+{
+    private ValidationResult(bool isSuccess, IEnumerable<string> errors)
+    {
+        IsSuccess = isSuccess;
+        Errors = errors.ToList();
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether validation succeeded.
+    /// </summary>
+    public bool IsSuccess { get; }
+
+    /// <summary>
+    /// Gets the list of validation errors.
+    /// </summary>
+    public IReadOnlyList<string> Errors { get; }
+
+    /// <summary>
+    /// Creates a successful validation result.
+    /// </summary>
+    public static ValidationResult Success() => new(true, []);
+
+    /// <summary>
+    /// Creates a failed validation result.
+    /// </summary>
+    public static ValidationResult Error(IEnumerable<string> errors) => new(false, errors);
+}
+```
+
+---
+
+## Repository Interface
+
+**File**: `TradingBot.Core/Interfaces/IUserPreferencesRepository.cs`
+
+```csharp
+// <copyright file="IUserPreferencesRepository.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Core.Interfaces;
+
+using TradingBot.Core.Entities;
+
+/// <summary>
+/// Repository interface for UserPreferences.
+/// </summary>
+public interface IUserPreferencesRepository
+{
+    /// <summary>
+    /// Gets user preferences by user ID.
+    /// </summary>
+    /// <param name="userId">The user ID (default: "default").</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The user preferences, or default preferences if not found.</returns>
+    Task<UserPreferences> GetByUserIdAsync(
+        string userId = "default",
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves or updates user preferences.
+    /// </summary>
+    /// <param name="preferences">The preferences to save.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the async operation.</returns>
+    Task SaveAsync(UserPreferences preferences, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resets user preferences to default values.
+    /// </summary>
+    /// <param name="userId">The user ID (default: "default").</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The reset preferences.</returns>
+    Task<UserPreferences> ResetToDefaultAsync(
+        string userId = "default",
+        CancellationToken cancellationToken = default);
+}
+```
+
+---
+
+## Service Interface
+
+**File**: `TradingBot.Core/Interfaces/IUserPreferencesService.cs`
+
+```csharp
+// <copyright file="IUserPreferencesService.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+namespace TradingBot.Core.Interfaces;
+
+using TradingBot.Core.Entities;
+using TradingBot.Core.Validators;
+
+/// <summary>
+/// Service interface for managing user preferences.
+/// </summary>
+public interface IUserPreferencesService
+{
+    /// <summary>
+    /// Gets the current user's preferences.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The user preferences.</returns>
+    Task<UserPreferences> GetPreferencesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates the current user's preferences.
+    /// </summary>
+    /// <param name="preferences">The updated preferences.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Validation result indicating success or errors.</returns>
+    Task<ValidationResult> UpdatePreferencesAsync(
+        UserPreferences preferences,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Resets preferences to default values.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The reset preferences.</returns>
+    Task<UserPreferences> ResetToDefaultAsync(CancellationToken cancellationToken = default);
+}
+```
+
+---
+
+## Database Migration
+
+**Migration Name**: `AddUserPreferences`
+
+**Up Migration**:
+```sql
+CREATE TABLE UserPreferences (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserId TEXT NOT NULL DEFAULT 'default',
+    Theme TEXT NOT NULL CHECK(Theme IN ('Light', 'Dark')) DEFAULT 'Light',
+    DashboardRefreshInterval INTEGER NOT NULL DEFAULT 5 CHECK(DashboardRefreshInterval >= 1 AND DashboardRefreshInterval <= 300),
+    NotificationDuration INTEGER NOT NULL DEFAULT 5 CHECK(NotificationDuration >= 2 AND NotificationDuration <= 10),
+    ShowSuccessNotifications INTEGER NOT NULL DEFAULT 1,
+    ShowErrorNotifications INTEGER NOT NULL DEFAULT 1,
+    ShowInfoNotifications INTEGER NOT NULL DEFAULT 1,
+    ShowWarningNotifications INTEGER NOT NULL DEFAULT 1,
+    CustomSettings TEXT,
+    CreatedAt TEXT NOT NULL DEFAULT (datetime('now')),
+    UpdatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE UNIQUE INDEX IX_UserPreferences_UserId ON UserPreferences(UserId);
+
+-- Seed default preferences for single user
+INSERT INTO UserPreferences (UserId, Theme, DashboardRefreshInterval, NotificationDuration)
+VALUES ('default', 'Light', 5, 5);
+```
+
+**Down Migration**:
+```sql
+DROP TABLE IF EXISTS UserPreferences;
+```
+
+---
+
+## Summary
+
+### New Entities
+1. **UserPreferences**: Database-persisted user settings
+2. **Theme**: SmartEnum for theme values (Light, Dark)
+
+### Client-Side Models (Not Persisted)
+1. **UIStateService**: Transient UI state (sidebar collapsed, etc.)
+2. **ToastNotification**: Toast message model
+3. **ToastService**: Toast notification manager
+
+### Validation
+- `UserPreferencesValidator`: Validates settings before save
+- Range checks: DashboardRefreshInterval (1-300), NotificationDuration (2-10)
+
+### Repository/Service Interfaces
+- `IUserPreferencesRepository`: Data access layer
+- `IUserPreferencesService`: Business logic layer
+
+---
+
+**Next Phase**: Generate API contracts (if needed) and quickstart guide.

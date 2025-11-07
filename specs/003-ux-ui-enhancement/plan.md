@@ -1,66 +1,144 @@
 # Implementation Plan: UX/UI Enhancement - Navigation & Settings
 
 **Branch**: `003-ux-ui-enhancement` | **Date**: 2025-11-07 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/003-ux-ui-enhancement/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Input**: Feature specification from `/specs/003-ux-ui-enhancement/spec.md`
 
 ## Summary
 
-Enhance the existing Blazor Server trading dashboard with comprehensive UX/UI improvements including a persistent left sidebar navigation menu, user settings and preferences management (theme, refresh intervals, notifications), visual design polish, keyboard navigation and WCAG 2.1 Level AA accessibility compliance, responsive layouts with component consistency, and contextual help throughout the application. The enhancements will use DaisyUI components and Tailwind CSS for consistent styling while maintaining the existing Blazor Server architecture.
+Implement comprehensive UX/UI enhancements for the TradingBot Blazor web application, including:
+- **Persistent left sidebar navigation** with collapsible icon-only mode
+- **User settings page** for theme (light/dark), refresh intervals, and notification preferences
+- **Custom Tailwind-based component library** following Atomic Design pattern (atoms, molecules, organisms)
+- **Heroicons integration** for consistent iconography
+- **Theme system** using Tailwind dark mode with CSS variables
+- **Toast notification system** with user-configurable display settings
+- **Keyboard navigation and accessibility** compliance (WCAG 2.1 Level AA)
+
+**Technical Approach** (from research.md):
+- Build reusable atomic components (Button, Input, Icon, etc.) with Tailwind CSS
+- No third-party component libraries (DaisyUI removed per user request)
+- Hybrid state management (client UIState service + database-persisted preferences)
+- SQLite database extension for UserPreferences table
+- Single-user system (UserId = "default", no authentication changes)
+
+---
 
 ## Technical Context
 
-**Language/Version**: C# / .NET 9 + ASP.NET Core Blazor Server
-**Primary Dependencies**: DaisyUI, Tailwind CSS, existing TradingBot.Web project from spec 002
-**Storage**: SQLite via Entity Framework Core 9 (extend schema for user preferences)
-**Testing**: xUnit + bUnit for component tests, FakeItEasy for mocking, Shouldly for assertions
-**Target Platform**: Web browsers (Chrome, Edge, Firefox, Safari - last 2 versions), desktop-only (minimum 1024px width)
-**Project Type**: Web application enhancement (builds on existing TradingBot.Web)
-**Performance Goals**: Navigation < 2 clicks to any section, settings save < 1s, visual feedback < 100ms, theme change instant, keyboard navigation fully functional
-**Constraints**: Must maintain existing Blazor Server architecture, reuse existing Core/Infrastructure layers, WCAG 2.1 Level AA compliance required, no mobile optimization (1024px minimum), desktop-only keyboard shortcuts
-**Scale/Scope**: 6 user stories (P1-P3 priority), ~40 functional requirements across 6 categories, left sidebar navigation with 6 main sections, user preferences entity with 5+ configurable settings
+**Language/Version**: C# 12 / .NET 9
+**Primary Dependencies**:
+  - ASP.NET Core Blazor Server 9.0
+  - Tailwind CSS 3.x (utility-first styling)
+  - Heroicons (SVG icons)
+  - Entity Framework Core 9 (SQLite)
+  - SignalR (existing, for real-time updates)
+  - Blazor-ApexCharts (existing, for data visualization)
+
+**Storage**: SQLite via EF Core 9 (extend with UserPreferences table)
+**Testing**: xUnit, bUnit (Blazor component testing), FakeItEasy (mocking), Shouldly (assertions)
+**Target Platform**: Modern web browsers (Chrome, Edge, Firefox, Safari - last 2 versions), desktop-first (minimum 1024px width)
+**Project Type**: Web (Blazor Server application)
+**Performance Goals**:
+  - API endpoints: < 200ms p95 (per constitution)
+  - Page load: < 1.5s FCP, < 3.5s TTI
+  - SignalR updates: Throttled to 500ms (2 updates/sec)
+  - Smooth UI transitions: < 300ms
+
+**Constraints**:
+  - Desktop-only responsive design (1024px minimum width)
+  - Single-user system (no multi-user authentication)
+  - Must maintain existing Blazor Server architecture from spec 002
+  - No mobile/touch optimization required
+
+**Scale/Scope**:
+  - Single web application
+  - ~15-20 new reusable components (atoms + molecules + organisms)
+  - 1 new database table (UserPreferences)
+  - 1 new page (Settings)
+  - Update existing MainLayout and navigation
+
+---
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Code Quality Gates
-- ✅ **Layered Architecture**: UI enhancements remain in presentation layer (TradingBot.Web), user preferences added to Core domain
-- ✅ **SOLID Principles**: Settings management follows SRP, DIP through service abstractions for preferences
-- ✅ **Naming Conventions**: All C# code follows PascalCase for public, camelCase with underscore for private fields
-- ✅ **File Headers**: All .cs files will include copyright headers per existing standard
-- ✅ **SmartEnum Pattern**: Will use existing SmartEnum types, no new enums introduced for this feature
+### ✅ Code Quality Compliance
 
-### Testing Gates
-- ✅ **80% Code Coverage**: Component tests for all new UI components, service tests for preferences management
-- ✅ **100% Critical Path Coverage**: Settings persistence, theme switching, navigation rendering, accessibility features
-- ✅ **AAA Pattern**: All tests follow Arrange-Act-Assert structure
-- ✅ **Test Naming**: `ComponentName_Scenario_ExpectedBehavior` format (e.g., `LeftSidebar_WhenCollapsed_ShowsIconsOnly`)
-- ✅ **Fast Execution**: Component tests expected < 50ms each, full suite addition < 30 seconds
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| Clean Code Standards | ✅ PASS | Component-based architecture, descriptive naming, single responsibility |
+| C# Coding Conventions | ✅ PASS | PascalCase, async/await, nullable reference types, IDisposable |
+| SmartEnum Pattern | ✅ PASS | `Theme` will use SmartEnum (Light, Dark) |
+| XML Documentation | ✅ PASS | All public components and services will have XML docs |
+| File Headers | ✅ PASS | Copyright headers required per project standards |
+| SOLID Principles | ✅ PASS | Interface-based services (IUserPreferencesService, IUserPreferencesRepository) |
 
-### Performance Gates
-- ✅ **Response Time**: Settings save < 1s, navigation render < 100ms, theme change instant (per spec SC-003, SC-004, SC-005)
-- ✅ **API p95 < 200ms**: User preferences CRUD operations meet constitution requirement
-- ✅ **Caching**: Theme configuration cached in memory, preferences loaded once per session
-- ✅ **Monitoring**: Structured logging for settings changes, navigation errors, accessibility issues
+### ✅ Testing Standards Compliance
 
-### Security Gates
-- ✅ **Authentication**: Leverage existing ASP.NET Core Identity (no changes needed)
-- ✅ **Authorization**: User preferences scoped to authenticated user, no cross-user access
-- ✅ **Input Validation**: All settings inputs validated (refresh interval 1-300s, notification duration 2-10s)
-- ✅ **XSS Prevention**: Blazor automatic escaping, parameterized queries for preferences storage
-- ✅ **Audit Trail**: Settings changes logged with user ID and timestamp
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| 80% Code Coverage | ✅ PASS | Will cover all services, repositories, and critical components |
+| 100% Critical Paths | ✅ PASS | UserPreferences save/load is critical, will have 100% coverage |
+| AAA Test Pattern | ✅ PASS | All tests follow Arrange-Act-Assert structure |
+| bUnit for Components | ✅ PASS | Blazor component tests using bUnit framework |
+| Test Independence | ✅ PASS | Each test uses isolated context/mocks |
 
-### UX Consistency Gates
-- ✅ **Responsive Design**: Desktop-only per spec (1024px minimum), follows DaisyUI and Tailwind CSS design system
-- ✅ **Accessibility**: WCAG 2.1 Level AA compliance for keyboard navigation, screen readers, color contrast (per spec SC-007)
-- ✅ **Error Handling**: User-friendly messages for settings validation errors, save failures, connection issues
-- ✅ **Visual Feedback**: Hover states on all interactive elements < 100ms, loading indicators < 200ms (per spec SC-005, SC-009)
-- ✅ **Color Coding**: Consistent use of green (success), red (error), yellow (warning), blue (info) per constitution
+### ⚠️ UX Consistency (Constitution Updated Required)
 
-### Status: ✅ PASS
-All gates align with constitution requirements. This feature enhances the existing TradingBot.Web project without violating architecture principles. No new violations requiring justification.
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| Consistent Design | ⚠️ UPDATE NEEDED | Constitution references DaisyUI - UPDATE to Tailwind-only approach |
+| Accessibility (WCAG 2.1 AA) | ✅ PASS | Full keyboard navigation, ARIA labels, color contrast compliance |
+| Responsive Design | ⚠️ PARTIAL | Constitution says "mobile-first" but spec is "desktop-first (1024px min)" |
+| Error Handling | ✅ PASS | User-friendly messages, toast notifications, actionable feedback |
+| Localization | ❌ OUT OF SCOPE | Multi-language support explicitly out of scope per spec |
+
+**Action Required**: Update constitution section 3.1 to reflect:
+- Tailwind CSS-only approach (no DaisyUI)
+- Desktop-first responsive design for trading applications (not mobile-first)
+
+### ✅ Performance Requirements Compliance
+
+| Target | Status | Notes |
+|--------|--------|-------|
+| API < 200ms p95 | ✅ PASS | Simple CRUD operations on UserPreferences, < 10ms database query |
+| Page Load < 1.5s FCP | ✅ PASS | Static assets, lazy load charts, Tailwind minified |
+| Real-time Updates | ✅ PASS | SignalR throttling at 500ms already implemented (spec 002) |
+| Caching Strategy | ✅ PASS | localStorage cache for preferences, 60s server cache |
+
+### ✅ Security Standards Compliance
+
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| Input Validation | ✅ PASS | Range validation on intervals (1-300s, 2-10s), validator class |
+| Encryption at Rest | ✅ PASS | No sensitive data in preferences (theme, intervals) |
+| No Secrets in Code | ✅ PASS | No API keys or credentials in preferences |
+| Audit Trail | ⚠️ PARTIAL | CreatedAt/UpdatedAt timestamps, but no audit log for preference changes |
+
+**Note**: Audit trail for financial transactions exists (spec 001), but preference changes are not financial.
+
+### ✅ DevOps/CI-CD Compliance
+
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| Git Workflow | ✅ PASS | Feature branch `003-ux-ui-enhancement`, PR required for merge |
+| Automated Tests | ✅ PASS | CI runs full test suite on PR |
+| Static Analysis | ✅ PASS | StyleCop, Roslynator enforced in build |
+| Code Review | ✅ PASS | Will follow 7.1 review checklist |
+
+### Gate Decision: ✅ **PASS WITH NOTES**
+
+**Justification**:
+- All critical standards met
+- Constitution update needed (UX section) to reflect Tailwind-only + desktop-first approach
+- No violations that block implementation
+- Audit trail for preferences is non-critical (not financial data)
+
+**Re-check after Phase 1 Design**: Verify component architecture aligns with clean code principles.
+
+---
 
 ## Project Structure
 
@@ -68,122 +146,335 @@ All gates align with constitution requirements. This feature enhances the existi
 
 ```text
 specs/003-ux-ui-enhancement/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-│   └── user-preferences-api.yaml  # User preferences CRUD endpoints
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── spec.md                  # Feature specification (user scenarios, requirements)
+├── plan.md                  # This file (/speckit.plan output)
+├── research.md              # Phase 0 output - technical decisions
+├── data-model.md            # Phase 1 output - entities, validation, DB schema
+├── quickstart.md            # Phase 1 output - developer setup guide
+├── contracts/               # Phase 1 output - API contracts
+│   └── user-preferences-api.yaml   # OpenAPI spec for preferences endpoints
+└── tasks.md                 # Phase 2 output (/speckit.tasks - NOT created yet)
 ```
 
 ### Source Code (repository root)
 
-**Existing Structure** (from spec 002, will be enhanced):
-```text
-src/
-├── TradingBot.Core/           # ADD: UserPreferences entity, IUserPreferencesRepository
-├── TradingBot.Infrastructure/ # ADD: UserPreferencesRepository, UserPreferences EF configuration
-├── TradingBot.Web/            # ENHANCE: Navigation, settings components, theme system
-│   ├── Components/
-│   │   ├── Layout/
-│   │   │   ├── MainLayout.razor          # MODIFY: Add left sidebar integration
-│   │   │   ├── LeftSidebar.razor         # NEW: Persistent left sidebar navigation
-│   │   │   └── TopHeader.razor           # NEW: Top header with settings access
-│   │   ├── Settings/                     # NEW: Settings components
-│   │   │   ├── SettingsPage.razor        # NEW: Main settings page
-│   │   │   ├── DisplaySettings.razor     # NEW: Theme, refresh interval settings
-│   │   │   ├── NotificationSettings.razor # NEW: Toast notification preferences
-│   │   │   └── PreferencesService.cs     # NEW: Settings management service
-│   │   ├── Shared/                       # ENHANCE: Shared UI components
-│   │   │   ├── Toast.razor               # NEW: Toast notification component
-│   │   │   ├── Modal.razor               # NEW: Accessible modal dialog
-│   │   │   ├── Tooltip.razor             # NEW: Contextual help tooltips
-│   │   │   ├── LoadingIndicator.razor    # NEW: Loading state component
-│   │   │   └── HelpIcon.razor            # NEW: Help icon with tooltip
-│   │   └── [Other existing components]   # ENHANCE: Add keyboard nav, ARIA labels
-│   ├── Pages/                             # ENHANCE: All existing pages
-│   │   └── Settings.razor                 # NEW: Settings page route
-│   ├── Services/
-│   │   ├── ThemeService.cs                # NEW: Theme management and persistence
-│   │   ├── NotificationService.cs         # NEW: Toast notification management
-│   │   └── KeyboardShortcutService.cs     # NEW: Keyboard shortcut handling
-│   ├── wwwroot/
-│   │   ├── css/
-│   │   │   ├── app.css                    # ENHANCE: Add sidebar, theme variables
-│   │   │   └── themes/                    # NEW: Light and dark theme CSS
-│   │   │       ├── light.css
-│   │   │       └── dark.css
-│   │   └── js/
-│   │       ├── theme-switcher.js          # NEW: Client-side theme switching
-│   │       └── keyboard-shortcuts.js      # NEW: Keyboard shortcut handlers
-│   ├── Migrations/                         # ADD: New migration for UserPreferences table
-│   ├── appsettings.json                    # ADD: Default user preferences config
-│   └── Program.cs                          # MODIFY: Register new services
+**Blazor Server Web Application Structure**:
 
-tests/
-└── TradingBot.Web.Tests/
-    ├── Components/
-    │   ├── Layout/
-    │   │   └── LeftSidebarTests.cs         # NEW: Sidebar component tests
-    │   ├── Settings/
-    │   │   ├── SettingsPageTests.cs        # NEW: Settings page tests
-    │   │   └── DisplaySettingsTests.cs     # NEW: Display settings tests
-    │   └── Shared/
-    │       ├── ToastTests.cs               # NEW: Toast component tests
-    │       └── ModalTests.cs               # NEW: Modal accessibility tests
-    ├── Services/
-    │   ├── ThemeServiceTests.cs            # NEW: Theme service tests
-    │   ├── NotificationServiceTests.cs     # NEW: Notification service tests
-    │   └── PreferencesServiceTests.cs      # NEW: Preferences service tests
-    └── Accessibility/
-        └── KeyboardNavigationTests.cs      # NEW: Keyboard nav integration tests
-```
-
-**DaisyUI and Tailwind CSS Integration**:
 ```text
-src/TradingBot.Web/
+src/TradingBot.Web/                         # Blazor Server project
+├── Components/
+│   ├── Atoms/                              # NEW: Basic reusable components
+│   │   ├── Button.razor
+│   │   ├── Input.razor
+│   │   ├── Select.razor
+│   │   ├── Toggle.razor
+│   │   ├── Icon.razor                      # Heroicons SVG wrapper
+│   │   ├── Badge.razor
+│   │   ├── Spinner.razor
+│   │   └── Label.razor
+│   ├── Molecules/                          # NEW: Composite components
+│   │   ├── FormField.razor                 # Label + Input + Error
+│   │   ├── MenuItem.razor                  # Icon + Label navigation item
+│   │   ├── Toast.razor                     # Single toast notification
+│   │   ├── Tooltip.razor                   # Hover tooltip
+│   │   └── Card.razor                      # Already exists, may update styling
+│   ├── Organisms/                          # NEW: Complex feature components
+│   │   ├── NavigationSidebar.razor         # Left sidebar navigation (replaces NavMenu)
+│   │   ├── SettingsForm.razor              # Settings page form
+│   │   ├── ThemeProvider.razor             # Theme context wrapper
+│   │   └── NotificationCenter.razor        # Toast container manager
+│   ├── Layout/
+│   │   ├── MainLayout.razor                # UPDATE: Add ThemeProvider, NavigationSidebar
+│   │   └── NavMenu.razor                   # DEPRECATED: Replace with NavigationSidebar
+│   ├── Pages/
+│   │   ├── Settings.razor                  # NEW: User settings page
+│   │   ├── Home.razor                      # UPDATE: May update styling
+│   │   ├── Portfolio.razor
+│   │   ├── Performance.razor
+│   │   ├── Strategies.razor
+│   │   └── Backtest.razor
+│   └── Shared/
+│       ├── ToastContainer.razor            # UPDATE: Use new Toast molecule
+│       └── ErrorBoundary.razor             # Already exists
+├── Services/                               # NEW: Client-side services
+│   ├── UIStateService.cs                   # Transient UI state (sidebar collapsed)
+│   └── NavigationService.cs                # Navigation helpers, active route detection
+├── Models/                                 # View models
+│   └── ToastNotification.cs                # UPDATE: From data-model.md
 ├── Styles/
-│   ├── app.css                            # ENHANCE: Add DaisyUI imports, custom utilities
-│   ├── components/                        # NEW: Component-specific styles
-│   │   ├── sidebar.css                    # Sidebar animations and states
-│   │   ├── toast.css                      # Toast notification styles
-│   │   └── themes.css                     # Theme-specific overrides
-│   └── utilities/                         # NEW: Custom Tailwind utilities
-│       └── accessibility.css              # Focus indicators, screen reader utilities
-├── tailwind.config.js                     # MODIFY: Add DaisyUI plugin, theme configuration
-├── package.json                           # MODIFY: Add DaisyUI dependency
-└── package-lock.json                      # UPDATE: Lock DaisyUI version
-```
+│   └── app.css                             # UPDATE: Add CSS variables for theme
+├── wwwroot/
+│   ├── css/
+│   │   └── app.css                         # Generated Tailwind CSS (build output)
+│   └── icons/                              # NEW: Optional Heroicons SVG storage
+├── tailwind.config.js                      # UPDATE: Add dark mode, theme colors
+├── package.json                            # Already exists (Tailwind build scripts)
+└── Program.cs                              # UPDATE: Register UIStateService
 
-**Database Schema Updates**:
-```text
-Database: tradingbot.db (SQLite)
+src/TradingBot.Core/                        # Domain layer
+├── Entities/
+│   └── UserPreferences.cs                  # NEW: From data-model.md
+├── ValueObjects/
+│   └── Theme.cs                            # NEW: SmartEnum (Light, Dark)
+├── Interfaces/
+│   ├── IUserPreferencesRepository.cs       # NEW: Data access interface
+│   └── IUserPreferencesService.cs          # NEW: Business logic interface
+└── Validators/
+    └── UserPreferencesValidator.cs         # NEW: Validate settings before save
 
-NEW TABLE: UserPreferences
-- Id (PK)
-- UserId (FK to AspNetUsers)
-- Theme (string: "light" or "dark")
-- DashboardRefreshInterval (int: 1-300 seconds)
-- NotificationTypesEnabled (JSON: {success: bool, error: bool, info: bool, warning: bool})
-- NotificationDuration (int: 2-10 seconds)
-- SidebarCollapsed (bool: always false on load, transient state)
-- CreatedAt (datetime)
-- UpdatedAt (datetime)
+src/TradingBot.Infrastructure/              # Data access layer
+├── Persistence/
+│   ├── Configurations/
+│   │   └── UserPreferencesConfiguration.cs # NEW: EF Core fluent config
+│   ├── Repositories/
+│   │   └── UserPreferencesRepository.cs    # NEW: Repository implementation
+│   └── Migrations/
+│       └── [TIMESTAMP]_AddUserPreferences.cs  # NEW: EF migration
+└── Services/
+    └── UserPreferencesService.cs           # NEW: Business logic implementation
+
+tests/TradingBot.Web.Tests/                 # NEW: Blazor component tests
+├── Components/
+│   ├── Atoms/
+│   │   ├── ButtonTests.cs
+│   │   ├── InputTests.cs
+│   │   └── IconTests.cs
+│   ├── Molecules/
+│   │   └── FormFieldTests.cs
+│   └── Organisms/
+│       ├── NavigationSidebarTests.cs
+│       └── SettingsFormTests.cs
+└── Services/
+    └── UIStateServiceTests.cs
+
+tests/TradingBot.Core.Tests/                # Existing, add new tests
+└── Validators/
+    └── UserPreferencesValidatorTests.cs    # NEW
+
+tests/TradingBot.Infrastructure.Tests/      # Existing, add new tests
+├── Repositories/
+│   └── UserPreferencesRepositoryTests.cs   # NEW
+└── Services/
+    └── UserPreferencesServiceTests.cs      # NEW
 ```
 
 **Structure Decision**:
-- This is a **web application enhancement** building on the existing TradingBot.Web project from spec 002
-- User preferences are added as a new domain entity in TradingBot.Core with repository in TradingBot.Infrastructure
-- Navigation and settings components are added to the existing Blazor component hierarchy
-- Theme management is implemented as a new service layer in TradingBot.Web
-- DaisyUI is integrated as a plugin to the existing Tailwind CSS setup
-- All new components follow the established Blazor Server patterns (dependency injection, component lifecycle)
-- Accessibility features are integrated throughout existing components via ARIA labels and keyboard handlers
-- Settings persistence uses the existing EF Core DbContext with a new UserPreferences table
+- **Web Application**: Single Blazor Server project with existing architecture from spec 002
+- **Atomic Design**: Components organized by complexity (Atoms → Molecules → Organisms)
+- **Clean Architecture**: Core (domain) → Infrastructure (data) → Web (presentation)
+- **Test Mirroring**: Test structure mirrors source structure for discoverability
+
+**Rationale**:
+- Atomic Design provides clear component hierarchy and promotes reusability
+- Separation of concerns: UI components (Web) vs domain logic (Core) vs data access (Infrastructure)
+- Existing Blazor Server architecture maintained (no breaking changes)
+
+---
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
-No violations detected. This feature enhances the existing TradingBot.Web project without introducing architectural violations.
+**No violations requiring justification.** All complexity is justified by feature requirements:
+
+| Potential Concern | Justification | Alternative Rejected |
+|-------------------|---------------|----------------------|
+| Three layers (Core/Infrastructure/Web) | Existing architecture from spec 002, maintains separation of concerns | Flat structure would violate clean architecture principles |
+| Atomic Design (3 levels) | Industry-standard pattern for component libraries, promotes reusability | Flat component folder would be hard to navigate with 15-20 components |
+| UserPreferences entity | Required to persist user settings per spec | localStorage-only rejected - can't sync across devices/browsers |
+| SmartEnum for Theme | Project standard (all enums use SmartEnum per CLAUDE.md) | Regular enum rejected - violates project conventions |
+
+---
+
+## Phase 0: Research Summary
+
+**Status**: ✅ Complete (see [research.md](./research.md))
+
+**Key Decisions Made**:
+
+1. **Component Architecture**: Atomic Design pattern with Tailwind CSS utility classes
+2. **Icon System**: Heroicons via SVG integration (Icon.razor component)
+3. **State Management**: Hybrid client/server (UIStateService for UI, UserPreferencesService for persistence)
+4. **Theme Implementation**: Tailwind dark mode with CSS variables, class-based toggling
+5. **Accessibility**: WCAG 2.1 Level AA via native HTML semantics + ARIA attributes
+6. **Form Validation**: Data Annotations with custom UserPreferencesValidator
+7. **Responsive Design**: Desktop-first (1024px min), collapsible sidebar for space optimization
+8. **Performance**: SignalR throttling, lazy loading, localStorage caching
+9. **Database Schema**: UserPreferences table with Theme SmartEnum, validation constraints
+10. **Component Reusability**: Headless component pattern with RenderFragment slots
+
+**All NEEDS CLARIFICATION items resolved.**
+
+---
+
+## Phase 1: Design Artifacts
+
+**Status**: ✅ Complete
+
+### 1. Data Model (data-model.md)
+
+**Entities**:
+- `UserPreferences` (database table)
+  - Id, UserId, Theme, DashboardRefreshInterval, NotificationDuration
+  - Notification toggles (Success, Error, Info, Warning)
+  - CustomSettings (JSON for future extensibility)
+  - CreatedAt, UpdatedAt timestamps
+- `Theme` (SmartEnum: Light, Dark)
+
+**Client-Side Models**:
+- `UIStateService` (sidebar collapsed state)
+- `ToastNotification` (toast message model)
+- `ToastService` (notification manager)
+
+**Validation**:
+- DashboardRefreshInterval: 1-300 seconds
+- NotificationDuration: 2-10 seconds
+- Theme: Required, must be Light or Dark
+
+**Repository/Service Interfaces**:
+- `IUserPreferencesRepository`: Data access
+- `IUserPreferencesService`: Business logic
+
+### 2. API Contracts (contracts/user-preferences-api.yaml)
+
+**Endpoints**:
+- `GET /api/preferences`: Get user preferences
+- `PUT /api/preferences`: Update preferences (with validation)
+- `POST /api/preferences/reset`: Reset to defaults
+
+**Note**: API is for internal Blazor Server communication, not external clients.
+
+### 3. Quickstart Guide (quickstart.md)
+
+**Developer Setup**:
+- Prerequisites (tools, packages)
+- Tailwind CSS configuration for dark mode
+- Database migration commands
+- Dependency injection setup
+- Component development patterns (Atomic Design)
+- Heroicons integration
+- Testing with bUnit
+- Code quality compliance
+
+---
+
+## Phase 2: Task Generation
+
+**Status**: ⏳ Pending
+
+**Next Command**: Run `/speckit.tasks` to generate dependency-ordered implementation tasks.
+
+**Expected Task Categories**:
+1. Database & Entities (Core layer)
+2. Repository & Services (Infrastructure layer)
+3. Atomic Components (Web layer - Atoms)
+4. Composite Components (Web layer - Molecules)
+5. Feature Components (Web layer - Organisms)
+6. Settings Page & Navigation (Web layer - Pages/Layout)
+7. Theme System Integration
+8. Testing (Unit + Component tests)
+9. Documentation & Polish
+
+---
+
+## Implementation Notes
+
+### Critical Path Items
+
+1. **Database Migration First**: Must create UserPreferences table before any service work
+2. **Theme SmartEnum Early**: Required by UserPreferences entity
+3. **Icon Component Before Navigation**: NavigationSidebar depends on Icon atom
+4. **UIStateService Before Sidebar**: Sidebar depends on collapse state
+5. **UserPreferencesService Before Settings Page**: Settings form needs service to save
+
+### Dependency Order
+
+```
+1. Database/Entities → 2. Services → 3. Atoms → 4. Molecules → 5. Organisms → 6. Pages
+```
+
+### Testing Strategy
+
+- **Unit Tests**: Services, validators, repositories (80% coverage minimum)
+- **Component Tests**: All atoms, molecules, organisms using bUnit
+- **Integration Tests**: Database migrations, UserPreferences CRUD
+- **Manual Testing**: Keyboard navigation, screen reader compatibility, theme switching
+
+### Performance Considerations
+
+- **Lazy Load Charts**: Don't load ApexCharts until needed (already implemented in spec 002)
+- **Throttle SignalR**: Existing 500ms throttle maintained
+- **Minify Tailwind**: Production build uses `--minify` flag
+- **localStorage Cache**: Preferences cached client-side to avoid repeated DB queries
+
+### Accessibility Checklist
+
+- [ ] All interactive elements have visible focus rings
+- [ ] Keyboard shortcuts don't conflict with browser defaults
+- [ ] ARIA labels on all icon-only buttons
+- [ ] Color contrast meets WCAG AA (4.5:1 for text, 3:1 for UI elements)
+- [ ] Modal focus trapping implemented
+- [ ] Form error messages linked via aria-describedby
+
+---
+
+## Re-evaluation: Constitution Check (Post-Design)
+
+**Status**: ✅ Still PASS
+
+**Changes since initial check**: None that affect compliance
+
+**Confirmed**:
+- All components follow single responsibility principle
+- Clean separation between presentation (Web), business logic (Core), and data access (Infrastructure)
+- SmartEnum pattern maintained
+- Test coverage plan meets 80% minimum (100% for UserPreferencesService critical path)
+- Accessibility compliance built into all component designs
+
+**Action Item**: Update constitution section 3.1 (UX/UI Principles) to reflect Tailwind-only approach and desktop-first responsive design. This is a documentation update, not a compliance violation.
+
+---
+
+## Summary & Next Steps
+
+### Deliverables from `/speckit.plan`
+
+- ✅ `plan.md` (this file)
+- ✅ `research.md` (Phase 0)
+- ✅ `data-model.md` (Phase 1)
+- ✅ `contracts/user-preferences-api.yaml` (Phase 1)
+- ✅ `quickstart.md` (Phase 1)
+
+### Ready for Implementation
+
+**Branch**: `003-ux-ui-enhancement`
+
+**Planning Complete**: All design artifacts generated, technical unknowns resolved.
+
+**Next Command**: `/speckit.tasks` to generate actionable task list with:
+- Dependency-ordered tasks (DB → Services → Components → Pages)
+- Acceptance criteria from spec.md
+- Implementation file paths
+- Testing requirements
+
+### Key Takeaways
+
+1. **No Component Library**: Build everything with Tailwind utilities (per user request)
+2. **Atomic Design**: Clear component hierarchy for maintainability
+3. **Single User**: UserId = "default", no auth changes needed
+4. **Desktop-First**: 1024px minimum width, no mobile optimization
+5. **Accessibility**: WCAG 2.1 AA compliance throughout
+6. **Theme System**: Tailwind dark mode with CSS variables for smooth transitions
+
+---
+
+**Planning Status**: ✅ **COMPLETE**
+
+**Estimated Implementation Time**:
+- Core (DB/Entities/Services): 4-6 hours
+- Components (Atoms/Molecules): 8-10 hours
+- Organisms & Pages: 6-8 hours
+- Testing: 6-8 hours
+- **Total**: ~24-32 hours
+
+**Ready to Execute**: Proceed with `/speckit.tasks` to begin implementation.

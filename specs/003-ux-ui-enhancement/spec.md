@@ -261,8 +261,8 @@ As a trader, I want to access helpful tooltips, explanations, and guidance throu
 
 - Users will access the application primarily from desktop browsers (minimum 1024px screen width)
 - Modern browsers with JavaScript enabled are required (Chrome, Edge, Firefox, Safari - last 2 versions)
-- The application will use DaisyUI components as the base component library for consistent styling
-- Tailwind CSS will be used for custom styling and layout adjustments
+- Tailwind CSS will be used for all styling, layout, and component design
+- Custom components will be built using Blazor components with Tailwind utility classes
 - Theme preference will be stored in user preferences and persist across sessions
 - The existing Blazor Server architecture will be maintained
 - Settings will be stored in the same SQLite database used for trading data
@@ -274,12 +274,11 @@ As a trader, I want to access helpful tooltips, explanations, and guidance throu
 
 ## Dependencies
 
-- DaisyUI component library for consistent UI components
-- Tailwind CSS for styling and responsive design
+- Tailwind CSS for styling and responsive design (already in project)
 - Existing Blazor Server infrastructure
 - User authentication system (for associating settings with users)
 - Database schema updates to store user preferences
-- Icon library for navigation and help icons (e.g., Font Awesome, Heroicons)
+- Icon library for navigation and help icons (e.g., Heroicons, Lucide, or Tabler Icons)
 
 ## Out of Scope
 
