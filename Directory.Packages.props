@@ -13,6 +13,7 @@
   <ItemGroup Label="CLI and Console">
     <PackageVersion Include="Blazor-ApexCharts" Version="6.0.2" />
     <PackageVersion Include="bUnit" Version="1.28.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />
     <PackageVersion Include="Spectre.Console" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />

@@ -71,11 +71,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPositionSizeCalculator, PositionSizeCalculator>();
         services.AddScoped<SignalProcessor>();
 
-        // Analytics services
+        // Analytics services - Changed to Scoped as they depend on IPortfolioManager
         services.AddScoped<IBacktestingEngine, Analytics.BacktestingEngine>();
-        services.AddSingleton<Analytics.EquityCurveGenerator>();
-        services.AddSingleton<Analytics.DrawdownAnalyzer>();
-        services.AddSingleton<Analytics.MetricsCalculator>();
+        services.AddScoped<Analytics.EquityCurveGenerator>();
+        services.AddScoped<Analytics.DrawdownAnalyzer>();
+        services.AddScoped<Analytics.MetricsCalculator>();
 
         // Background Jobs - Disabled to avoid DI lifetime conflicts with web applications
         // These services require singleton lifetime but depend on scoped services
