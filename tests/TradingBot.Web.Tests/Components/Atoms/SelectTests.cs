@@ -2,17 +2,18 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Web.Tests.Components.Atoms;
-
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Shouldly;
 using TradingBot.Web.Components.Atoms;
 using Xunit;
+
+namespace TradingBot.Web.Tests.Components.Atoms;
 
 /// <summary>
 /// Tests for the Select component.
 /// </summary>
-public class SelectTests : Bunit.TestContext
+public class SelectTests
 {
     /// <summary>
     /// Tests that the Select component renders with default values.
@@ -20,12 +21,15 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_RendersWithDefaults()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>();
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>();
 
         // Assert
         var select = cut.Find("select");
-        select.Should().NotBeNull();
+        select.ShouldNotBeNull();
     }
 
     /// <summary>
@@ -34,23 +38,27 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_RendersWithOptions()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
-            .Add(p => p.ChildContent, (RenderFragment)(builder =>
-            {
-                builder.OpenElement(0, "option");
-                builder.AddAttribute(1, "value", "option1");
-                builder.AddContent(2, "Option 1");
-                builder.CloseElement();
-                builder.OpenElement(3, "option");
-                builder.AddAttribute(4, "value", "option2");
-                builder.AddContent(5, "Option 2");
-                builder.CloseElement();
-            })));
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenElement(0, "option");
+            builder.AddAttribute(1, "value", "option1");
+            builder.AddContent(2, "Option 1");
+            builder.CloseElement();
+            builder.OpenElement(3, "option");
+            builder.AddAttribute(4, "value", "option2");
+            builder.AddContent(5, "Option 2");
+            builder.CloseElement();
+        };
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+            .Add(p => p.ChildContent, childContent));
 
         // Assert
         var options = cut.FindAll("option");
-        options.Count.Should().BeGreaterThan(0);
+        options.Count.ShouldBeGreaterThan(0);
     }
 
     /// <summary>
@@ -59,13 +67,16 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_RendersWithPlaceholder()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select an option"));
 
         // Assert
         var placeholder = cut.Find("option[disabled]");
-        placeholder.TextContent.Should().Be("Select an option");
+        placeholder.TextContent.ShouldBe("Select an option");
     }
 
     /// <summary>
@@ -74,14 +85,17 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_AppliesErrorStyling_WhenHasErrorIsTrue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
         var select = cut.Find("select");
-        select.ClassList.Should().Contain("border-red-300");
-        select.GetAttribute("aria-invalid").Should().Be("true");
+        select.ClassList.ShouldContain("border-red-300");
+        select.GetAttribute("aria-invalid").ShouldBe("true");
     }
 
     /// <summary>
@@ -90,14 +104,17 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_AppliesNormalStyling_WhenHasErrorIsFalse()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
         var select = cut.Find("select");
-        select.ClassList.Should().Contain("border-gray-300");
-        select.GetAttribute("aria-invalid").Should().BeNull();
+        select.ClassList.ShouldContain("border-gray-300");
+        select.GetAttribute("aria-invalid").ShouldBeNull();
     }
 
     /// <summary>
@@ -106,13 +123,16 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_IsDisabled_WhenIsDisabledIsTrue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
         var select = cut.Find("select");
-        select.HasAttribute("disabled").Should().BeTrue();
+        select.HasAttribute("disabled").ShouldBeTrue();
     }
 
     /// <summary>
@@ -122,21 +142,24 @@ public class SelectTests : Bunit.TestContext
     public void Select_TriggersValueChanged_OnSelectionChange()
     {
         // Arrange
+        using var ctx = new Bunit.TestContext();
         var newValue = string.Empty;
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenElement(0, "option");
+            builder.AddAttribute(1, "value", "option1");
+            builder.AddContent(2, "Option 1");
+            builder.CloseElement();
+            builder.OpenElement(3, "option");
+            builder.AddAttribute(4, "value", "option2");
+            builder.AddContent(5, "Option 2");
+            builder.CloseElement();
+        };
+
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.Value, "option1")
             .Add(p => p.ValueChanged, value => newValue = value)
-            .Add(p => p.ChildContent, (RenderFragment)(builder =>
-            {
-                builder.OpenElement(0, "option");
-                builder.AddAttribute(1, "value", "option1");
-                builder.AddContent(2, "Option 1");
-                builder.CloseElement();
-                builder.OpenElement(3, "option");
-                builder.AddAttribute(4, "value", "option2");
-                builder.AddContent(5, "Option 2");
-                builder.CloseElement();
-            })));
+            .Add(p => p.ChildContent, childContent));
 
         var select = cut.Find("select");
 
@@ -144,7 +167,7 @@ public class SelectTests : Bunit.TestContext
         select.Change("option2");
 
         // Assert
-        newValue.Should().Be("option2");
+        newValue.ShouldBe("option2");
     }
 
     /// <summary>
@@ -153,13 +176,16 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_AppliesCustomCssClasses()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.Class, "custom-select"));
 
         // Assert
         var select = cut.Find("select");
-        select.ClassList.Should().Contain("custom-select");
+        select.ClassList.ShouldContain("custom-select");
     }
 
     /// <summary>
@@ -168,13 +194,16 @@ public class SelectTests : Bunit.TestContext
     [Fact]
     public void Select_DoesNotShowPlaceholder_WhenShowPlaceholderIsFalse()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Select<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select option")
             .Add(p => p.ShowPlaceholder, false));
 
         // Assert
         var placeholders = cut.FindAll("option[disabled]");
-        placeholders.Should().BeEmpty();
+        placeholders.ShouldBeEmpty();
     }
 }

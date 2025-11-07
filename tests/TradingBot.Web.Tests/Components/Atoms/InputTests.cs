@@ -2,16 +2,17 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Web.Tests.Components.Atoms;
-
 using Bunit;
+using Shouldly;
 using TradingBot.Web.Components.Atoms;
 using Xunit;
+
+namespace TradingBot.Web.Tests.Components.Atoms;
 
 /// <summary>
 /// Tests for the Input component.
 /// </summary>
-public class InputTests : Bunit.TestContext
+public class InputTests
 {
     /// <summary>
     /// Tests that the Input component renders with default values.
@@ -19,13 +20,16 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_RendersWithDefaults()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>();
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>();
 
         // Assert
         var input = cut.Find("input");
-        input.Should().NotBeNull();
-        input.GetAttribute("type").Should().Be("text");
+        input.ShouldNotBeNull();
+        input.GetAttribute("type").ShouldBe("text");
     }
 
     /// <summary>
@@ -34,13 +38,16 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_RendersWithStringValue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.Value, "Test Value"));
 
         // Assert
         var input = cut.Find("input");
-        input.GetAttribute("value").Should().Be("Test Value");
+        input.GetAttribute("value").ShouldBe("Test Value");
     }
 
     /// <summary>
@@ -49,15 +56,18 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_RendersWithNumberValue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<int>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Value, 42));
 
         // Assert
         var input = cut.Find("input");
-        input.GetAttribute("type").Should().Be("number");
-        input.GetAttribute("value").Should().Be("42");
+        input.GetAttribute("type").ShouldBe("number");
+        input.GetAttribute("value").ShouldBe("42");
     }
 
     /// <summary>
@@ -66,14 +76,17 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_AppliesErrorStyling_WhenHasErrorIsTrue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
         var input = cut.Find("input");
-        input.ClassList.Should().Contain("border-red-300");
-        input.GetAttribute("aria-invalid").Should().Be("true");
+        input.ClassList.ShouldContain("border-red-300");
+        input.GetAttribute("aria-invalid").ShouldBe("true");
     }
 
     /// <summary>
@@ -82,14 +95,17 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_AppliesNormalStyling_WhenHasErrorIsFalse()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
         var input = cut.Find("input");
-        input.ClassList.Should().Contain("border-gray-300");
-        input.GetAttribute("aria-invalid").Should().BeNull();
+        input.ClassList.ShouldContain("border-gray-300");
+        input.GetAttribute("aria-invalid").ShouldBeNull();
     }
 
     /// <summary>
@@ -98,13 +114,16 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_RendersWithPlaceholder()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Enter text here"));
 
         // Assert
         var input = cut.Find("input");
-        input.GetAttribute("placeholder").Should().Be("Enter text here");
+        input.GetAttribute("placeholder").ShouldBe("Enter text here");
     }
 
     /// <summary>
@@ -113,13 +132,16 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_IsDisabled_WhenIsDisabledIsTrue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
         var input = cut.Find("input");
-        input.HasAttribute("disabled").Should().BeTrue();
+        input.HasAttribute("disabled").ShouldBeTrue();
     }
 
     /// <summary>
@@ -128,13 +150,16 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_IsReadonly_WhenIsReadonlyIsTrue()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.IsReadonly, true));
 
         // Assert
         var input = cut.Find("input");
-        input.HasAttribute("readonly").Should().BeTrue();
+        input.HasAttribute("readonly").ShouldBeTrue();
     }
 
     /// <summary>
@@ -144,8 +169,9 @@ public class InputTests : Bunit.TestContext
     public void Input_TriggersValueChanged_OnInputChange()
     {
         // Arrange
+        using var ctx = new Bunit.TestContext();
         var newValue = string.Empty;
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.Value, "Initial")
             .Add(p => p.ValueChanged, value => newValue = value));
 
@@ -155,7 +181,7 @@ public class InputTests : Bunit.TestContext
         input.Change("Updated");
 
         // Assert
-        newValue.Should().Be("Updated");
+        newValue.ShouldBe("Updated");
     }
 
     /// <summary>
@@ -164,8 +190,11 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_RendersWithMinMaxAttributes_ForNumberInputs()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<int>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Min, "1")
             .Add(p => p.Max, "100")
@@ -173,9 +202,9 @@ public class InputTests : Bunit.TestContext
 
         // Assert
         var input = cut.Find("input");
-        input.GetAttribute("min").Should().Be("1");
-        input.GetAttribute("max").Should().Be("100");
-        input.GetAttribute("step").Should().Be("5");
+        input.GetAttribute("min").ShouldBe("1");
+        input.GetAttribute("max").ShouldBe("100");
+        input.GetAttribute("step").ShouldBe("5");
     }
 
     /// <summary>
@@ -184,12 +213,15 @@ public class InputTests : Bunit.TestContext
     [Fact]
     public void Input_AppliesCustomCssClasses()
     {
-        // Arrange & Act
-        var cut = RenderComponent<Input<string>>(parameters => parameters
+        // Arrange
+        using var ctx = new Bunit.TestContext();
+
+        // Act
+        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
             .Add(p => p.Class, "custom-class"));
 
         // Assert
         var input = cut.Find("input");
-        input.ClassList.Should().Contain("custom-class");
+        input.ClassList.ShouldContain("custom-class");
     }
 }
