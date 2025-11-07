@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: TradingBot User Preferences API
+  description: API endpoints for managing user UI preferences and settings
+  version: 1.0.0
+  contact:
+    name: TradingBot Development Team
+
+servers:
+  - url: https://localhost:5001/api
+    description: Development server
+
+tags:
+  - name: Preferences
+    description: User preferences management endpoints
+
+paths:
+  /preferences:
+    get:
+      tags:
+        - Preferences
+      summary: Get current user preferences
+      description: Retrieves the authenticated user's UI preferences. Creates default preferences if none exist.
+      operationId: getUserPreferences
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User preferences retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferencesResponse'
+        '401':
+          description: Unauthorized - user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Preferences
+      summary: Update user preferences
+      description: Updates the authenticated user's UI preferences. All fields are required.
+      operationId: updateUserPreferences
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPreferencesRequest'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferencesResponse'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized - user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /preferences/reset:
+    post:
+      tags:
+        - Preferences
+      summary: Reset preferences to defaults
+      description: Resets the authenticated user's preferences to system defaults
+      operationId: resetUserPreferences
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Preferences reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferencesResponse'
+        '401':
+          description: Unauthorized - user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    UserPreferencesResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - theme
+        - dashboardRefreshInterval
+        - notificationTypesEnabled
+        - notificationDuration
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the preferences record
+          example: 1
+        userId:
+          type: string
+          description: User ID associated with these preferences
+          example: "abc123-def456-ghi789"
+        theme:
+          type: string
+          enum: [light, dark]
+          description: UI theme preference
+          example: "light"
+        dashboardRefreshInterval:
+          type: integer
+          minimum: 1
+          maximum: 300
+          description: Dashboard refresh interval in seconds
+          example: 10
+        notificationTypesEnabled:
+          $ref: '#/components/schemas/NotificationTypesEnabled'
+        notificationDuration:
+          type: integer
+          minimum: 2
+          maximum: 10
+          description: Toast notification display duration in seconds
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when preferences were created
+          example: "2025-11-07T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when preferences were last updated
+          example: "2025-11-07T14:30:00Z"
+
+    UpdateUserPreferencesRequest:
+      type: object
+      required:
+        - theme
+        - dashboardRefreshInterval
+        - notificationTypesEnabled
+        - notificationDuration
+      properties:
+        theme:
+          type: string
+          enum: [light, dark]
+          description: UI theme preference
+          example: "dark"
+        dashboardRefreshInterval:
+          type: integer
+          minimum: 1
+          maximum: 300
+          description: Dashboard refresh interval in seconds (1-300)
+          example: 30
+        notificationTypesEnabled:
+          $ref: '#/components/schemas/NotificationTypesEnabled'
+        notificationDuration:
+          type: integer
+          minimum: 2
+          maximum: 10
+          description: Toast notification display duration in seconds (2-10)
+          example: 7
+
+    NotificationTypesEnabled:
+      type: object
+      required:
+        - success
+        - error
+        - info
+        - warning
+      properties:
+        success:
+          type: boolean
+          description: Enable success notifications
+          example: true
+        error:
+          type: boolean
+          description: Enable error notifications
+          example: true
+        info:
+          type: boolean
+          description: Enable informational notifications
+          example: false
+        warning:
+          type: boolean
+          description: Enable warning notifications
+          example: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code or type
+          example: "Unauthorized"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "User is not authenticated"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when error occurred
+          example: "2025-11-07T12:00:00Z"
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - errors
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "ValidationError"
+        message:
+          type: string
+          description: General validation error message
+          example: "One or more validation errors occurred"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Field-specific validation errors
+          example:
+            dashboardRefreshInterval:
+              - "Dashboard refresh interval must be between 1 and 300 seconds"
+            theme:
+              - "Theme must be either 'light' or 'dark'"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when error occurred
+          example: "2025-11-07T12:00:00Z"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT bearer token authentication (provided by ASP.NET Core Identity)
