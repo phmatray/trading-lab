@@ -182,18 +182,18 @@ This project follows the existing TradingBot repository structure:
 
 ### Implementation for User Story 5
 
-- [ ] T083 [P] [US5] Create RiskSettings.razor page with risk configuration form in src/TradingBot.Web/Pages/RiskSettings.razor
-- [ ] T084 [P] [US5] Create RiskSettingsForm.razor component with inputs for leverage, stop-loss %, take-profit %, daily loss limit, max drawdown %, max position size % in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
-- [ ] T085 [P] [US5] Create RiskStatusIndicator.razor component showing current risk status (enabled/disabled) in src/TradingBot.Web/Components/Risk/RiskStatusIndicator.razor
-- [ ] T086 [US5] Integrate RiskSettingsService.GetCurrentSettingsAsync in RiskSettings.razor to load current settings in src/TradingBot.Web/Pages/RiskSettings.razor
-- [ ] T087 [US5] Implement form validation: leverage (1.0-10.0), stop-loss (0.1-50.0%), take-profit (0.1-100.0%), max position size (1.0-100.0%) in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
-- [ ] T088 [US5] Add client-side validation with DataAnnotations and EditForm in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
-- [ ] T089 [US5] Implement "Save" button handler calling RiskSettingsService.UpdateSettingsAsync in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
-- [ ] T090 [US5] Add validation error messages for each field in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
-- [ ] T091 [US5] Add success notification when settings saved successfully in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
-- [ ] T092 [US5] Add error handling for validation failures and save errors in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
-- [ ] T093 [US5] Add visual indicator for current risk status (enabled = green, disabled = red) in RiskStatusIndicator.razor in src/TradingBot.Web/Components/Risk/RiskStatusIndicator.razor
-- [ ] T094 [US5] Implement dashboard update via SignalR when risk settings changed in RealtimeUpdateService in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T083 [P] [US5] Create RiskSettings.razor page with risk configuration form in src/TradingBot.Web/Pages/RiskSettings.razor
+- [X] T084 [P] [US5] Create RiskSettingsForm.razor component with inputs for leverage, stop-loss %, take-profit %, daily loss limit, max drawdown %, max position size % in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
+- [X] T085 [P] [US5] Create RiskStatusIndicator.razor component showing current risk status (enabled/disabled) in src/TradingBot.Web/Components/Risk/RiskStatusIndicator.razor
+- [X] T086 [US5] Integrate RiskSettingsService.GetCurrentSettingsAsync in RiskSettings.razor to load current settings in src/TradingBot.Web/Pages/RiskSettings.razor
+- [X] T087 [US5] Implement form validation: leverage (1.0-10.0), stop-loss (0.1-50.0%), take-profit (0.1-100.0%), max position size (1.0-100.0%) in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
+- [X] T088 [US5] Add client-side validation with DataAnnotations and EditForm in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
+- [X] T089 [US5] Implement "Save" button handler calling RiskSettingsService.UpdateSettingsAsync in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
+- [X] T090 [US5] Add validation error messages for each field in RiskSettingsForm.razor in src/TradingBot.Web/Components/Risk/RiskSettingsForm.razor
+- [X] T091 [US5] Add success notification when settings saved successfully in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
+- [X] T092 [US5] Add error handling for validation failures and save errors in RiskSettings.razor in src/TradingBot.Web/Pages/RiskSettings.razor
+- [X] T093 [US5] Add visual indicator for current risk status (enabled = green, disabled = red) in RiskStatusIndicator.razor in src/TradingBot.Web/Components/Risk/RiskStatusIndicator.razor
+- [X] T094 [US5] Implement dashboard update via SignalR when risk settings changed in RealtimeUpdateService in src/TradingBot.Web/Services/RealtimeUpdateService.cs
 
 **Checkpoint**: User Story 5 complete - risk settings can be modified through web interface with full validation
 

@@ -2,9 +2,11 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TradingBot.Core.Models.Risk;
+using TradingBot.Web.Hubs;
 
 namespace TradingBot.Web.Services;
 
@@ -13,18 +15,22 @@ namespace TradingBot.Web.Services;
 /// </summary>
 public sealed class RiskSettingsService : IRiskSettingsService
 {
+    private readonly IHubContext<TradingHub, ITradingClient> _hubContext;
     private readonly ILogger<RiskSettingsService> _logger;
     private RiskSettings _currentSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RiskSettingsService"/> class.
     /// </summary>
+    /// <param name="hubContext">The SignalR hub context.</param>
     /// <param name="configuration">The configuration instance.</param>
     /// <param name="logger">The logger instance.</param>
     public RiskSettingsService(
+        IHubContext<TradingHub, ITradingClient> hubContext,
         IConfiguration configuration,
         ILogger<RiskSettingsService> logger)
     {
+        _hubContext = hubContext;
         _logger = logger;
 
         // Initialize from configuration
@@ -58,7 +64,7 @@ public sealed class RiskSettingsService : IRiskSettingsService
     }
 
     /// <inheritdoc/>
-    public Task<RiskSettings> UpdateSettingsAsync(
+    public async Task<RiskSettings> UpdateSettingsAsync(
         RiskSettings settings,
         CancellationToken cancellationToken = default)
     {
@@ -84,7 +90,11 @@ public sealed class RiskSettingsService : IRiskSettingsService
 
             _logger.LogInformation("Risk settings updated successfully");
 
-            return Task.FromResult(_currentSettings);
+            // Broadcast update to all connected clients via SignalR
+            await _hubContext.Clients.All.ReceiveRiskSettingsUpdate(_currentSettings);
+            _logger.LogInformation("Risk settings update broadcast to all clients");
+
+            return _currentSettings;
         }
         catch (Exception ex)
         {

@@ -1,0 +1,229 @@
+@using System.ComponentModel.DataAnnotations
+@using TradingBot.Core.Models.Risk
+
+<EditForm Model="@formModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="space-y-6">
+        <!-- Leverage -->
+        <div>
+            <label for="leverage" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Leverage
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(1.0 - 10.0)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.Leverage"
+                         id="leverage"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="0.1" />
+            <ValidationMessage For="@(() => formModel.Leverage)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Account leverage multiplier. Higher leverage increases both potential profit and risk.
+            </p>
+        </div>
+
+        <!-- Stop Loss Percent -->
+        <div>
+            <label for="stopLoss" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Stop Loss Percentage
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1% - 50%)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.StopLossPercent"
+                         id="stopLoss"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="0.1" />
+            <ValidationMessage For="@(() => formModel.StopLossPercent)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Default stop-loss level as percentage from entry price.
+            </p>
+        </div>
+
+        <!-- Take Profit Percent -->
+        <div>
+            <label for="takeProfit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Take Profit Percentage
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1% - 100%)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.TakeProfitPercent"
+                         id="takeProfit"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="0.1" />
+            <ValidationMessage For="@(() => formModel.TakeProfitPercent)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Default take-profit level as percentage from entry price.
+            </p>
+        </div>
+
+        <!-- Daily Loss Limit -->
+        <div>
+            <label for="dailyLossLimit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Daily Loss Limit
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(in currency units)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.DailyLossLimit"
+                         id="dailyLossLimit"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="100" />
+            <ValidationMessage For="@(() => formModel.DailyLossLimit)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Maximum loss per day in currency units.
+            </p>
+        </div>
+
+        <!-- Max Drawdown Percent -->
+        <div>
+            <label for="maxDrawdown" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Max Drawdown Percentage
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1% - 100%)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.MaxDrawdownPercent"
+                         id="maxDrawdown"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="0.1" />
+            <ValidationMessage For="@(() => formModel.MaxDrawdownPercent)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Maximum allowed drawdown before trading is halted.
+            </p>
+        </div>
+
+        <!-- Max Position Size Percent -->
+        <div>
+            <label for="maxPositionSize" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Max Position Size Percentage
+                <span class="text-gray-500 dark:text-gray-400 font-normal">(1% - 100%)</span>
+            </label>
+            <InputNumber @bind-Value="formModel.MaxPositionSizePercent"
+                         id="maxPositionSize"
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                         step="0.1" />
+            <ValidationMessage For="@(() => formModel.MaxPositionSizePercent)" class="text-red-600 text-sm mt-1" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Maximum position size as percentage of account equity.
+            </p>
+        </div>
+
+        <!-- Risk Limits Enabled Toggle -->
+        <div>
+            <label class="flex items-center">
+                <InputCheckbox @bind-Value="formModel.RiskLimitsEnabled"
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700" />
+                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Enable Risk Management</span>
+            </label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-6">
+                When disabled, risk limits are not enforced. Use with caution!
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button type="button"
+                    @onclick="HandleCancelClick"
+                    disabled="@IsSaving"
+                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                Cancel
+            </button>
+            <button type="submit"
+                    disabled="@IsSaving"
+                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (IsSaving)
+                {
+                    <span class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                    </span>
+                }
+                else
+                {
+                    <span>Save Settings</span>
+                }
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public RiskSettings? Settings { get; set; }
+
+    [Parameter]
+    public EventCallback<RiskSettings> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public bool IsSaving { get; set; }
+
+    private RiskSettingsFormModel formModel = new();
+
+    protected override void OnParametersSet()
+    {
+        if (Settings is not null)
+        {
+            formModel = new RiskSettingsFormModel
+            {
+                Leverage = Settings.Leverage,
+                StopLossPercent = Settings.StopLossPercent,
+                TakeProfitPercent = Settings.TakeProfitPercent,
+                DailyLossLimit = Settings.DailyLossLimit,
+                MaxDrawdownPercent = Settings.MaxDrawdownPercent,
+                MaxPositionSizePercent = Settings.MaxPositionSizePercent,
+                RiskLimitsEnabled = Settings.RiskLimitsEnabled
+            };
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var updatedSettings = new RiskSettings
+        {
+            Leverage = formModel.Leverage,
+            StopLossPercent = formModel.StopLossPercent,
+            TakeProfitPercent = formModel.TakeProfitPercent,
+            DailyLossLimit = formModel.DailyLossLimit,
+            MaxDrawdownPercent = formModel.MaxDrawdownPercent,
+            MaxPositionSizePercent = formModel.MaxPositionSizePercent,
+            RiskLimitsEnabled = formModel.RiskLimitsEnabled,
+            LastUpdated = DateTime.UtcNow
+        };
+
+        await OnSave.InvokeAsync(updatedSettings);
+    }
+
+    private async Task HandleCancelClick()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    // Form model with validation attributes
+    private sealed class RiskSettingsFormModel
+    {
+        [Required(ErrorMessage = "Leverage is required")]
+        [Range(1.0, 10.0, ErrorMessage = "Leverage must be between 1.0 and 10.0")]
+        public decimal Leverage { get; set; } = 1.0m;
+
+        [Required(ErrorMessage = "Stop loss percentage is required")]
+        [Range(0.1, 50.0, ErrorMessage = "Stop loss must be between 0.1% and 50%")]
+        public decimal StopLossPercent { get; set; } = 2.0m;
+
+        [Required(ErrorMessage = "Take profit percentage is required")]
+        [Range(0.1, 100.0, ErrorMessage = "Take profit must be between 0.1% and 100%")]
+        public decimal TakeProfitPercent { get; set; } = 5.0m;
+
+        [Required(ErrorMessage = "Daily loss limit is required")]
+        [Range(0.0, double.MaxValue, ErrorMessage = "Daily loss limit must be non-negative")]
+        public decimal DailyLossLimit { get; set; } = 1000m;
+
+        [Required(ErrorMessage = "Max drawdown percentage is required")]
+        [Range(0.1, 100.0, ErrorMessage = "Max drawdown must be between 0.1% and 100%")]
+        public decimal MaxDrawdownPercent { get; set; } = 10.0m;
+
+        [Required(ErrorMessage = "Max position size is required")]
+        [Range(1.0, 100.0, ErrorMessage = "Max position size must be between 1% and 100%")]
+        public decimal MaxPositionSizePercent { get; set; } = 10.0m;
+
+        public bool RiskLimitsEnabled { get; set; } = true;
+    }
+}

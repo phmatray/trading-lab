@@ -3,6 +3,7 @@
 // </copyright>
 
 using TradingBot.Core.Models.Portfolio;
+using TradingBot.Core.Models.Risk;
 using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Web.Hubs;
@@ -39,4 +40,11 @@ public interface ITradingClient
     /// <param name="status">Connection status ("connected", "reconnecting", "disconnected").</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task ReceiveConnectionStatus(string status);
+
+    /// <summary>
+    /// Receives risk settings update notification.
+    /// </summary>
+    /// <param name="settings">Updated risk settings.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ReceiveRiskSettingsUpdate(RiskSettings settings);
 }
