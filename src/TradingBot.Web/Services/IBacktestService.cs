@@ -24,5 +24,5 @@ public interface IBacktestService
     /// <param name="backtestId">The unique identifier of the backtest.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Detailed backtest result or null if not found.</returns>
-    Task<BacktestResult?> GetBacktestByIdAsync(Guid backtestId, CancellationToken cancellationToken = default);
+    Task<BacktestResult?> GetBacktestByIdAsync(string backtestId, CancellationToken cancellationToken = default);
 }

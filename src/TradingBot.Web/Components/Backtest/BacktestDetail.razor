@@ -1,4 +1,4 @@
-@using TradingBot.Web.Models
+@using TradingBot.Core.Models.Backtest
 
 <div class="space-y-6">
     <!-- Performance Summary Card -->
@@ -55,37 +55,37 @@
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Total Trades</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @Backtest.Metrics.TotalTrades
+                    @Backtest.Performance.TotalTrades
                 </p>
             </div>
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Win Rate</p>
                 <p class="text-lg font-semibold text-green-600 dark:text-green-400">
-                    @Backtest.Metrics.WinRate.ToString("F1")%
+                    @Backtest.Performance.WinRate.ToString("F1")%
                 </p>
             </div>
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Profit Factor</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @Backtest.Metrics.ProfitFactor.ToString("F2")
+                    @Backtest.Performance.ProfitFactor.ToString("F2")
                 </p>
             </div>
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Sharpe Ratio</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @Backtest.Metrics.SharpeRatio.ToString("F2")
+                    @Backtest.Performance.SharpeRatio.ToString("F2")
                 </p>
             </div>
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Max Drawdown</p>
                 <p class="text-lg font-semibold text-red-600 dark:text-red-400">
-                    @Backtest.Metrics.MaxDrawdownPercent.ToString("F2")%
+                    @Backtest.Performance.MaxDrawdown.ToString("F2")%
                 </p>
             </div>
             <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <p class="text-xs text-gray-600 dark:text-gray-400">Avg Win / Loss</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @Backtest.Metrics.AverageWin.ToString("C0") / @Backtest.Metrics.AverageLoss.ToString("C0")
+                    @Backtest.Performance.AverageWin.ToString("C0") / @Backtest.Performance.AverageLoss.ToString("C0")
                 </p>
             </div>
         </div>
@@ -140,16 +140,16 @@
                                     @result.TotalPnL.ToString("C0")
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
-                                    @result.Metrics.WinRate.ToString("F1")%
+                                    @result.Performance.WinRate.ToString("F1")%
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
-                                    @result.Metrics.SharpeRatio.ToString("F2")
+                                    @result.Performance.SharpeRatio.ToString("F2")
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-red-600 dark:text-red-400">
-                                    @result.Metrics.MaxDrawdownPercent.ToString("F2")%
+                                    @result.Performance.MaxDrawdown.ToString("F2")%
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-white">
-                                    @result.Metrics.TotalTrades
+                                    @result.Performance.TotalTrades
                                 </td>
                             </tr>
                         }

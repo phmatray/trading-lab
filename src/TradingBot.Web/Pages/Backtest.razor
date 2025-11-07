@@ -1,6 +1,6 @@
 @page "/backtest"
 @using TradingBot.Web.Services
-@using TradingBot.Web.Models
+@using TradingBot.Core.Models.Backtest
 @using TradingBot.Analytics
 @inject IBacktestService BacktestService
 @inject ILogger<Backtest> Logger
@@ -100,11 +100,11 @@
 @code {
     private List<BacktestResult>? backtestResults;
     private BacktestResult? selectedBacktest;
-    private Guid? selectedBacktestId;
+    private string? selectedBacktestId;
     private bool isLoading = true;
     private string? errorMessage;
     private bool comparisonMode = false;
-    private HashSet<Guid> selectedForComparison = new();
+    private readonly HashSet<string> selectedForComparison = new();
 
     private bool ShowComparisonTable => comparisonMode && selectedForComparison.Count > 1;
 
@@ -133,7 +133,7 @@
         }
     }
 
-    private async Task HandleBacktestSelected(Guid backtestId)
+    private async Task HandleBacktestSelected(string backtestId)
     {
         try
         {
@@ -148,7 +148,7 @@
         }
     }
 
-    private void HandleToggleComparison(Guid backtestId)
+    private void HandleToggleComparison(string backtestId)
     {
         if (selectedForComparison.Contains(backtestId))
         {

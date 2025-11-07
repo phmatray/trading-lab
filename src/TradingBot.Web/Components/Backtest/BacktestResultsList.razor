@@ -1,4 +1,4 @@
-@using TradingBot.Web.Models
+@using TradingBot.Core.Models.Backtest
 
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
     <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -88,26 +88,26 @@
     public List<BacktestResult> Results { get; set; } = new();
 
     [Parameter]
-    public Guid? SelectedBacktestId { get; set; }
+    public string? SelectedBacktestId { get; set; }
 
     [Parameter]
-    public EventCallback<Guid> OnBacktestSelected { get; set; }
+    public EventCallback<string> OnBacktestSelected { get; set; }
 
     [Parameter]
     public bool ComparisonMode { get; set; }
 
     [Parameter]
-    public HashSet<Guid> SelectedForComparison { get; set; } = new();
+    public HashSet<string> SelectedForComparison { get; set; } = new();
 
     [Parameter]
-    public EventCallback<Guid> OnToggleComparison { get; set; }
+    public EventCallback<string> OnToggleComparison { get; set; }
 
-    private async Task HandleSelect(Guid backtestId)
+    private async Task HandleSelect(string backtestId)
     {
         await OnBacktestSelected.InvokeAsync(backtestId);
     }
 
-    private async Task HandleToggleComparison(Guid backtestId)
+    private async Task HandleToggleComparison(string backtestId)
     {
         await OnToggleComparison.InvokeAsync(backtestId);
     }

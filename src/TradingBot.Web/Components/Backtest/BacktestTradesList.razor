@@ -4,7 +4,7 @@
     <!-- Top 5 Winning Trades -->
     <div>
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">Top 5 Winning Trades</h3>
-        @if (TopWinners.Any())
+        @if (GetTopWinners().Any())
         {
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -20,7 +20,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach (var trade in TopWinners)
+                        @foreach (var trade in GetTopWinners())
                         {
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
@@ -66,7 +66,7 @@
     <!-- Top 5 Losing Trades -->
     <div>
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">Top 5 Losing Trades</h3>
-        @if (TopLosers.Any())
+        @if (GetTopLosers().Any())
         {
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -82,7 +82,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach (var trade in TopLosers)
+                        @foreach (var trade in GetTopLosers())
                         {
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
@@ -130,15 +130,21 @@
     [Parameter]
     public List<Trade> Trades { get; set; } = new();
 
-    private List<Trade> TopWinners => Trades
-        .Where(t => t.RealizedPnL > 0)
-        .OrderByDescending(t => t.RealizedPnL)
-        .Take(5)
-        .ToList();
+    private List<Trade> GetTopWinners()
+    {
+        return Trades
+            .Where(t => t.RealizedPnL > 0)
+            .OrderByDescending(t => t.RealizedPnL)
+            .Take(5)
+            .ToList();
+    }
 
-    private List<Trade> TopLosers => Trades
-        .Where(t => t.RealizedPnL < 0)
-        .OrderBy(t => t.RealizedPnL)
-        .Take(5)
-        .ToList();
+    private List<Trade> GetTopLosers()
+    {
+        return Trades
+            .Where(t => t.RealizedPnL < 0)
+            .OrderBy(t => t.RealizedPnL)
+            .Take(5)
+            .ToList();
+    }
 }

@@ -1,17 +1,16 @@
 @using ApexCharts
-@using TradingBot.Web.Models
 
 @if (EquityCurve is not null && EquityCurve.Any())
 {
-    <ApexChart TItem="EquityDataPoint"
+    <ApexChart TItem="EquityPoint"
                Title="Portfolio Value Over Time"
                Options="@chartOptions">
-        <ApexPointSeries TItem="EquityDataPoint"
-                         Items="@EquityCurve"
+        <ApexPointSeries TItem="EquityPoint"
+                         Items="@GetEquityPoints()"
                          Name="Equity"
                          SeriesType="SeriesType.Line"
-                         XValue="@(e => e.Timestamp)"
-                         YValue="@(e => (decimal?)e.EquityValue)"
+                         XValue="@(e => e.Date)"
+                         YValue="@(e => (decimal?)e.Equity)"
                          OrderByDescending="e => e.X" />
     </ApexChart>
 }
@@ -24,9 +23,22 @@ else
 
 @code {
     [Parameter]
-    public List<EquityDataPoint>? EquityCurve { get; set; }
+    public List<(DateTime Date, decimal Equity)>? EquityCurve { get; set; }
 
-    private ApexChartOptions<EquityDataPoint> chartOptions = new ApexChartOptions<EquityDataPoint>
+    private List<EquityPoint> GetEquityPoints()
+    {
+        return EquityCurve?
+            .Select(e => new EquityPoint { Date = e.Date, Equity = e.Equity })
+            .ToList() ?? new List<EquityPoint>();
+    }
+
+    private sealed class EquityPoint
+    {
+        public DateTime Date { get; set; }
+        public decimal Equity { get; set; }
+    }
+
+    private readonly ApexChartOptions<EquityPoint> chartOptions = new ApexChartOptions<EquityPoint>
     {
         Chart = new Chart
         {
@@ -48,8 +60,7 @@ else
             },
             Zoom = new Zoom
             {
-                Enabled = true,
-                Type = ZoomType.X
+                Enabled = true
             }
         },
         Stroke = new Stroke

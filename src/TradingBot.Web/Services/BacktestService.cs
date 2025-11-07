@@ -52,14 +52,14 @@ public sealed class BacktestService : IBacktestService
     }
 
     /// <inheritdoc/>
-    public Task<BacktestResult?> GetBacktestByIdAsync(Guid backtestId, CancellationToken cancellationToken = default)
+    public Task<BacktestResult?> GetBacktestByIdAsync(string backtestId, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogInformation("Loading backtest result: {BacktestId}", backtestId);
 
             // In a real implementation, this would query a repository
-            var result = _backtestResults.FirstOrDefault(b => b.BacktestId == backtestId.ToString());
+            var result = _backtestResults.FirstOrDefault(b => b.BacktestId == backtestId);
 
             if (result == null)
             {
