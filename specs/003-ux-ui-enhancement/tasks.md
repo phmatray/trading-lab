@@ -46,33 +46,33 @@ This is a Blazor Server web application with clean architecture:
 
 ### Database & Domain Layer
 
-- [ ] T009 Create src/TradingBot.Core/ValueObjects/Theme.cs SmartEnum (Light, Dark)
-- [ ] T010 Create src/TradingBot.Core/Entities/UserPreferences.cs entity per data-model.md
-- [ ] T011 Create src/TradingBot.Core/Interfaces/IUserPreferencesRepository.cs interface
-- [ ] T012 [P] Create src/TradingBot.Core/Interfaces/IUserPreferencesService.cs interface
-- [ ] T013 [P] Create src/TradingBot.Core/Validators/UserPreferencesValidator.cs with range validation
-- [ ] T014 Create src/TradingBot.Infrastructure/Persistence/Configurations/UserPreferencesConfiguration.cs for EF Core
-- [ ] T015 Create src/TradingBot.Infrastructure/Persistence/Repositories/UserPreferencesRepository.cs implementation
-- [ ] T016 Create src/TradingBot.Infrastructure/Services/UserPreferencesService.cs implementation
-- [ ] T017 Create EF migration: `dotnet ef migrations add AddUserPreferences --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
-- [ ] T018 Apply migration: `dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
-- [ ] T019 Update src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs to add DbSet<UserPreferences>
-- [ ] T020 Register IUserPreferencesRepository and IUserPreferencesService in src/TradingBot.Web/Program.cs
+- [X] T009 Create src/TradingBot.Core/ValueObjects/Theme.cs SmartEnum (Light, Dark)
+- [X] T010 Create src/TradingBot.Core/Entities/UserPreferences.cs entity per data-model.md
+- [X] T011 Create src/TradingBot.Core/Interfaces/IUserPreferencesRepository.cs interface
+- [X] T012 [P] Create src/TradingBot.Core/Interfaces/IUserPreferencesService.cs interface
+- [X] T013 [P] Create src/TradingBot.Core/Validators/UserPreferencesValidator.cs with range validation
+- [X] T014 Create src/TradingBot.Infrastructure/Persistence/Configurations/UserPreferencesConfiguration.cs for EF Core
+- [X] T015 Create src/TradingBot.Infrastructure/Persistence/Repositories/UserPreferencesRepository.cs implementation
+- [X] T016 Create src/TradingBot.Infrastructure/Services/UserPreferencesService.cs implementation
+- [X] T017 Create EF migration: `dotnet ef migrations add AddUserPreferences --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
+- [X] T018 Apply migration: `dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web`
+- [X] T019 Update src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs to add DbSet<UserPreferences>
+- [X] T020 Register IUserPreferencesRepository and IUserPreferencesService in src/TradingBot.Infrastructure/DependencyInjection/ServiceCollectionExtensions.cs
 
 ### Client-Side Services
 
-- [ ] T021 [P] Create src/TradingBot.Web/Services/UIStateService.cs for sidebar collapse state
-- [ ] T022 [P] Create src/TradingBot.Web/Services/NavigationService.cs for active route detection
-- [ ] T023 [P] Create src/TradingBot.Web/Models/ToastNotification.cs per data-model.md
-- [ ] T024 [P] Create src/TradingBot.Web/Services/ToastService.cs for notification management
-- [ ] T025 Register UIStateService, NavigationService, ToastService in src/TradingBot.Web/Program.cs
+- [X] T021 [P] Create src/TradingBot.Web/Services/UIStateService.cs for sidebar collapse state
+- [X] T022 [P] Create src/TradingBot.Web/Services/NavigationService.cs for active route detection
+- [X] T023 [P] Create src/TradingBot.Web/Models/ToastNotification.cs per data-model.md (already exists from spec 002)
+- [X] T024 [P] Create src/TradingBot.Web/Services/ToastService.cs for notification management (already exists from spec 002)
+- [X] T025 Register UIStateService, NavigationService, ToastService in src/TradingBot.Web/Program.cs
 
 ### Foundational Tests
 
-- [ ] T026 [P] Write tests/TradingBot.Core.Tests/Validators/UserPreferencesValidatorTests.cs (test range validation 1-300, 2-10)
-- [ ] T027 [P] Write tests/TradingBot.Infrastructure.Tests/Repositories/UserPreferencesRepositoryTests.cs (CRUD operations)
-- [ ] T028 [P] Write tests/TradingBot.Infrastructure.Tests/Services/UserPreferencesServiceTests.cs (100% coverage - critical path)
-- [ ] T029 [P] Write tests/TradingBot.Web.Tests/Services/UIStateServiceTests.cs (toggle sidebar state)
+- [X] T026 [P] Write tests/TradingBot.Core.Tests/Validators/UserPreferencesValidatorTests.cs (test range validation 1-300, 2-10)
+- [X] T027 [P] Write tests/TradingBot.Infrastructure.Tests/Repositories/UserPreferencesRepositoryTests.cs (CRUD operations)
+- [X] T028 [P] Write tests/TradingBot.Infrastructure.Tests/Services/UserPreferencesServiceTests.cs (100% coverage - critical path)
+- [X] T029 [P] Write tests/TradingBot.Web.Tests/Services/UIStateServiceTests.cs (toggle sidebar state)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
