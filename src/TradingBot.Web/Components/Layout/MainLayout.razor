@@ -225,7 +225,12 @@
 
     private string GetContentMarginClass()
     {
-        return UIState.SidebarCollapsed ? "ml-16" : "ml-64";
+        // Responsive margin: adjusts based on sidebar state and screen size
+        // Default: ml-64 (expanded) or ml-16 (collapsed)
+        // lg breakpoint: ml-56 (expanded) or ml-16 (collapsed) for smaller screens
+        return UIState.SidebarCollapsed
+            ? "ml-16 lg:ml-16"  // Consistent icon-only width
+            : "ml-64 lg:ml-56"; // Slightly less margin on lg to match sidebar width
     }
 
 }

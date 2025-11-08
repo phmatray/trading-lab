@@ -16,6 +16,12 @@ module.exports = {
         warning: 'rgb(var(--color-warning) / <alpha-value>)',
         danger: 'rgb(var(--color-danger) / <alpha-value>)',
       },
+      // Desktop-first responsive design with lg (1024px) as minimum
+      screens: {
+        'lg': '1024px',   // Minimum supported width
+        'xl': '1280px',   // Standard desktop
+        '2xl': '1536px',  // Large desktop
+      },
       // Smooth transitions for theme switching
       transitionProperty: {
         'height': 'height',

@@ -88,7 +88,10 @@
     private string GetSidebarClasses()
     {
         var baseClasses = "fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out";
-        var widthClass = UIState.SidebarCollapsed ? "w-16" : "w-64";
+        // Responsive width: full width (64) by default, adjusts at lg breakpoint for smaller screens
+        var widthClass = UIState.SidebarCollapsed
+            ? "w-16 lg:w-16"  // Icon-only mode consistent across breakpoints
+            : "w-64 lg:w-56"; // Slightly narrower on lg screens to preserve content space
 
         return $"{baseClasses} {widthClass}";
     }

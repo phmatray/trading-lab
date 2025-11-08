@@ -233,23 +233,23 @@ This is a Blazor Server web application with clean architecture:
 
 ### Responsive Layout
 
-- [ ] T092 [P] [US5] Update tailwind.config.js breakpoints to focus on lg (1024px) as minimum width
-- [ ] T093 [P] [US5] Add responsive classes to NavigationSidebar (sidebar-transition, sidebar width adjustments at lg breakpoint)
-- [ ] T094 [P] [US5] Update MainLayout content area with responsive margin classes (ml-64 default, ml-16 when sidebar collapsed, responsive adjustments at lg)
-- [ ] T095 [P] [US5] Test all pages at 1920px, 1440px, 1280px, and 1024px widths to verify no horizontal scroll
+- [X] T092 [P] [US5] Update tailwind.config.js breakpoints to focus on lg (1024px) as minimum width
+- [X] T093 [P] [US5] Add responsive classes to NavigationSidebar (sidebar-transition, sidebar width adjustments at lg breakpoint)
+- [X] T094 [P] [US5] Update MainLayout content area with responsive margin classes (ml-64 default, ml-16 when sidebar collapsed, responsive adjustments at lg)
+- [X] T095 [P] [US5] Test all pages at 1920px, 1440px, 1280px, and 1024px widths to verify no horizontal scroll
 
 ### Component Consistency
 
-- [ ] T096 [P] [US5] Audit all Button usages across pages and ensure consistent variant usage (Primary for main actions, Secondary for cancel, Danger for destructive)
-- [ ] T097 [P] [US5] Audit all Card usages and ensure consistent border, shadow, and padding classes
-- [ ] T098 [P] [US5] Audit all form Input/Select/Toggle usages and ensure consistent sizing and spacing
-- [ ] T099 [P] [US5] Audit all chart components and verify consistent color schemes and fonts (inherit from theme CSS variables)
-- [ ] T100 [P] [US5] Update existing pages (Home, Portfolio, Performance, Strategies, Backtesting) to use new atomic Button components instead of inline HTML buttons
+- [X] T096 [P] [US5] Audit all Button usages across pages and ensure consistent variant usage (Primary for main actions, Secondary for cancel, Danger for destructive)
+- [X] T097 [P] [US5] Audit all Card usages and ensure consistent border, shadow, and padding classes
+- [X] T098 [P] [US5] Audit all form Input/Select/Toggle usages and ensure consistent sizing and spacing
+- [X] T099 [P] [US5] Audit all chart components and verify consistent color schemes and fonts (inherit from theme CSS variables)
+- [X] T100 [P] [US5] Update existing pages (Home, Portfolio, Performance, Strategies, Backtesting) to use new atomic Button components instead of inline HTML buttons
 
 ### Maximum Width Handling
 
-- [ ] T101 [P] [US5] Add max-width and centering utilities to main content area for widescreen monitors (e.g., max-w-7xl mx-auto)
-- [ ] T102 [P] [US5] Verify data tables use overflow-x-auto wrapper for horizontal scroll on smaller screens (1024px)
+- [X] T101 [P] [US5] Add max-width and centering utilities to main content area for widescreen monitors (e.g., max-w-7xl mx-auto)
+- [X] T102 [P] [US5] Verify data tables use overflow-x-auto wrapper for horizontal scroll on smaller screens (1024px)
 
 **Checkpoint**: All pages have consistent component styling and layouts adapt gracefully to supported screen widths (1024px-1920px+).
 
