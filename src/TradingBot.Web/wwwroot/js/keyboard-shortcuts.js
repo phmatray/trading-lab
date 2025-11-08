@@ -24,7 +24,7 @@
         }
 
         // Use event.code to get physical key, not the character produced
-        // KeyD, KeyP, KeyR, KeyS, KeyG, KeyB
+        // KeyD, KeyP, KeyR, KeyS, KeyG, KeyB, KeyH
         let route = null;
 
         switch (event.code) {
@@ -51,6 +51,10 @@
             case 'KeyB':
                 route = '/backtest';
                 console.log('Navigating to Backtest');
+                break;
+            case 'KeyH':
+                route = '/help';
+                console.log('Navigating to Help');
                 break;
         }
 

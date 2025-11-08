@@ -50,4 +50,7 @@ public enum IconName
 
     /// <summary>Information circle icon (for info).</summary>
     InformationCircle,
+
+    /// <summary>Question mark circle icon (for help).</summary>
+    QuestionMarkCircle,
 }

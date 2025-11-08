@@ -280,7 +280,7 @@ This is a Blazor Server web application with clean architecture:
 
 ### Help Page (Optional Enhancement)
 
-- [ ] T111 [P] [US6] Create src/TradingBot.Web/Components/Pages/Help.razor with FAQ and common task guides (OPTIONAL - can defer to future iteration)
+- [X] T111 [P] [US6] Create src/TradingBot.Web/Components/Pages/Help.razor with FAQ and common task guides (OPTIONAL - can defer to future iteration)
 
 **Checkpoint**: Application provides contextual help throughout, reducing learning curve and support burden.
 
