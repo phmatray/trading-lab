@@ -44,39 +44,39 @@ description: "Component Refactoring and Organization Task List"
 
 **⚠️ CRITICAL**: All molecules, organisms, and features depend on these atoms being migrated first
 
-- [ ] T004 Create subfolder src/TradingBot.Web/Components/Atoms/TbButton/
-- [ ] T005 Rename src/TradingBot.Web/Components/Atoms/Button.razor to src/TradingBot.Web/Components/Atoms/TbButton/TbButton.razor
-- [ ] T006 Move src/TradingBot.Web/Models/ButtonVariant.cs to src/TradingBot.Web/Components/Atoms/TbButton/ButtonVariant.cs
-- [ ] T007 Update namespace in TbButton.razor to TradingBot.Web.Components.Atoms
-- [ ] T008 Update namespace in ButtonVariant.cs to TradingBot.Web.Components.Atoms
-- [ ] T009 Update copyright headers in TbButton.razor and ButtonVariant.cs
-- [ ] T010 Delete duplicate src/TradingBot.Web/Components/Shared/Button.razor
-- [ ] T011 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbIcon/
-- [ ] T012 [P] Rename src/TradingBot.Web/Components/Atoms/Icon.razor to src/TradingBot.Web/Components/Atoms/TbIcon/TbIcon.razor
-- [ ] T013 [P] Move src/TradingBot.Web/Models/IconName.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconName.cs
-- [ ] T014 [P] Move src/TradingBot.Web/Models/IconVariant.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconVariant.cs
-- [ ] T015 [P] Update namespace in TbIcon.razor and supporting types to TradingBot.Web.Components.Atoms
-- [ ] T016 [P] Update copyright headers in TbIcon files
-- [ ] T017 [P] Rename src/TradingBot.Web/Components/Atoms/Input.razor to src/TradingBot.Web/Components/Atoms/TbInput.razor
-- [ ] T018 [P] Update namespace and copyright header in TbInput.razor
-- [ ] T019 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbBadge/
-- [ ] T020 [P] Rename src/TradingBot.Web/Components/Atoms/Badge.razor to src/TradingBot.Web/Components/Atoms/TbBadge/TbBadge.razor
-- [ ] T021 [P] Split Models/BadgeEnums.cs into TbBadge/BadgeVariant.cs and TbBadge/BadgeSize.cs
-- [ ] T022 [P] Update namespace and copyright headers in TbBadge files
-- [ ] T023 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbLabel/
-- [ ] T024 [P] Rename src/TradingBot.Web/Components/Atoms/Label.razor to src/TradingBot.Web/Components/Atoms/TbLabel/TbLabel.razor
-- [ ] T025 [P] Move src/TradingBot.Web/Models/LabelSize.cs to src/TradingBot.Web/Components/Atoms/TbLabel/LabelSize.cs
-- [ ] T026 [P] Update namespace and copyright headers in TbLabel files
-- [ ] T027 [P] Rename src/TradingBot.Web/Components/Atoms/Select.razor to src/TradingBot.Web/Components/Atoms/TbSelect.razor
-- [ ] T028 [P] Update namespace and copyright header in TbSelect.razor
-- [ ] T029 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbSpinner/
-- [ ] T030 [P] Rename src/TradingBot.Web/Components/Atoms/Spinner.razor to src/TradingBot.Web/Components/Atoms/TbSpinner/TbSpinner.razor
-- [ ] T031 [P] Extract SpinnerSize from Models/SpinnerEnums.cs to TbSpinner/SpinnerSize.cs
-- [ ] T032 [P] Update namespace and copyright headers in TbSpinner files
-- [ ] T033 [P] Rename src/TradingBot.Web/Components/Atoms/Toggle.razor to src/TradingBot.Web/Components/Atoms/TbToggle.razor
-- [ ] T034 [P] Update namespace and copyright header in TbToggle.razor
-- [ ] T035 Verify dotnet build succeeds after atom migrations
-- [ ] T036 Commit checkpoint for atom migrations
+- [X] T004 Create subfolder src/TradingBot.Web/Components/Atoms/TbButton/
+- [X] T005 Rename src/TradingBot.Web/Components/Atoms/Button.razor to src/TradingBot.Web/Components/Atoms/TbButton/TbButton.razor
+- [X] T006 Move src/TradingBot.Web/Models/ButtonVariant.cs to src/TradingBot.Web/Components/Atoms/TbButton/ButtonVariant.cs
+- [X] T007 Update namespace in TbButton.razor to TradingBot.Web.Components.Atoms
+- [X] T008 Update namespace in ButtonVariant.cs to TradingBot.Web.Components.Atoms
+- [X] T009 Update copyright headers in TbButton.razor and ButtonVariant.cs
+- [X] T010 Delete duplicate src/TradingBot.Web/Components/Shared/Button.razor
+- [X] T011 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbIcon/
+- [X] T012 [P] Rename src/TradingBot.Web/Components/Atoms/Icon.razor to src/TradingBot.Web/Components/Atoms/TbIcon/TbIcon.razor
+- [X] T013 [P] Move src/TradingBot.Web/Models/IconName.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconName.cs
+- [X] T014 [P] Move src/TradingBot.Web/Models/IconVariant.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconVariant.cs
+- [X] T015 [P] Update namespace in TbIcon.razor and supporting types to TradingBot.Web.Components.Atoms
+- [X] T016 [P] Update copyright headers in TbIcon files
+- [X] T017 [P] Rename src/TradingBot.Web/Components/Atoms/Input.razor to src/TradingBot.Web/Components/Atoms/TbInput.razor
+- [X] T018 [P] Update namespace and copyright header in TbInput.razor
+- [X] T019 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbBadge/
+- [X] T020 [P] Rename src/TradingBot.Web/Components/Atoms/Badge.razor to src/TradingBot.Web/Components/Atoms/TbBadge/TbBadge.razor
+- [X] T021 [P] Split Models/BadgeEnums.cs into TbBadge/BadgeVariant.cs and TbBadge/BadgeSize.cs
+- [X] T022 [P] Update namespace and copyright headers in TbBadge files
+- [X] T023 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbLabel/
+- [X] T024 [P] Rename src/TradingBot.Web/Components/Atoms/Label.razor to src/TradingBot.Web/Components/Atoms/TbLabel/TbLabel.razor
+- [X] T025 [P] Move src/TradingBot.Web/Models/LabelSize.cs to src/TradingBot.Web/Components/Atoms/TbLabel/LabelSize.cs
+- [X] T026 [P] Update namespace and copyright headers in TbLabel files
+- [X] T027 [P] Rename src/TradingBot.Web/Components/Atoms/Select.razor to src/TradingBot.Web/Components/Atoms/TbSelect.razor
+- [X] T028 [P] Update namespace and copyright header in TbSelect.razor
+- [X] T029 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbSpinner/
+- [X] T030 [P] Rename src/TradingBot.Web/Components/Atoms/Spinner.razor to src/TradingBot.Web/Components/Atoms/TbSpinner/TbSpinner.razor
+- [X] T031 [P] Extract SpinnerSize from Models/SpinnerEnums.cs to TbSpinner/SpinnerSize.cs
+- [X] T032 [P] Update namespace and copyright headers in TbSpinner files
+- [X] T033 [P] Rename src/TradingBot.Web/Components/Atoms/Toggle.razor to src/TradingBot.Web/Components/Atoms/TbToggle.razor
+- [X] T034 [P] Update namespace and copyright header in TbToggle.razor
+- [X] T035 Verify dotnet build succeeds after atom migrations
+- [X] T036 Commit checkpoint for atom migrations
 
 **Checkpoint**: Foundation ready - atoms complete, user story work can now begin
 

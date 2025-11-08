@@ -1,26 +1,26 @@
-// <copyright file="LabelEnums.cs" company="TradingBot">
+// <copyright file="ButtonSize.cs" company="TradingBot">
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Web.Models;
+namespace TradingBot.Web.Components.Atoms;
 
 /// <summary>
-/// Label size options.
+/// Defines button sizes.
 /// </summary>
-public enum LabelSize
+public enum ButtonSize
 {
     /// <summary>
-    /// Small label.
+    /// Small button.
     /// </summary>
     Small,
 
     /// <summary>
-    /// Medium label.
+    /// Medium button.
     /// </summary>
     Medium,
 
     /// <summary>
-    /// Large label.
+    /// Large button.
     /// </summary>
     Large,
 }

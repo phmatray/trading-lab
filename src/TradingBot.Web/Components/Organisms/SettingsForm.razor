@@ -20,12 +20,12 @@
                    HelpText="Choose your preferred color scheme. Light theme uses bright backgrounds, while dark theme reduces eye strain in low-light environments."
                    IsRequired="true">
             <InputContent>
-                <Select @bind-Value="_selectedTheme"
+                <TbSelect @bind-Value="_selectedTheme"
                         Id="theme-select"
                         Placeholder="Select theme">
                     <option value="Light">Light</option>
                     <option value="Dark">Dark</option>
-                </Select>
+                </TbSelect>
             </InputContent>
         </FormField>
 
@@ -36,7 +36,7 @@
                    ErrorMessage="@_refreshIntervalError"
                    IsRequired="true">
             <InputContent>
-                <Input @bind-Value="_preferences.DashboardRefreshInterval"
+                <TbInput @bind-Value="_preferences.DashboardRefreshInterval"
                        Id="refresh-interval"
                        Type="number"
                        Min="1"
@@ -52,7 +52,7 @@
                    ErrorMessage="@_notificationDurationError"
                    IsRequired="true">
             <InputContent>
-                <Input @bind-Value="_preferences.NotificationDuration"
+                <TbInput @bind-Value="_preferences.NotificationDuration"
                        Id="notification-duration"
                        Type="number"
                        Min="2"
@@ -74,7 +74,7 @@
                 <label for="toggle-success" class="text-sm text-gray-700 dark:text-gray-300">
                     Success Notifications
                 </label>
-                <Toggle @bind-IsChecked="_preferences.ShowSuccessNotifications"
+                <TbToggle @bind-IsChecked="_preferences.ShowSuccessNotifications"
                         Id="toggle-success" />
             </div>
 
@@ -82,7 +82,7 @@
                 <label for="toggle-error" class="text-sm text-gray-700 dark:text-gray-300">
                     Error Notifications
                 </label>
-                <Toggle @bind-IsChecked="_preferences.ShowErrorNotifications"
+                <TbToggle @bind-IsChecked="_preferences.ShowErrorNotifications"
                         Id="toggle-error" />
             </div>
 
@@ -90,7 +90,7 @@
                 <label for="toggle-info" class="text-sm text-gray-700 dark:text-gray-300">
                     Info Notifications
                 </label>
-                <Toggle @bind-IsChecked="_preferences.ShowInfoNotifications"
+                <TbToggle @bind-IsChecked="_preferences.ShowInfoNotifications"
                         Id="toggle-info" />
             </div>
 
@@ -98,23 +98,23 @@
                 <label for="toggle-warning" class="text-sm text-gray-700 dark:text-gray-300">
                     Warning Notifications
                 </label>
-                <Toggle @bind-IsChecked="_preferences.ShowWarningNotifications"
+                <TbToggle @bind-IsChecked="_preferences.ShowWarningNotifications"
                         Id="toggle-warning" />
             </div>
         </div>
 
         @* Form Actions *@
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <TradingBot.Web.Components.Atoms.Button Variant="TradingBot.Web.Components.Atoms.Button.ButtonVariant.Secondary"
+            <TbButton Variant="ButtonVariant.Secondary"
                     Type="button"
                     OnClick="HandleResetToDefaults">
                 Reset to Defaults
-            </TradingBot.Web.Components.Atoms.Button>
-            <TradingBot.Web.Components.Atoms.Button Variant="TradingBot.Web.Components.Atoms.Button.ButtonVariant.Primary"
+            </TbButton>
+            <TbButton Variant="ButtonVariant.Primary"
                     Type="submit"
                     IsLoading="_isSaving">
                 Save Changes
-            </TradingBot.Web.Components.Atoms.Button>
+            </TbButton>
         </div>
     </div>
 </EditForm>
@@ -136,14 +136,14 @@
                 This will reset all your preferences to their default values. This action cannot be undone.
             </p>
             <div class="flex items-center justify-end gap-3">
-                <TradingBot.Web.Components.Atoms.Button Variant="TradingBot.Web.Components.Atoms.Button.ButtonVariant.Secondary"
+                <TbButton Variant="ButtonVariant.Secondary"
                         OnClick="CloseResetDialog">
                     Cancel
-                </TradingBot.Web.Components.Atoms.Button>
-                <TradingBot.Web.Components.Atoms.Button Variant="TradingBot.Web.Components.Atoms.Button.ButtonVariant.Danger"
+                </TbButton>
+                <TbButton Variant="ButtonVariant.Danger"
                         OnClick="ConfirmReset">
                     Reset
-                </TradingBot.Web.Components.Atoms.Button>
+                </TbButton>
             </div>
         </div>
     </div>

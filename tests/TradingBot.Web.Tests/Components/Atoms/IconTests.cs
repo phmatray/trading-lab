@@ -23,7 +23,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -38,7 +38,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.Class, "w-8 h-8 text-blue-500"));
 
@@ -56,7 +56,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -73,7 +73,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.ChartBar));
 
         // Assert
@@ -90,7 +90,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -105,7 +105,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.Variant, IconVariant.Solid));
 
@@ -121,7 +121,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -136,7 +136,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.AriaLabel, "Home page"));
 
@@ -164,7 +164,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, iconName));
 
         // Assert
@@ -181,7 +181,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -197,7 +197,7 @@ public class IconTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.RenderComponent<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert

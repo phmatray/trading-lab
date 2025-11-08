@@ -3,7 +3,6 @@ Copyright (c) TradingBot. All rights reserved.
 </copyright> *@
 
 @using TradingBot.Web.Components.Atoms
-@using static TradingBot.Web.Components.Atoms.Button
 
 <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -82,18 +81,18 @@ Copyright (c) TradingBot. All rights reserved.
                 </div>
             </div>
             <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
-                <TradingBot.Web.Components.Atoms.Button
+                <TbButton
                     Variant="ButtonVariant.Danger"
                     OnClick="Confirm"
                     Class="w-full sm:w-auto">
                     Close Position
-                </TradingBot.Web.Components.Atoms.Button>
-                <TradingBot.Web.Components.Atoms.Button
+                </TbButton>
+                <TbButton
                     Variant="ButtonVariant.Secondary"
                     OnClick="Cancel"
                     Class="w-full sm:w-auto mt-3 sm:mt-0">
                     Cancel
-                </TradingBot.Web.Components.Atoms.Button>
+                </TbButton>
             </div>
         </div>
     </div>

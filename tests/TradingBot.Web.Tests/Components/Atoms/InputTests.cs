@@ -24,7 +24,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>();
+        var cut = ctx.RenderComponent<TbInput<string>>();
 
         // Assert
         var input = cut.Find("input");
@@ -42,7 +42,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.Value, "Test Value"));
 
         // Assert
@@ -60,7 +60,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Value, 42));
 
@@ -80,7 +80,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
@@ -99,7 +99,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
@@ -118,7 +118,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Enter text here"));
 
         // Assert
@@ -136,7 +136,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
@@ -154,7 +154,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.IsReadonly, true));
 
         // Assert
@@ -171,7 +171,7 @@ public class InputTests
         // Arrange
         using var ctx = new Bunit.TestContext();
         var newValue = string.Empty;
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.Value, "Initial")
             .Add(p => p.ValueChanged, value => newValue = value));
 
@@ -194,7 +194,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Min, "1")
             .Add(p => p.Max, "100")
@@ -217,7 +217,7 @@ public class InputTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbInput<string>>(parameters => parameters
             .Add(p => p.Class, "custom-class"));
 
         // Assert

@@ -12,7 +12,7 @@
          Match="@MatchMode"
          aria-current="@(IsActive() ? "page" : null)"
          @onkeydown="HandleKeyDown">
-    <Icon Name="@IconName"
+    <TbIcon Name="@IconName"
           Class="@GetIconClasses()"
           AriaLabel="@(IsCollapsed ? Label : null)"/>
     @if (!IsCollapsed)

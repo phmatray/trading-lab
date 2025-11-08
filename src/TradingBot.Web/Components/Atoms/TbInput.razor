@@ -1,33 +1,42 @@
-@* <copyright file="Select.razor" company="TradingBot">
+@* <copyright file="TbInput.razor" company="TradingBot">
  Copyright (c) TradingBot. All rights reserved.
  </copyright> *@
 
+@namespace TradingBot.Web.Components.Atoms
+
 @typeparam TValue
 
-<select id="@Id"
-        value="@CurrentValueAsString"
-        @onchange="HandleChange"
-        class="@GetSelectClasses()"
-        disabled="@IsDisabled"
-        aria-invalid="@(HasError ? "true" : null)"
-        aria-describedby="@GetAriaDescribedBy()"
-        aria-required="@(IsRequired ? "true" : null)">
-    @if (ShowPlaceholder && !string.IsNullOrEmpty(Placeholder))
-    {
-        <option value="" disabled selected>@Placeholder</option>
-    }
-    @ChildContent
-</select>
+<input type="@Type"
+       id="@Id"
+       value="@CurrentValueAsString"
+       @onchange="HandleChange"
+       @oninput="HandleInput"
+       class="@GetInputClasses()"
+       placeholder="@Placeholder"
+       disabled="@IsDisabled"
+       readonly="@IsReadonly"
+       min="@Min"
+       max="@Max"
+       step="@Step"
+       aria-invalid="@(HasError ? "true" : null)"
+       aria-describedby="@GetAriaDescribedBy()"
+       aria-required="@(IsRequired ? "true" : null)" />
 
 @code {
     /// <summary>
-    /// Gets or sets the unique identifier for the select element.
+    /// Gets or sets the unique identifier for the input element.
     /// </summary>
     [Parameter]
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
-    /// Gets or sets the selected value.
+    /// Gets or sets the input type (text, number, email, etc.).
+    /// </summary>
+    [Parameter]
+    public string Type { get; set; } = "text";
+
+    /// <summary>
+    /// Gets or sets the input value.
     /// </summary>
     [Parameter]
     public TValue? Value { get; set; }
@@ -45,31 +54,31 @@
     public string? Placeholder { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether to show the placeholder.
-    /// </summary>
-    [Parameter]
-    public bool ShowPlaceholder { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the select is disabled.
+    /// Gets or sets a value indicating whether the input is disabled.
     /// </summary>
     [Parameter]
     public bool IsDisabled { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the select has an error.
+    /// Gets or sets a value indicating whether the input is readonly.
+    /// </summary>
+    [Parameter]
+    public bool IsReadonly { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the input has an error.
     /// </summary>
     [Parameter]
     public bool HasError { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the select is required.
+    /// Gets or sets a value indicating whether the input is required.
     /// </summary>
     [Parameter]
     public bool IsRequired { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether there is help text associated with this select.
+    /// Gets or sets a value indicating whether there is help text associated with this input.
     /// </summary>
     [Parameter]
     public bool HasHelpText { get; set; }
@@ -81,10 +90,22 @@
     public string? Class { get; set; }
 
     /// <summary>
-    /// Gets or sets the child content (option elements).
+    /// Gets or sets the minimum value (for number inputs).
     /// </summary>
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public string? Min { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum value (for number inputs).
+    /// </summary>
+    [Parameter]
+    public string? Max { get; set; }
+
+    /// <summary>
+    /// Gets or sets the step value (for number inputs).
+    /// </summary>
+    [Parameter]
+    public string? Step { get; set; }
 
     private string? CurrentValueAsString
     {
@@ -98,14 +119,12 @@
         }
     }
 
-    private string GetSelectClasses()
+    private string GetInputClasses()
     {
         var baseClasses = "block w-full rounded-lg border px-4 py-2 text-base " +
                           "focus:outline-none focus:ring-2 focus:ring-offset-2 " +
                           "disabled:opacity-50 disabled:cursor-not-allowed " +
-                          "transition-colors appearance-none " +
-                          "bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUgNy41TDEwIDEyLjVMMTUgNy41IiBzdHJva2U9IiM2QjcyODAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==')] " +
-                          "bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-no-repeat pr-10";
+                          "transition-colors";
 
         var stateClasses = HasError
             ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 " +
@@ -143,6 +162,12 @@
         CurrentValueAsString = e.Value?.ToString();
     }
 
+    private void HandleInput(ChangeEventArgs e)
+    {
+        // Optional: Handle oninput for real-time validation
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
     private bool TryParseValue(string? value, out TValue? result)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -160,14 +185,19 @@
                 result = (TValue)(object)value;
                 return true;
             }
-            else if (targetType.IsEnum && Enum.TryParse(targetType, value, ignoreCase: true, out var enumValue))
-            {
-                result = (TValue)enumValue;
-                return true;
-            }
             else if (targetType == typeof(int) && int.TryParse(value, out var intValue))
             {
                 result = (TValue)(object)intValue;
+                return true;
+            }
+            else if (targetType == typeof(decimal) && decimal.TryParse(value, out var decimalValue))
+            {
+                result = (TValue)(object)decimalValue;
+                return true;
+            }
+            else if (targetType == typeof(double) && double.TryParse(value, out var doubleValue))
+            {
+                result = (TValue)(object)doubleValue;
                 return true;
             }
 

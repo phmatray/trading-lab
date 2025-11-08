@@ -24,7 +24,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>();
+        var cut = ctx.RenderComponent<TbToggle>();
 
         // Assert
         var button = cut.Find("button");
@@ -43,7 +43,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsChecked, true));
 
         // Assert
@@ -62,7 +62,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsChecked, false));
 
         // Assert
@@ -81,7 +81,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
@@ -98,7 +98,7 @@ public class ToggleTests
         // Arrange
         using var ctx = new Bunit.TestContext();
         var isChecked = false;
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsChecked, isChecked)
             .Add(p => p.IsCheckedChanged, value => isChecked = value));
 
@@ -121,7 +121,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
         var isChecked = false;
         var wasTriggered = false;
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsChecked, isChecked)
             .Add(p => p.IsDisabled, true)
             .Add(p => p.IsCheckedChanged, value => wasTriggered = true));
@@ -145,7 +145,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.Class, "custom-toggle"));
 
         // Assert
@@ -161,7 +161,7 @@ public class ToggleTests
     {
         // Arrange
         using var ctx = new Bunit.TestContext();
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.IsChecked, false));
 
         var thumb = cut.Find("span");
@@ -188,7 +188,7 @@ public class ToggleTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Toggle>(parameters => parameters
+        var cut = ctx.RenderComponent<TbToggle>(parameters => parameters
             .Add(p => p.Id, "test-toggle")
             .Add(p => p.IsChecked, true));
 

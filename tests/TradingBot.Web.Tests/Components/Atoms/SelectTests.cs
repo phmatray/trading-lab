@@ -25,7 +25,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>();
+        var cut = ctx.RenderComponent<TbSelect<string>>();
 
         // Assert
         var select = cut.Find("select");
@@ -53,7 +53,7 @@ public class SelectTests
         };
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.ChildContent, childContent));
 
         // Assert
@@ -71,7 +71,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select an option"));
 
         // Assert
@@ -89,7 +89,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
@@ -108,7 +108,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
@@ -127,7 +127,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
@@ -156,7 +156,7 @@ public class SelectTests
             builder.CloseElement();
         };
 
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.Value, "option1")
             .Add(p => p.ValueChanged, value => newValue = value)
             .Add(p => p.ChildContent, childContent));
@@ -180,7 +180,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.Class, "custom-select"));
 
         // Assert
@@ -198,7 +198,7 @@ public class SelectTests
         using var ctx = new Bunit.TestContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.RenderComponent<TbSelect<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select option")
             .Add(p => p.ShowPlaceholder, false));
 

@@ -5,7 +5,6 @@
 using Bunit;
 using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using TradingBot.Web.Models;
 using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
@@ -19,7 +18,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithDefaultVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .AddChildContent("Test Badge"));
 
         // Assert
@@ -33,7 +32,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithSuccessVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Success)
             .AddChildContent("Success"));
 
@@ -48,7 +47,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithErrorVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Error)
             .AddChildContent("Error"));
 
@@ -63,7 +62,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithWarningVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Warning)
             .AddChildContent("Warning"));
 
@@ -78,7 +77,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithInfoVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Info)
             .AddChildContent("Info"));
 
@@ -93,7 +92,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithPrimaryVariant()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Primary)
             .AddChildContent("Primary"));
 
@@ -108,7 +107,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithSmallSize()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Size, BadgeSize.Small)
             .AddChildContent("Small"));
 
@@ -123,7 +122,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithMediumSize()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Size, BadgeSize.Medium)
             .AddChildContent("Medium"));
 
@@ -138,7 +137,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithLargeSize()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Size, BadgeSize.Large)
             .AddChildContent("Large"));
 
@@ -153,7 +152,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithRoundedCorners_ByDefault()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .AddChildContent("Test"));
 
         // Assert
@@ -167,7 +166,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_Renders_WithPillStyle()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Pill, true)
             .AddChildContent("Pill Badge"));
 
@@ -184,7 +183,7 @@ public class BadgeTests : Bunit.TestContext
         const string content = "Test Badge Content";
 
         // Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .AddChildContent(content));
 
         // Assert
@@ -199,7 +198,7 @@ public class BadgeTests : Bunit.TestContext
         const string customClass = "my-custom-class";
 
         // Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Class, customClass)
             .AddChildContent("Test"));
 
@@ -213,7 +212,7 @@ public class BadgeTests : Bunit.TestContext
     public void Badge_HasBaseClasses()
     {
         // Arrange & Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .AddChildContent("Test"));
 
         // Assert
@@ -232,7 +231,7 @@ public class BadgeTests : Bunit.TestContext
         const string customClass = "extra-margin";
 
         // Act
-        var cut = RenderComponent<Badge>(parameters => parameters
+        var cut = RenderComponent<TbBadge>(parameters => parameters
             .Add(p => p.Variant, BadgeVariant.Success)
             .Add(p => p.Size, BadgeSize.Large)
             .Add(p => p.Pill, true)
@@ -268,7 +267,7 @@ public class BadgeTests : Bunit.TestContext
         foreach (var (variant, expectedBg, expectedText) in variants)
         {
             // Act
-            var cut = RenderComponent<Badge>(parameters => parameters
+            var cut = RenderComponent<TbBadge>(parameters => parameters
                 .Add(p => p.Variant, variant)
                 .AddChildContent(variant.ToString()));
 
