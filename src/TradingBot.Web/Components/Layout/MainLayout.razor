@@ -1,9 +1,11 @@
 @using TradingBot.Web.Components.Organisms
 @using TradingBot.Web.Services
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.JSInterop
 @inherits LayoutComponentBase
 @inject UIStateService UIState
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
 <ThemeProvider>
@@ -12,7 +14,7 @@
     <!-- Navigation Sidebar -->
     <NavigationSidebar/>
 
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()" @onkeydown="HandleKeyDown" tabindex="-1">
     <!-- Header -->
     <header
         class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
@@ -188,6 +190,35 @@
     private string GetContentMarginClass()
     {
         return UIState.SidebarCollapsed ? "ml-16" : "ml-64";
+    }
+
+    /// <summary>
+    /// Handles global keyboard shortcuts for navigation.
+    /// Alt+D: Dashboard, Alt+P: Portfolio, Alt+R: Performance, Alt+S: Strategies, Alt+G: Settings, Alt+B: Backtesting.
+    /// </summary>
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        // Only handle Alt key combinations
+        if (!e.AltKey || e.CtrlKey || e.ShiftKey)
+        {
+            return;
+        }
+
+        var route = e.Key.ToLowerInvariant() switch
+        {
+            "d" => "/",                    // Alt+D: Dashboard (Home)
+            "p" => "/portfolio",           // Alt+P: Portfolio
+            "r" => "/performance",         // Alt+R: Performance (Results)
+            "s" => "/strategies",          // Alt+S: Strategies
+            "g" => "/settings",            // Alt+G: Settings (Gear)
+            "b" => "/backtest",            // Alt+B: Backtesting
+            _ => null
+        };
+
+        if (route is not null)
+        {
+            NavigationManager.NavigateTo(route);
+        }
     }
 
 }

@@ -9,7 +9,9 @@
 <NavLink href="@Href"
          class="@GetClasses()"
          ActiveClass="@GetActiveClass()"
-         Match="@MatchMode">
+         Match="@MatchMode"
+         aria-current="@(IsActive() ? "page" : null)"
+         @onkeydown="HandleKeyDown">
     <Icon Name="@IconName"
           Class="@GetIconClasses()"
           AriaLabel="@(IsCollapsed ? Label : null)"/>
@@ -71,6 +73,39 @@
     private string GetIconClasses()
     {
         return IsCollapsed ? "w-6 h-6" : "w-5 h-5";
+    }
+
+    /// <summary>
+    /// Checks if this menu item is currently active based on the current navigation URI.
+    /// </summary>
+    private bool IsActive()
+    {
+        var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var targetPath = Href.TrimStart('/');
+
+        if (MatchMode == NavLinkMatch.All)
+        {
+            return string.Equals(currentPath, targetPath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Prefix match
+        return currentPath.StartsWith(targetPath, StringComparison.OrdinalIgnoreCase) ||
+               (string.IsNullOrEmpty(currentPath) && string.IsNullOrEmpty(targetPath));
+    }
+
+    /// <summary>
+    /// Handles keyboard navigation events.
+    /// Enter or Space activates the menu item.
+    /// Arrow keys can be used for navigation within the menu (handled by NavigationSidebar).
+    /// </summary>
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        // NavLink already handles Enter key natively, but we explicitly support it for clarity
+        // Space key also activates the link (standard <a> behavior)
+        if (e.Key is "Enter" or " " or "Spacebar")
+        {
+            Navigation.NavigateTo(Href);
+        }
     }
 
 }

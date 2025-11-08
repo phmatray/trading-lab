@@ -12,7 +12,9 @@
 
 <aside class="@GetSidebarClasses()"
        role="navigation"
-       aria-label="Main navigation">
+       aria-label="Main navigation"
+       @onkeydown="HandleKeyDown"
+       tabindex="-1">
     <div class="flex h-full flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
         <!-- Header with logo and toggle -->
         <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
@@ -23,6 +25,7 @@
             <button @onclick="ToggleSidebar"
                     class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     aria-label="@GetToggleAriaLabel()"
+                    aria-expanded="@(!UIState.SidebarCollapsed)"
                     type="button">
                 <Icon Name="@GetToggleIcon()" Class="w-6 h-6 text-gray-600 dark:text-gray-400"/>
             </button>
@@ -98,6 +101,19 @@
     private string GetToggleAriaLabel()
     {
         return UIState.SidebarCollapsed ? "Expand sidebar" : "Collapse sidebar";
+    }
+
+    /// <summary>
+    /// Handles keyboard events for the sidebar.
+    /// Escape key collapses the sidebar when expanded.
+    /// </summary>
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        // Collapse sidebar on Escape key (only if expanded)
+        if (e.Key == "Escape" && !UIState.SidebarCollapsed)
+        {
+            UIState.SidebarCollapsed = true;
+        }
     }
 
 }

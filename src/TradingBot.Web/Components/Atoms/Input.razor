@@ -17,7 +17,8 @@
        max="@Max"
        step="@Step"
        aria-invalid="@(HasError ? "true" : null)"
-       aria-describedby="@(HasError ? $"{Id}-error" : null)" />
+       aria-describedby="@GetAriaDescribedBy()"
+       aria-required="@(IsRequired ? "true" : null)" />
 
 @code {
     /// <summary>
@@ -67,6 +68,18 @@
     /// </summary>
     [Parameter]
     public bool HasError { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the input is required.
+    /// </summary>
+    [Parameter]
+    public bool IsRequired { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether there is help text associated with this input.
+    /// </summary>
+    [Parameter]
+    public bool HasHelpText { get; set; }
 
     /// <summary>
     /// Gets or sets additional CSS classes.
@@ -120,6 +133,26 @@
         var customClasses = Class ?? string.Empty;
 
         return $"{baseClasses} {stateClasses} {customClasses}".Trim();
+    }
+
+    /// <summary>
+    /// Gets the aria-describedby attribute value linking to help text and/or error messages.
+    /// </summary>
+    private string? GetAriaDescribedBy()
+    {
+        var ids = new List<string>();
+
+        if (HasHelpText)
+        {
+            ids.Add($"{Id}-help");
+        }
+
+        if (HasError)
+        {
+            ids.Add($"{Id}-error");
+        }
+
+        return ids.Any() ? string.Join(" ", ids) : null;
     }
 
     private void HandleChange(ChangeEventArgs e)
