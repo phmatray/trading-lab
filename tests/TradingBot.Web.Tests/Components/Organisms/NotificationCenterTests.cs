@@ -2,6 +2,8 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+#pragma warning disable FakeItEasy0003 // Argument constraint outside call specification - false positive in test setup
+
 using System.Threading.Tasks;
 using Bunit;
 using FakeItEasy;
