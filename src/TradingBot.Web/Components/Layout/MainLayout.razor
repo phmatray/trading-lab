@@ -77,7 +77,14 @@
     protected override async Task OnInitializedAsync()
     {
         await InitializeSignalRConnection();
-        await InitializeKeyboardShortcuts();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeKeyboardShortcuts();
+        }
     }
 
     private async Task InitializeKeyboardShortcuts()
@@ -203,7 +210,15 @@
         // Dispose keyboard shortcuts
         if (_dotNetHelper is not null)
         {
-            await JSRuntime.InvokeVoidAsync("keyboardShortcuts.dispose");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("keyboardShortcuts.dispose");
+            }
+            catch (InvalidOperationException)
+            {
+                // JS interop not available during static rendering or disposal
+            }
+
             _dotNetHelper.Dispose();
         }
     }
