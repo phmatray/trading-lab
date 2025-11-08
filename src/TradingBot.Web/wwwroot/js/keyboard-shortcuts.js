@@ -1,15 +1,11 @@
 // Global keyboard shortcuts for navigation
-window.keyboardShortcuts = {
-    dotNetHelper: null,
+(function () {
+    let dotNetHelper = null;
+    let boundHandler = null;
 
-    initialize: function (dotNetHelper) {
-        this.dotNetHelper = dotNetHelper;
+    function handleKeyDown(event) {
+        console.log('Key pressed:', event.key, 'Alt:', event.altKey, 'Ctrl:', event.ctrlKey);
 
-        // Add document-level keydown listener
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
-    },
-
-    handleKeyDown: function (event) {
         // Only handle Alt key combinations (and not Ctrl or Shift)
         if (!event.altKey || event.ctrlKey || event.shiftKey || event.metaKey) {
             return;
@@ -20,6 +16,7 @@ window.keyboardShortcuts = {
         if (activeElement && (
             activeElement.tagName === 'INPUT' ||
             activeElement.tagName === 'TEXTAREA' ||
+            activeElement.tagName === 'SELECT' ||
             activeElement.isContentEditable
         )) {
             return;
@@ -31,32 +28,63 @@ window.keyboardShortcuts = {
         switch (key) {
             case 'd':
                 route = '/';
+                console.log('Navigating to Dashboard');
                 break;
             case 'p':
                 route = '/portfolio';
+                console.log('Navigating to Portfolio');
                 break;
             case 'r':
                 route = '/performance';
+                console.log('Navigating to Performance');
                 break;
             case 's':
                 route = '/strategies';
+                console.log('Navigating to Strategies');
                 break;
             case 'g':
                 route = '/settings';
+                console.log('Navigating to Settings');
                 break;
             case 'b':
                 route = '/backtest';
+                console.log('Navigating to Backtest');
                 break;
         }
 
-        if (route && this.dotNetHelper) {
+        if (route && dotNetHelper) {
             event.preventDefault();
-            this.dotNetHelper.invokeMethodAsync('NavigateToRoute', route);
+            event.stopPropagation();
+            dotNetHelper.invokeMethodAsync('NavigateToRoute', route)
+                .catch(err => console.error('Navigation error:', err));
         }
-    },
-
-    dispose: function () {
-        document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-        this.dotNetHelper = null;
     }
-};
+
+    window.keyboardShortcuts = {
+        initialize: function (helper) {
+            console.log('Initializing keyboard shortcuts');
+            dotNetHelper = helper;
+
+            // Remove any existing listener first
+            if (boundHandler) {
+                document.removeEventListener('keydown', boundHandler);
+            }
+
+            // Create and store bound handler
+            boundHandler = handleKeyDown;
+
+            // Add listener with capture phase to ensure it fires
+            document.addEventListener('keydown', boundHandler, true);
+            console.log('Keyboard shortcuts initialized');
+        },
+
+        dispose: function () {
+            console.log('Disposing keyboard shortcuts');
+            if (boundHandler) {
+                document.removeEventListener('keydown', boundHandler, true);
+                boundHandler = null;
+            }
+            dotNetHelper = null;
+        }
+    };
+})();
