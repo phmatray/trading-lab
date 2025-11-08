@@ -26,6 +26,11 @@ public class UserPreferencesService : IUserPreferencesService
         _validator = new UserPreferencesValidator();
     }
 
+    /// <summary>
+    /// Occurs when user preferences are changed.
+    /// </summary>
+    public event EventHandler? PreferencesChanged;
+
     /// <inheritdoc/>
     public async Task<UserPreferences> GetPreferencesAsync(CancellationToken cancellationToken = default)
     {
@@ -45,6 +50,7 @@ public class UserPreferencesService : IUserPreferencesService
         }
 
         await _repository.SaveAsync(preferences, cancellationToken);
+        OnPreferencesChanged();
         return ValidationResult.Success();
     }
 
@@ -52,5 +58,13 @@ public class UserPreferencesService : IUserPreferencesService
     public async Task<UserPreferences> ResetToDefaultAsync(CancellationToken cancellationToken = default)
     {
         return await _repository.ResetToDefaultAsync("default", cancellationToken);
+    }
+
+    /// <summary>
+    /// Raises the PreferencesChanged event.
+    /// </summary>
+    protected virtual void OnPreferencesChanged()
+    {
+        PreferencesChanged?.Invoke(this, EventArgs.Empty);
     }
 }

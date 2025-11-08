@@ -1,0 +1,60 @@
+@* <copyright file="Label.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@using TradingBot.Web.Models
+
+<label for="@For" class="@GetClasses()">
+    @ChildContent
+    @if (Required)
+    {
+        <span class="text-red-500 dark:text-red-400 ml-1" aria-label="Required">*</span>
+    }
+</label>
+
+@code {
+    /// <summary>
+    /// Gets or sets the child content to be rendered inside the label.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the ID of the form element this label is for.
+    /// </summary>
+    [Parameter]
+    public string? For { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the field is required.
+    /// </summary>
+    [Parameter]
+    public bool Required { get; set; }
+
+    /// <summary>
+    /// Gets or sets the label size.
+    /// </summary>
+    [Parameter]
+    public LabelSize Size { get; set; } = LabelSize.Medium;
+
+    /// <summary>
+    /// Gets or sets additional CSS classes.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string GetClasses()
+    {
+        var baseClasses = "block font-medium text-gray-700 dark:text-gray-300";
+
+        var sizeClass = Size switch
+        {
+            LabelSize.Small => "text-xs mb-1",
+            LabelSize.Medium => "text-sm mb-1.5",
+            LabelSize.Large => "text-base mb-2",
+            _ => "text-sm mb-1.5"
+        };
+
+        return $"{baseClasses} {sizeClass} {Class}".Trim();
+    }
+}

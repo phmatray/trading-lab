@@ -1,17 +1,21 @@
+@* <copyright file="Table.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
 @typeparam TItem
 
 <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900/50">
         <tr>
             @TableHeader
         </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         @if (Items == null || !Items.Any())
         {
             <tr>
-                <td colspan="100" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="100" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                     @if (!string.IsNullOrEmpty(EmptyMessage))
                     {
                         @EmptyMessage
@@ -27,7 +31,7 @@
         {
             @foreach (var item in Items)
             {
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     @RowTemplate!(item)
                 </tr>
             }

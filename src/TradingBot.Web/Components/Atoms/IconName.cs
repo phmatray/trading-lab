@@ -38,4 +38,16 @@ public enum IconName
 
     /// <summary>Chevron right icon.</summary>
     ChevronRight,
+
+    /// <summary>Check circle icon (for success).</summary>
+    CheckCircle,
+
+    /// <summary>X circle icon (for error).</summary>
+    XCircle,
+
+    /// <summary>Exclamation triangle icon (for warning).</summary>
+    ExclamationTriangle,
+
+    /// <summary>Information circle icon (for info).</summary>
+    InformationCircle,
 }

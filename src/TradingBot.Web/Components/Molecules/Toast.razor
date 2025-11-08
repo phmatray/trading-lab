@@ -1,0 +1,147 @@
+@* <copyright file="Toast.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@using TradingBot.Web.Components.Atoms
+@using TradingBot.Web.Services
+@implements IDisposable
+
+<div class="@GetToastClasses()" role="alert" aria-live="polite">
+    <div class="flex items-start gap-3">
+        <!-- Icon -->
+        <div class="flex-shrink-0">
+            <Icon Name="@GetIcon()" Class="w-5 h-5" />
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+            @if (!string.IsNullOrEmpty(Message.Title))
+            {
+                <p class="font-semibold text-sm">@Message.Title</p>
+            }
+            <p class="@(string.IsNullOrEmpty(Message.Title) ? "text-sm" : "text-xs mt-0.5")">@Message.Message</p>
+        </div>
+
+        <!-- Dismiss button -->
+        <button
+            type="button"
+            class="flex-shrink-0 inline-flex text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded transition-colors"
+            @onclick="OnDismiss"
+            aria-label="Dismiss notification">
+            <Icon Name="IconName.XMark" Class="w-5 h-5" />
+        </button>
+    </div>
+
+    <!-- Progress bar -->
+    @if (ShowProgressBar && !_isPaused)
+    {
+        <div class="mt-2 w-full bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10 rounded-full h-1 overflow-hidden">
+            <div class="bg-current h-full transition-all" style="width: @(_progressPercentage)%; transition-duration: 100ms;"></div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the toast message to display.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public ToastMessage Message { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets whether to show a progress bar for auto-dismiss countdown.
+    /// </summary>
+    [Parameter]
+    public bool ShowProgressBar { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the callback invoked when the toast is dismissed.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnDismiss { get; set; }
+
+    private bool _isPaused;
+    private double _progressPercentage = 100;
+    private System.Threading.Timer? _timer;
+    private DateTime _startTime;
+    private int _remainingMs;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        _startTime = DateTime.UtcNow;
+        _remainingMs = Message.DurationMs;
+
+        StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        _timer = new System.Threading.Timer(_ =>
+        {
+            if (_isPaused)
+                return;
+
+            var elapsed = (DateTime.UtcNow - _startTime).TotalMilliseconds;
+            _progressPercentage = Math.Max(0, 100 - (elapsed / Message.DurationMs * 100));
+
+            if (elapsed >= Message.DurationMs)
+            {
+                _timer?.Dispose();
+                InvokeAsync(async () => await OnDismiss.InvokeAsync());
+            }
+            else
+            {
+                InvokeAsync(StateHasChanged);
+            }
+        }, null, 0, 100);
+    }
+
+    private void PauseTimer()
+    {
+        _isPaused = true;
+        var elapsed = (DateTime.UtcNow - _startTime).TotalMilliseconds;
+        _remainingMs = (int)(Message.DurationMs - elapsed);
+    }
+
+    private void ResumeTimer()
+    {
+        _isPaused = false;
+        _startTime = DateTime.UtcNow.AddMilliseconds(-(_remainingMs));
+    }
+
+    private string GetToastClasses()
+    {
+        var baseClasses = "relative rounded-lg shadow-lg p-4 max-w-sm w-full pointer-events-auto";
+        var animationClasses = "toast-slide-in";
+
+        var colorClasses = Message.Type switch
+        {
+            ToastType.Success => "bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800",
+            ToastType.Error => "bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800",
+            ToastType.Warning => "bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800",
+            ToastType.Info => "bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800",
+            _ => "bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
+        };
+
+        return $"{baseClasses} {animationClasses} {colorClasses}".Trim();
+    }
+
+    private IconName GetIcon()
+    {
+        return Message.Type switch
+        {
+            ToastType.Success => IconName.CheckCircle,
+            ToastType.Error => IconName.XCircle,
+            ToastType.Warning => IconName.ExclamationTriangle,
+            ToastType.Info => IconName.InformationCircle,
+            _ => IconName.InformationCircle
+        };
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}
