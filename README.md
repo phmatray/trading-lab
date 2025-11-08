@@ -1,6 +1,6 @@
-# TradingBot CLI
+# TradingBot
 
-A powerful, extensible algorithmic trading bot built with .NET 9, featuring automated strategy execution, risk management, and comprehensive order handling.
+A powerful, extensible algorithmic trading platform built with .NET 9, featuring automated strategy execution, risk management, and comprehensive order handling. Includes both a CLI application and a modern web dashboard built with Blazor Server.
 
 [![CI/CD](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml/badge.svg)](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/phmatray/TradingBot/branch/main/graph/badge.svg)](https://codecov.io/gh/phmatray/TradingBot)
@@ -39,6 +39,15 @@ A powerful, extensible algorithmic trading bot built with .NET 9, featuring auto
 - Automatic take-profit orders
 - Leverage controls (1-10x)
 
+### Web Dashboard (NEW)
+- **Real-time Trading Dashboard**: Live portfolio metrics, active positions, and recent trades with SignalR updates
+- **Performance Analytics**: Equity curves, trade statistics, and comprehensive performance metrics
+- **Strategy Management**: Enable/disable strategies, monitor performance by strategy
+- **Backtesting Interface**: Run historical backtests and analyze results
+- **User Settings**: Customizable themes (light/dark), refresh intervals, and notification preferences
+- **Responsive Design**: Desktop-optimized interface (minimum 1024px width)
+- **Accessibility**: WCAG 2.1 Level AA compliant with full keyboard navigation
+
 ## Architecture
 
 ```
@@ -72,6 +81,10 @@ dotnet build
 
 # Run the CLI
 dotnet run --project src/TradingBot.Cli
+
+# Run the Web Dashboard
+dotnet run --project src/TradingBot.Web
+# Navigate to https://localhost:5001 in your browser
 ```
 
 ### Configuration
@@ -254,7 +267,8 @@ TradingBot/
 │   ├── TradingBot.Strategies/        # Built-in trading strategies
 │   ├── TradingBot.Infrastructure/    # Data access and external services
 │   ├── TradingBot.Analytics/         # Performance analytics
-│   └── TradingBot.Cli/               # Command-line interface
+│   ├── TradingBot.Cli/               # Command-line interface
+│   └── TradingBot.Web/               # Blazor Server web dashboard
 ├── tests/                            # Unit and integration tests
 ├── specs/                            # Feature specifications
 └── .github/workflows/                # CI/CD pipelines

@@ -162,9 +162,9 @@ public class NavigationSidebarTests
         // Act
         var cut = ctx.RenderComponent<NavigationSidebar>();
 
-        // Assert - Should have 6 menu items (Dashboard, Portfolio, Performance, Strategies, Backtesting, Settings)
+        // Assert - Should have 7 menu items (Dashboard, Portfolio, Performance, Strategies, Backtesting, Settings, Help)
         var navLinks = cut.FindAll("a");
-        navLinks.Count.ShouldBe(6);
+        navLinks.Count.ShouldBe(7);
     }
 
     [Fact]
@@ -186,6 +186,7 @@ public class NavigationSidebarTests
         links[3].GetAttribute("href").ShouldBe("/strategies");
         links[4].GetAttribute("href").ShouldBe("/backtest");
         links[5].GetAttribute("href").ShouldBe("/settings");
+        links[6].GetAttribute("href").ShouldBe("/help");
     }
 
     [Fact]

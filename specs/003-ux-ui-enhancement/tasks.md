@@ -292,40 +292,40 @@ This is a Blazor Server web application with clean architecture:
 
 ### Code Quality
 
-- [ ] T112 [P] Run `dotnet format` to ensure all C# files follow formatting standards
-- [ ] T113 [P] Add copyright headers to all new C# files (use .specify script if available)
-- [ ] T114 [P] Run `dotnet build /p:RunAnalyzers=true` and fix any StyleCop/Roslynator warnings
-- [ ] T115 [P] Verify all public components and services have XML documentation comments
+- [X] T112 [P] Run `dotnet format` to ensure all C# files follow formatting standards
+- [X] T113 [P] Add copyright headers to all new C# files (use .specify script if available)
+- [X] T114 [P] Run `dotnet build /p:RunAnalyzers=true` and fix any StyleCop/Roslynator warnings
+- [X] T115 [P] Verify all public components and services have XML documentation comments
 
 ### Testing & Coverage
 
-- [ ] T116 [P] Run `dotnet test --collect:"XPlat Code Coverage"` to verify 80% code coverage minimum
-- [ ] T117 [P] Ensure UserPreferencesService has 100% test coverage (critical path per constitution)
-- [ ] T118 Run all bUnit component tests and verify they pass
+- [X] T116 [P] Run `dotnet test --collect:"XPlat Code Coverage"` to verify 80% code coverage minimum
+- [X] T117 [P] Ensure UserPreferencesService has 100% test coverage (critical path per constitution)
+- [X] T118 Run all bUnit component tests and verify they pass
 
 ### Performance Optimization
 
-- [ ] T119 [P] Run Tailwind CSS production build with minification: `npm run css:build -- --minify`
-- [ ] T120 [P] Verify SignalR throttling is maintained at 500ms (should be unchanged from spec 002)
-- [ ] T121 [P] Test dashboard refresh interval configuration (set to 10s and verify refresh occurs every 10s)
-- [ ] T122 [P] Add browser localStorage caching for UserPreferences in UserPreferencesService to avoid repeated DB queries
+- [X] T119 [P] Run Tailwind CSS production build with minification: `npm run css:build -- --minify`
+- [X] T120 [P] Verify SignalR throttling is maintained at 500ms (should be unchanged from spec 002)
+- [X] T121 [P] Test dashboard refresh interval configuration (set to 10s and verify refresh occurs every 10s)
+- [X] T122 [P] Add browser localStorage caching for UserPreferences in UserPreferencesService to avoid repeated DB queries
 
 ### Security & Validation
 
-- [ ] T123 [P] Verify input validation prevents XSS attacks (all user inputs are sanitized by Blazor)
-- [ ] T124 [P] Verify UserPreferences validation prevents SQL injection (using parameterized EF queries)
-- [ ] T125 [P] Test settings save with invalid values (out of range, null) and confirm proper error handling
+- [X] T123 [P] Verify input validation prevents XSS attacks (all user inputs are sanitized by Blazor)
+- [X] T124 [P] Verify UserPreferences validation prevents SQL injection (using parameterized EF queries)
+- [X] T125 [P] Test settings save with invalid values (out of range, null) and confirm proper error handling
 
 ### Documentation
 
-- [ ] T126 [P] Update project README with new features (navigation sidebar, settings page, theme system)
-- [ ] T127 [P] Run quickstart.md validation to ensure developer setup instructions are accurate
-- [ ] T128 [P] Create screenshot or demo GIF showing navigation, theme switching, settings page
+- [X] T126 [P] Update project README with new features (navigation sidebar, settings page, theme system)
+- [X] T127 [P] Run quickstart.md validation to ensure developer setup instructions are accurate
+- [X] T128 [P] Create screenshot or demo GIF showing navigation, theme switching, settings page
 
 ### Constitution Compliance
 
-- [ ] T129 Update .specify/memory/constitution.md section 3.1 (UX/UI Principles) to reflect Tailwind-only approach and desktop-first responsive design
-- [ ] T130 Final code review checklist per constitution section 7.1 (style guidelines, tests pass, coverage met, no vulnerabilities, performance, docs, error handling, logging)
+- [X] T129 Update .specify/memory/constitution.md section 3.1 (UX/UI Principles) to reflect Tailwind-only approach and desktop-first responsive design
+- [X] T130 Final code review checklist per constitution section 7.1 (style guidelines, tests pass, coverage met, no vulnerabilities, performance, docs, error handling, logging)
 
 ---
 
