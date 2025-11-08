@@ -4,10 +4,11 @@
     let boundHandler = null;
 
     function handleKeyDown(event) {
-        console.log('Key pressed:', event.key, 'Alt:', event.altKey, 'Ctrl:', event.ctrlKey);
+        console.log('Key pressed - key:', event.key, 'code:', event.code, 'Alt:', event.altKey, 'Ctrl:', event.ctrlKey, 'Meta:', event.metaKey);
 
-        // Only handle Alt key combinations (and not Ctrl or Shift)
-        if (!event.altKey || event.ctrlKey || event.shiftKey || event.metaKey) {
+        // Only handle Alt key combinations (and not Ctrl or Meta/Command)
+        // Allow Shift with Alt for uppercase letters
+        if (!event.altKey || event.ctrlKey || event.metaKey) {
             return;
         }
 
@@ -22,31 +23,32 @@
             return;
         }
 
-        const key = event.key.toLowerCase();
+        // Use event.code to get physical key, not the character produced
+        // KeyD, KeyP, KeyR, KeyS, KeyG, KeyB
         let route = null;
 
-        switch (key) {
-            case 'd':
+        switch (event.code) {
+            case 'KeyD':
                 route = '/';
                 console.log('Navigating to Dashboard');
                 break;
-            case 'p':
+            case 'KeyP':
                 route = '/portfolio';
                 console.log('Navigating to Portfolio');
                 break;
-            case 'r':
+            case 'KeyR':
                 route = '/performance';
                 console.log('Navigating to Performance');
                 break;
-            case 's':
+            case 'KeyS':
                 route = '/strategies';
                 console.log('Navigating to Strategies');
                 break;
-            case 'g':
+            case 'KeyG':
                 route = '/settings';
                 console.log('Navigating to Settings');
                 break;
-            case 'b':
+            case 'KeyB':
                 route = '/backtest';
                 console.log('Navigating to Backtest');
                 break;
@@ -55,7 +57,9 @@
         if (route && dotNetHelper) {
             event.preventDefault();
             event.stopPropagation();
+            console.log('Invoking navigation to:', route);
             dotNetHelper.invokeMethodAsync('NavigateToRoute', route)
+                .then(() => console.log('Navigation successful'))
                 .catch(err => console.error('Navigation error:', err));
         }
     }
