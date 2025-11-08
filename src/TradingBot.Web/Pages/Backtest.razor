@@ -31,19 +31,21 @@ else if (!string.IsNullOrEmpty(errorMessage))
 }
 else if (backtestResults is null || !backtestResults.Any())
 {
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No backtest results available</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the CLI to see results here</p>
-        <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4 text-left inline-block">
-            <code class="text-sm text-gray-800 dark:text-gray-200">
-                dotnet run --project src/TradingBot.Cli -- backtest --strategy momentum --symbol AAPL
-            </code>
+    <Card ContentClass="p-12">
+        <div class="text-center">
+            <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No backtest results available</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the CLI to see results here</p>
+            <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4 text-left inline-block">
+                <code class="text-sm text-gray-800 dark:text-gray-200">
+                    dotnet run --project src/TradingBot.Cli -- backtest --strategy momentum --symbol AAPL
+                </code>
+            </div>
         </div>
-    </div>
+    </Card>
 }
 else
 {

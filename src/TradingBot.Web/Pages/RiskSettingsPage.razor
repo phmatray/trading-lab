@@ -21,15 +21,13 @@ else if (currentSettings is not null)
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Risk Settings Form -->
         <div class="lg:col-span-2">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Risk Parameters</h2>
-
+            <Card Title="Risk Parameters">
                 <RiskSettingsForm
                     Settings="@currentSettings"
                     OnSave="@HandleSaveAsync"
                     OnCancel="@HandleCancel"
                     IsSaving="@isSaving"/>
-            </div>
+            </Card>
         </div>
 
         <!-- Risk Status Indicator -->
