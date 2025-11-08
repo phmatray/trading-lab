@@ -14,7 +14,7 @@
     <!-- Navigation Sidebar -->
     <NavigationSidebar/>
 
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()" @onkeydown="HandleKeyDown" tabindex="-1">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()">
     <!-- Header -->
     <header
         class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
@@ -67,6 +67,7 @@
     private int _reconnectAttempts = 0;
     private const int MaxReconnectAttempts = 5;
     private const int ReconnectDelayMs = 2000;
+    private DotNetObjectReference<MainLayout>? _dotNetHelper;
 
     protected override void OnInitialized()
     {
@@ -76,6 +77,19 @@
     protected override async Task OnInitializedAsync()
     {
         await InitializeSignalRConnection();
+        await InitializeKeyboardShortcuts();
+    }
+
+    private async Task InitializeKeyboardShortcuts()
+    {
+        _dotNetHelper = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("keyboardShortcuts.initialize", _dotNetHelper);
+    }
+
+    [JSInvokable]
+    public void NavigateToRoute(string route)
+    {
+        NavigationManager.NavigateTo(route);
     }
 
     private async Task InitializeSignalRConnection()
@@ -185,40 +199,18 @@
 
             await _hubConnection.DisposeAsync();
         }
+
+        // Dispose keyboard shortcuts
+        if (_dotNetHelper is not null)
+        {
+            await JSRuntime.InvokeVoidAsync("keyboardShortcuts.dispose");
+            _dotNetHelper.Dispose();
+        }
     }
 
     private string GetContentMarginClass()
     {
         return UIState.SidebarCollapsed ? "ml-16" : "ml-64";
-    }
-
-    /// <summary>
-    /// Handles global keyboard shortcuts for navigation.
-    /// Alt+D: Dashboard, Alt+P: Portfolio, Alt+R: Performance, Alt+S: Strategies, Alt+G: Settings, Alt+B: Backtesting.
-    /// </summary>
-    private void HandleKeyDown(KeyboardEventArgs e)
-    {
-        // Only handle Alt key combinations
-        if (!e.AltKey || e.CtrlKey || e.ShiftKey)
-        {
-            return;
-        }
-
-        var route = e.Key.ToLowerInvariant() switch
-        {
-            "d" => "/",                    // Alt+D: Dashboard (Home)
-            "p" => "/portfolio",           // Alt+P: Portfolio
-            "r" => "/performance",         // Alt+R: Performance (Results)
-            "s" => "/strategies",          // Alt+S: Strategies
-            "g" => "/settings",            // Alt+G: Settings (Gear)
-            "b" => "/backtest",            // Alt+B: Backtesting
-            _ => null
-        };
-
-        if (route is not null)
-        {
-            NavigationManager.NavigateTo(route);
-        }
     }
 
 }
