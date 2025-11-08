@@ -27,17 +27,17 @@ public class UserPreferencesValidator
 
         if (preferences.DashboardRefreshInterval < 1 || preferences.DashboardRefreshInterval > 300)
         {
-            errors.Add("Dashboard refresh interval must be between 1 and 300 seconds. Please enter a value in this range.");
+            errors.Add($"Dashboard refresh interval must be between 1 and 300 seconds. You entered {preferences.DashboardRefreshInterval} seconds. Please enter a value within the valid range.");
         }
 
         if (preferences.NotificationDuration < 2 || preferences.NotificationDuration > 10)
         {
-            errors.Add("Notification duration must be between 2 and 10 seconds. Please enter a value in this range.");
+            errors.Add($"Notification duration must be between 2 and 10 seconds. You entered {preferences.NotificationDuration} seconds. Please enter a value within the valid range.");
         }
 
         if (preferences.Theme == null)
         {
-            errors.Add("Theme is required.");
+            errors.Add("Theme is required. Please select either Light or Dark theme.");
         }
 
         return errors.Any()

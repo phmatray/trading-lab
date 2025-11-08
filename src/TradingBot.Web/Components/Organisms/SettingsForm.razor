@@ -17,7 +17,7 @@
         @* Theme Selection *@
         <FormField Label="Theme"
                    InputId="theme-select"
-                   HelpText="Choose between light and dark theme"
+                   HelpText="Choose your preferred color scheme. Light theme uses bright backgrounds, while dark theme reduces eye strain in low-light environments."
                    IsRequired="true">
             <InputContent>
                 <Select @bind-Value="_selectedTheme"
@@ -32,7 +32,7 @@
         @* Dashboard Refresh Interval *@
         <FormField Label="Dashboard Refresh Interval (seconds)"
                    InputId="refresh-interval"
-                   HelpText="How often the dashboard auto-refreshes (1-300 seconds). Recommended: 5-30 seconds."
+                   HelpText="Controls how often the dashboard automatically refreshes with latest trading data (1-300 seconds). Lower values provide more real-time updates but may increase server load. Recommended: 5-30 seconds for active monitoring, 60+ for casual viewing."
                    ErrorMessage="@_refreshIntervalError"
                    IsRequired="true">
             <InputContent>
@@ -48,7 +48,7 @@
         @* Notification Duration *@
         <FormField Label="Notification Duration (seconds)"
                    InputId="notification-duration"
-                   HelpText="How long toast notifications are displayed (2-10 seconds)"
+                   HelpText="How long toast notifications remain visible on screen (2-10 seconds). Shorter durations keep the interface cleaner, while longer durations ensure you don't miss important messages. Recommended: 5 seconds."
                    ErrorMessage="@_notificationDurationError"
                    IsRequired="true">
             <InputContent>
@@ -67,7 +67,7 @@
                 Notification Types
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Choose which types of notifications to display
+                Choose which types of notifications to display. Disable types you don't want to see to reduce distractions. Error notifications are strongly recommended to stay enabled.
             </p>
 
             <div class="flex items-center justify-between py-2">

@@ -263,20 +263,20 @@ This is a Blazor Server web application with clean architecture:
 
 ### Tooltip Component
 
-- [ ] T103 [P] [US6] Create src/TradingBot.Web/Components/Molecules/Tooltip.razor (hover tooltip with positioning, Tailwind styling)
-- [ ] T104 [P] [US6] Write tests/TradingBot.Web.Tests/Components/Molecules/TooltipTests.cs (shows on hover, hides on leave, correct positioning)
+- [X] T103 [P] [US6] Create src/TradingBot.Web/Components/Molecules/InfoTooltip.razor (hover tooltip with positioning, Tailwind styling)
+- [X] T104 [P] [US6] Write tests/TradingBot.Web.Tests/Components/Molecules/InfoTooltipTests.cs (shows on hover, hides on leave, correct positioning)
 
 ### Help Text Integration
 
-- [ ] T105 [P] [US6] Add tooltip help icons next to complex metrics on existing Performance page (Sharpe Ratio, Max Drawdown, etc.)
-- [ ] T106 [P] [US6] Add help text descriptions to each setting in SettingsForm (theme explanation, refresh interval recommendation, notification duration purpose)
-- [ ] T107 [P] [US6] Update FormField.razor to support optional help text parameter (displayed below input in text-sm text-gray-600)
-- [ ] T108 [P] [US6] Add empty state messages to existing pages (Portfolio: "No open positions. Execute a trading strategy to see positions here.", Trades: "No trade history yet.")
+- [X] T105 [P] [US6] Add tooltip help icons next to complex metrics on existing Performance page (Sharpe Ratio, Max Drawdown, etc.)
+- [X] T106 [P] [US6] Add help text descriptions to each setting in SettingsForm (theme explanation, refresh interval recommendation, notification duration purpose)
+- [X] T107 [P] [US6] Update FormField.razor to support optional help text parameter (displayed below input in text-sm text-gray-600)
+- [X] T108 [P] [US6] Add empty state messages to existing pages (Portfolio: "No open positions. Execute a trading strategy to see positions here.", Trades: "No trade history yet.")
 
 ### Form Validation Guidance
 
-- [ ] T109 [P] [US6] Update UserPreferencesValidator to return specific error messages with corrective guidance (e.g., "Refresh interval must be between 1 and 300 seconds. Please enter a value in this range.")
-- [ ] T110 [P] [US6] Ensure all form validation errors in SettingsForm display with clear, actionable messages
+- [X] T109 [P] [US6] Update UserPreferencesValidator to return specific error messages with corrective guidance (e.g., "Refresh interval must be between 1 and 300 seconds. Please enter a value in this range.")
+- [X] T110 [P] [US6] Ensure all form validation errors in SettingsForm display with clear, actionable messages
 
 ### Help Page (Optional Enhancement)
 
