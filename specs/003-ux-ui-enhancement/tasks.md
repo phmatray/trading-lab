@@ -162,23 +162,23 @@ This is a Blazor Server web application with clean architecture:
 
 - [X] T060 [P] [US3] Create src/TradingBot.Web/Components/Organisms/ThemeProvider.razor (wraps content with `dark` class based on UserPreferences.Theme)
 - [X] T061 [P] [US3] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to wrap content with ThemeProvider
-- [ ] T062 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/ThemeProviderTests.cs (applies dark class correctly)
+- [X] T062 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/ThemeProviderTests.cs (applies dark class correctly)
 
 ### Visual Feedback Components
 
 - [X] T063 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Spinner.razor (loading indicator with Tailwind animation)
 - [X] T064 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Badge.razor (status badges with color variants: success, error, warning, info)
 - [X] T065 [P] [US3] Create src/TradingBot.Web/Components/Atoms/Label.razor (form labels with consistent Tailwind styling)
-- [ ] T066 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/SpinnerTests.cs (renders, applies size classes)
-- [ ] T067 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/BadgeTests.cs (renders variants correctly)
+- [X] T066 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/SpinnerTests.cs (renders, applies size classes)
+- [X] T067 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Atoms/BadgeTests.cs (renders variants correctly)
 
 ### Toast Notification System
 
 - [X] T068 [P] [US3] Create src/TradingBot.Web/Components/Molecules/Toast.razor (single toast with icon, message, dismiss button, auto-dismiss after duration)
 - [X] T069 [US3] Create src/TradingBot.Web/Components/Organisms/NotificationCenter.razor (ToastContainer using ToastService, renders Toast molecules with slide-in animation)
 - [X] T070 [US3] Add NotificationCenter to src/TradingBot.Web/Components/Layout/MainLayout.razor (fixed top-right position)
-- [ ] T071 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Molecules/ToastTests.cs (renders message, dismisses on click, auto-dismiss after duration)
-- [ ] T072 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/NotificationCenterTests.cs (renders multiple toasts, respects user preferences for notification types)
+- [X] T071 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Molecules/ToastTests.cs (renders message, dismisses on click, auto-dismiss after duration)
+- [X] T072 [P] [US3] Write tests/TradingBot.Web.Tests/Components/Organisms/NotificationCenterTests.cs (renders multiple toasts, respects user preferences for notification types)
 
 ### Styling Updates
 
