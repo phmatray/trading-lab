@@ -90,16 +90,16 @@ description: "Component Refactoring and Organization Task List"
 
 ### Implementation for User Story 1
 
-- [ ] T037 [P] [US1] Find/replace all <Button references with <TbButton in src/TradingBot.Web/Pages/*.razor
-- [ ] T038 [P] [US1] Find/replace all <Icon references with <TbIcon in src/TradingBot.Web/Pages/*.razor
-- [ ] T039 [P] [US1] Find/replace all <Input references with <TbInput in src/TradingBot.Web/Pages/*.razor
-- [ ] T040 [P] [US1] Find/replace all <Badge references with <TbBadge in src/TradingBot.Web/Pages/*.razor
-- [ ] T041 [P] [US1] Find/replace all <Label references with <TbLabel in src/TradingBot.Web/Pages/*.razor
-- [ ] T042 [P] [US1] Find/replace all <Select references with <TbSelect in src/TradingBot.Web/Pages/*.razor
-- [ ] T043 [P] [US1] Find/replace all <Spinner references with <TbSpinner in src/TradingBot.Web/Pages/*.razor
-- [ ] T044 [P] [US1] Find/replace all <Toggle references with <TbToggle in src/TradingBot.Web/Pages/*.razor
-- [ ] T045 [US1] Verify dotnet build succeeds after all atom reference updates
-- [ ] T046 [US1] Verify all existing tests pass unchanged (dotnet test)
+- [X] T037 [P] [US1] Find/replace all <Button references with <TbButton in src/TradingBot.Web/Pages/*.razor
+- [X] T038 [P] [US1] Find/replace all <Icon references with <TbIcon in src/TradingBot.Web/Pages/*.razor
+- [X] T039 [P] [US1] Find/replace all <Input references with <TbInput in src/TradingBot.Web/Pages/*.razor
+- [X] T040 [P] [US1] Find/replace all <Badge references with <TbBadge in src/TradingBot.Web/Pages/*.razor
+- [X] T041 [P] [US1] Find/replace all <Label references with <TbLabel in src/TradingBot.Web/Pages/*.razor
+- [X] T042 [P] [US1] Find/replace all <Select references with <TbSelect in src/TradingBot.Web/Pages/*.razor
+- [X] T043 [P] [US1] Find/replace all <Spinner references with <TbSpinner in src/TradingBot.Web/Pages/*.razor
+- [X] T044 [P] [US1] Find/replace all <Toggle references with <TbToggle in src/TradingBot.Web/Pages/*.razor
+- [X] T045 [US1] Verify dotnet build succeeds after all atom reference updates
+- [X] T046 [US1] Verify all existing tests pass unchanged (dotnet test)
 - [ ] T047 [US1] Manual browser test: verify all pages render correctly with Tb-prefixed atoms
 - [ ] T048 [US1] Commit checkpoint for User Story 1 completion
 
