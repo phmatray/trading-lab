@@ -10,16 +10,16 @@ Copyright (c) TradingBot. All rights reserved.
 
 <PageTitle>Portfolio - TradingBot</PageTitle>
 
-<PageHeader Title="Portfolio Management"
+<TbPageHeader Title="Portfolio Management"
             Description="View trade history, manage positions, and export data" />
 
 @* Trade History Filter Section *@
 <div class="mb-6">
-    <TradeHistoryFilter OnFilterChanged="HandleFilterChanged"/>
+    <TbTradeHistoryFilter OnFilterChanged="HandleFilterChanged"/>
 </div>
 
 @* Trade History Table Section *@
-<Card Title="Trade History" CssClass="mb-6">
+<TbCard Title="Trade History" CssClass="mb-6">
     <HeaderActions>
         <button
             @onclick="ExportTradeHistory"
@@ -44,7 +44,7 @@ Copyright (c) TradingBot. All rights reserved.
         }
         else if (tradeHistory != null && tradeHistory.Any())
         {
-            <TradeHistoryTable
+            <TbTradeHistoryTable
                 Trades="@tradeHistory"
                 CurrentPage="@currentPage"
                 TotalPages="@totalPages"
@@ -63,10 +63,10 @@ Copyright (c) TradingBot. All rights reserved.
             </div>
         }
     </ChildContent>
-</Card>
+</TbCard>
 
 @* Open Positions Section *@
-<Card Title="Open Positions">
+<TbCard Title="Open Positions">
 
     @if (isLoadingPositions)
     {
@@ -79,9 +79,9 @@ Copyright (c) TradingBot. All rights reserved.
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach (var position in openPositions)
             {
-                <PositionCard
+                <TbPositionCard
                     Position="@position"
-                    OnCloseRequested="() => ShowClosePositionModal(position)"/>
+                    OnCloseRequested="() => ShowTbClosePositionModal(position)"/>
             }
         </div>
     }
@@ -97,7 +97,7 @@ Copyright (c) TradingBot. All rights reserved.
             </p>
         </div>
     }
-</Card>
+</TbCard>
 
 @* Success/Error Notifications *@
 @if (!string.IsNullOrEmpty(notificationMessage))
@@ -111,10 +111,10 @@ Copyright (c) TradingBot. All rights reserved.
 @* Close Position Modal *@
 @if (showCloseModal && selectedPosition != null)
 {
-    <ClosePositionModal
+    <TbClosePositionModal
         Position="@selectedPosition"
         OnConfirm="HandleClosePosition"
-        OnCancel="HideClosePositionModal"/>
+        OnCancel="HideTbClosePositionModal"/>
 }
 
 @code {
@@ -204,13 +204,13 @@ Copyright (c) TradingBot. All rights reserved.
         StateHasChanged();
     }
 
-    private void ShowClosePositionModal(Position position)
+    private void ShowTbClosePositionModal(Position position)
     {
         selectedPosition = position;
         showCloseModal = true;
     }
 
-    private void HideClosePositionModal()
+    private void HideTbClosePositionModal()
     {
         showCloseModal = false;
         selectedPosition = null;
@@ -228,7 +228,7 @@ Copyright (c) TradingBot. All rights reserved.
             // Reload positions after closing
             await LoadOpenPositionsAsync();
 
-            HideClosePositionModal();
+            HideTbClosePositionModal();
         }
         catch (Exception ex)
         {

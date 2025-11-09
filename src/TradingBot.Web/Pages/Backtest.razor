@@ -7,7 +7,7 @@
 
 <PageTitle>Backtest Results - TradingBot</PageTitle>
 
-<PageHeader Title="Backtest Results"
+<TbPageHeader Title="Backtest Results"
             Description="View and analyze historical strategy performance" />
 
 @if (isLoading)
@@ -31,7 +31,7 @@ else if (!string.IsNullOrEmpty(errorMessage))
 }
 else if (backtestResults is null || !backtestResults.Any())
 {
-    <Card ContentClass="p-12">
+    <TbCard ContentClass="p-12">
         <div class="text-center">
             <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -45,14 +45,14 @@ else if (backtestResults is null || !backtestResults.Any())
                 </code>
             </div>
         </div>
-    </Card>
+    </TbCard>
 }
 else
 {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Backtest Results List -->
         <div class="lg:col-span-1">
-            <BacktestResultsList
+            <TbBacktestResultsList
                 Results="@backtestResults"
                 SelectedBacktestId="@selectedBacktestId"
                 OnBacktestSelected="@HandleBacktestSelected"
@@ -65,7 +65,7 @@ else
         <div class="lg:col-span-2">
             @if (selectedBacktest is not null)
             {
-                <BacktestDetail
+                <TbBacktestDetail
                     Backtest="@selectedBacktest"
                     ShowComparison="@ShowComparisonTable"
                     ComparisonResults="@GetComparisonResults()"/>
@@ -97,7 +97,7 @@ else
                     Clear Selection
                 </button>
             </div>
-            <!-- Comparison table will be rendered by BacktestDetail when ShowComparison is true -->
+            <!-- Comparison table will be rendered by TbBacktestDetail when ShowComparison is true -->
         </div>
     }
 }

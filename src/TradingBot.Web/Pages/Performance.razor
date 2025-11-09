@@ -4,8 +4,8 @@
 
 @page "/performance"
 @using TradingBot.Web.Services
-@using TradingBot.Web.Components.Performance
-@using TradingBot.Web.Components.Charts
+@using TradingBot.Web.Components.Features.Performance
+@using TradingBot.Web.Components.Features.Charts
 @using TradingBot.Core.Models.Portfolio
 @inject IPerformanceService PerformanceService
 @inject ILogger<Performance> Logger
@@ -13,7 +13,7 @@
 <PageTitle>Performance Analytics - TradingBot</PageTitle>
 
 <div class="space-y-6">
-    <PageHeader Title="Performance Analytics"
+    <TbPageHeader Title="Performance Analytics"
                 Description="Analyze your trading performance with detailed metrics and visualizations">
         <Actions>
             <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Date Range:</label>
@@ -26,7 +26,7 @@
                 <option value="0">All Time</option>
             </select>
         </Actions>
-    </PageHeader>
+    </TbPageHeader>
 
     @if (_isLoading)
     {
@@ -65,17 +65,17 @@
     else
     {
         <!-- Performance Metrics Grid -->
-        <PerformanceMetricsGrid Metrics="_performanceMetrics"/>
+        <TbPerformanceMetricsGrid Metrics="_performanceMetrics"/>
 
         <!-- Trading Statistics -->
-        <TradingStatistics Metrics="_performanceMetrics"/>
+        <TbTradingStatistics Metrics="_performanceMetrics"/>
 
         <!-- Equity Curve Chart -->
         <div class="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
             <h2 class="text-xl font-semibold text-white mb-4">Portfolio Value Over Time</h2>
             @if (_equityCurveData.Any())
             {
-                <EquityCurveChart Data="_equityCurveData"/>
+                <TbEquityCurveChart Data="_equityCurveData"/>
             }
             else
             {

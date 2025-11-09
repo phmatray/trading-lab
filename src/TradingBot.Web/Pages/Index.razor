@@ -7,7 +7,7 @@ Copyright (c) TradingBot. All rights reserved.
 @using TradingBot.Core.Models
 @using TradingBot.Core.Interfaces
 @using TradingBot.Analytics
-@using TradingBot.Web.Components.Dashboard
+@using TradingBot.Web.Components.Features.Dashboard
 @using TradingBot.Web.Services
 @inject IDashboardService DashboardService
 @inject NavigationManager NavigationManager
@@ -15,7 +15,7 @@ Copyright (c) TradingBot. All rights reserved.
 
 <PageTitle>Dashboard - TradingBot</PageTitle>
 
-<PageHeader Title="Trading Dashboard"
+<TbPageHeader Title="Trading Dashboard"
             Description="Monitor your trading performance and account status in real-time" />
 
 <!-- Loading State -->
@@ -33,28 +33,29 @@ else if (_dashboardData is not null)
     <!-- Dashboard Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Account Summary -->
-        <AccountSummary Account="@_dashboardData.Account" LastUpdated="@_lastUpdated"/>
+        <TbAccountSummaryCard Account="@_dashboardData.Account" LastUpdated="@_lastUpdated"/>
 
         <!-- Performance Metrics -->
-        <PerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated"/>
+        <TbPerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated"/>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Risk Settings -->
-        <RiskSettingsCard Settings="@_dashboardData.RiskSettings"/>
+        @* TODO: Migrate RiskSettingsCard component *@
+        @* <TbRiskSettingsCard Settings="@_dashboardData.RiskSettings"/> *@
 
         <!-- Active Strategies -->
-        <ActiveStrategies Strategies="@_dashboardData.ActiveStrategies"/>
+        <TbActiveStrategiesCard Strategies="@_dashboardData.ActiveStrategies"/>
     </div>
 
-    <!-- Positions List -->
+    @* TODO: Migrate PositionList component *@
+    @* <!-- Positions List -->
     <div class="mb-6">
-        <PositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated"/>
-    </div>
+        <TbPositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated"/>
+    </div> *@
 
     <!-- Recent Trades -->
     <div class="mb-6">
-        <RecentTrades Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated"/>
+        <TbRecentTradesCard Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated"/>
     </div>
 }
 else if (_errorMessage is not null)

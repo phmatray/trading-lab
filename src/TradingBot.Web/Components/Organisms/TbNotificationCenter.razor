@@ -1,0 +1,94 @@
+@* <copyright file="TbNotificationCenter.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@namespace TradingBot.Web.Components.Organisms
+@using TradingBot.Web.Components.Atoms
+@using TradingBot.Web.Components.Molecules
+@using TradingBot.Web.Services
+@using TradingBot.Core.Interfaces
+@inject IToastService ToastService
+@inject IUserPreferencesService UserPreferencesService
+@implements IDisposable
+
+<div class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none" aria-live="polite" aria-atomic="false">
+    @foreach (var toast in _toasts)
+    {
+        if (ShouldShowToast(toast.Type))
+        {
+            <TbToast Message="toast" OnDismiss="@(() => RemoveToast(toast.Id))" />
+        }
+    }
+</div>
+
+@code {
+    private readonly List<ToastMessage> _toasts = new();
+    private bool _showSuccess = true;
+    private bool _showError = true;
+    private bool _showWarning = true;
+    private bool _showInfo = true;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        // Load user preferences for notification display
+        await LoadPreferencesAsync();
+
+        // Subscribe to toast events
+        ToastService.OnToastAdded += OnToastAdded;
+    }
+
+    private async Task LoadPreferencesAsync()
+    {
+        try
+        {
+            var preferences = await UserPreferencesService.GetPreferencesAsync();
+            _showSuccess = preferences.ShowSuccessNotifications;
+            _showError = preferences.ShowErrorNotifications;
+            _showWarning = preferences.ShowWarningNotifications;
+            _showInfo = preferences.ShowInfoNotifications;
+        }
+        catch
+        {
+            // Default to showing all notifications if preferences cannot be loaded
+            _showSuccess = true;
+            _showError = true;
+            _showWarning = true;
+            _showInfo = true;
+        }
+    }
+
+    private void OnToastAdded(object? sender, ToastMessage toast)
+    {
+        _toasts.Add(toast);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveToast(string id)
+    {
+        var toast = _toasts.FirstOrDefault(t => t.Id == id);
+        if (toast != null)
+        {
+            _toasts.Remove(toast);
+            StateHasChanged();
+        }
+    }
+
+    private bool ShouldShowToast(ToastType type)
+    {
+        return type switch
+        {
+            ToastType.Success => _showSuccess,
+            ToastType.Error => _showError,
+            ToastType.Warning => _showWarning,
+            ToastType.Info => _showInfo,
+            _ => true
+        };
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        ToastService.OnToastAdded -= OnToastAdded;
+    }
+}

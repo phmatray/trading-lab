@@ -7,7 +7,7 @@
 
 <PageTitle>Risk Settings - TradingBot</PageTitle>
 
-<PageHeader Title="Risk Management Settings"
+<TbPageHeader Title="Risk Management Settings"
             Description="Configure risk parameters to protect your trading account" />
 
 @if (isLoading)
@@ -21,18 +21,18 @@ else if (currentSettings is not null)
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Risk Settings Form -->
         <div class="lg:col-span-2">
-            <Card Title="Risk Parameters">
-                <RiskSettingsForm
+            <TbCard Title="Risk Parameters">
+                <TbRiskSettingsForm
                     Settings="@currentSettings"
                     OnSave="@HandleSaveAsync"
                     OnCancel="@HandleCancel"
                     IsSaving="@isSaving"/>
-            </Card>
+            </TbCard>
         </div>
 
         <!-- Risk Status Indicator -->
         <div class="lg:col-span-1">
-            <RiskStatusIndicator Settings="@currentSettings"/>
+            <TbRiskStatusIndicator Settings="@currentSettings"/>
         </div>
     </div>
 

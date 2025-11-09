@@ -1,0 +1,84 @@
+@*
+  <copyright file="TbErrorBoundary.razor" company="TradingBot">
+  Copyright (c) TradingBot. All rights reserved.
+  </copyright>
+*@
+
+@namespace TradingBot.Web.Components.Organisms
+@using TradingBot.Web.Components.Atoms
+@using TradingBot.Web.Components.Molecules
+@using Microsoft.AspNetCore.Components.Web
+@inherits Microsoft.AspNetCore.Components.Web.ErrorBoundary
+@inject ILogger<TbErrorBoundary> Logger
+
+@if (CurrentException is null)
+{
+    @ChildContent
+}
+else
+{
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+        <div class="max-w-lg w-full">
+            <TbCard>
+                <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
+                    <TbIcon Name="@IconName.ExclamationTriangle" Class="w-8 h-8 text-red-600 dark:text-red-400"/>
+                </div>
+
+                <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">
+                    Something went wrong
+                </h2>
+
+                <p class="text-center text-gray-600 dark:text-gray-400 mb-6">
+                    We encountered an unexpected error. Our team has been notified.
+                </p>
+
+                @if (ShowDetails)
+                {
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-md p-4 mb-6">
+                        <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Error Details:</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 font-mono break-all">
+                            @CurrentException.Message
+                        </p>
+                    </div>
+                }
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <TbButton Variant="ButtonVariant.Primary"
+                            OnClick="Recover"
+                            Class="flex-1">
+                        Try Again
+                    </TbButton>
+                    <TbButton Variant="ButtonVariant.Secondary"
+                            OnClick="() => ShowDetails = !ShowDetails"
+                            Class="flex-1">
+                        @(ShowDetails ? "Hide" : "Show") Details
+                    </TbButton>
+                </div>
+
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+                    Error ID: @ErrorId
+                </p>
+            </TbCard>
+        </div>
+    </div>
+}
+
+@code {
+    private bool ShowDetails { get; set; }
+
+    private string ErrorId { get; set; } = Guid.NewGuid().ToString("N")[..8];
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        Logger.LogError(exception, "Error boundary caught exception. Error ID: {ErrorId}", ErrorId);
+        return base.OnErrorAsync(exception);
+    }
+
+    private new void Recover()
+    {
+        ErrorId = Guid.NewGuid().ToString("N")[..8];
+        ShowDetails = false;
+        base.Recover();
+    }
+
+}

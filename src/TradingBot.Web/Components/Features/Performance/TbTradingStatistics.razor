@@ -1,0 +1,130 @@
+@* <copyright file="TbTradingStatistics.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+
+@using TradingBot.Core.Models.Portfolio
+
+<div class="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
+    <h2 class="text-xl font-semibold text-white mb-4">Trading Statistics</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Total Trades -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Total Trades</div>
+            <div class="text-2xl font-bold text-white">@Metrics.TotalTrades</div>
+            <div class="text-xs text-gray-500">
+                All time trades
+            </div>
+        </div>
+
+        <!-- Winning Trades -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Winning Trades</div>
+            <div class="text-2xl font-bold text-green-500">@Metrics.WinningTrades</div>
+            <div class="text-xs text-gray-500">
+                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.WinningTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))%
+                of total
+            </div>
+        </div>
+
+        <!-- Losing Trades -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Losing Trades</div>
+            <div class="text-2xl font-bold text-red-500">@Metrics.LosingTrades</div>
+            <div class="text-xs text-gray-500">
+                @((Metrics.TotalTrades > 0 ? (decimal)Metrics.LosingTrades / Metrics.TotalTrades * 100 : 0).ToString("F1"))%
+                of total
+            </div>
+        </div>
+
+        <!-- Average Win -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Average Win</div>
+            <div class="text-2xl font-bold text-green-500">@Metrics.AverageWin.ToString("C2")</div>
+            <div class="text-xs text-gray-500">
+                Per winning trade
+            </div>
+        </div>
+
+        <!-- Average Loss -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Average Loss</div>
+            <div class="text-2xl font-bold text-red-500">@Metrics.AverageLoss.ToString("C2")</div>
+            <div class="text-xs text-gray-500">
+                Per losing trade
+            </div>
+        </div>
+
+        <!-- Win/Loss Ratio -->
+        <div class="space-y-2">
+            <div class="text-sm font-medium text-gray-400">Win/Loss Ratio</div>
+            <div class="text-2xl font-bold @(GetWinLossRatio() >= 1 ? "text-green-500" : "text-red-500")">
+                @GetWinLossRatio().ToString("F2")
+            </div>
+            <div class="text-xs text-gray-500">
+                Average win ÷ Average loss
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Bar Chart for Win/Loss Distribution -->
+    <div class="mt-6 pt-6 border-t border-gray-700">
+        <div class="text-sm font-medium text-gray-300 mb-3">Win/Loss Distribution</div>
+        <div class="flex items-center gap-2">
+            <div class="flex-1 h-8 bg-gray-700 rounded-lg overflow-hidden flex">
+                @if (Metrics.TotalTrades > 0)
+                {
+                    var winPercentage = (double)Metrics.WinningTrades / Metrics.TotalTrades * 100;
+                    var lossPercentage = (double)Metrics.LosingTrades / Metrics.TotalTrades * 100;
+
+                    @if (winPercentage > 0)
+                    {
+                        <div class="bg-green-500 flex items-center justify-center text-white text-sm font-medium"
+                             style="width: @(winPercentage)%">
+                            @if (winPercentage >= 10)
+                            {
+                                <span>@winPercentage.ToString("F0")%</span>
+                            }
+                        </div>
+                    }
+
+                    @if (lossPercentage > 0)
+                    {
+                        <div class="bg-red-500 flex items-center justify-center text-white text-sm font-medium"
+                             style="width: @(lossPercentage)%">
+                            @if (lossPercentage >= 10)
+                            {
+                                <span>@lossPercentage.ToString("F0")%</span>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-green-500 rounded"></div>
+                <span>Wins: @Metrics.WinningTrades</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-red-500 rounded"></div>
+                <span>Losses: @Metrics.LosingTrades</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PerformanceMetrics Metrics { get; set; } = null!;
+
+    private decimal GetWinLossRatio()
+    {
+        if (Metrics.AverageLoss == 0)
+        {
+            return 0;
+        }
+
+        return Math.Abs(Metrics.AverageWin / Metrics.AverageLoss);
+    }
+
+}

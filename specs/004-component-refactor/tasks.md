@@ -115,36 +115,36 @@ description: "Component Refactoring and Organization Task List"
 
 ### Implementation for User Story 2 - Molecules
 
-- [ ] T049 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Card.razor to src/TradingBot.Web/Components/Molecules/TbCard.razor
-- [ ] T050 [P] [US2] Update namespace to TradingBot.Web.Components.Molecules and copyright header in TbCard.razor
-- [ ] T051 [P] [US2] Update internal component references in TbCard.razor to use TbButton and TbIcon
-- [ ] T052 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Modal.razor to src/TradingBot.Web/Components/Molecules/TbModal.razor
-- [ ] T053 [P] [US2] Update namespace and copyright header in TbModal.razor
-- [ ] T054 [P] [US2] Update internal component references in TbModal.razor to use TbButton and TbIcon
-- [ ] T055 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Table.razor to src/TradingBot.Web/Components/Molecules/TbTable.razor
-- [ ] T056 [P] [US2] Update namespace and copyright header in TbTable.razor
-- [ ] T057 [P] [US2] Update internal component references in TbTable.razor to use TbIcon and TbBadge
-- [ ] T058 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/FormField.razor to src/TradingBot.Web/Components/Molecules/TbFormField.razor
-- [ ] T059 [P] [US2] Update namespace and copyright header in TbFormField.razor
-- [ ] T060 [P] [US2] Update internal component references in TbFormField.razor to use TbLabel and TbInput
-- [ ] T061 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/MenuItem.razor to src/TradingBot.Web/Components/Molecules/TbMenuItem.razor
-- [ ] T062 [P] [US2] Update namespace and copyright header in TbMenuItem.razor
-- [ ] T063 [P] [US2] Update internal component references in TbMenuItem.razor to use TbIcon and TbBadge
-- [ ] T064 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbToast/
-- [ ] T065 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/Toast.razor to src/TradingBot.Web/Components/Molecules/TbToast/TbToast.razor
-- [ ] T066 [P] [US2] Move src/TradingBot.Web/Models/ToastType.cs to src/TradingBot.Web/Components/Molecules/TbToast/ToastType.cs
-- [ ] T067 [P] [US2] Update namespace and copyright headers in TbToast files
-- [ ] T068 [P] [US2] Update internal component references in TbToast.razor to use TbIcon and TbButton
-- [ ] T069 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/PageHeader.razor to src/TradingBot.Web/Components/Molecules/TbPageHeader.razor
-- [ ] T070 [P] [US2] Update namespace and copyright header in TbPageHeader.razor
-- [ ] T071 [P] [US2] Update internal component references in TbPageHeader.razor to use TbButton and TbIcon
-- [ ] T072 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbInfoTooltip/
-- [ ] T073 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/InfoTooltip.razor to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TbInfoTooltip.razor
-- [ ] T074 [P] [US2] Move src/TradingBot.Web/Models/TooltipPosition.cs to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TooltipPosition.cs
-- [ ] T075 [P] [US2] Update namespace and copyright headers in TbInfoTooltip files
-- [ ] T076 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/TablePagination.razor to src/TradingBot.Web/Components/Molecules/TbTablePagination.razor
-- [ ] T077 [P] [US2] Update namespace and copyright header in TbTablePagination.razor
-- [ ] T078 [P] [US2] Update internal component references in TbTablePagination.razor to use TbButton
+- [X] T049 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Card.razor to src/TradingBot.Web/Components/Molecules/TbCard.razor
+- [X] T050 [P] [US2] Update namespace to TradingBot.Web.Components.Molecules and copyright header in TbCard.razor
+- [X] T051 [P] [US2] Update internal component references in TbCard.razor to use TbButton and TbIcon
+- [X] T052 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Modal.razor to src/TradingBot.Web/Components/Molecules/TbModal.razor
+- [X] T053 [P] [US2] Update namespace and copyright header in TbModal.razor
+- [X] T054 [P] [US2] Update internal component references in TbModal.razor to use TbButton and TbIcon
+- [X] T055 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Table.razor to src/TradingBot.Web/Components/Molecules/TbTable.razor
+- [X] T056 [P] [US2] Update namespace and copyright header in TbTable.razor
+- [X] T057 [P] [US2] Update internal component references in TbTable.razor to use TbIcon and TbBadge
+- [X] T058 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/FormField.razor to src/TradingBot.Web/Components/Molecules/TbFormField.razor
+- [X] T059 [P] [US2] Update namespace and copyright header in TbFormField.razor
+- [X] T060 [P] [US2] Update internal component references in TbFormField.razor to use TbLabel and TbInput
+- [X] T061 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/MenuItem.razor to src/TradingBot.Web/Components/Molecules/TbMenuItem.razor
+- [X] T062 [P] [US2] Update namespace and copyright header in TbMenuItem.razor
+- [X] T063 [P] [US2] Update internal component references in TbMenuItem.razor to use TbIcon and TbBadge
+- [X] T064 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbToast/
+- [X] T065 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/Toast.razor to src/TradingBot.Web/Components/Molecules/TbToast/TbToast.razor
+- [X] T066 [P] [US2] Move src/TradingBot.Web/Models/ToastType.cs to src/TradingBot.Web/Components/Molecules/TbToast/ToastType.cs
+- [X] T067 [P] [US2] Update namespace and copyright headers in TbToast files
+- [X] T068 [P] [US2] Update internal component references in TbToast.razor to use TbIcon and TbButton
+- [X] T069 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/PageHeader.razor to src/TradingBot.Web/Components/Molecules/TbPageHeader.razor
+- [X] T070 [P] [US2] Update namespace and copyright header in TbPageHeader.razor
+- [X] T071 [P] [US2] Update internal component references in TbPageHeader.razor to use TbButton and TbIcon
+- [X] T072 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbInfoTooltip/
+- [X] T073 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/InfoTooltip.razor to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TbInfoTooltip.razor
+- [X] T074 [P] [US2] Move src/TradingBot.Web/Models/TooltipPosition.cs to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TooltipPosition.cs
+- [X] T075 [P] [US2] Update namespace and copyright headers in TbInfoTooltip files
+- [X] T076 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/TablePagination.razor to src/TradingBot.Web/Components/Molecules/TbTablePagination.razor
+- [X] T077 [P] [US2] Update namespace and copyright header in TbTablePagination.razor
+- [X] T078 [P] [US2] Update internal component references in TbTablePagination.razor to use TbButton
 
 ### Implementation for User Story 2 - Organisms
 
@@ -245,9 +245,9 @@ description: "Component Refactoring and Organization Task List"
 ### Verification for User Story 2
 
 - [ ] T169 [US2] Update all molecule/organism/feature component references in src/TradingBot.Web/Pages/*.razor to use Tb-prefixed names
-- [ ] T170 [US2] Update all component references in src/TradingBot.Web/Components/Layout/MainLayout.razor
-- [ ] T171 [US2] Verify dotnet build succeeds after all component migrations
-- [ ] T172 [US2] Verify all existing tests pass unchanged (dotnet test)
+- [X] T170 [US2] Update all component references in src/TradingBot.Web/Components/Layout/MainLayout.razor
+- [X] T171 [US2] Verify dotnet build succeeds after all component migrations
+- [X] T172 [US2] Verify all existing tests pass unchanged (dotnet test)
 - [ ] T173 [US2] Manual browser test: verify all pages render correctly with Tb-prefixed components
 - [ ] T174 [US2] Verify no components remain in src/TradingBot.Web/Components/Shared/ folder
 - [ ] T175 [US2] Verify all feature components in correct Features/{Domain}/ subfolders

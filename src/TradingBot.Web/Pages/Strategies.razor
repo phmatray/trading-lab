@@ -5,12 +5,12 @@
 @page "/strategies"
 @using TradingBot.Core.Interfaces
 @using TradingBot.Web.Services
-@using TradingBot.Web.Components.Strategy
+@using TradingBot.Web.Components.Features.Strategy
 @inject IStrategyManagementService StrategyService
 
 <PageTitle>Strategy Management - TradingBot</PageTitle>
 
-<PageHeader Title="Strategy Management"
+<TbPageHeader Title="Strategy Management"
             Description="View and manage your trading strategies" />
 
 @if (_isLoading)
@@ -37,7 +37,7 @@ else if (_error != null)
 }
 else if (_strategies == null || !_strategies.Any())
 {
-    <Card ContentClass="p-12">
+    <TbCard ContentClass="p-12">
         <div class="text-center">
             <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -47,7 +47,7 @@ else if (_strategies == null || !_strategies.Any())
             <p class="text-gray-600 dark:text-gray-400">There are no trading strategies available. Configure strategies using the CLI
                 application.</p>
         </div>
-    </Card>
+    </TbCard>
 }
 else
 {
@@ -68,7 +68,7 @@ else
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         @foreach (var strategy in _strategies)
         {
-            <StrategyCard
+            <TbStrategyCard
                 Strategy="@strategy"
                 OnStatusChanged="@HandleStatusChanged"/>
         }

@@ -1,0 +1,89 @@
+@* <copyright file="TbAccountSummaryCard.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@namespace TradingBot.Web.Components.Features.Dashboard
+@using TradingBot.Web.Components.Molecules
+@using TradingBot.Core.Models
+
+<TbCard>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Account Summary</h2>
+        @if (LastUpdated.HasValue)
+        {
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+                Updated: @LastUpdated.Value.ToString("HH:mm:ss")
+            </span>
+        }
+    </div>
+
+    @if (Account is not null)
+    {
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Equity</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        @Account.Equity.ToString("C2")
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Cash</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        @Account.Cash.ToString("C2")
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Position Value</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        @Account.PositionValue.ToString("C2")
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Buying Power</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        @Account.BuyingPower.ToString("C2")
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Unrealized P&L</p>
+                    <p class="text-lg font-semibold @GetPnLColorClass(Account.UnrealizedPnL)">
+                        @Account.UnrealizedPnL.ToString("C2")
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Realized P&L</p>
+                    <p class="text-lg font-semibold @GetPnLColorClass(Account.RealizedPnL)">
+                        @Account.RealizedPnL.ToString("C2")
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="flex items-center justify-center py-8">
+            <p class="text-gray-500 dark:text-gray-400">Loading account data...</p>
+        </div>
+    }
+</TbCard>
+
+@code {
+    [Parameter] public Account? Account { get; set; }
+
+    [Parameter] public DateTime? LastUpdated { get; set; }
+
+    private string GetPnLColorClass(decimal pnl)
+    {
+        return pnl switch
+        {
+            > 0 => "stat-positive",
+            < 0 => "stat-negative",
+            _ => "text-gray-900 dark:text-gray-100"
+        };
+    }
+
+}
