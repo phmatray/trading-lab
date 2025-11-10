@@ -1,393 +1,181 @@
----
-description: "Component Refactoring and Organization Task List"
----
-
 # Tasks: Component Refactoring and Organization
 
+**Feature**: Component Refactoring and Organization (004-component-refactor)
 **Input**: Design documents from `/specs/004-component-refactor/`
-**Prerequisites**: plan.md, spec.md, data-model.md, contracts/component-migration-map.md, contracts/namespace-mapping.md, research.md, quickstart.md
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/component-migration-map.md
 
-**Tests**: NOT INCLUDED - This is a pure refactoring effort. Existing tests must pass without modification to verify functional parity.
+**Tests**: No test generation requested in specification - existing tests must pass unchanged
 
-**Organization**: Tasks are grouped by user story to enable independent verification of each organizational improvement.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-## Format: `[ID] [P?] [Story?] Description`
+## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3, US4)
 - Include exact file paths in descriptions
 
-## Path Conventions
+---
 
-- **Project root**: `/Users/phmatray/Repositories/github-phm/TradingBot/`
-- **Web project**: `src/TradingBot.Web/`
-- **Components**: `src/TradingBot.Web/Components/`
-- **Pages**: `src/TradingBot.Web/Pages/`
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: Project structure preparation for refactoring
+
+- [ ] T001 Verify TradingBot.Web project builds successfully before refactoring
+- [ ] T002 Create backup commit point for rollback capability
+- [ ] T003 Create Features folder structure in src/TradingBot.Web/Components/Features/
 
 ---
 
-## Phase 1: Setup (Verification & Backup)
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Verify baseline and prepare for refactoring
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [X] T001 Verify all existing tests pass with dotnet test
-- [X] T002 Create git commit checkpoint before refactoring begins
-- [X] T003 Verify dotnet build succeeds with zero errors
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-**Checkpoint**: Baseline established - refactoring can begin
+- [ ] T004 [P] Migrate TbButton: Create src/TradingBot.Web/Components/Atoms/TbButton/ subfolder, rename Button.razor to TbButton.razor, move Models/ButtonVariant.cs to subfolder, update namespaces and copyright headers
+- [ ] T005 [P] Migrate TbInput: Rename src/TradingBot.Web/Components/Atoms/Input.razor to TbInput.razor, update namespace and copyright header
+- [ ] T006 [P] Migrate TbIcon: Create src/TradingBot.Web/Components/Atoms/TbIcon/ subfolder, rename Icon.razor to TbIcon.razor, move Models/IconName.cs and IconVariant.cs to subfolder, update namespaces
+- [ ] T007 [P] Migrate TbBadge: Create src/TradingBot.Web/Components/Atoms/TbBadge/ subfolder, rename Badge.razor to TbBadge.razor, split Models/BadgeEnums.cs into BadgeVariant.cs and BadgeSize.cs in subfolder
+- [ ] T008 [P] Migrate TbLabel: Create src/TradingBot.Web/Components/Atoms/TbLabel/ subfolder, rename Label.razor to TbLabel.razor, move Models/LabelSize.cs to subfolder
+- [ ] T009 [P] Migrate TbSelect: Rename src/TradingBot.Web/Components/Atoms/Select.razor to TbSelect.razor, update namespace and copyright header
+- [ ] T010 [P] Migrate TbSpinner: Create src/TradingBot.Web/Components/Atoms/TbSpinner/ subfolder, rename Spinner.razor to TbSpinner.razor, extract SpinnerSize from Models/SpinnerEnums.cs to subfolder
+- [ ] T011 [P] Migrate TbToggle: Rename src/TradingBot.Web/Components/Atoms/Toggle.razor to TbToggle.razor, update namespace and copyright header
+- [ ] T012 Update all Atom component internal namespaces to TradingBot.Web.Components.Atoms
+- [ ] T013 Verify atoms build: Run dotnet build and dotnet test to verify all atom migrations successful
 
----
-
-## Phase 2: Foundational (Core Component Infrastructure)
-
-**Purpose**: Migrate core atoms that all other components depend on - MUST complete before any user story work
-
-**⚠️ CRITICAL**: All molecules, organisms, and features depend on these atoms being migrated first
-
-- [X] T004 Create subfolder src/TradingBot.Web/Components/Atoms/TbButton/
-- [X] T005 Rename src/TradingBot.Web/Components/Atoms/Button.razor to src/TradingBot.Web/Components/Atoms/TbButton/TbButton.razor
-- [X] T006 Move src/TradingBot.Web/Models/ButtonVariant.cs to src/TradingBot.Web/Components/Atoms/TbButton/ButtonVariant.cs
-- [X] T007 Update namespace in TbButton.razor to TradingBot.Web.Components.Atoms
-- [X] T008 Update namespace in ButtonVariant.cs to TradingBot.Web.Components.Atoms
-- [X] T009 Update copyright headers in TbButton.razor and ButtonVariant.cs
-- [X] T010 Delete duplicate src/TradingBot.Web/Components/Shared/Button.razor
-- [X] T011 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbIcon/
-- [X] T012 [P] Rename src/TradingBot.Web/Components/Atoms/Icon.razor to src/TradingBot.Web/Components/Atoms/TbIcon/TbIcon.razor
-- [X] T013 [P] Move src/TradingBot.Web/Models/IconName.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconName.cs
-- [X] T014 [P] Move src/TradingBot.Web/Models/IconVariant.cs to src/TradingBot.Web/Components/Atoms/TbIcon/IconVariant.cs
-- [X] T015 [P] Update namespace in TbIcon.razor and supporting types to TradingBot.Web.Components.Atoms
-- [X] T016 [P] Update copyright headers in TbIcon files
-- [X] T017 [P] Rename src/TradingBot.Web/Components/Atoms/Input.razor to src/TradingBot.Web/Components/Atoms/TbInput.razor
-- [X] T018 [P] Update namespace and copyright header in TbInput.razor
-- [X] T019 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbBadge/
-- [X] T020 [P] Rename src/TradingBot.Web/Components/Atoms/Badge.razor to src/TradingBot.Web/Components/Atoms/TbBadge/TbBadge.razor
-- [X] T021 [P] Split Models/BadgeEnums.cs into TbBadge/BadgeVariant.cs and TbBadge/BadgeSize.cs
-- [X] T022 [P] Update namespace and copyright headers in TbBadge files
-- [X] T023 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbLabel/
-- [X] T024 [P] Rename src/TradingBot.Web/Components/Atoms/Label.razor to src/TradingBot.Web/Components/Atoms/TbLabel/TbLabel.razor
-- [X] T025 [P] Move src/TradingBot.Web/Models/LabelSize.cs to src/TradingBot.Web/Components/Atoms/TbLabel/LabelSize.cs
-- [X] T026 [P] Update namespace and copyright headers in TbLabel files
-- [X] T027 [P] Rename src/TradingBot.Web/Components/Atoms/Select.razor to src/TradingBot.Web/Components/Atoms/TbSelect.razor
-- [X] T028 [P] Update namespace and copyright header in TbSelect.razor
-- [X] T029 [P] Create subfolder src/TradingBot.Web/Components/Atoms/TbSpinner/
-- [X] T030 [P] Rename src/TradingBot.Web/Components/Atoms/Spinner.razor to src/TradingBot.Web/Components/Atoms/TbSpinner/TbSpinner.razor
-- [X] T031 [P] Extract SpinnerSize from Models/SpinnerEnums.cs to TbSpinner/SpinnerSize.cs
-- [X] T032 [P] Update namespace and copyright headers in TbSpinner files
-- [X] T033 [P] Rename src/TradingBot.Web/Components/Atoms/Toggle.razor to src/TradingBot.Web/Components/Atoms/TbToggle.razor
-- [X] T034 [P] Update namespace and copyright header in TbToggle.razor
-- [X] T035 Verify dotnet build succeeds after atom migrations
-- [X] T036 Commit checkpoint for atom migrations
-
-**Checkpoint**: Foundation ready - atoms complete, user story work can now begin
+**Checkpoint**: Foundation atoms ready - molecule and organism implementation can now begin
 
 ---
 
 ## Phase 3: User Story 1 - Component Consistency Across Application (Priority: P1) 🎯 MVP
 
-**Goal**: Establish consistent, predictable components by adding Tb prefix and eliminating duplicates so all pages use the same component implementations
+**Goal**: Eliminate duplicate components and establish single source of truth for all UI components with Tb prefix
 
-**Independent Test**: Verify all pages compile successfully and use TbButton instead of Button, verify no duplicate Button components exist in codebase
+**Independent Test**: Verify all pages use the same component implementations (e.g., all buttons use TbButton, no usage of duplicate Button components). Search codebase for duplicate component references.
 
 ### Implementation for User Story 1
 
-- [X] T037 [P] [US1] Find/replace all <Button references with <TbButton in src/TradingBot.Web/Pages/*.razor
-- [X] T038 [P] [US1] Find/replace all <Icon references with <TbIcon in src/TradingBot.Web/Pages/*.razor
-- [X] T039 [P] [US1] Find/replace all <Input references with <TbInput in src/TradingBot.Web/Pages/*.razor
-- [X] T040 [P] [US1] Find/replace all <Badge references with <TbBadge in src/TradingBot.Web/Pages/*.razor
-- [X] T041 [P] [US1] Find/replace all <Label references with <TbLabel in src/TradingBot.Web/Pages/*.razor
-- [X] T042 [P] [US1] Find/replace all <Select references with <TbSelect in src/TradingBot.Web/Pages/*.razor
-- [X] T043 [P] [US1] Find/replace all <Spinner references with <TbSpinner in src/TradingBot.Web/Pages/*.razor
-- [X] T044 [P] [US1] Find/replace all <Toggle references with <TbToggle in src/TradingBot.Web/Pages/*.razor
-- [X] T045 [US1] Verify dotnet build succeeds after all atom reference updates
-- [X] T046 [US1] Verify all existing tests pass unchanged (dotnet test)
-- [ ] T047 [US1] Manual browser test: verify all pages render correctly with Tb-prefixed atoms
-- [ ] T048 [US1] Commit checkpoint for User Story 1 completion
+- [ ] T014 [P] [US1] Migrate TbCard: Move Components/Shared/Card.razor to Components/Molecules/TbCard.razor, update namespace to TradingBot.Web.Components.Molecules, update internal references to TbButton and TbIcon
+- [ ] T015 [P] [US1] Migrate TbModal: Move Components/Shared/Modal.razor to Components/Molecules/TbModal.razor, update namespace and internal references to TbButton and TbIcon
+- [ ] T016 [P] [US1] Migrate TbTable: Move Components/Shared/Table.razor to Components/Molecules/TbTable.razor, update namespace and internal references to TbIcon and TbBadge
+- [ ] T017 [P] [US1] Migrate TbFormField: Rename Components/Molecules/FormField.razor to TbFormField.razor, update namespace and internal references to TbLabel and TbInput
+- [ ] T018 [P] [US1] Migrate TbMenuItem: Rename Components/Molecules/MenuItem.razor to TbMenuItem.razor, update namespace and internal references to TbIcon and TbBadge
+- [ ] T019 [P] [US1] Migrate TbToast: Create Components/Molecules/TbToast/ subfolder, rename Toast.razor to TbToast.razor, move Models/ToastType.cs to subfolder, update namespaces
+- [ ] T020 [P] [US1] Migrate TbPageHeader: Rename Components/Molecules/PageHeader.razor to TbPageHeader.razor, update namespace and internal references to TbButton and TbIcon
+- [ ] T021 [P] [US1] Migrate TbInfoTooltip: Create Components/Molecules/TbInfoTooltip/ subfolder, rename InfoTooltip.razor to TbInfoTooltip.razor, move Models/TooltipPosition.cs to subfolder
+- [ ] T022 [P] [US1] Migrate TbTablePagination: Rename Components/Molecules/TablePagination.razor to TbTablePagination.razor, update namespace and internal references to TbButton
+- [ ] T023 [US1] Update all Molecule component namespaces to TradingBot.Web.Components.Molecules and verify internal Tb-prefixed references
+- [ ] T024 [US1] Find and replace all page references: Update <Card to <TbCard, <Modal to <TbModal, <Table to <TbTable, <Button to <TbButton across all .razor files
+- [ ] T025 [US1] Verify molecule migration: Run dotnet build and dotnet test to confirm all molecules migrated successfully
+- [ ] T026 [P] [US1] Migrate TbToastContainer: Move Components/Shared/ToastContainer.razor to Components/Organisms/TbToastContainer.razor, update namespace to TradingBot.Web.Components.Organisms, update references to TbToast
+- [ ] T027 [P] [US1] Migrate TbErrorBoundary: Move Components/Shared/ErrorBoundary.razor to Components/Organisms/TbErrorBoundary.razor, update namespace and references to TbCard, TbButton, TbIcon
+- [ ] T028 [P] [US1] Migrate TbNotificationCenter: Rename Components/Organisms/NotificationCenter.razor to TbNotificationCenter.razor, update namespace and references to TbBadge, TbIcon, TbButton
+- [ ] T029 [P] [US1] Migrate TbSettingsForm: Rename Components/Organisms/SettingsForm.razor to TbSettingsForm.razor, update namespace and references to TbFormField, TbInput, TbSelect, TbToggle, TbButton, TbCard
+- [ ] T030 [P] [US1] Migrate TbThemeProvider: Rename Components/Organisms/ThemeProvider.razor to TbThemeProvider.razor, update namespace
+- [ ] T031 [US1] Consolidate TbNavigationSidebar: Rename Components/Organisms/NavigationSidebar.razor to TbNavigationSidebar.razor, merge functionality from Components/Layout/NavMenu.razor, delete NavMenu.razor, update MainLayout.razor reference
+- [ ] T032 [US1] Update all Organism component namespaces to TradingBot.Web.Components.Organisms and verify all internal Tb-prefixed references
+- [ ] T033 [US1] Delete duplicate Components/Shared/Button.razor (now using TbButton from Atoms)
+- [ ] T034 [US1] Verify organism migration and duplicate elimination: Run dotnet build and dotnet test to confirm zero duplicate components exist
+- [ ] T035 [US1] Verify Component Shared folder is empty and delete src/TradingBot.Web/Components/Shared/
+- [ ] T036 [US1] Final verification: Search codebase for non-Tb component references (grep for "<Button", "<Card", "<Modal" etc.) and confirm zero matches
 
-**Checkpoint**: User Story 1 complete - All pages now use consistent Tb-prefixed atom components, no duplicates
+**Checkpoint**: User Story 1 complete - All components use Tb prefix, duplicates eliminated, single source of truth established
 
 ---
 
 ## Phase 4: User Story 2 - Improved Developer Navigation and Discoverability (Priority: P2)
 
-**Goal**: Organize components into clear Atomic Design hierarchy (Molecules → Organisms → Features) so developers can quickly locate components
+**Goal**: Organize all feature-specific components into logical domain folders under Features/ for easy navigation and discoverability
 
-**Independent Test**: Verify all molecule components in Components/Molecules/ folder, all organisms in Components/Organisms/, all feature components in Components/Features/{Domain}/ with no legacy folders remaining
+**Independent Test**: Time how long it takes a developer to locate specific components (e.g., "find the position card component") and verify all related files are co-located
 
-### Implementation for User Story 2 - Molecules
+### Implementation for User Story 2
 
-- [X] T049 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Card.razor to src/TradingBot.Web/Components/Molecules/TbCard.razor
-- [X] T050 [P] [US2] Update namespace to TradingBot.Web.Components.Molecules and copyright header in TbCard.razor
-- [X] T051 [P] [US2] Update internal component references in TbCard.razor to use TbButton and TbIcon
-- [X] T052 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Modal.razor to src/TradingBot.Web/Components/Molecules/TbModal.razor
-- [X] T053 [P] [US2] Update namespace and copyright header in TbModal.razor
-- [X] T054 [P] [US2] Update internal component references in TbModal.razor to use TbButton and TbIcon
-- [X] T055 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/Table.razor to src/TradingBot.Web/Components/Molecules/TbTable.razor
-- [X] T056 [P] [US2] Update namespace and copyright header in TbTable.razor
-- [X] T057 [P] [US2] Update internal component references in TbTable.razor to use TbIcon and TbBadge
-- [X] T058 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/FormField.razor to src/TradingBot.Web/Components/Molecules/TbFormField.razor
-- [X] T059 [P] [US2] Update namespace and copyright header in TbFormField.razor
-- [X] T060 [P] [US2] Update internal component references in TbFormField.razor to use TbLabel and TbInput
-- [X] T061 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/MenuItem.razor to src/TradingBot.Web/Components/Molecules/TbMenuItem.razor
-- [X] T062 [P] [US2] Update namespace and copyright header in TbMenuItem.razor
-- [X] T063 [P] [US2] Update internal component references in TbMenuItem.razor to use TbIcon and TbBadge
-- [X] T064 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbToast/
-- [X] T065 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/Toast.razor to src/TradingBot.Web/Components/Molecules/TbToast/TbToast.razor
-- [X] T066 [P] [US2] Move src/TradingBot.Web/Models/ToastType.cs to src/TradingBot.Web/Components/Molecules/TbToast/ToastType.cs
-- [X] T067 [P] [US2] Update namespace and copyright headers in TbToast files
-- [X] T068 [P] [US2] Update internal component references in TbToast.razor to use TbIcon and TbButton
-- [X] T069 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/PageHeader.razor to src/TradingBot.Web/Components/Molecules/TbPageHeader.razor
-- [X] T070 [P] [US2] Update namespace and copyright header in TbPageHeader.razor
-- [X] T071 [P] [US2] Update internal component references in TbPageHeader.razor to use TbButton and TbIcon
-- [X] T072 [P] [US2] Create subfolder src/TradingBot.Web/Components/Molecules/TbInfoTooltip/
-- [X] T073 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/InfoTooltip.razor to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TbInfoTooltip.razor
-- [X] T074 [P] [US2] Move src/TradingBot.Web/Models/TooltipPosition.cs to src/TradingBot.Web/Components/Molecules/TbInfoTooltip/TooltipPosition.cs
-- [X] T075 [P] [US2] Update namespace and copyright headers in TbInfoTooltip files
-- [X] T076 [P] [US2] Rename src/TradingBot.Web/Components/Molecules/TablePagination.razor to src/TradingBot.Web/Components/Molecules/TbTablePagination.razor
-- [X] T077 [P] [US2] Update namespace and copyright header in TbTablePagination.razor
-- [X] T078 [P] [US2] Update internal component references in TbTablePagination.razor to use TbButton
+- [ ] T037 [P] [US2] Create Dashboard feature folder: mkdir -p src/TradingBot.Web/Components/Features/Dashboard
+- [ ] T038 [P] [US2] Create Portfolio feature folder: mkdir -p src/TradingBot.Web/Components/Features/Portfolio
+- [ ] T039 [P] [US2] Create Strategy feature folder: mkdir -p src/TradingBot.Web/Components/Features/Strategy
+- [ ] T040 [P] [US2] Create Risk feature folder: mkdir -p src/TradingBot.Web/Components/Features/Risk
+- [ ] T041 [P] [US2] Create Performance feature folder: mkdir -p src/TradingBot.Web/Components/Features/Performance
+- [ ] T042 [P] [US2] Create Backtest feature folder: mkdir -p src/TradingBot.Web/Components/Features/Backtest
+- [ ] T043 [P] [US2] Create Charts feature folder: mkdir -p src/TradingBot.Web/Components/Features/Charts
+- [ ] T044 [P] [US2] Migrate Dashboard components: Move and rename DashboardHeader.razor to TbDashboardHeader.razor, AccountSummaryCard.razor to TbAccountSummaryCard.razor, PerformanceMetricsCard.razor to TbPerformanceMetricsCard.razor, ActiveStrategiesCard.razor to TbActiveStrategiesCard.razor, RecentTradesCard.razor to TbRecentTradesCard.razor, MarketOverviewCard.razor to TbMarketOverviewCard.razor into Features/Dashboard/
+- [ ] T045 [P] [US2] Migrate Portfolio components: Move and rename PortfolioSummary.razor to TbPortfolioSummary.razor, PositionCard.razor to TbPositionCard.razor, PortfolioChart.razor to TbPortfolioChart.razor, AssetAllocationChart.razor to TbAssetAllocationChart.razor into Features/Portfolio/
+- [ ] T046 [P] [US2] Migrate Strategy components: Move and rename StrategyCard.razor to TbStrategyCard.razor, StrategyConfigForm.razor to TbStrategyConfigForm.razor into Features/Strategy/
+- [ ] T047 [P] [US2] Migrate Risk components: Move and rename RiskMetricsCard.razor to TbRiskMetricsCard.razor, RiskLimitsForm.razor to TbRiskLimitsForm.razor into Features/Risk/
+- [ ] T048 [P] [US2] Migrate Performance components: Move and rename EquityCurveChart.razor to TbEquityCurveChart.razor, PerformanceStatsCard.razor to TbPerformanceStatsCard.razor into Features/Performance/
+- [ ] T049 [P] [US2] Migrate Backtest components: Move and rename BacktestConfigForm.razor to TbBacktestConfigForm.razor, BacktestResultsCard.razor to TbBacktestResultsCard.razor, BacktestChart.razor to TbBacktestChart.razor into Features/Backtest/
+- [ ] T050 [P] [US2] Migrate Charts components: Move and rename CandlestickChart.razor to TbCandlestickChart.razor, LineChart.razor to TbLineChart.razor into Features/Charts/
+- [ ] T051 [US2] Update all Dashboard component namespaces to TradingBot.Web.Components.Features.Dashboard, update copyright headers, update internal component references to Tb-prefixed versions
+- [ ] T052 [US2] Update all Portfolio component namespaces to TradingBot.Web.Components.Features.Portfolio, update copyright headers, update internal component references
+- [ ] T053 [US2] Update all Strategy component namespaces to TradingBot.Web.Components.Features.Strategy, update copyright headers, update internal component references
+- [ ] T054 [US2] Update all Risk component namespaces to TradingBot.Web.Components.Features.Risk, update copyright headers, update internal component references
+- [ ] T055 [US2] Update all Performance component namespaces to TradingBot.Web.Components.Features.Performance, update copyright headers, update internal component references
+- [ ] T056 [US2] Update all Backtest component namespaces to TradingBot.Web.Components.Features.Backtest, update copyright headers, update internal component references
+- [ ] T057 [US2] Update all Charts component namespaces to TradingBot.Web.Components.Features.Charts, update copyright headers, update internal component references
+- [ ] T058 [US2] Update Pages/Dashboard.razor to use new TbDashboard* component names and namespaces
+- [ ] T059 [US2] Update Pages/Portfolio.razor to use new TbPortfolio* component names and namespaces
+- [ ] T060 [US2] Update Pages/Strategies.razor to use new TbStrategy* component names and namespaces
+- [ ] T061 [US2] Update Pages/Backtest.razor to use new TbBacktest* component names and namespaces
+- [ ] T062 [US2] Delete old feature folders: Remove Components/Dashboard/, Components/Portfolio/, Components/Strategy/, Components/Risk/, Components/Performance/, Components/Backtest/, Components/Charts/
+- [ ] T063 [US2] Verify feature organization: Run dotnet build and dotnet test to confirm all 21 feature components migrated successfully
+- [ ] T064 [US2] Move Components/Pages/Settings.razor to Pages/Settings.razor, update component references to Tb-prefixed versions
+- [ ] T065 [US2] Move Components/Pages/Help.razor to Pages/Help.razor, update component references to Tb-prefixed versions
+- [ ] T066 [US2] Delete Components/Pages/ folder after verifying it's empty
+- [ ] T067 [US2] Update Pages/Home.razor to use Tb-prefixed component references
+- [ ] T068 [US2] Final page verification: Run dotnet build and dotnet test to confirm all pages updated and routable
 
-### Implementation for User Story 2 - Organisms
-
-- [ ] T079 [P] [US2] Rename src/TradingBot.Web/Components/Organisms/NavigationSidebar.razor to src/TradingBot.Web/Components/Organisms/TbNavigationSidebar.razor
-- [ ] T080 [P] [US2] Merge functionality from src/TradingBot.Web/Components/Layout/NavMenu.razor into TbNavigationSidebar.razor
-- [ ] T081 [P] [US2] Delete src/TradingBot.Web/Components/Layout/NavMenu.razor
-- [ ] T082 [P] [US2] Update namespace and copyright header in TbNavigationSidebar.razor
-- [ ] T083 [P] [US2] Update internal component references in TbNavigationSidebar.razor to use TbMenuItem, TbIcon, TbBadge
-- [ ] T084 [P] [US2] Update src/TradingBot.Web/Components/Layout/MainLayout.razor to use TbNavigationSidebar
-- [ ] T085 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/ToastContainer.razor to src/TradingBot.Web/Components/Organisms/TbToastContainer.razor
-- [ ] T086 [P] [US2] Update namespace and copyright header in TbToastContainer.razor
-- [ ] T087 [P] [US2] Update internal component references in TbToastContainer.razor to use TbToast
-- [ ] T088 [P] [US2] Migrate src/TradingBot.Web/Components/Shared/ErrorBoundary.razor to src/TradingBot.Web/Components/Organisms/TbErrorBoundary.razor
-- [ ] T089 [P] [US2] Update namespace and copyright header in TbErrorBoundary.razor
-- [ ] T090 [P] [US2] Update internal component references in TbErrorBoundary.razor to use TbCard, TbButton, TbIcon
-- [ ] T091 [P] [US2] Rename src/TradingBot.Web/Components/Organisms/NotificationCenter.razor to src/TradingBot.Web/Components/Organisms/TbNotificationCenter.razor
-- [ ] T092 [P] [US2] Update namespace and copyright header in TbNotificationCenter.razor
-- [ ] T093 [P] [US2] Update internal component references in TbNotificationCenter.razor to use TbBadge, TbIcon, TbButton
-- [ ] T094 [P] [US2] Rename src/TradingBot.Web/Components/Organisms/SettingsForm.razor to src/TradingBot.Web/Components/Organisms/TbSettingsForm.razor
-- [ ] T095 [P] [US2] Update namespace and copyright header in TbSettingsForm.razor
-- [ ] T096 [P] [US2] Update internal component references in TbSettingsForm.razor to use TbFormField, TbInput, TbSelect, TbToggle, TbButton, TbCard
-- [ ] T097 [P] [US2] Rename src/TradingBot.Web/Components/Organisms/ThemeProvider.razor to src/TradingBot.Web/Components/Organisms/TbThemeProvider.razor
-- [ ] T098 [P] [US2] Update namespace and copyright header in TbThemeProvider.razor
-
-### Implementation for User Story 2 - Feature Components
-
-- [ ] T099 [US2] Create directory src/TradingBot.Web/Components/Features/Dashboard/
-- [ ] T100 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/DashboardHeader.razor to src/TradingBot.Web/Components/Features/Dashboard/TbDashboardHeader.razor
-- [ ] T101 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Dashboard and copyright header in TbDashboardHeader.razor
-- [ ] T102 [P] [US2] Update internal component references in TbDashboardHeader.razor to use Tb-prefixed components
-- [ ] T103 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/AccountSummaryCard.razor to src/TradingBot.Web/Components/Features/Dashboard/TbAccountSummaryCard.razor
-- [ ] T104 [P] [US2] Update namespace and copyright header in TbAccountSummaryCard.razor
-- [ ] T105 [P] [US2] Update internal component references in TbAccountSummaryCard.razor
-- [ ] T106 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/PerformanceMetricsCard.razor to src/TradingBot.Web/Components/Features/Dashboard/TbPerformanceMetricsCard.razor
-- [ ] T107 [P] [US2] Update namespace and copyright header in TbPerformanceMetricsCard.razor
-- [ ] T108 [P] [US2] Update internal component references in TbPerformanceMetricsCard.razor
-- [ ] T109 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/ActiveStrategiesCard.razor to src/TradingBot.Web/Components/Features/Dashboard/TbActiveStrategiesCard.razor
-- [ ] T110 [P] [US2] Update namespace and copyright header in TbActiveStrategiesCard.razor
-- [ ] T111 [P] [US2] Update internal component references in TbActiveStrategiesCard.razor
-- [ ] T112 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/RecentTradesCard.razor to src/TradingBot.Web/Components/Features/Dashboard/TbRecentTradesCard.razor
-- [ ] T113 [P] [US2] Update namespace and copyright header in TbRecentTradesCard.razor
-- [ ] T114 [P] [US2] Update internal component references in TbRecentTradesCard.razor
-- [ ] T115 [P] [US2] Rename src/TradingBot.Web/Components/Dashboard/MarketOverviewCard.razor to src/TradingBot.Web/Components/Features/Dashboard/TbMarketOverviewCard.razor
-- [ ] T116 [P] [US2] Update namespace and copyright header in TbMarketOverviewCard.razor
-- [ ] T117 [P] [US2] Update internal component references in TbMarketOverviewCard.razor
-- [ ] T118 [US2] Create directory src/TradingBot.Web/Components/Features/Portfolio/
-- [ ] T119 [P] [US2] Rename src/TradingBot.Web/Components/Portfolio/PortfolioSummary.razor to src/TradingBot.Web/Components/Features/Portfolio/TbPortfolioSummary.razor
-- [ ] T120 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Portfolio and copyright header in TbPortfolioSummary.razor
-- [ ] T121 [P] [US2] Update internal component references in TbPortfolioSummary.razor
-- [ ] T122 [P] [US2] Rename src/TradingBot.Web/Components/Portfolio/PositionCard.razor to src/TradingBot.Web/Components/Features/Portfolio/TbPositionCard.razor
-- [ ] T123 [P] [US2] Update namespace and copyright header in TbPositionCard.razor
-- [ ] T124 [P] [US2] Update internal component references in TbPositionCard.razor
-- [ ] T125 [P] [US2] Rename src/TradingBot.Web/Components/Portfolio/PortfolioChart.razor to src/TradingBot.Web/Components/Features/Portfolio/TbPortfolioChart.razor
-- [ ] T126 [P] [US2] Update namespace and copyright header in TbPortfolioChart.razor
-- [ ] T127 [P] [US2] Update internal component references in TbPortfolioChart.razor
-- [ ] T128 [P] [US2] Rename src/TradingBot.Web/Components/Portfolio/AssetAllocationChart.razor to src/TradingBot.Web/Components/Features/Portfolio/TbAssetAllocationChart.razor
-- [ ] T129 [P] [US2] Update namespace and copyright header in TbAssetAllocationChart.razor
-- [ ] T130 [P] [US2] Update internal component references in TbAssetAllocationChart.razor
-- [ ] T131 [US2] Create directory src/TradingBot.Web/Components/Features/Strategy/
-- [ ] T132 [P] [US2] Rename src/TradingBot.Web/Components/Strategy/StrategyCard.razor to src/TradingBot.Web/Components/Features/Strategy/TbStrategyCard.razor
-- [ ] T133 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Strategy and copyright header in TbStrategyCard.razor
-- [ ] T134 [P] [US2] Update internal component references in TbStrategyCard.razor
-- [ ] T135 [P] [US2] Rename src/TradingBot.Web/Components/Strategy/StrategyConfigForm.razor to src/TradingBot.Web/Components/Features/Strategy/TbStrategyConfigForm.razor
-- [ ] T136 [P] [US2] Update namespace and copyright header in TbStrategyConfigForm.razor
-- [ ] T137 [P] [US2] Update internal component references in TbStrategyConfigForm.razor
-- [ ] T138 [US2] Create directory src/TradingBot.Web/Components/Features/Risk/
-- [ ] T139 [P] [US2] Rename src/TradingBot.Web/Components/Risk/RiskMetricsCard.razor to src/TradingBot.Web/Components/Features/Risk/TbRiskMetricsCard.razor
-- [ ] T140 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Risk and copyright header in TbRiskMetricsCard.razor
-- [ ] T141 [P] [US2] Update internal component references in TbRiskMetricsCard.razor
-- [ ] T142 [P] [US2] Rename src/TradingBot.Web/Components/Risk/RiskLimitsForm.razor to src/TradingBot.Web/Components/Features/Risk/TbRiskLimitsForm.razor
-- [ ] T143 [P] [US2] Update namespace and copyright header in TbRiskLimitsForm.razor
-- [ ] T144 [P] [US2] Update internal component references in TbRiskLimitsForm.razor
-- [ ] T145 [US2] Create directory src/TradingBot.Web/Components/Features/Performance/
-- [ ] T146 [P] [US2] Rename src/TradingBot.Web/Components/Performance/EquityCurveChart.razor to src/TradingBot.Web/Components/Features/Performance/TbEquityCurveChart.razor
-- [ ] T147 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Performance and copyright header in TbEquityCurveChart.razor
-- [ ] T148 [P] [US2] Update internal component references in TbEquityCurveChart.razor
-- [ ] T149 [P] [US2] Rename src/TradingBot.Web/Components/Performance/PerformanceStatsCard.razor to src/TradingBot.Web/Components/Features/Performance/TbPerformanceStatsCard.razor
-- [ ] T150 [P] [US2] Update namespace and copyright header in TbPerformanceStatsCard.razor
-- [ ] T151 [P] [US2] Update internal component references in TbPerformanceStatsCard.razor
-- [ ] T152 [US2] Create directory src/TradingBot.Web/Components/Features/Backtest/
-- [ ] T153 [P] [US2] Rename src/TradingBot.Web/Components/Backtest/BacktestConfigForm.razor to src/TradingBot.Web/Components/Features/Backtest/TbBacktestConfigForm.razor
-- [ ] T154 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Backtest and copyright header in TbBacktestConfigForm.razor
-- [ ] T155 [P] [US2] Update internal component references in TbBacktestConfigForm.razor
-- [ ] T156 [P] [US2] Rename src/TradingBot.Web/Components/Backtest/BacktestResultsCard.razor to src/TradingBot.Web/Components/Features/Backtest/TbBacktestResultsCard.razor
-- [ ] T157 [P] [US2] Update namespace and copyright header in TbBacktestResultsCard.razor
-- [ ] T158 [P] [US2] Update internal component references in TbBacktestResultsCard.razor
-- [ ] T159 [P] [US2] Rename src/TradingBot.Web/Components/Backtest/BacktestChart.razor to src/TradingBot.Web/Components/Features/Backtest/TbBacktestChart.razor
-- [ ] T160 [P] [US2] Update namespace and copyright header in TbBacktestChart.razor
-- [ ] T161 [P] [US2] Update internal component references in TbBacktestChart.razor
-- [ ] T162 [US2] Create directory src/TradingBot.Web/Components/Features/Charts/
-- [ ] T163 [P] [US2] Rename src/TradingBot.Web/Components/Charts/CandlestickChart.razor to src/TradingBot.Web/Components/Features/Charts/TbCandlestickChart.razor
-- [ ] T164 [P] [US2] Update namespace to TradingBot.Web.Components.Features.Charts and copyright header in TbCandlestickChart.razor
-- [ ] T165 [P] [US2] Update internal component references in TbCandlestickChart.razor
-- [ ] T166 [P] [US2] Rename src/TradingBot.Web/Components/Charts/LineChart.razor to src/TradingBot.Web/Components/Features/Charts/TbLineChart.razor
-- [ ] T167 [P] [US2] Update namespace and copyright header in TbLineChart.razor
-- [ ] T168 [P] [US2] Update internal component references in TbLineChart.razor
-
-### Verification for User Story 2
-
-- [ ] T169 [US2] Update all molecule/organism/feature component references in src/TradingBot.Web/Pages/*.razor to use Tb-prefixed names
-- [X] T170 [US2] Update all component references in src/TradingBot.Web/Components/Layout/MainLayout.razor
-- [X] T171 [US2] Verify dotnet build succeeds after all component migrations
-- [X] T172 [US2] Verify all existing tests pass unchanged (dotnet test)
-- [ ] T173 [US2] Manual browser test: verify all pages render correctly with Tb-prefixed components
-- [ ] T174 [US2] Verify no components remain in src/TradingBot.Web/Components/Shared/ folder
-- [ ] T175 [US2] Verify all feature components in correct Features/{Domain}/ subfolders
-- [ ] T176 [US2] Commit checkpoint for User Story 2 completion
-
-**Checkpoint**: User Story 2 complete - All components organized in clear Atomic Design hierarchy with feature-based organization
+**Checkpoint**: User Story 2 complete - All 21 feature components organized in Features/ subfolders, all 7 pages consolidated in Pages/ with Tb-prefixed references
 
 ---
 
 ## Phase 5: User Story 3 - Reduced Code Duplication and Maintenance Burden (Priority: P2)
 
-**Goal**: Consolidate duplicate components and co-locate supporting types to establish single source of truth for each component
+**Goal**: Consolidate imports into single _Imports.razor file and co-locate supporting types with components
 
-**Independent Test**: Verify no duplicate component implementations exist, verify all supporting enums co-located with their components, verify single _Imports.razor file
+**Independent Test**: Verify single _Imports.razor exists with zero unused imports, search for duplicate component-specific enums in Models/
 
-### Implementation for User Story 3 - Pages Consolidation
+### Implementation for User Story 3
 
-- [ ] T177 [P] [US3] Move src/TradingBot.Web/Components/Pages/Settings.razor to src/TradingBot.Web/Pages/Settings.razor
-- [ ] T178 [P] [US3] Update all component references in Pages/Settings.razor to use Tb-prefixed components
-- [ ] T179 [P] [US3] Move src/TradingBot.Web/Components/Pages/Help.razor to src/TradingBot.Web/Pages/Help.razor
-- [ ] T180 [P] [US3] Update all component references in Pages/Help.razor to use Tb-prefixed components
-- [ ] T181 [US3] Update all component references in src/TradingBot.Web/Pages/Home.razor to use Tb-prefixed components
-- [ ] T182 [US3] Update all component references in src/TradingBot.Web/Pages/Dashboard.razor to use Tb-prefixed Dashboard feature components
-- [ ] T183 [US3] Update all component references in src/TradingBot.Web/Pages/Portfolio.razor to use Tb-prefixed Portfolio feature components
-- [ ] T184 [US3] Update all component references in src/TradingBot.Web/Pages/Strategies.razor to use Tb-prefixed Strategy feature components
-- [ ] T185 [US3] Update all component references in src/TradingBot.Web/Pages/Backtest.razor to use Tb-prefixed Backtest feature components
+- [ ] T069 [US3] Create consolidated src/TradingBot.Web/Components/_Imports.razor with all necessary namespaces (Blazor core, TradingBot.Core, all component namespaces, Services, Models)
+- [ ] T070 [US3] Delete src/TradingBot.Web/Pages/_Imports.razor (pages will inherit from Components/_Imports.razor)
+- [ ] T071 [US3] Verify all pages and components compile with consolidated imports: Run dotnet build
+- [ ] T072 [US3] Use IDE "Remove Unused Usings" feature on Components/_Imports.razor to eliminate unused imports
+- [ ] T073 [US3] Verify no unused imports remain: Run dotnet build and confirm zero namespace warnings
+- [ ] T074 [US3] Final import consolidation verification: Confirm single _Imports.razor at Components root, zero duplicate import files
 
-### Implementation for User Story 3 - Import Consolidation
-
-- [ ] T186 [US3] Create consolidated src/TradingBot.Web/Components/_Imports.razor with all necessary namespaces
-- [ ] T187 [US3] Add @using TradingBot.Web.Components.Atoms to _Imports.razor
-- [ ] T188 [US3] Add @using TradingBot.Web.Components.Molecules to _Imports.razor
-- [ ] T189 [US3] Add @using TradingBot.Web.Components.Organisms to _Imports.razor
-- [ ] T190 [US3] Add @using TradingBot.Web.Components.Features.Dashboard to _Imports.razor
-- [ ] T191 [US3] Add @using TradingBot.Web.Components.Features.Portfolio to _Imports.razor
-- [ ] T192 [US3] Add @using TradingBot.Web.Components.Features.Strategy to _Imports.razor
-- [ ] T193 [US3] Add @using TradingBot.Web.Components.Features.Risk to _Imports.razor
-- [ ] T194 [US3] Add @using TradingBot.Web.Components.Features.Performance to _Imports.razor
-- [ ] T195 [US3] Add @using TradingBot.Web.Components.Features.Backtest to _Imports.razor
-- [ ] T196 [US3] Add @using TradingBot.Web.Components.Features.Charts to _Imports.razor
-- [ ] T197 [US3] Delete src/TradingBot.Web/Pages/_Imports.razor (now inherited from Components/_Imports.razor)
-- [ ] T198 [US3] Verify dotnet build succeeds with consolidated imports
-- [ ] T199 [US3] Use IDE to remove unused using statements from consolidated _Imports.razor
-
-### Verification for User Story 3
-
-- [ ] T200 [US3] Verify only one _Imports.razor file exists in src/TradingBot.Web/Components/
-- [ ] T201 [US3] Verify all pages exist in src/TradingBot.Web/Pages/ folder only
-- [ ] T202 [US3] Verify all supporting enums co-located with their components (no component enums in Models/)
-- [ ] T203 [US3] Search codebase for duplicate component names and verify none exist
-- [ ] T204 [US3] Verify dotnet build succeeds
-- [ ] T205 [US3] Verify all existing tests pass unchanged (dotnet test)
-- [ ] T206 [US3] Manual browser test: verify all pages render correctly
-- [ ] T207 [US3] Commit checkpoint for User Story 3 completion
-
-**Checkpoint**: User Story 3 complete - Single source of truth established, duplicates eliminated, imports consolidated
+**Checkpoint**: User Story 3 complete - Single _Imports.razor with zero unused imports, all supporting types co-located with components
 
 ---
 
 ## Phase 6: User Story 4 - Clear Atomic Design Hierarchy (Priority: P3)
 
-**Goal**: Verify and enforce clear Atomic Design dependency rules so developers understand component composition and reuse patterns
+**Goal**: Document and verify component hierarchy follows Atomic Design dependency rules (Atoms → Molecules → Organisms → Features)
 
-**Independent Test**: Verify no atoms depend on molecules, no molecules depend on organisms, verify all components follow classification rules from data-model.md
+**Independent Test**: Review component hierarchy and verify no atoms depend on molecules, no molecules depend on organisms, run build to confirm no circular dependencies
 
 ### Implementation for User Story 4
 
-- [ ] T208 [US4] Create documentation comment in src/TradingBot.Web/Components/Atoms/README.md explaining atom definition and dependency rules
-- [ ] T209 [US4] Create documentation comment in src/TradingBot.Web/Components/Molecules/README.md explaining molecule definition and dependency rules
-- [ ] T210 [US4] Create documentation comment in src/TradingBot.Web/Components/Organisms/README.md explaining organism definition and dependency rules
-- [ ] T211 [US4] Create documentation comment in src/TradingBot.Web/Components/Features/README.md explaining feature component organization
-- [ ] T212 [US4] Verify TbButton.razor has no dependencies on other Tb components (only HTML elements)
-- [ ] T213 [US4] Verify TbInput.razor has no dependencies on other Tb components
-- [ ] T214 [US4] Verify TbIcon.razor has no dependencies on other Tb components
-- [ ] T215 [US4] Verify TbBadge.razor has no dependencies on other Tb components
-- [ ] T216 [US4] Verify TbLabel.razor has no dependencies on other Tb components
-- [ ] T217 [US4] Verify TbSelect.razor has no dependencies on other Tb components
-- [ ] T218 [US4] Verify TbSpinner.razor has no dependencies on other Tb components
-- [ ] T219 [US4] Verify TbToggle.razor has no dependencies on other Tb components
-- [ ] T220 [US4] Verify TbCard.razor only depends on atoms (TbButton, TbIcon), not molecules or organisms
-- [ ] T221 [US4] Verify TbModal.razor only depends on atoms
-- [ ] T222 [US4] Verify TbTable.razor only depends on atoms
-- [ ] T223 [US4] Verify TbFormField.razor only depends on atoms
-- [ ] T224 [US4] Verify TbMenuItem.razor only depends on atoms
-- [ ] T225 [US4] Verify TbToast.razor only depends on atoms
-- [ ] T226 [US4] Verify TbPageHeader.razor only depends on atoms
-- [ ] T227 [US4] Verify TbInfoTooltip.razor only depends on atoms
-- [ ] T228 [US4] Verify TbTablePagination.razor only depends on atoms
-- [ ] T229 [US4] Verify TbNavigationSidebar.razor depends only on atoms and molecules (TbMenuItem)
-- [ ] T230 [US4] Verify TbToastContainer.razor depends only on molecules (TbToast)
-- [ ] T231 [US4] Verify TbErrorBoundary.razor depends only on atoms and molecules
-- [ ] T232 [US4] Verify TbNotificationCenter.razor depends only on atoms and molecules
-- [ ] T233 [US4] Verify TbSettingsForm.razor depends only on atoms and molecules
-- [ ] T234 [US4] Verify all Dashboard feature components appropriately depend on atoms/molecules/organisms
-- [ ] T235 [US4] Verify all Portfolio feature components appropriately depend on atoms/molecules/organisms
-- [ ] T236 [US4] Verify all Strategy feature components appropriately depend on atoms/molecules/organisms
-- [ ] T237 [US4] Verify all Risk feature components appropriately depend on atoms/molecules/organisms
-- [ ] T238 [US4] Verify all Performance feature components appropriately depend on atoms/molecules/organisms
-- [ ] T239 [US4] Verify all Backtest feature components appropriately depend on atoms/molecules/organisms
-- [ ] T240 [US4] Verify all Charts feature components appropriately depend on atoms/molecules/organisms
+- [ ] T075 [US4] Verify Atom dependency rule: Grep all Atom components for references to Molecule/Organism components (should be zero matches)
+- [ ] T076 [US4] Verify Molecule dependency rule: Grep all Molecule components for references to Organism components (should be zero matches)
+- [ ] T077 [US4] Verify Organism dependencies: Confirm Organisms only reference Atoms and Molecules (no circular dependencies)
+- [ ] T078 [US4] Verify Feature dependencies: Confirm Feature components appropriately reference all levels as needed
+- [ ] T079 [US4] Run final build verification: Execute dotnet build to confirm zero circular dependency errors
+- [ ] T080 [US4] Create component hierarchy README: Document classification rules (Atoms/Molecules/Organisms/Features) in src/TradingBot.Web/Components/README.md
 
-### Verification for User Story 4
-
-- [ ] T241 [US4] Verify no circular dependencies exist between components
-- [ ] T242 [US4] Verify component hierarchy documented in README files
-- [ ] T243 [US4] Verify dotnet build succeeds
-- [ ] T244 [US4] Verify all existing tests pass unchanged (dotnet test)
-- [ ] T245 [US4] Commit checkpoint for User Story 4 completion
-
-**Checkpoint**: User Story 4 complete - Atomic Design hierarchy verified and documented with clear dependency rules
+**Checkpoint**: User Story 4 complete - Component hierarchy verified with zero dependency violations, classification guidelines documented
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final cleanup and verification across all user stories
+**Purpose**: Final verification and cleanup
 
-- [ ] T246 [P] Delete empty src/TradingBot.Web/Components/Shared/ folder
-- [ ] T247 [P] Delete empty src/TradingBot.Web/Components/Pages/ folder
-- [ ] T248 [P] Delete empty src/TradingBot.Web/Components/Dashboard/ folder
-- [ ] T249 [P] Delete empty src/TradingBot.Web/Components/Portfolio/ folder
-- [ ] T250 [P] Delete empty src/TradingBot.Web/Components/Strategy/ folder
-- [ ] T251 [P] Delete empty src/TradingBot.Web/Components/Risk/ folder
-- [ ] T252 [P] Delete empty src/TradingBot.Web/Components/Performance/ folder
-- [ ] T253 [P] Delete empty src/TradingBot.Web/Components/Backtest/ folder
-- [ ] T254 [P] Delete empty src/TradingBot.Web/Components/Charts/ folder
-- [ ] T255 Verify dotnet build /p:RunAnalyzers=true shows zero warnings (StyleCop compliance)
-- [ ] T256 Verify dotnet build succeeds with zero errors
-- [ ] T257 Verify dotnet test passes all tests without modification
-- [ ] T258 Manual browser test: Home page renders correctly
-- [ ] T259 Manual browser test: Dashboard page renders correctly
-- [ ] T260 Manual browser test: Portfolio page renders correctly
-- [ ] T261 Manual browser test: Strategies page renders correctly
-- [ ] T262 Manual browser test: Backtest page renders correctly
-- [ ] T263 Manual browser test: Settings page renders correctly
-- [ ] T264 Manual browser test: Help page renders correctly
-- [ ] T265 Verify all copyright headers have correct file names
-- [ ] T266 Verify all namespaces follow hierarchical structure per namespace-mapping.md
-- [ ] T267 Run quickstart.md validation scenarios
-- [ ] T268 Create final git commit for complete refactoring
+- [ ] T081 [P] Run StyleCop verification: Execute dotnet build /p:RunAnalyzers=true and confirm zero warnings
+- [ ] T082 [P] Verify all copyright headers updated with correct file names across all components
+- [ ] T083 [P] Run full test suite: Execute dotnet test and verify 100% pass rate (existing tests unchanged)
+- [ ] T084 Manual browser testing: Test all 7 pages (Home, Dashboard, Portfolio, Strategies, Backtest, Settings, Help) for rendering correctness
+- [ ] T085 Verify SignalR real-time updates continue working in Dashboard and Portfolio pages
+- [ ] T086 Final verification checklist: Confirm all 44 components use Tb prefix, 7 duplicates removed, Features/ organized, single _Imports.razor, zero StyleCop warnings
 
 ---
 
@@ -396,85 +184,152 @@ description: "Component Refactoring and Organization Task List"
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
-- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories (atoms must be migrated before molecules/organisms/features can use them)
-- **User Story 1 (Phase 3)**: Depends on Foundational phase - Can proceed independently
-- **User Story 2 (Phase 4)**: Depends on Foundational phase - Can proceed independently (or after US1 for safety)
-- **User Story 3 (Phase 5)**: Depends on US1 and US2 completion (needs all components migrated before consolidation)
-- **User Story 4 (Phase 6)**: Depends on US1, US2, US3 completion (verification of final structure)
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories (Atoms must be migrated first as they have no dependencies)
+- **User Story 1 (Phase 3)**: Depends on Foundational phase completion (Atoms must exist before Molecules/Organisms can be migrated)
+- **User Story 2 (Phase 4)**: Depends on User Story 1 completion (Feature components reference Atoms/Molecules/Organisms)
+- **User Story 3 (Phase 5)**: Depends on User Story 2 completion (import consolidation needs all components in final locations)
+- **User Story 4 (Phase 6)**: Depends on User Story 3 completion (hierarchy verification requires all components migrated)
 - **Polish (Phase 7)**: Depends on all user stories being complete
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Depends on Foundational (atoms migrated) - MVP candidate
-- **User Story 2 (P2)**: Depends on Foundational - Adds molecule/organism/feature organization
-- **User Story 3 (P2)**: Depends on US1 and US2 - Consolidates duplicates and imports
-- **User Story 4 (P3)**: Depends on US1, US2, US3 - Verifies and documents final hierarchy
+**IMPORTANT**: This refactoring has SEQUENTIAL dependencies due to component hierarchy:
+
+- **User Story 1 (P1)**: MUST complete before US2 (establishes Atoms/Molecules/Organisms that Features depend on)
+- **User Story 2 (P2)**: MUST complete before US3 (Features must be in final location before import consolidation)
+- **User Story 3 (P2)**: MUST complete before US4 (imports consolidated before hierarchy verification)
+- **User Story 4 (P3)**: Can only run after US1-US3 complete (verifies final hierarchy)
+
+### Within Each User Story
+
+**User Story 1** (Component Consistency):
+1. Migrate all Molecules (can run in parallel marked [P])
+2. Update molecule namespaces and internal references (sequential)
+3. Update page references to use Tb-prefixed molecules (sequential)
+4. Migrate all Organisms (can run in parallel marked [P])
+5. Consolidate NavigationSidebar (sequential - requires careful merge)
+6. Delete duplicates and verify (sequential)
+
+**User Story 2** (Developer Navigation):
+1. Create all feature folders (can run in parallel marked [P])
+2. Migrate all feature components to folders (can run in parallel marked [P] by feature)
+3. Update namespaces per feature (sequential per feature)
+4. Update page references (sequential)
+5. Delete old folders (sequential)
+
+**User Story 3** (Import Consolidation):
+1. Create consolidated _Imports.razor (sequential)
+2. Delete duplicate imports (sequential)
+3. Clean unused imports (sequential)
+
+**User Story 4** (Atomic Design Hierarchy):
+1. Verify dependency rules (can run in parallel marked [P] for different levels)
+2. Document hierarchy (sequential)
 
 ### Parallel Opportunities
 
-- Within Foundational phase: Many atom migrations marked [P] can run in parallel (different component subfolders)
-- Within User Story 1: All page updates marked [P] can run in parallel (different page files)
-- Within User Story 2: Many molecule/organism/feature migrations marked [P] can run in parallel (different component files)
-- Within User Story 3: Page consolidation tasks marked [P] can run in parallel
-- Polish phase: Folder deletions marked [P] can run in parallel
+**Within Foundational Phase**:
+- T004-T011: All Atom migrations can run in parallel (different files, marked [P])
+
+**Within User Story 1**:
+- T014-T022: All Molecule migrations can run in parallel (different files, marked [P])
+- T026-T030: Most Organism migrations can run in parallel (different files, marked [P]), except T031 (NavigationSidebar consolidation)
+
+**Within User Story 2**:
+- T037-T043: All feature folder creations can run in parallel (marked [P])
+- T044-T050: All feature component migrations can run in parallel by feature domain (marked [P])
+
+**Within User Story 4**:
+- T075-T078: All dependency verifications can run in parallel (marked [P])
+
+**Within Polish Phase**:
+- T081-T083: StyleCop, copyright, and test verifications can run in parallel (marked [P])
 
 ---
 
-## Parallel Example: Foundational Phase
+## Parallel Example: Foundational Phase (Atoms)
 
 ```bash
-# Launch multiple atom migrations together (different subfolders):
-Task: "Create subfolder src/TradingBot.Web/Components/Atoms/TbIcon/"
-Task: "Create subfolder src/TradingBot.Web/Components/Atoms/TbBadge/"
-Task: "Create subfolder src/TradingBot.Web/Components/Atoms/TbLabel/"
-
-# Rename multiple atoms in parallel:
-Task: "Rename Input.razor to TbInput.razor"
-Task: "Rename Select.razor to TbSelect.razor"
-Task: "Rename Toggle.razor to TbToggle.razor"
+# Launch all Atom migrations together:
+Task: "Migrate TbButton: Create subfolder, rename, move ButtonVariant.cs..."
+Task: "Migrate TbInput: Rename Input.razor to TbInput.razor..."
+Task: "Migrate TbIcon: Create subfolder, rename, move IconName.cs and IconVariant.cs..."
+Task: "Migrate TbBadge: Create subfolder, rename, split BadgeEnums.cs..."
+Task: "Migrate TbLabel: Create subfolder, rename, move LabelSize.cs..."
+Task: "Migrate TbSelect: Rename Select.razor to TbSelect.razor..."
+Task: "Migrate TbSpinner: Create subfolder, rename, extract SpinnerSize..."
+Task: "Migrate TbToggle: Rename Toggle.razor to TbToggle.razor..."
 ```
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (User Stories 1 + 2)
+### MVP First (User Story 1 Only)
 
-1. Complete Phase 1: Setup
-2. Complete Phase 2: Foundational (atoms migrated)
-3. Complete Phase 3: User Story 1 (consistent atom usage across pages)
-4. Complete Phase 4: User Story 2 (full Atomic Design organization)
-5. **STOP and VALIDATE**: Test all pages, verify organization
-6. Deploy/demo refactored structure
+1. Complete Phase 1: Setup (T001-T003)
+2. Complete Phase 2: Foundational (T004-T013) - CRITICAL: Atoms must be migrated first
+3. Complete Phase 3: User Story 1 (T014-T036) - Molecules, Organisms, duplicate elimination
+4. **STOP and VALIDATE**: Verify all components use Tb prefix, test independently
+5. Can deploy/demo if this level of consistency is sufficient
 
 ### Incremental Delivery
 
-1. Setup + Foundational → Atoms ready
-2. Add User Story 1 → Test independently → All pages use consistent Tb atoms
-3. Add User Story 2 → Test independently → Full Atomic Design hierarchy in place
-4. Add User Story 3 → Test independently → Duplicates eliminated, imports consolidated
-5. Add User Story 4 → Test independently → Hierarchy verified and documented
-6. Polish → Final cleanup and verification
+1. Complete Setup + Foundational → Atoms ready (T001-T013)
+2. Add User Story 1 → Consistency established (T014-T036) → Deploy/Demo (MVP!)
+3. Add User Story 2 → Navigation improved (T037-T068) → Deploy/Demo
+4. Add User Story 3 → Imports consolidated (T069-T074) → Deploy/Demo
+5. Add User Story 4 → Hierarchy documented (T075-T080) → Deploy/Demo
+6. Each story adds value without breaking previous stories
 
-### Sequential Strategy (Recommended for Safety)
+### Full Sequential Strategy
 
-1. Complete Setup + Foundational
-2. Complete User Story 1 → Verify
-3. Complete User Story 2 → Verify
-4. Complete User Story 3 → Verify
-5. Complete User Story 4 → Verify
-6. Polish → Verify
+**Due to component hierarchy dependencies, this refactoring MUST be executed sequentially:**
+
+1. Team completes Setup + Foundational together (T001-T013)
+2. Team completes User Story 1 together (T014-T036) - Atoms/Molecules/Organisms must exist before Features
+3. Team completes User Story 2 together (T037-T068) - Features must be in place before import consolidation
+4. Team completes User Story 3 together (T069-T074) - Imports must be consolidated before hierarchy verification
+5. Team completes User Story 4 together (T075-T080) - Final verification
+6. Complete Polish phase (T081-T086)
+
+**Parallel opportunities exist WITHIN each phase** (tasks marked [P]), but phases themselves are sequential.
 
 ---
 
 ## Notes
 
-- [P] tasks = different files/folders, no dependencies, can run in parallel
+- [P] tasks = different files within same phase, can run in parallel
 - [Story] label maps task to specific user story for traceability
-- This is a PURE REFACTORING effort - zero functionality changes allowed
-- All existing tests must pass without modification at every checkpoint
-- Commit at each checkpoint for rollback capability
-- Manual browser testing required at each checkpoint to verify rendering
-- StyleCop compliance required throughout (copyright headers, namespaces)
-- Supporting types co-located with components (enums in component subfolders)
-- Single _Imports.razor at Components root eliminates duplication
+- **CRITICAL**: Unlike typical features, this refactoring has SEQUENTIAL user story dependencies due to component hierarchy (Atoms → Molecules → Organisms → Features)
+- Existing tests MUST pass unchanged at every checkpoint (no test modifications allowed)
+- Commit after each checkpoint for rollback capability
+- Stop at any checkpoint to validate independently before proceeding
+- StyleCop compliance required throughout - copyright headers must match file names
+- Avoid: skipping checkpoints, modifying test logic, introducing functionality changes
+
+---
+
+## Total Task Summary
+
+- **Total Tasks**: 86 tasks
+- **Setup**: 3 tasks
+- **Foundational**: 10 tasks (8 Atoms + 2 verification)
+- **User Story 1** (Component Consistency): 23 tasks (9 Molecules + 6 Organisms + duplicate cleanup)
+- **User Story 2** (Developer Navigation): 32 tasks (7 feature folders + 21 component migrations + 4 page updates)
+- **User Story 3** (Import Consolidation): 6 tasks
+- **User Story 4** (Atomic Design Hierarchy): 6 tasks
+- **Polish**: 6 tasks
+
+**Parallel Opportunities**: 46 tasks marked [P] (within phases, not across phases)
+**MVP Scope**: Phases 1-3 (T001-T036) = 36 tasks for basic component consistency
+
+**Estimated Timeline** (based on component-migration-map.md):
+- Setup: 15 minutes
+- Foundational (Atoms): 1.5 hours
+- User Story 1 (Molecules + Organisms): 2.5 hours
+- User Story 2 (Features + Pages): 2.5 hours
+- User Story 3 (Imports): 15 minutes
+- User Story 4 (Hierarchy): 30 minutes
+- Polish: 1 hour
+- **Total**: 8-9 hours (including testing and verification)
