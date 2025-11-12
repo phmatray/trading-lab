@@ -2,8 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
-using TradingBot.Analytics;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Backtest;
 using TradingBot.Core.Models.Trading;

@@ -3,8 +3,6 @@ Copyright (c) TradingBot. All rights reserved.
 </copyright> *@
 
 @page "/portfolio"
-@using TradingBot.Web.Services
-@using TradingBot.Web.Models
 @inject IPortfolioService PortfolioService
 @inject IJSRuntime JS
 
@@ -24,8 +22,8 @@ Copyright (c) TradingBot. All rights reserved.
         <button
             @onclick="ExportTradeHistory"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled="@isExporting">
-            @if (isExporting)
+            disabled="@_isExporting">
+            @if (_isExporting)
             {
                 <span>Exporting...</span>
             }
@@ -36,18 +34,18 @@ Copyright (c) TradingBot. All rights reserved.
         </button>
     </HeaderActions>
     <ChildContent>
-        @if (isLoadingTrades)
+        @if (_isLoadingTrades)
         {
             <div class="flex items-center justify-center py-12">
                 <div class="text-gray-500 dark:text-gray-400">Loading trade history...</div>
             </div>
         }
-        else if (tradeHistory != null && tradeHistory.Any())
+        else if (_tradeHistory != null && _tradeHistory.Any())
         {
             <TbTradeHistoryTable
-                Trades="@tradeHistory"
-                CurrentPage="@currentPage"
-                TotalPages="@totalPages"
+                Trades="@_tradeHistory"
+                CurrentPage="@_currentPage"
+                TotalPages="@_totalPages"
                 OnPageChanged="HandlePageChanged"/>
         }
         else
@@ -68,16 +66,16 @@ Copyright (c) TradingBot. All rights reserved.
 @* Open Positions Section *@
 <TbCard Title="Open Positions">
 
-    @if (isLoadingPositions)
+    @if (_isLoadingPositions)
     {
         <div class="flex items-center justify-center py-8">
             <div class="text-gray-500 dark:text-gray-400">Loading positions...</div>
         </div>
     }
-    else if (openPositions != null && openPositions.Any())
+    else if (_openPositions != null && _openPositions.Any())
     {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach (var position in openPositions)
+            @foreach (var position in _openPositions)
             {
                 <TbPositionCard
                     Position="@position"
@@ -100,39 +98,39 @@ Copyright (c) TradingBot. All rights reserved.
 </TbCard>
 
 @* Success/Error Notifications *@
-@if (!string.IsNullOrEmpty(notificationMessage))
+@if (!string.IsNullOrEmpty(_notificationMessage))
 {
     <div
-        class="fixed bottom-4 right-4 @(notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
-        @notificationMessage
+        class="fixed bottom-4 right-4 @(_notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
+        @_notificationMessage
     </div>
 }
 
 @* Close Position Modal *@
-@if (showCloseModal && selectedPosition != null)
+@if (_showCloseModal && _selectedPosition != null)
 {
     <TbClosePositionModal
-        Position="@selectedPosition"
+        Position="@_selectedPosition"
         OnConfirm="HandleClosePosition"
         OnCancel="HideTbClosePositionModal"/>
 }
 
 @code {
-    private List<Trade> tradeHistory = new();
-    private List<Position> openPositions = new();
-    private PortfolioHistoryFilter currentFilter = new();
-    private Position? selectedPosition;
+    private List<Trade> _tradeHistory = new();
+    private List<Position> _openPositions = new();
+    private PortfolioHistoryFilter _currentFilter = new();
+    private Position? _selectedPosition;
 
-    private bool isLoadingTrades = true;
-    private bool isLoadingPositions = true;
-    private bool isExporting = false;
-    private bool showCloseModal = false;
+    private bool _isLoadingTrades = true;
+    private bool _isLoadingPositions = true;
+    private bool _isExporting;
+    private bool _showCloseModal;
 
-    private string? notificationMessage;
-    private bool notificationIsError;
+    private string? _notificationMessage;
+    private bool _notificationIsError;
 
-    private int currentPage = 1;
-    private int totalPages = 1;
+    private int _currentPage = 1;
+    private int _totalPages = 1;
     private const int PageSize = 20;
 
     protected override async Task OnInitializedAsync()
@@ -152,17 +150,17 @@ Copyright (c) TradingBot. All rights reserved.
     {
         try
         {
-            isLoadingTrades = true;
+            _isLoadingTrades = true;
             var result = await PortfolioService.GetTradeHistoryAsync(
-                currentFilter.StartDate,
-                currentFilter.EndDate,
-                currentFilter.Symbol,
-                currentFilter.StrategyName,
+                _currentFilter.StartDate,
+                _currentFilter.EndDate,
+                _currentFilter.Symbol,
+                _currentFilter.StrategyName,
                 CancellationToken.None);
 
-            tradeHistory = result.ToList();
-            totalPages = (int)Math.Ceiling((double)tradeHistory.Count / PageSize);
-            currentPage = Math.Min(currentPage, Math.Max(1, totalPages));
+            _tradeHistory = result.ToList();
+            _totalPages = (int)Math.Ceiling((double)_tradeHistory.Count / PageSize);
+            _currentPage = Math.Min(_currentPage, Math.Max(1, _totalPages));
         }
         catch (Exception ex)
         {
@@ -170,7 +168,7 @@ Copyright (c) TradingBot. All rights reserved.
         }
         finally
         {
-            isLoadingTrades = false;
+            _isLoadingTrades = false;
         }
     }
 
@@ -178,8 +176,8 @@ Copyright (c) TradingBot. All rights reserved.
     {
         try
         {
-            isLoadingPositions = true;
-            openPositions = (await PortfolioService.GetOpenPositionsAsync(CancellationToken.None)).ToList();
+            _isLoadingPositions = true;
+            _openPositions = (await PortfolioService.GetOpenPositionsAsync(CancellationToken.None)).ToList();
         }
         catch (Exception ex)
         {
@@ -187,43 +185,43 @@ Copyright (c) TradingBot. All rights reserved.
         }
         finally
         {
-            isLoadingPositions = false;
+            _isLoadingPositions = false;
         }
     }
 
     private async Task HandleFilterChanged(PortfolioHistoryFilter filter)
     {
-        currentFilter = filter;
-        currentPage = 1;
+        _currentFilter = filter;
+        _currentPage = 1;
         await LoadTradeHistoryAsync();
     }
 
     private void HandlePageChanged(int newPage)
     {
-        currentPage = newPage;
+        _currentPage = newPage;
         StateHasChanged();
     }
 
     private void ShowTbClosePositionModal(Position position)
     {
-        selectedPosition = position;
-        showCloseModal = true;
+        _selectedPosition = position;
+        _showCloseModal = true;
     }
 
     private void HideTbClosePositionModal()
     {
-        showCloseModal = false;
-        selectedPosition = null;
+        _showCloseModal = false;
+        _selectedPosition = null;
     }
 
     private async Task HandleClosePosition()
     {
-        if (selectedPosition == null) return;
+        if (_selectedPosition == null) return;
 
         try
         {
-            await PortfolioService.ClosePositionAsync(selectedPosition.Id, CancellationToken.None);
-            ShowNotification($"Position {selectedPosition.Symbol} closed successfully", isError: false);
+            await PortfolioService.ClosePositionAsync(_selectedPosition.Id, CancellationToken.None);
+            ShowNotification($"Position {_selectedPosition.Symbol} closed successfully", isError: false);
 
             // Reload positions after closing
             await LoadOpenPositionsAsync();
@@ -240,12 +238,12 @@ Copyright (c) TradingBot. All rights reserved.
     {
         try
         {
-            isExporting = true;
+            _isExporting = true;
             var csvData = await PortfolioService.ExportTradeHistoryAsync(
-                currentFilter.StartDate,
-                currentFilter.EndDate,
-                currentFilter.Symbol,
-                currentFilter.StrategyName,
+                _currentFilter.StartDate,
+                _currentFilter.EndDate,
+                _currentFilter.Symbol,
+                _currentFilter.StrategyName,
                 CancellationToken.None);
 
             await JS.InvokeVoidAsync("downloadFile", "trade-history.csv", "text/csv", csvData);
@@ -257,20 +255,20 @@ Copyright (c) TradingBot. All rights reserved.
         }
         finally
         {
-            isExporting = false;
+            _isExporting = false;
         }
     }
 
     private void ShowNotification(string message, bool isError)
     {
-        notificationMessage = message;
-        notificationIsError = isError;
+        _notificationMessage = message;
+        _notificationIsError = isError;
         StateHasChanged();
 
         // Auto-hide notification after 5 seconds
         _ = Task.Delay(5000).ContinueWith(_ =>
         {
-            notificationMessage = null;
+            _notificationMessage = null;
             InvokeAsync(StateHasChanged);
         });
     }

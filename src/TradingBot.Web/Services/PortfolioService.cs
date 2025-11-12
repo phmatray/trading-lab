@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Text;
-using Microsoft.Extensions.Logging;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Trading;
 

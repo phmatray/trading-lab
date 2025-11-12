@@ -3,12 +3,10 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
 using TradingBot.Core.Entities;
 using TradingBot.Core.ValueObjects;
 using TradingBot.Infrastructure.Persistence;
 using TradingBot.Infrastructure.Persistence.Repositories;
-using Xunit;
 
 namespace TradingBot.Infrastructure.Tests.Persistence.Repositories;
 

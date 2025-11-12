@@ -3,22 +3,23 @@
 // </copyright>
 
 using Bunit;
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
 
 /// <summary>
 /// Tests for the Spinner component.
 /// </summary>
-public class SpinnerTests : Bunit.TestContext
+public class SpinnerTests
 {
     [Fact]
     public void Spinner_Renders_WithDefaultSize()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>();
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>();
 
         // Assert
         var svg = cut.Find("svg");
@@ -29,8 +30,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithSmallSize()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Size, SpinnerSize.Small));
 
         // Assert
@@ -42,8 +46,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithLargeSize()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Size, SpinnerSize.Large));
 
         // Assert
@@ -55,8 +62,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithExtraLargeSize()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Size, SpinnerSize.ExtraLarge));
 
         // Assert
@@ -68,8 +78,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithPrimaryColor()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Color, SpinnerColor.Primary));
 
         // Assert
@@ -81,8 +94,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithSuccessColor()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Color, SpinnerColor.Success));
 
         // Assert
@@ -94,8 +110,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithWarningColor()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Color, SpinnerColor.Warning));
 
         // Assert
@@ -107,8 +126,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithDangerColor()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Color, SpinnerColor.Danger));
 
         // Assert
@@ -120,8 +142,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithWhiteColor()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Color, SpinnerColor.White));
 
         // Assert
@@ -133,8 +158,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_AppliesAnimateSpinClass()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>();
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>();
 
         // Assert
         var svg = cut.Find("svg");
@@ -146,10 +174,11 @@ public class SpinnerTests : Bunit.TestContext
     public void Spinner_Renders_WithLabel()
     {
         // Arrange
+        using var ctx = new BunitContext();
         const string label = "Loading data...";
 
         // Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Label, label));
 
         // Assert
@@ -161,8 +190,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_Renders_WithoutLabel_WhenNotProvided()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>();
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>();
 
         // Assert
         var spans = cut.FindAll("span");
@@ -173,10 +205,11 @@ public class SpinnerTests : Bunit.TestContext
     public void Spinner_Renders_WithCustomClass()
     {
         // Arrange
+        using var ctx = new BunitContext();
         const string customClass = "my-custom-class";
 
         // Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Class, customClass));
 
         // Assert
@@ -188,8 +221,11 @@ public class SpinnerTests : Bunit.TestContext
     [Fact]
     public void Spinner_HasCorrectAriaAttributes()
     {
-        // Arrange & Act
-        var cut = RenderComponent<TbSpinner>();
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbSpinner>();
 
         // Assert
         var container = cut.Find("div");
@@ -201,10 +237,11 @@ public class SpinnerTests : Bunit.TestContext
     public void Spinner_Label_HasCorrectColorClass()
     {
         // Arrange
+        using var ctx = new BunitContext();
         const string label = "Loading...";
 
         // Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Label, label)
             .Add(p => p.Color, SpinnerColor.Success));
 
@@ -218,11 +255,12 @@ public class SpinnerTests : Bunit.TestContext
     public void Spinner_CombinesMultipleProperties()
     {
         // Arrange
+        using var ctx = new BunitContext();
         const string label = "Processing...";
         const string customClass = "extra-margin";
 
         // Act
-        var cut = RenderComponent<TbSpinner>(parameters => parameters
+        var cut = ctx.Render<TbSpinner>(parameters => parameters
             .Add(p => p.Size, SpinnerSize.Large)
             .Add(p => p.Color, SpinnerColor.Warning)
             .Add(p => p.Label, label)

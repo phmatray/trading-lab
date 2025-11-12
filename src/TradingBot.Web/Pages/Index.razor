@@ -3,12 +3,6 @@ Copyright (c) TradingBot. All rights reserved.
 </copyright> *@
 
 @page "/"
-@using Microsoft.AspNetCore.SignalR.Client
-@using TradingBot.Core.Models
-@using TradingBot.Core.Interfaces
-@using TradingBot.Analytics
-@using TradingBot.Web.Components.Features.Dashboard
-@using TradingBot.Web.Services
 @inject IDashboardService DashboardService
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
@@ -163,7 +157,6 @@ else if (_errorMessage is not null)
         if (_dashboardData is not null)
         {
             // Add new trade to recent trades and keep only the last 5
-            _dashboardData.RecentTrades ??= new List<Trade>();
             _dashboardData.RecentTrades.Insert(0, trade);
             _dashboardData.RecentTrades = _dashboardData.RecentTrades.Take(5).ToList();
             _lastUpdated = DateTime.Now;

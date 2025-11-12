@@ -3,11 +3,7 @@
 // </copyright>
 
 using Bunit;
-using Microsoft.AspNetCore.Components.Web;
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using Xunit;
-using static TradingBot.Web.Components.Atoms.TbButton;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
 
@@ -23,10 +19,10 @@ public class ButtonTests
     public void Button_RendersWithDefaults()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.ChildContent, "Click me"));
 
         // Assert
@@ -43,10 +39,10 @@ public class ButtonTests
     public void Button_RendersPrimaryVariant()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Variant, ButtonVariant.Primary)
             .Add(p => p.ChildContent, "Primary"));
 
@@ -63,10 +59,10 @@ public class ButtonTests
     public void Button_RendersSecondaryVariant()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Variant, ButtonVariant.Secondary)
             .Add(p => p.ChildContent, "Secondary"));
 
@@ -83,10 +79,10 @@ public class ButtonTests
     public void Button_RendersDangerVariant()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Variant, ButtonVariant.Danger)
             .Add(p => p.ChildContent, "Delete"));
 
@@ -103,10 +99,10 @@ public class ButtonTests
     public void Button_RendersGhostVariant()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Variant, ButtonVariant.Ghost)
             .Add(p => p.ChildContent, "Ghost"));
 
@@ -122,10 +118,10 @@ public class ButtonTests
     public void Button_RendersSmallSize()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Size, ButtonSize.Small)
             .Add(p => p.ChildContent, "Small"));
 
@@ -143,10 +139,10 @@ public class ButtonTests
     public void Button_RendersMediumSize()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Size, ButtonSize.Medium)
             .Add(p => p.ChildContent, "Medium"));
 
@@ -164,10 +160,10 @@ public class ButtonTests
     public void Button_RendersLargeSize()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Size, ButtonSize.Large)
             .Add(p => p.ChildContent, "Large"));
 
@@ -185,10 +181,10 @@ public class ButtonTests
     public void Button_IsDisabled_WhenIsDisabledIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.IsDisabled, true)
             .Add(p => p.ChildContent, "Disabled"));
 
@@ -204,10 +200,10 @@ public class ButtonTests
     public void Button_ShowsLoadingSpinner_WhenIsLoadingIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.IsLoading, true)
             .Add(p => p.ChildContent, "Loading"));
 
@@ -224,10 +220,10 @@ public class ButtonTests
     public void Button_TriggersOnClick_WhenClicked()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var clicked = false;
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
-            .Add(p => p.OnClick, (MouseEventArgs e) => clicked = true)
+        var cut = ctx.Render<TbButton>(parameters => parameters
+            .Add(p => p.OnClick, _ => clicked = true)
             .Add(p => p.ChildContent, "Click"));
 
         var button = cut.Find("button");
@@ -246,11 +242,11 @@ public class ButtonTests
     public void Button_DoesNotTriggerOnClick_WhenDisabled()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var clicked = false;
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.IsDisabled, true)
-            .Add(p => p.OnClick, (MouseEventArgs e) => clicked = true)
+            .Add(p => p.OnClick, _ => clicked = true)
             .Add(p => p.ChildContent, "Disabled"));
 
         var button = cut.Find("button");
@@ -269,11 +265,11 @@ public class ButtonTests
     public void Button_DoesNotTriggerOnClick_WhenLoading()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var clicked = false;
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.IsLoading, true)
-            .Add(p => p.OnClick, (MouseEventArgs e) => clicked = true)
+            .Add(p => p.OnClick, _ => clicked = true)
             .Add(p => p.ChildContent, "Loading"));
 
         var button = cut.Find("button");
@@ -292,10 +288,10 @@ public class ButtonTests
     public void Button_RendersSubmitType()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Type, "submit")
             .Add(p => p.ChildContent, "Submit"));
 
@@ -311,10 +307,10 @@ public class ButtonTests
     public void Button_AppliesCustomCssClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<TbButton>(parameters => parameters
+        var cut = ctx.Render<TbButton>(parameters => parameters
             .Add(p => p.Class, "custom-button")
             .Add(p => p.ChildContent, "Custom"));
 

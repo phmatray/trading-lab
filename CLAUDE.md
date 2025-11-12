@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TradingBot CLI is an algorithmic trading platform built with .NET 9, featuring automated strategy execution, risk management, and comprehensive order handling. The solution uses a clean layered architecture with SQLite/EF Core for data persistence and Spectre.Console for the CLI interface.
+TradingBot is an algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. The solution includes:
+- **CLI Application**: Command-line interface using Spectre.Console
+- **Web Dashboard**: Modern Blazor Server application with real-time updates via SignalR
+- **Clean Architecture**: Layered architecture with SQLite/EF Core for data persistence
+- **Atomic Design**: Component hierarchy (Atoms → Molecules → Organisms → Pages) with Tb-prefixed components
 
 ## Build and Development Commands
 
@@ -25,6 +29,10 @@ dotnet run --project src/TradingBot.Cli
 
 # Run with configuration
 dotnet run --project src/TradingBot.Cli -- strategy list
+
+# Run the Web Dashboard
+dotnet run --project src/TradingBot.Web
+# Navigate to https://localhost:5001 in your browser
 ```
 
 ### Testing
@@ -66,7 +74,8 @@ dotnet ef database drop --project src/TradingBot.Infrastructure --startup-projec
 The solution follows a strict layered architecture with clear dependency flow:
 
 ```
-TradingBot.Cli (Presentation)
+TradingBot.Cli (CLI Presentation)
+TradingBot.Web (Web Presentation - Blazor Server)
     ↓
 TradingBot.Engine (Business Logic - Trading Engine)
 TradingBot.Strategies (Business Logic - Strategy Implementations)
@@ -93,7 +102,7 @@ TradingBot.Core (Domain Models & Interfaces)
 - NO external dependencies except SmartEnum
 
 **TradingBot.Infrastructure**: Data access and external services
-- Entity Framework Core 9 with SQLite
+- Entity Framework Core 10 with SQLite
 - TradingBotDbContext (DbContext with fluent configuration)
 - Repository pattern implementations
 - Yahoo Finance integration for market data
@@ -124,6 +133,21 @@ TradingBot.Core (Domain Models & Interfaces)
 - Commands: strategy (list/enable/disable), config (show/set/set-apikey)
 - Dependency injection composition root
 - Serilog for structured logging
+
+**TradingBot.Web**: Blazor Server web dashboard
+- Real-time updates via SignalR (TradingHub)
+- Atomic Design component structure (Atoms → Molecules → Organisms → Features)
+- All components prefixed with "Tb" (e.g., TbButton, TbCard, TbNavigationSidebar)
+- Component organization:
+  - **Atoms**: Basic UI elements (TbButton, TbInput, TbLabel, TbBadge, TbIcon, TbSpinner, TbToggle)
+  - **Molecules**: Composite components (TbFormField, TbMenuItem, TbToast)
+  - **Organisms**: Complex components (TbNavigationSidebar, TbThemeProvider, TbToastContainer, TbSettingsForm)
+  - **Features**: Domain-specific components grouped by feature (Dashboard, Portfolio, Strategy, Risk, Performance, Backtest, Charts)
+  - **Pages**: Full page components (Index, Portfolio, Strategies, Performance, Backtest, RiskSettings, Settings, Help)
+- Services: Dashboard, Portfolio, Performance, Strategy Management, Backtest, Risk Settings, Toast notifications
+- Tailwind CSS for styling (no third-party component libraries)
+- WCAG 2.1 Level AA compliant with full keyboard navigation
+- Desktop-first design (minimum 1024px width)
 
 ### Signal Processing Pipeline
 
@@ -226,14 +250,22 @@ Format: `MethodName_Scenario_ExpectedBehavior`
 
 ## Dependency Injection
 
-The CLI uses Microsoft.Extensions.DependencyInjection. All services are registered in:
-- `ServiceCollectionExtensions.AddTradingBotServices()` (Infrastructure project)
+Both CLI and Web applications use Microsoft.Extensions.DependencyInjection. All services are registered in:
+- `ServiceCollectionExtensions.AddTradingBotServices()` (Infrastructure project - shared core services)
 - `Program.cs` (CLI project for CLI-specific services)
+- `Program.cs` (Web project for web-specific services)
 
 Register dependencies as:
-- Singleton: Stateless services, caches
-- Scoped: DbContext, per-request services
+- Singleton: Stateless services, caches, hosted services (RealtimeUpdateService)
+- Scoped: DbContext, per-request services, web services (Dashboard, Portfolio, Performance)
 - Transient: Stateful services created per use
+
+**Web-specific services**:
+- IDashboardService, IPortfolioService, IPerformanceService (Scoped)
+- IStrategyManagementService, IBacktestService (Scoped)
+- IRiskSettingsService, IToastService (Singleton)
+- UIStateService, NavigationService (Scoped)
+- RealtimeUpdateService (Hosted Service - publishes updates via SignalR)
 
 ## Database
 
@@ -244,6 +276,7 @@ Register dependencies as:
 - **Trades**: Closed trade history
 - **Candles**: Cached historical market data
 - **Accounts**: Account state and equity tracking
+- **UserPreferences**: User-specific settings (theme, refresh intervals, notifications)
 
 ### Migrations
 
@@ -276,7 +309,9 @@ Configuration is in `appsettings.json` in the CLI project:
 
 Environment variables can override settings with prefix `TRADINGBOT_`.
 
-## CLI Usage
+## Application Usage
+
+### CLI Usage
 
 The CLI uses Spectre.Console.Cli with the following command structure:
 
@@ -290,6 +325,50 @@ dotnet run --project src/TradingBot.Cli -- strategy disable momentum
 dotnet run --project src/TradingBot.Cli -- config show
 dotnet run --project src/TradingBot.Cli -- config set MaxPositionSize 15.0
 dotnet run --project src/TradingBot.Cli -- config set-apikey YahooFinance "key"
+```
+
+### Web Dashboard Usage
+
+The web dashboard provides a comprehensive UI for managing your trading bot:
+
+**Pages**:
+- **Dashboard** (`/`): Real-time account summary, active strategies, performance metrics, recent trades
+- **Portfolio** (`/portfolio`): Open positions, trade history with filters, position management
+- **Strategies** (`/strategies`): Strategy cards with enable/disable toggle, performance by strategy
+- **Performance** (`/performance`): Equity curves, trade statistics, comprehensive metrics (Sharpe ratio, max drawdown, win rate)
+- **Backtest** (`/backtest`): Run historical backtests, analyze results, view trade lists
+- **Risk Settings** (`/risk-settings`): Configure risk limits, position sizing, stop-loss/take-profit
+- **Settings** (`/settings`): User preferences (theme, refresh intervals, notifications)
+- **Help** (`/help`): Documentation and keyboard shortcuts
+
+**Real-time Updates**:
+The dashboard uses SignalR for live updates. The `RealtimeUpdateService` hosted service publishes:
+- Portfolio updates (positions, P&L)
+- Trade notifications
+- Strategy status changes
+- Account balance updates
+
+**Component Development**:
+When creating new web components, follow the Atomic Design pattern:
+1. Create atoms for basic UI elements (prefix with "Tb")
+2. Compose molecules from atoms
+3. Build organisms from molecules
+4. Use organisms in feature-specific components
+5. Assemble pages from feature components
+
+Example component structure:
+```
+TradingBot.Web/Components/
+├── Atoms/          # Basic UI elements (TbButton, TbInput, etc.)
+├── Molecules/      # Composite components (TbFormField, TbMenuItem)
+├── Organisms/      # Complex components (TbNavigationSidebar, TbThemeProvider)
+├── Features/       # Domain components grouped by feature
+│   ├── Dashboard/
+│   ├── Portfolio/
+│   ├── Strategy/
+│   └── ...
+├── Pages/          # Full page components
+└── Layout/         # Layout components (MainLayout)
 ```
 
 ## Custom Slash Commands
@@ -404,6 +483,45 @@ var output = console.Output;
 
 Commands must accept `IAnsiConsole` parameter for testability.
 
+### Blazor Component Testing
+
+Use bUnit 2.0.66 for testing Blazor components. **Important API Changes**:
+- Use `BunitContext` instead of `Bunit.TestContext`
+- Use `ctx.Render<T>()` instead of `ctx.RenderComponent<T>()`
+
+```csharp
+using Bunit;
+
+public class TbButtonTests
+{
+    [Fact]
+    public void TbButton_RendersCorrectly()
+    {
+        // Arrange
+        using var ctx = new BunitContext();
+
+        // Act
+        var cut = ctx.Render<TbButton>(parameters => parameters
+            .Add(p => p.Text, "Click me")
+            .Add(p => p.Variant, "primary"));
+
+        // Assert
+        cut.Find("button").TextContent.ShouldBe("Click me");
+        cut.Find("button").ClassList.ShouldContain("bg-blue-600");
+    }
+}
+```
+
+### SignalR Hub Testing
+
+Test SignalR hubs by mocking the hub context:
+```csharp
+var hubContext = A.Fake<IHubContext<TradingHub>>();
+var service = new RealtimeUpdateService(hubContext, portfolioManager);
+await service.StartAsync(CancellationToken.None);
+// Verify hub methods were called
+```
+
 ## Common Gotchas
 
 1. **EF Core Tracking**: Be careful with tracked entities. Use `.AsNoTracking()` for read-only queries.
@@ -413,6 +531,11 @@ Commands must accept `IAnsiConsole` parameter for testability.
 5. **Signal Processing**: Signals are fire-and-forget events. Don't await signal generation expecting order completion.
 6. **Test Isolation**: Each test must be independent. Use separate DbContext instances or in-memory databases.
 7. **Migration Conflicts**: Always pull latest before creating migrations to avoid conflicts.
+8. **Blazor Component Naming**: All custom components must be prefixed with "Tb" (e.g., TbButton, not Button).
+9. **Import Consolidation**: Each page/component should have a single `_Imports.razor` file at the appropriate level (avoid duplicate imports).
+10. **SignalR Connection Management**: Always dispose SignalR connections properly. Use `await connection.DisposeAsync()` in Blazor components.
+11. **Blazor Render Modes**: The web app uses Interactive Server render mode. Be aware of circuit reconnection handling.
+12. **Tailwind CSS**: Use utility classes directly in components. No custom CSS unless absolutely necessary. Follow atomic design principles.
 
 ## Project Constitution
 
@@ -426,10 +549,19 @@ Refer to `.specify/memory/constitution.md` for comprehensive project standards i
 This constitution takes precedence for architectural decisions and coding standards.
 
 ## Active Technologies
-- C# / .NET 9 + ASP.NET Core Blazor Server, Tailwind CSS, SignalR, bUnit (testing), existing TradingBot layers (Core, Infrastructure, Engine, Analytics, Strategies) (002-blazor-server-app)
-- SQLite via Entity Framework Core 9 (shared with CLI application) (002-blazor-server-app)
-- C# / .NET 9 + ASP.NET Core Blazor Server + Tailwind CSS (no component library), existing TradingBot.Web project from spec 002 (003-ux-ui-enhancement)
-- SQLite via Entity Framework Core 9 (extend schema for user preferences) (003-ux-ui-enhancement)
+- **Framework**: C# / .NET 10 (LangVersion 14)
+- **Web**: ASP.NET Core Blazor Server with Interactive Server render mode
+- **CLI**: Spectre.Console.Cli
+- **Real-time Communication**: SignalR with MessagePack protocol
+- **Styling**: Tailwind CSS (no third-party component libraries)
+- **Icons**: Heroicons
+- **Charts**: Blazor-ApexCharts
+- **Database**: SQLite via Entity Framework Core 10
+- **Testing**: xUnit 3.2, bUnit 2.0.66, FakeItEasy 8.3, Shouldly 4.3
+- **Logging**: Serilog with structured logging
+- **Code Analysis**: StyleCop, Roslynator, SonarAnalyzer, Microsoft.CodeAnalysis.NetAnalyzers
 
 ## Recent Changes
-- 002-blazor-server-app: Added C# / .NET 9 + ASP.NET Core Blazor Server, Tailwind CSS, SignalR, bUnit (testing), existing TradingBot layers (Core, Infrastructure, Engine, Analytics, Strategies)
+- **2025-01-12**: Upgraded to .NET 10 and updated all NuGet packages
+- **2025-01-08**: Component refactoring with Atomic Design pattern and Tb-prefix (spec 004)
+- **Previous**: Added Blazor Server web dashboard with real-time updates (spec 002-003)

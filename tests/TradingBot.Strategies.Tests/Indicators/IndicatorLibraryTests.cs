@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Strategies.Indicators;
 
@@ -285,7 +284,7 @@ public sealed class IndicatorLibraryTests
         var candles = CreateVolatileCandles();
 
         // Act
-        var (upper, middle, lower) = IndicatorLibrary.CalculateBollingerBands(candles, 10, 2.0);
+        var (upper, _, lower) = IndicatorLibrary.CalculateBollingerBands(candles, 10, 2.0);
 
         // Assert
         var bandwidth = upper - lower;
@@ -332,7 +331,7 @@ public sealed class IndicatorLibraryTests
     public void CalculateATR_WithHighVolatility_ShouldReturnHigherValue()
     {
         // Arrange
-        var lowVolatilityCandles = CreateTestCandles(20, 100m); // Steady increase
+        var lowVolatilityCandles = CreateTestCandles(20); // Steady increase
         var highVolatilityCandles = CreateVolatileCandles(); // Choppy price action
 
         // Act

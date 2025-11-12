@@ -4,9 +4,7 @@
 
 using Bunit;
 using Microsoft.AspNetCore.Components;
-using Shouldly;
 using TradingBot.Web.Components.Molecules;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Molecules;
 
@@ -22,10 +20,10 @@ public class FormFieldTests
     public void FormField_RendersWithDefaults()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>();
+        var cut = ctx.Render<TbFormField>();
 
         // Assert
         var container = cut.Find(".form-field");
@@ -39,10 +37,10 @@ public class FormFieldTests
     public void FormField_RendersWithLabel()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.Label, "Username")
             .Add(p => p.InputId, "username-input"));
 
@@ -59,10 +57,10 @@ public class FormFieldTests
     public void FormField_ShowsRequiredIndicator_WhenIsRequiredIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.Label, "Email")
             .Add(p => p.IsRequired, true));
 
@@ -79,10 +77,10 @@ public class FormFieldTests
     public void FormField_RendersWithHelpText()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.InputId, "test-input")
             .Add(p => p.HelpText, "Enter your username"));
 
@@ -100,10 +98,10 @@ public class FormFieldTests
     public void FormField_RendersWithErrorMessage()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.InputId, "test-input")
             .Add(p => p.ErrorMessage, "This field is required"));
 
@@ -121,10 +119,10 @@ public class FormFieldTests
     public void FormField_HidesHelpText_WhenErrorMessageIsPresent()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.InputId, "test-input")
             .Add(p => p.HelpText, "This is help text")
             .Add(p => p.ErrorMessage, "This is an error"));
@@ -144,7 +142,7 @@ public class FormFieldTests
     public void FormField_RendersWithInputContent()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         RenderFragment inputContent = builder =>
         {
             builder.OpenElement(0, "input");
@@ -154,7 +152,7 @@ public class FormFieldTests
         };
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(
+        var cut = ctx.Render<TbFormField>(
             parameters => parameters.Add(p => p.InputContent, inputContent));
 
         // Assert
@@ -169,10 +167,10 @@ public class FormFieldTests
     public void FormField_AppliesCustomCssClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.Class, "custom-field"));
 
         // Assert
@@ -187,11 +185,11 @@ public class FormFieldTests
     public void FormField_DoesNotRenderLabel_WhenLabelIsNull()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<FormField>(parameters => parameters
-            .Add(p => p.Label, (string?)null));
+        var cut = ctx.Render<TbFormField>(parameters => parameters
+            .Add(p => p.Label, null));
 
         // Assert
         var labels = cut.FindAll("label");
@@ -205,12 +203,12 @@ public class FormFieldTests
     public void FormField_GeneratesUniqueInputId_WhenNotProvided()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut1 = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut1 = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.HelpText, "Help 1"));
-        var cut2 = ctx.RenderComponent<FormField>(parameters => parameters
+        var cut2 = ctx.Render<TbFormField>(parameters => parameters
             .Add(p => p.HelpText, "Help 2"));
 
         // Assert

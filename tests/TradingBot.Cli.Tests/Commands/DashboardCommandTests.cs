@@ -2,9 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
-using Shouldly;
-using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Testing;
 using TradingBot.Cli.Commands;

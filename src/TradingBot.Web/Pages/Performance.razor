@@ -3,10 +3,6 @@
    </copyright> *@
 
 @page "/performance"
-@using TradingBot.Web.Services
-@using TradingBot.Web.Components.Features.Performance
-@using TradingBot.Web.Components.Features.Charts
-@using TradingBot.Core.Models.Portfolio
 @inject IPerformanceService PerformanceService
 @inject ILogger<Performance> Logger
 
@@ -89,12 +85,12 @@
 
 @code {
     private bool _isLoading = true;
-    private bool _hasNoData = false;
-    private string? _errorMessage = null;
+    private bool _hasNoData;
+    private string? _errorMessage;
     private int _selectedDateRange = 30; // Default to last 30 days
 
     private PerformanceMetrics _performanceMetrics = null!;
-    private List<Models.EquityCurveDataPoint> _equityCurveData = new();
+    private List<EquityCurveDataPoint> _equityCurveData = new();
 
     protected override async Task OnInitializedAsync()
     {

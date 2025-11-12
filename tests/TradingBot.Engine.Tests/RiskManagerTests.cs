@@ -2,10 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Shouldly;
-using TradingBot.Engine;
 
 namespace TradingBot.Engine.Tests;
 

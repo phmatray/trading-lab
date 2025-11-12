@@ -4,10 +4,7 @@
 
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TradingBot.Core.Interfaces;
-using TradingBot.Core.Models;
 using TradingBot.Web.Hubs;
 
 namespace TradingBot.Web.Services;

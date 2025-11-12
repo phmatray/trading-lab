@@ -10,7 +10,7 @@ namespace TradingBot.Web.Services;
 /// </summary>
 public class UIStateService
 {
-    private bool _sidebarCollapsed = false;
+    private bool _sidebarCollapsed;
 
     /// <summary>
     /// Occurs when UI state changes.

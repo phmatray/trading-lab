@@ -12,9 +12,9 @@
   <!-- ============================================ -->
   <ItemGroup Label="CLI and Console">
     <PackageVersion Include="Blazor-ApexCharts" Version="6.0.2" />
-    <PackageVersion Include="bUnit" Version="1.28.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />
+    <PackageVersion Include="bUnit" Version="2.0.66" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
@@ -23,30 +23,30 @@
     <PackageVersion Include="Spectre.Console.Testing" Version="0.53.0" />
   </ItemGroup>
   <ItemGroup Label="Data Access - Entity Framework Core">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup Label="Configuration">
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0" />
     <PackageVersion Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup Label="Dependency Injection and Hosting">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup Label="Logging - Serilog">
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup Label="Domain - SmartEnum">
     <PackageVersion Include="Ardalis.SmartEnum" Version="8.2.0" />
-    <PackageVersion Include="Ardalis.SmartEnum.EFCore" Version="8.0.0" />
+    <PackageVersion Include="Ardalis.SmartEnum.EFCore" Version="8.2.0" />
   </ItemGroup>
   <ItemGroup Label="Market Data Providers">
     <PackageVersion Include="YahooFinanceApi" Version="2.3.3" />
@@ -63,7 +63,7 @@
   <ItemGroup Label="Resilience and Rate Limiting">
     <PackageVersion Include="Polly" Version="8.6.4" />
     <PackageVersion Include="Polly.Extensions" Version="8.6.4" />
-    <PackageVersion Include="Polly.RateLimiting" Version="8.4.0" />
+    <PackageVersion Include="Polly.RateLimiting" Version="8.6.4" />
   </ItemGroup>
   <ItemGroup Label="Math and Statistics">
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="TickerQ" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup Label="Source Link for Debugging">
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="9.0.0">
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -81,7 +81,7 @@
   <!-- Testing Packages -->
   <!-- ============================================ -->
   <ItemGroup Label="Testing - Framework">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="xunit.v3" Version="3.2.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
@@ -89,13 +89,12 @@
     </PackageVersion>
   </ItemGroup>
   <ItemGroup Label="Testing - Assertions and Mocking">
-    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="FakeItEasy" Version="8.3.0" />
     <PackageVersion Include="FakeItEasy.Analyzer.CSharp" Version="6.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Moq" Version="4.20.72" />
   </ItemGroup>
   <ItemGroup Label="Testing - Code Coverage">
     <PackageVersion Include="coverlet.collector" Version="6.0.4">
@@ -111,7 +110,7 @@
   <!-- Code Analysis and Quality -->
   <!-- ============================================ -->
   <ItemGroup Label="Code Analyzers">
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>

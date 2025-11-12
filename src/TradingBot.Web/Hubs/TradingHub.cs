@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
 namespace TradingBot.Web.Hubs;
 

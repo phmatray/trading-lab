@@ -3,8 +3,6 @@
 // </copyright> *@
 
 @namespace TradingBot.Web.Components.Molecules
-@using TradingBot.Web.Components.Atoms
-@using TradingBot.Web.Services
 @implements IDisposable
 
 <div class="@GetToastClasses()" role="alert" aria-live="polite">
@@ -63,7 +61,7 @@
 
     private bool _isPaused;
     private double _progressPercentage = 100;
-    private System.Threading.Timer? _timer;
+    private Timer? _timer;
     private DateTime _startTime;
     private int _remainingMs;
 
@@ -78,7 +76,7 @@
 
     private void StartTimer()
     {
-        _timer = new System.Threading.Timer(_ =>
+        _timer = new Timer(_ =>
         {
             if (_isPaused)
                 return;

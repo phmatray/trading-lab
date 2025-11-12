@@ -2,10 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Shouldly;
-using TradingBot.Analytics;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Backtest;
 using TradingBot.Core.Models.MarketData;
@@ -62,7 +59,6 @@ public sealed class BacktestingEngineTests
     {
         // Arrange
         var config = CreateBacktestConfiguration();
-        var emptyData = new List<Candle>();
 
         A.CallTo(() => _cache.GetAsync(
             A<string>._,
@@ -70,7 +66,7 @@ public sealed class BacktestingEngineTests
             A<DateTime>._,
             A<string>._,
             A<CancellationToken>._))
-            .Returns(emptyData);
+            .Returns([]);
 
         A.CallTo(() => _marketDataService.GetHistoricalDataAsync(
             A<string>._,
@@ -78,7 +74,7 @@ public sealed class BacktestingEngineTests
             A<DateTime>._,
             A<string>._,
             A<CancellationToken>._))
-            .Returns(emptyData);
+            .Returns([]);
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(

@@ -88,7 +88,7 @@ app.UseSerilogRequestLogging(options =>
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
         var host = httpContext.Request.Host.Value ?? "unknown";
-        var scheme = httpContext.Request.Scheme ?? "unknown";
+        var scheme = httpContext.Request.Scheme;
         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
         diagnosticContext.Set("RequestHost", host);

@@ -1,6 +1,4 @@
 @page "/risk-settings"
-@using TradingBot.Web.Services
-@using TradingBot.Core.Models.Risk
 @implements IDisposable
 @inject IRiskSettingsService RiskSettingsService
 @inject ILogger<RiskSettingsPage> Logger
@@ -76,7 +74,7 @@ else if (!string.IsNullOrEmpty(errorMessage))
     private bool isSaving = false;
     private string? successMessage;
     private string? errorMessage;
-    private System.Threading.Timer? notificationTimer;
+    private Timer? notificationTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,14 +118,14 @@ else if (!string.IsNullOrEmpty(errorMessage))
 
             // Auto-hide success message after 3 seconds
             notificationTimer?.Dispose();
-            notificationTimer = new System.Threading.Timer(_ =>
+            notificationTimer = new Timer(_ =>
             {
                 InvokeAsync(() =>
                 {
                     successMessage = null;
                     StateHasChanged();
                 });
-            }, null, 3000, System.Threading.Timeout.Infinite);
+            }, null, 3000, Timeout.Infinite);
         }
         catch (ArgumentException ex)
         {
