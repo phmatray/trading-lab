@@ -5,10 +5,8 @@
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using TradingBot.Web.Components.Organisms;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Organisms;
 
@@ -21,12 +19,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_RendersCorrectly()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");
@@ -39,14 +37,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_ShowsLogoWhenExpanded()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = false;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var heading = cut.Find("h1");
@@ -57,14 +55,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_HidesLogoWhenCollapsed()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = true;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         cut.FindAll("h1").Count.ShouldBe(0);
@@ -74,11 +72,11 @@ public class NavigationSidebarTests
     public void NavigationSidebar_ToggleButton_CollapsesAndExpands()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
         var button = cut.Find("button");
 
         // Initial state should be expanded
@@ -101,14 +99,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_AppliesExpandedWidthClass()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = false;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");
@@ -119,14 +117,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_AppliesCollapsedWidthClass()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = true;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");
@@ -137,12 +135,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_AppliesTransitionClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");
@@ -155,12 +153,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_RendersAllMenuItems()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert - Should have 7 menu items (Dashboard, Portfolio, Performance, Strategies, Backtesting, Settings, Help)
         var navLinks = cut.FindAll("a");
@@ -171,12 +169,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_MenuItemsHaveCorrectHrefs()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var links = cut.FindAll("a");
@@ -193,14 +191,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_ToggleButtonHasCorrectAriaLabel_WhenExpanded()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = false;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var button = cut.Find("button");
@@ -211,14 +209,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_ToggleButtonHasCorrectAriaLabel_WhenCollapsed()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = true;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var button = cut.Find("button");
@@ -229,14 +227,14 @@ public class NavigationSidebarTests
     public void NavigationSidebar_ToggleIconChanges_BasedOnState()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
         uiStateService.SidebarCollapsed = false;
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act - Expanded
-        var cutExpanded = ctx.RenderComponent<NavigationSidebar>();
+        var cutExpanded = ctx.Render<TbNavigationSidebar>();
 
         // Assert - Should show ChevronLeft when expanded
         var svgExpanded = cutExpanded.Find("button svg");
@@ -244,14 +242,14 @@ public class NavigationSidebarTests
         pathExpanded!.GetAttribute("d")?.ShouldContain("M15.75 19.5L8.25 12");
 
         // Arrange - Collapsed
-        using var ctx2 = new Bunit.TestContext();
+        using var ctx2 = new BunitContext();
         var uiStateService2 = new UIStateService();
         uiStateService2.SidebarCollapsed = true;
-        ctx2.Services.AddSingleton<UIStateService>(uiStateService2);
+        ctx2.Services.AddSingleton(uiStateService2);
         ctx2.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cutCollapsed = ctx2.RenderComponent<NavigationSidebar>();
+        var cutCollapsed = ctx2.Render<TbNavigationSidebar>();
 
         // Assert - Should show ChevronRight when collapsed
         var svgCollapsed = cutCollapsed.Find("button svg");
@@ -263,11 +261,11 @@ public class NavigationSidebarTests
     public void NavigationSidebar_UpdatesOnStateChange()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var uiStateService = new UIStateService();
-        ctx.Services.AddSingleton<UIStateService>(uiStateService);
+        ctx.Services.AddSingleton(uiStateService);
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
         var aside = cut.Find("aside");
 
         // Initial state
@@ -285,12 +283,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_HasFixedPositioning()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");
@@ -303,12 +301,12 @@ public class NavigationSidebarTests
     public void NavigationSidebar_HasCorrectZIndex()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
-        ctx.Services.AddSingleton<UIStateService>(new UIStateService());
+        using var ctx = new BunitContext();
+        ctx.Services.AddSingleton(new UIStateService());
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<NavigationSidebar>();
+        var cut = ctx.Render<TbNavigationSidebar>();
 
         // Assert
         var aside = cut.Find("aside");

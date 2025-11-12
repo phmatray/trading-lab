@@ -5,10 +5,8 @@
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
 using TradingBot.Web.Components.Molecules;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Molecules;
 
@@ -21,11 +19,11 @@ public class MenuItemTests
     public void MenuItem_RendersWithLabel()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home));
@@ -39,11 +37,11 @@ public class MenuItemTests
     public void MenuItem_RendersIcon()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home));
@@ -57,11 +55,11 @@ public class MenuItemTests
     public void MenuItem_WhenCollapsed_HidesLabel()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
@@ -75,11 +73,11 @@ public class MenuItemTests
     public void MenuItem_WhenCollapsed_IconHasAriaLabel()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
@@ -94,11 +92,11 @@ public class MenuItemTests
     public void MenuItem_WhenExpanded_IconIsAriaHidden()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
@@ -113,11 +111,11 @@ public class MenuItemTests
     public void MenuItem_AppliesHoverStyles()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home));
@@ -132,11 +130,11 @@ public class MenuItemTests
     public void MenuItem_AppliesFocusStyles()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home));
@@ -152,11 +150,11 @@ public class MenuItemTests
     public void MenuItem_WhenCollapsed_AppliesJustifyCenter()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
@@ -171,11 +169,11 @@ public class MenuItemTests
     public void MenuItem_SetsCorrectHref()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act
-        var cut = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cut = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Portfolio")
             .Add(p => p.Href, "/portfolio")
             .Add(p => p.IconName, IconName.Briefcase));
@@ -189,11 +187,11 @@ public class MenuItemTests
     public void MenuItem_IconSizeChanges_WhenCollapsed()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
 
         // Act - Expanded
-        var cutExpanded = ctx.RenderComponent<MenuItem>(parameters => parameters
+        var cutExpanded = ctx.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
@@ -205,9 +203,9 @@ public class MenuItemTests
         svgExpanded.ClassList.ShouldContain("h-5");
 
         // Arrange & Act - Collapsed
-        using var ctx2 = new Bunit.TestContext();
+        using var ctx2 = new BunitContext();
         ctx2.Services.AddSingleton<NavigationManager>(new MockNavigationManager());
-        var cutCollapsed = ctx2.RenderComponent<MenuItem>(parameters => parameters
+        var cutCollapsed = ctx2.Render<TbMenuItem>(parameters => parameters
             .Add(p => p.Label, "Dashboard")
             .Add(p => p.Href, "/")
             .Add(p => p.IconName, IconName.Home)
