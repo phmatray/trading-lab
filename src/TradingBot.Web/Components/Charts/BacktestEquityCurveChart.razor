@@ -11,7 +11,7 @@
                          SeriesType="SeriesType.Line"
                          XValue="@(e => e.Date)"
                          YValue="@(e => (decimal?)e.Equity)"
-                         OrderByDescending="e => e.X" />
+                         OrderByDescending="e => e.X"/>
     </ApexChart>
 }
 else
@@ -22,8 +22,7 @@ else
 }
 
 @code {
-    [Parameter]
-    public List<(DateTime Date, decimal Equity)>? EquityCurve { get; set; }
+    [Parameter] public List<(DateTime Date, decimal Equity)>? EquityCurve { get; set; }
 
     private List<EquityPoint> GetEquityPoints()
     {
@@ -116,4 +115,5 @@ else
             Mode = Mode.Light
         }
     };
+
 }

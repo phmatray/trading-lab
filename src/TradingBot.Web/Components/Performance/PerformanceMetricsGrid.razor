@@ -32,7 +32,23 @@
 
         <!-- Sharpe Ratio -->
         <div class="stat-card">
-            <div class="stat-label">Sharpe Ratio</div>
+            <div class="stat-label flex items-center gap-1">
+                Sharpe Ratio
+                <InfoTooltip Position="TooltipPosition.Top" IsVisible="false">
+                    <Trigger>
+                        <button class="text-gray-400 hover:text-gray-300 focus:outline-none" aria-label="Help: Sharpe Ratio">
+                            <Icon Name="IconName.InformationCircle" Class="w-4 h-4" />
+                        </button>
+                    </Trigger>
+                    <Content>
+                        <div class="text-xs">
+                            <p class="font-semibold">Sharpe Ratio</p>
+                            <p class="mt-1">Measures risk-adjusted returns by comparing portfolio returns to risk-free rate.</p>
+                            <p class="mt-1 text-gray-300">Higher is better. &gt;1 is good, &gt;2 is very good, &gt;3 is excellent.</p>
+                        </div>
+                    </Content>
+                </InfoTooltip>
+            </div>
             <div class="stat-value @GetColorClass(Metrics.SharpeRatio)">
                 @Metrics.SharpeRatio.ToString("F2")
             </div>
@@ -43,7 +59,23 @@
 
         <!-- Sortino Ratio -->
         <div class="stat-card">
-            <div class="stat-label">Sortino Ratio</div>
+            <div class="stat-label flex items-center gap-1">
+                Sortino Ratio
+                <InfoTooltip Position="TooltipPosition.Top" IsVisible="false">
+                    <Trigger>
+                        <button class="text-gray-400 hover:text-gray-300 focus:outline-none" aria-label="Help: Sortino Ratio">
+                            <Icon Name="IconName.InformationCircle" Class="w-4 h-4" />
+                        </button>
+                    </Trigger>
+                    <Content>
+                        <div class="text-xs">
+                            <p class="font-semibold">Sortino Ratio</p>
+                            <p class="mt-1">Similar to Sharpe but only penalizes downside volatility, not upside.</p>
+                            <p class="mt-1 text-gray-300">Higher is better. Typically higher than Sharpe ratio.</p>
+                        </div>
+                    </Content>
+                </InfoTooltip>
+            </div>
             <div class="stat-value @GetColorClass(Metrics.SortinoRatio)">
                 @Metrics.SortinoRatio.ToString("F2")
             </div>
@@ -54,7 +86,23 @@
 
         <!-- Calmar Ratio -->
         <div class="stat-card">
-            <div class="stat-label">Calmar Ratio</div>
+            <div class="stat-label flex items-center gap-1">
+                Calmar Ratio
+                <InfoTooltip Position="TooltipPosition.Top" IsVisible="false">
+                    <Trigger>
+                        <button class="text-gray-400 hover:text-gray-300 focus:outline-none" aria-label="Help: Calmar Ratio">
+                            <Icon Name="IconName.InformationCircle" Class="w-4 h-4" />
+                        </button>
+                    </Trigger>
+                    <Content>
+                        <div class="text-xs">
+                            <p class="font-semibold">Calmar Ratio</p>
+                            <p class="mt-1">Annual return divided by maximum drawdown. Measures return vs worst-case scenario.</p>
+                            <p class="mt-1 text-gray-300">Higher is better. &gt;3 is good, &gt;5 is excellent.</p>
+                        </div>
+                    </Content>
+                </InfoTooltip>
+            </div>
             <div class="stat-value @GetColorClass(Metrics.CalmarRatio)">
                 @Metrics.CalmarRatio.ToString("F2")
             </div>
@@ -65,7 +113,23 @@
 
         <!-- Max Drawdown -->
         <div class="stat-card">
-            <div class="stat-label">Max Drawdown</div>
+            <div class="stat-label flex items-center gap-1">
+                Max Drawdown
+                <InfoTooltip Position="TooltipPosition.Top" IsVisible="false">
+                    <Trigger>
+                        <button class="text-gray-400 hover:text-gray-300 focus:outline-none" aria-label="Help: Max Drawdown">
+                            <Icon Name="IconName.InformationCircle" Class="w-4 h-4" />
+                        </button>
+                    </Trigger>
+                    <Content>
+                        <div class="text-xs">
+                            <p class="font-semibold">Maximum Drawdown</p>
+                            <p class="mt-1">Largest peak-to-trough decline in portfolio value. Indicates worst loss period.</p>
+                            <p class="mt-1 text-gray-300">Lower is better. &lt;10% is good, &lt;20% is acceptable.</p>
+                        </div>
+                    </Content>
+                </InfoTooltip>
+            </div>
             <div class="stat-value @GetColorClass(-Metrics.MaxDrawdown)">
                 -@Metrics.MaxDrawdown.ToString("F2")%
             </div>
@@ -99,8 +163,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public PerformanceMetrics Metrics { get; set; } = null!;
+    [Parameter] public PerformanceMetrics Metrics { get; set; } = null!;
 
     private string GetColorClass(decimal value)
     {
@@ -117,4 +180,5 @@
             return "text-gray-600";
         }
     }
+
 }

@@ -49,7 +49,9 @@ public sealed class RealtimeUpdateService : IHostedService, IDisposable
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("RealtimeUpdateService is starting with {Interval}ms throttle", MinimumBroadcastInterval.TotalMilliseconds);
+        _logger.LogInformation(
+            "RealtimeUpdateService is starting with {Interval}ms throttle",
+            MinimumBroadcastInterval.TotalMilliseconds);
 
         // Check for updates frequently but only broadcast when changes detected or throttle period elapsed
         _timer = new Timer(
@@ -89,7 +91,8 @@ public sealed class RealtimeUpdateService : IHostedService, IDisposable
     private static string ComputeHash(object obj)
     {
         var json = JsonSerializer.Serialize(obj);
-        return Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(json)));
+        return Convert.ToBase64String(
+            System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(json)));
     }
 
     private async void BroadcastUpdates(object? state)

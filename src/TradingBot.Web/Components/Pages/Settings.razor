@@ -1,0 +1,18 @@
+@* <copyright file="Settings.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@page "/settings"
+@using TradingBot.Web.Components.Organisms
+
+<PageTitle>Settings - TradingBot</PageTitle>
+
+<div class="max-w-3xl mx-auto py-8 px-4">
+    <PageHeader Title="Settings"
+                Description="Customize your trading bot experience"
+                Class="mb-8" />
+
+    <Card>
+        <SettingsForm />
+    </Card>
+</div>

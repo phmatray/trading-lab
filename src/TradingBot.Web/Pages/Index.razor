@@ -15,99 +15,68 @@ Copyright (c) TradingBot. All rights reserved.
 
 <PageTitle>Dashboard - TradingBot</PageTitle>
 
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Trading Dashboard</h1>
+<PageHeader Title="Trading Dashboard"
+            Description="Monitor your trading performance and account status in real-time" />
 
-            <!-- Connection Status -->
-            <div class="flex items-center space-x-2">
-                <span class="relative flex h-3 w-3">
-                    @if (_connectionStatus == "connected")
-                    {
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    }
-                    else if (_connectionStatus == "reconnecting")
-                    {
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
-                    }
-                    else
-                    {
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    }
-                </span>
-                <span class="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                    @_connectionStatus
-                </span>
-            </div>
+<!-- Loading State -->
+@if (_isLoading)
+{
+    <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
         </div>
-
-        <!-- Loading State -->
-        @if (_isLoading)
-        {
-            <div class="flex items-center justify-center h-64">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p class="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
-                </div>
-            </div>
-        }
-        else if (_dashboardData is not null)
-        {
-            <!-- Dashboard Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Account Summary -->
-                <AccountSummary Account="@_dashboardData.Account" LastUpdated="@_lastUpdated" />
-
-                <!-- Performance Metrics -->
-                <PerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated" />
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Risk Settings -->
-                <RiskSettingsCard Settings="@_dashboardData.RiskSettings" />
-
-                <!-- Active Strategies -->
-                <ActiveStrategies Strategies="@_dashboardData.ActiveStrategies" />
-            </div>
-
-            <!-- Positions List -->
-            <div class="mb-6">
-                <PositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated" />
-            </div>
-
-            <!-- Recent Trades -->
-            <div class="mb-6">
-                <RecentTrades Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated" />
-            </div>
-        }
-        else if (_errorMessage is not null)
-        {
-            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <div class="flex items-center">
-                    <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                    </svg>
-                    <p class="text-red-800 dark:text-red-200">@_errorMessage</p>
-                </div>
-            </div>
-        }
     </div>
-</div>
+}
+else if (_dashboardData is not null)
+{
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Account Summary -->
+        <AccountSummary Account="@_dashboardData.Account" LastUpdated="@_lastUpdated"/>
+
+        <!-- Performance Metrics -->
+        <PerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated"/>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Risk Settings -->
+        <RiskSettingsCard Settings="@_dashboardData.RiskSettings"/>
+
+        <!-- Active Strategies -->
+        <ActiveStrategies Strategies="@_dashboardData.ActiveStrategies"/>
+    </div>
+
+    <!-- Positions List -->
+    <div class="mb-6">
+        <PositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated"/>
+    </div>
+
+    <!-- Recent Trades -->
+    <div class="mb-6">
+        <RecentTrades Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated"/>
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex items-center">
+            <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <p class="text-red-800 dark:text-red-200">@_errorMessage</p>
+        </div>
+    </div>
+}
 
 @code {
     private HubConnection? _hubConnection;
     private DashboardViewModel? _dashboardData;
-    private string _connectionStatus = "disconnected";
     private DateTime? _lastUpdated;
     private bool _isLoading = true;
     private string? _errorMessage;
-    private int _reconnectAttempts = 0;
-    private const int MaxReconnectAttempts = 5;
-    private const int ReconnectDelayMs = 2000;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,7 +111,8 @@ Copyright (c) TradingBot. All rights reserved.
 
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
-                .WithAutomaticReconnect(new[] {
+                .WithAutomaticReconnect(new[]
+                {
                     TimeSpan.FromSeconds(0),
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(5),
@@ -157,23 +127,13 @@ Copyright (c) TradingBot. All rights reserved.
             _hubConnection.On<Trade>("ReceiveTradeUpdate", HandleTradeUpdate);
 
             // Connection lifecycle events
-            _hubConnection.Reconnecting += OnReconnecting;
             _hubConnection.Reconnected += OnReconnected;
-            _hubConnection.Closed += OnClosed;
 
             await _hubConnection.StartAsync();
-            _connectionStatus = "connected";
-            _reconnectAttempts = 0;
-            StateHasChanged();
         }
         catch (Exception ex)
         {
-            _connectionStatus = "disconnected";
             _errorMessage = $"Failed to connect to real-time updates: {ex.Message}";
-            StateHasChanged();
-
-            // Attempt manual reconnection
-            await AttemptReconnection();
         }
     }
 
@@ -210,18 +170,8 @@ Copyright (c) TradingBot. All rights reserved.
         }
     }
 
-    private Task OnReconnecting(Exception? exception)
-    {
-        _connectionStatus = "reconnecting";
-        InvokeAsync(StateHasChanged);
-        return Task.CompletedTask;
-    }
-
     private Task OnReconnected(string? connectionId)
     {
-        _connectionStatus = "connected";
-        _reconnectAttempts = 0;
-
         // Reload dashboard data after reconnection
         InvokeAsync(async () =>
         {
@@ -232,62 +182,13 @@ Copyright (c) TradingBot. All rights reserved.
         return Task.CompletedTask;
     }
 
-    private Task OnClosed(Exception? exception)
-    {
-        _connectionStatus = "disconnected";
-        InvokeAsync(StateHasChanged);
-
-        // Attempt manual reconnection
-        InvokeAsync(AttemptReconnection);
-
-        return Task.CompletedTask;
-    }
-
-    private async Task AttemptReconnection()
-    {
-        if (_reconnectAttempts >= MaxReconnectAttempts)
-        {
-            _errorMessage = "Unable to connect to real-time updates after multiple attempts. Please refresh the page.";
-            StateHasChanged();
-            return;
-        }
-
-        _reconnectAttempts++;
-        _connectionStatus = "reconnecting";
-        StateHasChanged();
-
-        // Exponential backoff
-        var delay = ReconnectDelayMs * (int)Math.Pow(2, _reconnectAttempts - 1);
-        await Task.Delay(delay);
-
-        try
-        {
-            if (_hubConnection is not null)
-            {
-                await _hubConnection.StartAsync();
-                _connectionStatus = "connected";
-                _reconnectAttempts = 0;
-
-                // Reload data after successful reconnection
-                await LoadDashboardDataAsync();
-            }
-        }
-        catch
-        {
-            // Recursive retry
-            await AttemptReconnection();
-        }
-    }
-
     public async ValueTask DisposeAsync()
     {
         if (_hubConnection is not null)
         {
-            _hubConnection.Reconnecting -= OnReconnecting;
             _hubConnection.Reconnected -= OnReconnected;
-            _hubConnection.Closed -= OnClosed;
-
             await _hubConnection.DisposeAsync();
         }
     }
+
 }

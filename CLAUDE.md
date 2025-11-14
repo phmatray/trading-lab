@@ -428,6 +428,8 @@ This constitution takes precedence for architectural decisions and coding standa
 ## Active Technologies
 - C# / .NET 9 + ASP.NET Core Blazor Server, Tailwind CSS, SignalR, bUnit (testing), existing TradingBot layers (Core, Infrastructure, Engine, Analytics, Strategies) (002-blazor-server-app)
 - SQLite via Entity Framework Core 9 (shared with CLI application) (002-blazor-server-app)
+- C# / .NET 9 + ASP.NET Core Blazor Server + Tailwind CSS (no component library), existing TradingBot.Web project from spec 002 (003-ux-ui-enhancement)
+- SQLite via Entity Framework Core 9 (extend schema for user preferences) (003-ux-ui-enhancement)
 
 ## Recent Changes
 - 002-blazor-server-app: Added C# / .NET 9 + ASP.NET Core Blazor Server, Tailwind CSS, SignalR, bUnit (testing), existing TradingBot layers (Core, Infrastructure, Engine, Analytics, Strategies)

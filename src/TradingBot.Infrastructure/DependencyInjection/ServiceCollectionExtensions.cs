@@ -54,12 +54,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITradeRepository, TradeRepository>();
         services.AddScoped<ICandleRepository, CandleRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
 
         // Infrastructure services
         services.AddSingleton<IEncryptionService, EncryptionService>();
         services.AddSingleton<IMarketDataService, YahooFinanceService>();
         services.AddScoped<IHistoricalDataCache, HistoricalDataCache>();
         services.AddSingleton<IConfigurationService, Configuration.ConfigurationService>();
+        services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
         // Engine services
         // Note: Changed to Scoped to avoid DI lifetime conflicts with DbContext-dependent services

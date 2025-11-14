@@ -6,38 +6,32 @@
         @onclick="OnClick">
     @if (IsLoading)
     {
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
     }
     @ChildContent
 </button>
 
 @code {
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    [Parameter]
-    public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
 
-    [Parameter]
-    public string Type { get; set; } = "button";
+    [Parameter] public string Type { get; set; } = "button";
 
-    [Parameter]
-    public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
 
-    [Parameter]
-    public ButtonSize Size { get; set; } = ButtonSize.Medium;
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
 
-    [Parameter]
-    public bool IsDisabled { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
 
-    [Parameter]
-    public bool IsLoading { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
 
-    [Parameter]
-    public string AdditionalClasses { get; set; } = string.Empty;
+    [Parameter] public string AdditionalClasses { get; set; } = string.Empty;
 
     private string GetButtonClasses()
     {
@@ -81,4 +75,5 @@
         Medium,
         Large
     }
+
 }

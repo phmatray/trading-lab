@@ -4,10 +4,12 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using TradingBot.Core.Entities;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
+using TradingBot.Core.ValueObjects;
 
 namespace TradingBot.Infrastructure.Persistence;
 
@@ -59,6 +61,11 @@ public sealed class TradingBotDbContext : DbContext
     /// Gets the EquityPoints DbSet.
     /// </summary>
     public DbSet<EquityPoint> EquityPoints => Set<EquityPoint>();
+
+    /// <summary>
+    /// Gets the UserPreferences DbSet.
+    /// </summary>
+    public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)

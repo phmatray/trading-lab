@@ -1,0 +1,64 @@
+@* <copyright file="ThemeProvider.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@using TradingBot.Core.Interfaces
+@using TradingBot.Core.ValueObjects
+@using TradingBot.Infrastructure.Services
+@inject IUserPreferencesService UserPreferencesService
+@implements IDisposable
+
+<div class="@ThemeClass">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the child content to be wrapped with theme styling.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string ThemeClass { get; set; } = string.Empty;
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadThemeAsync();
+
+        // Subscribe to preferences changes
+        if (UserPreferencesService is UserPreferencesService service)
+        {
+            service.PreferencesChanged += OnPreferencesChanged;
+        }
+    }
+
+    private async Task LoadThemeAsync()
+    {
+        try
+        {
+            var preferences = await UserPreferencesService.GetPreferencesAsync();
+            ThemeClass = preferences.Theme == Theme.Dark ? "dark" : string.Empty;
+        }
+        catch
+        {
+            // Default to light theme if preferences cannot be loaded
+            ThemeClass = string.Empty;
+        }
+    }
+
+    private async void OnPreferencesChanged(object? sender, EventArgs e)
+    {
+        await LoadThemeAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (UserPreferencesService is UserPreferencesService service)
+        {
+            service.PreferencesChanged -= OnPreferencesChanged;
+        }
+    }
+}

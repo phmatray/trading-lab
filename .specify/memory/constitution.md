@@ -99,20 +99,24 @@ This constitution defines the core principles and standards for the TradingBot p
 
 ### 3.1 UI/UX Principles
 - **Consistency**: Maintain consistent design patterns across all interfaces
-  - Use DaisyUI components for web interfaces
-  - Follow Material Design guidelines for mobile
-  - Consistent color scheme and typography
+  - Use Tailwind CSS utility classes with custom atomic components (no third-party component libraries)
+  - Atomic Design pattern for component organization (Atoms → Molecules → Organisms)
+  - Consistent color scheme using Tailwind's semantic colors (green=success, red=error, yellow=warning, blue=info)
+  - Heroicons for consistent iconography across the platform
 
 - **Accessibility**:
   - WCAG 2.1 Level AA compliance
-  - Keyboard navigation support
-  - Screen reader compatibility
-  - Sufficient color contrast ratios
+  - Full keyboard navigation support (Tab, Enter, Escape, arrow keys)
+  - Keyboard shortcuts for navigation (Alt+D for Dashboard, Alt+P for Portfolio, etc.)
+  - Screen reader compatibility with proper ARIA labels and semantic HTML
+  - Sufficient color contrast ratios (4.5:1 for text, 3:1 for UI components)
+  - Visible focus rings on all interactive elements
 
 - **Responsive Design**:
-  - Mobile-first approach
-  - Support viewports from 320px to 4K displays
-  - Touch-friendly UI elements (minimum 44x44px tap targets)
+  - Desktop-first approach for trading applications (minimum 1024px width)
+  - Support viewports from 1024px to 4K displays
+  - Collapsible navigation sidebar for space optimization
+  - No mobile optimization required (desktop-only interface per trading application requirements)
 
 ### 3.2 Error Handling and Feedback
 - **User-Friendly Messages**: No technical jargon in user-facing errors

@@ -67,6 +67,10 @@ builder.Services.AddSingleton<IRiskSettingsService, RiskSettingsService>();
 builder.Services.AddScoped<IBacktestService, BacktestService>();
 builder.Services.AddSingleton<IToastService, ToastService>();
 
+// Add UI state and navigation services
+builder.Services.AddScoped<UIStateService>();
+builder.Services.AddScoped<NavigationService>();
+
 // Add real-time update service as hosted service
 builder.Services.AddHostedService<RealtimeUpdateService>();
 
