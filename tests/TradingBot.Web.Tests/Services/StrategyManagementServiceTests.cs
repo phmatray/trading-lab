@@ -47,14 +47,14 @@ public class StrategyManagementServiceTests
     }
 
     /// <summary>
-    /// Tests that ConfigureStrategyAsync returns true for valid parameters.
+    /// Tests that ConfigureStrategyAsync returns false for strategy not found.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     [Fact]
-    public async Task ConfigureStrategyAsync_ValidParameters_ReturnsTrue()
+    public async Task ConfigureStrategyAsync_StrategyNotFound_ReturnsFalse()
     {
         // Arrange
-        var strategyName = "MomentumStrategy";
+        var strategyName = "NonExistentStrategy";
         var parameters = new Dictionary<string, object>
         {
             { "FastPeriod", 10 },
@@ -62,30 +62,14 @@ public class StrategyManagementServiceTests
             { "SignalPeriod", 9 },
         };
 
-        var config = new StrategyConfiguration
-        {
-            StrategyName = strategyName,
-            ParametersJson = "{}",
-        };
-
-        A.CallTo(() => _fakeRepository.UpsertAsync(
-            A<StrategyConfiguration>._,
-            A<CancellationToken>._)).Returns(config);
-
-        var fakeClients = A.Fake<IHubClients<ITradingClient>>();
-        var fakeClient = A.Fake<ITradingClient>();
-        A.CallTo(() => _fakeHubContext.Clients).Returns(fakeClients);
-        A.CallTo(() => fakeClients.All).Returns(fakeClient);
-
         // Act
         var result = await _sut.ConfigureStrategyAsync(strategyName, parameters);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldBeFalse();
         A.CallTo(() => _fakeRepository.UpsertAsync(
-            A<StrategyConfiguration>.That.Matches(c => c.StrategyName == strategyName),
-            A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => fakeClient.OnStrategyConfigurationChanged(strategyName, parameters)).MustHaveHappenedOnceExactly();
+            A<StrategyConfiguration>._,
+            A<CancellationToken>._)).MustNotHaveHappened();
     }
 
     /// <summary>

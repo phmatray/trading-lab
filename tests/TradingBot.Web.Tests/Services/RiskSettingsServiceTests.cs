@@ -75,7 +75,7 @@ public class RiskSettingsServiceTests
         A.CallTo(() => _fakeRepository.UpdateAsync(
             A<RiskSettings>.That.Matches(s => s.Id == validSettings.Id),
             A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => fakeClient.OnRiskSettingsChanged(A<RiskSettings>._))
+        A.CallTo(() => fakeClient.ReceiveRiskSettingsUpdate(A<RiskSettings>._))
             .MustHaveHappenedOnceExactly();
     }
 

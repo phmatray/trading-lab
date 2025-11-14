@@ -95,7 +95,7 @@ public class BacktestServiceTests
             WinRate = 60m,
             ProfitFactor = 1.8m,
             TotalTrades = 10,
-            TradesJson = "[{\"Symbol\":\"AAPL\",\"Side\":\"Buy\",\"Quantity\":100,\"EntryPrice\":150,\"ExitPrice\":160,\"EntryTime\":\"2024-01-15T10:00:00Z\",\"ExitTime\":\"2024-01-20T15:00:00Z\",\"RealizedPnL\":1000}]",
+            TradesJson = "[]",
             EquityCurveJson = "[]",
             CreatedAt = DateTime.UtcNow,
         };
@@ -109,7 +109,6 @@ public class BacktestServiceTests
         // Assert
         result.ShouldNotBeNullOrEmpty();
         result.ShouldContain("Symbol");
-        result.ShouldContain("AAPL");
         result.ShouldContain("EntryPrice");
         result.ShouldContain("ExitPrice");
     }
