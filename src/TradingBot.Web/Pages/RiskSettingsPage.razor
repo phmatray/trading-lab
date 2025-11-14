@@ -174,8 +174,9 @@ else
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         HubConnection.Remove("ReceiveRiskSettingsUpdate");
+        return ValueTask.CompletedTask;
     }
 }
