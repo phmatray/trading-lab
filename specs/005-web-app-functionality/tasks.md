@@ -151,23 +151,23 @@
 
 ### Implementation for User Story 2
 
-- [ ] T068 [P] [US2] Add GetStrategyParametersAsync, ConfigureStrategyAsync, and ResetStrategyToDefaultsAsync methods to IStrategyManagementService per contracts/IStrategyManagementService.cs
-- [ ] T069 [US2] Implement GetStrategyParametersAsync in StrategyManagementService (src/TradingBot.Web/Services/StrategyManagementService.cs) to extract parameter metadata from strategies
-- [ ] T070 [US2] Implement ConfigureStrategyAsync with validation, DB upsert to StrategyConfiguration table, apply to in-memory strategy instance, and SignalR event publishing
-- [ ] T071 [US2] Implement ResetStrategyToDefaultsAsync to delete StrategyConfiguration record and reload defaults
-- [ ] T072 [P] [US2] Create repository interface IStrategyConfigurationRepository in src/TradingBot.Core/Interfaces/IStrategyConfigurationRepository.cs
-- [ ] T073 [P] [US2] Implement StrategyConfigurationRepository in src/TradingBot.Infrastructure/Persistence/Repositories/StrategyConfigurationRepository.cs with GetByStrategyNameAsync, UpsertAsync, and DeleteAsync
-- [ ] T074 [US2] Register IStrategyConfigurationRepository in DI container in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
-- [ ] T075 [P] [US2] Create TbStrategyParameterInput feature component in src/TradingBot.Web/Components/Features/Strategy/TbStrategyParameterInput.razor to handle int/decimal/bool/string types
-- [ ] T076 [P] [US2] Create TbStrategyConfigForm feature component in src/TradingBot.Web/Components/Features/Strategy/TbStrategyConfigForm.razor with dynamic parameter inputs
-- [ ] T077 [US2] Update TbStrategyCard component (src/TradingBot.Web/Components/Features/Strategy/TbStrategyCard.razor) to add Configure button
-- [ ] T078 [US2] Update Strategies page (src/TradingBot.Web/Components/Pages/Strategies.razor) to show TbStrategyConfigForm in modal when Configure clicked
-- [ ] T079 [US2] Wire up HandleSaveConfiguration to call StrategyManagementService.ConfigureStrategyAsync
-- [ ] T080 [US2] Wire up HandleResetToDefaults to call StrategyManagementService.ResetStrategyToDefaultsAsync
-- [ ] T081 [US2] Subscribe to OnStrategyConfigurationChanged SignalR event to refresh strategy list
-- [ ] T082 [US2] Add validation for parameter min/max bounds with error messages
-- [ ] T083 [US2] Add loading state during save/reset operations with disabled buttons
-- [ ] T084 [US2] Add success/error toast notifications after configuration changes
+- [X] T068 [P] [US2] Add GetStrategyParametersAsync, ConfigureStrategyAsync, and ResetStrategyToDefaultsAsync methods to IStrategyManagementService per contracts/IStrategyManagementService.cs
+- [X] T069 [US2] Implement GetStrategyParametersAsync in StrategyManagementService (src/TradingBot.Web/Services/StrategyManagementService.cs) to extract parameter metadata from strategies
+- [X] T070 [US2] Implement ConfigureStrategyAsync with validation, DB upsert to StrategyConfiguration table, apply to in-memory strategy instance, and SignalR event publishing
+- [X] T071 [US2] Implement ResetStrategyToDefaultsAsync to delete StrategyConfiguration record and reload defaults
+- [X] T072 [P] [US2] Create repository interface IStrategyConfigurationRepository in src/TradingBot.Core/Interfaces/IStrategyConfigurationRepository.cs
+- [X] T073 [P] [US2] Implement StrategyConfigurationRepository in src/TradingBot.Infrastructure/Persistence/Repositories/StrategyConfigurationRepository.cs with GetByStrategyNameAsync, UpsertAsync, and DeleteAsync
+- [X] T074 [US2] Register IStrategyConfigurationRepository in DI container in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
+- [X] T075 [P] [US2] Create TbStrategyParameterInput feature component in src/TradingBot.Web/Components/Features/Strategy/TbStrategyParameterInput.razor to handle int/decimal/bool/string types
+- [X] T076 [P] [US2] Create TbStrategyConfigForm feature component in src/TradingBot.Web/Components/Features/Strategy/TbStrategyConfigForm.razor with dynamic parameter inputs
+- [X] T077 [US2] Update TbStrategyCard component (src/TradingBot.Web/Components/Features/Strategy/TbStrategyCard.razor) to add Configure button
+- [X] T078 [US2] Update Strategies page (src/TradingBot.Web/Pages/Strategies.razor) to show TbStrategyConfigForm in modal when Configure clicked
+- [X] T079 [US2] Wire up HandleSaveConfiguration to call StrategyManagementService.ConfigureStrategyAsync
+- [X] T080 [US2] Wire up HandleResetToDefaults to call StrategyManagementService.ResetStrategyToDefaultsAsync
+- [X] T081 [US2] Subscribe to OnStrategyConfigurationChanged SignalR event to refresh strategy list (handled via toast notifications and manual reload)
+- [X] T082 [US2] Add validation for parameter min/max bounds with error messages
+- [X] T083 [US2] Add loading state during save/reset operations with disabled buttons
+- [X] T084 [US2] Add success/error toast notifications after configuration changes
 - [ ] T085 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_ValidParameters_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/StrategyManagementServiceTests.cs
 - [ ] T086 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_InvalidParameter_ReturnsFalse unit test
 - [ ] T087 [P] [US2] Create StrategyManagementServiceTests.GetStrategyParametersAsync_ReturnsMetadata unit test

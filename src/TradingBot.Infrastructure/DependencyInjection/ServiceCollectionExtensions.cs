@@ -56,6 +56,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
         services.AddScoped<IRiskSettingsRepository, RiskSettingsRepository>();
+        services.AddScoped<IStrategyConfigurationRepository, StrategyConfigurationRepository>();
 
         // Infrastructure services
         services.AddSingleton<IEncryptionService, EncryptionService>();

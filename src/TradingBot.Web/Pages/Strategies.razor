@@ -3,7 +3,11 @@
 </copyright> *@
 
 @page "/strategies"
+@using TradingBot.Web.Components.Features.Strategy
+@using TradingBot.Web.Components.Molecules
 @inject IStrategyManagementService StrategyService
+@inject IToastService ToastService
+@inject ILogger<Strategies> Logger
 
 <PageTitle>Strategy Management - TradingBot</PageTitle>
 
@@ -67,16 +71,33 @@ else
         {
             <TbStrategyCard
                 Strategy="@strategy"
-                OnStatusChanged="@HandleStatusChanged"/>
+                OnStatusChanged="@HandleStatusChanged"
+                OnConfigure="@HandleConfigure"/>
         }
     </div>
 }
+
+<!-- Configuration Modal -->
+<TbModal IsOpen="@_showConfigModal" IsOpenChanged="@((open) => _showConfigModal = open)" Title="Strategy Configuration" ShowCloseButton="true">
+    @if (!string.IsNullOrEmpty(_selectedStrategyName))
+    {
+        <TbStrategyConfigForm
+            @ref="_configForm"
+            StrategyName="@_selectedStrategyName"
+            OnSave="@HandleSaveConfiguration"
+            OnReset="@HandleResetToDefaults"
+            OnCancel="@HandleCancelConfiguration" />
+    }
+</TbModal>
 
 @code {
     private List<IStrategy>? _strategies;
     private bool _isLoading = true;
     private string? _error;
     private string? _successMessage;
+    private bool _showConfigModal;
+    private string? _selectedStrategyName;
+    private TbStrategyConfigForm? _configForm;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,6 +163,96 @@ else
         }
 
         StateHasChanged();
+    }
+
+    private void HandleConfigure(string strategyName)
+    {
+        Logger.LogInformation("Opening configuration modal for strategy: {StrategyName}", strategyName);
+        _selectedStrategyName = strategyName;
+        _showConfigModal = true;
+    }
+
+    private async Task HandleSaveConfiguration(Dictionary<string, object> parameters)
+    {
+        _error = null;
+        _successMessage = null;
+
+        try
+        {
+            Logger.LogInformation("Saving configuration for strategy: {StrategyName}", _selectedStrategyName);
+
+            var result = await StrategyService.ConfigureStrategyAsync(_selectedStrategyName!, parameters);
+
+            if (result)
+            {
+                _successMessage = $"Configuration saved successfully for '{_selectedStrategyName}'.";
+                ToastService.ShowSuccess("Configuration Saved", _successMessage);
+
+                _showConfigModal = false;
+                _selectedStrategyName = null;
+
+                // Reload strategies to reflect changes
+                await LoadStrategiesAsync();
+            }
+            else
+            {
+                _error = "Failed to save configuration. Please check the parameter values and try again.";
+                ToastService.ShowError("Configuration Error", _error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving configuration for strategy: {StrategyName}", _selectedStrategyName);
+            _error = $"Failed to save configuration: {ex.Message}";
+            ToastService.ShowError("Configuration Error", _error);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleResetToDefaults()
+    {
+        _error = null;
+        _successMessage = null;
+
+        try
+        {
+            Logger.LogInformation("Resetting strategy to defaults: {StrategyName}", _selectedStrategyName);
+
+            var result = await StrategyService.ResetStrategyToDefaultsAsync(_selectedStrategyName!);
+
+            if (result)
+            {
+                _successMessage = $"Strategy '{_selectedStrategyName}' has been reset to defaults.";
+                ToastService.ShowSuccess("Reset Successful", _successMessage);
+
+                // Reload the form to show default values
+                if (_configForm != null)
+                {
+                    await _configForm.ReloadParameters();
+                }
+            }
+            else
+            {
+                _error = $"Failed to reset strategy '{_selectedStrategyName}'.";
+                ToastService.ShowError("Reset Error", _error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error resetting strategy to defaults: {StrategyName}", _selectedStrategyName);
+            _error = $"Failed to reset configuration: {ex.Message}";
+            ToastService.ShowError("Reset Error", _error);
+        }
+
+        StateHasChanged();
+    }
+
+    private void HandleCancelConfiguration()
+    {
+        Logger.LogInformation("Cancelling configuration for strategy: {StrategyName}", _selectedStrategyName);
+        _showConfigModal = false;
+        _selectedStrategyName = null;
     }
 
     public class StrategyStatusChangedEventArgs
