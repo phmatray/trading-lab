@@ -3,11 +3,7 @@
 // </copyright>
 
 using Bunit;
-using Microsoft.Extensions.DependencyInjection;
-
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
 
@@ -20,10 +16,10 @@ public class IconTests
     public void Icon_RendersCorrectSvgElement()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -35,10 +31,10 @@ public class IconTests
     public void Icon_AppliesCustomCssClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.Class, "w-8 h-8 text-blue-500"));
 
@@ -53,44 +49,44 @@ public class IconTests
     public void Icon_RendersHomeIcon()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
         var svg = cut.Find("svg");
         var path = svg.QuerySelector("path");
         path.ShouldNotBeNull();
-        path!.GetAttribute("d")?.ShouldContain("M2.25 12l8.954");
+        path.GetAttribute("d")?.ShouldContain("M2.25 12l8.954");
     }
 
     [Fact]
     public void Icon_RendersChartBarIcon()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.ChartBar));
 
         // Assert
         var svg = cut.Find("svg");
         var path = svg.QuerySelector("path");
         path.ShouldNotBeNull();
-        path!.GetAttribute("d")?.ShouldContain("M3 13.125C3 12.504");
+        path.GetAttribute("d")?.ShouldContain("M3 13.125C3 12.504");
     }
 
     [Fact]
     public void Icon_RendersWithOutlineVariantByDefault()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -102,10 +98,10 @@ public class IconTests
     public void Icon_RendersWithSolidVariant()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.Variant, IconVariant.Solid));
 
@@ -118,10 +114,10 @@ public class IconTests
     public void Icon_WithoutAriaLabel_IsAriaHidden()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -133,10 +129,10 @@ public class IconTests
     public void Icon_WithAriaLabel_HasCorrectAriaAttributes()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home)
             .Add(p => p.AriaLabel, "Home page"));
 
@@ -161,10 +157,10 @@ public class IconTests
     public void Icon_RendersAllIconNames(IconName iconName)
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, iconName));
 
         // Assert
@@ -178,10 +174,10 @@ public class IconTests
     public void Icon_AppliesDefaultClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert
@@ -194,10 +190,10 @@ public class IconTests
     public void Icon_HasCorrectStrokeAttributes()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Icon>(parameters => parameters
+        var cut = ctx.Render<TbIcon>(parameters => parameters
             .Add(p => p.Name, IconName.Home));
 
         // Assert

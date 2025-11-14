@@ -2,12 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Shouldly;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.MarketData;
-using TradingBot.Strategies.Base;
 using TradingBot.Strategies.Implementations;
 
 namespace TradingBot.Strategies.Tests.Implementations;

@@ -43,8 +43,4 @@
     <PackageReference Include="Ardalis.SmartEnum.EFCore" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Persistence\Converters\" />
-  </ItemGroup>
-
 </Project>

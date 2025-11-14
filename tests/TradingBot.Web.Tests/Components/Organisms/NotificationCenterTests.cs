@@ -4,35 +4,31 @@
 
 #pragma warning disable FakeItEasy0003 // Argument constraint outside call specification - false positive in test setup
 
-using System.Threading.Tasks;
 using Bunit;
-using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.ValueObjects;
 using TradingBot.Web.Components.Organisms;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Organisms;
 
 /// <summary>
 /// Tests for the NotificationCenter component.
 /// </summary>
-public class NotificationCenterTests : Bunit.TestContext
+public class NotificationCenterTests
 {
-    private readonly ToastService _toastService;
-    private readonly IUserPreferencesService _preferencesService;
+    private readonly ToastService toastService;
+    private readonly IUserPreferencesService preferencesService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NotificationCenterTests"/> class.
     /// </summary>
     public NotificationCenterTests()
     {
-        _toastService = new ToastService();
-        _preferencesService = A.Fake<IUserPreferencesService>();
+        toastService = new ToastService();
+        preferencesService = A.Fake<IUserPreferencesService>();
 
         // Setup default preferences
         var defaultPreferences = new UserPreferences
@@ -44,18 +40,26 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = true,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(defaultPreferences));
+    }
 
-        Services.AddSingleton<IToastService>(_toastService);
-        Services.AddSingleton(_preferencesService);
+    private BunitContext SetupContext()
+    {
+        var ctx = new BunitContext();
+        ctx.Services.AddSingleton<IToastService>(toastService);
+        ctx.Services.AddSingleton(preferencesService);
+        return ctx;
     }
 
     [Fact]
     public void NotificationCenter_Renders_WithCorrectStructure()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Act
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
 
         // Assert
         var container = cut.Find("div[aria-live='polite']");
@@ -70,8 +74,11 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public void NotificationCenter_HasCorrectAriaAttributes()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Act
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
 
         // Assert
         var container = cut.Find("div[aria-live='polite']");
@@ -83,10 +90,13 @@ public class NotificationCenterTests : Bunit.TestContext
     public async Task NotificationCenter_DisplaysToast_WhenToastAdded()
     {
         // Arrange
-        var cut = RenderComponent<NotificationCenter>();
+        using var ctx = SetupContext();
+
+        // Arrange
+        var cut = ctx.Render<TbNotificationCenter>();
 
         // Act - Add a toast via the service
-        _toastService.ShowSuccess("Test success message");
+        toastService.ShowSuccess("Test success message");
 
         // Wait for async operations
         await Task.Delay(100);
@@ -99,6 +109,9 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_RespectsUserPreferences_ShowSuccessNotifications()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Preferences with success notifications disabled
         var preferences = new UserPreferences
         {
@@ -109,14 +122,14 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = true,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(preferences));
 
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Act - Add a success toast
-        _toastService.ShowSuccess("Success message (should be hidden)");
+        toastService.ShowSuccess("Success message (should be hidden)");
         await Task.Delay(100);
         cut.Render();
 
@@ -127,6 +140,9 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_RespectsUserPreferences_ShowErrorNotifications()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Preferences with error notifications disabled
         var preferences = new UserPreferences
         {
@@ -137,14 +153,14 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = true,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(preferences));
 
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Act - Add an error toast
-        _toastService.ShowError("Error message (should be hidden)");
+        toastService.ShowError("Error message (should be hidden)");
         await Task.Delay(100);
         cut.Render();
 
@@ -155,6 +171,9 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_RespectsUserPreferences_ShowWarningNotifications()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Preferences with warning notifications disabled
         var preferences = new UserPreferences
         {
@@ -165,14 +184,14 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = false,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(preferences));
 
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Act - Add a warning toast
-        _toastService.ShowWarning("Warning message (should be hidden)");
+        toastService.ShowWarning("Warning message (should be hidden)");
         await Task.Delay(100);
         cut.Render();
 
@@ -183,6 +202,9 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_RespectsUserPreferences_ShowInfoNotifications()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Preferences with info notifications disabled
         var preferences = new UserPreferences
         {
@@ -193,14 +215,14 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = true,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(preferences));
 
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Act - Add an info toast
-        _toastService.ShowInfo("Info message (should be hidden)");
+        toastService.ShowInfo("Info message (should be hidden)");
         await Task.Delay(100);
         cut.Render();
 
@@ -212,14 +234,17 @@ public class NotificationCenterTests : Bunit.TestContext
     public async Task NotificationCenter_DisplaysMultipleToasts()
     {
         // Arrange
-        var cut = RenderComponent<NotificationCenter>();
+        using var ctx = SetupContext();
+
+        // Arrange
+        var cut = ctx.Render<TbNotificationCenter>();
 
         // Act - Add multiple toasts
-        _toastService.ShowSuccess("Message 1");
+        toastService.ShowSuccess("Message 1");
         await Task.Delay(50);
-        _toastService.ShowInfo("Message 2");
+        toastService.ShowInfo("Message 2");
         await Task.Delay(50);
-        _toastService.ShowWarning("Message 3");
+        toastService.ShowWarning("Message 3");
         await Task.Delay(50);
 
         cut.Render();
@@ -233,27 +258,33 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_LoadsPreferences_OnInitialization()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange & Act
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Assert - Verify preferences were loaded
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .MustHaveHappened();
     }
 
     [Fact]
     public async Task NotificationCenter_HandlesPreferencesLoadError_Gracefully()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Simulate preferences load error
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Throws<InvalidOperationException>();
 
         // Act - Should not throw, should default to showing all notifications
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
-        _toastService.ShowSuccess("Test message with error");
+        toastService.ShowSuccess("Test message with error");
         await Task.Delay(100);
         cut.Render();
 
@@ -262,10 +293,13 @@ public class NotificationCenterTests : Bunit.TestContext
     }
 
     [Fact]
-    public void NotificationCenter_UnsubscribesFromToastService_OnDispose()
+    public void NotificationCenterunsubscribesFromToastService_OnDispose()
     {
         // Arrange
-        var cut = RenderComponent<NotificationCenter>();
+        using var ctx = SetupContext();
+
+        // Arrange
+        var cut = ctx.Render<TbNotificationCenter>();
         var instance = cut.Instance;
 
         // Act
@@ -279,6 +313,9 @@ public class NotificationCenterTests : Bunit.TestContext
     [Fact]
     public async Task NotificationCenter_ShowsOnlyEnabledNotificationTypes()
     {
+        // Arrange
+        using var ctx = SetupContext();
+
         // Arrange - Only show error and warning notifications
         var preferences = new UserPreferences
         {
@@ -289,17 +326,17 @@ public class NotificationCenterTests : Bunit.TestContext
             ShowWarningNotifications = true,
         };
 
-        A.CallTo(() => _preferencesService.GetPreferencesAsync(A<CancellationToken>._))
+        A.CallTo(() => preferencesService.GetPreferencesAsync(A<CancellationToken>._))
             .Returns(Task.FromResult(preferences));
 
-        var cut = RenderComponent<NotificationCenter>();
+        var cut = ctx.Render<TbNotificationCenter>();
         await cut.InvokeAsync(async () => await Task.Delay(100));
 
         // Act - Add all types of toasts
-        _toastService.ShowSuccess("Success (hidden)");
-        _toastService.ShowError("Error (visible)");
-        _toastService.ShowInfo("Info (hidden)");
-        _toastService.ShowWarning("Warning (visible)");
+        toastService.ShowSuccess("Success (hidden)");
+        toastService.ShowError("Error (visible)");
+        toastService.ShowInfo("Info (hidden)");
+        toastService.ShowWarning("Warning (visible)");
 
         await Task.Delay(100);
         cut.Render();

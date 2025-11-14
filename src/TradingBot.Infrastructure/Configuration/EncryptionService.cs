@@ -23,14 +23,18 @@ public sealed class EncryptionService : IEncryptionService
     {
         // Derive key from machine-specific data
         var password = GetMachineSpecificPassword();
-        using var deriveBytes = new Rfc2898DeriveBytes(
-            password,
-            Encoding.UTF8.GetBytes("TradingBotSalt2025"),
-            100000,
-            HashAlgorithmName.SHA256);
+        var salt = Encoding.UTF8.GetBytes("TradingBotSalt2025");
 
-        _key = deriveBytes.GetBytes(32); // 256 bits
-        _iv = deriveBytes.GetBytes(16);  // 128 bits
+        // Derive 48 bytes total (32 for AES-256 key + 16 for IV) using PBKDF2
+        var keyMaterial = Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            salt,
+            100000,
+            HashAlgorithmName.SHA256,
+            48);
+
+        _key = keyMaterial[..32];  // First 32 bytes for key (256 bits)
+        _iv = keyMaterial[32..];   // Last 16 bytes for IV (128 bits)
     }
 
     /// <inheritdoc/>

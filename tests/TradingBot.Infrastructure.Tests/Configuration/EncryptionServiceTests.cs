@@ -3,7 +3,6 @@
 // </copyright>
 
 using TradingBot.Infrastructure.Configuration;
-using Xunit;
 
 namespace TradingBot.Infrastructure.Tests.Configuration;
 
@@ -26,7 +25,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_WithValidPlaintext_ReturnsEncryptedString()
     {
         // Arrange
-        var plaintext = "my-api-key-12345";
+        const string plaintext = "my-api-key-12345";
 
         // Act
         var encrypted = _service.Encrypt(plaintext);
@@ -62,7 +61,7 @@ public sealed class EncryptionServiceTests
     public void Decrypt_WithValidCiphertext_ReturnsOriginalPlaintext()
     {
         // Arrange
-        var plaintext = "my-secret-password";
+        const string plaintext = "my-secret-password";
         var ciphertext = _service.Encrypt(plaintext);
 
         // Act
@@ -83,7 +82,7 @@ public sealed class EncryptionServiceTests
     public void Decrypt_WithInvalidCiphertext_ThrowsException()
     {
         // Arrange
-        var invalidCiphertext = "invalid-base64-string";
+        const string invalidCiphertext = "invalid-base64-string";
 
         // Act & Assert
         Assert.Throws<FormatException>(() => _service.Decrypt(invalidCiphertext));
@@ -122,7 +121,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_SameValueTwice_ProducesSameResult()
     {
         // Arrange
-        var plaintext = "consistent-encryption-test";
+        const string plaintext = "consistent-encryption-test";
 
         // Act
         var encrypted1 = _service.Encrypt(plaintext);
@@ -136,8 +135,8 @@ public sealed class EncryptionServiceTests
     public void Encrypt_DifferentValues_ProducesDifferentResults()
     {
         // Arrange
-        var plaintext1 = "value1";
-        var plaintext2 = "value2";
+        const string plaintext1 = "value1";
+        const string plaintext2 = "value2";
 
         // Act
         var encrypted1 = _service.Encrypt(plaintext1);
@@ -151,7 +150,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_WithSpecialCharacters_WorksCorrectly()
     {
         // Arrange
-        var plaintext = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`\"\\";
+        const string plaintext = "!@#$%^&*()_+-=[]{}|;:',.<>?/~`\"\\";
 
         // Act
         var encrypted = _service.Encrypt(plaintext);
@@ -165,7 +164,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_WithUnicodeCharacters_WorksCorrectly()
     {
         // Arrange
-        var plaintext = "Hello 世界 🌍 مرحبا мир";
+        const string plaintext = "Hello 世界 🌍 مرحبا мир";
 
         // Act
         var encrypted = _service.Encrypt(plaintext);
@@ -179,7 +178,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_WithWhitespace_PreservesWhitespace()
     {
         // Arrange
-        var plaintext = "  spaces  and\ttabs\nand\rnewlines  ";
+        const string plaintext = "  spaces  and\ttabs\nand\rnewlines  ";
 
         // Act
         var encrypted = _service.Encrypt(plaintext);
@@ -207,7 +206,7 @@ public sealed class EncryptionServiceTests
     public void EncryptionService_MultipleInstances_ProduceSameEncryption()
     {
         // Arrange
-        var plaintext = "consistency-test";
+        const string plaintext = "consistency-test";
         var service1 = new EncryptionService();
         var service2 = new EncryptionService();
 
@@ -223,7 +222,7 @@ public sealed class EncryptionServiceTests
     public void EncryptionService_DifferentInstances_CanDecryptEachOthersData()
     {
         // Arrange
-        var plaintext = "cross-instance-test";
+        const string plaintext = "cross-instance-test";
         var service1 = new EncryptionService();
         var service2 = new EncryptionService();
 
@@ -239,7 +238,7 @@ public sealed class EncryptionServiceTests
     public void Encrypt_ReturnsBase64String()
     {
         // Arrange
-        var plaintext = "test-base64-encoding";
+        const string plaintext = "test-base64-encoding";
 
         // Act
         var encrypted = _service.Encrypt(plaintext);
@@ -284,7 +283,7 @@ public sealed class EncryptionServiceTests
 
         try
         {
-            Convert.FromBase64String(base64);
+            _ = Convert.FromBase64String(base64);
             return true;
         }
         catch

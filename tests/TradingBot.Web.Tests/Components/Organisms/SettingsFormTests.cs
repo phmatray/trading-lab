@@ -3,17 +3,14 @@
 // </copyright>
 
 using Bunit;
-using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-using Shouldly;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Validators;
 using TradingBot.Core.ValueObjects;
 using TradingBot.Web.Components.Organisms;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Organisms;
 
@@ -29,7 +26,7 @@ public class SettingsFormTests
     public void SettingsForm_LoadsUserPreferences_OnInitialization()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -54,7 +51,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockJsRuntime);
 
         // Act
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Assert
         A.CallTo(() => mockPreferencesService.GetPreferencesAsync(A<CancellationToken>._))
@@ -71,7 +68,7 @@ public class SettingsFormTests
     public void SettingsForm_DisplaysValidationError_ForInvalidRefreshInterval()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -91,7 +88,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Set invalid value (out of 1-300 range)
         var refreshInput = cut.Find("#refresh-interval");
@@ -119,7 +116,7 @@ public class SettingsFormTests
     public void SettingsForm_DisplaysValidationError_ForInvalidNotificationDuration()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -139,7 +136,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Set invalid value (out of 2-10 range)
         var notificationInput = cut.Find("#notification-duration");
@@ -167,7 +164,7 @@ public class SettingsFormTests
     public void SettingsForm_SavesPreferences_WhenValidDataSubmitted()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -190,7 +187,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Change values
         var refreshInput = cut.Find("#refresh-interval");
@@ -227,7 +224,7 @@ public class SettingsFormTests
     public void SettingsForm_ShowsErrorToast_WhenSaveFails()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -250,7 +247,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act
         var form = cut.Find("form");
@@ -274,7 +271,7 @@ public class SettingsFormTests
     public void SettingsForm_TogglesNotificationPreferences_Correctly()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -301,7 +298,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Toggle info notifications off
         var infoToggle = cut.Find("#toggle-info");
@@ -331,7 +328,7 @@ public class SettingsFormTests
     public void SettingsForm_OpensResetConfirmationModal_WhenResetClicked()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -351,7 +348,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Click reset button
         var resetButtons = cut.FindAll("button");
@@ -376,7 +373,7 @@ public class SettingsFormTests
     public void SettingsForm_ResetsPreferences_WhenConfirmed()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -407,7 +404,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Open modal and confirm
         var resetButtons = cut.FindAll("button");
@@ -441,7 +438,7 @@ public class SettingsFormTests
     public void SettingsForm_CancelsReset_WhenModalClosed()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -461,7 +458,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Open modal and cancel
         var resetButtons = cut.FindAll("button");
@@ -492,7 +489,7 @@ public class SettingsFormTests
     public void SettingsForm_ChangesTheme_Correctly()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var mockPreferencesService = A.Fake<IUserPreferencesService>();
         var mockToastService = A.Fake<IToastService>();
         var mockJsRuntime = A.Fake<IJSRuntime>();
@@ -515,7 +512,7 @@ public class SettingsFormTests
         ctx.Services.AddSingleton(mockToastService);
         ctx.Services.AddSingleton(mockJsRuntime);
 
-        var cut = ctx.RenderComponent<SettingsForm>();
+        var cut = ctx.Render<TbSettingsForm>();
 
         // Act - Change theme to Dark
         var themeSelect = cut.Find("#theme-select");

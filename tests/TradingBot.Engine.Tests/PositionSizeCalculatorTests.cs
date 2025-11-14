@@ -2,10 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.Extensions.Logging;
-using Shouldly;
-using TradingBot.Engine;
 
 namespace TradingBot.Engine.Tests;
 
@@ -60,7 +57,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateFixedAmount(-100m, 50m, 1.0m))
+            _calculator.CalculateFixedAmount(-100m, 50m))
             .Message.ShouldContain("Fixed amount must be positive");
     }
 
@@ -69,7 +66,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateFixedAmount(1000m, 0m, 1.0m))
+            _calculator.CalculateFixedAmount(1000m, 0m))
             .Message.ShouldContain("Current price must be positive");
     }
 
@@ -131,7 +128,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateFixedPercent(-1000m, 10m, 50m, 1.0m))
+            _calculator.CalculateFixedPercent(-1000m, 10m, 50m))
             .Message.ShouldContain("Account balance must be positive");
     }
 
@@ -140,7 +137,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateFixedPercent(10000m, 150m, 50m, 1.0m))
+            _calculator.CalculateFixedPercent(10000m, 150m, 50m))
             .Message.ShouldContain("Percent of account must be between 0 and 100");
     }
 
@@ -149,7 +146,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateFixedPercent(10000m, 0m, 50m, 1.0m))
+            _calculator.CalculateFixedPercent(10000m, 0m, 50m))
             .Message.ShouldContain("Percent of account must be between 0 and 100");
     }
 
@@ -206,7 +203,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateRiskBased(10000m, 2m, 100m, 100m, 1.0m))
+            _calculator.CalculateRiskBased(10000m, 2m, 100m, 100m))
             .Message.ShouldContain("Entry price and stop-loss price cannot be the same");
     }
 
@@ -215,7 +212,7 @@ public class PositionSizeCalculatorTests
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() =>
-            _calculator.CalculateRiskBased(10000m, 2m, 100m, -10m, 1.0m))
+            _calculator.CalculateRiskBased(10000m, 2m, 100m, -10m))
             .Message.ShouldContain("Stop-loss price must be positive");
     }
 
@@ -414,8 +411,7 @@ public class PositionSizeCalculatorTests
             riskPercent,
             atr,
             atrMultiplier,
-            currentPrice,
-            1.0m);
+            currentPrice);
 
         var withLeverageResult = _calculator.CalculateVolatilityBased(
             accountBalance,
@@ -463,7 +459,7 @@ public class PositionSizeCalculatorTests
 
         if (leverage > 1.0m)
         {
-            var baseFixedAmount = _calculator.CalculateFixedAmount(1000m, currentPrice, 1.0m);
+            var baseFixedAmount = _calculator.CalculateFixedAmount(1000m, currentPrice);
             fixedAmount.ShouldBe(baseFixedAmount * leverage);
         }
     }

@@ -1,0 +1,69 @@
+@* <copyright file="TbBadge.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Atoms
+
+<span class="@GetClasses()">
+    @ChildContent
+</span>
+
+@code {
+    /// <summary>
+    /// Gets or sets the child content to be rendered inside the badge.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge variant/color.
+    /// </summary>
+    [Parameter]
+    public BadgeVariant Variant { get; set; } = BadgeVariant.Default;
+
+    /// <summary>
+    /// Gets or sets the badge size.
+    /// </summary>
+    [Parameter]
+    public BadgeSize Size { get; set; } = BadgeSize.Medium;
+
+    /// <summary>
+    /// Gets or sets whether the badge should have rounded corners.
+    /// </summary>
+    [Parameter]
+    public bool Pill { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional CSS classes.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string GetClasses()
+    {
+        var baseClasses = "inline-flex items-center font-medium";
+
+        var sizeClass = Size switch
+        {
+            BadgeSize.Small => "px-2 py-0.5 text-xs",
+            BadgeSize.Medium => "px-2.5 py-0.5 text-sm",
+            BadgeSize.Large => "px-3 py-1 text-base",
+            _ => "px-2.5 py-0.5 text-sm"
+        };
+
+        var roundedClass = Pill ? "rounded-full" : "rounded";
+
+        var variantClass = Variant switch
+        {
+            BadgeVariant.Default => "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+            BadgeVariant.Success => "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+            BadgeVariant.Error => "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+            BadgeVariant.Warning => "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+            BadgeVariant.Info => "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+            BadgeVariant.Primary => "bg-blue-600 text-white dark:bg-blue-500",
+            _ => "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+        };
+
+        return $"{baseClasses} {sizeClass} {roundedClass} {variantClass} {Class}".Trim();
+    }
+}

@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Microsoft.Extensions.Logging;
 using TradingBot.Core.Models.Backtest;
 
 namespace TradingBot.Web.Services;

@@ -4,9 +4,7 @@
 
 using Bunit;
 using Microsoft.AspNetCore.Components;
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
 
@@ -22,10 +20,10 @@ public class SelectTests
     public void Select_RendersWithDefaults()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>();
+        var cut = ctx.Render<TbSelect<string>>();
 
         // Assert
         var select = cut.Find("select");
@@ -39,7 +37,7 @@ public class SelectTests
     public void Select_RendersWithOptions()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         RenderFragment childContent = builder =>
         {
             builder.OpenElement(0, "option");
@@ -53,7 +51,7 @@ public class SelectTests
         };
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.ChildContent, childContent));
 
         // Assert
@@ -68,10 +66,10 @@ public class SelectTests
     public void Select_RendersWithPlaceholder()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select an option"));
 
         // Assert
@@ -86,10 +84,10 @@ public class SelectTests
     public void Select_AppliesErrorStyling_WhenHasErrorIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
@@ -105,10 +103,10 @@ public class SelectTests
     public void Select_AppliesNormalStyling_WhenHasErrorIsFalse()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
@@ -124,10 +122,10 @@ public class SelectTests
     public void Select_IsDisabled_WhenIsDisabledIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
@@ -142,7 +140,7 @@ public class SelectTests
     public void Select_TriggersValueChanged_OnSelectionChange()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var newValue = string.Empty;
         RenderFragment childContent = builder =>
         {
@@ -156,7 +154,7 @@ public class SelectTests
             builder.CloseElement();
         };
 
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.Value, "option1")
             .Add(p => p.ValueChanged, value => newValue = value)
             .Add(p => p.ChildContent, childContent));
@@ -177,10 +175,10 @@ public class SelectTests
     public void Select_AppliesCustomCssClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.Class, "custom-select"));
 
         // Assert
@@ -195,10 +193,10 @@ public class SelectTests
     public void Select_DoesNotShowPlaceholder_WhenShowPlaceholderIsFalse()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Select<string>>(parameters => parameters
+        var cut = ctx.Render<TbSelect<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Select option")
             .Add(p => p.ShowPlaceholder, false));
 

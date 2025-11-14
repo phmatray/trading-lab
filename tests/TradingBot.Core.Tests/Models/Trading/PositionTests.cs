@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Trading;
 

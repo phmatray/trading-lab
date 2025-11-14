@@ -1,0 +1,79 @@
+@* <copyright file="TbSpinner.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@namespace TradingBot.Web.Components.Atoms
+
+<div role="status" aria-label="Loading">
+    <svg class="@GetClasses()" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <span class="ml-2 text-sm @GetTextColorClass()">@Label</span>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the size of the spinner.
+    /// </summary>
+    [Parameter]
+    public SpinnerSize Size { get; set; } = SpinnerSize.Medium;
+
+    /// <summary>
+    /// Gets or sets the color variant of the spinner.
+    /// </summary>
+    [Parameter]
+    public SpinnerColor Color { get; set; } = SpinnerColor.Primary;
+
+    /// <summary>
+    /// Gets or sets an optional label to display next to the spinner.
+    /// </summary>
+    [Parameter]
+    public string? Label { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional CSS classes.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string GetClasses()
+    {
+        var sizeClass = Size switch
+        {
+            SpinnerSize.Small => "w-4 h-4",
+            SpinnerSize.Medium => "w-6 h-6",
+            SpinnerSize.Large => "w-8 h-8",
+            SpinnerSize.ExtraLarge => "w-12 h-12",
+            _ => "w-6 h-6"
+        };
+
+        var colorClass = Color switch
+        {
+            SpinnerColor.Primary => "text-blue-600 dark:text-blue-400",
+            SpinnerColor.Success => "text-green-600 dark:text-green-400",
+            SpinnerColor.Warning => "text-yellow-600 dark:text-yellow-400",
+            SpinnerColor.Danger => "text-red-600 dark:text-red-400",
+            SpinnerColor.White => "text-white",
+            _ => "text-blue-600 dark:text-blue-400"
+        };
+
+        return $"animate-spin {sizeClass} {colorClass} {Class}".Trim();
+    }
+
+    private string GetTextColorClass()
+    {
+        return Color switch
+        {
+            SpinnerColor.Primary => "text-blue-600 dark:text-blue-400",
+            SpinnerColor.Success => "text-green-600 dark:text-green-400",
+            SpinnerColor.Warning => "text-yellow-600 dark:text-yellow-400",
+            SpinnerColor.Danger => "text-red-600 dark:text-red-400",
+            SpinnerColor.White => "text-white",
+            _ => "text-blue-600 dark:text-blue-400"
+        };
+    }
+}

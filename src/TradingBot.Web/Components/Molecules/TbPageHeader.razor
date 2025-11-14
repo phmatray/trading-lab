@@ -1,0 +1,77 @@
+@* <copyright file="TbPageHeader.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@namespace TradingBot.Web.Components.Molecules
+
+<div class="@GetContainerClasses()">
+    <div class="@GetHeaderWrapperClasses()">
+        <div class="@GetTitleSectionClasses()">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                @Title
+            </h1>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    @Description
+                </p>
+            }
+        </div>
+
+        @if (Actions != null)
+        {
+            <div class="@GetActionsSectionClasses()">
+                @Actions
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the page title.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the page description (optional).
+    /// </summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets action buttons or controls to display in the header (optional).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional CSS classes for the container.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string GetContainerClasses()
+    {
+        var baseClasses = "mb-6";
+        return string.IsNullOrEmpty(Class) ? baseClasses : $"{baseClasses} {Class}";
+    }
+
+    private string GetHeaderWrapperClasses()
+    {
+        return Actions != null
+            ? "flex items-center justify-between"
+            : string.Empty;
+    }
+
+    private string GetTitleSectionClasses()
+    {
+        return Actions != null ? "flex-1" : string.Empty;
+    }
+
+    private string GetActionsSectionClasses()
+    {
+        return "flex items-center gap-4";
+    }
+}

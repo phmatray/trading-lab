@@ -2,10 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Shouldly;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Infrastructure.Persistence;
 using TradingBot.Infrastructure.Services;
@@ -28,7 +27,7 @@ public class HistoricalDataCacheTests : IDisposable
             .Options;
 
         _context = new TradingBotDbContext(options);
-        _logger = new Mock<ILogger<HistoricalDataCache>>().Object;
+        _logger = A.Fake<ILogger<HistoricalDataCache>>();
         _cache = new HistoricalDataCache(_context, _logger);
     }
 
@@ -322,7 +321,7 @@ public class HistoricalDataCacheTests : IDisposable
 
     public void Dispose()
     {
-        _context?.Dispose();
+        _context.Dispose();
     }
 
     private static IReadOnlyList<Candle> CreateSampleCandles(

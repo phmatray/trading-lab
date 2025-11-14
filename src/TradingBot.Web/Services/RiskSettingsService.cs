@@ -3,8 +3,6 @@
 // </copyright>
 
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using TradingBot.Core.Models.Risk;
 using TradingBot.Web.Hubs;
 
@@ -36,13 +34,13 @@ public sealed class RiskSettingsService : IRiskSettingsService
         // Initialize from configuration
         _currentSettings = new RiskSettings
         {
-            Leverage = configuration.GetValue<decimal>("TradingBot:DefaultLeverage", 1.0m),
-            StopLossPercent = configuration.GetValue<decimal>("TradingBot:StopLossPercent", 2.0m),
-            TakeProfitPercent = configuration.GetValue<decimal>("TradingBot:TakeProfitPercent", 5.0m),
-            DailyLossLimit = configuration.GetValue<decimal>("TradingBot:DailyLossLimit", 1000m),
-            MaxDrawdownPercent = configuration.GetValue<decimal>("TradingBot:MaxDrawdownPercent", 10.0m),
-            MaxPositionSizePercent = configuration.GetValue<decimal>("TradingBot:MaxPositionSize", 10.0m),
-            RiskLimitsEnabled = configuration.GetValue<bool>("TradingBot:RiskLimitsEnabled", true),
+            Leverage = configuration.GetValue("TradingBot:DefaultLeverage", 1.0m),
+            StopLossPercent = configuration.GetValue("TradingBot:StopLossPercent", 2.0m),
+            TakeProfitPercent = configuration.GetValue("TradingBot:TakeProfitPercent", 5.0m),
+            DailyLossLimit = configuration.GetValue("TradingBot:DailyLossLimit", 1000m),
+            MaxDrawdownPercent = configuration.GetValue("TradingBot:MaxDrawdownPercent", 10.0m),
+            MaxPositionSizePercent = configuration.GetValue("TradingBot:MaxPositionSize", 10.0m),
+            RiskLimitsEnabled = configuration.GetValue("TradingBot:RiskLimitsEnabled", true),
             LastUpdated = DateTime.UtcNow,
         };
     }

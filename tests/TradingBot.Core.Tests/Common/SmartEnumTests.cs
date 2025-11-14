@@ -3,7 +3,6 @@
 // </copyright>
 
 using Ardalis.SmartEnum;
-using Shouldly;
 
 namespace TradingBot.Core.Tests.Common;
 
@@ -50,7 +49,7 @@ public sealed class SmartEnumTests
     public void FromValue_WithInvalidValue_ShouldThrowException()
     {
         // Act & Assert
-        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromValue(999));
+        Should.Throw<SmartEnumNotFoundException>(() => TestEnum.FromValue(999));
     }
 
     [Fact]
@@ -96,15 +95,15 @@ public sealed class SmartEnumTests
         result.ShouldBe(TestEnum.Second);
 
         // Case-sensitive - these should throw
-        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("SECOND"));
-        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("second"));
+        Should.Throw<SmartEnumNotFoundException>(() => TestEnum.FromName("SECOND"));
+        Should.Throw<SmartEnumNotFoundException>(() => TestEnum.FromName("second"));
     }
 
     [Fact]
     public void FromName_WithInvalidName_ShouldThrowException()
     {
         // Act & Assert
-        Should.Throw<Ardalis.SmartEnum.SmartEnumNotFoundException>(() => TestEnum.FromName("Invalid"));
+        Should.Throw<SmartEnumNotFoundException>(() => TestEnum.FromName("Invalid"));
     }
 
     [Fact]
@@ -229,7 +228,7 @@ public sealed class SmartEnumTests
     public void OperatorEquals_WithOneNull_ShouldReturnFalse()
     {
         // Arrange
-        TestEnum? enum1 = TestEnum.First;
+        TestEnum enum1 = TestEnum.First;
         TestEnum? enum2 = null;
 
         // Act & Assert
@@ -384,7 +383,6 @@ public sealed class SmartEnumTests
     {
         public static readonly StringEnum Alpha = new(nameof(Alpha), "A");
         public static readonly StringEnum Beta = new(nameof(Beta), "B");
-        public static readonly StringEnum Gamma = new(nameof(Gamma), "C");
 
         private StringEnum(string name, string value)
             : base(name, value)

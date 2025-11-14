@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Trading;
 using TradingBot.Infrastructure.Persistence;
@@ -33,8 +32,8 @@ public class TradeRepositoryTests : IDisposable
     public async Task GetBySymbolAsync_ShouldReturnTradesForSymbol()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleTrade("SPY"));
-        await _repository.AddAsync(CreateSampleTrade("SPY"));
+        await _repository.AddAsync(CreateSampleTrade());
+        await _repository.AddAsync(CreateSampleTrade());
         await _repository.AddAsync(CreateSampleTrade("AAPL"));
         await _repository.SaveChangesAsync();
 
@@ -52,7 +51,7 @@ public class TradeRepositoryTests : IDisposable
     {
         // Arrange
         var now = DateTime.UtcNow;
-        await _repository.AddAsync(CreateSampleTrade("SPY", entryTime: now.AddDays(-5), exitTime: now.AddDays(-4)));
+        await _repository.AddAsync(CreateSampleTrade(entryTime: now.AddDays(-5), exitTime: now.AddDays(-4)));
         await _repository.AddAsync(CreateSampleTrade("AAPL", entryTime: now.AddDays(-3), exitTime: now.AddDays(-2)));
         await _repository.AddAsync(CreateSampleTrade("MSFT", entryTime: now.AddDays(-1), exitTime: now));
         await _repository.SaveChangesAsync();
@@ -70,7 +69,7 @@ public class TradeRepositoryTests : IDisposable
     public async Task GetByStrategyAsync_ShouldReturnTradesForStrategy()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleTrade("SPY", strategyName: "momentum"));
+        await _repository.AddAsync(CreateSampleTrade(strategyName: "momentum"));
         await _repository.AddAsync(CreateSampleTrade("AAPL", strategyName: "momentum"));
         await _repository.AddAsync(CreateSampleTrade("MSFT", strategyName: "meanreversion"));
         await _repository.SaveChangesAsync();
@@ -88,7 +87,7 @@ public class TradeRepositoryTests : IDisposable
     public async Task GetWinningTradesAsync_ShouldReturnOnlyProfitableTrades()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleTrade("SPY", realizedPnL: 100m));
+        await _repository.AddAsync(CreateSampleTrade(realizedPnL: 100m));
         await _repository.AddAsync(CreateSampleTrade("AAPL", realizedPnL: -50m));
         await _repository.AddAsync(CreateSampleTrade("MSFT", realizedPnL: 75m));
         await _repository.SaveChangesAsync();
@@ -107,7 +106,7 @@ public class TradeRepositoryTests : IDisposable
     public async Task GetLosingTradesAsync_ShouldReturnOnlyLosingTrades()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleTrade("SPY", realizedPnL: 100m));
+        await _repository.AddAsync(CreateSampleTrade(realizedPnL: 100m));
         await _repository.AddAsync(CreateSampleTrade("AAPL", realizedPnL: -50m));
         await _repository.AddAsync(CreateSampleTrade("MSFT", realizedPnL: -75m));
         await _repository.SaveChangesAsync();
@@ -126,7 +125,7 @@ public class TradeRepositoryTests : IDisposable
     public async Task GetAllAsync_ShouldReturnAllTrades()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleTrade("SPY"));
+        await _repository.AddAsync(CreateSampleTrade());
         await _repository.AddAsync(CreateSampleTrade("AAPL"));
         await _repository.AddAsync(CreateSampleTrade("MSFT"));
         await _repository.SaveChangesAsync();
@@ -141,7 +140,7 @@ public class TradeRepositoryTests : IDisposable
 
     public void Dispose()
     {
-        _context?.Dispose();
+        _context.Dispose();
     }
 
     private static Trade CreateSampleTrade(
@@ -152,9 +151,9 @@ public class TradeRepositoryTests : IDisposable
         DateTime? exitTime = null)
     {
         // Calculate prices to achieve desired PnL
-        var entryPrice = 450.00m;
-        var commission = 2m;
-        var quantity = 10m;
+        const decimal entryPrice = 450.00m;
+        const decimal commission = 2m;
+        const decimal quantity = 10m;
 
         // For buy side: (exitPrice - entryPrice) * quantity - commission = realizedPnL
         // exitPrice = (realizedPnL + commission) / quantity + entryPrice

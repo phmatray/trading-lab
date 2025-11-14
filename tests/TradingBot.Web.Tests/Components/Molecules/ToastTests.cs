@@ -2,23 +2,23 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using System.Threading.Tasks;
 using Bunit;
-using Shouldly;
 using TradingBot.Web.Components.Molecules;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Molecules;
 
 /// <summary>
 /// Tests for the Toast component.
 /// </summary>
-public class ToastTests : Bunit.TestContext
+public class ToastTests
 {
     [Fact]
     public void Toast_Renders_WithMessage()
     {
+        // Arrange
+        using var ctx = new BunitContext();
+
         // Arrange
         var message = new ToastMessage
         {
@@ -27,7 +27,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -38,6 +38,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_Renders_WithTitle()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -46,7 +49,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -58,6 +61,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_Renders_WithoutTitle_WhenNotProvided()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -65,7 +71,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -77,6 +83,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_AppliesSuccessClasses()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -84,7 +93,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -99,6 +108,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_AppliesErrorClasses()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Error,
@@ -106,7 +118,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -121,6 +133,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_AppliesWarningClasses()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Warning,
@@ -128,7 +143,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -143,6 +158,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_AppliesInfoClasses()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -150,7 +168,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -165,6 +183,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_HasCorrectAriaAttributes()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -172,7 +193,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -185,6 +206,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_HasDismissButton()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -192,7 +216,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -204,6 +228,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_DismissButton_InvokesCallback()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -211,7 +238,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         var dismissed = false;
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message)
             .Add(p => p.OnDismiss, () => { dismissed = true; }));
 
@@ -227,6 +254,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_ShowsProgressBar_ByDefault()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -235,7 +265,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -247,6 +277,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_HidesProgressBar_WhenDisabled()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -254,7 +287,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message)
             .Add(p => p.ShowProgressBar, false));
 
@@ -267,6 +300,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_AppliesSlideInAnimation()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -274,7 +310,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -287,6 +323,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_HasBaseStructuralClasses()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -294,7 +333,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -310,6 +349,9 @@ public class ToastTests : Bunit.TestContext
     [Fact]
     public void Toast_DisplaysIcon_ForAllTypes()
     {
+        // Arrange
+        using var ctx = new BunitContext();
+
         // Test each type to ensure the toast renders with an icon
         var types = new[] { ToastType.Success, ToastType.Error, ToastType.Warning, ToastType.Info };
 
@@ -323,7 +365,7 @@ public class ToastTests : Bunit.TestContext
             };
 
             // Act
-            var cut = RenderComponent<Toast>(parameters => parameters
+            var cut = ctx.Render<TbToast>(parameters => parameters
                 .Add(p => p.Message, message));
 
             // Assert
@@ -337,6 +379,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_WithTitleAndMessage_HasCorrectTextSizes()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Success,
@@ -345,7 +390,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert
@@ -363,6 +408,9 @@ public class ToastTests : Bunit.TestContext
     public void Toast_WithoutTitle_MessageHasLargerTextSize()
     {
         // Arrange
+        using var ctx = new BunitContext();
+
+        // Arrange
         var message = new ToastMessage
         {
             Type = ToastType.Info,
@@ -370,7 +418,7 @@ public class ToastTests : Bunit.TestContext
         };
 
         // Act
-        var cut = RenderComponent<Toast>(parameters => parameters
+        var cut = ctx.Render<TbToast>(parameters => parameters
             .Add(p => p.Message, message));
 
         // Assert

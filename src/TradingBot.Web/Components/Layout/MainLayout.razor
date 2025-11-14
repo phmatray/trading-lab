@@ -1,18 +1,14 @@
-@using TradingBot.Web.Components.Organisms
-@using TradingBot.Web.Services
-@using Microsoft.AspNetCore.SignalR.Client
-@using Microsoft.JSInterop
 @inherits LayoutComponentBase
 @inject UIStateService UIState
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
-<ThemeProvider>
-    <NotificationCenter/>
+<TbThemeProvider>
+    <TbNotificationCenter/>
 
     <!-- Navigation Sidebar -->
-    <NavigationSidebar/>
+    <TbNavigationSidebar/>
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()">
     <!-- Header -->
@@ -59,7 +55,7 @@
         </div>
     </main>
     </div>
-</ThemeProvider>
+</TbThemeProvider>
 
 @code {
     private HubConnection? _hubConnection;

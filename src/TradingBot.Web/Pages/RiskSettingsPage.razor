@@ -1,13 +1,11 @@
 @page "/risk-settings"
-@using TradingBot.Web.Services
-@using TradingBot.Core.Models.Risk
 @implements IDisposable
 @inject IRiskSettingsService RiskSettingsService
 @inject ILogger<RiskSettingsPage> Logger
 
 <PageTitle>Risk Settings - TradingBot</PageTitle>
 
-<PageHeader Title="Risk Management Settings"
+<TbPageHeader Title="Risk Management Settings"
             Description="Configure risk parameters to protect your trading account" />
 
 @if (isLoading)
@@ -21,18 +19,18 @@ else if (currentSettings is not null)
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Risk Settings Form -->
         <div class="lg:col-span-2">
-            <Card Title="Risk Parameters">
-                <RiskSettingsForm
+            <TbCard Title="Risk Parameters">
+                <TbRiskSettingsForm
                     Settings="@currentSettings"
                     OnSave="@HandleSaveAsync"
                     OnCancel="@HandleCancel"
                     IsSaving="@isSaving"/>
-            </Card>
+            </TbCard>
         </div>
 
         <!-- Risk Status Indicator -->
         <div class="lg:col-span-1">
-            <RiskStatusIndicator Settings="@currentSettings"/>
+            <TbRiskStatusIndicator Settings="@currentSettings"/>
         </div>
     </div>
 
@@ -76,7 +74,7 @@ else if (!string.IsNullOrEmpty(errorMessage))
     private bool isSaving = false;
     private string? successMessage;
     private string? errorMessage;
-    private System.Threading.Timer? notificationTimer;
+    private Timer? notificationTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,14 +118,14 @@ else if (!string.IsNullOrEmpty(errorMessage))
 
             // Auto-hide success message after 3 seconds
             notificationTimer?.Dispose();
-            notificationTimer = new System.Threading.Timer(_ =>
+            notificationTimer = new Timer(_ =>
             {
                 InvokeAsync(() =>
                 {
                     successMessage = null;
                     StateHasChanged();
                 });
-            }, null, 3000, System.Threading.Timeout.Infinite);
+            }, null, 3000, Timeout.Infinite);
         }
         catch (ArgumentException ex)
         {

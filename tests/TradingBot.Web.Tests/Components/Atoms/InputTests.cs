@@ -3,9 +3,7 @@
 // </copyright>
 
 using Bunit;
-using Shouldly;
 using TradingBot.Web.Components.Atoms;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components.Atoms;
 
@@ -21,10 +19,10 @@ public class InputTests
     public void Input_RendersWithDefaults()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>();
+        var cut = ctx.Render<TbInput<string>>();
 
         // Assert
         var input = cut.Find("input");
@@ -39,10 +37,10 @@ public class InputTests
     public void Input_RendersWithStringValue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.Value, "Test Value"));
 
         // Assert
@@ -57,10 +55,10 @@ public class InputTests
     public void Input_RendersWithNumberValue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
+        var cut = ctx.Render<TbInput<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Value, 42));
 
@@ -77,10 +75,10 @@ public class InputTests
     public void Input_AppliesErrorStyling_WhenHasErrorIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.HasError, true));
 
         // Assert
@@ -96,10 +94,10 @@ public class InputTests
     public void Input_AppliesNormalStyling_WhenHasErrorIsFalse()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.HasError, false));
 
         // Assert
@@ -115,10 +113,10 @@ public class InputTests
     public void Input_RendersWithPlaceholder()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.Placeholder, "Enter text here"));
 
         // Assert
@@ -133,10 +131,10 @@ public class InputTests
     public void Input_IsDisabled_WhenIsDisabledIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.IsDisabled, true));
 
         // Assert
@@ -151,10 +149,10 @@ public class InputTests
     public void Input_IsReadonly_WhenIsReadonlyIsTrue()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.IsReadonly, true));
 
         // Assert
@@ -169,9 +167,9 @@ public class InputTests
     public void Input_TriggersValueChanged_OnInputChange()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
         var newValue = string.Empty;
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.Value, "Initial")
             .Add(p => p.ValueChanged, value => newValue = value));
 
@@ -191,10 +189,10 @@ public class InputTests
     public void Input_RendersWithMinMaxAttributes_ForNumberInputs()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<int>>(parameters => parameters
+        var cut = ctx.Render<TbInput<int>>(parameters => parameters
             .Add(p => p.Type, "number")
             .Add(p => p.Min, "1")
             .Add(p => p.Max, "100")
@@ -214,10 +212,10 @@ public class InputTests
     public void Input_AppliesCustomCssClasses()
     {
         // Arrange
-        using var ctx = new Bunit.TestContext();
+        using var ctx = new BunitContext();
 
         // Act
-        var cut = ctx.RenderComponent<Input<string>>(parameters => parameters
+        var cut = ctx.Render<TbInput<string>>(parameters => parameters
             .Add(p => p.Class, "custom-class"));
 
         // Assert

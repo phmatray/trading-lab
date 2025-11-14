@@ -1,0 +1,85 @@
+@* <copyright file="TbInfoTooltip.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@namespace TradingBot.Web.Components.Molecules
+
+<div class="relative inline-block group">
+    @Trigger
+
+    @if (IsVisible)
+    {
+        <div class="@GetTooltipClasses()"
+             role="tooltip"
+             @onclick:stopPropagation="true">
+            <div class="@GetArrowClasses()"></div>
+            <div class="relative z-10">
+                @Content
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the trigger element that shows the tooltip on hover.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Trigger { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tooltip content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Content { get; set; }
+
+    /// <summary>
+    /// Gets or sets the tooltip position (Top, Bottom, Left, Right).
+    /// </summary>
+    [Parameter]
+    public TooltipPosition Position { get; set; } = TooltipPosition.Top;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the tooltip is visible.
+    /// </summary>
+    [Parameter]
+    public bool IsVisible { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the callback when visibility changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    private string GetTooltipClasses()
+    {
+        var baseClasses = "absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg max-w-xs whitespace-normal";
+
+        var positionClasses = Position switch
+        {
+            TooltipPosition.Top => "bottom-full left-1/2 -translate-x-1/2 mb-2",
+            TooltipPosition.Bottom => "top-full left-1/2 -translate-x-1/2 mt-2",
+            TooltipPosition.Left => "right-full top-1/2 -translate-y-1/2 mr-2",
+            TooltipPosition.Right => "left-full top-1/2 -translate-y-1/2 ml-2",
+            _ => "bottom-full left-1/2 -translate-x-1/2 mb-2"
+        };
+
+        return $"{baseClasses} {positionClasses} group-hover:block";
+    }
+
+    private string GetArrowClasses()
+    {
+        var baseClasses = "absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45";
+
+        var positionClasses = Position switch
+        {
+            TooltipPosition.Top => "bottom-[-4px] left-1/2 -translate-x-1/2",
+            TooltipPosition.Bottom => "top-[-4px] left-1/2 -translate-x-1/2",
+            TooltipPosition.Left => "right-[-4px] top-1/2 -translate-y-1/2",
+            TooltipPosition.Right => "left-[-4px] top-1/2 -translate-y-1/2",
+            _ => "bottom-[-4px] left-1/2 -translate-x-1/2"
+        };
+
+        return $"{baseClasses} {positionClasses}";
+    }
+}

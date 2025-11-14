@@ -2,9 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Services;
 

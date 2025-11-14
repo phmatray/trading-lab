@@ -3,7 +3,6 @@
 // </copyright>
 
 using TradingBot.Core.Models.Trading;
-using TradingBot.Web.Models;
 
 namespace TradingBot.Web.Services;
 

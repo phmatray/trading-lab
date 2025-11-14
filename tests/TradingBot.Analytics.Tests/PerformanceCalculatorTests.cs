@@ -2,8 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
-using TradingBot.Analytics;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Trading;
 
@@ -346,7 +344,7 @@ public sealed class PerformanceCalculatorTests
 
         for (int i = 0; i < count; i++)
         {
-            var entryPrice = 100m + (decimal)random.Next(-20, 20);
+            var entryPrice = 100m + random.Next(-20, 20);
             var change = (decimal)(random.NextDouble() * 20) - 10m; // -10% to +10%
             var exitPrice = entryPrice * (1m + (change / 100m));
 

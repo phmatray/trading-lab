@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Trading;
 using TradingBot.Infrastructure.Persistence;
@@ -50,7 +49,7 @@ public class PositionRepositoryTests : IDisposable
     public async Task GetBySymbolAsync_WhenPositionExists_ShouldReturnPosition()
     {
         // Arrange
-        var position = CreateSamplePosition("SPY");
+        var position = CreateSamplePosition();
         await _repository.AddAsync(position);
         await _repository.SaveChangesAsync();
 
@@ -76,7 +75,7 @@ public class PositionRepositoryTests : IDisposable
     public async Task GetOpenPositionsAsync_ShouldReturnOnlyNonZeroQuantityPositions()
     {
         // Arrange
-        await _repository.AddAsync(CreateSamplePosition("SPY", quantity: 10m));
+        await _repository.AddAsync(CreateSamplePosition());
         await _repository.AddAsync(CreateSamplePosition("AAPL", quantity: 0m)); // Closed position
         await _repository.AddAsync(CreateSamplePosition("MSFT", quantity: 15m));
         await _repository.SaveChangesAsync();
@@ -94,7 +93,7 @@ public class PositionRepositoryTests : IDisposable
     public async Task GetByStrategyAsync_ShouldReturnPositionsForStrategy()
     {
         // Arrange
-        await _repository.AddAsync(CreateSamplePosition("SPY", strategyName: "momentum"));
+        await _repository.AddAsync(CreateSamplePosition(strategyName: "momentum"));
         await _repository.AddAsync(CreateSamplePosition("AAPL", strategyName: "momentum"));
         await _repository.AddAsync(CreateSamplePosition("MSFT", strategyName: "meanreversion"));
         await _repository.SaveChangesAsync();
@@ -113,7 +112,7 @@ public class PositionRepositoryTests : IDisposable
     {
         // Arrange
         var now = DateTime.UtcNow;
-        var pos1 = CreateSamplePosition("SPY", openedAt: now.AddMinutes(-10));
+        var pos1 = CreateSamplePosition(openedAt: now.AddMinutes(-10));
         var pos2 = CreateSamplePosition("AAPL", openedAt: now.AddMinutes(-5));
         var pos3 = CreateSamplePosition("MSFT", openedAt: now);
 
@@ -178,8 +177,8 @@ public class PositionRepositoryTests : IDisposable
         // Arrange
         // This shouldn't happen in practice (one position per symbol)
         // but testing the behavior
-        var pos1 = CreateSamplePosition("SPY");
-        var pos2 = CreateSamplePosition("SPY");
+        var pos1 = CreateSamplePosition();
+        var pos2 = CreateSamplePosition();
 
         await _repository.AddAsync(pos1);
         await _repository.AddAsync(pos2);
@@ -195,7 +194,7 @@ public class PositionRepositoryTests : IDisposable
 
     public void Dispose()
     {
-        _context?.Dispose();
+        _context.Dispose();
     }
 
     private static Position CreateSamplePosition(

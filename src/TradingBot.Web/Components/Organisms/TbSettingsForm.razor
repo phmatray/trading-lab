@@ -1,0 +1,253 @@
+@* <copyright file="TbSettingsForm.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Organisms
+@using TradingBot.Core.Entities
+@using TradingBot.Core.ValueObjects
+@inject IUserPreferencesService UserPreferencesService
+@inject IToastService ToastService
+@inject IJSRuntime JSRuntime
+
+<EditForm Model="@_preferences" OnValidSubmit="HandleSaveChanges">
+    <div class="space-y-6">
+        @* Theme Selection *@
+        <TbFormField Label="Theme"
+                   InputId="theme-select"
+                   HelpText="Choose your preferred color scheme. Light theme uses bright backgrounds, while dark theme reduces eye strain in low-light environments."
+                   IsRequired="true">
+            <InputContent>
+                <TbSelect @bind-Value="_selectedTheme"
+                        Id="theme-select"
+                        Placeholder="Select theme">
+                    <option value="Light">Light</option>
+                    <option value="Dark">Dark</option>
+                </TbSelect>
+            </InputContent>
+        </TbFormField>
+
+        @* Dashboard Refresh Interval *@
+        <TbFormField Label="Dashboard Refresh Interval (seconds)"
+                   InputId="refresh-interval"
+                   HelpText="Controls how often the dashboard automatically refreshes with latest trading data (1-300 seconds). Lower values provide more real-time updates but may increase server load. Recommended: 5-30 seconds for active monitoring, 60+ for casual viewing."
+                   ErrorMessage="@_refreshIntervalError"
+                   IsRequired="true">
+            <InputContent>
+                <TbInput @bind-Value="_preferences.DashboardRefreshInterval"
+                       Id="refresh-interval"
+                       Type="number"
+                       Min="1"
+                       Max="300"
+                       HasError="@(!string.IsNullOrEmpty(_refreshIntervalError))" />
+            </InputContent>
+        </TbFormField>
+
+        @* Notification Duration *@
+        <TbFormField Label="Notification Duration (seconds)"
+                   InputId="notification-duration"
+                   HelpText="How long toast notifications remain visible on screen (2-10 seconds). Shorter durations keep the interface cleaner, while longer durations ensure you don't miss important messages. Recommended: 5 seconds."
+                   ErrorMessage="@_notificationDurationError"
+                   IsRequired="true">
+            <InputContent>
+                <TbInput @bind-Value="_preferences.NotificationDuration"
+                       Id="notification-duration"
+                       Type="number"
+                       Min="2"
+                       Max="10"
+                       HasError="@(!string.IsNullOrEmpty(_notificationDurationError))" />
+            </InputContent>
+        </TbFormField>
+
+        @* Notification Type Toggles *@
+        <div class="space-y-3">
+            <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">
+                Notification Types
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Choose which types of notifications to display. Disable types you don't want to see to reduce distractions. Error notifications are strongly recommended to stay enabled.
+            </p>
+
+            <div class="flex items-center justify-between py-2">
+                <label for="toggle-success" class="text-sm text-gray-700 dark:text-gray-300">
+                    Success Notifications
+                </label>
+                <TbToggle @bind-IsChecked="_preferences.ShowSuccessNotifications"
+                        Id="toggle-success" />
+            </div>
+
+            <div class="flex items-center justify-between py-2">
+                <label for="toggle-error" class="text-sm text-gray-700 dark:text-gray-300">
+                    Error Notifications
+                </label>
+                <TbToggle @bind-IsChecked="_preferences.ShowErrorNotifications"
+                        Id="toggle-error" />
+            </div>
+
+            <div class="flex items-center justify-between py-2">
+                <label for="toggle-info" class="text-sm text-gray-700 dark:text-gray-300">
+                    Info Notifications
+                </label>
+                <TbToggle @bind-IsChecked="_preferences.ShowInfoNotifications"
+                        Id="toggle-info" />
+            </div>
+
+            <div class="flex items-center justify-between py-2">
+                <label for="toggle-warning" class="text-sm text-gray-700 dark:text-gray-300">
+                    Warning Notifications
+                </label>
+                <TbToggle @bind-IsChecked="_preferences.ShowWarningNotifications"
+                        Id="toggle-warning" />
+            </div>
+        </div>
+
+        @* Form Actions *@
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <TbButton Variant="ButtonVariant.Secondary"
+                    Type="button"
+                    OnClick="HandleResetToDefaults">
+                Reset to Defaults
+            </TbButton>
+            <TbButton Variant="ButtonVariant.Primary"
+                    Type="submit"
+                    IsLoading="_isSaving">
+                Save Changes
+            </TbButton>
+        </div>
+    </div>
+</EditForm>
+
+@* Confirm Reset Dialog *@
+@if (_showResetConfirmation)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+         @onclick="CloseResetDialog">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+             @onclick:stopPropagation="true"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="reset-dialog-title">
+            <h3 id="reset-dialog-title" class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                Reset to Defaults?
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                This will reset all your preferences to their default values. This action cannot be undone.
+            </p>
+            <div class="flex items-center justify-end gap-3">
+                <TbButton Variant="ButtonVariant.Secondary"
+                        OnClick="CloseResetDialog">
+                    Cancel
+                </TbButton>
+                <TbButton Variant="ButtonVariant.Danger"
+                        OnClick="ConfirmReset">
+                    Reset
+                </TbButton>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private UserPreferences _preferences = new();
+    private string _selectedTheme = Theme.Light.Name;
+#pragma warning disable IDE0052, CS0414 // Field is assigned but never read (used in markup)
+    private bool _isSaving;
+    private bool _isDirty;
+#pragma warning restore IDE0052, CS0414
+    private bool _showResetConfirmation;
+    private string? _refreshIntervalError;
+    private string? _notificationDurationError;
+
+    /// <summary>
+    /// Initializes the component by loading user preferences.
+    /// </summary>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPreferences();
+    }
+
+    private async Task LoadPreferences()
+    {
+        _preferences = await UserPreferencesService.GetPreferencesAsync();
+        _selectedTheme = _preferences.Theme.Name;
+        _isDirty = false;
+    }
+
+    private async Task HandleSaveChanges()
+    {
+        // Clear previous errors
+        _refreshIntervalError = null;
+        _notificationDurationError = null;
+
+        // Validate ranges
+        if (_preferences.DashboardRefreshInterval < 1 || _preferences.DashboardRefreshInterval > 300)
+        {
+            _refreshIntervalError = "Refresh interval must be between 1 and 300 seconds. Please enter a value in this range.";
+            return;
+        }
+
+        if (_preferences.NotificationDuration < 2 || _preferences.NotificationDuration > 10)
+        {
+            _notificationDurationError = "Notification duration must be between 2 and 10 seconds. Please enter a value in this range.";
+            return;
+        }
+
+        _isSaving = true;
+
+        try
+        {
+            // Update theme from selected value
+            _preferences.Theme = _selectedTheme == "Dark" ? Theme.Dark : Theme.Light;
+            _preferences.UpdatedAt = DateTime.UtcNow;
+
+            var result = await UserPreferencesService.UpdatePreferencesAsync(_preferences);
+
+            if (result.IsSuccess)
+            {
+                ToastService.ShowSuccess("Settings saved successfully!");
+                _isDirty = false;
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors);
+                ToastService.ShowError($"Failed to save settings: {errors}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"An error occurred: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void HandleResetToDefaults()
+    {
+        _showResetConfirmation = true;
+    }
+
+    private void CloseResetDialog()
+    {
+        _showResetConfirmation = false;
+    }
+
+    private async Task ConfirmReset()
+    {
+        _showResetConfirmation = false;
+
+        try
+        {
+            var resetPreferences = await UserPreferencesService.ResetToDefaultAsync();
+            _preferences = resetPreferences;
+            _selectedTheme = resetPreferences.Theme.Name;
+            _isDirty = false;
+
+            ToastService.ShowSuccess("Settings reset to defaults successfully!");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to reset settings: {ex.Message}");
+        }
+    }
+}

@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Shouldly;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Models.Trading;
 using TradingBot.Infrastructure.Persistence;
@@ -77,7 +76,7 @@ public class OrderRepositoryTests : IDisposable
     public async Task GetAllAsync_ShouldReturnAllOrders()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleOrder("SPY"));
+        await _repository.AddAsync(CreateSampleOrder());
         await _repository.AddAsync(CreateSampleOrder("AAPL"));
         await _repository.AddAsync(CreateSampleOrder("MSFT"));
         await _repository.SaveChangesAsync();
@@ -94,8 +93,8 @@ public class OrderRepositoryTests : IDisposable
     public async Task GetBySymbolAsync_ShouldReturnOrdersForSymbol()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleOrder("SPY"));
-        await _repository.AddAsync(CreateSampleOrder("SPY"));
+        await _repository.AddAsync(CreateSampleOrder());
+        await _repository.AddAsync(CreateSampleOrder());
         await _repository.AddAsync(CreateSampleOrder("AAPL"));
         await _repository.SaveChangesAsync();
 
@@ -131,7 +130,7 @@ public class OrderRepositoryTests : IDisposable
     {
         // Arrange
         var now = DateTime.UtcNow;
-        await _repository.AddAsync(CreateSampleOrder("SPY", createdAt: now.AddDays(-5)));
+        await _repository.AddAsync(CreateSampleOrder(createdAt: now.AddDays(-5)));
         await _repository.AddAsync(CreateSampleOrder("AAPL", createdAt: now.AddDays(-3)));
         await _repository.AddAsync(CreateSampleOrder("MSFT", createdAt: now.AddDays(-1)));
         await _repository.SaveChangesAsync();
@@ -210,7 +209,7 @@ public class OrderRepositoryTests : IDisposable
     public async Task FindAsync_WithPredicate_ShouldReturnMatchingOrders()
     {
         // Arrange
-        await _repository.AddAsync(CreateSampleOrder("SPY", quantity: 5m));
+        await _repository.AddAsync(CreateSampleOrder(quantity: 5m));
         await _repository.AddAsync(CreateSampleOrder("AAPL", quantity: 15m));
         await _repository.AddAsync(CreateSampleOrder("MSFT", quantity: 25m));
         await _repository.SaveChangesAsync();
@@ -229,9 +228,9 @@ public class OrderRepositoryTests : IDisposable
     {
         // Arrange
         var now = DateTime.UtcNow;
-        var order1 = CreateSampleOrder("SPY", createdAt: now.AddMinutes(-10));
-        var order2 = CreateSampleOrder("SPY", createdAt: now.AddMinutes(-5));
-        var order3 = CreateSampleOrder("SPY", createdAt: now);
+        var order1 = CreateSampleOrder(createdAt: now.AddMinutes(-10));
+        var order2 = CreateSampleOrder(createdAt: now.AddMinutes(-5));
+        var order3 = CreateSampleOrder(createdAt: now);
 
         await _repository.AddAsync(order1);
         await _repository.AddAsync(order2);
@@ -250,7 +249,7 @@ public class OrderRepositoryTests : IDisposable
 
     public void Dispose()
     {
-        _context?.Dispose();
+        _context.Dispose();
     }
 
     private static Order CreateSampleOrder(

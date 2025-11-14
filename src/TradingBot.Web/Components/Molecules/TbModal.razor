@@ -1,0 +1,103 @@
+@* <copyright file="TbModal.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright> *@
+
+@namespace TradingBot.Web.Components.Molecules
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 overflow-y-auto"
+         @onclick="OnBackdropClick"
+         @onkeydown="HandleKeyDown"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="@(string.IsNullOrEmpty(Title) ? null : "modal-title")"
+         tabindex="-1">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Modal Container -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full" @onclick:stopPropagation="true">
+                <!-- Header -->
+                @if (!string.IsNullOrEmpty(Title) || ShowCloseButton)
+                {
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        @if (!string.IsNullOrEmpty(Title))
+                        {
+                            <h3 id="modal-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">@Title</h3>
+                        }
+                        @if (ShowCloseButton)
+                        {
+                            <button type="button"
+                                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Close dialog"
+                                    @onclick="Close">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                }
+
+                <!-- Content -->
+                <div class="px-6 py-4 text-gray-900 dark:text-gray-100">
+                    @ChildContent
+                </div>
+
+                <!-- Footer -->
+                @if (FooterContent != null)
+                {
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 rounded-b-lg">
+                        @FooterContent
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter] public string? Title { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+
+    [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(IsOpen);
+    }
+
+    private async Task OnBackdropClick()
+    {
+        if (CloseOnBackdropClick)
+        {
+            await Close();
+        }
+    }
+
+    /// <summary>
+    /// Handles keyboard events for the modal.
+    /// Escape key closes the modal.
+    /// </summary>
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+
+}

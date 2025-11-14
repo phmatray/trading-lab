@@ -1,11 +1,10 @@
 @page "/help"
-@using TradingBot.Web.Components.Molecules
-@using TradingBot.Web.Components.Shared
+
 
 <PageTitle>Help & Support - TradingBot</PageTitle>
 
 <div class="max-w-4xl mx-auto py-8 px-4">
-    <PageHeader
+    <TbPageHeader
         Title="Help & Support"
         Description="Find answers to common questions and learn how to use TradingBot effectively." />
 
@@ -13,7 +12,7 @@
         <!-- Quick Start Guide -->
         <section>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Quick Start Guide</h2>
-            <Card>
+            <TbCard>
                 <div class="space-y-4">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center font-bold">
@@ -63,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-            </Card>
+            </TbCard>
         </section>
 
         <!-- Frequently Asked Questions -->
@@ -71,7 +70,7 @@
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
             <div class="space-y-4">
                 <!-- FAQ Item 1 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">How do I change the theme from light to dark mode?</h3>
@@ -92,10 +91,10 @@
                             <p class="mt-2">Your theme preference will be saved and applied automatically on future visits.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
 
                 <!-- FAQ Item 2 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">What is the dashboard refresh interval and how do I change it?</h3>
@@ -117,10 +116,10 @@
                             <p class="mt-2"><strong>Note:</strong> A shorter interval provides more real-time data but may increase server load.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
 
                 <!-- FAQ Item 3 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">How do I enable or disable trading strategies?</h3>
@@ -141,10 +140,10 @@
                             <p class="mt-2"><strong>Warning:</strong> Disabling a strategy will stop it from generating new trading signals.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
 
                 <!-- FAQ Item 4 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">What do the performance metrics mean?</h3>
@@ -166,10 +165,10 @@
                             <p class="mt-2">Visit the <a href="/performance" class="text-blue-600 dark:text-blue-400 hover:underline">Performance</a> page for detailed metrics.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
 
                 <!-- FAQ Item 5 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">How do I customize notification preferences?</h3>
@@ -191,10 +190,10 @@
                             <p class="mt-2">Disabled notification types will not appear as toast messages.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
 
                 <!-- FAQ Item 6 -->
-                <Card>
+                <TbCard>
                     <details class="group">
                         <summary class="flex items-center justify-between cursor-pointer list-none">
                             <h3 class="font-semibold text-gray-900 dark:text-white">How do I collapse the navigation sidebar?</h3>
@@ -214,14 +213,14 @@
                             <p class="mt-2"><strong>Note:</strong> The sidebar always starts expanded when you load the page. This setting is not persisted across sessions.</p>
                         </div>
                     </details>
-                </Card>
+                </TbCard>
             </div>
         </section>
 
         <!-- Keyboard Shortcuts -->
         <section>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Keyboard Shortcuts</h2>
-            <Card>
+            <TbCard>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
@@ -312,7 +311,7 @@
                         </tbody>
                     </table>
                 </div>
-            </Card>
+            </TbCard>
         </section>
 
         <!-- Common Tasks -->
@@ -320,7 +319,7 @@
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Common Tasks</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Task Card 1 -->
-                <Card>
+                <TbCard>
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Reset All Settings to Default</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">
                         If you want to restore all settings to their default values:
@@ -331,10 +330,10 @@
                         <li>Click the "Reset to Defaults" button</li>
                         <li>Confirm the action in the dialog</li>
                     </ol>
-                </Card>
+                </TbCard>
 
                 <!-- Task Card 2 -->
-                <Card>
+                <TbCard>
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">View Trade History</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">
                         To review your past trades and analyze performance:
@@ -345,10 +344,10 @@
                         <li>Use filters to narrow down trades by date or symbol</li>
                         <li>Click on any trade for detailed information</li>
                     </ol>
-                </Card>
+                </TbCard>
 
                 <!-- Task Card 3 -->
-                <Card>
+                <TbCard>
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Run a Backtest</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">
                         To test a strategy against historical data:
@@ -360,10 +359,10 @@
                         <li>Click "Run Backtest" to start the simulation</li>
                         <li>Review results and performance metrics</li>
                     </ol>
-                </Card>
+                </TbCard>
 
                 <!-- Task Card 4 -->
-                <Card>
+                <TbCard>
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Monitor Live Performance</h3>
                     <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">
                         To track your trading performance in real-time:
@@ -374,14 +373,14 @@
                         <li>Check key metrics (Sharpe Ratio, Max Drawdown, etc.)</li>
                         <li>Adjust date range to see historical performance</li>
                     </ol>
-                </Card>
+                </TbCard>
             </div>
         </section>
 
         <!-- Troubleshooting -->
         <section>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Troubleshooting</h2>
-            <Card>
+            <TbCard>
                 <div class="space-y-4">
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-white">My settings are not saving</h3>
@@ -411,19 +410,19 @@
                         </p>
                     </div>
                 </div>
-            </Card>
+            </TbCard>
         </section>
 
         <!-- Contact Support -->
         <section>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Need More Help?</h2>
-            <Card>
+            <TbCard>
                 <div class="text-center py-6">
                     <p class="text-gray-600 dark:text-gray-300">
                         Can't find what you're looking for? Contact your system administrator for additional support.
                     </p>
                 </div>
-            </Card>
+            </TbCard>
         </section>
     </div>
 </div>

@@ -2,11 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Shouldly;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Validators;
 using TradingBot.Core.ValueObjects;
-using Xunit;
 
 namespace TradingBot.Core.Tests.Validators;
 

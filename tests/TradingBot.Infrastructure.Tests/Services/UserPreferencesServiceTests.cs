@@ -2,14 +2,10 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
-using Shouldly;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Interfaces;
-using TradingBot.Core.Validators;
 using TradingBot.Core.ValueObjects;
 using TradingBot.Infrastructure.Services;
-using Xunit;
 
 namespace TradingBot.Infrastructure.Tests.Services;
 
