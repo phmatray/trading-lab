@@ -227,17 +227,17 @@
 - [X] T117 [P] Add comprehensive XML documentation comments to all new public APIs in Web services
 - [X] T118 [P] Add file headers to all new C# files per StyleCop requirements
 - [X] T119 Run dotnet build /p:RunAnalyzers=true and fix all StyleCop/Roslynator warnings
-- [ ] T120 Run dotnet test and ensure all unit/integration tests pass
-- [ ] T121 Run dotnet test --collect:"XPlat Code Coverage" and verify 80% coverage minimum (100% for ClosePositionAsync, RunBacktestAsync, SaveRiskSettingsAsync)
+- [X] T120 Run dotnet test and ensure all unit/integration tests pass
+- [X] T121 Run dotnet test --collect:"XPlat Code Coverage" and verify 80% coverage minimum (100% for ClosePositionAsync, RunBacktestAsync, SaveRiskSettingsAsync)
 - [ ] T122 Manual test: Close position flow per User Story 1 acceptance criteria
 - [ ] T123 Manual test: Configure strategy parameters flow per User Story 2 acceptance criteria
 - [ ] T124 Manual test: Run backtest flow per User Story 3 acceptance criteria
 - [ ] T125 Manual test: Adjust risk settings flow per User Story 4 acceptance criteria
 - [ ] T126 Manual test: Real-time updates flow per User Story 5 acceptance criteria
 - [ ] T127 Manual test: SignalR reconnection handling after network interruption
-- [ ] T128 [P] Update CLAUDE.md to document new components, services, and background workers
-- [ ] T129 Verify quickstart.md instructions work end-to-end for new developer onboarding
-- [ ] T130 Run final build, verify zero warnings, commit all changes with conventional commit message
+- [X] T128 [P] Update CLAUDE.md to document new components, services, and background workers
+- [X] T129 Verify quickstart.md instructions work end-to-end for new developer onboarding
+- [X] T130 Run final build, verify zero warnings, commit all changes with conventional commit message
 
 ---
 

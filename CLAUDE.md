@@ -144,7 +144,20 @@ TradingBot.Core (Domain Models & Interfaces)
   - **Organisms**: Complex components (TbNavigationSidebar, TbThemeProvider, TbToastContainer, TbSettingsForm)
   - **Features**: Domain-specific components grouped by feature (Dashboard, Portfolio, Strategy, Risk, Performance, Backtest, Charts)
   - **Pages**: Full page components (Index, Portfolio, Strategies, Performance, Backtest, RiskSettings, Settings, Help)
-- Services: Dashboard, Portfolio, Performance, Strategy Management, Backtest, Risk Settings, Toast notifications
+- Services:
+  - **DashboardService** (Scoped): Aggregates dashboard data
+  - **PortfolioService** (Scoped): Manages positions and trade history with close position capability
+  - **PerformanceService** (Scoped): Calculates performance metrics and equity curves
+  - **StrategyManagementService** (Scoped): Configures and manages trading strategies with dynamic parameters
+  - **BacktestService** (Scoped): Executes backtests asynchronously via background queue
+  - **RiskSettingsService** (Singleton): Manages risk settings with validation
+  - **ToastService** (Singleton): Toast notifications
+  - **UIStateService** (Scoped): UI state management
+  - **NavigationService** (Scoped): Navigation helpers
+  - **RealtimeUpdateService** (Hosted Service): Publishes real-time updates via SignalR
+- Background Workers:
+  - **BacktestExecutionWorker**: Processes backtest requests from background queue using Channel-based task queue
+  - **IBackgroundTaskQueue**: Channel-based async task queue for long-running operations
 - Tailwind CSS for styling (no third-party component libraries)
 - WCAG 2.1 Level AA compliant with full keyboard navigation
 - Desktop-first design (minimum 1024px width)
