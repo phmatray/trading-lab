@@ -9,6 +9,7 @@ using TradingBot.Web.Components;
 using TradingBot.Web.Hubs;
 using TradingBot.Web.Middleware;
 using TradingBot.Web.Services;
+using TradingBot.Web.Workers;
 
 // Configure Serilog with structured logging and enrichment
 Log.Logger = new LoggerConfiguration()
@@ -70,6 +71,10 @@ builder.Services.AddSingleton<IToastService, ToastService>();
 // Add UI state and navigation services
 builder.Services.AddScoped<UIStateService>();
 builder.Services.AddScoped<NavigationService>();
+
+// Add background task queue and worker for long-running operations (backtests)
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+builder.Services.AddHostedService<BacktestExecutionWorker>();
 
 // Add real-time update service as hosted service
 builder.Services.AddHostedService<RealtimeUpdateService>();

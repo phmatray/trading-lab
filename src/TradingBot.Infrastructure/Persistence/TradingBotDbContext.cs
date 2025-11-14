@@ -75,11 +75,6 @@ public sealed class TradingBotDbContext : DbContext
     public DbSet<StrategyConfiguration> StrategyConfigurations => Set<StrategyConfiguration>();
 
     /// <summary>
-    /// Gets the RiskSettings DbSet.
-    /// </summary>
-    public DbSet<RiskSettings> RiskSettings => Set<RiskSettings>();
-
-    /// <summary>
     /// Gets the BacktestResults DbSet.
     /// </summary>
     public DbSet<BacktestResult> BacktestResults => Set<BacktestResult>();

@@ -62,6 +62,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHistoricalDataCache, HistoricalDataCache>();
         services.AddSingleton<IConfigurationService, Configuration.ConfigurationService>();
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
+        services.AddHttpClient<ISymbolSearchService, YahooFinanceSymbolSearchService>();
+        services.AddMemoryCache();
 
         // Engine services
         // Note: Changed to Scoped to avoid DI lifetime conflicts with DbContext-dependent services
