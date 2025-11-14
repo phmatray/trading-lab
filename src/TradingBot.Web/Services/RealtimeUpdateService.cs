@@ -15,17 +15,20 @@ namespace TradingBot.Web.Services;
 public sealed class RealtimeUpdateService : IHostedService, IDisposable
 {
     private static readonly TimeSpan MinimumBroadcastInterval = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan EquityUpdateInterval = TimeSpan.FromSeconds(2);
 
     private readonly IHubContext<TradingHub, ITradingClient> _hubContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RealtimeUpdateService> _logger;
     private readonly Dictionary<Guid, string> _lastPositionHashes = new();
+    private readonly HashSet<Guid> _knownPositionIds = new();
     private Timer? _timer;
     private bool _disposed;
 
     // Caching and change detection
     private string? _lastAccountStateHash;
     private DateTime _lastBroadcastTime = DateTime.MinValue;
+    private DateTime _lastEquityUpdateTime = DateTime.MinValue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RealtimeUpdateService"/> class.
@@ -125,12 +128,27 @@ public sealed class RealtimeUpdateService : IHostedService, IDisposable
             var positions = await portfolioManager.GetPositionsAsync();
             var currentPositionIds = new HashSet<Guid>();
 
-            // Broadcast position updates only if changed
+            // Detect new positions and broadcast position updates
             foreach (var position in positions)
             {
                 currentPositionIds.Add(position.Id);
                 var positionHash = ComputeHash(position);
 
+                // Check if this is a new position (position opened)
+                if (!_knownPositionIds.Contains(position.Id))
+                {
+                    await _hubContext.Clients.All.OnPositionOpened(position);
+                    _knownPositionIds.Add(position.Id);
+                    _logger.LogInformation(
+                        "Position opened: {Symbol} {Side} {Quantity} @ {Price}",
+                        position.Symbol,
+                        position.Side,
+                        position.Quantity,
+                        position.EntryPrice);
+                    broadcastOccurred = true;
+                }
+
+                // Broadcast position updates only if changed
                 if (!_lastPositionHashes.TryGetValue(position.Id, out var lastHash) || lastHash != positionHash)
                 {
                     await _hubContext.Clients.All.ReceivePositionUpdate(position);
@@ -139,11 +157,48 @@ public sealed class RealtimeUpdateService : IHostedService, IDisposable
                 }
             }
 
-            // Clean up hashes for closed positions
-            var closedPositionIds = _lastPositionHashes.Keys.Except(currentPositionIds).ToList();
-            foreach (var closedId in closedPositionIds)
+            // Detect closed positions
+            var closedPositionIds = _knownPositionIds.Except(currentPositionIds).ToList();
+            if (closedPositionIds.Count > 0)
             {
-                _lastPositionHashes.Remove(closedId);
+                // Get recent trades to find the most recent one for each closed position
+                var trades = await portfolioManager.GetTradeHistoryAsync(
+                    startDate: DateTime.UtcNow.AddMinutes(-5),
+                    endDate: DateTime.UtcNow);
+
+                foreach (var closedId in closedPositionIds)
+                {
+                    // Find the most recent trade (assumes trade was just created when position closed)
+                    var closedTrade = trades
+                        .OrderByDescending(t => t.ExitTime)
+                        .FirstOrDefault();
+
+                    if (closedTrade != null)
+                    {
+                        await _hubContext.Clients.All.OnPositionClosed(closedId, closedTrade);
+                        _logger.LogInformation(
+                            "Position closed: {PositionId} - {Symbol} - Realized P&L: {PnL}",
+                            closedId,
+                            closedTrade.Symbol,
+                            closedTrade.RealizedPnL);
+                    }
+
+                    _knownPositionIds.Remove(closedId);
+                    _lastPositionHashes.Remove(closedId);
+                    broadcastOccurred = true;
+                }
+            }
+
+            // Broadcast equity updates every 2 seconds
+            if (now - _lastEquityUpdateTime >= EquityUpdateInterval)
+            {
+                var totalEquity = account.Equity;
+                var unrealizedPnL = positions.Sum(p => p.UnrealizedPnL);
+                var realizedPnL = account.RealizedPnL;
+
+                await _hubContext.Clients.All.OnEquityUpdated(totalEquity, unrealizedPnL, realizedPnL);
+                _lastEquityUpdateTime = now;
+                broadcastOccurred = true;
             }
 
             // Update last broadcast time only if we actually broadcast

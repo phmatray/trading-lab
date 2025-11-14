@@ -5,6 +5,9 @@ Copyright (c) TradingBot. All rights reserved.
 @page "/portfolio"
 @inject IPortfolioService PortfolioService
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@implements IAsyncDisposable
 
 <PageTitle>Portfolio - TradingBot</PageTitle>
 
@@ -116,6 +119,7 @@ Copyright (c) TradingBot. All rights reserved.
 }
 
 @code {
+    private HubConnection? _hubConnection;
     private List<Trade> _tradeHistory = new();
     private List<Position> _openPositions = new();
     private PortfolioHistoryFilter _currentFilter = new();
@@ -136,6 +140,7 @@ Copyright (c) TradingBot. All rights reserved.
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
+        await InitializeSignalRConnection();
     }
 
     private async Task LoadDataAsync()
@@ -271,6 +276,112 @@ Copyright (c) TradingBot. All rights reserved.
             _notificationMessage = null;
             InvokeAsync(StateHasChanged);
         });
+    }
+
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // Register SignalR event handlers for position events
+            _hubConnection.On<Position>("OnPositionOpened", HandlePositionOpened);
+            _hubConnection.On<Guid, Trade>("OnPositionClosed", HandlePositionClosedEvent);
+
+            // Connection lifecycle events
+            _hubConnection.Closed += OnConnectionClosed;
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Failed to connect to real-time updates: {ex.Message}", isError: true);
+        }
+    }
+
+    private void HandlePositionOpened(Position position)
+    {
+        // Add new position to the list
+        _openPositions.Insert(0, position);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandlePositionClosedEvent(Guid positionId, Trade trade)
+    {
+        // Remove closed position from list
+        var position = _openPositions.FirstOrDefault(p => p.Id == positionId);
+        if (position is not null)
+        {
+            _openPositions.Remove(position);
+        }
+
+        // Add trade to history
+        _tradeHistory.Insert(0, trade);
+        _tradeHistory = _tradeHistory.Take(PageSize * _totalPages).ToList();
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnConnectionClosed(Exception? exception)
+    {
+        // Notify user that connection was lost
+        InvokeAsync(() =>
+        {
+            ToastService.ShowWarning("Real-time portfolio updates disconnected. Attempting to reconnect...", "Connection Lost");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        // Notify user that we're attempting to reconnect
+        InvokeAsync(() =>
+        {
+            ToastService.ShowInfo("Reconnecting to real-time updates...", "Reconnecting");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        // Notify user that connection was restored
+        InvokeAsync(async () =>
+        {
+            ToastService.ShowSuccess("Real-time portfolio updates reconnected successfully!", "Connected");
+            await LoadDataAsync();
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Closed -= OnConnectionClosed;
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            await _hubConnection.DisposeAsync();
+        }
     }
 
 }

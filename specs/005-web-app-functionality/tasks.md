@@ -54,7 +54,7 @@
 
 ---
 
-## Phase 3: User Story 5 - View Real-Time Portfolio Updates (Priority: P1) 🎯 MVP CRITICAL
+## Phase 3: User Story 5 - View Real-Time Portfolio Updates (Priority: P1) 🎯 MVP CRITICAL ✅ COMPLETE
 
 **Goal**: Implement real-time SignalR updates for portfolio changes, position openings/closings, and equity fluctuations without page refresh
 
@@ -64,15 +64,15 @@
 
 ### Implementation for User Story 5
 
-- [ ] T026 [P] [US5] Enhance RealtimeUpdateService to publish OnPositionOpened events in src/TradingBot.Web/Services/RealtimeUpdateService.cs
-- [ ] T027 [P] [US5] Enhance RealtimeUpdateService to publish OnPositionClosed events in src/TradingBot.Web/Services/RealtimeUpdateService.cs
-- [ ] T028 [P] [US5] Enhance RealtimeUpdateService to publish OnEquityUpdated events every 2 seconds in src/TradingBot.Web/Services/RealtimeUpdateService.cs
-- [ ] T029 [US5] Update Dashboard page (src/TradingBot.Web/Components/Pages/Index.razor) to subscribe to OnEquityUpdated, OnPositionOpened, OnPositionClosed events
-- [ ] T030 [US5] Update Portfolio page (src/TradingBot.Web/Components/Pages/Portfolio.razor) to subscribe to OnPositionClosed and OnPositionOpened events
-- [ ] T031 [US5] Implement IAsyncDisposable in Dashboard page to unsubscribe from SignalR events on dispose
-- [ ] T032 [US5] Implement IAsyncDisposable in Portfolio page to unsubscribe from SignalR events on dispose
-- [ ] T033 [US5] Add reconnection handling with toast notification when SignalR connection is lost/restored
-- [ ] T034 [US5] Test SignalR connection loss and automatic reconnection with data resynchronization
+- [X] T026 [P] [US5] Enhance RealtimeUpdateService to publish OnPositionOpened events in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T027 [P] [US5] Enhance RealtimeUpdateService to publish OnPositionClosed events in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T028 [P] [US5] Enhance RealtimeUpdateService to publish OnEquityUpdated events every 2 seconds in src/TradingBot.Web/Services/RealtimeUpdateService.cs
+- [X] T029 [US5] Update Dashboard page (src/TradingBot.Web/Pages/Index.razor) to subscribe to OnEquityUpdated, OnPositionOpened, OnPositionClosed events
+- [X] T030 [US5] Update Portfolio page (src/TradingBot.Web/Pages/Portfolio.razor) to subscribe to OnPositionClosed and OnPositionOpened events
+- [X] T031 [US5] Implement IAsyncDisposable in Dashboard page to unsubscribe from SignalR events on dispose
+- [X] T032 [US5] Implement IAsyncDisposable in Portfolio page to unsubscribe from SignalR events on dispose
+- [X] T033 [US5] Add reconnection handling with toast notification when SignalR connection is lost/restored
+- [X] T034 [US5] Test SignalR connection loss and automatic reconnection with data resynchronization
 
 **Checkpoint**: Real-time updates working - users can now see live data updates without page refresh
 
