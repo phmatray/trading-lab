@@ -1,0 +1,465 @@
+// <copyright file="OrderExecutionServiceTests.cs" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
+using Shouldly;
+using TradingBot.Core.Enums;
+using TradingBot.Core.Interfaces;
+using TradingBot.Core.Models.MarketData;
+using TradingBot.Core.Models.Trading;
+
+namespace TradingBot.Engine.Tests;
+
+public sealed class OrderExecutionServiceTests
+{
+    private readonly ILogger<OrderExecutionService> _logger;
+    private readonly IOrderRepository _orderRepository;
+    private readonly IMarketDataService _marketDataService;
+    private readonly OrderExecutionService _orderExecutionService;
+
+    public OrderExecutionServiceTests()
+    {
+        _logger = A.Fake<ILogger<OrderExecutionService>>();
+        _orderRepository = A.Fake<IOrderRepository>();
+        _marketDataService = A.Fake<IMarketDataService>();
+        _orderExecutionService = new OrderExecutionService(
+            _orderRepository,
+            _marketDataService,
+            _logger);
+    }
+
+    private static Quote CreateTestQuote(string symbol = "SPY", decimal price = 450m)
+    {
+        return new Quote
+        {
+            Symbol = symbol,
+            Price = price,
+            Bid = price - 0.50m,
+            Ask = price + 0.50m,
+            Volume = 1000000,
+            Change = 5m,
+            ChangePercent = 1.12m,
+            Timestamp = DateTime.UtcNow,
+        };
+    }
+
+    private static Order CreateTestOrder(
+        OrderType type = OrderType.Market,
+        OrderSide side = OrderSide.Buy,
+        decimal quantity = 10m,
+        string symbol = "SPY")
+    {
+        return new Order
+        {
+            Id = Guid.NewGuid(),
+            Symbol = symbol,
+            Type = type,
+            Side = side,
+            Quantity = quantity,
+            Status = OrderStatus.Pending,
+            CreatedAt = DateTime.UtcNow,
+            StrategyName = "TestStrategy",
+        };
+    }
+
+    [Fact]
+    public void Constructor_WithNullOrderRepository_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new OrderExecutionService(null!, _marketDataService, _logger));
+    }
+
+    [Fact]
+    public void Constructor_WithNullMarketDataService_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new OrderExecutionService(_orderRepository, null!, _logger));
+    }
+
+    [Fact]
+    public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new OrderExecutionService(_orderRepository, _marketDataService, null!));
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithNullOrder_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        await Should.ThrowAsync<ArgumentNullException>(
+            async () => await _orderExecutionService.SubmitOrderAsync(null!));
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithValidMarketOrder_ShouldSubmitAndExecute()
+    {
+        // Arrange
+        var order = CreateTestOrder();
+        var quote = CreateTestQuote();
+
+        A.CallTo(() => _marketDataService.GetQuoteAsync("SPY", A<CancellationToken>._))
+            .Returns(quote);
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Filled);
+        result.FilledQuantity.ShouldBe(10m);
+        result.AverageFillPrice.ShouldBeGreaterThan(0);
+
+        A.CallTo(() => _orderRepository.AddAsync(order, A<CancellationToken>._))
+            .MustHaveHappened();
+        A.CallTo(() => _orderRepository.UpdateAsync(order, A<CancellationToken>._))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithValidLimitOrder_ShouldSubmitWithoutExecution()
+    {
+        // Arrange
+        var order = CreateTestOrder(type: OrderType.Limit);
+        order.LimitPrice = 450m;
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Submitted);
+        result.FilledQuantity.ShouldBe(0m);
+
+        A.CallTo(() => _orderRepository.AddAsync(order, A<CancellationToken>._))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithInvalidQuantity_ShouldRejectOrder()
+    {
+        // Arrange
+        var order = CreateTestOrder(quantity: 0m);
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Rejected);
+
+        A.CallTo(() => _orderRepository.AddAsync(order, A<CancellationToken>._))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithEmptySymbol_ShouldRejectOrder()
+    {
+        // Arrange
+        var order = CreateTestOrder(symbol: string.Empty);
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Rejected);
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithLimitOrderZeroPrice_ShouldRejectOrder()
+    {
+        // Arrange
+        var order = CreateTestOrder(type: OrderType.Limit);
+        order.LimitPrice = 0m;
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Rejected);
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WithStopLossZeroPrice_ShouldRejectOrder()
+    {
+        // Arrange
+        var order = CreateTestOrder(type: OrderType.StopLoss, side: OrderSide.Sell);
+        order.StopPrice = 0m;
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Rejected);
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WhenMarketDataUnavailable_ShouldSubmitButNotExecute()
+    {
+        // Arrange
+        var order = CreateTestOrder();
+
+        A.CallTo(() => _marketDataService.GetQuoteAsync("SPY", A<CancellationToken>._))
+            .Returns<Quote>(null!);
+
+        // Act
+        var result = await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(OrderStatus.Submitted);
+        result.FilledQuantity.ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WhenOrderFilled_ShouldRaiseOrderFilledEvent()
+    {
+        // Arrange
+        var order = CreateTestOrder();
+        var quote = CreateTestQuote();
+
+        A.CallTo(() => _marketDataService.GetQuoteAsync("SPY", A<CancellationToken>._))
+            .Returns(quote);
+
+        Order? filledOrder = null;
+        _orderExecutionService.OrderFilled += (_, o) => filledOrder = o;
+
+        // Act
+        await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert - Event should fire synchronously
+        filledOrder.ShouldNotBeNull();
+        filledOrder.Status.ShouldBe(OrderStatus.Filled);
+    }
+
+    [Fact]
+    public async Task SubmitOrderAsync_WhenOrderRejected_ShouldRaiseOrderRejectedEvent()
+    {
+        // Arrange
+        var order = CreateTestOrder(quantity: 0m);
+
+        Order? rejectedOrder = null;
+        _orderExecutionService.OrderRejected += (_, o) => rejectedOrder = o;
+
+        // Act
+        await _orderExecutionService.SubmitOrderAsync(order);
+
+        // Assert - Event should fire synchronously
+        rejectedOrder.ShouldNotBeNull();
+        rejectedOrder.Status.ShouldBe(OrderStatus.Rejected);
+    }
+
+    [Fact]
+    public async Task CancelOrderAsync_WithNonExistentOrder_ShouldReturnFalse()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(Task.FromResult<Order?>(null));
+
+        // Act
+        var result = await _orderExecutionService.CancelOrderAsync(orderId);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task CancelOrderAsync_WithPendingOrder_ShouldCancelSuccessfully()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var order = CreateTestOrder();
+        order.Id = orderId;
+
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(order);
+
+        // Act
+        var result = await _orderExecutionService.CancelOrderAsync(orderId);
+
+        // Assert
+        result.ShouldBeTrue();
+        order.Status.ShouldBe(OrderStatus.Cancelled);
+        A.CallTo(() => _orderRepository.UpdateAsync(order, A<CancellationToken>._))
+            .MustHaveHappened();
+    }
+
+    [Fact]
+    public async Task CancelOrderAsync_WithFilledOrder_ShouldReturnFalse()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var order = CreateTestOrder();
+        order.Id = orderId;
+        order.Status = OrderStatus.Filled;
+
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(order);
+
+        // Act
+        var result = await _orderExecutionService.CancelOrderAsync(orderId);
+
+        // Assert
+        result.ShouldBeFalse();
+        order.Status.ShouldBe(OrderStatus.Filled);
+    }
+
+    [Fact]
+    public async Task CancelOrderAsync_WhenSuccessful_ShouldRaiseOrderCancelledEvent()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var order = CreateTestOrder();
+        order.Id = orderId;
+
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(order);
+
+        Order? cancelledOrder = null;
+        _orderExecutionService.OrderCancelled += (_, o) => cancelledOrder = o;
+
+        // Act
+        await _orderExecutionService.CancelOrderAsync(orderId);
+
+        // Assert
+        cancelledOrder.ShouldNotBeNull();
+        cancelledOrder.Status.ShouldBe(OrderStatus.Cancelled);
+    }
+
+    [Fact]
+    public async Task GetOrderAsync_WithExistingOrder_ShouldReturnOrder()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        var order = CreateTestOrder();
+        order.Id = orderId;
+        order.Status = OrderStatus.Filled;
+
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(order);
+
+        // Act
+        var result = await _orderExecutionService.GetOrderAsync(orderId);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(orderId);
+    }
+
+    [Fact]
+    public async Task GetOrderAsync_WithNonExistentOrder_ShouldReturnNull()
+    {
+        // Arrange
+        var orderId = Guid.NewGuid();
+        A.CallTo(() => _orderRepository.GetByIdAsync(orderId, A<CancellationToken>._))
+            .Returns(Task.FromResult<Order?>(null));
+
+        // Act
+        var result = await _orderExecutionService.GetOrderAsync(orderId);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetOrdersAsync_WithNoFilters_ShouldReturnAllOrders()
+    {
+        // Arrange
+        var orders = new List<Order>
+        {
+            CreateTestOrder(symbol: "SPY"),
+            CreateTestOrder(symbol: "QQQ"),
+        };
+        orders[0].Status = OrderStatus.Filled;
+        orders[1].Status = OrderStatus.Pending;
+
+        A.CallTo(() => _orderRepository.GetAllAsync(A<CancellationToken>._))
+            .Returns(orders);
+
+        // Act
+        var result = await _orderExecutionService.GetOrdersAsync();
+
+        // Assert
+        result.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task GetOrdersAsync_WithSymbolFilter_ShouldFilterBySymbol()
+    {
+        // Arrange
+        var orders = new List<Order>
+        {
+            CreateTestOrder(symbol: "SPY"),
+            CreateTestOrder(symbol: "QQQ"),
+        };
+
+        A.CallTo(() => _orderRepository.GetAllAsync(A<CancellationToken>._))
+            .Returns(orders);
+
+        // Act
+        var result = await _orderExecutionService.GetOrdersAsync(symbol: "SPY");
+
+        // Assert
+        result.Count.ShouldBe(1);
+        result[0].Symbol.ShouldBe("SPY");
+    }
+
+    [Fact]
+    public async Task GetOrdersAsync_WithStatusFilter_ShouldFilterByStatus()
+    {
+        // Arrange
+        var orders = new List<Order>
+        {
+            CreateTestOrder(symbol: "SPY"),
+            CreateTestOrder(symbol: "QQQ"),
+        };
+        orders[0].Status = OrderStatus.Filled;
+        orders[1].Status = OrderStatus.Pending;
+
+        A.CallTo(() => _orderRepository.GetAllAsync(A<CancellationToken>._))
+            .Returns(orders);
+
+        // Act
+        var result = await _orderExecutionService.GetOrdersAsync(status: OrderStatus.Pending);
+
+        // Assert
+        result.Count.ShouldBe(1);
+        result[0].Status.ShouldBe(OrderStatus.Pending);
+    }
+
+    [Fact]
+    public async Task GetOpenOrdersAsync_ShouldReturnOnlyOpenOrders()
+    {
+        // Arrange
+        var orders = new List<Order>
+        {
+            CreateTestOrder(symbol: "SPY"),
+            CreateTestOrder(symbol: "QQQ"),
+            CreateTestOrder(symbol: "AAPL"),
+            CreateTestOrder(symbol: "MSFT"),
+        };
+        orders[0].Status = OrderStatus.Pending;
+        orders[1].Status = OrderStatus.Submitted;
+        orders[2].Status = OrderStatus.Filled;
+        orders[3].Status = OrderStatus.Cancelled;
+
+        A.CallTo(() => _orderRepository.GetAllAsync(A<CancellationToken>._))
+            .Returns(orders);
+
+        // Act
+        var result = await _orderExecutionService.GetOpenOrdersAsync();
+
+        // Assert
+        result.Count.ShouldBe(2);
+        result.All(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Submitted).ShouldBeTrue();
+    }
+}

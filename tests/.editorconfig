@@ -1,0 +1,29 @@
+# EditorConfig for test projects
+# Relaxed rules for unit tests
+
+root = false
+
+[*.cs]
+# Disable documentation requirements for test methods
+dotnet_diagnostic.SA1600.severity = none
+
+# Disable XML documentation header requirements
+dotnet_diagnostic.SA1633.severity = none
+
+# Allow test methods without documentation
+dotnet_diagnostic.CS1591.severity = none
+
+# Disable xUnit cancellation token warnings for simpler test code
+dotnet_diagnostic.xUnit1051.severity = suggestion
+
+# Allow regions in test files for organization
+dotnet_diagnostic.SA1124.severity = none
+
+# Allow flexible member ordering in tests
+dotnet_diagnostic.SA1202.severity = none
+
+# Allow comments without preceding blank lines
+dotnet_diagnostic.SA1515.severity = none
+
+# Allow multiple whitespace for alignment in tests
+dotnet_diagnostic.SA1025.severity = none
