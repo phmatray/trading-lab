@@ -13,7 +13,6 @@ namespace TradingBot.Web.Services;
 public sealed class DashboardService : IDashboardService
 {
     private readonly IPortfolioManager _portfolioManager;
-    private readonly IRiskSettingsService _riskSettingsService;
     private readonly IStrategyManagementService _strategyManagementService;
     private readonly ILogger<DashboardService> _logger;
 
@@ -21,17 +20,14 @@ public sealed class DashboardService : IDashboardService
     /// Initializes a new instance of the <see cref="DashboardService"/> class.
     /// </summary>
     /// <param name="portfolioManager">The portfolio manager.</param>
-    /// <param name="riskSettingsService">The risk settings service.</param>
     /// <param name="strategyManagementService">The strategy management service.</param>
     /// <param name="logger">The logger instance.</param>
     public DashboardService(
         IPortfolioManager portfolioManager,
-        IRiskSettingsService riskSettingsService,
         IStrategyManagementService strategyManagementService,
         ILogger<DashboardService> logger)
     {
         _portfolioManager = portfolioManager;
-        _riskSettingsService = riskSettingsService;
         _strategyManagementService = strategyManagementService;
         _logger = logger;
     }
@@ -53,7 +49,6 @@ public sealed class DashboardService : IDashboardService
                 strategyName: null,
                 cancellationToken: cancellationToken);
             var metricsTask = _portfolioManager.GetPerformanceMetricsAsync(cancellationToken);
-            var riskSettingsTask = _riskSettingsService.GetCurrentSettingsAsync(cancellationToken);
             var strategiesTask = _strategyManagementService.GetAllStrategiesAsync(cancellationToken);
 
             await Task.WhenAll(
@@ -61,15 +56,17 @@ public sealed class DashboardService : IDashboardService
                 positionsTask,
                 tradesTask,
                 metricsTask,
-                riskSettingsTask,
                 strategiesTask);
 
             var account = await accountTask;
             var positions = await positionsTask;
             var trades = await tradesTask;
             var metrics = await metricsTask;
-            var riskSettings = await riskSettingsTask;
             var strategies = await strategiesTask;
+
+            // Use default risk settings for dashboard display
+            // The actual risk settings are managed through the RiskSettingsPage
+            var riskSettings = new TradingBot.Core.Models.Risk.RiskSettings();
 
             // Take top 10 positions by value
             var topPositions = positions

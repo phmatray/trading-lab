@@ -79,6 +79,11 @@ public sealed class TradingBotDbContext : DbContext
     /// </summary>
     public DbSet<BacktestResult> BacktestResults => Set<BacktestResult>();
 
+    /// <summary>
+    /// Gets the RiskSettings DbSet.
+    /// </summary>
+    public DbSet<Core.Models.Configuration.RiskSettings> RiskSettings => Set<Core.Models.Configuration.RiskSettings>();
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

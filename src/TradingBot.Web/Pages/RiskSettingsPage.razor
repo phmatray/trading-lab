@@ -1,60 +1,70 @@
 @page "/risk-settings"
-@implements IDisposable
+@using TradingBot.Core.Models.Configuration
+@implements IAsyncDisposable
 @inject IRiskSettingsService RiskSettingsService
+@inject IToastService ToastService
 @inject ILogger<RiskSettingsPage> Logger
+@inject Microsoft.AspNetCore.SignalR.Client.HubConnection HubConnection
 
 <PageTitle>Risk Settings - TradingBot</PageTitle>
 
 <TbPageHeader Title="Risk Management Settings"
             Description="Configure risk parameters to protect your trading account" />
 
-@if (isLoading)
+@if (_isLoading)
 {
     <div class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <TbSpinner Size="@SpinnerSize.Large" />
     </div>
 }
-else if (currentSettings is not null)
+else if (_currentSettings is not null)
 {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Risk Settings Form -->
         <div class="lg:col-span-2">
             <TbCard Title="Risk Parameters">
                 <TbRiskSettingsForm
-                    Settings="@currentSettings"
+                    Settings="@_currentSettings"
                     OnSave="@HandleSaveAsync"
-                    OnCancel="@HandleCancel"
-                    IsSaving="@isSaving"/>
+                    OnReset="@HandleResetAsync"
+                    IsLoading="@_isSaving"/>
             </TbCard>
         </div>
 
-        <!-- Risk Status Indicator -->
+        <!-- Risk Info -->
         <div class="lg:col-span-1">
-            <TbRiskStatusIndicator Settings="@currentSettings"/>
+            <TbCard Title="Current Settings">
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Position Size</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxPositionSizePercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Open Positions</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxOpenPositions</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Stop Loss</p>
+                        <p class="text-lg font-semibold">@_currentSettings.StopLossPercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Take Profit</p>
+                        <p class="text-lg font-semibold">@_currentSettings.TakeProfitPercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Daily Loss</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxDailyLossPercent%</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Last modified</p>
+                        <p class="text-sm">@_currentSettings.LastModified.ToLocalTime().ToString("g")</p>
+                    </div>
+                </div>
+            </TbCard>
         </div>
     </div>
-
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            @successMessage
-        </div>
-    }
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-            @errorMessage
-        </div>
-    }
 }
-else if (!string.IsNullOrEmpty(errorMessage))
+else
 {
     <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div class="flex">
@@ -63,97 +73,109 @@ else if (!string.IsNullOrEmpty(errorMessage))
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <p class="text-red-800 dark:text-red-300">@errorMessage</p>
+            <p class="text-red-800 dark:text-red-300">Failed to load risk settings. Please try again.</p>
         </div>
     </div>
 }
 
 @code {
-    private RiskSettings? currentSettings;
-    private bool isLoading = true;
-    private bool isSaving = false;
-    private string? successMessage;
-    private string? errorMessage;
-    private Timer? notificationTimer;
+    private TradingBot.Core.Models.Configuration.RiskSettings? _currentSettings;
+    private bool _isLoading = true;
+    private bool _isSaving = false;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadRiskSettingsAsync();
+
+        // Subscribe to SignalR risk settings updates
+        HubConnection.On<TradingBot.Core.Models.Configuration.RiskSettings>("ReceiveRiskSettingsUpdate", async (settings) =>
+        {
+            _currentSettings = settings;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        if (HubConnection.State != Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
+        {
+            await HubConnection.StartAsync();
+        }
     }
 
     private async Task LoadRiskSettingsAsync()
     {
         try
         {
-            isLoading = true;
-            errorMessage = null;
-            currentSettings = await RiskSettingsService.GetCurrentSettingsAsync();
+            _isLoading = true;
+            _currentSettings = await RiskSettingsService.GetRiskSettingsAsync();
             Logger.LogInformation("Risk settings loaded successfully");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to load risk settings");
-            errorMessage = "Failed to load risk settings. Please try again.";
+            ToastService.ShowError("Failed to load risk settings");
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
-    private async Task HandleSaveAsync(RiskSettings updatedSettings)
+    private async Task HandleSaveAsync(TradingBot.Core.Models.Configuration.RiskSettings updatedSettings)
     {
         try
         {
-            isSaving = true;
-            errorMessage = null;
-            successMessage = null;
+            _isSaving = true;
 
-            await RiskSettingsService.UpdateSettingsAsync(updatedSettings);
+            var success = await RiskSettingsService.SaveRiskSettingsAsync(updatedSettings);
 
-            currentSettings = updatedSettings;
-            successMessage = "Risk settings saved successfully!";
-            Logger.LogInformation("Risk settings updated: Leverage={Leverage}, StopLoss={StopLoss}%, TakeProfit={TakeProfit}%",
-                updatedSettings.Leverage, updatedSettings.StopLossPercent, updatedSettings.TakeProfitPercent);
-
-            // Auto-hide success message after 3 seconds
-            notificationTimer?.Dispose();
-            notificationTimer = new Timer(_ =>
+            if (success)
             {
-                InvokeAsync(() =>
-                {
-                    successMessage = null;
-                    StateHasChanged();
-                });
-            }, null, 3000, Timeout.Infinite);
-        }
-        catch (ArgumentException ex)
-        {
-            Logger.LogWarning(ex, "Validation error while saving risk settings");
-            errorMessage = $"Validation error: {ex.Message}";
+                _currentSettings = updatedSettings;
+                ToastService.ShowSuccess("Risk settings saved successfully!");
+                Logger.LogInformation("Risk settings updated: MaxPositionSize={MaxPositionSize}%, StopLoss={StopLoss}%, TakeProfit={TakeProfit}%",
+                    updatedSettings.MaxPositionSizePercent, updatedSettings.StopLossPercent, updatedSettings.TakeProfitPercent);
+            }
+            else
+            {
+                ToastService.ShowError("Failed to save risk settings. Please check your values and try again.");
+                Logger.LogWarning("Risk settings validation failed");
+            }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to save risk settings");
-            errorMessage = "Failed to save risk settings. Please try again.";
+            ToastService.ShowError("An error occurred while saving risk settings");
         }
         finally
         {
-            isSaving = false;
+            _isSaving = false;
         }
     }
 
-    private void HandleCancel()
+    private async Task HandleResetAsync()
     {
-        // Reload original settings
-        _ = LoadRiskSettingsAsync();
-        successMessage = null;
-        errorMessage = null;
+        try
+        {
+            _isSaving = true;
+
+            var defaultSettings = await RiskSettingsService.ResetToDefaultsAsync();
+            _currentSettings = defaultSettings;
+
+            ToastService.ShowSuccess("Risk settings reset to defaults!");
+            Logger.LogInformation("Risk settings reset to defaults");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to reset risk settings");
+            ToastService.ShowError("An error occurred while resetting risk settings");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        notificationTimer?.Dispose();
+        HubConnection.Remove("ReceiveRiskSettingsUpdate");
     }
-
 }

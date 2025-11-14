@@ -48,7 +48,7 @@ public interface ITradingClient
     /// </summary>
     /// <param name="settings">Updated risk settings.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task ReceiveRiskSettingsUpdate(RiskSettings settings);
+    Task ReceiveRiskSettingsUpdate(Core.Models.Configuration.RiskSettings settings);
 
     /// <summary>
     /// Notifies clients when a new position is opened.
@@ -104,7 +104,7 @@ public interface ITradingClient
     /// </summary>
     /// <param name="newSettings">The updated risk settings.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task OnRiskSettingsChanged(RiskSettings newSettings);
+    Task OnRiskSettingsChanged(Core.Models.Configuration.RiskSettings newSettings);
 
     /// <summary>
     /// Notifies clients when a strategy's configuration parameters are changed.

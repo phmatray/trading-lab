@@ -118,20 +118,20 @@
 
 ### Implementation for User Story 4
 
-- [ ] T050 [P] [US4] Add SaveRiskSettingsAsync and ResetToDefaultsAsync methods to IRiskSettingsService per contracts/IRiskSettingsService.cs
-- [ ] T051 [US4] Implement SaveRiskSettingsAsync in RiskSettingsService (src/TradingBot.Web/Services/RiskSettingsService.cs) with validation, DB update, RiskManager reload, and SignalR event
-- [ ] T052 [US4] Implement ResetToDefaultsAsync in RiskSettingsService with default values from data-model.md
-- [ ] T053 [P] [US4] Create repository interface IRiskSettingsRepository in src/TradingBot.Core/Interfaces/IRiskSettingsRepository.cs
-- [ ] T054 [P] [US4] Implement RiskSettingsRepository in src/TradingBot.Infrastructure/Persistence/Repositories/RiskSettingsRepository.cs with GetAsync and UpdateAsync methods
-- [ ] T055 [US4] Register IRiskSettingsRepository in DI container in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
-- [ ] T056 [P] [US4] Create TbRiskSettingsForm feature component in src/TradingBot.Web/Components/Features/Risk/TbRiskSettingsForm.razor with validation
-- [ ] T057 [US4] Update RiskSettingsPage (src/TradingBot.Web/Components/Pages/RiskSettingsPage.razor) to replace read-only display with TbRiskSettingsForm
-- [ ] T058 [US4] Add Save button handler to call RiskSettingsService.SaveRiskSettingsAsync
-- [ ] T059 [US4] Add Reset to Defaults button handler to call RiskSettingsService.ResetToDefaultsAsync
-- [ ] T060 [US4] Subscribe to OnRiskSettingsChanged SignalR event to refresh form after external updates
-- [ ] T061 [US4] Add validation error display for out-of-range values with specific error messages
-- [ ] T062 [US4] Add loading state during save/reset operations
-- [ ] T063 [US4] Add success/error toast notifications after save/reset
+- [X] T050 [P] [US4] Add SaveRiskSettingsAsync and ResetToDefaultsAsync methods to IRiskSettingsService per contracts/IRiskSettingsService.cs
+- [X] T051 [US4] Implement SaveRiskSettingsAsync in RiskSettingsService (src/TradingBot.Web/Services/RiskSettingsService.cs) with validation, DB update, RiskManager reload, and SignalR event
+- [X] T052 [US4] Implement ResetToDefaultsAsync in RiskSettingsService with default values from data-model.md
+- [X] T053 [P] [US4] Create repository interface IRiskSettingsRepository in src/TradingBot.Core/Interfaces/IRiskSettingsRepository.cs
+- [X] T054 [P] [US4] Implement RiskSettingsRepository in src/TradingBot.Infrastructure/Persistence/Repositories/RiskSettingsRepository.cs with GetAsync and UpdateAsync methods
+- [X] T055 [US4] Register IRiskSettingsRepository in DI container in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
+- [X] T056 [P] [US4] Create TbRiskSettingsForm feature component in src/TradingBot.Web/Components/Features/Risk/TbRiskSettingsForm.razor with validation
+- [X] T057 [US4] Update RiskSettingsPage (src/TradingBot.Web/Components/Pages/RiskSettingsPage.razor) to replace read-only display with TbRiskSettingsForm
+- [X] T058 [US4] Add Save button handler to call RiskSettingsService.SaveRiskSettingsAsync
+- [X] T059 [US4] Add Reset to Defaults button handler to call RiskSettingsService.ResetToDefaultsAsync
+- [X] T060 [US4] Subscribe to OnRiskSettingsChanged SignalR event to refresh form after external updates
+- [X] T061 [US4] Add validation error display for out-of-range values with specific error messages
+- [X] T062 [US4] Add loading state during save/reset operations
+- [X] T063 [US4] Add success/error toast notifications after save/reset
 - [ ] T064 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_ValidSettings_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/RiskSettingsServiceTests.cs
 - [ ] T065 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_InvalidRange_ReturnsFalse unit test
 - [ ] T066 [P] [US4] Create RiskSettingsServiceTests.ResetToDefaultsAsync_ReturnsDefaultValues unit test
