@@ -354,11 +354,11 @@ public sealed class MeanReversionStrategyTests
         if (signal != null)
         {
             signal.Metadata.ShouldNotBeNull();
-            signal.Metadata.ShouldContainKey("upper_band");
-            signal.Metadata.ShouldContainKey("middle_band");
-            signal.Metadata.ShouldContainKey("lower_band");
-            signal.Metadata.ShouldContainKey("current_price");
-            signal.Metadata.ShouldContainKey("band_width");
+            signal.Metadata.ContainsKey("upper_band").ShouldBeTrue();
+            signal.Metadata.ContainsKey("middle_band").ShouldBeTrue();
+            signal.Metadata.ContainsKey("lower_band").ShouldBeTrue();
+            signal.Metadata.ContainsKey("current_price").ShouldBeTrue();
+            signal.Metadata.ContainsKey("band_width").ShouldBeTrue();
         }
     }
 }

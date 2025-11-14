@@ -1,0 +1,164 @@
+@page "/risk-settings"
+@using TradingBot.Web.Services
+@using TradingBot.Core.Models.Risk
+@implements IDisposable
+@inject IRiskSettingsService RiskSettingsService
+@inject ILogger<RiskSettingsPage> Logger
+
+<PageTitle>Risk Settings - TradingBot</PageTitle>
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Risk Management Settings</h1>
+        <p class="mt-2 text-gray-600 dark:text-gray-400">Configure risk parameters to protect your trading account</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="flex items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+    }
+    else if (currentSettings is not null)
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Risk Settings Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Risk Parameters</h2>
+
+                    <RiskSettingsForm
+                        Settings="@currentSettings"
+                        OnSave="@HandleSaveAsync"
+                        OnCancel="@HandleCancel"
+                        IsSaving="@isSaving" />
+                </div>
+            </div>
+
+            <!-- Risk Status Indicator -->
+            <div class="lg:col-span-1">
+                <RiskStatusIndicator Settings="@currentSettings" />
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                @successMessage
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                @errorMessage
+            </div>
+        }
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div class="flex">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-red-800 dark:text-red-300">@errorMessage</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private RiskSettings? currentSettings;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string? successMessage;
+    private string? errorMessage;
+    private System.Threading.Timer? notificationTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRiskSettingsAsync();
+    }
+
+    private async Task LoadRiskSettingsAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            currentSettings = await RiskSettingsService.GetCurrentSettingsAsync();
+            Logger.LogInformation("Risk settings loaded successfully");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load risk settings");
+            errorMessage = "Failed to load risk settings. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSaveAsync(RiskSettings updatedSettings)
+    {
+        try
+        {
+            isSaving = true;
+            errorMessage = null;
+            successMessage = null;
+
+            await RiskSettingsService.UpdateSettingsAsync(updatedSettings);
+
+            currentSettings = updatedSettings;
+            successMessage = "Risk settings saved successfully!";
+            Logger.LogInformation("Risk settings updated: Leverage={Leverage}, StopLoss={StopLoss}%, TakeProfit={TakeProfit}%",
+                updatedSettings.Leverage, updatedSettings.StopLossPercent, updatedSettings.TakeProfitPercent);
+
+            // Auto-hide success message after 3 seconds
+            notificationTimer?.Dispose();
+            notificationTimer = new System.Threading.Timer(_ =>
+            {
+                InvokeAsync(() =>
+                {
+                    successMessage = null;
+                    StateHasChanged();
+                });
+            }, null, 3000, System.Threading.Timeout.Infinite);
+        }
+        catch (ArgumentException ex)
+        {
+            Logger.LogWarning(ex, "Validation error while saving risk settings");
+            errorMessage = $"Validation error: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to save risk settings");
+            errorMessage = "Failed to save risk settings. Please try again.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        // Reload original settings
+        _ = LoadRiskSettingsAsync();
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    public void Dispose()
+    {
+        notificationTimer?.Dispose();
+    }
+}

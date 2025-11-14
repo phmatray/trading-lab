@@ -1,0 +1,93 @@
+@* <copyright file="RiskSettingsCard.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@using TradingBot.Core.Models
+
+<div class="card-trading">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Risk Settings</h2>
+        @if (Settings is not null)
+        {
+            <span class="px-3 py-1 text-xs font-semibold rounded-full @GetStatusBadgeClass()">
+                @(Settings.RiskLimitsEnabled ? "Enabled" : "Disabled")
+            </span>
+        }
+    </div>
+
+    @if (Settings is not null)
+    {
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Leverage</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    @Settings.Leverage.ToString("N1")x
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Stop Loss</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    @Settings.StopLossPercent.ToString("N2")%
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Take Profit</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    @Settings.TakeProfitPercent.ToString("N2")%
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Max Position Size</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    @Settings.MaxPositionSizePercent.ToString("N2")%
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Daily Loss Limit</p>
+                <p class="text-lg font-semibold stat-negative">
+                    @Settings.DailyLossLimit.ToString("C2")
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Max Drawdown</p>
+                <p class="text-lg font-semibold stat-negative">
+                    @Settings.MaxDrawdownPercent.ToString("N2")%
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Last updated: @Settings.LastUpdated.ToString("MM/dd/yyyy HH:mm:ss")
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="flex items-center justify-center py-8">
+            <p class="text-gray-500 dark:text-gray-400">Loading risk settings...</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RiskSettings? Settings { get; set; }
+
+    private string GetStatusBadgeClass()
+    {
+        if (Settings is null)
+        {
+            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        }
+
+        return Settings.RiskLimitsEnabled
+            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+    }
+}

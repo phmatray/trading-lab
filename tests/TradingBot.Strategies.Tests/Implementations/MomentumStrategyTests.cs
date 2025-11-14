@@ -286,12 +286,12 @@ public sealed class MomentumStrategyTests
         if (signal != null)
         {
             signal.Metadata.ShouldNotBeNull();
-            signal.Metadata.ShouldContainKey("rsi");
-            signal.Metadata.ShouldContainKey("macd");
-            signal.Metadata.ShouldContainKey("macd_signal");
-            signal.Metadata.ShouldContainKey("macd_histogram");
-            signal.Metadata.ShouldContainKey("sma");
-            signal.Metadata.ShouldContainKey("current_price");
+            signal.Metadata.ContainsKey("rsi").ShouldBeTrue();
+            signal.Metadata.ContainsKey("macd").ShouldBeTrue();
+            signal.Metadata.ContainsKey("macd_signal").ShouldBeTrue();
+            signal.Metadata.ContainsKey("macd_histogram").ShouldBeTrue();
+            signal.Metadata.ContainsKey("sma").ShouldBeTrue();
+            signal.Metadata.ContainsKey("current_price").ShouldBeTrue();
         }
     }
 

@@ -62,28 +62,24 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IConfigurationService, Configuration.ConfigurationService>();
 
         // Engine services
-        services.AddSingleton<IStrategyEngine, StrategyEngine>();
+        // Note: Changed to Scoped to avoid DI lifetime conflicts with DbContext-dependent services
+        services.AddScoped<IStrategyEngine, StrategyEngine>();
         services.AddScoped<IOrderExecutionService, OrderExecutionService>();
-        services.AddSingleton<IPortfolioManager, PortfolioManager>();
-        services.AddSingleton<IRiskManager, RiskManager>();
-        services.AddSingleton<IStopLossManager, StopLossManager>();
-        services.AddSingleton<IPositionSizeCalculator, PositionSizeCalculator>();
-        services.AddSingleton<SignalProcessor>();
+        services.AddScoped<IPortfolioManager, PortfolioManager>();
+        services.AddScoped<IRiskManager, RiskManager>();
+        services.AddScoped<IStopLossManager, StopLossManager>();
+        services.AddScoped<IPositionSizeCalculator, PositionSizeCalculator>();
+        services.AddScoped<SignalProcessor>();
 
-        // Analytics services
-        services.AddSingleton<IBacktestingEngine, Analytics.BacktestingEngine>();
-        services.AddSingleton<Analytics.EquityCurveGenerator>();
-        services.AddSingleton<Analytics.DrawdownAnalyzer>();
-        services.AddSingleton<Analytics.MetricsCalculator>();
+        // Analytics services - Changed to Scoped as they depend on IPortfolioManager
+        services.AddScoped<IBacktestingEngine, Analytics.BacktestingEngine>();
+        services.AddScoped<Analytics.EquityCurveGenerator>();
+        services.AddScoped<Analytics.DrawdownAnalyzer>();
+        services.AddScoped<Analytics.MetricsCalculator>();
 
-        // Background Jobs
-        services.AddSingleton<BackgroundJobs.MarketDataRefreshJob>();
-        services.AddSingleton<BackgroundJobs.RiskMonitoringJob>();
-        services.AddSingleton<BackgroundJobs.EndOfDayJob>();
-
-        services.AddHostedService<BackgroundJobs.MarketDataRefreshJobScheduler>();
-        services.AddHostedService<BackgroundJobs.RiskMonitoringJobScheduler>();
-        services.AddHostedService<BackgroundJobs.EndOfDayJobScheduler>();
+        // Background Jobs - Disabled to avoid DI lifetime conflicts with web applications
+        // These services require singleton lifetime but depend on scoped services
+        // For CLI applications, these can be re-enabled with refactored dependencies
 
         // Logging with Serilog
         services.AddLogging(builder =>

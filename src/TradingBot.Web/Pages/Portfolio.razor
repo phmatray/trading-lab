@@ -1,0 +1,269 @@
+@* <copyright file="Portfolio.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@page "/portfolio"
+@using TradingBot.Web.Services
+@using TradingBot.Web.Models
+@inject IPortfolioService PortfolioService
+@inject IJSRuntime JS
+
+<PageTitle>Portfolio - TradingBot</PageTitle>
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Portfolio Management</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">View trade history, manage positions, and export data</p>
+    </div>
+
+    @* Trade History Filter Section *@
+    <div class="mb-6">
+        <TradeHistoryFilter OnFilterChanged="HandleFilterChanged" />
+    </div>
+
+    @* Trade History Table Section *@
+    <div class="card-trading mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Trade History</h2>
+            <button
+                @onclick="ExportTradeHistory"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled="@isExporting">
+                @if (isExporting)
+                {
+                    <span>Exporting...</span>
+                }
+                else
+                {
+                    <span>📥 Export CSV</span>
+                }
+            </button>
+        </div>
+
+        @if (isLoadingTrades)
+        {
+            <div class="flex items-center justify-center py-12">
+                <div class="text-gray-500 dark:text-gray-400">Loading trade history...</div>
+            </div>
+        }
+        else if (tradeHistory != null && tradeHistory.Any())
+        {
+            <TradeHistoryTable
+                Trades="@tradeHistory"
+                CurrentPage="@currentPage"
+                TotalPages="@totalPages"
+                OnPageChanged="HandlePageChanged" />
+        }
+        else
+        {
+            <div class="flex items-center justify-center py-12">
+                <p class="text-gray-500 dark:text-gray-400">No trade history found for the selected filters.</p>
+            </div>
+        }
+    </div>
+
+    @* Open Positions Section *@
+    <div class="card-trading">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">Open Positions</h2>
+
+        @if (isLoadingPositions)
+        {
+            <div class="flex items-center justify-center py-8">
+                <div class="text-gray-500 dark:text-gray-400">Loading positions...</div>
+            </div>
+        }
+        else if (openPositions != null && openPositions.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach (var position in openPositions)
+                {
+                    <PositionCard
+                        Position="@position"
+                        OnCloseRequested="() => ShowClosePositionModal(position)" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="flex items-center justify-center py-8">
+                <p class="text-gray-500 dark:text-gray-400">No open positions</p>
+            </div>
+        }
+    </div>
+
+    @* Success/Error Notifications *@
+    @if (!string.IsNullOrEmpty(notificationMessage))
+    {
+        <div class="fixed bottom-4 right-4 @(notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
+            @notificationMessage
+        </div>
+    }
+
+    @* Close Position Modal *@
+    @if (showCloseModal && selectedPosition != null)
+    {
+        <ClosePositionModal
+            Position="@selectedPosition"
+            OnConfirm="HandleClosePosition"
+            OnCancel="HideClosePositionModal" />
+    }
+</div>
+
+@code {
+    private List<Trade> tradeHistory = new();
+    private List<Position> openPositions = new();
+    private PortfolioHistoryFilter currentFilter = new();
+    private Position? selectedPosition;
+
+    private bool isLoadingTrades = true;
+    private bool isLoadingPositions = true;
+    private bool isExporting = false;
+    private bool showCloseModal = false;
+
+    private string? notificationMessage;
+    private bool notificationIsError;
+
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private const int PageSize = 20;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        await Task.WhenAll(
+            LoadTradeHistoryAsync(),
+            LoadOpenPositionsAsync()
+        );
+    }
+
+    private async Task LoadTradeHistoryAsync()
+    {
+        try
+        {
+            isLoadingTrades = true;
+            var result = await PortfolioService.GetTradeHistoryAsync(
+                currentFilter.StartDate,
+                currentFilter.EndDate,
+                currentFilter.Symbol,
+                currentFilter.StrategyName,
+                CancellationToken.None);
+
+            tradeHistory = result.ToList();
+            totalPages = (int)Math.Ceiling((double)tradeHistory.Count / PageSize);
+            currentPage = Math.Min(currentPage, Math.Max(1, totalPages));
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Error loading trade history: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            isLoadingTrades = false;
+        }
+    }
+
+    private async Task LoadOpenPositionsAsync()
+    {
+        try
+        {
+            isLoadingPositions = true;
+            openPositions = (await PortfolioService.GetOpenPositionsAsync(CancellationToken.None)).ToList();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Error loading positions: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            isLoadingPositions = false;
+        }
+    }
+
+    private async Task HandleFilterChanged(PortfolioHistoryFilter filter)
+    {
+        currentFilter = filter;
+        currentPage = 1;
+        await LoadTradeHistoryAsync();
+    }
+
+    private void HandlePageChanged(int newPage)
+    {
+        currentPage = newPage;
+        StateHasChanged();
+    }
+
+    private void ShowClosePositionModal(Position position)
+    {
+        selectedPosition = position;
+        showCloseModal = true;
+    }
+
+    private void HideClosePositionModal()
+    {
+        showCloseModal = false;
+        selectedPosition = null;
+    }
+
+    private async Task HandleClosePosition()
+    {
+        if (selectedPosition == null) return;
+
+        try
+        {
+            await PortfolioService.ClosePositionAsync(selectedPosition.Id, CancellationToken.None);
+            ShowNotification($"Position {selectedPosition.Symbol} closed successfully", isError: false);
+
+            // Reload positions after closing
+            await LoadOpenPositionsAsync();
+
+            HideClosePositionModal();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Failed to close position: {ex.Message}", isError: true);
+        }
+    }
+
+    private async Task ExportTradeHistory()
+    {
+        try
+        {
+            isExporting = true;
+            var csvData = await PortfolioService.ExportTradeHistoryAsync(
+                currentFilter.StartDate,
+                currentFilter.EndDate,
+                currentFilter.Symbol,
+                currentFilter.StrategyName,
+                CancellationToken.None);
+
+            await JS.InvokeVoidAsync("downloadFile", "trade-history.csv", "text/csv", csvData);
+            ShowNotification("Trade history exported successfully", isError: false);
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Export failed: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            isExporting = false;
+        }
+    }
+
+    private void ShowNotification(string message, bool isError)
+    {
+        notificationMessage = message;
+        notificationIsError = isError;
+        StateHasChanged();
+
+        // Auto-hide notification after 5 seconds
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            notificationMessage = null;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+}

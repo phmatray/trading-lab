@@ -1,0 +1,45 @@
+@* Reusable card component with Tailwind CSS styling *@
+
+<div class="@CssClass bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 class="text-lg font-semibold text-gray-900">@Title</h3>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <p class="text-sm text-gray-600 mt-1">@Subtitle</p>
+            }
+        </div>
+    }
+
+    <div class="@ContentClass px-6 py-4">
+        @ChildContent
+    </div>
+
+    @if (FooterContent != null)
+    {
+        <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? FooterContent { get; set; }
+
+    [Parameter]
+    public string CssClass { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ContentClass { get; set; } = string.Empty;
+}

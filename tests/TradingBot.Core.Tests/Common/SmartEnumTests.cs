@@ -164,6 +164,7 @@ public sealed class SmartEnumTests
     {
         // Act & Assert
         TestEnum.First.Equals(null).ShouldBeFalse();
+        TestEnum.First.ShouldNotBeNull();
         TestEnum.First.Equals((object?)null).ShouldBeFalse();
     }
 

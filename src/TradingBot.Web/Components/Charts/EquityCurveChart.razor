@@ -1,0 +1,166 @@
+@* <copyright file="EquityCurveChart.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+
+@using ApexCharts
+@using TradingBot.Web.Models
+
+<div class="equity-curve-chart">
+    @if (Data.Any())
+    {
+        <ApexChart TItem="EquityCurveDataPoint"
+                   Title=""
+                   Height="400"
+                   Options="_chartOptions">
+
+            <ApexPointSeries TItem="EquityCurveDataPoint"
+                             Items="Data"
+                             Name="Portfolio Value"
+                             SeriesType="SeriesType.Area"
+                             XValue="@(e => e.Timestamp)"
+                             YValue="@(e => (decimal)e.EquityValue)"
+                             OrderBy="e => e.X" />
+        </ApexChart>
+    }
+    else
+    {
+        <div class="text-center py-8 text-gray-500">
+            <p>No equity curve data available</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<EquityCurveDataPoint> Data { get; set; } = new();
+
+    private ApexChartOptions<EquityCurveDataPoint> _chartOptions = null!;
+
+    protected override void OnInitialized()
+    {
+        _chartOptions = new ApexChartOptions<EquityCurveDataPoint>
+        {
+            Theme = new Theme
+            {
+                Mode = Mode.Dark,
+                Palette = PaletteType.Palette1
+            },
+            Chart = new Chart
+            {
+                Toolbar = new Toolbar
+                {
+                    Show = true,
+                    Tools = new Tools
+                    {
+                        Download = true,
+                        Selection = true,
+                        Zoom = true,
+                        Zoomin = true,
+                        Zoomout = true,
+                        Pan = true,
+                        Reset = true
+                    }
+                },
+                Zoom = new Zoom
+                {
+                    Enabled = true
+                }
+            },
+            Colors = new List<string> { "#3b82f6" }, // Tailwind blue-500
+            Stroke = new Stroke
+            {
+                Curve = Curve.Smooth,
+                Width = 2
+            },
+            Fill = new Fill
+            {
+                Type = new List<FillType> { FillType.Gradient },
+                Gradient = new FillGradient
+                {
+                    ShadeIntensity = 1,
+                    OpacityFrom = 0.7,
+                    OpacityTo = 0.2,
+                    Stops = new List<double> { 0, 90, 100 }
+                }
+            },
+            Xaxis = new XAxis
+            {
+                Type = XAxisType.Datetime,
+                Labels = new XAxisLabels
+                {
+                    Format = "MMM dd, yyyy",
+                    Style = new AxisLabelStyle
+                    {
+                        Colors = "#9ca3af", // Tailwind gray-400
+                        FontFamily = "Inter, system-ui, sans-serif"
+                    }
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis
+                {
+                    Labels = new YAxisLabels
+                    {
+                        Formatter = @"function(value) {
+                            return '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                        }",
+                        Style = new AxisLabelStyle
+                        {
+                            Colors = "#9ca3af", // Tailwind gray-400
+                            FontFamily = "Inter, system-ui, sans-serif"
+                        }
+                    },
+                    Title = new AxisTitle
+                    {
+                        Text = "Portfolio Value",
+                        Style = new AxisTitleStyle
+                        {
+                            Color = "#d1d5db", // Tailwind gray-300
+                            FontSize = "14px",
+                            FontFamily = "Inter, system-ui, sans-serif",
+                            FontWeight = "600"
+                        }
+                    }
+                }
+            },
+            Tooltip = new Tooltip
+            {
+                Enabled = true,
+                X = new TooltipX
+                {
+                    Format = "MMM dd, yyyy HH:mm"
+                },
+                Y = new TooltipY
+                {
+                    Formatter = @"function(value) {
+                        return '$' + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                    }"
+                }
+            },
+            Grid = new Grid
+            {
+                BorderColor = "#374151", // Tailwind gray-700
+                StrokeDashArray = 4
+            },
+            Legend = new Legend
+            {
+                Show = false
+            },
+            Responsive = new List<Responsive<EquityCurveDataPoint>>
+            {
+                new Responsive<EquityCurveDataPoint>
+                {
+                    Breakpoint = 768,
+                    Options = new ApexChartOptions<EquityCurveDataPoint>
+                    {
+                        Chart = new Chart
+                        {
+                            Height = 300
+                        }
+                    }
+                }
+            }
+        };
+    }
+}

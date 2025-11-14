@@ -1,0 +1,85 @@
+@* Reusable modal component with Tailwind CSS styling *@
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-50 overflow-y-auto" @onclick="OnBackdropClick">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+        <!-- Modal Container -->
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full" @onclick:stopPropagation="true">
+                <!-- Header -->
+                @if (!string.IsNullOrEmpty(Title) || ShowCloseButton)
+                {
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                        @if (!string.IsNullOrEmpty(Title))
+                        {
+                            <h3 class="text-lg font-semibold text-gray-900">@Title</h3>
+                        }
+                        @if (ShowCloseButton)
+                        {
+                            <button type="button"
+                                    class="text-gray-400 hover:text-gray-500 transition-colors"
+                                    @onclick="Close">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                }
+
+                <!-- Content -->
+                <div class="px-6 py-4">
+                    @ChildContent
+                </div>
+
+                <!-- Footer -->
+                @if (FooterContent != null)
+                {
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                        @FooterContent
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? FooterContent { get; set; }
+
+    [Parameter]
+    public bool ShowCloseButton { get; set; } = true;
+
+    [Parameter]
+    public bool CloseOnBackdropClick { get; set; } = true;
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(IsOpen);
+    }
+
+    private async Task OnBackdropClick()
+    {
+        if (CloseOnBackdropClick)
+        {
+            await Close();
+        }
+    }
+}
