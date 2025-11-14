@@ -1,0 +1,181 @@
+@* <copyright file="TbSymbolSearchInput.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Organisms
+@using TradingBot.Infrastructure.Services
+@inject ISymbolSearchService SymbolSearchService
+@inject ILogger<TbSymbolSearchInput> Logger
+@implements IDisposable
+
+<div class="relative">
+    <TbInput @bind-Value="@searchQuery"
+             Type="text"
+             Id="@Id"
+             Placeholder="@Placeholder"
+             HasError="@HasError"
+             IsRequired="@IsRequired"
+             @oninput="@OnSearchInput"
+             Class="@Class" />
+
+    @if (isSearching)
+    {
+        <div class="absolute right-3 top-1/2 -translate-y-1/2">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+        </div>
+    }
+
+    @if (showResults && searchResults.Any())
+    {
+        <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            @foreach (var result in searchResults)
+            {
+                <button type="button"
+                        @onclick="@(() => SelectSymbol(result))"
+                        class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-semibold text-gray-900 dark:text-gray-100">@result.Symbol</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">@result.Name</div>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-500">@result.Exchange</div>
+                    </div>
+                </button>
+            }
+        </div>
+    }
+
+    @if (showResults && !isSearching && !searchResults.Any() && !string.IsNullOrWhiteSpace(searchQuery))
+    {
+        <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">No symbols found matching "@searchQuery"</p>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the unique identifier for the input element.
+    /// </summary>
+    [Parameter]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Gets or sets the selected symbol value.
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback for value changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the placeholder text.
+    /// </summary>
+    [Parameter]
+    public string Placeholder { get; set; } = "Search symbol (e.g., AAPL)";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the input has an error.
+    /// </summary>
+    [Parameter]
+    public bool HasError { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the input is required.
+    /// </summary>
+    [Parameter]
+    public bool IsRequired { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional CSS classes.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback when a symbol is selected.
+    /// </summary>
+    [Parameter]
+    public EventCallback<SymbolSearchResult> OnSymbolSelected { get; set; }
+
+    private string searchQuery = string.Empty;
+    private List<SymbolSearchResult> searchResults = new();
+    private bool isSearching = false;
+    private bool showResults = false;
+    private System.Threading.Timer? debounceTimer;
+    private const int DebounceMilliseconds = 300;
+
+    protected override void OnInitialized()
+    {
+        searchQuery = Value ?? string.Empty;
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString() ?? string.Empty;
+        searchQuery = input;
+
+        // Dispose old timer
+        debounceTimer?.Dispose();
+
+        if (string.IsNullOrWhiteSpace(input) || input.Length < 1)
+        {
+            showResults = false;
+            searchResults.Clear();
+            StateHasChanged();
+            return;
+        }
+
+        // Create new debounce timer
+        debounceTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await SearchSymbolsAsync(input);
+            });
+        }, null, DebounceMilliseconds, Timeout.Infinite);
+    }
+
+    private async Task SearchSymbolsAsync(string query)
+    {
+        try
+        {
+            isSearching = true;
+            showResults = true;
+            StateHasChanged();
+
+            searchResults = await SymbolSearchService.SearchSymbolsAsync(query, maxResults: 10);
+            Logger.LogDebug("Symbol search for '{Query}' returned {Count} results", query, searchResults.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error searching symbols for query '{Query}'", query);
+            searchResults.Clear();
+        }
+        finally
+        {
+            isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SelectSymbol(SymbolSearchResult result)
+    {
+        searchQuery = result.Symbol;
+        showResults = false;
+        searchResults.Clear();
+
+        await ValueChanged.InvokeAsync(result.Symbol);
+        await OnSymbolSelected.InvokeAsync(result);
+        StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        debounceTimer?.Dispose();
+    }
+}

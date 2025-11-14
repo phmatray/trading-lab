@@ -1,0 +1,252 @@
+@* <copyright file="TbBacktestForm.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Features.Backtest
+@using TradingBot.Web.Models
+@using TradingBot.Infrastructure.Services
+@using TradingBot.Core.Interfaces
+@inject IStrategyManagementService StrategyManagementService
+@inject ILogger<TbBacktestForm> Logger
+
+<div class="space-y-6">
+    <div>
+        <TbLabel For="strategy-select" Text="Strategy" IsRequired="true" />
+        <select id="strategy-select"
+                @bind="request.StrategyName"
+                class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Select a strategy</option>
+            @foreach (var strategy in availableStrategies)
+            {
+                <option value="@strategy.Name">@strategy.Name</option>
+            }
+        </select>
+        @if (validationErrors.ContainsKey(nameof(request.StrategyName)))
+        {
+            <p class="mt-1 text-sm text-red-600 dark:text-red-400">@validationErrors[nameof(request.StrategyName)]</p>
+        }
+    </div>
+
+    <div>
+        <TbLabel For="symbol-input" Text="Symbol" IsRequired="true" />
+        <TbSymbolSearchInput @bind-Value="request.Symbol"
+                            Id="symbol-input"
+                            Placeholder="Search symbol (e.g., AAPL)"
+                            HasError="@validationErrors.ContainsKey(nameof(request.Symbol))"
+                            IsRequired="true"
+                            OnSymbolSelected="@HandleSymbolSelected" />
+        @if (validationErrors.ContainsKey(nameof(request.Symbol)))
+        {
+            <p class="mt-1 text-sm text-red-600 dark:text-red-400">@validationErrors[nameof(request.Symbol)]</p>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <TbLabel For="start-date" Text="Start Date" IsRequired="true" />
+            <TbInput @bind-Value="@startDateString"
+                    Type="date"
+                    Id="start-date"
+                    HasError="@validationErrors.ContainsKey(nameof(request.StartDate))"
+                    IsRequired="true"
+                    Max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            @if (validationErrors.ContainsKey(nameof(request.StartDate)))
+            {
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">@validationErrors[nameof(request.StartDate)]</p>
+            }
+        </div>
+
+        <div>
+            <TbLabel For="end-date" Text="End Date" IsRequired="true" />
+            <TbInput @bind-Value="@endDateString"
+                    Type="date"
+                    Id="end-date"
+                    HasError="@validationErrors.ContainsKey(nameof(request.EndDate))"
+                    IsRequired="true"
+                    Max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            @if (validationErrors.ContainsKey(nameof(request.EndDate)))
+            {
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">@validationErrors[nameof(request.EndDate)]</p>
+            }
+        </div>
+    </div>
+
+    <div>
+        <TbLabel For="initial-capital" Text="Initial Capital ($)" IsRequired="true" />
+        <TbInput @bind-Value="request.InitialCapital"
+                Type="number"
+                Id="initial-capital"
+                HasError="@validationErrors.ContainsKey(nameof(request.InitialCapital))"
+                IsRequired="true"
+                Min="1000"
+                Max="10000000"
+                Step="1000" />
+        @if (validationErrors.ContainsKey(nameof(request.InitialCapital)))
+        {
+            <p class="mt-1 text-sm text-red-600 dark:text-red-400">@validationErrors[nameof(request.InitialCapital)]</p>
+        }
+    </div>
+
+    <div class="flex gap-3">
+        <TbButton Text="Run Backtest"
+                 OnClick="@HandleRunBacktest"
+                 Variant="@ButtonVariant.Primary"
+                 IsDisabled="@IsDisabled"
+                 IsLoading="@IsLoading" />
+        @if (OnCancel.HasDelegate)
+        {
+            <TbButton Text="Cancel"
+                     OnClick="@OnCancel"
+                     Variant="@ButtonVariant.Secondary"
+                     IsDisabled="@IsLoading" />
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the event callback when form is submitted successfully.
+    /// </summary>
+    [Parameter]
+    public EventCallback<BacktestRequest> OnSubmit { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback when form is cancelled.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the form is disabled.
+    /// </summary>
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the form is in loading state.
+    /// </summary>
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private readonly BacktestRequest request = new() { InitialCapital = 100000m };
+    private readonly Dictionary<string, string> validationErrors = new();
+    private List<IStrategy> availableStrategies = new();
+
+    private string startDateString
+    {
+        get => request.StartDate == default ? string.Empty : request.StartDate.ToString("yyyy-MM-dd");
+        set
+        {
+            if (DateTime.TryParse(value, out var date))
+            {
+                request.StartDate = date;
+            }
+        }
+    }
+
+    private string endDateString
+    {
+        get => request.EndDate == default ? string.Empty : request.EndDate.ToString("yyyy-MM-dd");
+        set
+        {
+            if (DateTime.TryParse(value, out var date))
+            {
+                request.EndDate = date;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStrategiesAsync();
+
+        // Set default dates: last year
+        request.EndDate = DateTime.Today;
+        request.StartDate = DateTime.Today.AddYears(-1);
+    }
+
+    private async Task LoadStrategiesAsync()
+    {
+        try
+        {
+            availableStrategies = await StrategyManagementService.GetAllStrategiesAsync();
+            Logger.LogDebug("Loaded {Count} strategies for backtest form", availableStrategies.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading strategies for backtest form");
+        }
+    }
+
+    private void HandleSymbolSelected(SymbolSearchResult result)
+    {
+        request.Symbol = result.Symbol;
+        Logger.LogDebug("Symbol selected: {Symbol}", result.Symbol);
+    }
+
+    private async Task HandleRunBacktest()
+    {
+        if (!ValidateForm())
+        {
+            return;
+        }
+
+        await OnSubmit.InvokeAsync(request);
+    }
+
+    private bool ValidateForm()
+    {
+        validationErrors.Clear();
+
+        // Strategy validation
+        if (string.IsNullOrWhiteSpace(request.StrategyName))
+        {
+            validationErrors[nameof(request.StrategyName)] = "Strategy is required";
+        }
+
+        // Symbol validation
+        if (string.IsNullOrWhiteSpace(request.Symbol))
+        {
+            validationErrors[nameof(request.Symbol)] = "Symbol is required";
+        }
+        else if (!System.Text.RegularExpressions.Regex.IsMatch(request.Symbol, @"^[A-Z]{1,5}$"))
+        {
+            validationErrors[nameof(request.Symbol)] = "Symbol must be 1-5 uppercase letters";
+        }
+
+        // Date validation
+        if (request.StartDate == default)
+        {
+            validationErrors[nameof(request.StartDate)] = "Start date is required";
+        }
+        else if (request.StartDate > DateTime.Today)
+        {
+            validationErrors[nameof(request.StartDate)] = "Start date cannot be in the future";
+        }
+
+        if (request.EndDate == default)
+        {
+            validationErrors[nameof(request.EndDate)] = "End date is required";
+        }
+        else if (request.EndDate > DateTime.Today)
+        {
+            validationErrors[nameof(request.EndDate)] = "End date cannot be in the future";
+        }
+        else if (request.EndDate <= request.StartDate)
+        {
+            validationErrors[nameof(request.EndDate)] = "End date must be after start date";
+        }
+        else if ((request.EndDate - request.StartDate).TotalDays < 30)
+        {
+            validationErrors[nameof(request.EndDate)] = "Date range must be at least 30 days";
+        }
+
+        // Initial capital validation
+        if (request.InitialCapital < 1000 || request.InitialCapital > 10000000)
+        {
+            validationErrors[nameof(request.InitialCapital)] = "Initial capital must be between $1,000 and $10,000,000";
+        }
+
+        return !validationErrors.Any();
+    }
+}

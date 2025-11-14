@@ -1,13 +1,32 @@
 @page "/backtest"
 @using TradingBot.Core.Models.Backtest
+@using TradingBot.Web.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @inject IBacktestService BacktestService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
 @inject ILogger<Backtest> Logger
+@implements IAsyncDisposable
 
-<PageTitle>Backtest Results - TradingBot</PageTitle>
+<PageTitle>Backtest - TradingBot</PageTitle>
 
-<TbPageHeader Title="Backtest Results"
-            Description="View and analyze historical strategy performance" />
+<TbPageHeader Title="Backtest"
+            Description="Run backtests and analyze historical strategy performance" />
 
+@* Run New Backtest Section *@
+<div class="mb-6">
+    <TbBacktestRunner OnBacktestSubmit="@HandleRunBacktest"
+                     OnBacktestCancel="@HandleCancelBacktest"
+                     CurrentBacktestId="@currentBacktestId"
+                     CurrentProgress="@currentProgress"
+                     CurrentStatusMessage="@currentStatusMessage"
+                     IsRunning="@isRunningBacktest"
+                     IsComplete="@isBacktestComplete"
+                     IsFailed="@isBacktestFailed" />
+</div>
+
+@* Backtest Results Section *@
 @if (isLoading)
 {
     <div class="flex items-center justify-center py-12">
@@ -36,12 +55,7 @@ else if (backtestResults is null || !backtestResults.Any())
                       d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No backtest results available</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the CLI to see results here</p>
-            <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4 text-left inline-block">
-                <code class="text-sm text-gray-800 dark:text-gray-200">
-                    dotnet run --project src/TradingBot.Cli -- backtest --strategy momentum --symbol AAPL
-                </code>
-            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the form above to see results here</p>
         </div>
     </TbCard>
 }
@@ -101,6 +115,7 @@ else
 }
 
 @code {
+    private HubConnection? _hubConnection;
     private List<BacktestResult>? backtestResults;
     private BacktestResult? selectedBacktest;
     private string? selectedBacktestId;
@@ -109,11 +124,20 @@ else
     private bool comparisonMode = false;
     private readonly HashSet<string> selectedForComparison = new();
 
+    // Backtest execution state
+    private string? currentBacktestId;
+    private int currentProgress = 0;
+    private string currentStatusMessage = string.Empty;
+    private bool isRunningBacktest = false;
+    private bool isBacktestComplete = false;
+    private bool isBacktestFailed = false;
+
     private bool ShowComparisonTable => comparisonMode && selectedForComparison.Count > 1;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadBacktestResultsAsync();
+        await InitializeSignalRConnection();
     }
 
     private async Task LoadBacktestResultsAsync()
@@ -185,4 +209,261 @@ else
             .ToList();
     }
 
+    // T103: Wire up HandleRunBacktest
+    private async Task HandleRunBacktest(BacktestRequest request)
+    {
+        try
+        {
+            Logger.LogInformation("Starting backtest for strategy {Strategy} on symbol {Symbol}", request.StrategyName, request.Symbol);
+
+            // Reset state
+            isRunningBacktest = true;
+            isBacktestComplete = false;
+            isBacktestFailed = false;
+            currentProgress = 0;
+            currentStatusMessage = "Submitting backtest request...";
+
+            // Run the backtest
+            currentBacktestId = await BacktestService.RunBacktestAsync(request);
+
+            ToastService.ShowInfo($"Backtest {currentBacktestId} started successfully", "Backtest Started");
+            Logger.LogInformation("Backtest {BacktestId} submitted successfully", currentBacktestId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to start backtest");
+            ToastService.ShowError($"Failed to start backtest: {ex.Message}", "Backtest Failed");
+
+            isRunningBacktest = false;
+            isBacktestFailed = true;
+            currentStatusMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task HandleCancelBacktest(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Cancelling backtest {BacktestId}", backtestId);
+
+            var success = await BacktestService.CancelBacktestAsync(backtestId);
+
+            if (success)
+            {
+                ToastService.ShowInfo("Backtest cancelled successfully", "Cancelled");
+                isRunningBacktest = false;
+                isBacktestFailed = true;
+                currentStatusMessage = "Cancelled by user";
+            }
+            else
+            {
+                ToastService.ShowWarning("Backtest not found or already completed", "Cancel Failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to cancel backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to cancel backtest: {ex.Message}", "Error");
+        }
+    }
+
+    // T109: Add export trades to CSV button handler
+    private async Task HandleExportTrades(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Exporting trades for backtest {BacktestId}", backtestId);
+
+            var csvData = await BacktestService.ExportBacktestTradesToCsvAsync(backtestId);
+
+            if (string.IsNullOrEmpty(csvData))
+            {
+                ToastService.ShowWarning("No trades found to export", "Export");
+                return;
+            }
+
+            await JS.InvokeVoidAsync("downloadFile", $"backtest-{backtestId}-trades.csv", "text/csv", csvData);
+            ToastService.ShowSuccess("Trades exported successfully", "Export Complete");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to export trades for backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to export trades: {ex.Message}", "Export Failed");
+        }
+    }
+
+    private async Task HandleDeleteBacktest(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Deleting backtest {BacktestId}", backtestId);
+
+            var success = await BacktestService.DeleteBacktestAsync(backtestId);
+
+            if (success)
+            {
+                ToastService.ShowSuccess("Backtest deleted successfully", "Deleted");
+
+                // Refresh the list
+                await LoadBacktestResultsAsync();
+
+                // Clear selection if the deleted backtest was selected
+                if (selectedBacktestId == backtestId)
+                {
+                    selectedBacktest = null;
+                    selectedBacktestId = null;
+                }
+            }
+            else
+            {
+                ToastService.ShowWarning("Backtest not found", "Delete Failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to delete backtest: {ex.Message}", "Delete Failed");
+        }
+    }
+
+    // T104, T105, T106, T110: SignalR integration and IAsyncDisposable
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // T104: Subscribe to OnBacktestProgress SignalR event
+            _hubConnection.On<string, int, string>("OnBacktestProgress", HandleBacktestProgress);
+
+            // T105: Subscribe to OnBacktestCompleted SignalR event
+            _hubConnection.On<string, BacktestResult>("OnBacktestCompleted", HandleBacktestCompleted);
+
+            // T106: Subscribe to OnBacktestFailed SignalR event
+            _hubConnection.On<string, string>("OnBacktestFailed", HandleBacktestFailed);
+
+            // Connection lifecycle events
+            _hubConnection.Closed += OnConnectionClosed;
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+
+            await _hubConnection.StartAsync();
+            Logger.LogInformation("SignalR connection established for backtest page");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to connect to SignalR hub");
+            ToastService.ShowError("Failed to connect to real-time updates", "Connection Error");
+        }
+    }
+
+    private void HandleBacktestProgress(string backtestId, int progressPercent, string statusMessage)
+    {
+        if (currentBacktestId == backtestId)
+        {
+            currentProgress = progressPercent;
+            currentStatusMessage = statusMessage;
+            InvokeAsync(StateHasChanged);
+            Logger.LogDebug("Backtest {BacktestId} progress: {Progress}% - {Status}", backtestId, progressPercent, statusMessage);
+        }
+    }
+
+    private void HandleBacktestCompleted(string backtestId, BacktestResult result)
+    {
+        if (currentBacktestId == backtestId)
+        {
+            currentProgress = 100;
+            currentStatusMessage = "Backtest completed successfully";
+            isBacktestComplete = true;
+            isRunningBacktest = false;
+
+            ToastService.ShowSuccess(
+                $"Backtest completed! Total Return: {result.TotalReturn:F2}%, Sharpe Ratio: {result.SharpeRatio:F2}",
+                "Backtest Complete");
+
+            // Refresh results list and select the new backtest
+            InvokeAsync(async () =>
+            {
+                await LoadBacktestResultsAsync();
+                await HandleBacktestSelected(backtestId);
+                StateHasChanged();
+            });
+
+            Logger.LogInformation("Backtest {BacktestId} completed successfully", backtestId);
+        }
+    }
+
+    private void HandleBacktestFailed(string backtestId, string errorMessage)
+    {
+        if (currentBacktestId == backtestId)
+        {
+            currentStatusMessage = $"Error: {errorMessage}";
+            isBacktestFailed = true;
+            isRunningBacktest = false;
+
+            ToastService.ShowError($"Backtest failed: {errorMessage}", "Backtest Failed");
+            InvokeAsync(StateHasChanged);
+
+            Logger.LogError("Backtest {BacktestId} failed: {Error}", backtestId, errorMessage);
+        }
+    }
+
+    private Task OnConnectionClosed(Exception? exception)
+    {
+        InvokeAsync(() =>
+        {
+            ToastService.ShowWarning("Real-time updates disconnected. Attempting to reconnect...", "Connection Lost");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        InvokeAsync(() =>
+        {
+            ToastService.ShowInfo("Reconnecting to real-time updates...", "Reconnecting");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        InvokeAsync(async () =>
+        {
+            ToastService.ShowSuccess("Real-time updates reconnected successfully!", "Connected");
+            await LoadBacktestResultsAsync();
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    // T110: Implement IAsyncDisposable
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Closed -= OnConnectionClosed;
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            await _hubConnection.DisposeAsync();
+            Logger.LogInformation("SignalR connection disposed for backtest page");
+        }
+    }
 }
