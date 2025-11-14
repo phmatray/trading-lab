@@ -306,7 +306,7 @@ public sealed class RiskManagerTests
     {
         // Arrange
         var initialSettings = await _riskManager.GetRiskSettingsAsync();
-        var initialTimestamp = initialSettings.LastUpdated;
+        var initialTimestamp = initialSettings.LastModified;
 
         // Wait a bit to ensure timestamp changes
         await Task.Delay(10);
@@ -316,6 +316,6 @@ public sealed class RiskManagerTests
         var updatedSettings = await _riskManager.GetRiskSettingsAsync();
 
         // Assert
-        updatedSettings.LastUpdated.ShouldBeGreaterThan(initialTimestamp);
+        updatedSettings.LastModified.ShouldBeGreaterThan(initialTimestamp);
     }
 }

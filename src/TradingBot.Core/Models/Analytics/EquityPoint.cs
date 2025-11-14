@@ -6,6 +6,7 @@ namespace TradingBot.Core.Models.Analytics;
 
 /// <summary>
 /// Represents a point on the equity curve with associated metrics.
+/// Consolidated from Models/Portfolio/EquityPoint.cs and Models/Analytics/EquityPoint.cs.
 /// </summary>
 public sealed class EquityPoint
 {
@@ -18,6 +19,11 @@ public sealed class EquityPoint
     /// Gets or sets the total equity at this point.
     /// </summary>
     public required decimal Equity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cumulative return percentage.
+    /// </summary>
+    public decimal CumulativeReturn { get; set; }
 
     /// <summary>
     /// Gets or sets the drawdown percentage at this point.

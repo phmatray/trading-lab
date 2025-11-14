@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Enums;
+using TradingBot.Core.Models.Analytics;
 using TradingBot.Core.Models.Backtest;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.MarketData;

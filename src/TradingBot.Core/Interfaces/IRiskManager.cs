@@ -2,7 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using TradingBot.Core.Models.Risk;
+using TradingBot.Core.Models.Configuration;
 
 namespace TradingBot.Core.Interfaces;
 

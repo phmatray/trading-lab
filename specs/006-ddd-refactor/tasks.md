@@ -19,11 +19,11 @@
 
 **Purpose**: Project initialization and dependency management
 
-- [ ] T001 Add Ardalis.SharedKernel NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
-- [ ] T002 Add MediatR NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
-- [ ] T003 Add Ardalis.Specification NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
-- [ ] T004 Add Ardalis.Specification.EntityFrameworkCore NuGet package to src/TradingBot.Infrastructure/TradingBot.Infrastructure.csproj
-- [ ] T005 Restore all NuGet packages to verify dependencies resolve correctly
+- [X] T001 Add Ardalis.SharedKernel NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
+- [X] T002 Add MediatR NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
+- [X] T003 Add Ardalis.Specification NuGet package to src/TradingBot.Core/TradingBot.Core.csproj
+- [X] T004 Add Ardalis.Specification.EntityFrameworkCore NuGet package to src/TradingBot.Infrastructure/TradingBot.Infrastructure.csproj
+- [X] T005 Restore all NuGet packages to verify dependencies resolve correctly
 
 ---
 
@@ -33,10 +33,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create src/TradingBot.Core/Events/ directory for domain event classes
-- [ ] T007 [P] Create src/TradingBot.Infrastructure/EventDispatching/ directory for event dispatcher implementation
-- [ ] T008 Update src/TradingBot.Core/Interfaces/IRepository.cs to extend Ardalis.SharedKernel.IRepositoryBase
-- [ ] T009 Update src/TradingBot.Core/Interfaces/IReadRepository.cs to extend Ardalis.SharedKernel.IReadRepositoryBase
+- [X] T006 Create src/TradingBot.Core/Events/ directory for domain event classes
+- [X] T007 [P] Create src/TradingBot.Infrastructure/EventDispatching/ directory for event dispatcher implementation
+- [X] T008 Update src/TradingBot.Core/Interfaces/IRepository.cs to extend Ardalis.SharedKernel.IRepositoryBase
+- [X] T009 Update src/TradingBot.Core/Interfaces/IReadRepository.cs to extend Ardalis.SharedKernel.IReadRepositoryBase
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in priority order
 
@@ -52,22 +52,22 @@
 
 **RiskSettings Consolidation** (Keep Models/Configuration/, remove Models/Risk/):
 
-- [ ] T010 [US2] Read src/TradingBot.Core/Models/Risk/RiskSettings.cs to document properties and usages
-- [ ] T011 [US2] Read src/TradingBot.Core/Models/Configuration/RiskSettings.cs to compare with Risk version
-- [ ] T012 [US2] Merge any missing properties from Models/Risk/RiskSettings.cs into Models/Configuration/RiskSettings.cs
-- [ ] T013 [US2] Find all files using `TradingBot.Core.Models.Risk.RiskSettings` via grep search
-- [ ] T014 [US2] Update all using statements from `TradingBot.Core.Models.Risk` to `TradingBot.Core.Models.Configuration` for RiskSettings references
-- [ ] T015 [US2] Delete src/TradingBot.Core/Models/Risk/RiskSettings.cs (duplicate removed)
-- [ ] T016 [US2] Delete src/TradingBot.Core/Models/Risk/ directory if now empty
+- [X] T010 [US2] Read src/TradingBot.Core/Models/Risk/RiskSettings.cs to document properties and usages
+- [X] T011 [US2] Read src/TradingBot.Core/Models/Configuration/RiskSettings.cs to compare with Risk version
+- [X] T012 [US2] Merge any missing properties from Models/Risk/RiskSettings.cs into Models/Configuration/RiskSettings.cs
+- [X] T013 [US2] Find all files using `TradingBot.Core.Models.Risk.RiskSettings` via grep search
+- [X] T014 [US2] Update all using statements from `TradingBot.Core.Models.Risk` to `TradingBot.Core.Models.Configuration` for RiskSettings references
+- [X] T015 [US2] Delete src/TradingBot.Core/Models/Risk/RiskSettings.cs (duplicate removed)
+- [X] T016 [US2] Delete src/TradingBot.Core/Models/Risk/ directory if now empty
 
 **EquityPoint Consolidation** (Keep Models/Analytics/, remove Models/Portfolio/):
 
-- [ ] T017 [US2] Read src/TradingBot.Core/Models/Portfolio/EquityPoint.cs to document properties and usages
-- [ ] T018 [US2] Read src/TradingBot.Core/Models/Analytics/EquityPoint.cs to compare with Portfolio version
-- [ ] T019 [US2] Merge any missing properties from Models/Portfolio/EquityPoint.cs into Models/Analytics/EquityPoint.cs
-- [ ] T020 [US2] Find all files using `TradingBot.Core.Models.Portfolio.EquityPoint` via grep search
-- [ ] T021 [US2] Update all using statements from `TradingBot.Core.Models.Portfolio` to `TradingBot.Core.Models.Analytics` for EquityPoint references
-- [ ] T022 [US2] Delete src/TradingBot.Core/Models/Portfolio/EquityPoint.cs (duplicate removed)
+- [X] T017 [US2] Read src/TradingBot.Core/Models/Portfolio/EquityPoint.cs to document properties and usages
+- [X] T018 [US2] Read src/TradingBot.Core/Models/Analytics/EquityPoint.cs to compare with Portfolio version
+- [X] T019 [US2] Merge any missing properties from Models/Portfolio/EquityPoint.cs into Models/Analytics/EquityPoint.cs
+- [X] T020 [US2] Find all files using `TradingBot.Core.Models.Portfolio.EquityPoint` via grep search
+- [X] T021 [US2] Update all using statements from `TradingBot.Core.Models.Portfolio` to `TradingBot.Core.Models.Analytics` for EquityPoint references
+- [X] T022 [US2] Delete src/TradingBot.Core/Models/Portfolio/EquityPoint.cs (duplicate removed)
 
 **Verification**:
 

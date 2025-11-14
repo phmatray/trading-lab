@@ -76,7 +76,7 @@ public sealed class RiskShowCommand : AsyncCommand
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine(
-            $"[dim]Last updated: {settings.LastUpdated:yyyy-MM-dd HH:mm:ss} UTC[/]");
+            $"[dim]Last modified: {settings.LastModified:yyyy-MM-dd HH:mm:ss} UTC[/]");
 
         return 0;
     }
