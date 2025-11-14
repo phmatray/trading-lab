@@ -132,10 +132,10 @@
 - [X] T061 [US4] Add validation error display for out-of-range values with specific error messages
 - [X] T062 [US4] Add loading state during save/reset operations
 - [X] T063 [US4] Add success/error toast notifications after save/reset
-- [ ] T064 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_ValidSettings_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/RiskSettingsServiceTests.cs
-- [ ] T065 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_InvalidRange_ReturnsFalse unit test
-- [ ] T066 [P] [US4] Create RiskSettingsServiceTests.ResetToDefaultsAsync_ReturnsDefaultValues unit test
-- [ ] T067 [P] [US4] Create TbRiskSettingsFormTests.Validation_InvalidValues_ShowsErrors bUnit test in tests/TradingBot.Web.Tests/Components/TbRiskSettingsFormTests.cs
+- [X] T064 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_ValidSettings_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/RiskSettingsServiceTests.cs
+- [X] T065 [P] [US4] Create RiskSettingsServiceTests.SaveRiskSettingsAsync_InvalidRange_ReturnsFalse unit test
+- [X] T066 [P] [US4] Create RiskSettingsServiceTests.ResetToDefaultsAsync_ReturnsDefaultValues unit test
+- [X] T067 [P] [US4] Create TbRiskSettingsFormTests.Validation_InvalidValues_ShowsErrors bUnit test in tests/TradingBot.Web.Tests/Components/TbRiskSettingsFormTests.cs
 
 **Checkpoint**: User Story 4 complete - users can adjust and save risk settings with validation
 
@@ -168,10 +168,10 @@
 - [X] T082 [US2] Add validation for parameter min/max bounds with error messages
 - [X] T083 [US2] Add loading state during save/reset operations with disabled buttons
 - [X] T084 [US2] Add success/error toast notifications after configuration changes
-- [ ] T085 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_ValidParameters_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/StrategyManagementServiceTests.cs
-- [ ] T086 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_InvalidParameter_ReturnsFalse unit test
-- [ ] T087 [P] [US2] Create StrategyManagementServiceTests.GetStrategyParametersAsync_ReturnsMetadata unit test
-- [ ] T088 [P] [US2] Create TbStrategyConfigFormTests.Save_ValidParameters_InvokesCallback bUnit test in tests/TradingBot.Web.Tests/Components/TbStrategyConfigFormTests.cs
+- [X] T085 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_ValidParameters_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/StrategyManagementServiceTests.cs
+- [X] T086 [P] [US2] Create StrategyManagementServiceTests.ConfigureStrategyAsync_InvalidParameter_ReturnsFalse unit test
+- [X] T087 [P] [US2] Create StrategyManagementServiceTests.GetStrategyParametersAsync_ReturnsMetadata unit test
+- [X] T088 [P] [US2] Create TbStrategyConfigFormTests.Save_ValidParameters_InvokesCallback bUnit test in tests/TradingBot.Web.Tests/Components/TbStrategyConfigFormTests.cs
 
 **Checkpoint**: User Story 2 complete - users can configure and save strategy parameters with validation
 
@@ -209,10 +209,10 @@
 - [X] T108 [US3] Add symbol validation using ISymbolSearchService
 - [X] T109 [US3] Add export trades to CSV button handler in TbBacktestDetail component (implemented in Backtest page HandleExportTrades)
 - [X] T110 [US3] Implement IAsyncDisposable in Backtest page to unsubscribe from SignalR events
-- [ ] T111 [P] [US3] Create BacktestServiceTests.RunBacktestAsync_ValidRequest_ReturnsBacktestId unit test in tests/TradingBot.Web.Tests/Services/BacktestServiceTests.cs
-- [ ] T112 [P] [US3] Create BacktestServiceTests.ExportBacktestTradesToCsvAsync_ValidBacktest_ReturnsCsv unit test
-- [ ] T113 [P] [US3] Create TbBacktestFormTests.Validation_InvalidDateRange_ShowsErrors bUnit test in tests/TradingBot.Web.Tests/Components/TbBacktestFormTests.cs
-- [ ] T114 [P] [US3] Create BacktestExecutionIntegrationTests.RunBacktest_EndToEnd integration test in tests/TradingBot.Web.Tests/Integration/BacktestExecutionIntegrationTests.cs
+- [X] T111 [P] [US3] Create BacktestServiceTests.RunBacktestAsync_ValidRequest_ReturnsBacktestId unit test in tests/TradingBot.Web.Tests/Services/BacktestServiceTests.cs
+- [X] T112 [P] [US3] Create BacktestServiceTests.ExportBacktestTradesToCsvAsync_ValidBacktest_ReturnsCsv unit test
+- [X] T113 [P] [US3] Create TbBacktestFormTests.Validation_InvalidDateRange_ShowsErrors bUnit test in tests/TradingBot.Web.Tests/Components/TbBacktestFormTests.cs
+- [X] T114 [P] [US3] Create BacktestExecutionIntegrationTests.RunBacktest_EndToEnd integration test in tests/TradingBot.Web.Tests/Integration/BacktestExecutionIntegrationTests.cs
 
 **Checkpoint**: User Story 3 complete - users can run backtests interactively and view comprehensive results
 
