@@ -11,7 +11,7 @@
 
 <div class="space-y-6">
     <div>
-        <TbLabel For="strategy-select" Text="Strategy" IsRequired="true" />
+        <TbLabel For="strategy-select" Required="true">Strategy</TbLabel>
         <select id="strategy-select"
                 @bind="request.StrategyName"
                 class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -28,7 +28,7 @@
     </div>
 
     <div>
-        <TbLabel For="symbol-input" Text="Symbol" IsRequired="true" />
+        <TbLabel For="symbol-input" Required="true">Symbol</TbLabel>
         <TbSymbolSearchInput @bind-Value="request.Symbol"
                             Id="symbol-input"
                             Placeholder="Search symbol (e.g., AAPL)"
@@ -43,7 +43,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-            <TbLabel For="start-date" Text="Start Date" IsRequired="true" />
+            <TbLabel For="start-date" Required="true">Start Date</TbLabel>
             <TbInput @bind-Value="@startDateString"
                     Type="date"
                     Id="start-date"
@@ -57,7 +57,7 @@
         </div>
 
         <div>
-            <TbLabel For="end-date" Text="End Date" IsRequired="true" />
+            <TbLabel For="end-date" Required="true">End Date</TbLabel>
             <TbInput @bind-Value="@endDateString"
                     Type="date"
                     Id="end-date"
@@ -72,7 +72,7 @@
     </div>
 
     <div>
-        <TbLabel For="initial-capital" Text="Initial Capital ($)" IsRequired="true" />
+        <TbLabel For="initial-capital" Required="true">Initial Capital ($)</TbLabel>
         <TbInput @bind-Value="request.InitialCapital"
                 Type="number"
                 Id="initial-capital"
@@ -88,17 +88,19 @@
     </div>
 
     <div class="flex gap-3">
-        <TbButton Text="Run Backtest"
-                 OnClick="@HandleRunBacktest"
+        <TbButton OnClick="@HandleRunBacktest"
                  Variant="@ButtonVariant.Primary"
                  IsDisabled="@IsDisabled"
-                 IsLoading="@IsLoading" />
+                 IsLoading="@IsLoading">
+            Run Backtest
+        </TbButton>
         @if (OnCancel.HasDelegate)
         {
-            <TbButton Text="Cancel"
-                     OnClick="@OnCancel"
+            <TbButton OnClick="@OnCancel"
                      Variant="@ButtonVariant.Secondary"
-                     IsDisabled="@IsLoading" />
+                     IsDisabled="@IsLoading">
+                Cancel
+            </TbButton>
         }
     </div>
 </div>

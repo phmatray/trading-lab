@@ -107,6 +107,13 @@
     [Parameter]
     public string? Step { get; set; }
 
+    /// <summary>
+    /// Gets or sets the event callback for input events (fires on every keystroke).
+    /// Used when binding with @bind-Value:event="oninput".
+    /// </summary>
+    [Parameter]
+    public EventCallback<TValue?> OnInput { get; set; }
+
     private string? CurrentValueAsString
     {
         get => Value?.ToString();
@@ -162,10 +169,15 @@
         CurrentValueAsString = e.Value?.ToString();
     }
 
-    private void HandleInput(ChangeEventArgs e)
+    private async Task HandleInput(ChangeEventArgs e)
     {
-        // Optional: Handle oninput for real-time validation
-        CurrentValueAsString = e.Value?.ToString();
+        // Handle oninput for real-time validation and binding
+        var value = e.Value?.ToString();
+        if (TryParseValue(value, out var parsedValue))
+        {
+            await ValueChanged.InvokeAsync(parsedValue);
+            await OnInput.InvokeAsync(parsedValue);
+        }
     }
 
     private bool TryParseValue(string? value, out TValue? result)

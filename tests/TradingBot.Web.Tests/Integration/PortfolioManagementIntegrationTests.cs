@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.Extensions.Logging;
+using TradingBot.Core.Enums;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Trading;
 using TradingBot.Web.Services;
@@ -18,6 +19,7 @@ public class PortfolioManagementIntegrationTests
     /// Tests the complete end-to-end close position workflow.
     /// Simulates: Get positions -> Find position -> Close position -> Verify closure.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
     public async Task ClosePosition_EndToEnd_CompletesSuccessfully()
     {
@@ -33,8 +35,6 @@ public class PortfolioManagementIntegrationTests
             Quantity = 100m,
             EntryPrice = 150.00m,
             CurrentPrice = 155.00m,
-            UnrealizedPnL = 500m,
-            EntryTime = DateTime.UtcNow.AddHours(-2),
             StrategyName = "MomentumStrategy",
             OpenedAt = DateTime.UtcNow.AddHours(-2)
         };
@@ -85,6 +85,7 @@ public class PortfolioManagementIntegrationTests
     /// <summary>
     /// Tests the close position workflow when position doesn't exist.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
     public async Task ClosePosition_NonExistentPosition_ReturnsFalse()
     {
@@ -110,6 +111,7 @@ public class PortfolioManagementIntegrationTests
     /// <summary>
     /// Tests closing multiple positions in sequence.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
     public async Task ClosePosition_MultiplePositions_ClosesEachSuccessfully()
     {
@@ -122,8 +124,6 @@ public class PortfolioManagementIntegrationTests
             Quantity = 100m,
             EntryPrice = 150.00m,
             CurrentPrice = 155.00m,
-            UnrealizedPnL = 500m,
-            EntryTime = DateTime.UtcNow.AddHours(-2),
             StrategyName = "Strategy1",
             OpenedAt = DateTime.UtcNow.AddHours(-2)
         };
@@ -136,8 +136,6 @@ public class PortfolioManagementIntegrationTests
             Quantity = 50m,
             EntryPrice = 2800.00m,
             CurrentPrice = 2820.00m,
-            UnrealizedPnL = 1000m,
-            EntryTime = DateTime.UtcNow.AddHours(-1),
             StrategyName = "Strategy2",
             OpenedAt = DateTime.UtcNow.AddHours(-1)
         };
@@ -180,6 +178,7 @@ public class PortfolioManagementIntegrationTests
     /// <summary>
     /// Tests the close position workflow with error handling.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
     public async Task ClosePosition_PortfolioManagerThrowsException_PropagatesException()
     {
@@ -195,8 +194,6 @@ public class PortfolioManagementIntegrationTests
             Quantity = 100m,
             EntryPrice = 150.00m,
             CurrentPrice = 155.00m,
-            UnrealizedPnL = 500m,
-            EntryTime = DateTime.UtcNow,
             StrategyName = "TestStrategy",
             OpenedAt = DateTime.UtcNow
         };
@@ -220,6 +217,7 @@ public class PortfolioManagementIntegrationTests
     /// <summary>
     /// Tests the trade history export after closing a position.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
     [Fact]
     public async Task ClosePosition_ExportTradeHistory_IncludesClosedPosition()
     {
@@ -235,8 +233,6 @@ public class PortfolioManagementIntegrationTests
             Quantity = 100m,
             EntryPrice = 150.00m,
             CurrentPrice = 155.00m,
-            UnrealizedPnL = 500m,
-            EntryTime = DateTime.UtcNow.AddHours(-2),
             StrategyName = "MomentumStrategy",
             OpenedAt = DateTime.UtcNow.AddHours(-2)
         };
@@ -251,7 +247,6 @@ public class PortfolioManagementIntegrationTests
             ExitPrice = 155.00m,
             EntryTime = DateTime.UtcNow.AddHours(-2),
             ExitTime = DateTime.UtcNow,
-            RealizedPnL = 500m,
             Commission = 1.00m,
             StrategyName = "MomentumStrategy"
         };

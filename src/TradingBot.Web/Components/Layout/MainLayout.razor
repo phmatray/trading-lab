@@ -210,9 +210,10 @@
             {
                 await JSRuntime.InvokeVoidAsync("keyboardShortcuts.dispose");
             }
-            catch (InvalidOperationException)
+            catch (Exception ex) when (ex is InvalidOperationException or JSDisconnectedException)
             {
                 // JS interop not available during static rendering or disposal
+                // Circuit may have already disconnected
             }
 
             _dotNetHelper.Dispose();

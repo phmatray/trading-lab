@@ -1,0 +1,50 @@
+// <copyright file="TbLoadingOverlay.razor" company="TradingBot">
+// Copyright (c) TradingBot. All rights reserved.
+// </copyright>
+
+@if (IsVisible)
+{
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50" @onclick="HandleBackdropClick">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 flex flex-col items-center space-y-4" @onclick:stopPropagation>
+            <TbSpinner Size="SpinnerSize.Large" />
+            @if (!string.IsNullOrWhiteSpace(Message))
+            {
+                <p class="text-gray-700 dark:text-gray-300 text-lg font-medium">@Message</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets a value indicating whether the overlay is visible.
+    /// </summary>
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    /// <summary>
+    /// Gets or sets the loading message to display.
+    /// </summary>
+    [Parameter]
+    public string Message { get; set; } = "Loading...";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether clicking the backdrop should dismiss the overlay.
+    /// </summary>
+    [Parameter]
+    public bool DismissOnBackdropClick { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the callback invoked when the overlay is dismissed.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnDismiss { get; set; }
+
+    private async Task HandleBackdropClick()
+    {
+        if (DismissOnBackdropClick)
+        {
+            await OnDismiss.InvokeAsync();
+        }
+    }
+}

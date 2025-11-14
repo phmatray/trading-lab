@@ -10,12 +10,12 @@
 
 <div class="relative">
     <TbInput @bind-Value="@searchQuery"
+             @bind-Value:event="oninput"
              Type="text"
              Id="@Id"
              Placeholder="@Placeholder"
              HasError="@HasError"
              IsRequired="@IsRequired"
-             @oninput="@OnSearchInput"
              Class="@Class" />
 
     @if (isSearching)
@@ -102,7 +102,20 @@
     [Parameter]
     public EventCallback<SymbolSearchResult> OnSymbolSelected { get; set; }
 
-    private string searchQuery = string.Empty;
+    private string _searchQuery = string.Empty;
+    private string searchQuery
+    {
+        get => _searchQuery;
+        set
+        {
+            if (_searchQuery != value)
+            {
+                _searchQuery = value;
+                OnSearchQueryChanged(value);
+            }
+        }
+    }
+
     private List<SymbolSearchResult> searchResults = new();
     private bool isSearching = false;
     private bool showResults = false;
@@ -111,14 +124,11 @@
 
     protected override void OnInitialized()
     {
-        searchQuery = Value ?? string.Empty;
+        _searchQuery = Value ?? string.Empty;
     }
 
-    private async Task OnSearchInput(ChangeEventArgs e)
+    private void OnSearchQueryChanged(string input)
     {
-        var input = e.Value?.ToString() ?? string.Empty;
-        searchQuery = input;
-
         // Dispose old timer
         debounceTimer?.Dispose();
 
@@ -165,7 +175,7 @@
 
     private async Task SelectSymbol(SymbolSearchResult result)
     {
-        searchQuery = result.Symbol;
+        _searchQuery = result.Symbol;
         showResults = false;
         searchResults.Clear();
 

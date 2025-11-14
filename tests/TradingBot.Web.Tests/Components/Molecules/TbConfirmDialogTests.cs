@@ -102,7 +102,11 @@ public class TbConfirmDialogTests
 
         var cut = ctx.Render<TbConfirmDialog>(parameters => parameters
             .Add(p => p.ConfirmButtonText, "Confirm")
-            .Add(p => p.OnConfirm, () => { confirmCalled = true; return Task.CompletedTask; }));
+            .Add(p => p.OnConfirm, () =>
+            {
+                confirmCalled = true;
+                return Task.CompletedTask;
+            }));
 
         // Act
         var buttons = cut.FindAll("button");
@@ -125,7 +129,11 @@ public class TbConfirmDialogTests
 
         var cut = ctx.Render<TbConfirmDialog>(parameters => parameters
             .Add(p => p.CancelButtonText, "Cancel")
-            .Add(p => p.OnCancel, () => { cancelCalled = true; return Task.CompletedTask; }));
+            .Add(p => p.OnCancel, () =>
+            {
+                cancelCalled = true;
+                return Task.CompletedTask;
+            }));
 
         // Act
         var buttons = cut.FindAll("button");
@@ -147,7 +155,11 @@ public class TbConfirmDialogTests
         var cancelCalled = false;
 
         var cut = ctx.Render<TbConfirmDialog>(parameters => parameters
-            .Add(p => p.OnCancel, () => { cancelCalled = true; return Task.CompletedTask; }));
+            .Add(p => p.OnCancel, () =>
+            {
+                cancelCalled = true;
+                return Task.CompletedTask;
+            }));
 
         // Act
         var overlay = cut.Find("div.bg-gray-500.bg-opacity-75");
@@ -250,8 +262,16 @@ public class TbConfirmDialogTests
             .Add(p => p.IsConfirming, true)
             .Add(p => p.ConfirmButtonText, "Confirm")
             .Add(p => p.CancelButtonText, "Cancel")
-            .Add(p => p.OnConfirm, () => { confirmCalled = true; return Task.CompletedTask; })
-            .Add(p => p.OnCancel, () => { cancelCalled = true; return Task.CompletedTask; }));
+            .Add(p => p.OnConfirm, () =>
+            {
+                confirmCalled = true;
+                return Task.CompletedTask;
+            })
+            .Add(p => p.OnCancel, () =>
+            {
+                cancelCalled = true;
+                return Task.CompletedTask;
+            }));
 
         // Act
         var buttons = cut.FindAll("button");

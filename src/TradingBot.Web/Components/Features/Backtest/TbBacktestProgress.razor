@@ -59,10 +59,11 @@
     @if (!IsComplete && !IsFailed && OnCancel.HasDelegate)
     {
         <div class="flex justify-center">
-            <TbButton Text="Cancel Backtest"
-                     OnClick="@OnCancel"
+            <TbButton OnClick="@OnCancel"
                      Variant="@ButtonVariant.Secondary"
-                     Size="@ButtonSize.Small" />
+                     Size="@ButtonSize.Small">
+                Cancel Backtest
+            </TbButton>
         </div>
     }
 </div>

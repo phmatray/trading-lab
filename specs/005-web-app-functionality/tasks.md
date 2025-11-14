@@ -218,15 +218,15 @@
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+## Phase 8: Polish & Cross-Cutting Concerns ✅ COMPLETE
 
 **Purpose**: Improvements that affect multiple user stories and final quality checks
 
-- [ ] T115 [P] Create TbLoadingOverlay molecule component in src/TradingBot.Web/Components/Molecules/TbLoadingOverlay.razor for full-screen loading states
-- [ ] T116 [P] Add ExportTradeHistoryAsync implementation to PortfolioService for CSV export from Portfolio page
-- [ ] T117 [P] Add comprehensive XML documentation comments to all new public APIs in Web services
-- [ ] T118 [P] Add file headers to all new C# files per StyleCop requirements
-- [ ] T119 Run dotnet build /p:RunAnalyzers=true and fix all StyleCop/Roslynator warnings
+- [X] T115 [P] Create TbLoadingOverlay molecule component in src/TradingBot.Web/Components/Molecules/TbLoadingOverlay.razor for full-screen loading states
+- [X] T116 [P] Add ExportTradeHistoryAsync implementation to PortfolioService for CSV export from Portfolio page
+- [X] T117 [P] Add comprehensive XML documentation comments to all new public APIs in Web services
+- [X] T118 [P] Add file headers to all new C# files per StyleCop requirements
+- [X] T119 Run dotnet build /p:RunAnalyzers=true and fix all StyleCop/Roslynator warnings
 - [ ] T120 Run dotnet test and ensure all unit/integration tests pass
 - [ ] T121 Run dotnet test --collect:"XPlat Code Coverage" and verify 80% coverage minimum (100% for ClosePositionAsync, RunBacktestAsync, SaveRiskSettingsAsync)
 - [ ] T122 Manual test: Close position flow per User Story 1 acceptance criteria
