@@ -2,9 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Web.Services;
-
 using TradingBot.Core.Models.Configuration;
+
+namespace TradingBot.Web.Services;
 
 /// <summary>
 /// Service for managing risk management settings.
@@ -18,7 +18,7 @@ public interface IRiskSettingsService
     /// <returns>The current risk settings, or default values if none exist.</returns>
     /// <remarks>
     /// Risk settings are stored as a singleton (single row in database with fixed ID).
-    /// Default values: MaxPositionSize=10%, StopLoss=2%, TakeProfit=5%, MaxOpenPositions=5, MaxDailyLoss=5%
+    /// Default values: MaxPositionSize=10%, StopLoss=2%, TakeProfit=5%, MaxOpenPositions=5, MaxDailyLoss=5%.
     /// </remarks>
     Task<RiskSettings> GetRiskSettingsAsync(CancellationToken cancellationToken = default);
 

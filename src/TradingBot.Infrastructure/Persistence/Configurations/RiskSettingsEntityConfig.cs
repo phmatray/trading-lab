@@ -2,11 +2,11 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Infrastructure.Persistence.Configurations;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TradingBot.Core.Models.Configuration;
+
+namespace TradingBot.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// Entity configuration for RiskSettings.

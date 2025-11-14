@@ -64,7 +64,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IStrategyManagementService, StrategyManagementService>();
-builder.Services.AddSingleton<IRiskSettingsService, RiskSettingsService>();
+builder.Services.AddScoped<IRiskSettingsService, RiskSettingsService>();
 builder.Services.AddScoped<IBacktestService, BacktestService>();
 builder.Services.AddSingleton<IToastService, ToastService>();
 

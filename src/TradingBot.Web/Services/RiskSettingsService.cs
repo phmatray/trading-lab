@@ -2,12 +2,12 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Web.Services;
-
 using Microsoft.AspNetCore.SignalR;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Web.Hubs;
+
+namespace TradingBot.Web.Services;
 
 /// <summary>
 /// Service for managing risk settings with persistence and real-time updates.

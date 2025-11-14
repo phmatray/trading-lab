@@ -2,9 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Core.Interfaces;
-
 using TradingBot.Core.Models.Configuration;
+
+namespace TradingBot.Core.Interfaces;
 
 /// <summary>
 /// Repository interface for managing risk settings persistence.

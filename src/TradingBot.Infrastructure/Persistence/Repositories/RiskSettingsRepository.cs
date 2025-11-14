@@ -2,11 +2,11 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-namespace TradingBot.Infrastructure.Persistence.Repositories;
-
 using Microsoft.EntityFrameworkCore;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Configuration;
+
+namespace TradingBot.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Repository implementation for risk settings persistence.

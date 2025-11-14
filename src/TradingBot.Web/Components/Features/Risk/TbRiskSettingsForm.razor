@@ -191,7 +191,7 @@
         await OnReset.InvokeAsync();
     }
 
-    private class RiskSettingsFormModel
+    private sealed class RiskSettingsFormModel
     {
         [Required(ErrorMessage = "Max position size is required")]
         [Range(0.1, 100.0, ErrorMessage = "Max position size must be between 0.1% and 100%")]
