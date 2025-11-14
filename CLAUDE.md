@@ -560,6 +560,8 @@ This constitution takes precedence for architectural decisions and coding standa
 - **Testing**: xUnit 3.2, bUnit 2.0.66, FakeItEasy 8.3, Shouldly 4.3
 - **Logging**: Serilog with structured logging
 - **Code Analysis**: StyleCop, Roslynator, SonarAnalyzer, Microsoft.CodeAnalysis.NetAnalyzers
+- C# 14 / .NET 10.0 + ASP.NET Core Blazor Server 10.0, SignalR 10.0 with MessagePack, Blazor-ApexCharts 6.0.2, Tailwind CSS 4.x, Entity Framework Core 10.0 (SQLite), Serilog 4.3.0, Ardalis.SmartEnum (005-web-app-functionality)
+- SQLite via Entity Framework Core 10.0 (existing: Orders, Positions, Trades, Candles, Accounts, UserPreferences; new tables: StrategyConfigurations, BacktestResults, RiskSettings) (005-web-app-functionality)
 
 ## Recent Changes
 - **2025-01-12**: Upgraded to .NET 10 and updated all NuGet packages

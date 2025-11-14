@@ -13,22 +13,20 @@
 
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 1: Setup (Shared Infrastructure) ✅ COMPLETE
 
 **Purpose**: Project initialization and database schema setup
 
-- [ ] T001 Verify feature branch 005-web-app-functionality is checked out and up to date
-- [ ] T002 [P] Create StrategyConfiguration entity in src/TradingBot.Core/Models/Configuration/StrategyConfiguration.cs
-- [ ] T003 [P] Create RiskSettings entity in src/TradingBot.Core/Models/Configuration/RiskSettings.cs
-- [ ] T004 [P] Verify BacktestResult entity exists in src/TradingBot.Core/Models/Backtest/BacktestResult.cs and add missing properties per data-model.md
-- [ ] T005 [P] Create StrategyConfigurationEntityConfig in src/TradingBot.Infrastructure/Persistence/Configurations/StrategyConfigurationEntityConfig.cs
-- [ ] T006 [P] Create RiskSettingsEntityConfig with default seed data in src/TradingBot.Infrastructure/Persistence/Configurations/RiskSettingsEntityConfig.cs
-- [ ] T007 [P] Create BacktestResultEntityConfig in src/TradingBot.Infrastructure/Persistence/Configurations/BacktestResultEntityConfig.cs
-- [ ] T008 Register entity configurations in src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs OnModelCreating method
-- [ ] T009 Create migration AddStrategyConfigurationsTable using dotnet ef migrations add
-- [ ] T010 Create migration AddRiskSettingsTable using dotnet ef migrations add
-- [ ] T011 Create migration AddBacktestResultsTable using dotnet ef migrations add
-- [ ] T012 Apply all migrations using dotnet ef database update and verify tables exist in tradingbot.db
+- [X] T001 Verify feature branch 005-web-app-functionality is checked out and up to date
+- [X] T002 [P] Create StrategyConfiguration entity in src/TradingBot.Core/Models/Configuration/StrategyConfiguration.cs
+- [X] T003 [P] Create RiskSettings entity in src/TradingBot.Core/Models/Configuration/RiskSettings.cs
+- [X] T004 [P] Verify BacktestResult entity exists in src/TradingBot.Core/Models/Backtest/BacktestResult.cs and add missing properties per data-model.md
+- [X] T005 [P] Create StrategyConfigurationEntityConfig in src/TradingBot.Infrastructure/Persistence/Configurations/StrategyConfigurationEntityConfig.cs
+- [X] T006 [P] Create RiskSettingsEntityConfig with default seed data in src/TradingBot.Infrastructure/Persistence/Configurations/RiskSettingsEntityConfig.cs
+- [X] T007 [P] Create BacktestResultEntityConfig in src/TradingBot.Infrastructure/Persistence/Configurations/BacktestResultEntityConfig.cs
+- [X] T008 Register entity configurations in src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs OnModelCreating method
+- [X] T009-T011 Create consolidated migration AddWebAppEntities using dotnet ef migrations add (combined all three tables into single migration)
+- [X] T012 Apply all migrations using dotnet ef database update and verify tables exist in tradingbot.db
 
 ---
 

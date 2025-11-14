@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Entities;
 using TradingBot.Core.Enums;
+using TradingBot.Core.Models.Backtest;
+using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
@@ -66,6 +68,21 @@ public sealed class TradingBotDbContext : DbContext
     /// Gets the UserPreferences DbSet.
     /// </summary>
     public DbSet<UserPreferences> UserPreferences => Set<UserPreferences>();
+
+    /// <summary>
+    /// Gets the StrategyConfigurations DbSet.
+    /// </summary>
+    public DbSet<StrategyConfiguration> StrategyConfigurations => Set<StrategyConfiguration>();
+
+    /// <summary>
+    /// Gets the RiskSettings DbSet.
+    /// </summary>
+    public DbSet<RiskSettings> RiskSettings => Set<RiskSettings>();
+
+    /// <summary>
+    /// Gets the BacktestResults DbSet.
+    /// </summary>
+    public DbSet<BacktestResult> BacktestResults => Set<BacktestResult>();
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
