@@ -78,7 +78,7 @@
 
 ---
 
-## Phase 4: User Story 1 - Close Open Positions (Priority: P1) 🎯 MVP CORE
+## Phase 4: User Story 1 - Close Open Positions (Priority: P1) 🎯 MVP CORE ✅ COMPLETE
 
 **Goal**: Enable traders to quickly close losing positions or take profits on winning positions from the Portfolio page
 
@@ -88,21 +88,21 @@
 
 ### Implementation for User Story 1
 
-- [ ] T035 [P] [US1] Add ClosePositionAsync method to IPortfolioService interface per contracts/IPortfolioService.cs
-- [ ] T036 [US1] Implement ClosePositionAsync in PortfolioService (src/TradingBot.Web/Services/PortfolioService.cs) with order creation, execution, and SignalR event publishing
-- [ ] T037 [P] [US1] Create TbConfirmDialog molecule component in src/TradingBot.Web/Components/Molecules/TbConfirmDialog.razor
-- [ ] T038 [P] [US1] Create TbOpenPositionsTable feature component in src/TradingBot.Web/Components/Features/Portfolio/TbOpenPositionsTable.razor with Close button per position
-- [ ] T039 [P] [US1] Create TbClosePositionDialog feature component in src/TradingBot.Web/Components/Features/Portfolio/TbClosePositionDialog.razor wrapping TbConfirmDialog
-- [ ] T040 [US1] Integrate TbOpenPositionsTable into Portfolio page (src/TradingBot.Web/Components/Pages/Portfolio.razor) above trade history
-- [ ] T041 [US1] Wire up HandleClosePosition handler in Portfolio page to show confirmation dialog
-- [ ] T042 [US1] Wire up ConfirmClosePosition handler in Portfolio page to call PortfolioService.ClosePositionAsync
-- [ ] T043 [US1] Add loading state management during position closure with disabled button states
-- [ ] T044 [US1] Add success/error toast notifications after position closure attempt
-- [ ] T045 [US1] Subscribe to OnPositionClosed SignalR event to refresh positions list in real-time
-- [ ] T046 [P] [US1] Create PortfolioServiceTests.ClosePositionAsync_ValidPosition_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/PortfolioServiceTests.cs
-- [ ] T047 [P] [US1] Create PortfolioServiceTests.ClosePositionAsync_PositionNotFound_ReturnsFalse unit test
-- [ ] T048 [P] [US1] Create TbConfirmDialogTests.ClickConfirm_InvokesCallback bUnit test in tests/TradingBot.Web.Tests/Components/TbConfirmDialogTests.cs
-- [ ] T049 [P] [US1] Create PortfolioManagementIntegrationTests.ClosePosition_EndToEnd integration test in tests/TradingBot.Web.Tests/Integration/PortfolioManagementIntegrationTests.cs
+- [X] T035 [P] [US1] Add ClosePositionAsync method to IPortfolioService interface per contracts/IPortfolioService.cs
+- [X] T036 [US1] Implement ClosePositionAsync in PortfolioService (src/TradingBot.Web/Services/PortfolioService.cs) with order creation, execution, and SignalR event publishing
+- [X] T037 [P] [US1] Create TbConfirmDialog molecule component in src/TradingBot.Web/Components/Molecules/TbConfirmDialog.razor
+- [X] T038 [P] [US1] Create TbOpenPositionsTable feature component in src/TradingBot.Web/Components/Features/Portfolio/TbOpenPositionsTable.razor with Close button per position
+- [X] T039 [P] [US1] Create TbClosePositionDialog feature component in src/TradingBot.Web/Components/Features/Portfolio/TbClosePositionDialog.razor wrapping TbConfirmDialog
+- [X] T040 [US1] Integrate TbOpenPositionsTable into Portfolio page (src/TradingBot.Web/Components/Pages/Portfolio.razor) above trade history
+- [X] T041 [US1] Wire up HandleClosePosition handler in Portfolio page to show confirmation dialog
+- [X] T042 [US1] Wire up ConfirmClosePosition handler in Portfolio page to call PortfolioService.ClosePositionAsync
+- [X] T043 [US1] Add loading state management during position closure with disabled button states
+- [X] T044 [US1] Add success/error toast notifications after position closure attempt
+- [X] T045 [US1] Subscribe to OnPositionClosed SignalR event to refresh positions list in real-time
+- [X] T046 [P] [US1] Create PortfolioServiceTests.ClosePositionAsync_ValidPosition_ReturnsTrue unit test in tests/TradingBot.Web.Tests/Services/PortfolioServiceTests.cs
+- [X] T047 [P] [US1] Create PortfolioServiceTests.ClosePositionAsync_PositionNotFound_ReturnsFalse unit test
+- [X] T048 [P] [US1] Create TbConfirmDialogTests.ClickConfirm_InvokesCallback bUnit test in tests/TradingBot.Web.Tests/Components/TbConfirmDialogTests.cs
+- [X] T049 [P] [US1] Create PortfolioManagementIntegrationTests.ClosePosition_EndToEnd integration test in tests/TradingBot.Web.Tests/Integration/PortfolioManagementIntegrationTests.cs
 
 **Checkpoint**: User Story 1 complete - users can close positions from the web interface with confirmation
 
