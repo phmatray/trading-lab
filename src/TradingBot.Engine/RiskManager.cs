@@ -4,7 +4,7 @@
 
 using Microsoft.Extensions.Logging;
 using TradingBot.Core.Interfaces;
-using TradingBot.Core.Models.Risk;
+using TradingBot.Core.Models.Configuration;
 
 namespace TradingBot.Engine;
 
@@ -42,7 +42,7 @@ public sealed class RiskManager : IRiskManager
                 MaxDrawdownPercent = _settings.MaxDrawdownPercent,
                 MaxPositionSizePercent = _settings.MaxPositionSizePercent,
                 RiskLimitsEnabled = _settings.RiskLimitsEnabled,
-                LastUpdated = _settings.LastUpdated,
+                LastModified = _settings.LastModified,
             };
         }
         finally
@@ -63,7 +63,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.Leverage = leverage;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Leverage set to {Leverage}x", leverage);
         }
         finally
@@ -84,7 +84,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.StopLossPercent = stopLossPercent;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Stop-loss set to {StopLoss}%", stopLossPercent);
         }
         finally
@@ -105,7 +105,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.TakeProfitPercent = takeProfitPercent;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Take-profit set to {TakeProfit}%", takeProfitPercent);
         }
         finally
@@ -126,7 +126,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.DailyLossLimit = dailyLossLimit;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Daily loss limit set to ${DailyLossLimit:N2}", dailyLossLimit);
         }
         finally
@@ -147,7 +147,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.MaxDrawdownPercent = maxDrawdownPercent;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Max drawdown set to {MaxDrawdown}%", maxDrawdownPercent);
         }
         finally
@@ -168,7 +168,7 @@ public sealed class RiskManager : IRiskManager
         try
         {
             _settings.MaxPositionSizePercent = maxPositionSizePercent;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
             _logger.LogInformation("Max position size set to {MaxPositionSize}%", maxPositionSizePercent);
         }
         finally
@@ -190,7 +190,7 @@ public sealed class RiskManager : IRiskManager
             _settings.MaxDrawdownPercent = 10.0m;
             _settings.MaxPositionSizePercent = 10.0m;
             _settings.RiskLimitsEnabled = true;
-            _settings.LastUpdated = DateTime.UtcNow;
+            _settings.LastModified = DateTime.UtcNow;
 
             _logger.LogInformation("Risk settings reset to defaults");
         }

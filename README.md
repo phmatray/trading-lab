@@ -1,6 +1,6 @@
 # TradingBot
 
-A powerful, extensible algorithmic trading platform built with .NET 9, featuring automated strategy execution, risk management, and comprehensive order handling. Includes both a CLI application and a modern web dashboard built with Blazor Server.
+A powerful, extensible algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. Includes a modern web dashboard built with Blazor Server using Domain-Driven Design patterns.
 
 [![CI/CD](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml/badge.svg)](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/phmatray/TradingBot/branch/main/graph/badge.svg)](https://codecov.io/gh/phmatray/TradingBot)
@@ -39,31 +39,42 @@ A powerful, extensible algorithmic trading platform built with .NET 9, featuring
 - Automatic take-profit orders
 - Leverage controls (1-10x)
 
-### Web Dashboard (NEW)
+### Web Dashboard
 - **Real-time Trading Dashboard**: Live portfolio metrics, active positions, and recent trades with SignalR updates
-- **Performance Analytics**: Equity curves, trade statistics, and comprehensive performance metrics
-- **Strategy Management**: Enable/disable strategies, monitor performance by strategy
-- **Backtesting Interface**: Run historical backtests and analyze results
+- **Performance Analytics**: Equity curves, trade statistics, and comprehensive performance metrics (Sharpe ratio, max drawdown, win rate)
+- **Strategy Management**: Enable/disable strategies, configure parameters, monitor performance
+- **Backtesting Interface**: Run historical backtests and analyze results with detailed trade lists
+- **Risk Settings**: Configure position sizing, stop-loss, take-profit, daily loss limits, and leverage
 - **User Settings**: Customizable themes (light/dark), refresh intervals, and notification preferences
 - **Responsive Design**: Desktop-optimized interface (minimum 1024px width)
 - **Accessibility**: WCAG 2.1 Level AA compliant with full keyboard navigation
+- **Domain-Driven Design**: Built using Ardalis.SharedKernel with domain events and aggregate patterns
 
 ## Architecture
 
+Clean Architecture with Domain-Driven Design patterns:
+
 ```
-TradingBot CLI
-├── Core Layer (Domain Models & Interfaces)
+TradingBot Web Application
+├── Core Layer (Domain Models, Aggregates, Domain Events)
 ├── Strategy Engine (Technical Analysis & Signals)
 ├── Trading Engine (Order Execution & Portfolio)
-├── Infrastructure (Data Access & Market Data)
-└── CLI (User Interface)
+├── Infrastructure (Data Access, Event Dispatching, Market Data)
+└── Web (Blazor Server UI with SignalR)
 ```
+
+**DDD Patterns**:
+- Domain entities extend `EntityBase<T>` from Ardalis.SharedKernel
+- Aggregates implement `IAggregateRoot` (Order, Position, Account, Trade)
+- Domain events for state changes (OrderFilledEvent, PositionClosedEvent, etc.)
+- MediatR for domain event dispatching
+- Repository pattern using Ardalis.Specification
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET 9.0 SDK or later
+- .NET 10.0 SDK or later
 - SQLite (bundled with .NET)
 
 ### Installation
@@ -78,9 +89,6 @@ dotnet restore
 
 # Build the solution
 dotnet build
-
-# Run the CLI
-dotnet run --project src/TradingBot.Cli
 
 # Run the Web Dashboard
 dotnet run --project src/TradingBot.Web
@@ -114,33 +122,18 @@ Configuration is stored in `appsettings.json`:
 
 ## Usage
 
-### CLI Commands
+### Web Dashboard
 
-#### Strategy Management
+Access the web dashboard at `https://localhost:5001` after running the application.
 
-```bash
-# List all strategies
-tradingbot strategy list
-
-# Enable a strategy
-tradingbot strategy enable momentum
-
-# Disable a strategy
-tradingbot strategy disable momentum
-```
-
-#### Configuration
-
-```bash
-# Show current configuration
-tradingbot config show
-
-# Set a configuration value
-tradingbot config set MaxPositionSize 15.0
-
-# Set API keys (encrypted storage)
-tradingbot config set-apikey YahooFinance "your-api-key"
-```
+**Main Features**:
+- **Dashboard** (`/`): Real-time account summary, active strategies, recent trades
+- **Portfolio** (`/portfolio`): Open positions, trade history with advanced filters
+- **Strategies** (`/strategies`): Enable/disable strategies, configure parameters
+- **Performance** (`/performance`): Equity curves, trade statistics, performance metrics
+- **Backtest** (`/backtest`): Run historical backtests and analyze results
+- **Risk Settings** (`/risk-settings`): Configure position sizing, limits, stop-loss/take-profit
+- **Settings** (`/settings`): Customize theme, refresh intervals, notifications
 
 ### Programmatic Usage
 
@@ -249,26 +242,28 @@ public class MyCustomStrategy : IStrategy
 
 ## Database Schema
 
-The application uses SQLite with Entity Framework Core 9:
+The application uses SQLite with Entity Framework Core 10:
 
-- **Orders**: All submitted orders with status tracking
-- **Positions**: Open positions with real-time P&L
-- **Trades**: Closed trade history
+- **Orders**: All submitted orders with status tracking (Aggregate Root)
+- **Positions**: Open positions with real-time P&L (Aggregate Root)
+- **Trades**: Closed trade history (Aggregate Root)
 - **Candles**: Cached historical market data
-- **Accounts**: Account state and equity tracking
+- **Accounts**: Account state and equity tracking (Aggregate Root)
+- **RiskSettings**: Risk management configuration (Aggregate Root)
+- **BacktestResults**: Historical backtest results
+- **UserPreferences**: User-specific settings (theme, notifications)
 
 ## Project Structure
 
 ```
 TradingBot/
 ├── src/
-│   ├── TradingBot.Core/              # Domain models and interfaces
+│   ├── TradingBot.Core/              # Domain models, aggregates, domain events
 │   ├── TradingBot.Engine/            # Trading engine and strategy execution
 │   ├── TradingBot.Strategies/        # Built-in trading strategies
-│   ├── TradingBot.Infrastructure/    # Data access and external services
+│   ├── TradingBot.Infrastructure/    # Data access, repositories, event dispatching
 │   ├── TradingBot.Analytics/         # Performance analytics
-│   ├── TradingBot.Cli/               # Command-line interface
-│   └── TradingBot.Web/               # Blazor Server web dashboard
+│   └── TradingBot.Web/               # Blazor Server web dashboard (single entry point)
 ├── tests/                            # Unit and integration tests
 ├── specs/                            # Feature specifications
 └── .github/workflows/                # CI/CD pipelines
@@ -367,7 +362,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Market data provided by Yahoo Finance
 - Technical indicator calculations inspired by TA-Lib
-- Built with .NET 9 and Entity Framework Core 9
+- Built with .NET 10 and Entity Framework Core 10
+- DDD patterns from Ardalis.SharedKernel
 
 ## Support
 
@@ -378,4 +374,4 @@ For issues, questions, or suggestions:
 
 ---
 
-**Built with ❤️ using .NET 9 and Claude Code**
+**Built with ❤️ using .NET 10 and Claude Code**

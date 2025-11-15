@@ -3,8 +3,8 @@
 // </copyright>
 
 using TradingBot.Core.Interfaces;
+using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.Portfolio;
-using TradingBot.Core.Models.Risk;
 using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Web.Models;

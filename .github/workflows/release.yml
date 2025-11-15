@@ -62,19 +62,19 @@ jobs:
           - os: windows-latest
             platform: win-x64
             artifact_name: tradingbot-win-x64.zip
-            executable: TradingBot.Cli.exe
+            executable: TradingBot.Web.exe
           - os: ubuntu-latest
             platform: linux-x64
             artifact_name: tradingbot-linux-x64.tar.gz
-            executable: TradingBot.Cli
+            executable: TradingBot.Web
           - os: macos-latest
             platform: osx-x64
             artifact_name: tradingbot-osx-x64.tar.gz
-            executable: TradingBot.Cli
+            executable: TradingBot.Web
           - os: macos-latest
             platform: osx-arm64
             artifact_name: tradingbot-osx-arm64.tar.gz
-            executable: TradingBot.Cli
+            executable: TradingBot.Web
 
     steps:
       - name: Checkout code
@@ -93,7 +93,7 @@ jobs:
 
       - name: Publish ${{ matrix.platform }}
         run: |
-          dotnet publish src/TradingBot.Cli/TradingBot.Cli.csproj \
+          dotnet publish src/TradingBot.Web/TradingBot.Web.csproj \
             -c Release \
             -r ${{ matrix.platform }} \
             --self-contained true \

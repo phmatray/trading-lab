@@ -2,6 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
 
@@ -10,8 +11,15 @@ namespace TradingBot.Core.Models.Backtest;
 /// <summary>
 /// Represents the results of a completed backtest execution.
 /// </summary>
-public class BacktestResult
+public class BacktestResult : IAggregateRoot
 {
+    private readonly List<DomainEventBase> _domainEvents = new();
+
+    /// <summary>
+    /// Gets the domain events collection.
+    /// </summary>
+    public IReadOnlyCollection<DomainEventBase> DomainEvents => _domainEvents.AsReadOnly();
+
     /// <summary>
     /// Gets or sets the unique identifier for this backtest.
     /// Format: "bt_{strategy}_{symbol}_{timestamp}" for readability.
@@ -127,4 +135,21 @@ public class BacktestResult
     /// Gets or sets the duration of the backtest execution.
     /// </summary>
     public TimeSpan Duration { get; set; }
+
+    /// <summary>
+    /// Clears all domain events.
+    /// </summary>
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
+    /// <summary>
+    /// Registers a domain event.
+    /// </summary>
+    /// <param name="domainEvent">The domain event to register.</param>
+    protected void RegisterDomainEvent(DomainEventBase domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
 }

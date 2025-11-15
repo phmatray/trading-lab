@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 TradingBot is an algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. The solution includes:
-- **CLI Application**: Command-line interface using Spectre.Console
-- **Web Dashboard**: Modern Blazor Server application with real-time updates via SignalR
+- **Web Dashboard**: Modern Blazor Server application with real-time updates via SignalR (single entry point)
 - **Clean Architecture**: Layered architecture with SQLite/EF Core for data persistence
+- **Domain-Driven Design**: Uses Ardalis.SharedKernel for DDD patterns (aggregates, domain events, repositories)
 - **Atomic Design**: Component hierarchy (Atoms → Molecules → Organisms → Pages) with Tb-prefixed components
 
 ## Build and Development Commands
@@ -23,12 +23,6 @@ dotnet build
 
 # Build with code analyzers enabled
 dotnet build /p:RunAnalyzers=true
-
-# Run the CLI application
-dotnet run --project src/TradingBot.Cli
-
-# Run with configuration
-dotnet run --project src/TradingBot.Cli -- strategy list
 
 # Run the Web Dashboard
 dotnet run --project src/TradingBot.Web
@@ -58,13 +52,13 @@ dotnet test --verbosity detailed
 
 ```bash
 # Create a new migration (from Infrastructure project)
-dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 
 # Update database
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 
 # Drop database (use with caution)
-dotnet ef database drop --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef database drop --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 ```
 
 ## Architecture
@@ -74,7 +68,6 @@ dotnet ef database drop --project src/TradingBot.Infrastructure --startup-projec
 The solution follows a strict layered architecture with clear dependency flow:
 
 ```
-TradingBot.Cli (CLI Presentation)
 TradingBot.Web (Web Presentation - Blazor Server)
     ↓
 TradingBot.Engine (Business Logic - Trading Engine)
@@ -87,26 +80,30 @@ TradingBot.Core (Domain Models & Interfaces)
 ```
 
 **Dependency Rules:**
-- Core has NO dependencies (pure domain models and interfaces)
+- Core has NO dependencies (pure domain models and interfaces, extends Ardalis.SharedKernel)
 - Infrastructure depends ONLY on Core
 - Engine/Strategies/Analytics depend on Core (and optionally Infrastructure for implementations)
-- CLI depends on all layers (composition root)
+- Web depends on all layers (composition root)
 - NO circular dependencies allowed
 
 ### Key Projects
 
 **TradingBot.Core**: Domain models and interfaces
-- Domain entities (Order, Position, Trade, Signal, Account, Candle)
+- Domain entities extending EntityBase<T> from Ardalis.SharedKernel (Order, Position, Trade, Account, RiskSettings)
+- Domain events extending DomainEventBase (OrderFilledEvent, PositionClosedEvent, etc.)
 - Core interfaces (IStrategy, IStrategyEngine, IPortfolioManager, IRiskManager, IOrderExecutionService)
+- Repository interfaces extending IRepositoryBase and IReadRepositoryBase from SharedKernel
 - All enums use SmartEnum pattern (Ardalis.SmartEnum)
-- NO external dependencies except SmartEnum
+- Dependencies: Ardalis.SharedKernel, Ardalis.SmartEnum, MediatR (for domain events)
 
 **TradingBot.Infrastructure**: Data access and external services
 - Entity Framework Core 10 with SQLite
-- TradingBotDbContext (DbContext with fluent configuration)
-- Repository pattern implementations
+- TradingBotDbContext (DbContext with fluent configuration and domain event dispatching)
+- Generic repository implementations (EfRepository<T>, EfReadRepository<T>) extending RepositoryBase from SharedKernel
+- MediatorDomainEventDispatcher for dispatching domain events via MediatR
 - Yahoo Finance integration for market data
 - Encryption service for API key storage
+- Dependencies: Ardalis.Specification.EntityFrameworkCore
 
 **TradingBot.Engine**: Core trading engine
 - StrategyEngine: Manages and executes strategies, emits signals
@@ -128,13 +125,7 @@ TradingBot.Core (Domain Models & Interfaces)
 - Equity curve generation
 - Trade statistics
 
-**TradingBot.Cli**: Command-line interface
-- Spectre.Console.Cli for commands
-- Commands: strategy (list/enable/disable), config (show/set/set-apikey)
-- Dependency injection composition root
-- Serilog for structured logging
-
-**TradingBot.Web**: Blazor Server web dashboard
+**TradingBot.Web**: Blazor Server web dashboard (single application entry point)
 - Real-time updates via SignalR (TradingHub)
 - Atomic Design component structure (Atoms → Molecules → Organisms → Features)
 - All components prefixed with "Tb" (e.g., TbButton, TbCard, TbNavigationSidebar)
@@ -229,7 +220,7 @@ Never use traditional C# enums. Always use SmartEnum.
 - **xUnit**: Test framework
 - **FakeItEasy**: Mocking framework
 - **Shouldly**: Assertion library
-- **Spectre.Console.Testing**: CLI testing with TestConsole
+- **bUnit**: Blazor component testing
 
 ### Test Structure
 
@@ -263,9 +254,8 @@ Format: `MethodName_Scenario_ExpectedBehavior`
 
 ## Dependency Injection
 
-Both CLI and Web applications use Microsoft.Extensions.DependencyInjection. All services are registered in:
+The Web application uses Microsoft.Extensions.DependencyInjection. All services are registered in:
 - `ServiceCollectionExtensions.AddTradingBotServices()` (Infrastructure project - shared core services)
-- `Program.cs` (CLI project for CLI-specific services)
 - `Program.cs` (Web project for web-specific services)
 
 Register dependencies as:
@@ -295,15 +285,15 @@ Register dependencies as:
 
 Always create migrations when changing entity models:
 ```bash
-dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
+dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 ```
 
-The database file is `tradingbot.db` in the CLI output directory.
+The database file is `tradingbot.db` in the Web output directory.
 
 ## Configuration
 
-Configuration is in `appsettings.json` in the CLI project:
+Configuration is in `appsettings.json` in the Web project:
 
 ```json
 {
@@ -323,22 +313,6 @@ Configuration is in `appsettings.json` in the CLI project:
 Environment variables can override settings with prefix `TRADINGBOT_`.
 
 ## Application Usage
-
-### CLI Usage
-
-The CLI uses Spectre.Console.Cli with the following command structure:
-
-```bash
-# Strategy commands
-dotnet run --project src/TradingBot.Cli -- strategy list
-dotnet run --project src/TradingBot.Cli -- strategy enable momentum
-dotnet run --project src/TradingBot.Cli -- strategy disable momentum
-
-# Config commands
-dotnet run --project src/TradingBot.Cli -- config show
-dotnet run --project src/TradingBot.Cli -- config set MaxPositionSize 15.0
-dotnet run --project src/TradingBot.Cli -- config set-apikey YahooFinance "key"
-```
 
 ### Web Dashboard Usage
 
@@ -423,10 +397,175 @@ The system uses events for decoupling:
 - `StrategyEngine.SignalGenerated` → SignalProcessor listens
 - This pattern allows multiple subscribers without tight coupling
 
+### Domain Events
+
+The application implements Domain-Driven Design (DDD) patterns using **Ardalis.SharedKernel** for domain events:
+
+**Event Infrastructure**:
+- All domain events extend `DomainEventBase` from Ardalis.SharedKernel
+- Events are dispatched via **MediatR** before SaveChangesAsync completes
+- Event handlers are registered in DI container as MediatR notification handlers
+- Events enable eventual consistency between aggregates
+
+**Key Domain Events**:
+- `OrderFilledEvent`: Raised when an order is filled
+- `OrderCancelledEvent`: Raised when an order is cancelled
+- `PositionOpenedEvent`: Raised when a position is opened
+- `PositionClosedEvent`: Raised when a position is closed
+- `PositionPriceUpdatedEvent`: Raised when position price updates
+- `CashUpdatedEvent`: Raised when account cash changes
+- `EquityUpdatedEvent`: Raised when account equity changes
+- `AccountSuspendedEvent`: Raised when account is suspended
+
+**Event Dispatching Flow**:
+```csharp
+// 1. Entity raises domain event
+public void MarkAsFilled(decimal fillPrice, decimal commission, DateTime filledAt)
+{
+    Status = OrderStatus.Filled;
+    RegisterDomainEvent(new OrderFilledEvent(Id, Symbol, Quantity, fillPrice, commission));
+}
+
+// 2. DbContext dispatches events before save
+public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+{
+    await _domainEventDispatcher.DispatchAndClearEvents(entitiesWithEvents);
+    return await base.SaveChangesAsync(cancellationToken);
+}
+
+// 3. MediatR notifies registered handlers
+public class OrderFilledEventHandler : INotificationHandler<OrderFilledEvent>
+{
+    public async Task Handle(OrderFilledEvent notification, CancellationToken cancellationToken)
+    {
+        // Update position, account, send notifications, etc.
+    }
+}
+```
+
+**Usage Guidelines**:
+- Domain events are raised within aggregate roots (entities implementing `IAggregateRoot`)
+- Events represent business-significant state changes
+- Keep events focused on a single concern (OrderFilled, not OrderFilledAndPositionOpened)
+- Event handlers should be idempotent (safe to process multiple times)
+- Use events to maintain eventual consistency between aggregates
+- Never modify aggregates directly from event handlers without proper transactional boundaries
+
+### Ardalis.SharedKernel Usage Patterns
+
+**EntityBase<TId>**: Base class for all entities with identity
+```csharp
+public sealed class Order : EntityBase<Guid>, IAggregateRoot
+{
+    // Id property inherited from EntityBase<Guid>
+    // DomainEvents collection inherited for event registration
+
+    public required string Symbol { get; set; }
+    public required OrderStatus Status { get; set; }
+
+    public void MarkAsFilled(decimal fillPrice, decimal commission, DateTime filledAt)
+    {
+        Status = OrderStatus.Filled;
+        RegisterDomainEvent(new OrderFilledEvent(Id, Symbol, Quantity, fillPrice, commission));
+    }
+}
+```
+
+**IAggregateRoot**: Marker interface for aggregate roots
+```csharp
+// All entities that are aggregate roots implement this interface
+public sealed class Position : EntityBase<Guid>, IAggregateRoot { }
+public sealed class Account : IAggregateRoot  // Manual implementation for non-Guid IDs
+{
+    public required string Id { get; set; }
+    private readonly List<DomainEventBase> _domainEvents = new();
+    public IEnumerable<DomainEventBase> DomainEvents => _domainEvents.AsReadOnly();
+
+    protected void RegisterDomainEvent(DomainEventBase domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}
+```
+
+**IRepository and IReadRepository**: Repository interfaces
+```csharp
+// Core interfaces extend SharedKernel interfaces
+public interface IRepository<T> : IRepositoryBase<T> where T : class, IAggregateRoot { }
+public interface IReadRepository<T> : IReadRepositoryBase<T> where T : class { }
+
+// Infrastructure implementations extend RepositoryBase
+public class EfRepository<T> : RepositoryBase<T>, IRepository<T>
+    where T : class, IAggregateRoot
+{
+    public EfRepository(TradingBotDbContext dbContext) : base(dbContext) { }
+}
+```
+
+**Specifications Pattern**: Query encapsulation using Ardalis.Specification
+```csharp
+// Define specifications for common queries
+public class PendingOrdersSpec : Specification<Order>
+{
+    public PendingOrdersSpec()
+    {
+        Query.Where(o => o.Status == OrderStatus.Pending)
+             .OrderBy(o => o.CreatedAt);
+    }
+}
+
+// Use in repositories
+var pendingOrders = await _orderRepository.ListAsync(new PendingOrdersSpec());
+```
+
+**Entity Configuration**:
+```csharp
+// Always ignore DomainEvents property in EF Core configurations
+public class OrderConfiguration : IEntityTypeConfiguration<Order>
+{
+    public void Configure(EntityTypeBuilder<Order> builder)
+    {
+        builder.ToTable("Orders");
+        builder.HasKey(o => o.Id);
+
+        // CRITICAL: Ignore domain events collection
+        builder.Ignore(o => o.DomainEvents);
+
+        // Other configurations...
+    }
+}
+```
+
+**Non-Guid Aggregate Roots**:
+For entities with non-Guid IDs (string, long), manually implement IAggregateRoot:
+```csharp
+public sealed class Account : IAggregateRoot
+{
+    // Manual Id property (string instead of Guid)
+    public required string Id { get; set; }
+
+    // Manual domain events implementation
+    private readonly List<DomainEventBase> _domainEvents = new();
+    public IEnumerable<DomainEventBase> DomainEvents => _domainEvents.AsReadOnly();
+
+    protected void RegisterDomainEvent(DomainEventBase domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}
+```
+
 ### Repository Pattern
 
 All data access goes through repository interfaces:
 - IOrderRepository, IPositionRepository, ITradeRepository, etc.
+- All repository interfaces extend `IRepositoryBase<T>` from Ardalis.SharedKernel
+- Generic repositories (`EfRepository<T>`, `EfReadRepository<T>`) extend `RepositoryBase<T>`
+- Use **Specifications** pattern for complex queries instead of exposing IQueryable
 - Never access DbContext directly from business logic
 - Repositories are in Infrastructure, interfaces in Core
 
@@ -484,18 +623,6 @@ Before any order executes:
 
 This sequence is critical for safety and cannot be bypassed.
 
-### CLI Testing
-
-Use Spectre.Console.Testing for testing CLI commands:
-```csharp
-var console = new TestConsole();
-var command = new MyCommand();
-await command.ExecuteAsync(context, settings, console, CancellationToken.None);
-var output = console.Output;
-```
-
-Commands must accept `IAnsiConsole` parameter for testability.
-
 ### Blazor Component Testing
 
 Use bUnit 2.0.66 for testing Blazor components. **Important API Changes**:
@@ -549,6 +676,10 @@ await service.StartAsync(CancellationToken.None);
 10. **SignalR Connection Management**: Always dispose SignalR connections properly. Use `await connection.DisposeAsync()` in Blazor components.
 11. **Blazor Render Modes**: The web app uses Interactive Server render mode. Be aware of circuit reconnection handling.
 12. **Tailwind CSS**: Use utility classes directly in components. No custom CSS unless absolutely necessary. Follow atomic design principles.
+13. **Domain Events**: Always ignore the `DomainEvents` property in EF Core entity configurations (use `builder.Ignore(e => e.DomainEvents)`).
+14. **Aggregate Boundaries**: Never navigate from one aggregate root to another via object references. Use ID references and repositories.
+15. **Event Ordering**: Domain events are dispatched in the order they were registered. Design handlers to be idempotent.
+16. **Non-Guid IDs**: Entities with non-Guid IDs (string, long) must manually implement IAggregateRoot and domain event management.
 
 ## Project Constitution
 
@@ -564,19 +695,21 @@ This constitution takes precedence for architectural decisions and coding standa
 ## Active Technologies
 - **Framework**: C# / .NET 10 (LangVersion 14)
 - **Web**: ASP.NET Core Blazor Server with Interactive Server render mode
-- **CLI**: Spectre.Console.Cli
 - **Real-time Communication**: SignalR with MessagePack protocol
 - **Styling**: Tailwind CSS (no third-party component libraries)
 - **Icons**: Heroicons
-- **Charts**: Blazor-ApexCharts
+- **Charts**: Blazor-ApexCharts 6.0.2
 - **Database**: SQLite via Entity Framework Core 10
+- **DDD Patterns**: Ardalis.SharedKernel (entities, aggregates, domain events, repositories)
+- **Domain Events**: MediatR (event dispatching and handling)
+- **Specifications**: Ardalis.Specification (query encapsulation)
 - **Testing**: xUnit 3.2, bUnit 2.0.66, FakeItEasy 8.3, Shouldly 4.3
-- **Logging**: Serilog with structured logging
+- **Logging**: Serilog 4.3.0 with structured logging
 - **Code Analysis**: StyleCop, Roslynator, SonarAnalyzer, Microsoft.CodeAnalysis.NetAnalyzers
-- C# 14 / .NET 10.0 + ASP.NET Core Blazor Server 10.0, SignalR 10.0 with MessagePack, Blazor-ApexCharts 6.0.2, Tailwind CSS 4.x, Entity Framework Core 10.0 (SQLite), Serilog 4.3.0, Ardalis.SmartEnum (005-web-app-functionality)
-- SQLite via Entity Framework Core 10.0 (existing: Orders, Positions, Trades, Candles, Accounts, UserPreferences; new tables: StrategyConfigurations, BacktestResults, RiskSettings) (005-web-app-functionality)
+- **Enums**: Ardalis.SmartEnum (type-safe enum pattern)
 
 ## Recent Changes
+- **2025-01-15**: DDD refactoring complete - removed CLI application, eliminated duplicate classes, implemented DDD patterns with Ardalis.SharedKernel (spec 006)
 - **2025-01-12**: Upgraded to .NET 10 and updated all NuGet packages
 - **2025-01-08**: Component refactoring with Atomic Design pattern and Tb-prefix (spec 004)
 - **Previous**: Added Blazor Server web dashboard with real-time updates (spec 002-003)

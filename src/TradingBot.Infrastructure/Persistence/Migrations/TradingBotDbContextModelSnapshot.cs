@@ -68,6 +68,45 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                     b.ToTable("UserPreferences", (string)null);
                 });
 
+            modelBuilder.Entity("TradingBot.Core.Models.Analytics.EquityPoint", b =>
+                {
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("timestamp");
+
+                    b.Property<decimal>("CumulativeReturn")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("cumulative_return");
+
+                    b.Property<decimal>("Drawdown")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("drawdown");
+
+                    b.Property<decimal>("Equity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("equity");
+
+                    b.Property<decimal>("Peak")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("peak");
+
+                    b.Property<decimal>("ReturnPercent")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("return_percent");
+
+                    b.HasKey("Timestamp");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("idx_equity_points_timestamp");
+
+                    b.ToTable("equity_points", (string)null);
+                });
+
             modelBuilder.Entity("TradingBot.Core.Models.Backtest.BacktestResult", b =>
                 {
                     b.Property<string>("BacktestId")
@@ -156,11 +195,20 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("DailyLossLimit")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Leverage")
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("MaxDailyLossPercent")
                         .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MaxDrawdownPercent")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxOpenPositions")
@@ -169,6 +217,9 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("MaxPositionSizePercent")
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("RiskLimitsEnabled")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("StopLossPercent")
                         .HasPrecision(18, 2)
@@ -187,10 +238,14 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                         {
                             Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedAt = new DateTime(2025, 1, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DailyLossLimit = 1000m,
                             LastModified = new DateTime(2025, 1, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Leverage = 1.0m,
                             MaxDailyLossPercent = 5.0m,
+                            MaxDrawdownPercent = 10.0m,
                             MaxOpenPositions = 5,
                             MaxPositionSizePercent = 10.0m,
+                            RiskLimitsEnabled = true,
                             StopLossPercent = 2.0m,
                             TakeProfitPercent = 5.0m
                         });
@@ -387,30 +442,6 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                     b.HasKey("AccountId");
 
                     b.ToTable("accounts", (string)null);
-                });
-
-            modelBuilder.Entity("TradingBot.Core.Models.Portfolio.EquityPoint", b =>
-                {
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("timestamp");
-
-                    b.Property<decimal>("CumulativeReturn")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("cumulative_return");
-
-                    b.Property<decimal>("Equity")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("equity");
-
-                    b.HasKey("Timestamp");
-
-                    b.HasIndex("Timestamp")
-                        .HasDatabaseName("idx_equity_points_timestamp");
-
-                    b.ToTable("equity_points", (string)null);
                 });
 
             modelBuilder.Entity("TradingBot.Core.Models.Trading.Order", b =>

@@ -2,20 +2,17 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using TradingBot.Core.Enums;
+using TradingBot.Core.Events;
 
 namespace TradingBot.Core.Models.Trading;
 
 /// <summary>
-/// Represents an open trading position.
+/// Represents an open trading position aggregate root.
 /// </summary>
-public sealed class Position
+public sealed class Position : EntityBase<Guid>, IAggregateRoot
 {
-    /// <summary>
-    /// Gets or sets the unique identifier for this position.
-    /// </summary>
-    public required Guid Id { get; set; }
-
     /// <summary>
     /// Gets or sets the trading symbol.
     /// </summary>
@@ -81,4 +78,71 @@ public sealed class Position
     /// Gets the position value.
     /// </summary>
     public decimal PositionValue => Quantity * CurrentPrice;
+
+    /// <summary>
+    /// Updates the current price of the position.
+    /// </summary>
+    /// <param name="newPrice">The new current price.</param>
+    public void UpdatePrice(decimal newPrice)
+    {
+        if (newPrice <= 0)
+        {
+            throw new ArgumentException("Price must be positive", nameof(newPrice));
+        }
+
+        CurrentPrice = newPrice;
+
+        RegisterDomainEvent(new PositionPriceUpdatedEvent(Id, Symbol, newPrice, UnrealizedPnL));
+    }
+
+    /// <summary>
+    /// Closes the position at the specified exit price.
+    /// </summary>
+    /// <param name="exitPrice">The exit price.</param>
+    /// <param name="exitTime">The exit time.</param>
+    /// <returns>The realized profit and loss.</returns>
+    public decimal Close(decimal exitPrice, DateTime exitTime)
+    {
+        if (exitPrice <= 0)
+        {
+            throw new ArgumentException("Exit price must be positive", nameof(exitPrice));
+        }
+
+        var realizedPnL = CalculateRealizedPnL(exitPrice);
+
+        RegisterDomainEvent(new PositionClosedEvent(Id, Symbol, realizedPnL));
+
+        return realizedPnL;
+    }
+
+    /// <summary>
+    /// Increases the quantity of the position (averaging in).
+    /// </summary>
+    /// <param name="additionalQuantity">The additional quantity to add.</param>
+    /// <param name="newAveragePrice">The new average entry price after adding quantity.</param>
+    public void IncreaseQuantity(decimal additionalQuantity, decimal newAveragePrice)
+    {
+        if (additionalQuantity <= 0)
+        {
+            throw new ArgumentException("Additional quantity must be positive", nameof(additionalQuantity));
+        }
+
+        if (newAveragePrice <= 0)
+        {
+            throw new ArgumentException("New average price must be positive", nameof(newAveragePrice));
+        }
+
+        Quantity += additionalQuantity;
+        EntryPrice = newAveragePrice;
+
+        // Note: No domain event for quantity increase as it's part of the same position
+        // Could add PositionQuantityIncreasedEvent if needed for auditing
+    }
+
+    private decimal CalculateRealizedPnL(decimal exitPrice)
+    {
+        return Side == OrderSide.Buy
+            ? (exitPrice - EntryPrice) * Quantity
+            : (EntryPrice - exitPrice) * Quantity;
+    }
 }

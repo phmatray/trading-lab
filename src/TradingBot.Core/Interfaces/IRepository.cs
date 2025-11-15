@@ -8,6 +8,7 @@ namespace TradingBot.Core.Interfaces;
 
 /// <summary>
 /// Base repository interface for common data access operations.
+/// TODO: Will extend Ardalis.SharedKernel IRepositoryBase after entities implement IAggregateRoot (Phase 4).
 /// </summary>
 /// <typeparam name="T">Entity type.</typeparam>
 public interface IRepository<T>

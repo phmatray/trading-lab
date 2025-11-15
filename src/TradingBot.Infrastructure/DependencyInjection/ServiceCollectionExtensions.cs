@@ -2,6 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,15 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // MediatR for domain events
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly);
+        });
+
+        // Domain Event Dispatcher (custom implementation using MediatR)
+        services.AddScoped<IDomainEventDispatcher, EventDispatching.MediatorDomainEventDispatcher>();
+
         // Database
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Data Source=tradingbot.db";
@@ -47,6 +57,10 @@ public static class ServiceCollectionExtensions
                 options.EnableSensitiveDataLogging();
             }
         });
+
+        // Generic repositories (Ardalis.SharedKernel support)
+        services.AddScoped(typeof(Ardalis.SharedKernel.IRepository<>), typeof(EfRepository<>));
+        services.AddScoped(typeof(Ardalis.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
 
         // Repositories (Scoped - tied to DbContext lifetime)
         services.AddScoped<IOrderRepository, OrderRepository>();
