@@ -6,8 +6,8 @@ using Spectre.Console.Testing;
 using TradingBot.Cli.Dashboard;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Interfaces;
+using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.Portfolio;
-using TradingBot.Core.Models.Risk;
 using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Cli.Tests.Dashboard;

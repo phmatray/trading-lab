@@ -71,9 +71,9 @@
 
 **Verification**:
 
-- [ ] T023 [US2] Run `dotnet build` to verify no compilation errors after duplicate elimination
-- [ ] T024 [US2] Run `dotnet test` to verify all existing tests pass with consolidated classes
-- [ ] T025 [US2] Search codebase for remaining class name duplicates using grep
+- [X] T023 [US2] Run `dotnet build` to verify no compilation errors after duplicate elimination
+- [X] T024 [US2] Run `dotnet test` to verify all existing tests pass with consolidated classes
+- [X] T025 [US2] Search codebase for remaining class name duplicates using grep
 
 **Checkpoint**: At this point, all duplicates should be eliminated and tests passing
 
@@ -87,42 +87,42 @@
 
 ### 4.1: Domain Events Infrastructure
 
-- [ ] T026 [P] [US3] Create OrderFilledEvent class in src/TradingBot.Core/Events/OrderFilledEvent.cs extending DomainEventBase
-- [ ] T027 [P] [US3] Create OrderCancelledEvent class in src/TradingBot.Core/Events/OrderCancelledEvent.cs extending DomainEventBase
-- [ ] T028 [P] [US3] Create PositionOpenedEvent class in src/TradingBot.Core/Events/PositionOpenedEvent.cs extending DomainEventBase
-- [ ] T029 [P] [US3] Create PositionClosedEvent class in src/TradingBot.Core/Events/PositionClosedEvent.cs extending DomainEventBase
-- [ ] T030 [P] [US3] Create PositionPriceUpdatedEvent class in src/TradingBot.Core/Events/PositionPriceUpdatedEvent.cs extending DomainEventBase
-- [ ] T031 [P] [US3] Create CashUpdatedEvent class in src/TradingBot.Core/Events/CashUpdatedEvent.cs extending DomainEventBase
-- [ ] T032 [P] [US3] Create EquityUpdatedEvent class in src/TradingBot.Core/Events/EquityUpdatedEvent.cs extending DomainEventBase
-- [ ] T033 [P] [US3] Create AccountSuspendedEvent class in src/TradingBot.Core/Events/AccountSuspendedEvent.cs extending DomainEventBase
-- [ ] T034 [US3] Implement MediatorDomainEventDispatcher in src/TradingBot.Infrastructure/EventDispatching/MediatorDomainEventDispatcher.cs
-- [ ] T035 [US3] Register MediatR and event dispatcher in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs DI container
+- [X] T026 [P] [US3] Create OrderFilledEvent class in src/TradingBot.Core/Events/OrderFilledEvent.cs extending DomainEventBase
+- [X] T027 [P] [US3] Create OrderCancelledEvent class in src/TradingBot.Core/Events/OrderCancelledEvent.cs extending DomainEventBase
+- [X] T028 [P] [US3] Create PositionOpenedEvent class in src/TradingBot.Core/Events/PositionOpenedEvent.cs extending DomainEventBase
+- [X] T029 [P] [US3] Create PositionClosedEvent class in src/TradingBot.Core/Events/PositionClosedEvent.cs extending DomainEventBase
+- [X] T030 [P] [US3] Create PositionPriceUpdatedEvent class in src/TradingBot.Core/Events/PositionPriceUpdatedEvent.cs extending DomainEventBase
+- [X] T031 [P] [US3] Create CashUpdatedEvent class in src/TradingBot.Core/Events/CashUpdatedEvent.cs extending DomainEventBase
+- [X] T032 [P] [US3] Create EquityUpdatedEvent class in src/TradingBot.Core/Events/EquityUpdatedEvent.cs extending DomainEventBase
+- [X] T033 [P] [US3] Create AccountSuspendedEvent class in src/TradingBot.Core/Events/AccountSuspendedEvent.cs extending DomainEventBase
+- [X] T034 [US3] Implement MediatorDomainEventDispatcher in src/TradingBot.Infrastructure/EventDispatching/MediatorDomainEventDispatcher.cs
+- [X] T035 [US3] Register MediatR and event dispatcher in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs DI container
 
 ### 4.2: Entity Refactoring - Order Aggregate
 
-- [ ] T036 [US3] Update src/TradingBot.Core/Models/Trading/Order.cs to extend EntityBase<Guid> and implement IAggregateRoot
-- [ ] T037 [US3] Add MarkAsFilled business method with OrderFilledEvent registration to Order entity
-- [ ] T038 [US3] Add Cancel business method with OrderCancelledEvent registration to Order entity
-- [ ] T039 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/OrderConfiguration.cs to ignore DomainEvents property
+- [X] T036 [US3] Update src/TradingBot.Core/Models/Trading/Order.cs to extend EntityBase<Guid> and implement IAggregateRoot
+- [X] T037 [US3] Add MarkAsFilled business method with OrderFilledEvent registration to Order entity
+- [X] T038 [US3] Add Cancel business method with OrderCancelledEvent registration to Order entity
+- [X] T039 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/OrderConfiguration.cs to ignore DomainEvents property
 - [ ] T040 [US3] Update any Order entity tests in tests/TradingBot.Core.Tests/ to verify domain event registration
 
 ### 4.3: Entity Refactoring - Position Aggregate
 
-- [ ] T041 [US3] Update src/TradingBot.Core/Models/Trading/Position.cs to extend EntityBase<Guid> and implement IAggregateRoot
-- [ ] T042 [US3] Add UpdatePrice business method with PositionPriceUpdatedEvent registration to Position entity
-- [ ] T043 [US3] Add Close business method with PositionClosedEvent registration to Position entity
-- [ ] T044 [US3] Add IncreaseQuantity business method to Position entity (for adding to positions)
-- [ ] T045 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/PositionConfiguration.cs to ignore DomainEvents property
+- [X] T041 [US3] Update src/TradingBot.Core/Models/Trading/Position.cs to extend EntityBase<Guid> and implement IAggregateRoot
+- [X] T042 [US3] Add UpdatePrice business method with PositionPriceUpdatedEvent registration to Position entity
+- [X] T043 [US3] Add Close business method with PositionClosedEvent registration to Position entity
+- [X] T044 [US3] Add IncreaseQuantity business method to Position entity (for adding to positions)
+- [X] T045 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/PositionConfiguration.cs to ignore DomainEvents property
 - [ ] T046 [US3] Update any Position entity tests in tests/TradingBot.Core.Tests/ to verify domain event registration
 
 ### 4.4: Entity Refactoring - Account Aggregate
 
-- [ ] T047 [US3] Update src/TradingBot.Core/Models/Portfolio/Account.cs to extend EntityBase<string> and implement IAggregateRoot
-- [ ] T048 [US3] Add DeductCash business method with CashUpdatedEvent registration to Account entity
-- [ ] T049 [US3] Add AddCash business method with CashUpdatedEvent registration to Account entity
-- [ ] T050 [US3] Add UpdateEquity business method with EquityUpdatedEvent registration to Account entity
-- [ ] T051 [US3] Add Suspend business method with AccountSuspendedEvent registration to Account entity
-- [ ] T052 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/AccountConfiguration.cs to ignore DomainEvents property
+- [X] T047 [US3] Update src/TradingBot.Core/Models/Portfolio/Account.cs to implement IAggregateRoot (manually, AccountId is string)
+- [X] T048 [US3] Add DeductCash business method with CashUpdatedEvent registration to Account entity
+- [X] T049 [US3] Add AddCash business method with CashUpdatedEvent registration to Account entity
+- [X] T050 [US3] Add UpdateEquity business method with EquityUpdatedEvent registration to Account entity
+- [X] T051 [US3] Add Suspend business method with AccountSuspendedEvent registration to Account entity
+- [X] T052 [US3] Update src/TradingBot.Infrastructure/Persistence/Configurations/AccountConfiguration.cs to ignore DomainEvents property
 - [ ] T053 [US3] Update any Account entity tests in tests/TradingBot.Core.Tests/ to verify business method invariants
 
 ### 4.5: Entity Refactoring - Other Entities

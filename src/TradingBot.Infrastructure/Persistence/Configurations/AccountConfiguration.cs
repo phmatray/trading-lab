@@ -20,6 +20,9 @@ internal sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         builder.HasKey(a => a.AccountId);
 
+        // Ignore domain events collection (not persisted)
+        builder.Ignore(a => a.DomainEvents);
+
         builder.Property(a => a.AccountId)
             .HasColumnName("account_id")
             .HasMaxLength(50)

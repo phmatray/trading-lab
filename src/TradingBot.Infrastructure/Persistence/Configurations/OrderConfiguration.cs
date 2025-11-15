@@ -20,6 +20,9 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasKey(o => o.Id);
 
+        // Ignore domain events collection (not persisted)
+        builder.Ignore(o => o.DomainEvents);
+
         builder.Property(o => o.Id)
             .HasColumnName("id")
             .IsRequired();

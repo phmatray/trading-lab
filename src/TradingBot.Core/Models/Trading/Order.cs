@@ -2,20 +2,17 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using TradingBot.Core.Enums;
+using TradingBot.Core.Events;
 
 namespace TradingBot.Core.Models.Trading;
 
 /// <summary>
-/// Represents a trading order.
+/// Represents a trading order aggregate root.
 /// </summary>
-public sealed class Order
+public sealed class Order : EntityBase<Guid>, IAggregateRoot
 {
-    /// <summary>
-    /// Gets or sets the unique identifier for this order.
-    /// </summary>
-    public required Guid Id { get; set; }
-
     /// <summary>
     /// Gets or sets the trading symbol.
     /// </summary>
@@ -90,4 +87,46 @@ public sealed class Order
     /// Gets or sets the signal ID that triggered this order.
     /// </summary>
     public Guid? SignalId { get; set; }
+
+    /// <summary>
+    /// Marks the order as filled with the specified details.
+    /// </summary>
+    /// <param name="fillPrice">The fill price.</param>
+    /// <param name="commission">The commission charged.</param>
+    /// <param name="filledAt">The timestamp when filled.</param>
+    public void MarkAsFilled(decimal fillPrice, decimal commission, DateTime filledAt)
+    {
+        if (Status == OrderStatus.Filled)
+        {
+            throw new InvalidOperationException("Order is already filled");
+        }
+
+        if (fillPrice <= 0)
+        {
+            throw new ArgumentException("Fill price must be positive", nameof(fillPrice));
+        }
+
+        Status = OrderStatus.Filled;
+        FilledQuantity = Quantity;
+        AverageFillPrice = fillPrice;
+        Commission = commission;
+        FilledAt = filledAt;
+
+        RegisterDomainEvent(new OrderFilledEvent(Id, Symbol, Quantity, fillPrice, commission));
+    }
+
+    /// <summary>
+    /// Cancels the order.
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status != OrderStatus.Pending)
+        {
+            throw new InvalidOperationException($"Cannot cancel order in {Status} status");
+        }
+
+        Status = OrderStatus.Cancelled;
+
+        RegisterDomainEvent(new OrderCancelledEvent(Id, Symbol));
+    }
 }

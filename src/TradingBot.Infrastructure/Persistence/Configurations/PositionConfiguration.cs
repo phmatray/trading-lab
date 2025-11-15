@@ -20,6 +20,9 @@ internal sealed class PositionConfiguration : IEntityTypeConfiguration<Position>
 
         builder.HasKey(p => p.Id);
 
+        // Ignore domain events collection (not persisted)
+        builder.Ignore(p => p.DomainEvents);
+
         builder.Property(p => p.Id)
             .HasColumnName("id")
             .IsRequired();

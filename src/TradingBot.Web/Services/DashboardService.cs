@@ -66,7 +66,7 @@ public sealed class DashboardService : IDashboardService
 
             // Use default risk settings for dashboard display
             // The actual risk settings are managed through the RiskSettingsPage
-            var riskSettings = new TradingBot.Core.Models.Risk.RiskSettings();
+            var riskSettings = new TradingBot.Core.Models.Configuration.RiskSettings();
 
             // Take top 10 positions by value
             var topPositions = positions
