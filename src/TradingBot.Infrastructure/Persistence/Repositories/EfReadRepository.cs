@@ -2,8 +2,8 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using Ardalis.Specification.EntityFrameworkCore;
+using TradingBot.Core.SharedKernel;
 
 namespace TradingBot.Infrastructure.Persistence.Repositories;
 

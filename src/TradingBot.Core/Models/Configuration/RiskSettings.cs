@@ -2,7 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
+using TradingBot.Core.SharedKernel;
 
 namespace TradingBot.Core.Models.Configuration;
 

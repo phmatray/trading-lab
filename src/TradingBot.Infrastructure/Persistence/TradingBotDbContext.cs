@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Entities;
@@ -13,6 +12,7 @@ using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
+using TradingBot.Core.SharedKernel;
 using TradingBot.Core.ValueObjects;
 
 namespace TradingBot.Infrastructure.Persistence;

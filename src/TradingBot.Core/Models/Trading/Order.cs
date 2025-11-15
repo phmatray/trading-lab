@@ -2,9 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using TradingBot.Core.Enums;
 using TradingBot.Core.Events;
+using TradingBot.Core.SharedKernel;
 
 namespace TradingBot.Core.Models.Trading;
 

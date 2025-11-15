@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using TradingBot.Analytics;
 using TradingBot.Core.Interfaces;
+using TradingBot.Core.SharedKernel;
 using TradingBot.Engine;
 using TradingBot.Infrastructure.Configuration;
 using TradingBot.Infrastructure.MarketData;
@@ -59,8 +59,8 @@ public static class ServiceCollectionExtensions
         });
 
         // Generic repositories (Ardalis.SharedKernel support)
-        services.AddScoped(typeof(Ardalis.SharedKernel.IRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(Ardalis.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
+        services.AddScoped(typeof(Core.SharedKernel.IRepository<>), typeof(EfRepository<>));
+        services.AddScoped(typeof(Core.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
 
         // Repositories (Scoped - tied to DbContext lifetime)
         services.AddScoped<IOrderRepository, OrderRepository>();
