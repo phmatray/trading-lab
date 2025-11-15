@@ -20,6 +20,9 @@ internal sealed class TradeConfiguration : IEntityTypeConfiguration<Trade>
 
         builder.HasKey(t => t.Id);
 
+        // Ignore domain events from SharedKernel
+        builder.Ignore(t => t.DomainEvents);
+
         builder.Property(t => t.Id)
             .HasColumnName("id")
             .IsRequired();

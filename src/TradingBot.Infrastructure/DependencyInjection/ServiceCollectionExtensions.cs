@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly);
         });
 
-        // Domain Event Dispatcher
+        // Domain Event Dispatcher (from Ardalis.SharedKernel)
         services.AddScoped<IDomainEventDispatcher, MediatorDomainEventDispatcher>();
 
         // Database
@@ -57,6 +57,10 @@ public static class ServiceCollectionExtensions
                 options.EnableSensitiveDataLogging();
             }
         });
+
+        // Generic repositories (Ardalis.SharedKernel support)
+        services.AddScoped(typeof(Ardalis.SharedKernel.IRepository<>), typeof(EfRepository<>));
+        services.AddScoped(typeof(Ardalis.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
 
         // Repositories (Scoped - tied to DbContext lifetime)
         services.AddScoped<IOrderRepository, OrderRepository>();

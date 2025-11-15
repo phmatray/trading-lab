@@ -2,6 +2,8 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
+
 namespace TradingBot.Core.Models.Configuration;
 
 /// <summary>
@@ -9,14 +11,8 @@ namespace TradingBot.Core.Models.Configuration;
 /// This is a singleton entity (only one row per database).
 /// Consolidated from Models/Risk/RiskSettings.cs and Models/Configuration/RiskSettings.cs.
 /// </summary>
-public class RiskSettings
+public class RiskSettings : EntityBase<Guid>, IAggregateRoot
 {
-    /// <summary>
-    /// Gets or sets the unique identifier for this record.
-    /// Always uses a fixed GUID to ensure single-row table.
-    /// </summary>
-    public Guid Id { get; set; } = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
     /// <summary>
     /// Gets or sets the account leverage multiplier.
     /// Example: 1.0 means no leverage, 2.0 means 2x leverage.

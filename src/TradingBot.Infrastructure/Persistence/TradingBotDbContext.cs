@@ -2,6 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Entities;
@@ -21,13 +22,19 @@ namespace TradingBot.Infrastructure.Persistence;
 /// </summary>
 public sealed class TradingBotDbContext : DbContext
 {
+    private readonly IDomainEventDispatcher? _dispatcher;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TradingBotDbContext"/> class.
     /// </summary>
     /// <param name="options">The options for this context.</param>
-    public TradingBotDbContext(DbContextOptions<TradingBotDbContext> options)
+    /// <param name="dispatcher">Optional domain event dispatcher.</param>
+    public TradingBotDbContext(
+        DbContextOptions<TradingBotDbContext> options,
+        IDomainEventDispatcher? dispatcher = null)
         : base(options)
     {
+        _dispatcher = dispatcher;
     }
 
     /// <summary>
@@ -84,6 +91,29 @@ public sealed class TradingBotDbContext : DbContext
     /// Gets the RiskSettings DbSet.
     /// </summary>
     public DbSet<Core.Models.Configuration.RiskSettings> RiskSettings => Set<Core.Models.Configuration.RiskSettings>();
+
+    /// <inheritdoc/>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        // Dispatch domain events before saving changes
+        if (_dispatcher != null)
+        {
+            // Get all entities with domain events (both EntityBase and IAggregateRoot)
+            var entitiesWithEvents = ChangeTracker.Entries()
+                .Select(e => e.Entity)
+                .OfType<IHasDomainEvents>()
+                .Where(e => e.DomainEvents.Any())
+                .ToList();
+
+            if (entitiesWithEvents.Any())
+            {
+                await _dispatcher.DispatchAndClearEvents(entitiesWithEvents);
+            }
+        }
+
+        // Save changes to database
+        return await base.SaveChangesAsync(cancellationToken);
+    }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)

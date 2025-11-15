@@ -20,6 +20,9 @@ public class BacktestResultEntityConfig : IEntityTypeConfiguration<BacktestResul
 
         builder.HasKey(x => x.BacktestId);
 
+        // Ignore domain events from SharedKernel
+        builder.Ignore(x => x.DomainEvents);
+
         builder.Property(x => x.BacktestId)
             .IsRequired()
             .HasMaxLength(200);

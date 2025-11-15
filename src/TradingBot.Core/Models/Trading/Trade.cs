@@ -2,6 +2,7 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
+using Ardalis.SharedKernel;
 using TradingBot.Core.Enums;
 
 namespace TradingBot.Core.Models.Trading;
@@ -9,13 +10,8 @@ namespace TradingBot.Core.Models.Trading;
 /// <summary>
 /// Represents a completed trade (closed position).
 /// </summary>
-public sealed class Trade
+public sealed class Trade : EntityBase<Guid>, IAggregateRoot
 {
-    /// <summary>
-    /// Gets or sets the unique identifier for this trade.
-    /// </summary>
-    public required Guid Id { get; set; }
-
     /// <summary>
     /// Gets or sets the trading symbol.
     /// </summary>

@@ -20,6 +20,9 @@ public class RiskSettingsEntityConfig : IEntityTypeConfiguration<RiskSettings>
 
         builder.HasKey(x => x.Id);
 
+        // Ignore domain events from SharedKernel
+        builder.Ignore(x => x.DomainEvents);
+
         builder.Property(x => x.MaxPositionSizePercent)
             .HasPrecision(18, 2)
             .IsRequired();
