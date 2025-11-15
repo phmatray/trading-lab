@@ -397,10 +397,175 @@ The system uses events for decoupling:
 - `StrategyEngine.SignalGenerated` → SignalProcessor listens
 - This pattern allows multiple subscribers without tight coupling
 
+### Domain Events
+
+The application implements Domain-Driven Design (DDD) patterns using **Ardalis.SharedKernel** for domain events:
+
+**Event Infrastructure**:
+- All domain events extend `DomainEventBase` from Ardalis.SharedKernel
+- Events are dispatched via **MediatR** before SaveChangesAsync completes
+- Event handlers are registered in DI container as MediatR notification handlers
+- Events enable eventual consistency between aggregates
+
+**Key Domain Events**:
+- `OrderFilledEvent`: Raised when an order is filled
+- `OrderCancelledEvent`: Raised when an order is cancelled
+- `PositionOpenedEvent`: Raised when a position is opened
+- `PositionClosedEvent`: Raised when a position is closed
+- `PositionPriceUpdatedEvent`: Raised when position price updates
+- `CashUpdatedEvent`: Raised when account cash changes
+- `EquityUpdatedEvent`: Raised when account equity changes
+- `AccountSuspendedEvent`: Raised when account is suspended
+
+**Event Dispatching Flow**:
+```csharp
+// 1. Entity raises domain event
+public void MarkAsFilled(decimal fillPrice, decimal commission, DateTime filledAt)
+{
+    Status = OrderStatus.Filled;
+    RegisterDomainEvent(new OrderFilledEvent(Id, Symbol, Quantity, fillPrice, commission));
+}
+
+// 2. DbContext dispatches events before save
+public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+{
+    await _domainEventDispatcher.DispatchAndClearEvents(entitiesWithEvents);
+    return await base.SaveChangesAsync(cancellationToken);
+}
+
+// 3. MediatR notifies registered handlers
+public class OrderFilledEventHandler : INotificationHandler<OrderFilledEvent>
+{
+    public async Task Handle(OrderFilledEvent notification, CancellationToken cancellationToken)
+    {
+        // Update position, account, send notifications, etc.
+    }
+}
+```
+
+**Usage Guidelines**:
+- Domain events are raised within aggregate roots (entities implementing `IAggregateRoot`)
+- Events represent business-significant state changes
+- Keep events focused on a single concern (OrderFilled, not OrderFilledAndPositionOpened)
+- Event handlers should be idempotent (safe to process multiple times)
+- Use events to maintain eventual consistency between aggregates
+- Never modify aggregates directly from event handlers without proper transactional boundaries
+
+### Ardalis.SharedKernel Usage Patterns
+
+**EntityBase<TId>**: Base class for all entities with identity
+```csharp
+public sealed class Order : EntityBase<Guid>, IAggregateRoot
+{
+    // Id property inherited from EntityBase<Guid>
+    // DomainEvents collection inherited for event registration
+
+    public required string Symbol { get; set; }
+    public required OrderStatus Status { get; set; }
+
+    public void MarkAsFilled(decimal fillPrice, decimal commission, DateTime filledAt)
+    {
+        Status = OrderStatus.Filled;
+        RegisterDomainEvent(new OrderFilledEvent(Id, Symbol, Quantity, fillPrice, commission));
+    }
+}
+```
+
+**IAggregateRoot**: Marker interface for aggregate roots
+```csharp
+// All entities that are aggregate roots implement this interface
+public sealed class Position : EntityBase<Guid>, IAggregateRoot { }
+public sealed class Account : IAggregateRoot  // Manual implementation for non-Guid IDs
+{
+    public required string Id { get; set; }
+    private readonly List<DomainEventBase> _domainEvents = new();
+    public IEnumerable<DomainEventBase> DomainEvents => _domainEvents.AsReadOnly();
+
+    protected void RegisterDomainEvent(DomainEventBase domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}
+```
+
+**IRepository and IReadRepository**: Repository interfaces
+```csharp
+// Core interfaces extend SharedKernel interfaces
+public interface IRepository<T> : IRepositoryBase<T> where T : class, IAggregateRoot { }
+public interface IReadRepository<T> : IReadRepositoryBase<T> where T : class { }
+
+// Infrastructure implementations extend RepositoryBase
+public class EfRepository<T> : RepositoryBase<T>, IRepository<T>
+    where T : class, IAggregateRoot
+{
+    public EfRepository(TradingBotDbContext dbContext) : base(dbContext) { }
+}
+```
+
+**Specifications Pattern**: Query encapsulation using Ardalis.Specification
+```csharp
+// Define specifications for common queries
+public class PendingOrdersSpec : Specification<Order>
+{
+    public PendingOrdersSpec()
+    {
+        Query.Where(o => o.Status == OrderStatus.Pending)
+             .OrderBy(o => o.CreatedAt);
+    }
+}
+
+// Use in repositories
+var pendingOrders = await _orderRepository.ListAsync(new PendingOrdersSpec());
+```
+
+**Entity Configuration**:
+```csharp
+// Always ignore DomainEvents property in EF Core configurations
+public class OrderConfiguration : IEntityTypeConfiguration<Order>
+{
+    public void Configure(EntityTypeBuilder<Order> builder)
+    {
+        builder.ToTable("Orders");
+        builder.HasKey(o => o.Id);
+
+        // CRITICAL: Ignore domain events collection
+        builder.Ignore(o => o.DomainEvents);
+
+        // Other configurations...
+    }
+}
+```
+
+**Non-Guid Aggregate Roots**:
+For entities with non-Guid IDs (string, long), manually implement IAggregateRoot:
+```csharp
+public sealed class Account : IAggregateRoot
+{
+    // Manual Id property (string instead of Guid)
+    public required string Id { get; set; }
+
+    // Manual domain events implementation
+    private readonly List<DomainEventBase> _domainEvents = new();
+    public IEnumerable<DomainEventBase> DomainEvents => _domainEvents.AsReadOnly();
+
+    protected void RegisterDomainEvent(DomainEventBase domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}
+```
+
 ### Repository Pattern
 
 All data access goes through repository interfaces:
 - IOrderRepository, IPositionRepository, ITradeRepository, etc.
+- All repository interfaces extend `IRepositoryBase<T>` from Ardalis.SharedKernel
+- Generic repositories (`EfRepository<T>`, `EfReadRepository<T>`) extend `RepositoryBase<T>`
+- Use **Specifications** pattern for complex queries instead of exposing IQueryable
 - Never access DbContext directly from business logic
 - Repositories are in Infrastructure, interfaces in Core
 
@@ -511,6 +676,10 @@ await service.StartAsync(CancellationToken.None);
 10. **SignalR Connection Management**: Always dispose SignalR connections properly. Use `await connection.DisposeAsync()` in Blazor components.
 11. **Blazor Render Modes**: The web app uses Interactive Server render mode. Be aware of circuit reconnection handling.
 12. **Tailwind CSS**: Use utility classes directly in components. No custom CSS unless absolutely necessary. Follow atomic design principles.
+13. **Domain Events**: Always ignore the `DomainEvents` property in EF Core entity configurations (use `builder.Ignore(e => e.DomainEvents)`).
+14. **Aggregate Boundaries**: Never navigate from one aggregate root to another via object references. Use ID references and repositories.
+15. **Event Ordering**: Domain events are dispatched in the order they were registered. Design handlers to be idempotent.
+16. **Non-Guid IDs**: Entities with non-Guid IDs (string, long) must manually implement IAggregateRoot and domain event management.
 
 ## Project Constitution
 
@@ -526,19 +695,21 @@ This constitution takes precedence for architectural decisions and coding standa
 ## Active Technologies
 - **Framework**: C# / .NET 10 (LangVersion 14)
 - **Web**: ASP.NET Core Blazor Server with Interactive Server render mode
-- **CLI**: Spectre.Console.Cli
 - **Real-time Communication**: SignalR with MessagePack protocol
 - **Styling**: Tailwind CSS (no third-party component libraries)
 - **Icons**: Heroicons
-- **Charts**: Blazor-ApexCharts
+- **Charts**: Blazor-ApexCharts 6.0.2
 - **Database**: SQLite via Entity Framework Core 10
+- **DDD Patterns**: Ardalis.SharedKernel (entities, aggregates, domain events, repositories)
+- **Domain Events**: MediatR (event dispatching and handling)
+- **Specifications**: Ardalis.Specification (query encapsulation)
 - **Testing**: xUnit 3.2, bUnit 2.0.66, FakeItEasy 8.3, Shouldly 4.3
-- **Logging**: Serilog with structured logging
+- **Logging**: Serilog 4.3.0 with structured logging
 - **Code Analysis**: StyleCop, Roslynator, SonarAnalyzer, Microsoft.CodeAnalysis.NetAnalyzers
-- C# 14 / .NET 10.0 + ASP.NET Core Blazor Server 10.0, SignalR 10.0 with MessagePack, Blazor-ApexCharts 6.0.2, Tailwind CSS 4.x, Entity Framework Core 10.0 (SQLite), Serilog 4.3.0, Ardalis.SmartEnum (005-web-app-functionality)
-- SQLite via Entity Framework Core 10.0 (existing: Orders, Positions, Trades, Candles, Accounts, UserPreferences; new tables: StrategyConfigurations, BacktestResults, RiskSettings) (005-web-app-functionality)
+- **Enums**: Ardalis.SmartEnum (type-safe enum pattern)
 
 ## Recent Changes
+- **2025-01-15**: DDD refactoring complete - removed CLI application, eliminated duplicate classes, implemented DDD patterns with Ardalis.SharedKernel (spec 006)
 - **2025-01-12**: Upgraded to .NET 10 and updated all NuGet packages
 - **2025-01-08**: Component refactoring with Atomic Design pattern and Tb-prefix (spec 004)
 - **Previous**: Added Blazor Server web dashboard with real-time updates (spec 002-003)

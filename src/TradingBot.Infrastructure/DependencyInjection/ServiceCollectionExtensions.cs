@@ -40,8 +40,8 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly);
         });
 
-        // Domain Event Dispatcher (from Ardalis.SharedKernel)
-        services.AddScoped<IDomainEventDispatcher, MediatorDomainEventDispatcher>();
+        // Domain Event Dispatcher (custom implementation using MediatR)
+        services.AddScoped<IDomainEventDispatcher, EventDispatching.MediatorDomainEventDispatcher>();
 
         // Database
         var connectionString = configuration.GetConnectionString("DefaultConnection")
