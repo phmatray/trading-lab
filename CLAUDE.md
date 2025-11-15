@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 TradingBot is an algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. The solution includes:
-- **CLI Application**: Command-line interface using Spectre.Console
-- **Web Dashboard**: Modern Blazor Server application with real-time updates via SignalR
+- **Web Dashboard**: Modern Blazor Server application with real-time updates via SignalR (single entry point)
 - **Clean Architecture**: Layered architecture with SQLite/EF Core for data persistence
+- **Domain-Driven Design**: Uses Ardalis.SharedKernel for DDD patterns (aggregates, domain events, repositories)
 - **Atomic Design**: Component hierarchy (Atoms → Molecules → Organisms → Pages) with Tb-prefixed components
 
 ## Build and Development Commands
@@ -23,12 +23,6 @@ dotnet build
 
 # Build with code analyzers enabled
 dotnet build /p:RunAnalyzers=true
-
-# Run the CLI application
-dotnet run --project src/TradingBot.Cli
-
-# Run with configuration
-dotnet run --project src/TradingBot.Cli -- strategy list
 
 # Run the Web Dashboard
 dotnet run --project src/TradingBot.Web
@@ -58,13 +52,13 @@ dotnet test --verbosity detailed
 
 ```bash
 # Create a new migration (from Infrastructure project)
-dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 
 # Update database
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 
 # Drop database (use with caution)
-dotnet ef database drop --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef database drop --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 ```
 
 ## Architecture
@@ -74,7 +68,6 @@ dotnet ef database drop --project src/TradingBot.Infrastructure --startup-projec
 The solution follows a strict layered architecture with clear dependency flow:
 
 ```
-TradingBot.Cli (CLI Presentation)
 TradingBot.Web (Web Presentation - Blazor Server)
     ↓
 TradingBot.Engine (Business Logic - Trading Engine)
@@ -87,26 +80,30 @@ TradingBot.Core (Domain Models & Interfaces)
 ```
 
 **Dependency Rules:**
-- Core has NO dependencies (pure domain models and interfaces)
+- Core has NO dependencies (pure domain models and interfaces, extends Ardalis.SharedKernel)
 - Infrastructure depends ONLY on Core
 - Engine/Strategies/Analytics depend on Core (and optionally Infrastructure for implementations)
-- CLI depends on all layers (composition root)
+- Web depends on all layers (composition root)
 - NO circular dependencies allowed
 
 ### Key Projects
 
 **TradingBot.Core**: Domain models and interfaces
-- Domain entities (Order, Position, Trade, Signal, Account, Candle)
+- Domain entities extending EntityBase<T> from Ardalis.SharedKernel (Order, Position, Trade, Account, RiskSettings)
+- Domain events extending DomainEventBase (OrderFilledEvent, PositionClosedEvent, etc.)
 - Core interfaces (IStrategy, IStrategyEngine, IPortfolioManager, IRiskManager, IOrderExecutionService)
+- Repository interfaces extending IRepositoryBase and IReadRepositoryBase from SharedKernel
 - All enums use SmartEnum pattern (Ardalis.SmartEnum)
-- NO external dependencies except SmartEnum
+- Dependencies: Ardalis.SharedKernel, Ardalis.SmartEnum, MediatR (for domain events)
 
 **TradingBot.Infrastructure**: Data access and external services
 - Entity Framework Core 10 with SQLite
-- TradingBotDbContext (DbContext with fluent configuration)
-- Repository pattern implementations
+- TradingBotDbContext (DbContext with fluent configuration and domain event dispatching)
+- Generic repository implementations (EfRepository<T>, EfReadRepository<T>) extending RepositoryBase from SharedKernel
+- MediatorDomainEventDispatcher for dispatching domain events via MediatR
 - Yahoo Finance integration for market data
 - Encryption service for API key storage
+- Dependencies: Ardalis.Specification.EntityFrameworkCore
 
 **TradingBot.Engine**: Core trading engine
 - StrategyEngine: Manages and executes strategies, emits signals
@@ -128,13 +125,7 @@ TradingBot.Core (Domain Models & Interfaces)
 - Equity curve generation
 - Trade statistics
 
-**TradingBot.Cli**: Command-line interface
-- Spectre.Console.Cli for commands
-- Commands: strategy (list/enable/disable), config (show/set/set-apikey)
-- Dependency injection composition root
-- Serilog for structured logging
-
-**TradingBot.Web**: Blazor Server web dashboard
+**TradingBot.Web**: Blazor Server web dashboard (single application entry point)
 - Real-time updates via SignalR (TradingHub)
 - Atomic Design component structure (Atoms → Molecules → Organisms → Features)
 - All components prefixed with "Tb" (e.g., TbButton, TbCard, TbNavigationSidebar)
@@ -229,7 +220,7 @@ Never use traditional C# enums. Always use SmartEnum.
 - **xUnit**: Test framework
 - **FakeItEasy**: Mocking framework
 - **Shouldly**: Assertion library
-- **Spectre.Console.Testing**: CLI testing with TestConsole
+- **bUnit**: Blazor component testing
 
 ### Test Structure
 
@@ -263,9 +254,8 @@ Format: `MethodName_Scenario_ExpectedBehavior`
 
 ## Dependency Injection
 
-Both CLI and Web applications use Microsoft.Extensions.DependencyInjection. All services are registered in:
+The Web application uses Microsoft.Extensions.DependencyInjection. All services are registered in:
 - `ServiceCollectionExtensions.AddTradingBotServices()` (Infrastructure project - shared core services)
-- `Program.cs` (CLI project for CLI-specific services)
 - `Program.cs` (Web project for web-specific services)
 
 Register dependencies as:
@@ -295,15 +285,15 @@ Register dependencies as:
 
 Always create migrations when changing entity models:
 ```bash
-dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
-dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Cli
+dotnet ef migrations add MigrationName --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
+dotnet ef database update --project src/TradingBot.Infrastructure --startup-project src/TradingBot.Web
 ```
 
-The database file is `tradingbot.db` in the CLI output directory.
+The database file is `tradingbot.db` in the Web output directory.
 
 ## Configuration
 
-Configuration is in `appsettings.json` in the CLI project:
+Configuration is in `appsettings.json` in the Web project:
 
 ```json
 {
@@ -323,22 +313,6 @@ Configuration is in `appsettings.json` in the CLI project:
 Environment variables can override settings with prefix `TRADINGBOT_`.
 
 ## Application Usage
-
-### CLI Usage
-
-The CLI uses Spectre.Console.Cli with the following command structure:
-
-```bash
-# Strategy commands
-dotnet run --project src/TradingBot.Cli -- strategy list
-dotnet run --project src/TradingBot.Cli -- strategy enable momentum
-dotnet run --project src/TradingBot.Cli -- strategy disable momentum
-
-# Config commands
-dotnet run --project src/TradingBot.Cli -- config show
-dotnet run --project src/TradingBot.Cli -- config set MaxPositionSize 15.0
-dotnet run --project src/TradingBot.Cli -- config set-apikey YahooFinance "key"
-```
 
 ### Web Dashboard Usage
 
@@ -483,18 +457,6 @@ Before any order executes:
 3. Only then does OrderExecutionService execute
 
 This sequence is critical for safety and cannot be bypassed.
-
-### CLI Testing
-
-Use Spectre.Console.Testing for testing CLI commands:
-```csharp
-var console = new TestConsole();
-var command = new MyCommand();
-await command.ExecuteAsync(context, settings, console, CancellationToken.None);
-var output = console.Output;
-```
-
-Commands must accept `IAnsiConsole` parameter for testability.
 
 ### Blazor Component Testing
 
