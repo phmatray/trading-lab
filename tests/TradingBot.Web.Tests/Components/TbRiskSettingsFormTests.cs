@@ -3,13 +3,10 @@
 // </copyright>
 
 using Bunit;
-using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Web.Components.Features.Risk;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Components;
 

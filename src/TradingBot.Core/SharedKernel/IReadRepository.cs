@@ -12,6 +12,4 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 /// <typeparam name="T">The entity type.</typeparam>
 public interface IReadRepository<T> : IReadRepositoryBase<T>
-  where T : class, IAggregateRoot
-{
-}
+  where T : class, IAggregateRoot;

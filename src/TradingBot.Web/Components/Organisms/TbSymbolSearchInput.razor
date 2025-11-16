@@ -9,7 +9,7 @@
 @implements IDisposable
 
 <div class="relative">
-    <TbInput @bind-Value="@searchQuery"
+    <TbInput @bind-Value="@SearchQuery"
              @bind-Value:event="oninput"
              Type="text"
              Id="@Id"
@@ -18,17 +18,17 @@
              IsRequired="@IsRequired"
              Class="@Class" />
 
-    @if (isSearching)
+    @if (_isSearching)
     {
         <div class="absolute right-3 top-1/2 -translate-y-1/2">
             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
         </div>
     }
 
-    @if (showResults && searchResults.Any())
+    @if (_showResults && _searchResults.Any())
     {
         <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-            @foreach (var result in searchResults)
+            @foreach (var result in _searchResults)
             {
                 <button type="button"
                         @onclick="@(() => SelectSymbol(result))"
@@ -45,10 +45,10 @@
         </div>
     }
 
-    @if (showResults && !isSearching && !searchResults.Any() && !string.IsNullOrWhiteSpace(searchQuery))
+    @if (_showResults && !_isSearching && !_searchResults.Any() && !string.IsNullOrWhiteSpace(SearchQuery))
     {
         <div class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400">No symbols found matching "@searchQuery"</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">No symbols found matching "@SearchQuery"</p>
         </div>
     }
 </div>
@@ -103,7 +103,7 @@
     public EventCallback<SymbolSearchResult> OnSymbolSelected { get; set; }
 
     private string _searchQuery = string.Empty;
-    private string searchQuery
+    private string SearchQuery
     {
         get => _searchQuery;
         set
@@ -116,10 +116,10 @@
         }
     }
 
-    private List<SymbolSearchResult> searchResults = new();
-    private bool isSearching = false;
-    private bool showResults = false;
-    private System.Threading.Timer? debounceTimer;
+    private List<SymbolSearchResult> _searchResults = new();
+    private bool _isSearching;
+    private bool _showResults;
+    private Timer? _debounceTimer;
     private const int DebounceMilliseconds = 300;
 
     protected override void OnInitialized()
@@ -130,18 +130,18 @@
     private void OnSearchQueryChanged(string input)
     {
         // Dispose old timer
-        debounceTimer?.Dispose();
+        _debounceTimer?.Dispose();
 
         if (string.IsNullOrWhiteSpace(input) || input.Length < 1)
         {
-            showResults = false;
-            searchResults.Clear();
+            _showResults = false;
+            _searchResults.Clear();
             StateHasChanged();
             return;
         }
 
         // Create new debounce timer
-        debounceTimer = new System.Threading.Timer(async _ =>
+        _debounceTimer = new Timer(async _ =>
         {
             await InvokeAsync(async () =>
             {
@@ -154,21 +154,21 @@
     {
         try
         {
-            isSearching = true;
-            showResults = true;
+            _isSearching = true;
+            _showResults = true;
             StateHasChanged();
 
-            searchResults = await SymbolSearchService.SearchSymbolsAsync(query, maxResults: 10);
-            Logger.LogDebug("Symbol search for '{Query}' returned {Count} results", query, searchResults.Count);
+            _searchResults = await SymbolSearchService.SearchSymbolsAsync(query, maxResults: 10);
+            Logger.LogDebug("Symbol search for '{Query}' returned {Count} results", query, _searchResults.Count);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error searching symbols for query '{Query}'", query);
-            searchResults.Clear();
+            _searchResults.Clear();
         }
         finally
         {
-            isSearching = false;
+            _isSearching = false;
             StateHasChanged();
         }
     }
@@ -176,8 +176,8 @@
     private async Task SelectSymbol(SymbolSearchResult result)
     {
         _searchQuery = result.Symbol;
-        showResults = false;
-        searchResults.Clear();
+        _showResults = false;
+        _searchResults.Clear();
 
         await ValueChanged.InvokeAsync(result.Symbol);
         await OnSymbolSelected.InvokeAsync(result);
@@ -186,6 +186,6 @@
 
     void IDisposable.Dispose()
     {
-        debounceTimer?.Dispose();
+        _debounceTimer?.Dispose();
     }
 }

@@ -141,7 +141,7 @@ public class OrderRepositoryTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(1);
-        result.First().Symbol.ShouldBe("AAPL");
+        result[0].Symbol.ShouldBe("AAPL");
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class OrderRepositoryTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(3);
-        result.First().Id.ShouldBe(order3.Id); // Most recent first
+        result[0].Id.ShouldBe(order3.Id); // Most recent first
         result.Last().Id.ShouldBe(order1.Id);  // Oldest last
     }
 

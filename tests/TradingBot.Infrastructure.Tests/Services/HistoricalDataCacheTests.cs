@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TradingBot.Core.Models.MarketData;
@@ -80,7 +79,7 @@ public class HistoricalDataCacheTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(10);
-        result.First().Symbol.ShouldBe("SPY");
+        result[0].Symbol.ShouldBe("SPY");
     }
 
     [Fact]

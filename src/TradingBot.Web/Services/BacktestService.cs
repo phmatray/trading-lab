@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
-using TradingBot.Analytics;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Backtest;
 using TradingBot.Core.Models.Trading;
