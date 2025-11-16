@@ -9,10 +9,10 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 public interface IDomainEventDispatcher
 {
-  /// <summary>
-  /// Dispatches domain events from entities and clears them.
-  /// </summary>
-  /// <param name="entitiesWithEvents">The entities containing domain events.</param>
-  /// <returns>A task representing the asynchronous operation.</returns>
-  Task DispatchAndClearEvents(IEnumerable<IHasDomainEvents> entitiesWithEvents);
+    /// <summary>
+    /// Dispatches domain events from entities and clears them.
+    /// </summary>
+    /// <param name="entitiesWithEvents">The entities containing domain events.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task DispatchAndClearEvents(IEnumerable<IHasDomainEvents> entitiesWithEvents);
 }

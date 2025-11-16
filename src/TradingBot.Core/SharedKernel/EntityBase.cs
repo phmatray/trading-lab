@@ -11,10 +11,10 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 public abstract class EntityBase : HasDomainEventsBase
 {
-  /// <summary>
-  /// Gets or sets the entity identifier.
-  /// </summary>
-  public int Id { get; set; }
+    /// <summary>
+    /// Gets or sets the entity identifier.
+    /// </summary>
+    public int Id { get; set; }
 }
 
 /// <summary>
@@ -24,10 +24,10 @@ public abstract class EntityBase : HasDomainEventsBase
 public abstract class EntityBase<TId> : HasDomainEventsBase
   where TId : struct, IEquatable<TId>
 {
-  /// <summary>
-  /// Gets or sets the entity identifier.
-  /// </summary>
-  public TId Id { get; set; }
+    /// <summary>
+    /// Gets or sets the entity identifier.
+    /// </summary>
+    public TId Id { get; set; }
 }
 
 /// <summary>
@@ -39,8 +39,8 @@ public abstract class EntityBase<T, TId> : HasDomainEventsBase
   where T : EntityBase<T, TId>
   where TId : struct, IEquatable<TId>
 {
-  /// <summary>
-  /// Gets or sets the entity identifier.
-  /// </summary>
-  public TId Id { get; set; }
+    /// <summary>
+    /// Gets or sets the entity identifier.
+    /// </summary>
+    public TId Id { get; set; }
 }

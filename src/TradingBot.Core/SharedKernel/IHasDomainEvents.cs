@@ -9,13 +9,13 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 public interface IHasDomainEvents
 {
-  /// <summary>
-  /// Gets the collection of domain events.
-  /// </summary>
-  IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+    /// <summary>
+    /// Gets the collection of domain events.
+    /// </summary>
+    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
 
-  /// <summary>
-  /// Clears all domain events.
-  /// </summary>
-  void ClearDomainEvents();
+    /// <summary>
+    /// Clears all domain events.
+    /// </summary>
+    void ClearDomainEvents();
 }

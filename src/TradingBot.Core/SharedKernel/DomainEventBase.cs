@@ -10,8 +10,8 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 public abstract class DomainEventBase : IDomainEvent
 {
-  /// <summary>
-  /// Gets or sets the date and time when the event occurred.
-  /// </summary>
-  public DateTime DateOccurred { get; protected set; } = DateTime.UtcNow;
+    /// <summary>
+    /// Gets or sets the date and time when the event occurred.
+    /// </summary>
+    public DateTime DateOccurred { get; protected set; } = DateTime.UtcNow;
 }

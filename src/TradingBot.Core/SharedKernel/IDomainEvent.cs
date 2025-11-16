@@ -11,8 +11,8 @@ namespace TradingBot.Core.SharedKernel;
 /// </summary>
 public interface IDomainEvent : INotification
 {
-  /// <summary>
-  /// Gets the date and time when the event occurred.
-  /// </summary>
-  DateTime DateOccurred { get; }
+    /// <summary>
+    /// Gets the date and time when the event occurred.
+    /// </summary>
+    DateTime DateOccurred { get; }
 }

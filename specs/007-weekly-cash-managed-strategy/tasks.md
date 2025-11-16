@@ -28,9 +28,9 @@ Multi-project layered architecture:
 
 **Purpose**: Project initialization, database migration, and NuGet package setup
 
-- [ ] T001 Add NCrontab NuGet package to Directory.Packages.props if not already present
-- [ ] T002 Register WeeklyCashManagedStrategy services in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
-- [ ] T003 [P] Add copyright headers template to all new files per code quality standards
+- [X] T001 Add NCrontab NuGet package to Directory.Packages.props if not already present
+- [X] T002 Register WeeklyCashManagedStrategy services in src/TradingBot.Infrastructure/ServiceCollectionExtensions.cs
+- [X] T003 [P] Add copyright headers template to all new files per code quality standards
 
 ---
 
@@ -42,41 +42,41 @@ Multi-project layered architecture:
 
 ### Domain Model (Core Layer)
 
-- [ ] T004 [P] Create StrategyConfiguration value object in src/TradingBot.Core/ValueObjects/StrategyConfiguration.cs
-- [ ] T005 [P] Create BreakoutRuleConfig value object in src/TradingBot.Core/ValueObjects/BreakoutRuleConfig.cs
-- [ ] T006 Create WeeklyCashManagedStrategy aggregate root in src/TradingBot.Core/Entities/WeeklyCashManagedStrategy.cs
+- [X] T004 [P] Create StrategyConfiguration value object in src/TradingBot.Core/ValueObjects/StrategyConfiguration.cs
+- [X] T005 [P] Create BreakoutRuleConfig value object in src/TradingBot.Core/ValueObjects/BreakoutRuleConfig.cs
+- [X] T006 Create WeeklyCashManagedStrategy aggregate root in src/TradingBot.Core/Models/Strategy/WeeklyCashManagedStrategy.cs
 
 ### Domain Events (Core Layer)
 
-- [ ] T007 [P] Create StrategyEnabledEvent in src/TradingBot.Core/Events/StrategyEnabledEvent.cs
-- [ ] T008 [P] Create StrategyDisabledEvent in src/TradingBot.Core/Events/StrategyDisabledEvent.cs
-- [ ] T009 [P] Create StrategyExecutedEvent in src/TradingBot.Core/Events/StrategyExecutedEvent.cs
-- [ ] T010 [P] Create MA20UpdatedEvent in src/TradingBot.Core/Events/MA20UpdatedEvent.cs
-- [ ] T011 [P] Create StrategyConfigurationUpdatedEvent in src/TradingBot.Core/Events/StrategyConfigurationUpdatedEvent.cs
-- [ ] T012 [P] Create CashBufferAdjustedEvent in src/TradingBot.Core/Events/CashBufferAdjustedEvent.cs
+- [X] T007 [P] Create StrategyEnabledEvent in src/TradingBot.Core/Events/StrategyEnabledEvent.cs
+- [X] T008 [P] Create StrategyDisabledEvent in src/TradingBot.Core/Events/StrategyDisabledEvent.cs
+- [X] T009 [P] Create StrategyExecutedEvent in src/TradingBot.Core/Events/StrategyExecutedEvent.cs
+- [X] T010 [P] Create MA20UpdatedEvent in src/TradingBot.Core/Events/MA20UpdatedEvent.cs
+- [X] T011 [P] Create StrategyConfigurationUpdatedEvent in src/TradingBot.Core/Events/StrategyConfigurationUpdatedEvent.cs
+- [X] T012 [P] Create CashBufferAdjustedEvent in src/TradingBot.Core/Events/CashBufferAdjustedEvent.cs
 
 ### Repository Interfaces (Core Layer)
 
-- [ ] T013 [P] Create IWeeklyCashManagedStrategyRepository interface in src/TradingBot.Core/Interfaces/IWeeklyCashManagedStrategyRepository.cs
-- [ ] T014 [P] Create IMA20IndicatorService interface in src/TradingBot.Core/Interfaces/IMA20IndicatorService.cs
-- [ ] T015 [P] Create IWeeklyRoutineExecutor interface in src/TradingBot.Core/Interfaces/IWeeklyRoutineExecutor.cs
-- [ ] T016 [P] Create ICashBufferManager interface in src/TradingBot.Core/Interfaces/ICashBufferManager.cs
-- [ ] T017 [P] Create IBreakoutDetector interface in src/TradingBot.Core/Interfaces/IBreakoutDetector.cs
+- [X] T013 [P] Create IWeeklyCashManagedStrategyRepository interface in src/TradingBot.Core/Interfaces/IWeeklyCashManagedStrategyRepository.cs
+- [X] T014 [P] Create IMA20IndicatorService interface in src/TradingBot.Core/Interfaces/IMA20IndicatorService.cs
+- [X] T015 [P] Create IWeeklyRoutineExecutor interface in src/TradingBot.Core/Interfaces/IWeeklyRoutineExecutor.cs
+- [X] T016 [P] Create ICashBufferManager interface in src/TradingBot.Core/Interfaces/ICashBufferManager.cs
+- [X] T017 [P] Create IBreakoutDetector interface in src/TradingBot.Core/Interfaces/IBreakoutDetector.cs
 
 ### Database Configuration (Infrastructure Layer)
 
-- [ ] T018 Create WeeklyCashManagedStrategyConfiguration EF Core configuration in src/TradingBot.Infrastructure/Persistence/Configurations/WeeklyCashManagedStrategyConfiguration.cs
-- [ ] T019 Add DbSet<WeeklyCashManagedStrategy> to TradingBotDbContext in src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs
-- [ ] T020 Create EF Core migration AddWeeklyCashManagedStrategy using dotnet ef migrations add
-- [ ] T021 Review and apply migration to database using dotnet ef database update
+- [X] T018 Create WeeklyCashManagedStrategyConfiguration EF Core configuration in src/TradingBot.Infrastructure/Persistence/Configurations/WeeklyCashManagedStrategyConfiguration.cs
+- [X] T019 Add DbSet<WeeklyCashManagedStrategy> to TradingBotDbContext in src/TradingBot.Infrastructure/Persistence/TradingBotDbContext.cs
+- [X] T020 Create EF Core migration AddWeeklyCashManagedStrategy using dotnet ef migrations add
+- [X] T021 Review and apply migration to database using dotnet ef database update
 
 ### Repository Implementation (Infrastructure Layer)
 
-- [ ] T022 Create WeeklyCashManagedStrategyRepository implementation in src/TradingBot.Infrastructure/Persistence/Repositories/WeeklyCashManagedStrategyRepository.cs
+- [X] T022 Create WeeklyCashManagedStrategyRepository implementation in src/TradingBot.Infrastructure/Persistence/Repositories/WeeklyCashManagedStrategyRepository.cs
 
 ### MA20 Indicator Service (Infrastructure Layer)
 
-- [ ] T023 Create MA20IndicatorService with sliding window algorithm in src/TradingBot.Infrastructure/Services/MA20IndicatorService.cs
+- [X] T023 Create MA20IndicatorService with sliding window algorithm in src/TradingBot.Infrastructure/Services/MA20IndicatorService.cs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

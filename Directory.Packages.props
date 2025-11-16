@@ -74,6 +74,7 @@
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup Label="Background Jobs">
+    <PackageVersion Include="NCrontab" Version="3.4.0" />
     <PackageVersion Include="TickerQ" Version="2.5.3" />
   </ItemGroup>
   <ItemGroup Label="Source Link for Debugging">
