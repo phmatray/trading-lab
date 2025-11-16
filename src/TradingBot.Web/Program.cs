@@ -80,6 +80,9 @@ builder.Services.AddHostedService<BacktestExecutionWorker>();
 // Add real-time update service as hosted service
 builder.Services.AddHostedService<RealtimeUpdateService>();
 
+// Add weekly routine worker for automated strategy execution
+builder.Services.AddHostedService<TradingBot.Web.BackgroundWorkers.WeeklyRoutineWorker>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

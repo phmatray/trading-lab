@@ -30,6 +30,38 @@ public interface IWeeklyRoutineExecutor
     Task ExecuteDailyRoutineAsync(
         WeeklyCashManagedStrategy strategy,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Evaluates whether buy conditions are met for a strategy.
+    /// </summary>
+    /// <param name="strategyId">Strategy identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if buy should execute.</returns>
+    Task<bool> ShouldExecuteBuyAsync(Guid strategyId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Calculates the buy amount based on strategy configuration.
+    /// </summary>
+    /// <param name="strategyId">Strategy identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Buy amount in dollars.</returns>
+    Task<decimal> CalculateBuyAmountAsync(Guid strategyId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Evaluates whether sell conditions are met for a strategy.
+    /// </summary>
+    /// <param name="strategyId">Strategy identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if sell should execute.</returns>
+    Task<bool> ShouldExecuteSellAsync(Guid strategyId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Calculates the sell quantity based on strategy configuration.
+    /// </summary>
+    /// <param name="strategyId">Strategy identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Sell quantity in shares.</returns>
+    Task<decimal> CalculateSellQuantityAsync(Guid strategyId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

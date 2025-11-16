@@ -10,7 +10,7 @@ namespace TradingBot.Web.Models;
 /// Data transfer object for weekly cash-managed strategy configuration.
 /// Used for user input and validation in web forms.
 /// </summary>
-public sealed class StrategyConfigurationDto
+public sealed class StrategyConfigurationDto : IValidatableObject
 {
     /// <summary>
     /// Gets or sets the strategy name (unique identifier).

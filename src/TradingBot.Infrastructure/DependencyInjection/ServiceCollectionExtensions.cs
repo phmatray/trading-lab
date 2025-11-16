@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRiskSettingsRepository, RiskSettingsRepository>();
         services.AddScoped<IStrategyConfigurationRepository, StrategyConfigurationRepository>();
         services.AddScoped<IBacktestResultRepository, BacktestResultRepository>();
+        services.AddScoped<IWeeklyCashManagedStrategyRepository, WeeklyCashManagedStrategyRepository>();
 
         // Infrastructure services
         services.AddSingleton<IEncryptionService, EncryptionService>();
@@ -81,6 +82,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
         services.AddHttpClient<ISymbolSearchService, YahooFinanceSymbolSearchService>();
         services.AddMemoryCache();
+        services.AddSingleton<ITradingCalendar, TradingCalendar>();
+        services.AddScoped<IMA20IndicatorService, MA20IndicatorService>();
 
         // Engine services
         // Note: Changed to Scoped to avoid DI lifetime conflicts with DbContext-dependent services
@@ -91,6 +94,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStopLossManager, StopLossManager>();
         services.AddScoped<IPositionSizeCalculator, PositionSizeCalculator>();
         services.AddScoped<SignalProcessor>();
+        services.AddScoped<IWeeklyRoutineExecutor, Engine.WeeklyRoutine.WeeklyRoutineExecutor>();
 
         // Analytics services - Changed to Scoped as they depend on IPortfolioManager
         services.AddScoped<IBacktestingEngine, Analytics.BacktestingEngine>();

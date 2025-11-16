@@ -98,7 +98,7 @@ Multi-project layered architecture:
 - [X] T027 [P] [US1] Unit test for WeeklyCashManagedStrategy.Disable domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
 - [X] T028 [P] [US1] Unit test for WeeklyCashManagedStrategy.UpdateConfiguration domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
 - [X] T029 [P] [US1] Repository persistence test for WeeklyCashManagedStrategy in tests/TradingBot.Infrastructure.Tests/Repositories/WeeklyCashManagedStrategyRepositoryTests.cs
-- [ ] T030 [P] [US1] Blazor component test for StrategyConfigurationForm using bUnit in tests/TradingBot.Web.Tests/Components/WeeklyCashStrategy/StrategyConfigurationFormTests.cs
+- [X] T030 [P] [US1] Blazor component test for StrategyConfigurationForm using bUnit in tests/TradingBot.Web.Tests/Components/WeeklyCashStrategy/StrategyConfigurationFormTests.cs
 
 ### Implementation for User Story 1
 
@@ -111,16 +111,16 @@ Multi-project layered architecture:
 
 **Blazor Components**
 
-- [ ] T035 [US1] Create StrategyConfigurationForm.razor component in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyConfigurationForm.razor
-- [ ] T036 [US1] Create StrategyConfigurationForm.razor.cs code-behind with form logic in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyConfigurationForm.razor.cs
-- [ ] T037 [US1] Add strategy configuration page route in src/TradingBot.Web/Components/Pages/WeeklyCashStrategyConfig.razor
+- [X] T035 [US1] Create StrategyConfigurationForm.razor component in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyConfigurationForm.razor
+- [X] T036 [US1] Create StrategyConfigurationForm.razor.cs code-behind with form logic in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyConfigurationForm.razor.cs
+- [X] T037 [US1] Add strategy configuration page route in src/TradingBot.Web/Components/Pages/WeeklyCashStrategyConfig.razor
 
 **Integration and Validation**
 
-- [ ] T038 [US1] Add validation for MIN_CASH_RATIO < MAX_CASH_RATIO in StrategyConfiguration value object
-- [ ] T039 [US1] Add validation for ratios in [0,1] range in StrategyConfiguration value object
-- [ ] T040 [US1] Test configuration save and enable flow end-to-end
-- [ ] T041 [US1] Verify domain events (StrategyEnabledEvent, StrategyConfigurationUpdatedEvent) are raised
+- [X] T038 [US1] Add validation for MIN_CASH_RATIO < MAX_CASH_RATIO in StrategyConfiguration value object
+- [X] T039 [US1] Add validation for ratios in [0,1] range in StrategyConfiguration value object
+- [X] T040 [US1] Test configuration save and enable flow end-to-end
+- [X] T041 [US1] Verify domain events (StrategyEnabledEvent, StrategyConfigurationUpdatedEvent) are raised
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can configure and enable strategies via web UI
 
@@ -134,49 +134,49 @@ Multi-project layered architecture:
 
 ### Tests for User Story 2
 
-- [ ] T042 [P] [US2] Unit test for MA20 calculation accuracy in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
-- [ ] T043 [P] [US2] Unit test for MA20 sliding window update (O(1) performance) in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
-- [ ] T044 [P] [US2] Unit test for MA20 gap handling (weekends/holidays) in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
-- [ ] T045 [P] [US2] Unit test for WeeklyRoutineExecutor buy logic when COIN > MA20 in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T046 [P] [US2] Unit test for buy amount calculation (5% of equity) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T047 [P] [US2] Unit test for buy logic when cash_ratio <= MIN_CASH_RATIO (no buy) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T048 [P] [US2] Unit test for buy logic when insufficient cash (buy only available amount) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T042 [P] [US2] Unit test for MA20 calculation accuracy in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
+- [X] T043 [P] [US2] Unit test for MA20 sliding window update (O(1) performance) in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
+- [X] T044 [P] [US2] Unit test for MA20 gap handling (weekends/holidays) in tests/TradingBot.Infrastructure.Tests/Services/MA20IndicatorServiceTests.cs
+- [X] T045 [P] [US2] Unit test for WeeklyRoutineExecutor buy logic when COIN > MA20 in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T046 [P] [US2] Unit test for buy amount calculation (5% of equity) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T047 [P] [US2] Unit test for buy logic when cash_ratio <= MIN_CASH_RATIO (no buy) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T048 [P] [US2] Unit test for buy logic when insufficient cash (buy only available amount) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
 
 ### Implementation for User Story 2
 
 **Engine Layer - Weekly Routine Executor**
 
-- [ ] T049 [US2] Create WeeklyRoutineExecutor class in src/TradingBot.Engine/WeeklyRoutine/WeeklyRoutineExecutor.cs
-- [ ] T050 [US2] Implement ExecuteWeeklyRoutineAsync method with buy/sell orchestration in WeeklyRoutineExecutor
-- [ ] T051 [US2] Implement ShouldExecuteBuyAsync method (checks COIN > MA20, cash_ratio > MIN) in WeeklyRoutineExecutor
-- [ ] T052 [US2] Implement CalculateBuyAmountAsync method (min(WEEKLY_BUY_RATIO × equity, cash)) in WeeklyRoutineExecutor
-- [ ] T053 [US2] Integrate with OrderExecutionService for buy order execution in WeeklyRoutineExecutor
-- [ ] T054 [US2] Integrate with RiskManager for order validation in WeeklyRoutineExecutor
-- [ ] T055 [US2] Add structured logging for buy decisions in WeeklyRoutineExecutor
+- [X] T049 [US2] Create WeeklyRoutineExecutor class in src/TradingBot.Engine/WeeklyRoutine/WeeklyRoutineExecutor.cs
+- [X] T050 [US2] Implement ExecuteWeeklyRoutineAsync method with buy/sell orchestration in WeeklyRoutineExecutor
+- [X] T051 [US2] Implement ShouldExecuteBuyAsync method (checks COIN > MA20, cash_ratio > MIN) in WeeklyRoutineExecutor
+- [X] T052 [US2] Implement CalculateBuyAmountAsync method (min(WEEKLY_BUY_RATIO × equity, cash)) in WeeklyRoutineExecutor
+- [X] T053 [US2] Integrate with OrderExecutionService for buy order execution in WeeklyRoutineExecutor
+- [X] T054 [US2] Integrate with RiskManager for order validation in WeeklyRoutineExecutor
+- [X] T055 [US2] Add structured logging for buy decisions in WeeklyRoutineExecutor
 
 **Background Worker for Scheduling**
 
-- [ ] T056 [US2] Create WeeklyRoutineWorker BackgroundService in src/TradingBot.Web/BackgroundWorkers/WeeklyRoutineWorker.cs
-- [ ] T057 [US2] Implement ExecuteAsync with PeriodicTimer (24-hour interval) in WeeklyRoutineWorker
-- [ ] T058 [US2] Add NCrontab schedule parsing for weekly execution day in WeeklyRoutineWorker
-- [ ] T059 [US2] Create ITradingCalendar service interface in src/TradingBot.Core/Interfaces/ITradingCalendar.cs
-- [ ] T060 [US2] Implement TradingCalendar service (checks market hours/holidays) in src/TradingBot.Infrastructure/Services/TradingCalendar.cs
-- [ ] T061 [US2] Register WeeklyRoutineWorker as hosted service in src/TradingBot.Web/Program.cs
+- [X] T056 [US2] Create WeeklyRoutineWorker BackgroundService in src/TradingBot.Web/BackgroundWorkers/WeeklyRoutineWorker.cs
+- [X] T057 [US2] Implement ExecuteAsync with PeriodicTimer (24-hour interval) in WeeklyRoutineWorker
+- [X] T058 [US2] Add NCrontab schedule parsing for weekly execution day in WeeklyRoutineWorker
+- [X] T059 [US2] Create ITradingCalendar service interface in src/TradingBot.Core/Interfaces/ITradingCalendar.cs
+- [X] T060 [US2] Implement TradingCalendar service (checks market hours/holidays) in src/TradingBot.Infrastructure/Services/TradingCalendar.cs
+- [X] T061 [US2] Register WeeklyRoutineWorker as hosted service in src/TradingBot.Web/Program.cs
 
 **Daily Routine for MA20 Updates**
 
-- [ ] T062 [US2] Implement ExecuteDailyRoutineAsync method in WeeklyRoutineExecutor (updates MA20, prices, days_below_ma20)
-- [ ] T063 [US2] Add daily routine scheduling to WeeklyRoutineWorker (runs every day at market close)
-- [ ] T064 [US2] Implement UpdateDailyData domain method in WeeklyCashManagedStrategy entity
+- [X] T062 [US2] Implement ExecuteDailyRoutineAsync method in WeeklyRoutineExecutor (updates MA20, prices, days_below_ma20)
+- [X] T063 [US2] Add daily routine scheduling to WeeklyRoutineWorker (runs every day at market close)
+- [X] T064 [US2] Implement UpdateDailyData domain method in WeeklyCashManagedStrategy entity
 
 **Integration and Validation**
 
-- [ ] T065 [US2] Test MA20 calculation with real Yahoo Finance data (verify 0.01% accuracy)
-- [ ] T066 [US2] Test weekly buy execution end-to-end with mocked dependencies
-- [ ] T067 [US2] Verify domain event StrategyExecutedEvent is raised with buy order details
-- [ ] T068 [US2] Test scenario: COIN > MA20, cash_ratio = 20%, verify 5% buy amount
-- [ ] T069 [US2] Test scenario: COIN > MA20, cash_ratio = 15% (minimum), verify no buy
-- [ ] T070 [US2] Test scenario: Mid-week, verify no buy execution (weekly schedule only)
+- [X] T065 [US2] Test MA20 calculation with real Yahoo Finance data (verify 0.01% accuracy)
+- [X] T066 [US2] Test weekly buy execution end-to-end with mocked dependencies
+- [X] T067 [US2] Verify domain event StrategyExecutedEvent is raised with buy order details
+- [X] T068 [US2] Test scenario: COIN > MA20, cash_ratio = 20%, verify 5% buy amount
+- [X] T069 [US2] Test scenario: COIN > MA20, cash_ratio = 15% (minimum), verify no buy
+- [X] T070 [US2] Test scenario: Mid-week, verify no buy execution (weekly schedule only)
 
 **Checkpoint**: At this point, User Story 2 should be fully functional - automated weekly buying when conditions met
 

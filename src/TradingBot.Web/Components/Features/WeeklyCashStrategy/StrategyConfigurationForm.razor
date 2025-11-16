@@ -1,0 +1,238 @@
+@* <copyright file="StrategyConfigurationForm.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Features.WeeklyCashStrategy
+@using TradingBot.Web.Models
+@using TradingBot.Web.Services
+@inject WeeklyCashStrategyService WeeklyCashService
+@inject IToastService ToastService
+@inject ILogger<StrategyConfigurationForm> Logger
+
+<EditForm Model="@Configuration" OnValidSubmit="HandleSaveConfiguration">
+    <DataAnnotationsValidator />
+    <div class="space-y-6">
+        @* Basic Settings *@
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Basic Configuration
+            </h3>
+
+            <TbFormField Label="Strategy Name"
+                       InputId="strategy-name"
+                       HelpText="Unique name for this strategy instance (3-100 characters)"
+                       IsRequired="true">
+                <InputContent>
+                    <InputText @bind-Value="Configuration.Name"
+                             id="strategy-name"
+                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             placeholder="e.g., BTC-Weekly-Strategy" />
+                    <ValidationMessage For="@(() => Configuration.Name)" />
+                </InputContent>
+            </TbFormField>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TbFormField Label="ETP Symbol"
+                           InputId="etp-symbol"
+                           HelpText="ETP symbol to trade (2-6 uppercase letters, e.g., BTCW)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputText @bind-Value="Configuration.EtpSymbol"
+                                 id="etp-symbol"
+                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                 placeholder="BTCW" />
+                        <ValidationMessage For="@(() => Configuration.EtpSymbol)" />
+                    </InputContent>
+                </TbFormField>
+
+                <TbFormField Label="Underlying Symbol"
+                           InputId="underlying-symbol"
+                           HelpText="Underlying asset symbol (2-6 uppercase letters, e.g., COIN)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputText @bind-Value="Configuration.UnderlyingSymbol"
+                                 id="underlying-symbol"
+                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                 placeholder="COIN" />
+                        <ValidationMessage For="@(() => Configuration.UnderlyingSymbol)" />
+                    </InputContent>
+                </TbFormField>
+            </div>
+        </div>
+
+        @* Cash Ratio Settings *@
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Cash Buffer Settings
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Define the target cash buffer range. The strategy will maintain cash between these limits through automatic rebalancing.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TbFormField Label="Minimum Cash Ratio (%)"
+                           InputId="min-cash-ratio"
+                           HelpText="Minimum cash percentage (15% recommended)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputNumber @bind-Value="Configuration.MinCashRatio"
+                                   id="min-cash-ratio"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   step="0.01" />
+                        <ValidationMessage For="@(() => Configuration.MinCashRatio)" />
+                    </InputContent>
+                </TbFormField>
+
+                <TbFormField Label="Maximum Cash Ratio (%)"
+                           InputId="max-cash-ratio"
+                           HelpText="Maximum cash percentage (25% recommended)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputNumber @bind-Value="Configuration.MaxCashRatio"
+                                   id="max-cash-ratio"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   step="0.01" />
+                        <ValidationMessage For="@(() => Configuration.MaxCashRatio)" />
+                    </InputContent>
+                </TbFormField>
+            </div>
+        </div>
+
+        @* Buy/Sell Ratios *@
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Trading Ratios
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Define weekly buy and sell percentages. These control how aggressively the strategy trades.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TbFormField Label="Weekly Buy Ratio (%)"
+                           InputId="weekly-buy-ratio"
+                           HelpText="Percentage of equity to invest weekly (5% recommended)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputNumber @bind-Value="Configuration.WeeklyBuyRatio"
+                                   id="weekly-buy-ratio"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   step="0.01" />
+                        <ValidationMessage For="@(() => Configuration.WeeklyBuyRatio)" />
+                    </InputContent>
+                </TbFormField>
+
+                <TbFormField Label="Weekly Sell Ratio (%)"
+                           InputId="weekly-sell-ratio"
+                           HelpText="Percentage of position to sell weekly (10% recommended)"
+                           IsRequired="true">
+                    <InputContent>
+                        <InputNumber @bind-Value="Configuration.WeeklySellRatio"
+                                   id="weekly-sell-ratio"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   step="0.01" />
+                        <ValidationMessage For="@(() => Configuration.WeeklySellRatio)" />
+                    </InputContent>
+                </TbFormField>
+            </div>
+        </div>
+
+        @* Execution Schedule *@
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Schedule
+            </h3>
+
+            <TbFormField Label="Execution Day of Week"
+                       InputId="execution-day"
+                       HelpText="Day of week for weekly routine execution (Friday recommended)"
+                       IsRequired="true">
+                <InputContent>
+                    <TbSelect @bind-Value="Configuration.ExecutionDayOfWeek"
+                            Id="execution-day">
+                        <option value="0">Sunday</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday (Recommended)</option>
+                        <option value="6">Saturday</option>
+                    </TbSelect>
+                    <ValidationMessage For="@(() => Configuration.ExecutionDayOfWeek)" />
+                </InputContent>
+            </TbFormField>
+        </div>
+
+        @* Breakout Rule (Optional) *@
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Breakout Rule (Optional)
+                </h3>
+                <TbToggle @bind-IsChecked="Configuration.IsBreakoutRuleEnabled"
+                        Id="breakout-enabled" />
+            </div>
+
+            @if (Configuration.IsBreakoutRuleEnabled)
+            {
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Breakout rule doubles the buy amount when price and volume conditions indicate strong momentum.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <TbFormField Label="Price Threshold (%)"
+                               InputId="breakout-price"
+                               HelpText="Minimum weekly price increase (10% recommended)">
+                        <InputContent>
+                            <InputNumber @bind-Value="Configuration.BreakoutPriceThreshold"
+                                       id="breakout-price"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       step="0.01" />
+                            <ValidationMessage For="@(() => Configuration.BreakoutPriceThreshold)" />
+                        </InputContent>
+                    </TbFormField>
+
+                    <TbFormField Label="Volume Multiplier"
+                               InputId="breakout-volume"
+                               HelpText="Minimum volume multiplier (1.5x recommended)">
+                        <InputContent>
+                            <InputNumber @bind-Value="Configuration.BreakoutVolumeMultiplier"
+                                       id="breakout-volume"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       step="0.1" />
+                            <ValidationMessage For="@(() => Configuration.BreakoutVolumeMultiplier)" />
+                        </InputContent>
+                    </TbFormField>
+
+                    <TbFormField Label="Buy Multiplier"
+                               InputId="breakout-buy"
+                               HelpText="Buy amount multiplier (2x recommended)">
+                        <InputContent>
+                            <InputNumber @bind-Value="Configuration.BreakoutBuyMultiplier"
+                                       id="breakout-buy"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       step="0.1" />
+                            <ValidationMessage For="@(() => Configuration.BreakoutBuyMultiplier)" />
+                        </InputContent>
+                    </TbFormField>
+                </div>
+            }
+        </div>
+
+        @* Action Buttons *@
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <TbButton Type="ButtonType.Button"
+                    Variant="ButtonVariant.Secondary"
+                    OnClick="HandleCancel"
+                    Disabled="@IsSaving">
+                Cancel
+            </TbButton>
+
+            <TbButton Type="ButtonType.Submit"
+                    Variant="ButtonVariant.Primary"
+                    Disabled="@IsSaving"
+                    IsLoading="@IsSaving">
+                @(StrategyId.HasValue ? "Update Configuration" : "Create Strategy")
+            </TbButton>
+        </div>
+    </div>
+</EditForm>
