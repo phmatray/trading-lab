@@ -92,22 +92,22 @@ Multi-project layered architecture:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T024 [P] [US1] Unit test for StrategyConfiguration validation in tests/TradingBot.Core.Tests/ValueObjects/StrategyConfigurationTests.cs
-- [ ] T025 [P] [US1] Unit test for BreakoutRuleConfig validation in tests/TradingBot.Core.Tests/ValueObjects/BreakoutRuleConfigTests.cs
-- [ ] T026 [P] [US1] Unit test for WeeklyCashManagedStrategy.Enable domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
-- [ ] T027 [P] [US1] Unit test for WeeklyCashManagedStrategy.Disable domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
-- [ ] T028 [P] [US1] Unit test for WeeklyCashManagedStrategy.UpdateConfiguration domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
-- [ ] T029 [P] [US1] Repository persistence test for WeeklyCashManagedStrategy in tests/TradingBot.Infrastructure.Tests/Repositories/WeeklyCashManagedStrategyRepositoryTests.cs
+- [X] T024 [P] [US1] Unit test for StrategyConfiguration validation in tests/TradingBot.Core.Tests/ValueObjects/StrategyConfigurationTests.cs
+- [X] T025 [P] [US1] Unit test for BreakoutRuleConfig validation in tests/TradingBot.Core.Tests/ValueObjects/BreakoutRuleConfigTests.cs
+- [X] T026 [P] [US1] Unit test for WeeklyCashManagedStrategy.Enable domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
+- [X] T027 [P] [US1] Unit test for WeeklyCashManagedStrategy.Disable domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
+- [X] T028 [P] [US1] Unit test for WeeklyCashManagedStrategy.UpdateConfiguration domain behavior in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
+- [X] T029 [P] [US1] Repository persistence test for WeeklyCashManagedStrategy in tests/TradingBot.Infrastructure.Tests/Repositories/WeeklyCashManagedStrategyRepositoryTests.cs
 - [ ] T030 [P] [US1] Blazor component test for StrategyConfigurationForm using bUnit in tests/TradingBot.Web.Tests/Components/WeeklyCashStrategy/StrategyConfigurationFormTests.cs
 
 ### Implementation for User Story 1
 
 **DTOs and Web Services**
 
-- [ ] T031 [P] [US1] Create StrategyConfigurationDto with validation attributes in src/TradingBot.Web/Models/StrategyConfigurationDto.cs
-- [ ] T032 [P] [US1] Create StrategyStateDto for real-time updates in src/TradingBot.Web/Models/StrategyStateDto.cs
-- [ ] T033 [US1] Create WeeklyCashStrategyService (Scoped) for configuration operations in src/TradingBot.Web/Services/WeeklyCashStrategyService.cs
-- [ ] T034 [US1] Register WeeklyCashStrategyService in DI container in src/TradingBot.Web/Program.cs
+- [X] T031 [P] [US1] Create StrategyConfigurationDto with validation attributes in src/TradingBot.Web/Models/StrategyConfigurationDto.cs
+- [X] T032 [P] [US1] Create StrategyStateDto for real-time updates in src/TradingBot.Web/Models/StrategyStateDto.cs
+- [X] T033 [US1] Create WeeklyCashStrategyService (Scoped) for configuration operations in src/TradingBot.Web/Services/WeeklyCashStrategyService.cs
+- [X] T034 [US1] Register WeeklyCashStrategyService in DI container in src/TradingBot.Web/Program.cs
 
 **Blazor Components**
 

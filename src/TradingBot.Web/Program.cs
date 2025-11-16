@@ -66,6 +66,7 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IStrategyManagementService, StrategyManagementService>();
 builder.Services.AddScoped<IRiskSettingsService, RiskSettingsService>();
 builder.Services.AddScoped<IBacktestService, BacktestService>();
+builder.Services.AddScoped<WeeklyCashStrategyService>();
 builder.Services.AddSingleton<IToastService, ToastService>();
 
 // Add UI state and navigation services
