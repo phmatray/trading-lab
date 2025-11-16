@@ -190,37 +190,37 @@ Multi-project layered architecture:
 
 ### Tests for User Story 3
 
-- [ ] T071 [P] [US3] Unit test for days_below_ma20 counter increment logic in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
-- [ ] T072 [P] [US3] Unit test for days_below_ma20 counter reset when COIN >= MA20 in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
-- [ ] T073 [P] [US3] Unit test for WeeklyRoutineExecutor sell logic when days_below_ma20 >= 2 in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T074 [P] [US3] Unit test for sell quantity calculation (10% of position) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T075 [P] [US3] Unit test for sell logic when days_below_ma20 = 1 (no sell, threshold not met) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
-- [ ] T076 [P] [US3] Unit test for sell logic when COIN crosses back above MA20 (counter resets, no sell) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T071 [P] [US3] Unit test for days_below_ma20 counter increment logic in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
+- [X] T072 [P] [US3] Unit test for days_below_ma20 counter reset when COIN >= MA20 in tests/TradingBot.Core.Tests/Entities/WeeklyCashManagedStrategyTests.cs
+- [X] T073 [P] [US3] Unit test for WeeklyRoutineExecutor sell logic when days_below_ma20 >= 2 in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T074 [P] [US3] Unit test for sell quantity calculation (10% of position) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T075 [P] [US3] Unit test for sell logic when days_below_ma20 = 1 (no sell, threshold not met) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
+- [X] T076 [P] [US3] Unit test for sell logic when COIN crosses back above MA20 (counter resets, no sell) in tests/TradingBot.Engine.Tests/WeeklyRoutine/WeeklyRoutineExecutorTests.cs
 
 ### Implementation for User Story 3
 
 **Engine Layer - Sell Logic**
 
-- [ ] T077 [US3] Implement ShouldExecuteSellAsync method (checks days_below_ma20 >= 2, position > 0) in WeeklyRoutineExecutor
-- [ ] T078 [US3] Implement CalculateSellQuantityAsync method (WEEKLY_SELL_RATIO × position_size) in WeeklyRoutineExecutor
-- [ ] T079 [US3] Integrate sell logic into ExecuteWeeklyRoutineAsync method in WeeklyRoutineExecutor
-- [ ] T080 [US3] Integrate with OrderExecutionService for sell order execution in WeeklyRoutineExecutor
-- [ ] T081 [US3] Add structured logging for sell decisions in WeeklyRoutineExecutor
+- [X] T077 [US3] Implement ShouldExecuteSellAsync method (checks days_below_ma20 >= 2, position > 0) in WeeklyRoutineExecutor
+- [X] T078 [US3] Implement CalculateSellQuantityAsync method (WEEKLY_SELL_RATIO × position_size) in WeeklyRoutineExecutor
+- [X] T079 [US3] Integrate sell logic into ExecuteWeeklyRoutineAsync method in WeeklyRoutineExecutor
+- [X] T080 [US3] Integrate with OrderExecutionService for sell order execution in WeeklyRoutineExecutor
+- [X] T081 [US3] Add structured logging for sell decisions in WeeklyRoutineExecutor
 
 **Daily Counter Management**
 
-- [ ] T082 [US3] Update ExecuteDailyRoutineAsync to increment days_below_ma20 when COIN < MA20
-- [ ] T083 [US3] Update ExecuteDailyRoutineAsync to reset days_below_ma20 to 0 when COIN >= MA20
-- [ ] T084 [US3] Raise MA20UpdatedEvent with updated days_below_ma20 value
+- [X] T082 [US3] Update ExecuteDailyRoutineAsync to increment days_below_ma20 when COIN < MA20
+- [X] T083 [US3] Update ExecuteDailyRoutineAsync to reset days_below_ma20 to 0 when COIN >= MA20
+- [X] T084 [US3] Raise MA20UpdatedEvent with updated days_below_ma20 value
 
 **Integration and Validation**
 
-- [ ] T085 [US3] Test sell execution end-to-end with mocked dependencies
-- [ ] T086 [US3] Verify domain event StrategyExecutedEvent is raised with sell order details
-- [ ] T087 [US3] Test scenario: days_below_ma20 = 2, position = 100 shares, verify 10 shares sell
-- [ ] T088 [US3] Test scenario: days_below_ma20 = 1, verify no sell (threshold not met)
-- [ ] T089 [US3] Test scenario: COIN below MA20 for 2 days then crosses above, verify counter reset and no sell
-- [ ] T090 [US3] Test scenario: Mid-week, days_below_ma20 increments but no sell order (weekly schedule only)
+- [X] T085 [US3] Test sell execution end-to-end with mocked dependencies
+- [X] T086 [US3] Verify domain event StrategyExecutedEvent is raised with sell order details
+- [X] T087 [US3] Test scenario: days_below_ma20 = 2, position = 100 shares, verify 10 shares sell
+- [X] T088 [US3] Test scenario: days_below_ma20 = 1, verify no sell (threshold not met)
+- [X] T089 [US3] Test scenario: COIN below MA20 for 2 days then crosses above, verify counter reset and no sell
+- [X] T090 [US3] Test scenario: Mid-week, days_below_ma20 increments but no sell order (weekly schedule only)
 
 **Checkpoint**: At this point, User Stories 1, 2, AND 3 should all work independently - full buy/sell automation operational
 
@@ -234,31 +234,31 @@ Multi-project layered architecture:
 
 ### Tests for User Story 4
 
-- [ ] T091 [P] [US4] Unit test for CashBufferManager when cash_ratio < MIN_CASH_RATIO in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
-- [ ] T092 [P] [US4] Unit test for CashBufferManager when cash_ratio > MAX_CASH_RATIO in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
-- [ ] T093 [P] [US4] Unit test for CashBufferManager when cash_ratio within range (no action) in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
-- [ ] T094 [P] [US4] Unit test for CashBufferManager respecting COIN > MA20 condition for excess cash buys in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
+- [X] T091 [P] [US4] Unit test for CashBufferManager when cash_ratio < MIN_CASH_RATIO in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
+- [X] T092 [P] [US4] Unit test for CashBufferManager when cash_ratio > MAX_CASH_RATIO in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
+- [X] T093 [P] [US4] Unit test for CashBufferManager when cash_ratio within range (no action) in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
+- [X] T094 [P] [US4] Unit test for CashBufferManager respecting COIN > MA20 condition for excess cash buys in tests/TradingBot.Engine.Tests/WeeklyRoutine/CashBufferManagerTests.cs
 
 ### Implementation for User Story 4
 
 **Engine Layer - Cash Buffer Manager**
 
-- [ ] T095 [US4] Create CashBufferManager class in src/TradingBot.Engine/WeeklyRoutine/CashBufferManager.cs
-- [ ] T096 [US4] Implement AdjustCashBufferAsync method (main rebalancing logic) in CashBufferManager
-- [ ] T097 [US4] Implement logic: if cash_ratio < MIN_CASH_RATIO, sell WEEKLY_SELL_RATIO of position in CashBufferManager
-- [ ] T098 [US4] Implement logic: if cash_ratio > MAX_CASH_RATIO and COIN > MA20, buy with excess cash in CashBufferManager
-- [ ] T099 [US4] Integrate CashBufferManager into WeeklyRoutineExecutor after primary buy/sell logic
-- [ ] T100 [US4] Add structured logging for cash buffer adjustments with before/after ratios
-- [ ] T101 [US4] Raise CashBufferAdjustedEvent when adjustment executes
+- [X] T095 [US4] Create CashBufferManager class in src/TradingBot.Engine/WeeklyRoutine/CashBufferManager.cs
+- [X] T096 [US4] Implement AdjustCashBufferAsync method (main rebalancing logic) in CashBufferManager
+- [X] T097 [US4] Implement logic: if cash_ratio < MIN_CASH_RATIO, sell WEEKLY_SELL_RATIO of position in CashBufferManager
+- [X] T098 [US4] Implement logic: if cash_ratio > MAX_CASH_RATIO and COIN > MA20, buy with excess cash in CashBufferManager
+- [X] T099 [US4] Integrate CashBufferManager into WeeklyRoutineExecutor after primary buy/sell logic
+- [X] T100 [US4] Add structured logging for cash buffer adjustments with before/after ratios
+- [X] T101 [US4] Raise CashBufferAdjustedEvent when adjustment executes
 
 **Integration and Validation**
 
-- [ ] T102 [US4] Test cash buffer rebalancing end-to-end with mocked dependencies
-- [ ] T103 [US4] Verify domain event CashBufferAdjustedEvent is raised with adjustment details
-- [ ] T104 [US4] Test scenario: cash_ratio = 12% after primary logic, verify 10% sell to rebuild buffer
-- [ ] T105 [US4] Test scenario: cash_ratio = 30% after primary logic and COIN > MA20, verify buy to reduce excess
-- [ ] T106 [US4] Test scenario: cash_ratio = 30% but COIN < MA20, verify no buy (only buys if bullish)
-- [ ] T107 [US4] Test scenario: cash_ratio = 20% (within range), verify no adjustment
+- [X] T102 [US4] Test cash buffer rebalancing end-to-end with mocked dependencies
+- [X] T103 [US4] Verify domain event CashBufferAdjustedEvent is raised with adjustment details
+- [X] T104 [US4] Test scenario: cash_ratio = 12% after primary logic, verify 10% sell to rebuild buffer
+- [X] T105 [US4] Test scenario: cash_ratio = 30% after primary logic and COIN > MA20, verify buy to reduce excess
+- [X] T106 [US4] Test scenario: cash_ratio = 30% but COIN < MA20, verify no buy (only buys if bullish)
+- [X] T107 [US4] Test scenario: cash_ratio = 20% (within range), verify no adjustment
 
 **Checkpoint**: All core trading logic complete - strategy maintains healthy cash buffer automatically
 
@@ -280,16 +280,16 @@ Multi-project layered architecture:
 
 **SignalR Hub Extension**
 
-- [ ] T111 [US5] Extend TradingHub with SendStrategyStateUpdate method in src/TradingBot.Web/Hubs/TradingHub.cs
-- [ ] T112 [US5] Create StrategyUpdateBroadcaster event handler for StrategyExecutedEvent in src/TradingBot.Web/Services/StrategyUpdateBroadcaster.cs
-- [ ] T113 [US5] Create StrategyUpdateBroadcaster event handler for MA20UpdatedEvent in src/TradingBot.Web/Services/StrategyUpdateBroadcaster.cs
-- [ ] T114 [US5] Implement batching with 2-second interval and hash-based change detection in StrategyUpdateBroadcaster
-- [ ] T115 [US5] Register StrategyUpdateBroadcaster as MediatR notification handler in src/TradingBot.Web/Program.cs
+- [X] T111 [US5] Extend TradingHub with SendStrategyStateUpdate method in src/TradingBot.Web/Hubs/TradingHub.cs
+- [X] T112 [US5] Create StrategyUpdateBroadcaster event handler for StrategyExecutedEvent in src/TradingBot.Web/Services/StrategyUpdateBroadcaster.cs
+- [X] T113 [US5] Create StrategyUpdateBroadcaster event handler for MA20UpdatedEvent in src/TradingBot.Web/Services/StrategyUpdateBroadcaster.cs
+- [X] T114 [US5] Implement batching with 2-second interval and hash-based change detection in StrategyUpdateBroadcaster
+- [X] T115 [US5] Register StrategyUpdateBroadcaster as MediatR notification handler in src/TradingBot.Web/Program.cs
 
 **Blazor Components**
 
-- [ ] T116 [P] [US5] Create StrategyStateCard.razor component with real-time SignalR connection in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyStateCard.razor
-- [ ] T117 [P] [US5] Create StrategyDetailsPanel.razor component with metrics and charts in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyDetailsPanel.razor
+- [X] T116 [P] [US5] Create StrategyStateCard.razor component with real-time SignalR connection in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyStateCard.razor
+- [X] T117 [P] [US5] Create StrategyDetailsPanel.razor component with metrics and charts in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyDetailsPanel.razor
 - [ ] T118 [US5] Add strategy details page route in src/TradingBot.Web/Components/Pages/WeeklyCashStrategyDetails.razor
 - [ ] T119 [US5] Add strategy summary card to strategies overview page in src/TradingBot.Web/Components/Pages/Strategies.razor
 

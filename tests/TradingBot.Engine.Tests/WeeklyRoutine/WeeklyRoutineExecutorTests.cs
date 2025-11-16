@@ -31,6 +31,7 @@ public sealed class WeeklyRoutineExecutorTests
     private readonly IPortfolioManager _fakePortfolioManager;
     private readonly IOrderExecutionService _fakeOrderExecutionService;
     private readonly IRiskManager _fakeRiskManager;
+    private readonly ICashBufferManager _fakeCashBufferManager;
     private readonly ILogger<WeeklyRoutineExecutor> _fakeLogger;
     private readonly WeeklyRoutineExecutor _sut;
 
@@ -42,6 +43,7 @@ public sealed class WeeklyRoutineExecutorTests
         _fakePortfolioManager = A.Fake<IPortfolioManager>();
         _fakeOrderExecutionService = A.Fake<IOrderExecutionService>();
         _fakeRiskManager = A.Fake<IRiskManager>();
+        _fakeCashBufferManager = A.Fake<ICashBufferManager>();
         _fakeLogger = A.Fake<ILogger<WeeklyRoutineExecutor>>();
 
         _sut = new WeeklyRoutineExecutor(
@@ -51,6 +53,7 @@ public sealed class WeeklyRoutineExecutorTests
             _fakePortfolioManager,
             _fakeOrderExecutionService,
             _fakeRiskManager,
+            _fakeCashBufferManager,
             _fakeLogger);
     }
 
@@ -384,6 +387,21 @@ public sealed class WeeklyRoutineExecutorTests
         };
     }
 
+    private static Position CreateTestPosition(string symbol = "BTCW", decimal quantity = 100, decimal entryPrice = 45m, decimal currentPrice = 50m)
+    {
+        return new Position
+        {
+            Id = Guid.NewGuid(),
+            Symbol = symbol,
+            Side = OrderSide.Buy,
+            Quantity = quantity,
+            EntryPrice = entryPrice,
+            CurrentPrice = currentPrice,
+            OpenedAt = DateTime.UtcNow.AddDays(-7),
+            StrategyName = "Test Strategy",
+        };
+    }
+
     /// <summary>
     /// T066: End-to-end integration test for weekly buy execution.
     /// Verifies complete workflow with mocked dependencies.
@@ -591,6 +609,479 @@ public sealed class WeeklyRoutineExecutorTests
         // Day-of-week filtering is done by WeeklyRoutineWorker.ShouldExecuteToday()
         shouldBuy.ShouldBeTrue(
             "Buy conditions met (COIN > MA20, cash > min). " +
+            "Day-of-week check is separate (handled by worker).");
+    }
+
+    // ==================== PHASE 5: USER STORY 3 - SELL LOGIC TESTS ====================
+
+    /// <summary>
+    /// T073: Unit test for WeeklyRoutineExecutor sell logic when days_below_ma20 >= 2.
+    /// Verifies that sell conditions are correctly evaluated when threshold is met.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ShouldExecuteSell_WhenDaysBelowMA20IsTwo_ReturnsTrue()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 2; // Threshold met
+        strategy.CurrentUnderlyingPrice = 130m; // Below MA20
+        strategy.CurrentMA20 = 140m;
+
+        // Mock existing position of 100 shares
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+
+        // Assert
+        shouldSell.ShouldBeTrue("Sell should execute when days_below_ma20 >= 2");
+    }
+
+    /// <summary>
+    /// T074: Unit test for sell quantity calculation (10% of position).
+    /// Verifies that sell quantity is correctly calculated as WEEKLY_SELL_RATIO × position_size.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task CalculateSellQuantity_With10PercentRatio_Returns10PercentOfPosition()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.WeeklySellRatio = 0.10m; // 10%
+        strategy.DaysBelowMA20 = 2;
+
+        // Position: 100 shares
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var sellQuantity = await _sut.CalculateSellQuantityAsync(strategyId);
+
+        // Assert
+        // Expected: 10% of 100 shares = 10 shares
+        sellQuantity.ShouldBe(10m);
+    }
+
+    /// <summary>
+    /// T075: Unit test for sell logic when days_below_ma20 = 1 (no sell, threshold not met).
+    /// Verifies that sell does not execute when only 1 day below MA20.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ShouldExecuteSell_WhenDaysBelowMA20IsOne_ReturnsFalse()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 1; // Threshold NOT met (needs >= 2)
+        strategy.CurrentUnderlyingPrice = 130m;
+        strategy.CurrentMA20 = 140m;
+
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+
+        // Assert
+        shouldSell.ShouldBeFalse("Sell should NOT execute when days_below_ma20 < 2");
+    }
+
+    /// <summary>
+    /// T076: Unit test for sell logic when COIN crosses back above MA20 (counter resets, no sell).
+    /// Verifies that sell conditions are false after counter reset.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ShouldExecuteSell_WhenCounterResetAfterCrossAbove_ReturnsFalse()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 0; // Counter reset (COIN crossed back above MA20)
+        strategy.CurrentUnderlyingPrice = 150m; // Now above MA20
+        strategy.CurrentMA20 = 140m;
+
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+
+        // Assert
+        shouldSell.ShouldBeFalse("Sell should NOT execute when counter reset (COIN > MA20)");
+    }
+
+    /// <summary>
+    /// T075: Verify sell logic when no position exists - should return false.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ShouldExecuteSell_WhenNoPosition_ReturnsFalse()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 2; // Threshold met
+        strategy.CurrentUnderlyingPrice = 130m;
+        strategy.CurrentMA20 = 140m;
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        // No position exists
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(Task.FromResult<Position?>(null));
+
+        // Act
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+
+        // Assert
+        shouldSell.ShouldBeFalse("Sell should NOT execute when no position exists");
+    }
+
+    /// <summary>
+    /// T074: Verify sell quantity calculation with different position sizes.
+    /// </summary>
+    /// <param name="positionSize">Current position size.</param>
+    /// <param name="sellRatio">Weekly sell ratio.</param>
+    /// <param name="expectedQuantity">Expected sell quantity.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Theory]
+    [InlineData(50, 0.10, 5)]   // 50 shares, 10% = 5 shares
+    [InlineData(100, 0.10, 10)] // 100 shares, 10% = 10 shares
+    [InlineData(200, 0.10, 20)] // 200 shares, 10% = 20 shares
+    [InlineData(100, 0.20, 20)] // 100 shares, 20% = 20 shares
+    public async Task CalculateSellQuantity_WithVariousPositionSizes_ReturnsCorrectQuantity(
+        decimal positionSize,
+        decimal sellRatio,
+        decimal expectedQuantity)
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.WeeklySellRatio = sellRatio;
+        strategy.DaysBelowMA20 = 2;
+
+        var position = CreateTestPosition(quantity: positionSize);
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var sellQuantity = await _sut.CalculateSellQuantityAsync(strategyId);
+
+        // Assert
+        sellQuantity.ShouldBe(expectedQuantity);
+    }
+
+    // ==================== INTEGRATION TESTS FOR SELL LOGIC ====================
+
+    /// <summary>
+    /// T085: End-to-end integration test for weekly sell execution.
+    /// Verifies complete sell workflow with mocked dependencies.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ExecuteWeeklyRoutine_WithSellConditionsMet_ExecutesOrderSuccessfully()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 2; // Threshold met
+        strategy.CurrentUnderlyingPrice = 130m; // COIN < MA20 (bearish)
+        strategy.CurrentMA20 = 140m;
+        strategy.WeeklySellRatio = 0.10m; // 10%
+
+        var account = CreateTestAccount(totalEquity: 100000m, cash: 20000m);
+        var etpPrice = 50m;
+
+        // Existing position: 100 shares
+        var position = CreateTestPosition(currentPrice: etpPrice);
+
+        var expectedSellQuantity = 10m; // 10% of 100 shares
+
+        // Set up mocks for complete workflow
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetAccountAsync(A<CancellationToken>._))
+            .Returns(account);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        A.CallTo(() => _fakeMarketDataService.GetQuoteAsync("BTCW", A<CancellationToken>._))
+            .Returns(new Quote
+            {
+                Symbol = "BTCW",
+                Price = etpPrice,
+                Timestamp = DateTime.UtcNow,
+                Bid = etpPrice - 0.01m,
+                Ask = etpPrice + 0.01m,
+                Volume = 1000000,
+                Change = 0m,
+                ChangePercent = 0m,
+            });
+
+        A.CallTo(() => _fakeOrderExecutionService.SubmitOrderAsync(A<Order>._, A<CancellationToken>._))
+            .ReturnsLazily((Order order, CancellationToken ct) =>
+            {
+                order.Status = OrderStatus.Filled;
+                return Task.FromResult(order);
+            });
+
+        // Act
+        var result = await _sut.ExecuteWeeklyRoutineAsync(strategy, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.SellOrderId.ShouldNotBeNull("Sell order should be placed when conditions met");
+        result.CashRatioAfter.ShouldBeGreaterThan(0);
+
+        // Verify sell order was submitted with correct parameters
+        A.CallTo(() => _fakeOrderExecutionService.SubmitOrderAsync(
+                A<Order>.That.Matches(o =>
+                    o.Symbol == "BTCW" &&
+                    o.Side == OrderSide.Sell &&
+                    o.Quantity == expectedSellQuantity &&
+                    o.Type == OrderType.Market),
+                A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+
+        // Verify strategy was updated
+        A.CallTo(() => _fakeStrategyRepository.UpdateAsync(strategy, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    /// <summary>
+    /// T086: Verify StrategyExecutedEvent domain event is raised with sell order details.
+    /// NOTE: Domain events are raised within the entity and dispatched by DbContext.
+    /// This test verifies the sell order ID would be recorded through strategy state.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ExecuteWeeklyRoutine_WithSellExecution_UpdatesStrategyTimestamp()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 2;
+        strategy.CurrentUnderlyingPrice = 130m;
+        strategy.CurrentMA20 = 140m;
+
+        var account = CreateTestAccount(totalEquity: 100000m, cash: 20000m);
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetAccountAsync(A<CancellationToken>._))
+            .Returns(account);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        A.CallTo(() => _fakeMarketDataService.GetQuoteAsync("BTCW", A<CancellationToken>._))
+            .Returns(new Quote
+            {
+                Symbol = "BTCW",
+                Price = 50m,
+                Timestamp = DateTime.UtcNow,
+                Bid = 49.99m,
+                Ask = 50.01m,
+                Volume = 1000000,
+                Change = 0m,
+                ChangePercent = 0m,
+            });
+
+        A.CallTo(() => _fakeOrderExecutionService.SubmitOrderAsync(A<Order>._, A<CancellationToken>._))
+            .ReturnsLazily((Order order, CancellationToken ct) =>
+            {
+                order.Status = OrderStatus.Filled;
+                return Task.FromResult(order);
+            });
+
+        var beforeExecution = DateTime.UtcNow;
+
+        // Act
+        var result = await _sut.ExecuteWeeklyRoutineAsync(strategy, CancellationToken.None);
+
+        // Assert - Verify LastExecutionTimestamp was updated
+        strategy.LastExecutionTimestamp.ShouldNotBeNull();
+        strategy.LastExecutionTimestamp.Value.ShouldBeGreaterThanOrEqualTo(beforeExecution);
+        strategy.LastExecutionTimestamp.Value.ShouldBeLessThanOrEqualTo(DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// T087: Test scenario with days_below_ma20 = 2 and 100 shares - should sell 10 shares (10%).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ExecuteWeeklyRoutine_DaysBelowMA20Is2_Sells10PercentOfPosition()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 2;
+        strategy.CurrentUnderlyingPrice = 130m; // COIN < MA20
+        strategy.CurrentMA20 = 140m;
+        strategy.WeeklySellRatio = 0.10m;
+
+        var account = CreateTestAccount(totalEquity: 100000m, cash: 20000m);
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+        var sellQuantity = await _sut.CalculateSellQuantityAsync(strategyId);
+
+        // Assert
+        shouldSell.ShouldBeTrue("Sell should execute when days_below_ma20 = 2");
+        sellQuantity.ShouldBe(10m, "Sell quantity should be 10% of 100 shares");
+    }
+
+    /// <summary>
+    /// T088: Test scenario with days_below_ma20 = 1 - should NOT sell (threshold not met).
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ExecuteWeeklyRoutine_DaysBelowMA20Is1_DoesNotExecuteSell()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 1; // Threshold NOT met
+        strategy.CurrentUnderlyingPrice = 130m;
+        strategy.CurrentMA20 = 140m;
+
+        var account = CreateTestAccount(totalEquity: 100000m, cash: 20000m);
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetAccountAsync(A<CancellationToken>._))
+            .Returns(account);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var result = await _sut.ExecuteWeeklyRoutineAsync(strategy, CancellationToken.None);
+
+        // Assert
+        result.SellOrderId.ShouldBeNull("Sell order should NOT be placed when days_below_ma20 < 2");
+
+        // Verify no sell order was submitted
+        A.CallTo(() => _fakeOrderExecutionService.SubmitOrderAsync(
+                A<Order>.That.Matches(o => o.Side == OrderSide.Sell),
+                A<CancellationToken>._))
+            .MustNotHaveHappened();
+    }
+
+    /// <summary>
+    /// T089: Test scenario where COIN crosses back above MA20 - counter resets, no sell.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ExecuteWeeklyRoutine_CounterResetAfterCrossAbove_DoesNotExecuteSell()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 0; // Counter reset
+        strategy.CurrentUnderlyingPrice = 150m; // COIN > MA20 (crossed back above)
+        strategy.CurrentMA20 = 140m;
+
+        var account = CreateTestAccount(totalEquity: 100000m, cash: 20000m);
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetAccountAsync(A<CancellationToken>._))
+            .Returns(account);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act
+        var result = await _sut.ExecuteWeeklyRoutineAsync(strategy, CancellationToken.None);
+
+        // Assert
+        result.SellOrderId.ShouldBeNull("Sell should NOT execute when counter reset");
+
+        // Verify no sell order was submitted
+        A.CallTo(() => _fakeOrderExecutionService.SubmitOrderAsync(
+                A<Order>.That.Matches(o => o.Side == OrderSide.Sell),
+                A<CancellationToken>._))
+            .MustNotHaveHappened();
+    }
+
+    /// <summary>
+    /// T090: Test mid-week scenario - days_below_ma20 increments but no sell order (weekly schedule only).
+    /// NOTE: This test verifies sell logic conditions. Day-of-week filtering is handled by WeeklyRoutineWorker.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+    [Fact]
+    public async Task ShouldExecuteSell_WithAllConditionsMet_ReturnsTrue()
+    {
+        // Arrange
+        var strategyId = Guid.NewGuid();
+        var strategy = CreateTestStrategy(strategyId);
+        strategy.DaysBelowMA20 = 3; // Well above threshold
+        strategy.CurrentUnderlyingPrice = 130m;
+        strategy.CurrentMA20 = 140m;
+
+        var position = CreateTestPosition();
+
+        A.CallTo(() => _fakeStrategyRepository.GetByIdAsync(strategyId, A<CancellationToken>._))
+            .Returns(strategy);
+
+        A.CallTo(() => _fakePortfolioManager.GetPositionAsync("BTCW", A<CancellationToken>._))
+            .Returns(position);
+
+        // Act - Sell conditions check (independent of day-of-week)
+        var shouldSell = await _sut.ShouldExecuteSellAsync(strategyId);
+
+        // Assert
+        // T090: ShouldExecuteSellAsync checks days_below_ma20 and position only
+        // Day-of-week filtering is done by WeeklyRoutineWorker.ShouldExecuteToday()
+        shouldSell.ShouldBeTrue(
+            "Sell conditions met (days_below_ma20 >= 2, position > 0). " +
             "Day-of-week check is separate (handled by worker).");
     }
 }

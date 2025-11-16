@@ -111,4 +111,11 @@ public interface ITradingClient
     /// <param name="parameters">The new parameter values.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task OnStrategyConfigurationChanged(string strategyName, Dictionary<string, object> parameters);
+
+    /// <summary>
+    /// Receives real-time strategy state updates.
+    /// </summary>
+    /// <param name="state">The updated strategy state.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ReceiveStrategyStateUpdate(Models.StrategyStateDto state);
 }

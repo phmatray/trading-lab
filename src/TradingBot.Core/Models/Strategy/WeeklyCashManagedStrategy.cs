@@ -223,6 +223,25 @@ public sealed class WeeklyCashManagedStrategy : EntityBase<Guid>, IAggregateRoot
     }
 
     /// <summary>
+    /// Records a cash buffer adjustment and raises a domain event.
+    /// </summary>
+    /// <param name="orderId">The adjustment order ID (buy or sell).</param>
+    /// <param name="adjustmentType">The adjustment type (Buy or Sell).</param>
+    /// <param name="cashRatioBefore">Cash ratio before adjustment.</param>
+    /// <param name="cashRatioAfter">Cash ratio after adjustment.</param>
+    public void RecordCashBufferAdjustment(Guid orderId, string adjustmentType, decimal cashRatioBefore, decimal cashRatioAfter)
+    {
+        LastModified = DateTime.UtcNow;
+
+        RegisterDomainEvent(new CashBufferAdjustedEvent(
+            Id,
+            orderId,
+            adjustmentType,
+            cashRatioBefore,
+            cashRatioAfter));
+    }
+
+    /// <summary>
     /// Updates the configuration parameters and raises a domain event.
     /// </summary>
     /// <param name="config">New configuration values.</param>

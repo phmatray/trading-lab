@@ -22,6 +22,7 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
     private readonly IPortfolioManager _portfolioManager;
     private readonly IOrderExecutionService _orderExecutionService;
     private readonly IRiskManager _riskManager;
+    private readonly ICashBufferManager _cashBufferManager;
     private readonly ILogger<WeeklyRoutineExecutor> _logger;
 
     /// <summary>
@@ -33,6 +34,7 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
     /// <param name="portfolioManager">Portfolio manager.</param>
     /// <param name="orderExecutionService">Order execution service.</param>
     /// <param name="riskManager">Risk manager.</param>
+    /// <param name="cashBufferManager">Cash buffer manager.</param>
     /// <param name="logger">Logger.</param>
     public WeeklyRoutineExecutor(
         IWeeklyCashManagedStrategyRepository strategyRepository,
@@ -41,6 +43,7 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
         IPortfolioManager portfolioManager,
         IOrderExecutionService orderExecutionService,
         IRiskManager riskManager,
+        ICashBufferManager cashBufferManager,
         ILogger<WeeklyRoutineExecutor> logger)
     {
         _strategyRepository = strategyRepository;
@@ -49,6 +52,7 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
         _portfolioManager = portfolioManager;
         _orderExecutionService = orderExecutionService;
         _riskManager = riskManager;
+        _cashBufferManager = cashBufferManager;
         _logger = logger;
     }
 
@@ -103,13 +107,57 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
                     cashRatioBefore);
             }
 
-            // Execute sell logic if conditions are met (to be implemented in User Story 3)
+            // T079: Execute sell logic if conditions are met
             var shouldSell = await ShouldExecuteSellAsync(strategy.Id, cancellationToken);
             if (shouldSell)
             {
+                var sellOrderId = await ExecuteSellOrderAsync(strategy, account, cancellationToken);
+                if (sellOrderId.HasValue)
+                {
+                    result.SellOrderId = sellOrderId.Value;
+                    _logger.LogInformation(
+                        "Sell order placed: {OrderId} for strategy {StrategyId}",
+                        sellOrderId.Value,
+                        strategy.Id);
+                }
+            }
+            else
+            {
                 _logger.LogDebug(
-                    "Sell conditions met for strategy {StrategyId} - will be implemented in User Story 3",
-                    strategy.Id);
+                    "Sell conditions not met for strategy {StrategyId}. DaysBelowMA20={DaysBelowMA20}",
+                    strategy.Id,
+                    strategy.DaysBelowMA20);
+            }
+
+            // T099: Execute cash buffer adjustment after primary buy/sell logic
+            _logger.LogDebug(
+                "Checking cash buffer adjustment for strategy {StrategyId}",
+                strategy.Id);
+
+            var cashBufferAdjustment = await _cashBufferManager.AdjustCashBufferAsync(
+                strategy.Id,
+                cancellationToken);
+
+            if (cashBufferAdjustment.Adjusted)
+            {
+                _logger.LogInformation(
+                    "Cash buffer adjusted for strategy {StrategyId}: {Action} order {OrderId}. " +
+                    "Cash ratio: {Before:P2} → {After:P2}. Reason: {Reason}",
+                    strategy.Id,
+                    cashBufferAdjustment.Action,
+                    cashBufferAdjustment.OrderId,
+                    cashBufferAdjustment.CashRatioBefore,
+                    cashBufferAdjustment.CashRatioAfter,
+                    cashBufferAdjustment.Reason);
+
+                result.CashBufferOrderId = cashBufferAdjustment.OrderId;
+            }
+            else
+            {
+                _logger.LogDebug(
+                    "No cash buffer adjustment needed for strategy {StrategyId}. Reason: {Reason}",
+                    strategy.Id,
+                    cashBufferAdjustment.Reason);
             }
 
             // Get updated account state
@@ -258,9 +306,27 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
     /// <inheritdoc/>
     public async Task<bool> ShouldExecuteSellAsync(Guid strategyId, CancellationToken cancellationToken = default)
     {
-        // T071: To be implemented in User Story 3
-        // For now, return false to allow User Story 2 testing
-        return await Task.FromResult(false);
+        // T077: Check sell conditions
+        var strategy = await _strategyRepository.GetByIdAsync(strategyId, cancellationToken);
+        if (strategy == null)
+        {
+            return false;
+        }
+
+        // Condition 1: days_below_ma20 >= 2 (threshold met)
+        if (strategy.DaysBelowMA20 < 2)
+        {
+            return false;
+        }
+
+        // Condition 2: position exists and has quantity > 0
+        var position = await _portfolioManager.GetPositionAsync(strategy.EtpSymbol, cancellationToken);
+        if (position == null || position.Quantity <= 0)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <inheritdoc/>
@@ -286,7 +352,23 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
     /// <inheritdoc/>
     public async Task<decimal> CalculateSellQuantityAsync(Guid strategyId, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException("T072: To be implemented in User Story 3");
+        // T078: Calculate sell quantity as WEEKLY_SELL_RATIO × position_size
+        var strategy = await _strategyRepository.GetByIdAsync(strategyId, cancellationToken);
+        if (strategy == null)
+        {
+            return 0m;
+        }
+
+        var position = await _portfolioManager.GetPositionAsync(strategy.EtpSymbol, cancellationToken);
+        if (position == null || position.Quantity <= 0)
+        {
+            return 0m;
+        }
+
+        // Calculate sell quantity: WEEKLY_SELL_RATIO × position_size
+        var sellQuantity = Math.Floor(strategy.WeeklySellRatio * position.Quantity);
+
+        return sellQuantity;
     }
 
     /// <summary>
@@ -406,6 +488,97 @@ public sealed class WeeklyRoutineExecutor : IWeeklyRoutineExecutor
             _logger.LogError(
                 ex,
                 "Error executing buy order for strategy {StrategyId}, Symbol={Symbol}",
+                strategy.Id,
+                strategy.EtpSymbol);
+
+            // Don't throw - return null to indicate order was not placed
+            // This allows the routine to continue with other operations
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Executes a sell order with risk validation and order execution service integration.
+    /// T080: Integration with OrderExecutionService for sell order execution.
+    /// T081: Structured logging for sell decisions.
+    /// </summary>
+    /// <param name="strategy">The strategy to execute sell for.</param>
+    /// <param name="account">Current account state.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Order ID if sell executed, null otherwise.</returns>
+    private async Task<Guid?> ExecuteSellOrderAsync(
+        WeeklyCashManagedStrategy strategy,
+        Core.Models.Portfolio.Account account,
+        CancellationToken cancellationToken)
+    {
+        // Calculate sell quantity
+        var sellQuantity = await CalculateSellQuantityAsync(strategy.Id, cancellationToken);
+
+        if (sellQuantity <= 0)
+        {
+            _logger.LogDebug(
+                "Sell quantity is zero or negative for strategy {StrategyId}, skipping order",
+                strategy.Id);
+            return null;
+        }
+
+        // T081: Structured logging for sell decision
+        _logger.LogInformation(
+            "Preparing sell order for strategy {StrategyId}: Symbol={Symbol}, Quantity={Quantity}, DaysBelowMA20={DaysBelowMA20}",
+            strategy.Id,
+            strategy.EtpSymbol,
+            sellQuantity,
+            strategy.DaysBelowMA20);
+
+        try
+        {
+            // Get current ETP price
+            var currentPrice = await GetCurrentPriceAsync(strategy.EtpSymbol, cancellationToken);
+            if (currentPrice == null)
+            {
+                _logger.LogWarning(
+                    "Unable to get current price for {Symbol}, cannot execute sell order",
+                    strategy.EtpSymbol);
+                return null;
+            }
+
+            // Create sell order entity
+            var order = new Order
+            {
+                Id = Guid.NewGuid(),
+                Symbol = strategy.EtpSymbol,
+                Type = OrderType.Market,
+                Side = OrderSide.Sell,
+                Quantity = sellQuantity,
+                Status = OrderStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                StrategyName = strategy.Name,
+            };
+
+            _logger.LogDebug(
+                "Created sell order: {OrderId}, Symbol={Symbol}, Quantity={Quantity}, Price={Price:C}",
+                order.Id,
+                order.Symbol,
+                sellQuantity,
+                currentPrice.Value);
+
+            // T080: Submit order via OrderExecutionService
+            var submittedOrder = await _orderExecutionService.SubmitOrderAsync(order, cancellationToken);
+
+            _logger.LogInformation(
+                "Sell order submitted successfully: {OrderId}, Symbol={Symbol}, Quantity={Quantity}, Status={Status}",
+                submittedOrder.Id,
+                submittedOrder.Symbol,
+                submittedOrder.Quantity,
+                submittedOrder.Status);
+
+            return submittedOrder.Id;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error executing sell order for strategy {StrategyId}, Symbol={Symbol}",
                 strategy.Id,
                 strategy.EtpSymbol);
 

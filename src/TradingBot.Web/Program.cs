@@ -59,6 +59,12 @@ builder.Services.AddResponseCompression(options =>
 // Add existing TradingBot services from Infrastructure layer
 builder.Services.AddTradingBotServices(builder.Configuration);
 
+// Add MediatR for Web assembly (for notification handlers like StrategyUpdateBroadcaster)
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
 // Add Web application services
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IPortfolioService, PortfolioService>();
@@ -68,6 +74,9 @@ builder.Services.AddScoped<IRiskSettingsService, RiskSettingsService>();
 builder.Services.AddScoped<IBacktestService, BacktestService>();
 builder.Services.AddScoped<WeeklyCashStrategyService>();
 builder.Services.AddSingleton<IToastService, ToastService>();
+
+// Add strategy update broadcaster as singleton (handles batching and state)
+builder.Services.AddSingleton<StrategyUpdateBroadcaster>();
 
 // Add UI state and navigation services
 builder.Services.AddScoped<UIStateService>();
