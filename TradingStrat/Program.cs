@@ -1,17 +1,36 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Spectre.Console;
 using TradingStrat.Data;
 using TradingStrat.Services;
 using TradingStrat.Utilities;
 
-Console.WriteLine("=== Trading Strategy - Historical Data Fetcher ===\n");
+// Display header
+AnsiConsole.Write(
+    new FigletText("Trading Strategy")
+        .LeftJustified()
+        .Color(Color.Cyan1));
+
+AnsiConsole.MarkupLine("[grey]Historical Data Fetcher powered by Yahoo Finance[/]\n");
 
 try
 {
+    TradingContext context = null!;
+
     // Step 1: Initialize database
-    Console.WriteLine("Initializing database...");
-    await using var context = new TradingContext();
-    await context.Database.EnsureCreatedAsync();
-    Console.WriteLine("Database initialized successfully.\n");
+    await AnsiConsole.Status()
+        .StartAsync("Initializing database...", async ctx =>
+        {
+            ctx.Spinner(Spinner.Known.Dots);
+            ctx.SpinnerStyle(Style.Parse("green"));
+
+            context = new TradingContext();
+            await context.Database.EnsureCreatedAsync();
+
+            ctx.Status("[green]Database initialized successfully[/]");
+            await Task.Delay(300);
+        });
+
+    AnsiConsole.MarkupLine("[green]✓[/] Database ready\n");
 
     // Step 2: Resolve ISIN to Yahoo ticker(s)
     const string isin = "XS2399367254";
@@ -19,11 +38,12 @@ try
 
     if (possibleTickers == null || !possibleTickers.Any())
     {
-        Console.WriteLine($"ERROR: Could not resolve ISIN {isin} to Yahoo ticker");
+        AnsiConsole.MarkupLine($"[red]✗ ERROR:[/] Could not resolve ISIN {isin} to Yahoo ticker");
         return;
     }
 
-    Console.WriteLine($"Resolved ISIN {isin} to ticker(s): {string.Join(", ", possibleTickers)}");
+    AnsiConsole.MarkupLine($"[yellow]ISIN:[/] {isin}");
+    AnsiConsole.MarkupLine($"[yellow]Possible tickers:[/] [cyan]{string.Join(", ", possibleTickers)}[/]\n");
 
     // Step 3: Initialize services
     var yahooService = new YahooFinanceService();
@@ -32,92 +52,128 @@ try
 
     // Step 3.5: Try to find a working ticker
     string? ticker = null;
-    foreach (var candidateTicker in possibleTickers)
-    {
-        Console.WriteLine($"Trying ticker: {candidateTicker}...");
-        try
-        {
-            // Try to fetch just one day of data to test if the ticker works
-            var testData = await yahooService.GetHistoricalDataAsync(
-                candidateTicker,
-                DateTime.Today.AddDays(-7),
-                DateTime.Today);
 
-            if (testData.Any())
-            {
-                ticker = candidateTicker;
-                Console.WriteLine($"Successfully connected with ticker: {ticker}\n");
-                break;
-            }
-        }
-        catch (Exception ex)
+    await AnsiConsole.Status()
+        .StartAsync("Testing ticker connections...", async ctx =>
         {
-            Console.WriteLine($"Failed with {candidateTicker}: {ex.Message}");
-        }
-    }
+            ctx.Spinner(Spinner.Known.Dots);
+            ctx.SpinnerStyle(Style.Parse("yellow"));
+
+            foreach (var candidateTicker in possibleTickers)
+            {
+                ctx.Status($"Testing [cyan]{candidateTicker}[/]...");
+                try
+                {
+                    var testData = await yahooService.GetHistoricalDataAsync(
+                        candidateTicker,
+                        DateTime.Today.AddDays(-7),
+                        DateTime.Today);
+
+                    if (testData.Any())
+                    {
+                        ticker = candidateTicker;
+                        ctx.Status($"[green]Successfully connected with {ticker}[/]");
+                        await Task.Delay(300);
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[dim]  Failed with {candidateTicker}: {ex.Message.EscapeMarkup()}[/]");
+                }
+            }
+        });
 
     if (ticker == null)
     {
-        Console.WriteLine($"\nERROR: Could not fetch data with any available ticker for ISIN {isin}");
-        Console.WriteLine("This may be due to:");
-        Console.WriteLine("- Yahoo Finance API rate limiting");
-        Console.WriteLine("- The security not being available on Yahoo Finance");
-        Console.WriteLine("- Temporary Yahoo Finance API issues");
-        Console.WriteLine("\nPlease try again later or verify the ticker manually at https://finance.yahoo.com/");
+        var panel = new Panel(
+            "[red]Could not fetch data with any available ticker[/]\n\n" +
+            "[yellow]This may be due to:[/]\n" +
+            "• Yahoo Finance API rate limiting\n" +
+            "• The security not being available\n" +
+            "• Temporary API issues\n\n" +
+            "[dim]Please try again later or verify at https://finance.yahoo.com/[/]")
+        {
+            Header = new PanelHeader("[red]Connection Error[/]"),
+            Border = BoxBorder.Rounded,
+            BorderStyle = Style.Parse("red")
+        };
+
+        AnsiConsole.Write(panel);
         return;
     }
 
+    AnsiConsole.MarkupLine($"[green]✓[/] Connected to ticker [cyan]{ticker}[/]\n");
+
     // Step 4: Determine date range for fetching
     var latestDate = await repository.GetLatestDataDateAsync(ticker);
-    var startDate = latestDate?.AddDays(1) ?? new DateTime(2021, 12, 10); // Security launched on Dec 10, 2021
+    var startDate = latestDate?.AddDays(1) ?? new DateTime(2021, 12, 10);
     var endDate = DateTime.Today;
 
     if (latestDate.HasValue)
     {
-        Console.WriteLine($"Latest data in database: {latestDate:yyyy-MM-dd}");
+        AnsiConsole.MarkupLine($"[dim]Latest data in database: {latestDate:yyyy-MM-dd}[/]");
 
         if (startDate > endDate)
         {
-            Console.WriteLine("Database is up to date. No new data to fetch.\n");
+            AnsiConsole.MarkupLine("[green]✓[/] Database is up to date\n");
 
-            // Display summary of existing data
             var existingSummary = await repository.GetDataSummaryAsync(ticker);
             DisplayDataSummary(existingSummary);
 
-            // Offer export option
             await HandleExportAsync(repository, exportService, ticker);
             return;
         }
 
-        Console.WriteLine($"Fetching new data from {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}...\n");
+        AnsiConsole.MarkupLine($"[yellow]→[/] Fetching new data from [cyan]{startDate:yyyy-MM-dd}[/] to [cyan]{endDate:yyyy-MM-dd}[/]\n");
     }
     else
     {
-        Console.WriteLine("No existing data found. Fetching all historical data...");
-        Console.WriteLine($"Fetching historical data from {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}...\n");
+        AnsiConsole.MarkupLine("[yellow]→[/] No existing data found. Fetching all historical data");
+        AnsiConsole.MarkupLine($"[dim]Date range: {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}[/]\n");
     }
 
     // Step 5: Fetch data from Yahoo Finance
-    Console.WriteLine($"Connecting to Yahoo Finance API...");
     var recordsBefore = await context.HistoricalPrices.CountAsync(p => p.Ticker == ticker);
+    IReadOnlyList<HistoricalDataPoint> historicalData = [];
 
-    var historicalData = await yahooService.GetHistoricalDataAsync(ticker, startDate, endDate);
-    Console.WriteLine($"Retrieved {historicalData.Count} records from Yahoo Finance");
+    await AnsiConsole.Status()
+        .StartAsync("Fetching data from Yahoo Finance...", async ctx =>
+        {
+            ctx.Spinner(Spinner.Known.BouncingBall);
+            ctx.SpinnerStyle(Style.Parse("cyan"));
+
+            historicalData = await yahooService.GetHistoricalDataAsync(ticker, startDate, endDate);
+
+            ctx.Status($"[green]Retrieved {historicalData.Count} records[/]");
+            await Task.Delay(500);
+        });
 
     if (historicalData.Count == 0)
     {
-        Console.WriteLine("No new data available.\n");
+        AnsiConsole.MarkupLine("[yellow]No new data available[/]\n");
         return;
     }
 
+    AnsiConsole.MarkupLine($"[green]✓[/] Retrieved [cyan]{historicalData.Count}[/] records from Yahoo Finance\n");
+
     // Step 6: Save to database
-    Console.WriteLine("Saving to database...");
-    await repository.SaveHistoricalDataAsync(ticker, isin, historicalData);
+    await AnsiConsole.Status()
+        .StartAsync("Saving to database...", async ctx =>
+        {
+            ctx.Spinner(Spinner.Known.Dots);
+            ctx.SpinnerStyle(Style.Parse("green"));
+
+            await repository.SaveHistoricalDataAsync(ticker, isin, historicalData);
+
+            ctx.Status("[green]Data saved successfully[/]");
+            await Task.Delay(300);
+        });
 
     var recordsAfter = await context.HistoricalPrices.CountAsync(p => p.Ticker == ticker);
     var newRecordsAdded = recordsAfter - recordsBefore;
 
-    Console.WriteLine($"Successfully saved {newRecordsAdded} new records to database\n");
+    AnsiConsole.MarkupLine($"[green]✓[/] Saved [cyan]{newRecordsAdded}[/] new records to database\n");
 
     // Step 7: Display data summary
     var summary = await repository.GetDataSummaryAsync(ticker);
@@ -129,74 +185,114 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"\nERROR: {ex.Message}");
-    if (ex.InnerException != null)
+    var errorPanel = new Panel(
+        $"[red]{ex.Message.EscapeMarkup()}[/]\n\n" +
+        (ex.InnerException != null ? $"[dim]Details: {ex.InnerException.Message.EscapeMarkup()}[/]" : ""))
     {
-        Console.WriteLine($"Details: {ex.InnerException.Message}");
-    }
+        Header = new PanelHeader("[red bold]Error[/]"),
+        Border = BoxBorder.Rounded,
+        BorderStyle = Style.Parse("red")
+    };
+
+    AnsiConsole.Write(errorPanel);
     Environment.Exit(1);
 }
 
 static void DisplayDataSummary(DataSummary summary)
 {
-    Console.WriteLine("=== Data Summary ===");
-    Console.WriteLine($"Ticker:        {summary.Ticker}{(summary.ISIN != null ? $" ({summary.ISIN})" : "")}");
-    Console.WriteLine($"Total Records: {summary.TotalRecords:N0}");
+    AnsiConsole.Write(new Rule("[yellow]Data Summary[/]").LeftJustified());
+    AnsiConsole.WriteLine();
+
+    var table = new Table()
+        .Border(TableBorder.Rounded)
+        .BorderColor(Color.Grey)
+        .AddColumn(new TableColumn("[yellow]Property[/]").LeftAligned())
+        .AddColumn(new TableColumn("[cyan]Value[/]").RightAligned());
+
+    table.AddRow("Ticker", $"[cyan]{summary.Ticker}[/]");
+
+    if (summary.ISIN != null)
+    {
+        table.AddRow("ISIN", $"[dim]{summary.ISIN}[/]");
+    }
+
+    table.AddRow("Total Records", $"[cyan]{summary.TotalRecords:N0}[/]");
 
     if (summary.NewRecords > 0)
     {
-        Console.WriteLine($"New Records:   {summary.NewRecords:N0}");
+        table.AddRow("New Records", $"[green]{summary.NewRecords:N0}[/]");
     }
 
-    if (summary.OldestDate.HasValue && summary.LatestDate.HasValue)
+    if (summary is { OldestDate: not null, LatestDate: not null })
     {
-        Console.WriteLine($"Date Range:    {summary.OldestDate:yyyy-MM-dd} to {summary.LatestDate:yyyy-MM-dd}");
+        table.AddRow("Date Range", $"[dim]{summary.OldestDate:yyyy-MM-dd}[/] → [cyan]{summary.LatestDate:yyyy-MM-dd}[/]");
     }
 
-    if (summary.MinPrice.HasValue && summary.MaxPrice.HasValue)
+    if (summary is { MinPrice: not null, MaxPrice: not null })
     {
-        Console.WriteLine($"Price Range:   ${summary.MinPrice:F2} - ${summary.MaxPrice:F2}");
+        table.AddRow("Price Range", $"[dim]${summary.MinPrice:F2}[/] → [cyan]${summary.MaxPrice:F2}[/]");
     }
 
     if (summary.LatestClose.HasValue)
     {
-        Console.WriteLine($"Latest Close:  ${summary.LatestClose:F2}");
+        table.AddRow("Latest Close", $"[green bold]${summary.LatestClose:F2}[/]");
     }
 
-    Console.WriteLine();
+    AnsiConsole.Write(table);
+    AnsiConsole.WriteLine();
 }
 
 static async Task HandleExportAsync(IDataRepository repository, IExportService exportService, string ticker)
 {
-    Console.Write("Export data? (CSV/JSON/Both/Skip) [Skip]: ");
-    var exportChoice = Console.ReadLine()?.Trim().ToUpperInvariant() ?? "SKIP";
+    string exportChoice;
 
-    if (exportChoice is "SKIP" or "S" or "")
+    if (!AnsiConsole.Profile.Capabilities.Interactive)
     {
-        Console.WriteLine("Export skipped.");
+        // Non-interactive mode: default to Skip
+        exportChoice = "Skip";
+        AnsiConsole.MarkupLine("[dim]Non-interactive mode: Export skipped[/]");
+    }
+    else
+    {
+        exportChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Export data?[/]")
+                .PageSize(10)
+                .AddChoices("Skip", "CSV", "JSON", "Both (CSV + JSON)"));
+    }
+
+    if (exportChoice == "Skip")
+    {
         return;
     }
 
     var data = await repository.GetHistoricalDataAsync(ticker);
     var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-    switch (exportChoice)
-    {
-        case "CSV" or "C":
-            await exportService.ExportToCsvAsync(data, $"trading_{ticker}_{timestamp}.csv");
-            break;
+    await AnsiConsole.Status()
+        .StartAsync("Exporting data...", async ctx =>
+        {
+            ctx.Spinner(Spinner.Known.Star);
+            ctx.SpinnerStyle(Style.Parse("yellow"));
 
-        case "JSON" or "J":
-            await exportService.ExportToJsonAsync(data, $"trading_{ticker}_{timestamp}.json");
-            break;
+            switch (exportChoice)
+            {
+                case "CSV":
+                    await exportService.ExportToCsvAsync(data, $"trading_{ticker}_{timestamp}.csv");
+                    break;
 
-        case "BOTH" or "B":
-            await exportService.ExportToCsvAsync(data, $"trading_{ticker}_{timestamp}.csv");
-            await exportService.ExportToJsonAsync(data, $"trading_{ticker}_{timestamp}.json");
-            break;
+                case "JSON":
+                    await exportService.ExportToJsonAsync(data, $"trading_{ticker}_{timestamp}.json");
+                    break;
 
-        default:
-            Console.WriteLine("Invalid choice. Export skipped.");
-            break;
-    }
+                case "Both (CSV + JSON)":
+                    await exportService.ExportToCsvAsync(data, $"trading_{ticker}_{timestamp}.csv");
+                    await exportService.ExportToJsonAsync(data, $"trading_{ticker}_{timestamp}.json");
+                    break;
+            }
+
+            await Task.Delay(300);
+        });
+
+    AnsiConsole.MarkupLine("[green]✓[/] Export completed successfully");
 }

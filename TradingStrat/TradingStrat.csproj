@@ -14,6 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="YahooQuotesApi" Version="7.0.5" />
   </ItemGroup>
 

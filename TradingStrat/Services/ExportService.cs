@@ -15,8 +15,6 @@ public class ExportService : IExportService
             await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             await csv.WriteRecordsAsync(data);
-
-            Console.WriteLine($"CSV export complete: {filePath}");
         }
         catch (Exception ex)
         {
@@ -36,8 +34,6 @@ public class ExportService : IExportService
 
             var json = JsonSerializer.Serialize(data, options);
             await File.WriteAllTextAsync(filePath, json);
-
-            Console.WriteLine($"JSON export complete: {filePath}");
         }
         catch (Exception ex)
         {
