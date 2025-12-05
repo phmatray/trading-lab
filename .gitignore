@@ -1,0 +1,39 @@
+# Build results
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+trading.db*
+
+# Export files
+trading_*.csv
+trading_*.json
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# User-specific files
+*.rsuser
+
+# Test results
+[Tt]est[Rr]esult*/
+
+# Logs
+*.log
