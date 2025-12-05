@@ -78,14 +78,10 @@ public static class ProgramBacktest
             var initialCapitalInput = AnsiConsole.Ask<decimal>("[yellow]Initial capital:[/]", 10_000m);
 
             var latestDate = await repository.GetLatestDataDateAsync(ticker);
-            var oldestDate = await context.HistoricalPrices
-                .Where(p => p.Ticker == ticker)
-                .MinAsync(p => (DateTime?)p.DateTime);
-
-            var startDate = oldestDate ?? new DateTime(2021, 12, 10);
             var endDate = latestDate ?? DateTime.Today;
+            var startDate = endDate.AddYears(-2);
 
-            AnsiConsole.MarkupLine($"\n[yellow]Date range:[/] [cyan]{startDate:yyyy-MM-dd}[/] to [cyan]{endDate:yyyy-MM-dd}[/]\n");
+            AnsiConsole.MarkupLine($"\n[yellow]Date range (last 2 years):[/] [cyan]{startDate:yyyy-MM-dd}[/] to [cyan]{endDate:yyyy-MM-dd}[/]\n");
 
             var config = new BacktestBuilder()
                 .ForTicker(ticker)
