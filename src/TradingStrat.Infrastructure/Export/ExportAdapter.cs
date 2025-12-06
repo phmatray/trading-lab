@@ -32,7 +32,7 @@ public class ExportAdapter : IExportPort
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
-            var json = JsonSerializer.Serialize(data, options);
+            string json = JsonSerializer.Serialize(data, options);
             await File.WriteAllTextAsync(filePath, json);
         }
         catch (Exception ex)

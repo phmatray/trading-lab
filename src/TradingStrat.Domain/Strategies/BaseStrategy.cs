@@ -41,7 +41,9 @@ public abstract class BaseStrategy(IIndicatorCalculator indicatorCalculator) : I
     protected int CalculateQuantity(decimal cash, decimal price, int currentPosition)
     {
         if (currentPosition > 0)
+        {
             return 0;
+        }
 
         return (int)(cash / price);
     }

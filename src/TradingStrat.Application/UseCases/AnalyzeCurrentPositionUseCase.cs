@@ -94,10 +94,10 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         progress?.Report("Generating prediction...");
 
         // Step 5: Generate prediction for next trading day
-        var currentIndex = completeData.Count - 1;
+        int currentIndex = completeData.Count - 1;
         var currentFeatures = featureEngine.BuildFeaturesForIndex(currentIndex);
 
-        var predictedReturn = _mlModelPort.Predict(model, currentFeatures);
+        float predictedReturn = _mlModelPort.Predict(model, currentFeatures);
 
         // Step 6: Build result object
         var latestBar = completeData[currentIndex];
@@ -148,7 +148,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
 
             var freshDataList = freshData.ToList();
             var latestFreshDate = freshDataList.Max(h => h.DateTime);
-            var daysSinceLatest = (today - latestFreshDate).Days;
+            int daysSinceLatest = (today - latestFreshDate).Days;
 
             if (daysSinceLatest > 3)
             {
@@ -185,8 +185,8 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
 
     private TradeSignal DetermineSignal(float predictedReturn, PredictionThresholds thresholds, decimal currentPrice)
     {
-        var returnDecimal = (decimal)predictedReturn;
-        var returnPercent = predictedReturn * 100;
+        decimal returnDecimal = (decimal)predictedReturn;
+        float returnPercent = predictedReturn * 100;
 
         if (returnDecimal >= thresholds.BuyThreshold)
         {

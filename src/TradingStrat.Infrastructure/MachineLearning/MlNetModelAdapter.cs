@@ -23,7 +23,7 @@ public class MlNetModelAdapter : IMLModelPort
             _logger.LogDebug("Starting ML model training with config: Leaves={Leaves}, MinExamples={MinExamples}, LearningRate={LearningRate}, Trees={Trees}",
                 config.NumberOfLeaves, config.MinimumExampleCountPerLeaf, config.LearningRate, config.NumberOfTrees);
 
-            var rowCount = (int)(trainingData.GetRowCount() ?? 0);
+            int rowCount = (int)(trainingData.GetRowCount() ?? 0);
             _logger.LogDebug("Training data contains {RowCount} rows", rowCount);
 
             _logger.LogDebug("Training FastTree regression model...");

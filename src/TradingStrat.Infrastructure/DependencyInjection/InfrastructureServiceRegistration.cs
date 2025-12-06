@@ -16,7 +16,7 @@ public static class InfrastructureServiceRegistration
         IConfiguration configuration)
     {
         // Database context
-        var connectionString = configuration.GetSection("Trading:Database:ConnectionString").Value
+        string connectionString = configuration.GetSection("Trading:Database:ConnectionString").Value
             ?? "Data Source=trading.db";
 
         services.AddDbContext<TradingContext>(options =>

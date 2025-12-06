@@ -80,14 +80,14 @@ public static class AnalysisPresenter
         AnsiConsole.Write(new Rule("[yellow]ML Prediction (Next Trading Day)[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var signalColor = result.PredictedSignal switch
+        string signalColor = result.PredictedSignal switch
         {
             SignalType.Buy => "green",
             SignalType.Sell => "red",
             _ => "yellow"
         };
 
-        var signalEmoji = result.PredictedSignal switch
+        string signalEmoji = result.PredictedSignal switch
         {
             SignalType.Buy => "📈",
             SignalType.Sell => "📉",
@@ -180,58 +180,92 @@ public static class AnalysisPresenter
     private static string FormatPriceChange(decimal change)
     {
         if (change > 0)
+        {
             return $"[green]+${change:F2}[/]";
+        }
         else if (change < 0)
+        {
             return $"[red]${change:F2}[/]";
+        }
         else
+        {
             return $"[dim]$0.00[/]";
+        }
     }
 
     private static string FormatPercentChange(decimal percent)
     {
         if (percent > 0)
+        {
             return $"[green]+{percent:F2}%[/]";
+        }
         else if (percent < 0)
+        {
             return $"[red]{percent:F2}%[/]";
+        }
         else
+        {
             return $"[dim]0.00%[/]";
+        }
     }
 
     private static string FormatPredictedReturn(float returnValue)
     {
-        var percent = returnValue * 100;
+        float percent = returnValue * 100;
         if (percent > 0)
+        {
             return $"[green bold]+{percent:F2}%[/]";
+        }
         else if (percent < 0)
+        {
             return $"[red bold]{percent:F2}%[/]";
+        }
         else
+        {
             return $"[yellow]0.00%[/]";
+        }
     }
 
     private static string CalculateConfidence(float returnValue)
     {
-        var absReturn = Math.Abs(returnValue);
+        float absReturn = Math.Abs(returnValue);
 
         if (absReturn >= 0.02f)  // 2%+
+        {
             return "[green bold]HIGH[/]";
+        }
         else if (absReturn >= 0.01f)  // 1-2%
+        {
             return "[yellow]MEDIUM[/]";
+        }
         else if (absReturn >= 0.005f)  // 0.5-1%
+        {
             return "[yellow]LOW[/]";
+        }
         else
+        {
             return "[red]VERY LOW[/]";
+        }
     }
 
     private static string FormatFloat(float value, bool colorCode = false)
     {
         if (!colorCode)
+        {
             return $"[cyan]{value:F4}[/]";
+        }
 
         if (value > 0)
+        {
             return $"[green]+{value:F4}[/]";
+        }
         else if (value < 0)
+        {
             return $"[red]{value:F4}[/]";
+        }
         else
+        {
             return $"[dim]{value:F4}[/]";
+        }
     }
 }

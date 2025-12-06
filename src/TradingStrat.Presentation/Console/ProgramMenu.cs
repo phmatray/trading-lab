@@ -43,7 +43,7 @@ public class ProgramMenu
 
         while (true)
         {
-            var choice = AnsiConsole.Prompt(
+            string choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[yellow]Main Menu:[/]")
                     .PageSize(10)
@@ -92,8 +92,8 @@ public class ProgramMenu
     {
         try
         {
-            var ticker = _config.DefaultTicker;
-            var isin = _config.DefaultIsin;
+            string ticker = _config.DefaultTicker;
+            string isin = _config.DefaultIsin;
 
             var command = new FetchDataCommand(ticker, isin);
 
@@ -130,9 +130,9 @@ public class ProgramMenu
     {
         try
         {
-            var ticker = _config.DefaultTicker;
+            string ticker = _config.DefaultTicker;
 
-            var strategy = AnsiConsole.Prompt(
+            string strategy = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[yellow]Select trading strategy:[/]")
                     .PageSize(10)
@@ -146,7 +146,7 @@ public class ProgramMenu
 
             var (strategyType, strategyParams) = ParseStrategyChoice(strategy);
 
-            var initialCapital = AnsiConsole.Ask(
+            decimal initialCapital = AnsiConsole.Ask(
                 "[yellow]Initial capital:[/]",
                 _config.Backtest.InitialCapital);
 
@@ -197,9 +197,9 @@ public class ProgramMenu
     {
         try
         {
-            var ticker = _config.DefaultTicker;
+            string ticker = _config.DefaultTicker;
 
-            var thresholdChoice = AnsiConsole.Prompt(
+            string thresholdChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[yellow]Select prediction thresholds:[/]")
                     .PageSize(10)
@@ -306,10 +306,10 @@ public class ProgramMenu
 
     private Domain.ValueObjects.PredictionThresholds GetCustomThresholds()
     {
-        var buyThreshold = AnsiConsole.Ask(
+        decimal buyThreshold = AnsiConsole.Ask(
             "[yellow]Buy threshold (%):[/]", 1.0m) / 100m;
 
-        var sellThreshold = AnsiConsole.Ask(
+        decimal sellThreshold = AnsiConsole.Ask(
             "[yellow]Sell threshold (%):[/]", -1.0m) / 100m;
 
         return new Domain.ValueObjects.PredictionThresholds(buyThreshold, sellThreshold);
@@ -322,7 +322,7 @@ public class ProgramMenu
             return;
         }
 
-        var exportChoice = AnsiConsole.Prompt(
+        string exportChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[yellow]Export data?[/]")
                 .PageSize(10)
@@ -334,7 +334,7 @@ public class ProgramMenu
         }
 
         var data = await _historicalDataPort.GetHistoricalDataAsync(ticker);
-        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
         await AnsiConsole.Status()
             .StartAsync("Exporting data...", async ctx =>
@@ -371,7 +371,7 @@ public class ProgramMenu
             return;
         }
 
-        var exportChoice = AnsiConsole.Prompt(
+        string exportChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("\n[yellow]Export results?[/]")
                 .PageSize(10)
@@ -379,8 +379,8 @@ public class ProgramMenu
 
         if (exportChoice == "JSON")
         {
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var filename = $"backtest_{ticker}_{strategyType.Replace(" ", "_")}_{timestamp}.json";
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            string filename = $"backtest_{ticker}_{strategyType.Replace(" ", "_")}_{timestamp}.json";
 
             await _exportPort.ExportToJsonAsync(result, filename);
             AnsiConsole.MarkupLine($"\n[green]✓[/] Exported to {filename}");
@@ -394,7 +394,7 @@ public class ProgramMenu
             return;
         }
 
-        var exportChoice = AnsiConsole.Prompt(
+        string exportChoice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("\n[yellow]Export analysis?[/]")
                 .PageSize(10)
@@ -402,8 +402,8 @@ public class ProgramMenu
 
         if (exportChoice == "JSON")
         {
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var filename = $"live_analysis_{ticker}_{timestamp}.json";
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            string filename = $"live_analysis_{ticker}_{timestamp}.json";
 
             await _exportPort.ExportToJsonAsync(result, filename);
             AnsiConsole.MarkupLine($"\n[green]✓[/] Exported to {filename}");

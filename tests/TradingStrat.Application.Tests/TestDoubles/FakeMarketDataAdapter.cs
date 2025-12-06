@@ -65,16 +65,16 @@ public class FakeMarketDataAdapter : IMarketDataPort
     {
         var data = new List<HistoricalPrice>();
         var baseDate = DateTime.Today.AddDays(-100);
-        var basePrice = 100m;
+        decimal basePrice = 100m;
 
         // Generate 100 days of fake data with slight upward trend
         for (int i = 0; i < 100; i++)
         {
             var date = baseDate.AddDays(i);
-            var open = basePrice + i * 0.5m;
-            var close = open + (decimal)(new Random(i).NextDouble() - 0.5) * 2m;
-            var high = Math.Max(open, close) + 1m;
-            var low = Math.Min(open, close) - 1m;
+            decimal open = basePrice + i * 0.5m;
+            decimal close = open + (decimal)(new Random(i).NextDouble() - 0.5) * 2m;
+            decimal high = Math.Max(open, close) + 1m;
+            decimal low = Math.Min(open, close) - 1m;
 
             data.Add(new HistoricalPrice
             {

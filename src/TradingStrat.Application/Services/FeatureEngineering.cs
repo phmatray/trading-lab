@@ -80,7 +80,9 @@ public class FeatureEngineering
     public MarketFeatures BuildFeaturesForIndex(int index)
     {
         if (index < 1)
+        {
             return CreateDefaultFeatures();
+        }
 
         return new MarketFeatures
         {
@@ -135,109 +137,176 @@ public class FeatureEngineering
     // Price-based features
     private float CalculateSafeReturn(int index)
     {
-        if (index < 1 || _closePrices[index - 1] == 0) return 0;
+        if (index < 1 || _closePrices[index - 1] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - _closePrices[index - 1]) / _closePrices[index - 1]));
     }
 
     private float CalculateSafeLogReturn(int index)
     {
-        if (index < 1 || _closePrices[index - 1] == 0 || _closePrices[index] == 0) return 0;
+        if (index < 1 || _closePrices[index - 1] == 0 || _closePrices[index] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)Math.Log((double)(_closePrices[index] / _closePrices[index - 1])));
     }
 
     private float CalculateHighLowRange(int index)
     {
-        if (_closePrices[index] == 0 || _highPrices[index] == _lowPrices[index]) return 0;
+        if (_closePrices[index] == 0 || _highPrices[index] == _lowPrices[index])
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_highPrices[index] - _lowPrices[index]) / _closePrices[index]));
     }
 
     private float CalculateOpenCloseRange(int index)
     {
-        if (_openPrices[index] == 0) return 0;
+        if (_openPrices[index] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - _openPrices[index]) / _openPrices[index]));
     }
 
     private float CalculatePricePosition(int index)
     {
-        var range = _highPrices[index] - _lowPrices[index];
-        if (range == 0) return 0.5f;
+        decimal range = _highPrices[index] - _lowPrices[index];
+        if (range == 0)
+        {
+            return 0.5f;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - _lowPrices[index]) / range));
     }
 
     // Moving average features
     private float CalculatePriceToSMA20(int index)
     {
-        if (_sma20[index] == 0) return 0;
+        if (_sma20[index] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - _sma20[index]) / _sma20[index]));
     }
 
     // Momentum features
     private float CalculateMomentum(int index, int period)
     {
-        if (index < period) return 0;
+        if (index < period)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)(_closePrices[index] - _closePrices[index - period]));
     }
 
     private float CalculateROC(int index, int period)
     {
-        if (index < period || _closePrices[index - period] == 0) return 0;
+        if (index < period || _closePrices[index - period] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - _closePrices[index - period]) / _closePrices[index - period]));
     }
 
     private float CalculateStochRSI(int index)
     {
-        if (index < 14) return 50;
+        if (index < 14)
+        {
+            return 50;
+        }
 
-        var period = 14;
-        var minRSI = decimal.MaxValue;
-        var maxRSI = decimal.MinValue;
+        int period = 14;
+        decimal minRSI = decimal.MaxValue;
+        decimal maxRSI = decimal.MinValue;
 
         for (int i = Math.Max(0, index - period + 1); i <= index; i++)
         {
-            if (_rsi14[i] < minRSI) minRSI = _rsi14[i];
-            if (_rsi14[i] > maxRSI) maxRSI = _rsi14[i];
+            if (_rsi14[i] < minRSI)
+            {
+                minRSI = _rsi14[i];
+            }
+
+            if (_rsi14[i] > maxRSI)
+            {
+                maxRSI = _rsi14[i];
+            }
         }
 
-        if (maxRSI == minRSI) return 50;
+        if (maxRSI == minRSI)
+        {
+            return 50;
+        }
+
         return ValidateFloat((float)(((_rsi14[index] - minRSI) / (maxRSI - minRSI)) * 100));
     }
 
     // Volatility features
     private float CalculateBollingerPosition(int index)
     {
-        if (index < 20 || _sma20[index] == 0 || _stdDev20[index] == 0) return 0.5f;
+        if (index < 20 || _sma20[index] == 0 || _stdDev20[index] == 0)
+        {
+            return 0.5f;
+        }
 
-        var upperBand = _sma20[index] + (2 * _stdDev20[index]);
-        var lowerBand = _sma20[index] - (2 * _stdDev20[index]);
-        var bandWidth = upperBand - lowerBand;
+        decimal upperBand = _sma20[index] + (2 * _stdDev20[index]);
+        decimal lowerBand = _sma20[index] - (2 * _stdDev20[index]);
+        decimal bandWidth = upperBand - lowerBand;
 
-        if (bandWidth == 0) return 0.5f;
+        if (bandWidth == 0)
+        {
+            return 0.5f;
+        }
+
         return ValidateFloat((float)((_closePrices[index] - lowerBand) / bandWidth));
     }
 
     // Volume features
     private float CalculateVolumeChange(int index)
     {
-        if (index < 1 || _volumes[index - 1] == 0) return 0;
+        if (index < 1 || _volumes[index - 1] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_volumes[index] - _volumes[index - 1]) / (double)_volumes[index - 1]));
     }
 
     private float CalculateVolumeRatio(int index)
     {
-        if (_volumeMA10[index] == 0) return 1;
+        if (_volumeMA10[index] == 0)
+        {
+            return 1;
+        }
+
         return ValidateFloat((float)(_volumes[index] / (double)_volumeMA10[index]));
     }
 
     private float CalculatePriceVolumeCorrelation(int index, int period)
     {
-        if (index < period) return 0;
+        if (index < period)
+        {
+            return 0;
+        }
 
         var priceChanges = new List<double>();
         var volumeChanges = new List<double>();
 
         for (int i = index - period + 1; i <= index; i++)
         {
-            if (i < 1) continue;
+            if (i < 1)
+            {
+                continue;
+            }
 
             if (_closePrices[i - 1] != 0)
             {
@@ -250,7 +319,10 @@ public class FeatureEngineering
             }
         }
 
-        if (priceChanges.Count < 2) return 0;
+        if (priceChanges.Count < 2)
+        {
+            return 0;
+        }
 
         return ValidateFloat(CalculateCorrelation(priceChanges, volumeChanges));
     }
@@ -258,14 +330,18 @@ public class FeatureEngineering
     // Target variable
     private float CalculateNextDayReturn(int index)
     {
-        if (index >= _closePrices.Length - 1 || _closePrices[index] == 0) return 0;
+        if (index >= _closePrices.Length - 1 || _closePrices[index] == 0)
+        {
+            return 0;
+        }
+
         return ValidateFloat((float)((_closePrices[index + 1] - _closePrices[index]) / _closePrices[index]));
     }
 
     // Helper methods
     private decimal[] CalculateVolumeSMA(int period)
     {
-        var volumeMA = new decimal[_volumes.Length];
+        decimal[] volumeMA = new decimal[_volumes.Length];
 
         for (int i = 0; i < _volumes.Length; i++)
         {
@@ -288,19 +364,26 @@ public class FeatureEngineering
 
     private float CalculateCorrelation(List<double> x, List<double> y)
     {
-        if (x.Count != y.Count || x.Count < 2) return 0;
+        if (x.Count != y.Count || x.Count < 2)
+        {
+            return 0;
+        }
 
-        var n = x.Count;
-        var sumX = x.Sum();
-        var sumY = y.Sum();
-        var sumXY = x.Zip(y, (a, b) => a * b).Sum();
-        var sumX2 = x.Sum(a => a * a);
-        var sumY2 = y.Sum(b => b * b);
+        int n = x.Count;
+        double sumX = x.Sum();
+        double sumY = y.Sum();
+        double sumXY = x.Zip(y, (a, b) => a * b).Sum();
+        double sumX2 = x.Sum(a => a * a);
+        double sumY2 = y.Sum(b => b * b);
 
-        var numerator = (n * sumXY) - (sumX * sumY);
-        var denominator = Math.Sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
+        double numerator = (n * sumXY) - (sumX * sumY);
+        double denominator = Math.Sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
 
-        if (denominator == 0) return 0;
+        if (denominator == 0)
+        {
+            return 0;
+        }
+
         return (float)(numerator / denominator);
     }
 
@@ -311,7 +394,7 @@ public class FeatureEngineering
 
     private decimal[] CalculateReturnStdDev(int period)
     {
-        var stdDev = new decimal[_closePrices.Length];
+        decimal[] stdDev = new decimal[_closePrices.Length];
 
         for (int i = 0; i < _closePrices.Length; i++)
         {
@@ -352,8 +435,8 @@ public class FeatureEngineering
 
     private static decimal CalculateStandardDeviation(List<decimal> values)
     {
-        var mean = values.Average();
-        var variance = values.Sum(r => (r - mean) * (r - mean)) / (values.Count - 1);
+        decimal mean = values.Average();
+        decimal variance = values.Sum(r => (r - mean) * (r - mean)) / (values.Count - 1);
         return (decimal)Math.Sqrt((double)variance);
     }
 }

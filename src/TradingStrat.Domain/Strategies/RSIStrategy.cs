@@ -25,7 +25,9 @@ public class RSIStrategy : BaseStrategy
         : base(indicatorCalculator)
     {
         if (oversoldThreshold >= overboughtThreshold)
+        {
             throw new ArgumentException("Oversold threshold must be less than overbought threshold");
+        }
 
         _period = period;
         _oversoldThreshold = oversoldThreshold;
@@ -45,13 +47,13 @@ public class RSIStrategy : BaseStrategy
             return new TradeSignal(SignalType.Hold, 0, 0, "Insufficient data for RSI");
         }
 
-        var currentPrice = ClosePrices[currentIndex];
-        var rsiCurrent = _rsi[currentIndex];
-        var rsiPrevious = _rsi[currentIndex - 1];
+        decimal currentPrice = ClosePrices[currentIndex];
+        decimal rsiCurrent = _rsi[currentIndex];
+        decimal rsiPrevious = _rsi[currentIndex - 1];
 
         if (rsiPrevious <= _oversoldThreshold && rsiCurrent > _oversoldThreshold && currentPosition == 0)
         {
-            var quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
+            int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
             {
                 return new TradeSignal(

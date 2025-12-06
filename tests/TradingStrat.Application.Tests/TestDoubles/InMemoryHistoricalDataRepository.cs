@@ -81,13 +81,13 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         }
 
         var data = _data[ticker];
-        var isin = data.FirstOrDefault()?.ISIN;
-        var totalRecords = data.Count;
+        string? isin = data.FirstOrDefault()?.ISIN;
+        int totalRecords = data.Count;
         var oldestDate = data.Min(p => p.DateTime);
         var latestDate = data.Max(p => p.DateTime);
-        var minPrice = data.Where(p => p.Low.HasValue).Min(p => p.Low);
-        var maxPrice = data.Where(p => p.High.HasValue).Max(p => p.High);
-        var latestClose = data.OrderByDescending(p => p.DateTime).FirstOrDefault()?.Close;
+        decimal? minPrice = data.Where(p => p.Low.HasValue).Min(p => p.Low);
+        decimal? maxPrice = data.Where(p => p.High.HasValue).Max(p => p.High);
+        decimal? latestClose = data.OrderByDescending(p => p.DateTime).FirstOrDefault()?.Close;
 
         return Task.FromResult(new DataSummaryResult(
             ticker,

@@ -14,7 +14,7 @@ public class PortfolioState
 
     public void ExecuteBuy(int quantity, decimal price, decimal commission)
     {
-        var totalCost = (quantity * price) + commission;
+        decimal totalCost = (quantity * price) + commission;
         Cash -= totalCost;
 
         if (Position == 0)
@@ -32,7 +32,7 @@ public class PortfolioState
 
     public void ExecuteSell(int quantity, decimal price, decimal commission)
     {
-        var totalProceeds = (quantity * price) - commission;
+        decimal totalProceeds = (quantity * price) - commission;
         Cash += totalProceeds;
         Position -= quantity;
         TotalCommissionPaid += commission;

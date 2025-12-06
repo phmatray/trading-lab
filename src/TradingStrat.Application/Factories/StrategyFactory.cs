@@ -34,34 +34,34 @@ public class StrategyFactory : IStrategyFactory
 
     private MovingAverageCrossoverStrategy CreateMovingAverageCrossoverStrategy(Dictionary<string, object> parameters)
     {
-        var fastPeriod = GetParameter(parameters, "FastPeriod", 20);
-        var slowPeriod = GetParameter(parameters, "SlowPeriod", 50);
+        int fastPeriod = GetParameter(parameters, "FastPeriod", 20);
+        int slowPeriod = GetParameter(parameters, "SlowPeriod", 50);
 
         return new MovingAverageCrossoverStrategy(_indicatorCalculator, fastPeriod, slowPeriod);
     }
 
     private RSIStrategy CreateRSIStrategy(Dictionary<string, object> parameters)
     {
-        var period = GetParameter(parameters, "Period", 14);
-        var oversoldThreshold = GetParameter<decimal>(parameters, "OversoldThreshold", 30);
-        var overboughtThreshold = GetParameter<decimal>(parameters, "OverboughtThreshold", 70);
+        int period = GetParameter(parameters, "Period", 14);
+        decimal oversoldThreshold = GetParameter<decimal>(parameters, "OversoldThreshold", 30);
+        decimal overboughtThreshold = GetParameter<decimal>(parameters, "OverboughtThreshold", 70);
 
         return new RSIStrategy(_indicatorCalculator, period, oversoldThreshold, overboughtThreshold);
     }
 
     private MACDStrategy CreateMACDStrategy(Dictionary<string, object> parameters)
     {
-        var fastPeriod = GetParameter(parameters, "FastPeriod", 12);
-        var slowPeriod = GetParameter(parameters, "SlowPeriod", 26);
-        var signalPeriod = GetParameter(parameters, "SignalPeriod", 9);
+        int fastPeriod = GetParameter(parameters, "FastPeriod", 12);
+        int slowPeriod = GetParameter(parameters, "SlowPeriod", 26);
+        int signalPeriod = GetParameter(parameters, "SignalPeriod", 9);
 
         return new MACDStrategy(_indicatorCalculator, fastPeriod, slowPeriod, signalPeriod);
     }
 
     private MachineLearningStrategy CreateMachineLearningStrategy(Dictionary<string, object> parameters)
     {
-        var buyThreshold = GetParameter(parameters, "BuyThreshold", 0.01m);
-        var sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
+        decimal buyThreshold = GetParameter(parameters, "BuyThreshold", 0.01m);
+        decimal sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
         var thresholds = new PredictionThresholds(buyThreshold, sellThreshold);
 
         var logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();
@@ -70,8 +70,10 @@ public class StrategyFactory : IStrategyFactory
 
     private T GetParameter<T>(Dictionary<string, object> parameters, string key, T defaultValue)
     {
-        if (!parameters.TryGetValue(key, out var value))
+        if (!parameters.TryGetValue(key, out object? value))
+        {
             return defaultValue;
+        }
 
         try
         {

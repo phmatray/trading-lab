@@ -11,7 +11,6 @@ public class MACDStrategy : BaseStrategy
     private readonly int _signalPeriod;
     private decimal[] _macd = null!;
     private decimal[] _signal = null!;
-    private decimal[] _histogram = null!;
 
     public override string Name => $"MACD ({_fastPeriod}/{_slowPeriod}/{_signalPeriod})";
 
@@ -35,26 +34,26 @@ public class MACDStrategy : BaseStrategy
     public override void Initialize(IReadOnlyList<HistoricalPrice> historicalData)
     {
         base.Initialize(historicalData);
-        (_macd, _signal, _histogram) = CalculateMACD(_fastPeriod, _slowPeriod, _signalPeriod);
+        (_macd, _signal, _) = CalculateMACD(_fastPeriod, _slowPeriod, _signalPeriod);
     }
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
     {
-        var requiredBars = _slowPeriod + _signalPeriod;
+        int requiredBars = _slowPeriod + _signalPeriod;
         if (currentIndex < requiredBars || _macd[currentIndex] == 0 || _signal[currentIndex] == 0)
         {
             return new TradeSignal(SignalType.Hold, 0, 0, "Insufficient data for MACD");
         }
 
-        var currentPrice = ClosePrices[currentIndex];
-        var macdCurrent = _macd[currentIndex];
-        var signalCurrent = _signal[currentIndex];
-        var macdPrevious = _macd[currentIndex - 1];
-        var signalPrevious = _signal[currentIndex - 1];
+        decimal currentPrice = ClosePrices[currentIndex];
+        decimal macdCurrent = _macd[currentIndex];
+        decimal signalCurrent = _signal[currentIndex];
+        decimal macdPrevious = _macd[currentIndex - 1];
+        decimal signalPrevious = _signal[currentIndex - 1];
 
         if (macdPrevious <= signalPrevious && macdCurrent > signalCurrent && currentPosition == 0)
         {
-            var quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
+            int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
             {
                 return new TradeSignal(

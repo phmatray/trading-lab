@@ -1,5 +1,5 @@
-using Shouldly;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 

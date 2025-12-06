@@ -26,7 +26,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
     {
         progress?.Report("Initializing data fetch...");
 
-        var ticker = await ResolveTicker(command.Ticker, command.Isin, progress);
+        string ticker = await ResolveTicker(command.Ticker, command.Isin, progress);
         var (startDate, endDate, isUpToDate) = await DetermineDateRange(ticker, command, progress);
 
         if (isUpToDate)
@@ -52,16 +52,20 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
     private async Task<string> ResolveTicker(string? ticker, string? isin, IProgress<string>? progress)
     {
         if (string.IsNullOrEmpty(isin))
+        {
             return ticker ?? throw new ArgumentException("Either ticker or ISIN must be provided");
+        }
 
         var possibleTickers = _tickerResolver.GetAllTickersForIsin(isin);
 
         if (possibleTickers == null || !possibleTickers.Any())
+        {
             throw new InvalidOperationException($"Could not resolve ISIN {isin} to Yahoo ticker");
+        }
 
         progress?.Report($"Found possible tickers: {string.Join(", ", possibleTickers)}");
 
-        var workingTicker = await FindWorkingTicker(possibleTickers, progress);
+        string? workingTicker = await FindWorkingTicker(possibleTickers, progress);
 
         if (workingTicker == null)
         {
@@ -75,7 +79,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
 
     private async Task<string?> FindWorkingTicker(IEnumerable<string> possibleTickers, IProgress<string>? progress)
     {
-        foreach (var candidateTicker in possibleTickers)
+        foreach (string candidateTicker in possibleTickers)
         {
             progress?.Report($"Testing {candidateTicker}...");
 
@@ -120,7 +124,9 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
             progress?.Report($"Latest data in database: {latestDate:yyyy-MM-dd}");
 
             if (startDate > endDate)
+            {
                 return (startDate, endDate, isUpToDate: true);
+            }
 
             progress?.Report($"Fetching new data from {startDate:yyyy-MM-dd} to {endDate:yyyy-MM-dd}");
         }
@@ -142,7 +148,9 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         var historicalData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, endDate);
 
         if (historicalData.Any())
+        {
             progress?.Report($"Retrieved {historicalData.Count} records from Yahoo Finance");
+        }
 
         return historicalData;
     }

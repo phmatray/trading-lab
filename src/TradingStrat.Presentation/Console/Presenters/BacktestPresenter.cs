@@ -124,8 +124,8 @@ public static class BacktestPresenter
             }
 
             var trade = tradesToDisplay[i];
-            var typeColor = trade.Type == TradeType.Buy ? "green" : "red";
-            var plText = trade.ProfitLoss.HasValue ? FormatProfitLoss(trade.ProfitLoss.Value) : "[dim]-[/]";
+            string typeColor = trade.Type == TradeType.Buy ? "green" : "red";
+            string plText = trade.ProfitLoss.HasValue ? FormatProfitLoss(trade.ProfitLoss.Value) : "[dim]-[/]";
 
             table.AddRow(
                 $"[dim]{tradeNumber}[/]",
@@ -151,15 +151,17 @@ public static class BacktestPresenter
     private static void DisplayEquityCurveSummary(List<EquityPoint> equityCurve)
     {
         if (equityCurve.Count == 0)
+        {
             return;
+        }
 
         AnsiConsole.Write(new Rule("[yellow]Equity Curve Summary[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var startEquity = equityCurve[0].Equity;
-        var endEquity = equityCurve[^1].Equity;
-        var maxEquity = equityCurve.Max(e => e.Equity);
-        var minEquity = equityCurve.Min(e => e.Equity);
+        decimal startEquity = equityCurve[0].Equity;
+        decimal endEquity = equityCurve[^1].Equity;
+        decimal maxEquity = equityCurve.Max(e => e.Equity);
+        decimal minEquity = equityCurve.Min(e => e.Equity);
 
         AnsiConsole.MarkupLine($"[yellow]Start:[/] {FormatCurrency(startEquity)}");
         AnsiConsole.MarkupLine($"[yellow]End:[/] {FormatCurrency(endEquity)}");
@@ -169,25 +171,31 @@ public static class BacktestPresenter
 
     private static string FormatCurrency(decimal value, bool isNegative = false)
     {
-        var color = isNegative ? "red" : "cyan";
+        string color = isNegative ? "red" : "cyan";
         return $"[{color}]${Math.Abs(value):N2}[/]";
     }
 
     private static string FormatProfitLoss(decimal value)
     {
         if (value > 0)
+        {
             return $"[green]+${value:N2}[/]";
+        }
         else if (value < 0)
+        {
             return $"[red]-${Math.Abs(value):N2}[/]";
+        }
         else
+        {
             return $"[dim]$0.00[/]";
+        }
     }
 
     private static string FormatPercentage(decimal value, bool isNegative = false)
     {
-        var color = value > 0 && !isNegative ? "green" :
+        string color = value > 0 && !isNegative ? "green" :
                     value < 0 || isNegative ? "red" : "dim";
-        var sign = value > 0 && !isNegative ? "+" : value < 0 || isNegative ? "-" : "";
+        string sign = value > 0 && !isNegative ? "+" : value < 0 || isNegative ? "-" : "";
         return $"[{color}]{sign}{Math.Abs(value):F2}%[/]";
     }
 }

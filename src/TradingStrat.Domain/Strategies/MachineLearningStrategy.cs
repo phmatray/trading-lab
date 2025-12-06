@@ -57,7 +57,7 @@ public class MachineLearningStrategy : BaseStrategy
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
     {
-        var currentPrice = ClosePrices[currentIndex];
+        decimal currentPrice = ClosePrices[currentIndex];
 
         // Need minimum training data
         if (currentIndex < _minTrainingBars)
@@ -76,7 +76,7 @@ public class MachineLearningStrategy : BaseStrategy
 
             // Predict for current bar (last feature in the array)
             var currentFeature = features[^1];
-            var predictedReturn = Predict(model, currentFeature);
+            float predictedReturn = Predict(model, currentFeature);
 
             _logger?.LogDebug("Prediction at index {Index}: {Return:F4}", currentIndex, predictedReturn);
 
@@ -191,11 +191,11 @@ public class MachineLearningStrategy : BaseStrategy
 
     private TradeSignal GenerateSignalFromPrediction(float predictedReturn, decimal currentPrice, decimal currentCash, int currentPosition)
     {
-        var returnDecimal = (decimal)predictedReturn;
+        decimal returnDecimal = (decimal)predictedReturn;
 
         if (returnDecimal >= _thresholds.BuyThreshold && currentPosition == 0)
         {
-            var quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
+            int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
             {
                 return new TradeSignal(
@@ -220,75 +220,125 @@ public class MachineLearningStrategy : BaseStrategy
     // Feature calculation helper methods
     private float CalculateDailyReturn(int index)
     {
-        if (index < 1 || ClosePrices[index - 1] == 0) return 0f;
+        if (index < 1 || ClosePrices[index - 1] == 0)
+        {
+            return 0f;
+        }
+
         return (float)((ClosePrices[index] - ClosePrices[index - 1]) / ClosePrices[index - 1]);
     }
 
     private float CalculateLogReturn(int index)
     {
-        if (index < 1 || ClosePrices[index - 1] == 0 || ClosePrices[index] == 0) return 0f;
+        if (index < 1 || ClosePrices[index - 1] == 0 || ClosePrices[index] == 0)
+        {
+            return 0f;
+        }
+
         return (float)Math.Log((double)(ClosePrices[index] / ClosePrices[index - 1]));
     }
 
     private float CalculateHighLowRange(int index)
     {
-        if (ClosePrices[index] == 0 || _highPrices[index] == _lowPrices[index]) return 0f;
+        if (ClosePrices[index] == 0 || _highPrices[index] == _lowPrices[index])
+        {
+            return 0f;
+        }
+
         return (float)((_highPrices[index] - _lowPrices[index]) / ClosePrices[index]);
     }
 
     private float CalculateOpenCloseRange(int index)
     {
-        if (_openPrices[index] == 0) return 0f;
+        if (_openPrices[index] == 0)
+        {
+            return 0f;
+        }
+
         return (float)((ClosePrices[index] - _openPrices[index]) / _openPrices[index]);
     }
 
     private float CalculatePricePosition(int index)
     {
-        var range = _highPrices[index] - _lowPrices[index];
-        if (range == 0) return 0.5f;
+        decimal range = _highPrices[index] - _lowPrices[index];
+        if (range == 0)
+        {
+            return 0.5f;
+        }
+
         return (float)((ClosePrices[index] - _lowPrices[index]) / range);
     }
 
     private float CalculatePriceToSMA20(int index)
     {
-        var sma20 = CalculateSMA(20);
-        if (sma20[index] == 0) return 0f;
+        decimal[] sma20 = CalculateSMA(20);
+        if (sma20[index] == 0)
+        {
+            return 0f;
+        }
+
         return (float)((ClosePrices[index] - sma20[index]) / sma20[index]);
     }
 
     private float CalculateMomentum(int index, int period)
     {
-        if (index < period) return 0f;
+        if (index < period)
+        {
+            return 0f;
+        }
+
         return (float)(ClosePrices[index] - ClosePrices[index - period]);
     }
 
     private float CalculateROC(int index, int period)
     {
-        if (index < period || ClosePrices[index - period] == 0) return 0f;
+        if (index < period || ClosePrices[index - period] == 0)
+        {
+            return 0f;
+        }
+
         return (float)((ClosePrices[index] - ClosePrices[index - period]) / ClosePrices[index - period]);
     }
 
     private float CalculateStochRSI(int index)
     {
-        if (index < 14) return 50f;
-        var rsi14 = CalculateRSI(14);
-        var period = 14;
-        var minRSI = decimal.MaxValue;
-        var maxRSI = decimal.MinValue;
+        if (index < 14)
+        {
+            return 50f;
+        }
+
+        decimal[] rsi14 = CalculateRSI(14);
+        int period = 14;
+        decimal minRSI = decimal.MaxValue;
+        decimal maxRSI = decimal.MinValue;
 
         for (int i = Math.Max(0, index - period + 1); i <= index; i++)
         {
-            if (rsi14[i] < minRSI) minRSI = rsi14[i];
-            if (rsi14[i] > maxRSI) maxRSI = rsi14[i];
+            if (rsi14[i] < minRSI)
+            {
+                minRSI = rsi14[i];
+            }
+
+            if (rsi14[i] > maxRSI)
+            {
+                maxRSI = rsi14[i];
+            }
         }
 
-        if (maxRSI == minRSI) return 50f;
+        if (maxRSI == minRSI)
+        {
+            return 50f;
+        }
+
         return (float)(((rsi14[index] - minRSI) / (maxRSI - minRSI)) * 100);
     }
 
     private float CalculateReturnStdDev(int index, int period)
     {
-        if (index < period) return 0f;
+        if (index < period)
+        {
+            return 0f;
+        }
 
         var returns = new List<decimal>();
         for (int j = index - period + 1; j <= index; j++)
@@ -299,38 +349,60 @@ public class MachineLearningStrategy : BaseStrategy
             }
         }
 
-        if (returns.Count < 2) return 0f;
+        if (returns.Count < 2)
+        {
+            return 0f;
+        }
 
-        var mean = returns.Average();
-        var variance = returns.Sum(r => (r - mean) * (r - mean)) / (returns.Count - 1);
+        decimal mean = returns.Average();
+        decimal variance = returns.Sum(r => (r - mean) * (r - mean)) / (returns.Count - 1);
         return (float)Math.Sqrt((double)variance);
     }
 
     private float CalculateBollingerPosition(int index)
     {
-        if (index < 20) return 0.5f;
-        var sma20 = CalculateSMA(20);
-        var stdDev20 = CalculateReturnStdDev(index, 20);
+        if (index < 20)
+        {
+            return 0.5f;
+        }
 
-        if (sma20[index] == 0 || stdDev20 == 0) return 0.5f;
+        decimal[] sma20 = CalculateSMA(20);
+        float stdDev20 = CalculateReturnStdDev(index, 20);
 
-        var upperBand = sma20[index] + (2 * (decimal)stdDev20);
-        var lowerBand = sma20[index] - (2 * (decimal)stdDev20);
-        var bandWidth = upperBand - lowerBand;
+        if (sma20[index] == 0 || stdDev20 == 0)
+        {
+            return 0.5f;
+        }
 
-        if (bandWidth == 0) return 0.5f;
+        decimal upperBand = sma20[index] + (2 * (decimal)stdDev20);
+        decimal lowerBand = sma20[index] - (2 * (decimal)stdDev20);
+        decimal bandWidth = upperBand - lowerBand;
+
+        if (bandWidth == 0)
+        {
+            return 0.5f;
+        }
+
         return (float)((ClosePrices[index] - lowerBand) / bandWidth);
     }
 
     private float CalculateVolumeChange(int index)
     {
-        if (index < 1 || _volumes[index - 1] == 0) return 0f;
+        if (index < 1 || _volumes[index - 1] == 0)
+        {
+            return 0f;
+        }
+
         return (float)((_volumes[index] - _volumes[index - 1]) / (double)_volumes[index - 1]);
     }
 
     private float CalculateVolumeMA(int index, int period)
     {
-        if (index < period - 1) return 0f;
+        if (index < period - 1)
+        {
+            return 0f;
+        }
+
         long sum = 0;
         for (int j = 0; j < period; j++)
         {
@@ -341,21 +413,31 @@ public class MachineLearningStrategy : BaseStrategy
 
     private float CalculateVolumeRatio(int index)
     {
-        var volumeMA = CalculateVolumeMA(index, 10);
-        if (volumeMA == 0) return 1f;
+        float volumeMA = CalculateVolumeMA(index, 10);
+        if (volumeMA == 0)
+        {
+            return 1f;
+        }
+
         return _volumes[index] / volumeMA;
     }
 
     private float CalculatePriceVolumeCorrelation(int index, int period)
     {
-        if (index < period) return 0f;
+        if (index < period)
+        {
+            return 0f;
+        }
 
         var priceChanges = new List<double>();
         var volumeChanges = new List<double>();
 
         for (int i = index - period + 1; i <= index; i++)
         {
-            if (i < 1) continue;
+            if (i < 1)
+            {
+                continue;
+            }
 
             if (ClosePrices[i - 1] != 0)
             {
@@ -368,19 +450,26 @@ public class MachineLearningStrategy : BaseStrategy
             }
         }
 
-        if (priceChanges.Count < 2) return 0f;
+        if (priceChanges.Count < 2)
+        {
+            return 0f;
+        }
 
-        var n = priceChanges.Count;
-        var sumX = priceChanges.Sum();
-        var sumY = volumeChanges.Sum();
-        var sumXY = priceChanges.Zip(volumeChanges, (a, b) => a * b).Sum();
-        var sumX2 = priceChanges.Sum(a => a * a);
-        var sumY2 = volumeChanges.Sum(b => b * b);
+        int n = priceChanges.Count;
+        double sumX = priceChanges.Sum();
+        double sumY = volumeChanges.Sum();
+        double sumXY = priceChanges.Zip(volumeChanges, (a, b) => a * b).Sum();
+        double sumX2 = priceChanges.Sum(a => a * a);
+        double sumY2 = volumeChanges.Sum(b => b * b);
 
-        var numerator = (n * sumXY) - (sumX * sumY);
-        var denominator = Math.Sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
+        double numerator = (n * sumXY) - (sumX * sumY);
+        double denominator = Math.Sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
 
-        if (denominator == 0) return 0f;
+        if (denominator == 0)
+        {
+            return 0f;
+        }
+
         return (float)(numerator / denominator);
     }
 

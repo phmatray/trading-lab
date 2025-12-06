@@ -53,10 +53,10 @@ public class HistoricalPriceBuilder
 
         for (int i = 0; i < _closePrices.Count; i++)
         {
-            var close = _closePrices[i];
-            var open = i > 0 ? _closePrices[i - 1] : close * 0.99m;
-            var high = Math.Max(open, close) * 1.01m;
-            var low = Math.Min(open, close) * 0.99m;
+            decimal close = _closePrices[i];
+            decimal open = i > 0 ? _closePrices[i - 1] : close * 0.99m;
+            decimal high = Math.Max(open, close) * 1.01m;
+            decimal low = Math.Min(open, close) * 0.99m;
 
             result.Add(new HistoricalPrice
             {

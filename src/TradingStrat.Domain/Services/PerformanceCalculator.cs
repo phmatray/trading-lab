@@ -15,12 +15,12 @@ public class PerformanceCalculator
             return CreateEmptyMetrics(initialCapital);
         }
 
-        var finalEquity = equityCurve[^1].Equity;
-        var totalReturn = finalEquity - initialCapital;
-        var totalReturnPercentage = (totalReturn / initialCapital) * 100;
+        decimal finalEquity = equityCurve[^1].Equity;
+        decimal totalReturn = finalEquity - initialCapital;
+        decimal totalReturnPercentage = (totalReturn / initialCapital) * 100;
 
-        var daysInYears = totalDays / 252m;
-        var annualizedReturn = daysInYears > 0
+        decimal daysInYears = totalDays / 252m;
+        decimal annualizedReturn = daysInYears > 0
             ? (decimal)Math.Pow((double)(finalEquity / initialCapital), (double)(1 / daysInYears)) - 1
             : 0;
         annualizedReturn *= 100;
@@ -28,33 +28,33 @@ public class PerformanceCalculator
         var buyTrades = trades.Where(t => t.Type == TradeType.Buy).ToList();
         var sellTrades = trades.Where(t => t.Type == TradeType.Sell).ToList();
 
-        var roundTripTrades = Math.Min(buyTrades.Count, sellTrades.Count);
-        var winningTrades = sellTrades.Count(t => t.ProfitLoss > 0);
-        var losingTrades = sellTrades.Count(t => t.ProfitLoss < 0);
-        var winRate = sellTrades.Count > 0 ? (decimal)winningTrades / sellTrades.Count * 100 : 0;
+        int roundTripTrades = Math.Min(buyTrades.Count, sellTrades.Count);
+        int winningTrades = sellTrades.Count(t => t.ProfitLoss > 0);
+        int losingTrades = sellTrades.Count(t => t.ProfitLoss < 0);
+        decimal winRate = sellTrades.Count > 0 ? (decimal)winningTrades / sellTrades.Count * 100 : 0;
 
         var wins = sellTrades.Where(t => t.ProfitLoss > 0).Select(t => t.ProfitLoss ?? 0).ToList();
         var losses = sellTrades.Where(t => t.ProfitLoss < 0).Select(t => Math.Abs(t.ProfitLoss ?? 0)).ToList();
 
-        var averageWin = wins.Count > 0 ? wins.Average() : 0;
-        var averageLoss = losses.Count > 0 ? losses.Average() : 0;
-        var largestWin = wins.Count > 0 ? wins.Max() : 0;
-        var largestLoss = losses.Count > 0 ? losses.Max() : 0;
+        decimal averageWin = wins.Count > 0 ? wins.Average() : 0;
+        decimal averageLoss = losses.Count > 0 ? losses.Average() : 0;
+        decimal largestWin = wins.Count > 0 ? wins.Max() : 0;
+        decimal largestLoss = losses.Count > 0 ? losses.Max() : 0;
 
-        var grossProfit = wins.Sum();
-        var grossLoss = losses.Sum();
-        var profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
+        decimal grossProfit = wins.Sum();
+        decimal grossLoss = losses.Sum();
+        decimal profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
 
         var (maxConsecutiveWins, maxConsecutiveLosses) = CalculateConsecutiveWinsLosses(sellTrades);
 
         var (maxDrawdown, maxDrawdownPercentage) = CalculateMaxDrawdown(equityCurve);
 
         var dailyReturns = CalculateDailyReturns(equityCurve);
-        var sharpeRatio = CalculateSharpeRatio(dailyReturns);
-        var volatility = CalculateVolatility(dailyReturns) * 100;
+        decimal sharpeRatio = CalculateSharpeRatio(dailyReturns);
+        decimal volatility = CalculateVolatility(dailyReturns) * 100;
 
-        var daysInMarket = equityCurve.Count(e => e.Position > 0);
-        var marketExposurePercentage = totalDays > 0 ? (decimal)daysInMarket / totalDays * 100 : 0;
+        int daysInMarket = equityCurve.Count(e => e.Position > 0);
+        decimal marketExposurePercentage = totalDays > 0 ? (decimal)daysInMarket / totalDays * 100 : 0;
 
         return new PerformanceMetrics(
             InitialCapital: initialCapital,
@@ -115,7 +115,9 @@ public class PerformanceCalculator
     private (int maxWins, int maxLosses) CalculateConsecutiveWinsLosses(List<Trade> sellTrades)
     {
         if (sellTrades.Count == 0)
+        {
             return (0, 0);
+        }
 
         int currentWinStreak = 0;
         int currentLossStreak = 0;
@@ -144,7 +146,9 @@ public class PerformanceCalculator
     private (decimal maxDrawdown, decimal maxDrawdownPercentage) CalculateMaxDrawdown(List<EquityPoint> equityCurve)
     {
         if (equityCurve.Count == 0)
+        {
             return (0, 0);
+        }
 
         decimal maxEquity = equityCurve[0].Equity;
         decimal maxDrawdown = 0;
@@ -157,8 +161,8 @@ public class PerformanceCalculator
                 maxEquity = point.Equity;
             }
 
-            var drawdown = maxEquity - point.Equity;
-            var drawdownPercentage = maxEquity > 0 ? (drawdown / maxEquity) * 100 : 0;
+            decimal drawdown = maxEquity - point.Equity;
+            decimal drawdownPercentage = maxEquity > 0 ? (drawdown / maxEquity) * 100 : 0;
 
             if (drawdown > maxDrawdown)
             {
@@ -176,12 +180,12 @@ public class PerformanceCalculator
 
         for (int i = 1; i < equityCurve.Count; i++)
         {
-            var previousEquity = equityCurve[i - 1].Equity;
-            var currentEquity = equityCurve[i].Equity;
+            decimal previousEquity = equityCurve[i - 1].Equity;
+            decimal currentEquity = equityCurve[i].Equity;
 
             if (previousEquity > 0)
             {
-                var dailyReturn = (currentEquity - previousEquity) / previousEquity;
+                decimal dailyReturn = (currentEquity - previousEquity) / previousEquity;
                 returns.Add(dailyReturn);
             }
         }
@@ -192,35 +196,43 @@ public class PerformanceCalculator
     private decimal CalculateSharpeRatio(List<decimal> dailyReturns)
     {
         if (dailyReturns.Count < 2)
+        {
             return 0;
+        }
 
-        var averageReturn = dailyReturns.Average();
-        var stdDev = CalculateStandardDeviation(dailyReturns);
+        decimal averageReturn = dailyReturns.Average();
+        decimal stdDev = CalculateStandardDeviation(dailyReturns);
 
         if (stdDev == 0)
+        {
             return 0;
+        }
 
-        var sharpeRatio = averageReturn / stdDev;
+        decimal sharpeRatio = averageReturn / stdDev;
         return sharpeRatio * (decimal)Math.Sqrt(252);
     }
 
     private decimal CalculateVolatility(List<decimal> dailyReturns)
     {
         if (dailyReturns.Count < 2)
+        {
             return 0;
+        }
 
-        var stdDev = CalculateStandardDeviation(dailyReturns);
+        decimal stdDev = CalculateStandardDeviation(dailyReturns);
         return stdDev * (decimal)Math.Sqrt(252);
     }
 
     private decimal CalculateStandardDeviation(List<decimal> values)
     {
         if (values.Count < 2)
+        {
             return 0;
+        }
 
-        var average = values.Average();
-        var sumOfSquares = values.Sum(v => Math.Pow((double)(v - average), 2));
-        var variance = sumOfSquares / (values.Count - 1);
+        decimal average = values.Average();
+        double sumOfSquares = values.Sum(v => Math.Pow((double)(v - average), 2));
+        double variance = sumOfSquares / (values.Count - 1);
         return (decimal)Math.Sqrt(variance);
     }
 }

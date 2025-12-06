@@ -24,7 +24,9 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
         : base(indicatorCalculator)
     {
         if (fastPeriod >= slowPeriod)
+        {
             throw new ArgumentException("Fast period must be less than slow period");
+        }
 
         _fastPeriod = fastPeriod;
         _slowPeriod = slowPeriod;
@@ -44,15 +46,15 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
             return new TradeSignal(SignalType.Hold, 0, 0, "Insufficient data for indicators");
         }
 
-        var currentPrice = ClosePrices[currentIndex];
-        var fastCurrent = _fastMA[currentIndex];
-        var slowCurrent = _slowMA[currentIndex];
-        var fastPrevious = _fastMA[currentIndex - 1];
-        var slowPrevious = _slowMA[currentIndex - 1];
+        decimal currentPrice = ClosePrices[currentIndex];
+        decimal fastCurrent = _fastMA[currentIndex];
+        decimal slowCurrent = _slowMA[currentIndex];
+        decimal fastPrevious = _fastMA[currentIndex - 1];
+        decimal slowPrevious = _slowMA[currentIndex - 1];
 
         if (fastPrevious <= slowPrevious && fastCurrent > slowCurrent && currentPosition == 0)
         {
-            var quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
+            int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
             {
                 return new TradeSignal(

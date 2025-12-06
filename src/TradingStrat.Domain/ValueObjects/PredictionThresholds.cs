@@ -16,10 +16,16 @@ public class PredictionThresholds
     public SignalType ConvertPredictionToSignal(float predictedReturn)
     {
         if (predictedReturn >= (float)BuyThreshold)
+        {
             return SignalType.Buy;
+        }
         else if (predictedReturn <= (float)SellThreshold)
+        {
             return SignalType.Sell;
+        }
         else
+        {
             return SignalType.Hold;
+        }
     }
 }

@@ -6,7 +6,7 @@ public class IndicatorCalculator : IIndicatorCalculator
 {
     public decimal[] CalculateSMA(decimal[] prices, int period)
     {
-        var sma = new decimal[prices.Length];
+        decimal[] sma = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
         {
@@ -29,8 +29,8 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateEMA(decimal[] prices, int period)
     {
-        var ema = new decimal[prices.Length];
-        var multiplier = 2m / (period + 1);
+        decimal[] ema = new decimal[prices.Length];
+        decimal multiplier = 2m / (period + 1);
 
         for (int i = 0; i < prices.Length; i++)
         {
@@ -60,7 +60,7 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateRSI(decimal[] prices, int period)
     {
-        var rsi = new decimal[prices.Length];
+        decimal[] rsi = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
         {
@@ -84,11 +84,15 @@ public class IndicatorCalculator : IIndicatorCalculator
 
         for (int j = 1; j <= period; j++)
         {
-            var change = prices[index - j + 1] - prices[index - j];
+            decimal change = prices[index - j + 1] - prices[index - j];
             if (change > 0)
+            {
                 gains += change;
+            }
             else
+            {
                 losses -= change;
+            }
         }
 
         return (gains / period, losses / period);
@@ -97,9 +101,11 @@ public class IndicatorCalculator : IIndicatorCalculator
     private static decimal CalculateRSIValue(decimal avgGain, decimal avgLoss)
     {
         if (avgLoss == 0)
+        {
             return 100;
+        }
 
-        var rs = avgGain / avgLoss;
+        decimal rs = avgGain / avgLoss;
         return 100 - (100 / (1 + rs));
     }
 
@@ -109,18 +115,18 @@ public class IndicatorCalculator : IIndicatorCalculator
         int slowPeriod = 26,
         int signalPeriod = 9)
     {
-        var fastEMA = CalculateEMA(prices, fastPeriod);
-        var slowEMA = CalculateEMA(prices, slowPeriod);
+        decimal[] fastEMA = CalculateEMA(prices, fastPeriod);
+        decimal[] slowEMA = CalculateEMA(prices, slowPeriod);
 
-        var macd = new decimal[prices.Length];
+        decimal[] macd = new decimal[prices.Length];
         for (int i = 0; i < prices.Length; i++)
         {
             macd[i] = fastEMA[i] - slowEMA[i];
         }
 
-        var signal = CalculateEMAFromArray(macd, signalPeriod);
+        decimal[] signal = CalculateEMAFromArray(macd, signalPeriod);
 
-        var histogram = new decimal[prices.Length];
+        decimal[] histogram = new decimal[prices.Length];
         for (int i = 0; i < prices.Length; i++)
         {
             histogram[i] = macd[i] - signal[i];
@@ -131,13 +137,13 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateATR(HistoricalPrice[] prices, int period)
     {
-        var trueRanges = CalculateTrueRanges(prices);
+        decimal[] trueRanges = CalculateTrueRanges(prices);
         return CalculateATRFromTrueRanges(trueRanges, period);
     }
 
     private static decimal[] CalculateTrueRanges(HistoricalPrice[] prices)
     {
-        var trueRanges = new decimal[prices.Length];
+        decimal[] trueRanges = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
         {
@@ -156,20 +162,20 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     private static decimal CalculateTrueRange(HistoricalPrice current, HistoricalPrice previous)
     {
-        var high = current.High ?? 0;
-        var low = current.Low ?? 0;
-        var prevClose = previous.Close ?? 0;
+        decimal high = current.High ?? 0;
+        decimal low = current.Low ?? 0;
+        decimal prevClose = previous.Close ?? 0;
 
-        var tr1 = high - low;
-        var tr2 = Math.Abs(high - prevClose);
-        var tr3 = Math.Abs(low - prevClose);
+        decimal tr1 = high - low;
+        decimal tr2 = Math.Abs(high - prevClose);
+        decimal tr3 = Math.Abs(low - prevClose);
 
         return Math.Max(tr1, Math.Max(tr2, tr3));
     }
 
     private static decimal[] CalculateATRFromTrueRanges(decimal[] trueRanges, int period)
     {
-        var atr = new decimal[trueRanges.Length];
+        decimal[] atr = new decimal[trueRanges.Length];
 
         for (int i = 0; i < trueRanges.Length; i++)
         {
@@ -204,7 +210,7 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateStdDev(decimal[] prices, int period)
     {
-        var stdDev = new decimal[prices.Length];
+        decimal[] stdDev = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
         {
@@ -219,16 +225,16 @@ public class IndicatorCalculator : IIndicatorCalculator
             {
                 sum += prices[i - j];
             }
-            var mean = sum / period;
+            decimal mean = sum / period;
 
             decimal sumSquaredDifferences = 0;
             for (int j = 0; j < period; j++)
             {
-                var diff = prices[i - j] - mean;
+                decimal diff = prices[i - j] - mean;
                 sumSquaredDifferences += diff * diff;
             }
 
-            var variance = sumSquaredDifferences / period;
+            decimal variance = sumSquaredDifferences / period;
             stdDev[i] = (decimal)Math.Sqrt((double)variance);
         }
 
@@ -237,8 +243,8 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     private decimal[] CalculateEMAFromArray(decimal[] data, int period)
     {
-        var ema = new decimal[data.Length];
-        var multiplier = 2m / (period + 1);
+        decimal[] ema = new decimal[data.Length];
+        decimal multiplier = 2m / (period + 1);
 
         for (int i = 0; i < data.Length; i++)
         {

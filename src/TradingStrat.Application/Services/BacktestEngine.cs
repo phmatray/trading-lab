@@ -85,13 +85,13 @@ public class BacktestEngine
         for (int i = 0; i < filteredData.Count; i++)
         {
             var currentBar = filteredData[i];
-            var currentPrice = currentBar.Close ?? 0;
+            decimal currentPrice = currentBar.Close ?? 0;
 
             var signal = strategy.GenerateSignal(i, portfolio.Cash, portfolio.Position);
 
             ProcessSignal(signal, currentBar, portfolio, configuration, trades);
 
-            var equity = portfolio.GetEquity(currentPrice);
+            decimal equity = portfolio.GetEquity(currentPrice);
             equityCurve.Add(new EquityPoint(currentBar.DateTime, equity, portfolio.Position));
 
             progress?.Report((i + 1, filteredData.Count, trades.Count));
@@ -122,13 +122,13 @@ public class BacktestEngine
         BacktestConfiguration configuration,
         List<Trade> trades)
     {
-        var commission = CalculateCommission(
+        decimal commission = CalculateCommission(
             signal.Quantity * signal.Price,
             configuration.CommissionPercentage,
             configuration.MinimumCommission);
 
-        var grossAmount = signal.Quantity * signal.Price;
-        var netAmount = grossAmount + commission;
+        decimal grossAmount = signal.Quantity * signal.Price;
+        decimal netAmount = grossAmount + commission;
 
         if (netAmount <= portfolio.Cash)
         {
@@ -155,14 +155,14 @@ public class BacktestEngine
         BacktestConfiguration configuration,
         List<Trade> trades)
     {
-        var commission = CalculateCommission(
+        decimal commission = CalculateCommission(
             signal.Quantity * signal.Price,
             configuration.CommissionPercentage,
             configuration.MinimumCommission);
 
-        var grossAmount = signal.Quantity * signal.Price;
-        var netAmount = grossAmount - commission;
-        var profitLoss = (signal.Price - portfolio.AverageEntryPrice) * signal.Quantity - commission;
+        decimal grossAmount = signal.Quantity * signal.Price;
+        decimal netAmount = grossAmount - commission;
+        decimal profitLoss = (signal.Price - portfolio.AverageEntryPrice) * signal.Quantity - commission;
 
         portfolio.ExecuteSell(signal.Quantity, signal.Price, commission);
 
@@ -188,18 +188,20 @@ public class BacktestEngine
         List<EquityPoint> equityCurve)
     {
         if (portfolio.Position <= 0)
+        {
             return;
+        }
 
         var lastBar = filteredData[^1];
-        var lastPrice = lastBar.Close ?? 0;
-        var commission = CalculateCommission(
+        decimal lastPrice = lastBar.Close ?? 0;
+        decimal commission = CalculateCommission(
             portfolio.Position * lastPrice,
             configuration.CommissionPercentage,
             configuration.MinimumCommission);
 
-        var grossAmount = portfolio.Position * lastPrice;
-        var netAmount = grossAmount - commission;
-        var profitLoss = (lastPrice - portfolio.AverageEntryPrice) * portfolio.Position - commission;
+        decimal grossAmount = portfolio.Position * lastPrice;
+        decimal netAmount = grossAmount - commission;
+        decimal profitLoss = (lastPrice - portfolio.AverageEntryPrice) * portfolio.Position - commission;
 
         portfolio.ExecuteSell(portfolio.Position, lastPrice, commission);
 
@@ -216,7 +218,7 @@ public class BacktestEngine
             ProfitLoss = profitLoss
         });
 
-        var finalEquity = portfolio.GetEquity(lastPrice);
+        decimal finalEquity = portfolio.GetEquity(lastPrice);
         equityCurve[^1] = new EquityPoint(lastBar.DateTime, finalEquity, 0);
     }
 
@@ -245,7 +247,7 @@ public class BacktestEngine
 
     private decimal CalculateCommission(decimal amount, decimal percentage, decimal minimum)
     {
-        var commission = amount * percentage;
+        decimal commission = amount * percentage;
         return Math.Max(commission, minimum);
     }
 }
