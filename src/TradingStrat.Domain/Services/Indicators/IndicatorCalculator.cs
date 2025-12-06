@@ -70,33 +70,37 @@ public class IndicatorCalculator : IIndicatorCalculator
                 continue;
             }
 
-            decimal gains = 0;
-            decimal losses = 0;
-
-            for (int j = 1; j <= period; j++)
-            {
-                var change = prices[i - j + 1] - prices[i - j];
-                if (change > 0)
-                    gains += change;
-                else
-                    losses -= change;
-            }
-
-            var avgGain = gains / period;
-            var avgLoss = losses / period;
-
-            if (avgLoss == 0)
-            {
-                rsi[i] = 100;
-            }
-            else
-            {
-                var rs = avgGain / avgLoss;
-                rsi[i] = 100 - (100 / (1 + rs));
-            }
+            var (avgGain, avgLoss) = CalculateAverageGainsAndLosses(prices, i, period);
+            rsi[i] = CalculateRSIValue(avgGain, avgLoss);
         }
 
         return rsi;
+    }
+
+    private static (decimal avgGain, decimal avgLoss) CalculateAverageGainsAndLosses(decimal[] prices, int index, int period)
+    {
+        decimal gains = 0;
+        decimal losses = 0;
+
+        for (int j = 1; j <= period; j++)
+        {
+            var change = prices[index - j + 1] - prices[index - j];
+            if (change > 0)
+                gains += change;
+            else
+                losses -= change;
+        }
+
+        return (gains / period, losses / period);
+    }
+
+    private static decimal CalculateRSIValue(decimal avgGain, decimal avgLoss)
+    {
+        if (avgLoss == 0)
+            return 100;
+
+        var rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
     }
 
     public (decimal[] macd, decimal[] signal, decimal[] histogram) CalculateMACD(
@@ -127,30 +131,47 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateATR(HistoricalPrice[] prices, int period)
     {
-        var atr = new decimal[prices.Length];
+        var trueRanges = CalculateTrueRanges(prices);
+        return CalculateATRFromTrueRanges(trueRanges, period);
+    }
+
+    private static decimal[] CalculateTrueRanges(HistoricalPrice[] prices)
+    {
         var trueRanges = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
         {
-            if (i == 0)
-            {
-                trueRanges[i] = (prices[i].High ?? 0) - (prices[i].Low ?? 0);
-            }
-            else
-            {
-                var high = prices[i].High ?? 0;
-                var low = prices[i].Low ?? 0;
-                var prevClose = prices[i - 1].Close ?? 0;
-
-                var tr1 = high - low;
-                var tr2 = Math.Abs(high - prevClose);
-                var tr3 = Math.Abs(low - prevClose);
-
-                trueRanges[i] = Math.Max(tr1, Math.Max(tr2, tr3));
-            }
+            trueRanges[i] = i == 0
+                ? CalculateInitialTrueRange(prices[i])
+                : CalculateTrueRange(prices[i], prices[i - 1]);
         }
 
-        for (int i = 0; i < prices.Length; i++)
+        return trueRanges;
+    }
+
+    private static decimal CalculateInitialTrueRange(HistoricalPrice price)
+    {
+        return (price.High ?? 0) - (price.Low ?? 0);
+    }
+
+    private static decimal CalculateTrueRange(HistoricalPrice current, HistoricalPrice previous)
+    {
+        var high = current.High ?? 0;
+        var low = current.Low ?? 0;
+        var prevClose = previous.Close ?? 0;
+
+        var tr1 = high - low;
+        var tr2 = Math.Abs(high - prevClose);
+        var tr3 = Math.Abs(low - prevClose);
+
+        return Math.Max(tr1, Math.Max(tr2, tr3));
+    }
+
+    private static decimal[] CalculateATRFromTrueRanges(decimal[] trueRanges, int period)
+    {
+        var atr = new decimal[trueRanges.Length];
+
+        for (int i = 0; i < trueRanges.Length; i++)
         {
             if (i < period - 1)
             {
@@ -158,22 +179,27 @@ public class IndicatorCalculator : IIndicatorCalculator
                 continue;
             }
 
-            if (i == period - 1)
-            {
-                decimal sum = 0;
-                for (int j = 0; j < period; j++)
-                {
-                    sum += trueRanges[i - j];
-                }
-                atr[i] = sum / period;
-            }
-            else
-            {
-                atr[i] = ((atr[i - 1] * (period - 1)) + trueRanges[i]) / period;
-            }
+            atr[i] = i == period - 1
+                ? CalculateInitialATR(trueRanges, i, period)
+                : CalculateSmoothedATR(atr[i - 1], trueRanges[i], period);
         }
 
         return atr;
+    }
+
+    private static decimal CalculateInitialATR(decimal[] trueRanges, int index, int period)
+    {
+        decimal sum = 0;
+        for (int j = 0; j < period; j++)
+        {
+            sum += trueRanges[index - j];
+        }
+        return sum / period;
+    }
+
+    private static decimal CalculateSmoothedATR(decimal previousATR, decimal currentTrueRange, int period)
+    {
+        return ((previousATR * (period - 1)) + currentTrueRange) / period;
     }
 
     public decimal[] CalculateStdDev(decimal[] prices, int period)
