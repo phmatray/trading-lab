@@ -26,7 +26,8 @@ public static class ProgramMenu
                     .AddChoices(
                         "1. Fetch/Update Historical Data",
                         "2. Run Backtest",
-                        "3. Exit"));
+                        "3. Analyze Current Position",
+                        "4. Exit"));
 
             AnsiConsole.WriteLine();
 
@@ -38,12 +39,15 @@ public static class ProgramMenu
                 case "2. Run Backtest":
                     await ProgramBacktest.RunAsync();
                     break;
-                case "3. Exit":
+                case "3. Analyze Current Position":
+                    await ProgramAnalyze.RunAsync();
+                    break;
+                case "4. Exit":
                     AnsiConsole.MarkupLine("[grey]Goodbye![/]");
                     return;
             }
 
-            if (choice != "3. Exit")
+            if (choice != "4. Exit")
             {
                 AnsiConsole.WriteLine();
                 AnsiConsole.MarkupLine("[dim]Press any key to return to menu...[/]");

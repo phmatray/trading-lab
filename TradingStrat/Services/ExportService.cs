@@ -59,4 +59,23 @@ public class ExportService : IExportService
             throw new InvalidOperationException($"Failed to export backtest result: {ex.Message}", ex);
         }
     }
+
+    public async Task ExportLiveAnalysisAsync(LiveAnalysisResult result, string filePath)
+    {
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            var json = JsonSerializer.Serialize(result, options);
+            await File.WriteAllTextAsync(filePath, json);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to export live analysis result: {ex.Message}", ex);
+        }
+    }
 }
