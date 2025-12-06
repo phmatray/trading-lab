@@ -15,10 +15,10 @@ public class MachineLearningStrategy : BaseStrategy
     private MarketFeatures[] _featureMatrix = null!;
     private FeatureEngineering _featureEngine = null!;
 
-    public override string Name => "ML LightGBM Regression";
+    public override string Name => "ML FastTree Regression";
 
     public override string Description =>
-        $"Machine learning strategy using LightGBM regression to predict next-day price changes. " +
+        $"Machine learning strategy using FastTree gradient boosting to predict next-day price changes. " +
         $"Buy threshold: {_thresholds.BuyThreshold:P2}, Sell threshold: {_thresholds.SellThreshold:P2}";
 
     public MachineLearningStrategy(
@@ -110,13 +110,13 @@ public class MachineLearningStrategy : BaseStrategy
         var pipeline = _mlContext.Transforms
             .Concatenate("Features", featureColumns)
             .Append(_mlContext.Transforms.NormalizeMinMax("Features")) // Feature scaling
-            .Append(_mlContext.Regression.Trainers.LightGbm(
+            .Append(_mlContext.Regression.Trainers.FastTree(
                 labelColumnName: nameof(MarketFeatures.NextDayReturn),
                 featureColumnName: "Features",
                 numberOfLeaves: 31,
                 minimumExampleCountPerLeaf: 20,
                 learningRate: 0.1,
-                numberOfIterations: 100));
+                numberOfTrees: 100));
 
         // Train the model
         try
@@ -187,7 +187,7 @@ public class MachineLearningStrategy : BaseStrategy
     {
         return new Dictionary<string, object>
         {
-            { "Algorithm", "LightGBM Regression" },
+            { "Algorithm", "FastTree Gradient Boosting" },
             { "Features", 26 },
             { "BuyThreshold", _thresholds.BuyThreshold },
             { "SellThreshold", _thresholds.SellThreshold },
