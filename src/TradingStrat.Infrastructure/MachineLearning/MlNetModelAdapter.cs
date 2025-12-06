@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers.FastTree;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.ValueObjects;
 
@@ -27,10 +29,10 @@ public class MlNetModelAdapter : IMLModelPort
             _logger.LogDebug("Training data contains {RowCount} rows", rowCount);
 
             _logger.LogDebug("Training FastTree regression model...");
-            var startTime = DateTime.UtcNow;
+            DateTime startTime = DateTime.UtcNow;
 
             // Define the training pipeline
-            var pipeline = _mlContext.Transforms.Concatenate(
+            EstimatorChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>? pipeline = _mlContext.Transforms.Concatenate(
                     "Features",
                     // Price-based (5)
                     nameof(MarketFeatures.DailyReturn),
@@ -74,9 +76,9 @@ public class MlNetModelAdapter : IMLModelPort
                     numberOfTrees: config.NumberOfTrees));
 
             // Train the model
-            var model = pipeline.Fit(trainingData);
+            TransformerChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>? model = pipeline.Fit(trainingData);
 
-            var elapsed = DateTime.UtcNow - startTime;
+            TimeSpan elapsed = DateTime.UtcNow - startTime;
             _logger.LogDebug("Model training completed in {ElapsedMs}ms", elapsed.TotalMilliseconds);
 
             return model;
@@ -95,10 +97,10 @@ public class MlNetModelAdapter : IMLModelPort
             _logger.LogDebug("Making prediction for features");
 
             // Create prediction engine
-            var predictionEngine = _mlContext.Model.CreatePredictionEngine<MarketFeatures, PricePrediction>(model);
+            PredictionEngine<MarketFeatures, PricePrediction>? predictionEngine = _mlContext.Model.CreatePredictionEngine<MarketFeatures, PricePrediction>(model);
 
             // Make prediction
-            var prediction = predictionEngine.Predict(features);
+            PricePrediction? prediction = predictionEngine.Predict(features);
 
             _logger.LogDebug("Prediction generated: Score={Score}", prediction.Score);
 

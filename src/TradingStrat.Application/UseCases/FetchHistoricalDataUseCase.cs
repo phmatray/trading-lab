@@ -1,6 +1,7 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -27,7 +28,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         progress?.Report("Initializing data fetch...");
 
         string ticker = await ResolveTicker(command.Ticker, command.Isin, progress);
-        var (startDate, endDate, isUpToDate) = await DetermineDateRange(ticker, command, progress);
+        (DateTime startDate, DateTime endDate, bool isUpToDate) = await DetermineDateRange(ticker, command, progress);
 
         if (isUpToDate)
         {
@@ -35,7 +36,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
             return await _historicalDataPort.GetDataSummaryAsync(ticker);
         }
 
-        var historicalData = await FetchMarketData(ticker, startDate, endDate, progress);
+        IReadOnlyList<HistoricalPrice> historicalData = await FetchMarketData(ticker, startDate, endDate, progress);
 
         if (!historicalData.Any())
         {
@@ -56,7 +57,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
             return ticker ?? throw new ArgumentException("Either ticker or ISIN must be provided");
         }
 
-        var possibleTickers = _tickerResolver.GetAllTickersForIsin(isin);
+        List<string>? possibleTickers = _tickerResolver.GetAllTickersForIsin(isin);
 
         if (possibleTickers == null || !possibleTickers.Any())
         {
@@ -97,7 +98,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
     {
         try
         {
-            var testData = await _marketDataPort.FetchHistoricalDataAsync(
+            IReadOnlyList<HistoricalPrice> testData = await _marketDataPort.FetchHistoricalDataAsync(
                 ticker,
                 DateTime.Today.AddDays(-7),
                 DateTime.Today);
@@ -115,9 +116,9 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         FetchDataCommand command,
         IProgress<string>? progress)
     {
-        var latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker);
-        var startDate = command.StartDate ?? latestDate?.AddDays(1) ?? new DateTime(2021, 12, 10);
-        var endDate = command.EndDate ?? DateTime.Today;
+        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker);
+        DateTime startDate = command.StartDate ?? latestDate?.AddDays(1) ?? new DateTime(2021, 12, 10);
+        DateTime endDate = command.EndDate ?? DateTime.Today;
 
         if (latestDate.HasValue)
         {
@@ -138,14 +139,14 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         return (startDate, endDate, isUpToDate: false);
     }
 
-    private async Task<IReadOnlyList<Domain.Entities.HistoricalPrice>> FetchMarketData(
+    private async Task<IReadOnlyList<HistoricalPrice>> FetchMarketData(
         string ticker,
         DateTime startDate,
         DateTime endDate,
         IProgress<string>? progress)
     {
         progress?.Report("Fetching data from Yahoo Finance...");
-        var historicalData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, endDate);
+        IReadOnlyList<HistoricalPrice> historicalData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, endDate);
 
         if (historicalData.Any())
         {
@@ -158,7 +159,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
     private async Task SaveData(
         string ticker,
         string? isin,
-        IReadOnlyList<Domain.Entities.HistoricalPrice> historicalData,
+        IReadOnlyList<HistoricalPrice> historicalData,
         IProgress<string>? progress)
     {
         progress?.Report("Saving to database...");

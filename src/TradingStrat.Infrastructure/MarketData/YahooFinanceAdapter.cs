@@ -18,12 +18,12 @@ public class YahooFinanceAdapter : IMarketDataPort
             var startInstant = Instant.FromDateTimeUtc(DateTime.SpecifyKind(startDate, DateTimeKind.Utc));
 
             // Create YahooQuotes with history start date
-            var yahooQuotes = new YahooQuotesBuilder()
+            YahooQuotes yahooQuotes = new YahooQuotesBuilder()
                 .WithHistoryStartDate(startInstant)
                 .Build();
 
             // Fetch historical data
-            var result = await yahooQuotes.GetHistoryAsync(ticker).ConfigureAwait(false);
+            Result<History> result = await yahooQuotes.GetHistoryAsync(ticker).ConfigureAwait(false);
 
             if (!result.HasValue || result.Value.Ticks.IsEmpty)
             {
@@ -62,10 +62,10 @@ public class YahooFinanceAdapter : IMarketDataPort
         try
         {
             // Fetch last 7 days to ensure we get at least one data point
-            var endDate = DateTime.Today;
-            var startDate = endDate.AddDays(-7);
+            DateTime endDate = DateTime.Today;
+            DateTime startDate = endDate.AddDays(-7);
 
-            var data = await FetchHistoricalDataAsync(ticker, startDate, endDate);
+            IReadOnlyList<HistoricalPrice> data = await FetchHistoricalDataAsync(ticker, startDate, endDate);
 
             // Return the most recent data point
             return data.OrderByDescending(d => d.DateTime).FirstOrDefault();

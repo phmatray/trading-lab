@@ -1,6 +1,7 @@
 using FakeItEasy;
 using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
@@ -38,14 +39,14 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today.AddDays(-1));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        DataSummaryResult result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
         result.Ticker.ShouldBe("TEST");
         result.TotalRecords.ShouldBeGreaterThan(0);
 
-        var savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
         savedData.ShouldNotBeEmpty();
     }
 
@@ -63,7 +64,7 @@ public class FetchHistoricalDataUseCaseTests
             .Returns(new List<string> { "CON3.L", "3COI.DE" });
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        DataSummaryResult result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -89,10 +90,10 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: new DateTime(2024, 1, 31));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        DataSummaryResult result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        var savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
 
         // Should not have duplicates for existing dates
         savedData.GroupBy(p => p.DateTime)
@@ -116,7 +117,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        DataSummaryResult result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -156,7 +157,7 @@ public class FetchHistoricalDataUseCaseTests
             .Returns(null);
 
         // Act & Assert
-        var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
+        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
         ex.Message.ShouldContain("Could not resolve ISIN");
     }
 }

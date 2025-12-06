@@ -39,7 +39,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         progress?.Report("Loading historical data from database...");
 
         // Step 1: Load historical data from database
-        var historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
+        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
 
         if (historicalData.Count < 30)
         {
@@ -56,7 +56,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         if (command.FetchFreshData)
         {
             progress?.Report("Fetching latest market data...");
-            (var freshData, isFresh, warning) = await FetchLatestDataAsync(command.Ticker);
+            (List<HistoricalPrice> freshData, isFresh, warning) = await FetchLatestDataAsync(command.Ticker);
 
             progress?.Report("Merging and preparing data...");
             completeData = MergeHistoricalData(historicalData, freshData);
@@ -75,13 +75,13 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
             completeData.AsReadOnly(),
             _indicatorCalculator);
 
-        var features = featureEngine.BuildFeatureMatrix();
+        MarketFeatures[] features = featureEngine.BuildFeatureMatrix();
 
         progress?.Report("Training ML model...");
 
         // Step 4: Train ML model
         var mlContext = new MLContext(seed: 42);
-        var trainingData = mlContext.Data.LoadFromEnumerable(features);
+        IDataView? trainingData = mlContext.Data.LoadFromEnumerable(features);
 
         var mlConfig = new MLModelConfiguration(
             NumberOfLeaves: _config.MachineLearning.ModelParameters.NumberOfLeaves,
@@ -89,23 +89,23 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
             LearningRate: _config.MachineLearning.ModelParameters.LearningRate,
             NumberOfTrees: _config.MachineLearning.ModelParameters.NumberOfTrees);
 
-        var model = _mlModelPort.TrainModel(trainingData, mlConfig);
+        ITransformer model = _mlModelPort.TrainModel(trainingData, mlConfig);
 
         progress?.Report("Generating prediction...");
 
         // Step 5: Generate prediction for next trading day
         int currentIndex = completeData.Count - 1;
-        var currentFeatures = featureEngine.BuildFeaturesForIndex(currentIndex);
+        MarketFeatures currentFeatures = featureEngine.BuildFeaturesForIndex(currentIndex);
 
         float predictedReturn = _mlModelPort.Predict(model, currentFeatures);
 
         // Step 6: Build result object
-        var latestBar = completeData[currentIndex];
-        var previousBar = completeData[currentIndex - 1];
+        HistoricalPrice latestBar = completeData[currentIndex];
+        HistoricalPrice previousBar = completeData[currentIndex - 1];
 
         // Step 7: Determine signal based on thresholds
-        var thresholds = command.Thresholds ?? new PredictionThresholds();
-        var signal = DetermineSignal(predictedReturn, thresholds, latestBar.Close ?? 0);
+        PredictionThresholds thresholds = command.Thresholds ?? new PredictionThresholds();
+        TradeSignal signal = DetermineSignal(predictedReturn, thresholds, latestBar.Close ?? 0);
 
         progress?.Report("Analysis complete");
 
@@ -135,10 +135,10 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
     {
         try
         {
-            var today = DateTime.Today;
-            var startDate = today.AddDays(-7);
+            DateTime today = DateTime.Today;
+            DateTime startDate = today.AddDays(-7);
 
-            var freshData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, today);
+            IReadOnlyList<HistoricalPrice> freshData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, today);
 
             if (freshData.Count == 0)
             {
@@ -147,7 +147,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
             }
 
             var freshDataList = freshData.ToList();
-            var latestFreshDate = freshDataList.Max(h => h.DateTime);
+            DateTime latestFreshDate = freshDataList.Max(h => h.DateTime);
             int daysSinceLatest = (today - latestFreshDate).Days;
 
             if (daysSinceLatest > 3)

@@ -24,17 +24,17 @@ public class BacktestEngine
         BacktestConfiguration configuration,
         IProgress<(int current, int total, int trades)>? progress = null)
     {
-        var filteredData = await LoadAndFilterData(configuration);
+        List<HistoricalPrice> filteredData = await LoadAndFilterData(configuration);
         strategy.Initialize(filteredData);
 
-        var portfolio = InitializePortfolio(configuration.InitialCapital);
+        PortfolioState portfolio = InitializePortfolio(configuration.InitialCapital);
         var trades = new List<Trade>();
         var equityCurve = new List<EquityPoint>();
 
         ProcessBacktest(strategy, configuration, filteredData, portfolio, trades, equityCurve, progress);
         CloseFinalPosition(configuration, filteredData, portfolio, trades, equityCurve);
 
-        var metrics = _performanceCalculator.Calculate(
+        PerformanceMetrics metrics = _performanceCalculator.Calculate(
             trades,
             equityCurve,
             configuration.InitialCapital,
@@ -45,7 +45,7 @@ public class BacktestEngine
 
     private async Task<List<HistoricalPrice>> LoadAndFilterData(BacktestConfiguration configuration)
     {
-        var historicalData = await _historicalDataPort.GetHistoricalDataAsync(configuration.Ticker);
+        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(configuration.Ticker);
 
         var filteredData = historicalData
             .Where(h => h.DateTime >= configuration.StartDate && h.DateTime <= configuration.EndDate)
@@ -84,10 +84,10 @@ public class BacktestEngine
     {
         for (int i = 0; i < filteredData.Count; i++)
         {
-            var currentBar = filteredData[i];
+            HistoricalPrice currentBar = filteredData[i];
             decimal currentPrice = currentBar.Close ?? 0;
 
-            var signal = strategy.GenerateSignal(i, portfolio.Cash, portfolio.Position);
+            TradeSignal signal = strategy.GenerateSignal(i, portfolio.Cash, portfolio.Position);
 
             ProcessSignal(signal, currentBar, portfolio, configuration, trades);
 
@@ -192,7 +192,7 @@ public class BacktestEngine
             return;
         }
 
-        var lastBar = filteredData[^1];
+        HistoricalPrice lastBar = filteredData[^1];
         decimal lastPrice = lastBar.Close ?? 0;
         decimal commission = CalculateCommission(
             portfolio.Position * lastPrice,

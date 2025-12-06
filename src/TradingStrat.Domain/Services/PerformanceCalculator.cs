@@ -45,11 +45,11 @@ public class PerformanceCalculator
         decimal grossLoss = losses.Sum();
         decimal profitFactor = grossLoss > 0 ? grossProfit / grossLoss : 0;
 
-        var (maxConsecutiveWins, maxConsecutiveLosses) = CalculateConsecutiveWinsLosses(sellTrades);
+        (int maxConsecutiveWins, int maxConsecutiveLosses) = CalculateConsecutiveWinsLosses(sellTrades);
 
-        var (maxDrawdown, maxDrawdownPercentage) = CalculateMaxDrawdown(equityCurve);
+        (decimal maxDrawdown, decimal maxDrawdownPercentage) = CalculateMaxDrawdown(equityCurve);
 
-        var dailyReturns = CalculateDailyReturns(equityCurve);
+        List<decimal> dailyReturns = CalculateDailyReturns(equityCurve);
         decimal sharpeRatio = CalculateSharpeRatio(dailyReturns);
         decimal volatility = CalculateVolatility(dailyReturns) * 100;
 
@@ -124,7 +124,7 @@ public class PerformanceCalculator
         int maxWinStreak = 0;
         int maxLossStreak = 0;
 
-        foreach (var trade in sellTrades)
+        foreach (Trade trade in sellTrades)
         {
             if (trade.ProfitLoss > 0)
             {
@@ -154,7 +154,7 @@ public class PerformanceCalculator
         decimal maxDrawdown = 0;
         decimal maxDrawdownPercentage = 0;
 
-        foreach (var point in equityCurve)
+        foreach (EquityPoint point in equityCurve)
         {
             if (point.Equity > maxEquity)
             {

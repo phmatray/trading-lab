@@ -1,4 +1,5 @@
 using Shouldly;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.Tests.Builders;
@@ -30,10 +31,10 @@ public class RSIStrategyTests
     public void Constructor_WithInvalidThresholds_ShouldThrow()
     {
         // Arrange & Act
-        var act = () => new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 80, overboughtThreshold: 70);
+        Func<RSIStrategy> act = () => new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 80, overboughtThreshold: 70);
 
         // Assert
-        var ex = Should.Throw<ArgumentException>(act);
+        ArgumentException ex = Should.Throw<ArgumentException>(act);
         ex.Message.ShouldContain("Oversold threshold must be less than overbought threshold");
     }
 
@@ -42,7 +43,7 @@ public class RSIStrategyTests
     {
         // Arrange
         // Create declining prices to get low RSI (oversold), then recovery to cross above threshold
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(
                 150m, 145m, 140m, 135m, 130m,
                 125m, 120m, 115m, 110m, 105m,
@@ -54,7 +55,7 @@ public class RSIStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(19, 10000m, 0);
+        TradeSignal signal = strategy.GenerateSignal(19, 10000m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Buy);
@@ -67,7 +68,7 @@ public class RSIStrategyTests
         // Arrange
         // Create rising prices to get high RSI (overbought), then decline to cross below threshold
         // Mirror the buy test - invert the price pattern
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(
                 50m, 55m, 60m, 65m, 70m,
                 75m, 80m, 85m, 90m, 95m,
@@ -79,7 +80,7 @@ public class RSIStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act - assuming we have a position
-        var signal = strategy.GenerateSignal(19, 0m, 100);
+        TradeSignal signal = strategy.GenerateSignal(19, 0m, 100);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Sell);
@@ -91,7 +92,7 @@ public class RSIStrategyTests
     {
         // Arrange
         // Create sideways movement to get neutral RSI
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(
                 100m, 101m, 100m, 101m, 100m,
                 101m, 100m, 101m, 100m, 101m,
@@ -103,7 +104,7 @@ public class RSIStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(19, 10000m, 0);
+        TradeSignal signal = strategy.GenerateSignal(19, 10000m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Hold);
@@ -113,7 +114,7 @@ public class RSIStrategyTests
     public void GenerateSignal_WhenNotEnoughData_ReturnsHoldSignal()
     {
         // Arrange
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(100m, 101m, 102m)  // Only 3 data points
             .Build();
 
@@ -121,7 +122,7 @@ public class RSIStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(2, 10000m, 0);
+        TradeSignal signal = strategy.GenerateSignal(2, 10000m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Hold);

@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.ML;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers.FastTree;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
@@ -16,7 +18,7 @@ public class MachineLearningStrategy : BaseStrategy
     private readonly PredictionThresholds _thresholds;
     private readonly ILogger<MachineLearningStrategy>? _logger;
     private readonly MLContext _mlContext;
-    private readonly int _minTrainingBars = 100;
+    private const int MinTrainingBars = 100;
 
     private decimal[] _highPrices = null!;
     private decimal[] _lowPrices = null!;
@@ -52,7 +54,7 @@ public class MachineLearningStrategy : BaseStrategy
         _volumes = historicalData.Select(h => h.Volume ?? 0).ToArray();
 
         _logger?.LogDebug("Initialized ML strategy with {DataPoints} data points, min training bars: {MinBars}",
-            historicalData.Count, _minTrainingBars);
+            historicalData.Count, MinTrainingBars);
     }
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
@@ -60,22 +62,22 @@ public class MachineLearningStrategy : BaseStrategy
         decimal currentPrice = ClosePrices[currentIndex];
 
         // Need minimum training data
-        if (currentIndex < _minTrainingBars)
+        if (currentIndex < MinTrainingBars)
         {
-            _logger?.LogDebug("Insufficient training data at index {Index} (need {MinBars})", currentIndex, _minTrainingBars);
+            _logger?.LogDebug("Insufficient training data at index {Index} (need {MinBars})", currentIndex, MinTrainingBars);
             return new TradeSignal(SignalType.Hold, currentPrice, 0, "Insufficient training data");
         }
 
         try
         {
             // Build features for training (all data up to currentIndex)
-            var features = BuildFeatures(currentIndex + 1);
+            MarketFeatures[] features = BuildFeatures(currentIndex + 1);
 
             // Train model with walk-forward approach (exclude last feature which is for prediction)
-            var model = TrainModel(features, currentIndex);
+            ITransformer model = TrainModel(features, currentIndex);
 
             // Predict for current bar (last feature in the array)
-            var currentFeature = features[^1];
+            MarketFeatures currentFeature = features[^1];
             float predictedReturn = Predict(model, currentFeature);
 
             _logger?.LogDebug("Prediction at index {Index}: {Return:F4}", currentIndex, predictedReturn);
@@ -149,12 +151,12 @@ public class MachineLearningStrategy : BaseStrategy
     private ITransformer TrainModel(MarketFeatures[] features, int currentIndex)
     {
         // Exclude the last feature (current bar) from training since it has no target
-        var trainingFeatures = features.Take(features.Length - 1).ToArray();
-        var trainingData = _mlContext.Data.LoadFromEnumerable(trainingFeatures);
+        MarketFeatures[] trainingFeatures = features.Take(features.Length - 1).ToArray();
+        IDataView? trainingData = _mlContext.Data.LoadFromEnumerable(trainingFeatures);
 
         _logger?.LogDebug("Training model with {Count} samples", trainingFeatures.Length);
 
-        var pipeline = _mlContext.Transforms
+        EstimatorChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>? pipeline = _mlContext.Transforms
             .Concatenate("Features",
                 nameof(MarketFeatures.DailyReturn), nameof(MarketFeatures.LogReturn),
                 nameof(MarketFeatures.HighLowRange), nameof(MarketFeatures.OpenCloseRange),
@@ -184,8 +186,8 @@ public class MachineLearningStrategy : BaseStrategy
 
     private float Predict(ITransformer model, MarketFeatures features)
     {
-        var predictionEngine = _mlContext.Model.CreatePredictionEngine<MarketFeatures, PricePrediction>(model);
-        var prediction = predictionEngine.Predict(features);
+        PredictionEngine<MarketFeatures, PricePrediction>? predictionEngine = _mlContext.Model.CreatePredictionEngine<MarketFeatures, PricePrediction>(model);
+        PricePrediction? prediction = predictionEngine.Predict(features);
         return prediction.Score;
     }
 
@@ -484,7 +486,7 @@ public class MachineLearningStrategy : BaseStrategy
             { "NumberOfTrees", 100 },
             { "BuyThreshold", _thresholds.BuyThreshold },
             { "SellThreshold", _thresholds.SellThreshold },
-            { "MinTrainingBars", _minTrainingBars },
+            { "MinTrainingBars", MinTrainingBars },
             { "ValidationMethod", "Walk-Forward" }
         };
     }

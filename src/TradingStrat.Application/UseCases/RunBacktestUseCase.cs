@@ -3,6 +3,7 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -27,7 +28,7 @@ public class RunBacktestUseCase : IBacktestUseCase
         IProgress<BacktestProgress>? progress = null)
     {
         // Check if data exists
-        var allData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
+        List<HistoricalPrice> allData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
 
         if (allData.Count == 0)
         {
@@ -37,12 +38,12 @@ public class RunBacktestUseCase : IBacktestUseCase
         }
 
         // Determine date range
-        var latestDate = await _historicalDataPort.GetLatestDataDateAsync(command.Ticker);
-        var endDate = command.EndDate ?? latestDate ?? DateTime.Today;
-        var startDate = command.StartDate ?? endDate.AddYears(-2);
+        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(command.Ticker);
+        DateTime endDate = command.EndDate ?? latestDate ?? DateTime.Today;
+        DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
         // Create strategy
-        var strategy = _strategyFactory.CreateStrategy(
+        IStrategy strategy = _strategyFactory.CreateStrategy(
             command.StrategyType,
             command.StrategyParameters);
 
@@ -56,12 +57,12 @@ public class RunBacktestUseCase : IBacktestUseCase
             MinimumCommission: command.MinimumCommission);
 
         // Run backtest
-        var internalProgress = progress != null
+        Progress<(int current, int total, int trades)>? internalProgress = progress != null
             ? new Progress<(int current, int total, int trades)>(p =>
                 progress.Report(new BacktestProgress(p.current, p.total, p.trades)))
             : null;
 
-        var result = await _backtestEngine.RunBacktestAsync(strategy, config, internalProgress);
+        BacktestResult result = await _backtestEngine.RunBacktestAsync(strategy, config, internalProgress);
 
         return result;
     }

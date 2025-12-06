@@ -21,7 +21,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         var dataList = data.ToList();
 
         // Update ticker and ISIN for all entries
-        foreach (var price in dataList)
+        foreach (HistoricalPrice price in dataList)
         {
             price.Ticker = ticker;
             price.ISIN = isin;
@@ -80,11 +80,11 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
             return Task.FromResult(new DataSummaryResult(ticker, null, 0, 0, null, null, null, null, null));
         }
 
-        var data = _data[ticker];
+        List<HistoricalPrice> data = _data[ticker];
         string? isin = data.FirstOrDefault()?.ISIN;
         int totalRecords = data.Count;
-        var oldestDate = data.Min(p => p.DateTime);
-        var latestDate = data.Max(p => p.DateTime);
+        DateTime oldestDate = data.Min(p => p.DateTime);
+        DateTime latestDate = data.Max(p => p.DateTime);
         decimal? minPrice = data.Where(p => p.Low.HasValue).Min(p => p.Low);
         decimal? maxPrice = data.Where(p => p.High.HasValue).Max(p => p.High);
         decimal? latestClose = data.OrderByDescending(p => p.DateTime).FirstOrDefault()?.Close;

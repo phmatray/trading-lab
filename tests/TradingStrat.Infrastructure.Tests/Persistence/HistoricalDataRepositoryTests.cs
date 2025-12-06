@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 
@@ -16,7 +17,7 @@ public class HistoricalDataRepositoryTests : IDisposable
 
     public HistoricalDataRepositoryTests()
     {
-        var options = new DbContextOptionsBuilder<TradingContext>()
+        DbContextOptions<TradingContext> options = new DbContextOptionsBuilder<TradingContext>()
             .UseSqlite("Data Source=:memory:")
             .Options;
 
@@ -61,9 +62,9 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", data);
 
         // Assert
-        var savedData = await _repository.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST");
         savedData.Count.ShouldBe(2);
-        foreach (var p in savedData)
+        foreach (HistoricalPrice p in savedData)
         {
             p.Ticker.ShouldBe("TEST");
             p.ISIN.ShouldBe("TEST_ISIN");
@@ -106,11 +107,11 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TEST", null, duplicateData);
 
         // Assert
-        var savedData = await _repository.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST");
         savedData.Count.ShouldBe(2);  // Should have 2 records (1 original + 1 new)
 
         // Original record should remain unchanged
-        var jan1Record = savedData.First(p => p.DateTime == new DateTime(2024, 1, 1));
+        HistoricalPrice jan1Record = savedData.First(p => p.DateTime == new DateTime(2024, 1, 1));
         jan1Record.Close.ShouldBe(100m);
     }
 
@@ -128,7 +129,7 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TEST", null, data);
 
         // Act
-        var latestDate = await _repository.GetLatestDataDateAsync("TEST");
+        DateTime? latestDate = await _repository.GetLatestDataDateAsync("TEST");
 
         // Assert
         latestDate.ShouldBe(new DateTime(2024, 1, 3));
@@ -138,7 +139,7 @@ public class HistoricalDataRepositoryTests : IDisposable
     public async Task GetLatestDataDateAsync_WhenNoData_ShouldReturnNull()
     {
         // Act
-        var latestDate = await _repository.GetLatestDataDateAsync("NODATA");
+        DateTime? latestDate = await _repository.GetLatestDataDateAsync("NODATA");
 
         // Assert
         latestDate.ShouldBeNull();
@@ -162,7 +163,7 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TEST", null, data);
 
         // Act
-        var filtered = await _repository.GetHistoricalDataAsync(
+        List<HistoricalPrice> filtered = await _repository.GetHistoricalDataAsync(
             "TEST",
             new DateTime(2024, 1, 3),
             new DateTime(2024, 1, 7));
@@ -208,7 +209,7 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", data);
 
         // Act
-        var summary = await _repository.GetDataSummaryAsync("TEST");
+        DataSummaryResult summary = await _repository.GetDataSummaryAsync("TEST");
 
         // Assert
         summary.Ticker.ShouldBe("TEST");
@@ -225,7 +226,7 @@ public class HistoricalDataRepositoryTests : IDisposable
     public async Task GetDataSummaryAsync_WhenNoData_ShouldReturnEmptySummary()
     {
         // Act
-        var summary = await _repository.GetDataSummaryAsync("NODATA");
+        DataSummaryResult summary = await _repository.GetDataSummaryAsync("NODATA");
 
         // Assert
         summary.Ticker.ShouldBe("NODATA");
@@ -253,8 +254,8 @@ public class HistoricalDataRepositoryTests : IDisposable
         await _repository.SaveHistoricalDataAsync("TICKER2", null, ticker2Data);
 
         // Assert
-        var ticker1Retrieved = await _repository.GetHistoricalDataAsync("TICKER1");
-        var ticker2Retrieved = await _repository.GetHistoricalDataAsync("TICKER2");
+        List<HistoricalPrice> ticker1Retrieved = await _repository.GetHistoricalDataAsync("TICKER1");
+        List<HistoricalPrice> ticker2Retrieved = await _repository.GetHistoricalDataAsync("TICKER2");
 
         ticker1Retrieved.Count.ShouldBe(1);
         ticker1Retrieved[0].Close.ShouldBe(100m);

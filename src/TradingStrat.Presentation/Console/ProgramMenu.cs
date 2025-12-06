@@ -3,6 +3,8 @@ using Spectre.Console;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Presentation.Console.Presenters;
 
 namespace TradingStrat.Presentation.Console;
@@ -144,7 +146,7 @@ public class ProgramMenu
                         "ML FastTree (1% thresholds)",
                         "ML FastTree (0.5% thresholds)"));
 
-            var (strategyType, strategyParams) = ParseStrategyChoice(strategy);
+            (string strategyType, Dictionary<string, object>? strategyParams) = ParseStrategyChoice(strategy);
 
             decimal initialCapital = AnsiConsole.Ask(
                 "[yellow]Initial capital:[/]",
@@ -160,7 +162,7 @@ public class ProgramMenu
                 _config.Backtest.CommissionPercentage,
                 _config.Backtest.MinimumCommission);
 
-            Domain.Entities.BacktestResult? result = null;
+            BacktestResult? result = null;
 
             await AnsiConsole.Status()
                 .StartAsync("Running backtest...", async ctx =>
@@ -208,13 +210,13 @@ public class ProgramMenu
                         "0.5% Thresholds (±0.5%)",
                         "Custom Thresholds"));
 
-            var thresholds = ParseThresholdChoice(thresholdChoice);
+            PredictionThresholds thresholds = ParseThresholdChoice(thresholdChoice);
 
             AnsiConsole.WriteLine();
 
             var command = new AnalysisCommand(ticker, thresholds);
 
-            Domain.Entities.LiveAnalysisResult? result = null;
+            LiveAnalysisResult? result = null;
 
             await AnsiConsole.Status()
                 .StartAsync("Analyzing current position...", async ctx =>
@@ -293,18 +295,18 @@ public class ProgramMenu
         };
     }
 
-    private Domain.ValueObjects.PredictionThresholds ParseThresholdChoice(string choice)
+    private PredictionThresholds ParseThresholdChoice(string choice)
     {
         return choice switch
         {
-            "1% Thresholds (±1%)" => new Domain.ValueObjects.PredictionThresholds(0.01m, -0.01m),
-            "0.5% Thresholds (±0.5%)" => new Domain.ValueObjects.PredictionThresholds(0.005m, -0.005m),
+            "1% Thresholds (±1%)" => new PredictionThresholds(0.01m, -0.01m),
+            "0.5% Thresholds (±0.5%)" => new PredictionThresholds(0.005m, -0.005m),
             "Custom Thresholds" => GetCustomThresholds(),
-            _ => new Domain.ValueObjects.PredictionThresholds()
+            _ => new PredictionThresholds()
         };
     }
 
-    private Domain.ValueObjects.PredictionThresholds GetCustomThresholds()
+    private PredictionThresholds GetCustomThresholds()
     {
         decimal buyThreshold = AnsiConsole.Ask(
             "[yellow]Buy threshold (%):[/]", 1.0m) / 100m;
@@ -312,7 +314,7 @@ public class ProgramMenu
         decimal sellThreshold = AnsiConsole.Ask(
             "[yellow]Sell threshold (%):[/]", -1.0m) / 100m;
 
-        return new Domain.ValueObjects.PredictionThresholds(buyThreshold, sellThreshold);
+        return new PredictionThresholds(buyThreshold, sellThreshold);
     }
 
     private async Task HandleExportAsync(string ticker)
@@ -333,7 +335,7 @@ public class ProgramMenu
             return;
         }
 
-        var data = await _historicalDataPort.GetHistoricalDataAsync(ticker);
+        List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker);
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
         await AnsiConsole.Status()
@@ -364,7 +366,7 @@ public class ProgramMenu
         AnsiConsole.MarkupLine("[green]✓[/] Export completed successfully");
     }
 
-    private async Task HandleBacktestExportAsync(Domain.Entities.BacktestResult result, string ticker, string strategyType)
+    private async Task HandleBacktestExportAsync(BacktestResult result, string ticker, string strategyType)
     {
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
@@ -387,7 +389,7 @@ public class ProgramMenu
         }
     }
 
-    private async Task HandleAnalysisExportAsync(Domain.Entities.LiveAnalysisResult result, string ticker)
+    private async Task HandleAnalysisExportAsync(LiveAnalysisResult result, string ticker)
     {
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {

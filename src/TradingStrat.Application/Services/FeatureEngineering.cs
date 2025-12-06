@@ -404,7 +404,7 @@ public class FeatureEngineering
                 continue;
             }
 
-            var returns = CalculateReturnsForPeriod(i, period);
+            List<decimal> returns = CalculateReturnsForPeriod(i, period);
 
             if (returns.Count < 2)
             {

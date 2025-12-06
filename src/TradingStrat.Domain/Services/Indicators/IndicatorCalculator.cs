@@ -70,7 +70,7 @@ public class IndicatorCalculator : IIndicatorCalculator
                 continue;
             }
 
-            var (avgGain, avgLoss) = CalculateAverageGainsAndLosses(prices, i, period);
+            (decimal avgGain, decimal avgLoss) = CalculateAverageGainsAndLosses(prices, i, period);
             rsi[i] = CalculateRSIValue(avgGain, avgLoss);
         }
 

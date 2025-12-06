@@ -76,7 +76,7 @@ public class HistoricalPriceBuilder
 
     public HistoricalPrice BuildSingle()
     {
-        var prices = Build();
+        List<HistoricalPrice> prices = Build();
         return prices.First();
     }
 }

@@ -64,7 +64,7 @@ public class StrategyFactory : IStrategyFactory
         decimal sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
         var thresholds = new PredictionThresholds(buyThreshold, sellThreshold);
 
-        var logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();
+        ILogger<MachineLearningStrategy> logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();
         return new MachineLearningStrategy(_indicatorCalculator, thresholds, logger);
     }
 

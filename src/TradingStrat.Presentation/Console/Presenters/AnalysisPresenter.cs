@@ -61,7 +61,7 @@ public static class AnalysisPresenter
         AnsiConsole.Write(new Rule("[yellow]Current Market Data[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var table = new Table()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Grey)
             .AddColumn(new TableColumn("[yellow]Metric[/]").LeftAligned())
@@ -113,7 +113,7 @@ public static class AnalysisPresenter
         AnsiConsole.Write(new Rule("[yellow]Feature Analysis (26 Indicators)[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var table = new Table()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Grey)
             .AddColumn(new TableColumn("[yellow]Category[/]").LeftAligned())

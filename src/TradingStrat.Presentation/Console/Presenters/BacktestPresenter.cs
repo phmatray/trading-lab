@@ -38,7 +38,7 @@ public static class BacktestPresenter
         AnsiConsole.Write(new Rule("[yellow]Performance Summary[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var table = new Table()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Grey)
             .AddColumn(new TableColumn("[yellow]Metric[/]").LeftAligned())
@@ -97,7 +97,7 @@ public static class BacktestPresenter
         AnsiConsole.Write(new Rule("[yellow]Trade History[/]").LeftJustified());
         AnsiConsole.WriteLine();
 
-        var table = new Table()
+        Table table = new Table()
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Grey)
             .AddColumn(new TableColumn("[yellow]#[/]").RightAligned())
@@ -109,7 +109,7 @@ public static class BacktestPresenter
             .AddColumn(new TableColumn("[yellow]P&L[/]").RightAligned())
             .AddColumn(new TableColumn("[yellow]Reason[/]").LeftAligned());
 
-        var tradesToDisplay = trades.Count <= 20
+        List<Trade> tradesToDisplay = trades.Count <= 20
             ? trades
             : trades.Take(10).Concat(trades.Skip(trades.Count - 10)).ToList();
 
@@ -123,7 +123,7 @@ public static class BacktestPresenter
                 continue;
             }
 
-            var trade = tradesToDisplay[i];
+            Trade trade = tradesToDisplay[i];
             string typeColor = trade.Type == TradeType.Buy ? "green" : "red";
             string plText = trade.ProfitLoss.HasValue ? FormatProfitLoss(trade.ProfitLoss.Value) : "[dim]-[/]";
 

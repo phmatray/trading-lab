@@ -22,7 +22,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
         }
 
         // Update ticker and ISIN for all entries
-        foreach (var price in dataList)
+        foreach (HistoricalPrice price in dataList)
         {
             price.Ticker = ticker;
             price.ISIN = isin;
@@ -31,7 +31,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
 
         // Get existing dates to filter out duplicates
         var dates = dataList.Select(p => p.DateTime).ToList();
-        var existingDates = await _context.HistoricalPrices
+        List<DateTime> existingDates = await _context.HistoricalPrices
             .Where(p => p.Ticker == ticker && dates.Contains(p.DateTime))
             .Select(p => p.DateTime)
             .ToListAsync();
@@ -73,7 +73,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
 
     public async Task<DataSummaryResult> GetDataSummaryAsync(string ticker)
     {
-        var data = await _context.HistoricalPrices
+        List<HistoricalPrice> data = await _context.HistoricalPrices
             .Where(p => p.Ticker == ticker)
             .ToListAsync();
 
@@ -84,8 +84,8 @@ public class HistoricalDataRepository : IHistoricalDataPort
 
         string? isin = data.FirstOrDefault()?.ISIN;
         int totalRecords = data.Count;
-        var oldestDate = data.Min(p => p.DateTime);
-        var latestDate = data.Max(p => p.DateTime);
+        DateTime oldestDate = data.Min(p => p.DateTime);
+        DateTime latestDate = data.Max(p => p.DateTime);
         decimal? minPrice = data.Where(p => p.Low.HasValue).Min(p => p.Low);
         decimal? maxPrice = data.Where(p => p.High.HasValue).Max(p => p.High);
         decimal? latestClose = data

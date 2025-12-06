@@ -1,4 +1,5 @@
 using Shouldly;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.Tests.Builders;
@@ -30,10 +31,10 @@ public class MovingAverageCrossoverStrategyTests
     public void Constructor_WithFastPeriodGreaterThanSlowPeriod_ShouldThrow()
     {
         // Arrange & Act
-        var act = () => new MovingAverageCrossoverStrategy(_indicatorCalculator, fastPeriod: 20, slowPeriod: 10);
+        Func<MovingAverageCrossoverStrategy> act = () => new MovingAverageCrossoverStrategy(_indicatorCalculator, fastPeriod: 20, slowPeriod: 10);
 
         // Assert
-        var ex = Should.Throw<ArgumentException>(act);
+        ArgumentException ex = Should.Throw<ArgumentException>(act);
         ex.Message.ShouldContain("Fast period must be less than slow period");
     }
 
@@ -43,7 +44,7 @@ public class MovingAverageCrossoverStrategyTests
         // Arrange
         // Create price data where fast MA crosses above slow MA at index 14
         // Use declining then sharp rally pattern
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(
                 110m, 108m, 106m, 104m, 102m,  // Decline - slow moves down gradually
                 100m, 98m, 96m, 94m, 92m,      // Continued decline
@@ -54,7 +55,7 @@ public class MovingAverageCrossoverStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(14, 10000m, 0);
+        TradeSignal signal = strategy.GenerateSignal(14, 10000m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Buy);
@@ -67,7 +68,7 @@ public class MovingAverageCrossoverStrategyTests
         // Arrange
         // Create price data where fast MA crosses below slow MA at index 14
         // Use rising then sharp decline pattern
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(
                 90m, 92m, 94m, 96m, 98m,       // Rise - slow moves up gradually
                 100m, 102m, 104m, 106m, 108m,  // Continued rise
@@ -78,7 +79,7 @@ public class MovingAverageCrossoverStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act - assuming we have a position
-        var signal = strategy.GenerateSignal(14, 0m, 100);
+        TradeSignal signal = strategy.GenerateSignal(14, 0m, 100);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Sell);
@@ -89,7 +90,7 @@ public class MovingAverageCrossoverStrategyTests
     public void GenerateSignal_WhenNotEnoughData_ReturnsHoldSignal()
     {
         // Arrange
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(100m, 101m, 102m)  // Only 3 data points
             .Build();
 
@@ -97,7 +98,7 @@ public class MovingAverageCrossoverStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(2, 10000m, 0);
+        TradeSignal signal = strategy.GenerateSignal(2, 10000m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Hold);
@@ -108,7 +109,7 @@ public class MovingAverageCrossoverStrategyTests
     public void GenerateSignal_WhenNoPositionAndNoCash_ReturnsHoldSignal()
     {
         // Arrange
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithTrendingPrices(count: 20, startPrice: 100m, increment: 1m)
             .Build();
 
@@ -116,7 +117,7 @@ public class MovingAverageCrossoverStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal = strategy.GenerateSignal(19, 0m, 0);
+        TradeSignal signal = strategy.GenerateSignal(19, 0m, 0);
 
         // Assert
         signal.Type.ShouldBe(SignalType.Hold);
@@ -126,14 +127,14 @@ public class MovingAverageCrossoverStrategyTests
     public void Initialize_WithValidData_ShouldNotThrow()
     {
         // Arrange
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithTrendingPrices(count: 50, startPrice: 100m, increment: 0.5m)
             .Build();
 
         var strategy = new MovingAverageCrossoverStrategy(_indicatorCalculator, fastPeriod: 20, slowPeriod: 50);
 
         // Act
-        var act = () => strategy.Initialize(prices.AsReadOnly());
+        Action act = () => strategy.Initialize(prices.AsReadOnly());
 
         // Assert
         Should.NotThrow(act);
@@ -143,7 +144,7 @@ public class MovingAverageCrossoverStrategyTests
     public void GenerateSignal_AfterMultipleCalls_ShouldProduceConsistentResults()
     {
         // Arrange
-        var prices = HistoricalPriceBuilder.Create()
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithTrendingPrices(count: 30, startPrice: 100m, increment: 1m)
             .Build();
 
@@ -151,8 +152,8 @@ public class MovingAverageCrossoverStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        var signal1 = strategy.GenerateSignal(20, 10000m, 0);
-        var signal2 = strategy.GenerateSignal(20, 10000m, 0);
+        TradeSignal signal1 = strategy.GenerateSignal(20, 10000m, 0);
+        TradeSignal signal2 = strategy.GenerateSignal(20, 10000m, 0);
 
         // Assert
         signal1.Type.ShouldBe(signal2.Type);

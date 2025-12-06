@@ -41,7 +41,7 @@ public class FakeMarketDataAdapter : IMarketDataPort
 
     public Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker)
     {
-        var latest = _fakeData.OrderByDescending(p => p.DateTime).FirstOrDefault();
+        HistoricalPrice? latest = _fakeData.OrderByDescending(p => p.DateTime).FirstOrDefault();
 
         if (latest == null)
         {
@@ -64,13 +64,13 @@ public class FakeMarketDataAdapter : IMarketDataPort
     private static List<HistoricalPrice> GenerateDefaultFakeData()
     {
         var data = new List<HistoricalPrice>();
-        var baseDate = DateTime.Today.AddDays(-100);
+        DateTime baseDate = DateTime.Today.AddDays(-100);
         decimal basePrice = 100m;
 
         // Generate 100 days of fake data with slight upward trend
         for (int i = 0; i < 100; i++)
         {
-            var date = baseDate.AddDays(i);
+            DateTime date = baseDate.AddDays(i);
             decimal open = basePrice + i * 0.5m;
             decimal close = open + (decimal)(new Random(i).NextDouble() - 0.5) * 2m;
             decimal high = Math.Max(open, close) + 1m;
