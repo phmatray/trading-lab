@@ -321,14 +321,7 @@ public class FeatureEngineering
                 continue;
             }
 
-            var returns = new List<decimal>();
-            for (int j = i - period + 1; j <= i; j++)
-            {
-                if (j > 0 && _closePrices[j - 1] != 0)
-                {
-                    returns.Add((_closePrices[j] - _closePrices[j - 1]) / _closePrices[j - 1]);
-                }
-            }
+            var returns = CalculateReturnsForPeriod(i, period);
 
             if (returns.Count < 2)
             {
@@ -336,11 +329,31 @@ public class FeatureEngineering
                 continue;
             }
 
-            var mean = returns.Average();
-            var variance = returns.Sum(r => (r - mean) * (r - mean)) / (returns.Count - 1);
-            stdDev[i] = (decimal)Math.Sqrt((double)variance);
+            stdDev[i] = CalculateStandardDeviation(returns);
         }
 
         return stdDev;
+    }
+
+    private List<decimal> CalculateReturnsForPeriod(int endIndex, int period)
+    {
+        var returns = new List<decimal>();
+
+        for (int j = endIndex - period + 1; j <= endIndex; j++)
+        {
+            if (j > 0 && _closePrices[j - 1] != 0)
+            {
+                returns.Add((_closePrices[j] - _closePrices[j - 1]) / _closePrices[j - 1]);
+            }
+        }
+
+        return returns;
+    }
+
+    private static decimal CalculateStandardDeviation(List<decimal> values)
+    {
+        var mean = values.Average();
+        var variance = values.Sum(r => (r - mean) * (r - mean)) / (values.Count - 1);
+        return (decimal)Math.Sqrt((double)variance);
     }
 }
