@@ -1,3 +1,13 @@
 <Solution>
-  <Project Path="TradingStrat/TradingStrat.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/TradingStrat.Application/TradingStrat.Application.csproj" />
+    <Project Path="src/TradingStrat.Domain/TradingStrat.Domain.csproj" />
+    <Project Path="src/TradingStrat.Infrastructure/TradingStrat.Infrastructure.csproj" />
+    <Project Path="src/TradingStrat.Presentation/TradingStrat.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TradingStrat.Application.Tests/TradingStrat.Application.Tests.csproj" />
+    <Project Path="tests/TradingStrat.Domain.Tests/TradingStrat.Domain.Tests.csproj" />
+    <Project Path="tests/TradingStrat.Infrastructure.Tests/TradingStrat.Infrastructure.Tests.csproj" />
+  </Folder>
 </Solution>
