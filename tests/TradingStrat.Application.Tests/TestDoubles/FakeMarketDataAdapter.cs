@@ -64,7 +64,7 @@ public class FakeMarketDataAdapter : IMarketDataPort
     private static List<HistoricalPrice> GenerateDefaultFakeData()
     {
         var data = new List<HistoricalPrice>();
-        var baseDate = new DateTime(2024, 1, 1);
+        var baseDate = DateTime.Today.AddDays(-100);
         var basePrice = 100m;
 
         // Generate 100 days of fake data with slight upward trend

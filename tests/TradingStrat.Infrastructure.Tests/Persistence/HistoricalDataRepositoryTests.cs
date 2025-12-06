@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Infrastructure.Persistence.EfCore;
@@ -62,12 +62,12 @@ public class HistoricalDataRepositoryTests : IDisposable
 
         // Assert
         var savedData = await _repository.GetHistoricalDataAsync("TEST");
-        savedData.Should().HaveCount(2);
-        savedData.Should().AllSatisfy(p =>
+        savedData.Count.ShouldBe(2);
+        foreach (var p in savedData)
         {
-            p.Ticker.Should().Be("TEST");
-            p.ISIN.Should().Be("TEST_ISIN");
-        });
+            p.Ticker.ShouldBe("TEST");
+            p.ISIN.ShouldBe("TEST_ISIN");
+        }
     }
 
     [Fact]
@@ -107,11 +107,11 @@ public class HistoricalDataRepositoryTests : IDisposable
 
         // Assert
         var savedData = await _repository.GetHistoricalDataAsync("TEST");
-        savedData.Should().HaveCount(2);  // Should have 2 records (1 original + 1 new)
+        savedData.Count.ShouldBe(2);  // Should have 2 records (1 original + 1 new)
 
         // Original record should remain unchanged
         var jan1Record = savedData.First(p => p.DateTime == new DateTime(2024, 1, 1));
-        jan1Record.Close.Should().Be(100m);
+        jan1Record.Close.ShouldBe(100m);
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class HistoricalDataRepositoryTests : IDisposable
         var latestDate = await _repository.GetLatestDataDateAsync("TEST");
 
         // Assert
-        latestDate.Should().Be(new DateTime(2024, 1, 3));
+        latestDate.ShouldBe(new DateTime(2024, 1, 3));
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class HistoricalDataRepositoryTests : IDisposable
         var latestDate = await _repository.GetLatestDataDateAsync("NODATA");
 
         // Assert
-        latestDate.Should().BeNull();
+        latestDate.ShouldBeNull();
     }
 
     [Fact]
@@ -168,9 +168,9 @@ public class HistoricalDataRepositoryTests : IDisposable
             new DateTime(2024, 1, 7));
 
         // Assert
-        filtered.Should().HaveCount(5);
-        filtered.First().DateTime.Should().Be(new DateTime(2024, 1, 3));
-        filtered.Last().DateTime.Should().Be(new DateTime(2024, 1, 7));
+        filtered.Count.ShouldBe(5);
+        filtered.First().DateTime.ShouldBe(new DateTime(2024, 1, 3));
+        filtered.Last().DateTime.ShouldBe(new DateTime(2024, 1, 7));
     }
 
     [Fact]
@@ -211,14 +211,14 @@ public class HistoricalDataRepositoryTests : IDisposable
         var summary = await _repository.GetDataSummaryAsync("TEST");
 
         // Assert
-        summary.Ticker.Should().Be("TEST");
-        summary.ISIN.Should().Be("TEST_ISIN");
-        summary.TotalRecords.Should().Be(3);
-        summary.OldestDate.Should().Be(new DateTime(2024, 1, 1));
-        summary.LatestDate.Should().Be(new DateTime(2024, 1, 3));
-        summary.MinPrice.Should().Be(95m);
-        summary.MaxPrice.Should().Be(115m);
-        summary.LatestClose.Should().Be(102m);
+        summary.Ticker.ShouldBe("TEST");
+        summary.ISIN.ShouldBe("TEST_ISIN");
+        summary.TotalRecords.ShouldBe(3);
+        summary.OldestDate.ShouldBe(new DateTime(2024, 1, 1));
+        summary.LatestDate.ShouldBe(new DateTime(2024, 1, 3));
+        summary.MinPrice.ShouldBe(95m);
+        summary.MaxPrice.ShouldBe(115m);
+        summary.LatestClose.ShouldBe(102m);
     }
 
     [Fact]
@@ -228,10 +228,10 @@ public class HistoricalDataRepositoryTests : IDisposable
         var summary = await _repository.GetDataSummaryAsync("NODATA");
 
         // Assert
-        summary.Ticker.Should().Be("NODATA");
-        summary.TotalRecords.Should().Be(0);
-        summary.OldestDate.Should().BeNull();
-        summary.LatestDate.Should().BeNull();
+        summary.Ticker.ShouldBe("NODATA");
+        summary.TotalRecords.ShouldBe(0);
+        summary.OldestDate.ShouldBeNull();
+        summary.LatestDate.ShouldBeNull();
     }
 
     [Fact]
@@ -256,11 +256,11 @@ public class HistoricalDataRepositoryTests : IDisposable
         var ticker1Retrieved = await _repository.GetHistoricalDataAsync("TICKER1");
         var ticker2Retrieved = await _repository.GetHistoricalDataAsync("TICKER2");
 
-        ticker1Retrieved.Should().HaveCount(1);
-        ticker1Retrieved[0].Close.Should().Be(100m);
+        ticker1Retrieved.Count.ShouldBe(1);
+        ticker1Retrieved[0].Close.ShouldBe(100m);
 
-        ticker2Retrieved.Should().HaveCount(1);
-        ticker2Retrieved[0].Close.Should().Be(200m);
+        ticker2Retrieved.Count.ShouldBe(1);
+        ticker2Retrieved[0].Close.ShouldBe(200m);
     }
 
     public void Dispose()

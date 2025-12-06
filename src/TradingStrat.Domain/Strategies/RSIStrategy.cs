@@ -24,6 +24,9 @@ public class RSIStrategy : BaseStrategy
         decimal overboughtThreshold = 70)
         : base(indicatorCalculator)
     {
+        if (oversoldThreshold >= overboughtThreshold)
+            throw new ArgumentException("Oversold threshold must be less than overbought threshold");
+
         _period = period;
         _oversoldThreshold = oversoldThreshold;
         _overboughtThreshold = overboughtThreshold;

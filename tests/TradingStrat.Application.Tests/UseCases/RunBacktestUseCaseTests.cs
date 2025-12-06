@@ -1,5 +1,5 @@
-using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shouldly;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
@@ -57,10 +57,10 @@ public class RunBacktestUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Ticker.Should().Be("TEST");
-        result.Metrics.Should().NotBeNull();
-        result.Metrics.InitialCapital.Should().Be(10000m);
+        result.ShouldNotBeNull();
+        result.Ticker.ShouldBe("TEST");
+        result.Metrics.ShouldNotBeNull();
+        result.Metrics.InitialCapital.ShouldBe(10000m);
     }
 
     [Fact]
@@ -71,12 +71,9 @@ public class RunBacktestUseCaseTests
             Ticker: "NODATA",
             StrategyType: "ma");
 
-        // Act
-        var act = async () => await _useCase.ExecuteAsync(command);
-
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*No historical data found*");
+        // Act & Assert
+        var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
+        ex.Message.ShouldContain("No historical data found");
     }
 
     [Fact]
@@ -101,8 +98,8 @@ public class RunBacktestUseCaseTests
         await _useCase.ExecuteAsync(command, progress);
 
         // Assert
-        progressReports.Should().NotBeEmpty();
-        progressReports.Should().Contain(p => p.Current > 0);
+        progressReports.ShouldNotBeEmpty();
+        progressReports.ShouldContain(p => p.Current > 0);
     }
 
     [Theory]
@@ -123,8 +120,8 @@ public class RunBacktestUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
-        result.StrategyName.Should().NotBeEmpty();
+        result.ShouldNotBeNull();
+        result.StrategyName.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -146,8 +143,8 @@ public class RunBacktestUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(endDate);
+        result.StartDate.ShouldBe(startDate);
+        result.EndDate.ShouldBe(endDate);
     }
 
     [Fact]
@@ -172,7 +169,7 @@ public class RunBacktestUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
+        result.ShouldNotBeNull();
         // Commission should reduce total returns compared to 0% commission
     }
 

@@ -23,6 +23,9 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
         int slowPeriod = 50)
         : base(indicatorCalculator)
     {
+        if (fastPeriod >= slowPeriod)
+            throw new ArgumentException("Fast period must be less than slow period");
+
         _fastPeriod = fastPeriod;
         _slowPeriod = slowPeriod;
     }

@@ -1,5 +1,5 @@
-using FluentAssertions;
-using Moq;
+using FakeItEasy;
+using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
@@ -12,19 +12,19 @@ public class FetchHistoricalDataUseCaseTests
 {
     private readonly InMemoryHistoricalDataRepository _historicalDataPort;
     private readonly FakeMarketDataAdapter _marketDataPort;
-    private readonly Mock<ITickerResolver> _tickerResolverMock;
+    private readonly ITickerResolver _tickerResolverFake;
     private readonly FetchHistoricalDataUseCase _useCase;
 
     public FetchHistoricalDataUseCaseTests()
     {
         _historicalDataPort = new InMemoryHistoricalDataRepository();
         _marketDataPort = new FakeMarketDataAdapter();
-        _tickerResolverMock = new Mock<ITickerResolver>();
+        _tickerResolverFake = A.Fake<ITickerResolver>();
 
         _useCase = new FetchHistoricalDataUseCase(
             _historicalDataPort,
             _marketDataPort,
-            _tickerResolverMock.Object);
+            _tickerResolverFake);
     }
 
     [Fact]
@@ -34,19 +34,19 @@ public class FetchHistoricalDataUseCaseTests
         var command = new FetchDataCommand(
             Ticker: "TEST",
             Isin: null,
-            StartDate: new DateTime(2024, 1, 1),
-            EndDate: new DateTime(2024, 1, 31));
+            StartDate: DateTime.Today.AddDays(-30),
+            EndDate: DateTime.Today.AddDays(-1));
 
         // Act
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Ticker.Should().Be("TEST");
-        result.TotalRecords.Should().BeGreaterThan(0);
+        result.ShouldNotBeNull();
+        result.Ticker.ShouldBe("TEST");
+        result.TotalRecords.ShouldBeGreaterThan(0);
 
         var savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
-        savedData.Should().NotBeEmpty();
+        savedData.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -56,20 +56,19 @@ public class FetchHistoricalDataUseCaseTests
         var command = new FetchDataCommand(
             Ticker: "CON3.L",
             Isin: "XS2399367254",
-            StartDate: new DateTime(2024, 1, 1),
-            EndDate: new DateTime(2024, 1, 31));
+            StartDate: DateTime.Today.AddDays(-30),
+            EndDate: DateTime.Today.AddDays(-1));
 
-        _tickerResolverMock
-            .Setup(x => x.GetAllTickersForIsin("XS2399367254"))
+        A.CallTo(() => _tickerResolverFake.GetAllTickersForIsin("XS2399367254"))
             .Returns(new List<string> { "CON3.L", "3COI.DE" });
 
         // Act
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Ticker.Should().Be("CON3.L");
-        _tickerResolverMock.Verify(x => x.GetAllTickersForIsin("XS2399367254"), Times.Once);
+        result.ShouldNotBeNull();
+        result.Ticker.ShouldBe("CON3.L");
+        A.CallTo(() => _tickerResolverFake.GetAllTickersForIsin("XS2399367254")).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -97,7 +96,7 @@ public class FetchHistoricalDataUseCaseTests
 
         // Should not have duplicates for existing dates
         savedData.GroupBy(p => p.DateTime)
-            .Should().OnlyContain(g => g.Count() == 1, "dates should not be duplicated");
+            .ShouldAllBe(g => g.Count() == 1, "dates should not be duplicated");
     }
 
     [Fact]
@@ -120,8 +119,8 @@ public class FetchHistoricalDataUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Should().NotBeNull();
-        result.TotalRecords.Should().Be(1);  // Only existing record
+        result.ShouldNotBeNull();
+        result.TotalRecords.ShouldBe(1);  // Only existing record
     }
 
     [Fact]
@@ -140,9 +139,9 @@ public class FetchHistoricalDataUseCaseTests
         await _useCase.ExecuteAsync(command, progress);
 
         // Assert
-        progressMessages.Should().NotBeEmpty();
-        progressMessages.Should().Contain(msg => msg.Contains("Initializing"));
-        progressMessages.Should().Contain(msg => msg.Contains("Fetching"));
+        progressMessages.ShouldNotBeEmpty();
+        progressMessages.ShouldContain(msg => msg.Contains("Initializing"));
+        progressMessages.ShouldContain(msg => msg.Contains("Fetching"));
     }
 
     [Fact]
@@ -153,15 +152,11 @@ public class FetchHistoricalDataUseCaseTests
             Ticker: "INVALID",
             Isin: "INVALID_ISIN");
 
-        _tickerResolverMock
-            .Setup(x => x.GetAllTickersForIsin("INVALID_ISIN"))
+        A.CallTo(() => _tickerResolverFake.GetAllTickersForIsin("INVALID_ISIN"))
             .Returns((List<string>?)null);
 
-        // Act
-        var act = async () => await _useCase.ExecuteAsync(command);
-
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Could not resolve ISIN*");
+        // Act & Assert
+        var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
+        ex.Message.ShouldContain("Could not resolve ISIN");
     }
 }

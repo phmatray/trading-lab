@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.Tests.Builders;
@@ -22,8 +22,8 @@ public class RSIStrategyTests
         var strategy = new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 30, overboughtThreshold: 70);
 
         // Assert
-        strategy.Should().NotBeNull();
-        strategy.Name.Should().Be("RSI (14, 30/70)");
+        strategy.ShouldNotBeNull();
+        strategy.Name.ShouldBe("RSI (14, 30/70)");
     }
 
     [Fact]
@@ -33,21 +33,21 @@ public class RSIStrategyTests
         var act = () => new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 80, overboughtThreshold: 70);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Oversold threshold must be less than overbought threshold*");
+        var ex = Should.Throw<ArgumentException>(act);
+        ex.Message.ShouldContain("Oversold threshold must be less than overbought threshold");
     }
 
     [Fact]
     public void GenerateSignal_WhenRSIOversold_ReturnsBuySignal()
     {
         // Arrange
-        // Create declining prices to get low RSI (oversold)
+        // Create declining prices to get low RSI (oversold), then recovery to cross above threshold
         var prices = HistoricalPriceBuilder.Create()
             .WithPrices(
-                150m, 148m, 145m, 143m, 140m,
-                138m, 135m, 133m, 130m, 128m,
-                125m, 123m, 120m, 118m, 115m,
-                113m, 110m, 108m, 105m, 103m)
+                150m, 145m, 140m, 135m, 130m,
+                125m, 120m, 115m, 110m, 105m,
+                100m, 98m, 96m, 95m, 94m,      // Deep oversold
+                96m, 98m, 101m, 104m, 108m)    // Recovery crosses above 30
             .Build();
 
         var strategy = new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 30, overboughtThreshold: 70);
@@ -57,21 +57,22 @@ public class RSIStrategyTests
         var signal = strategy.GenerateSignal(19, 10000m, 0);
 
         // Assert
-        signal.Type.Should().Be(SignalType.Buy);
-        signal.Quantity.Should().BeGreaterThan(0);
+        signal.Type.ShouldBe(SignalType.Buy);
+        signal.Quantity.ShouldBeGreaterThan(0);
     }
 
     [Fact]
     public void GenerateSignal_WhenRSIOverbought_ReturnsSellSignal()
     {
         // Arrange
-        // Create rising prices to get high RSI (overbought)
+        // Create rising prices to get high RSI (overbought), then decline to cross below threshold
+        // Mirror the buy test - invert the price pattern
         var prices = HistoricalPriceBuilder.Create()
             .WithPrices(
-                100m, 102m, 105m, 107m, 110m,
-                112m, 115m, 117m, 120m, 122m,
-                125m, 127m, 130m, 132m, 135m,
-                137m, 140m, 142m, 145m, 147m)
+                50m, 55m, 60m, 65m, 70m,
+                75m, 80m, 85m, 90m, 95m,
+                100m, 102m, 104m, 105m, 106m,  // Peak - deep overbought
+                104m, 102m, 99m, 96m, 92m)     // Decline - crosses below 70
             .Build();
 
         var strategy = new RSIStrategy(_indicatorCalculator, period: 14, oversoldThreshold: 30, overboughtThreshold: 70);
@@ -81,8 +82,8 @@ public class RSIStrategyTests
         var signal = strategy.GenerateSignal(19, 0m, 100);
 
         // Assert
-        signal.Type.Should().Be(SignalType.Sell);
-        signal.Quantity.Should().Be(100);
+        signal.Type.ShouldBe(SignalType.Sell);
+        signal.Quantity.ShouldBe(100);
     }
 
     [Fact]
@@ -105,7 +106,7 @@ public class RSIStrategyTests
         var signal = strategy.GenerateSignal(19, 10000m, 0);
 
         // Assert
-        signal.Type.Should().Be(SignalType.Hold);
+        signal.Type.ShouldBe(SignalType.Hold);
     }
 
     [Fact]
@@ -123,8 +124,8 @@ public class RSIStrategyTests
         var signal = strategy.GenerateSignal(2, 10000m, 0);
 
         // Assert
-        signal.Type.Should().Be(SignalType.Hold);
-        signal.Reason.Should().Contain("Insufficient data");
+        signal.Type.ShouldBe(SignalType.Hold);
+        signal.Reason.ShouldContain("Insufficient data");
     }
 
     [Theory]
@@ -137,7 +138,7 @@ public class RSIStrategyTests
         var strategy = new RSIStrategy(_indicatorCalculator, period, oversold, overbought);
 
         // Assert
-        strategy.Should().NotBeNull();
-        strategy.Name.Should().Be($"RSI ({period}, {oversold}/{overbought})");
+        strategy.ShouldNotBeNull();
+        strategy.Name.ShouldBe($"RSI ({period}, {oversold}/{overbought})");
     }
 }
