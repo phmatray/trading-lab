@@ -153,7 +153,7 @@ public class FetchHistoricalDataUseCaseTests
             Isin: "INVALID_ISIN");
 
         A.CallTo(() => _tickerResolverFake.GetAllTickersForIsin("INVALID_ISIN"))
-            .Returns((List<string>?)null);
+            .Returns(null);
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));

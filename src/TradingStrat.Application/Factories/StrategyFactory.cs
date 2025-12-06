@@ -60,8 +60,8 @@ public class StrategyFactory : IStrategyFactory
 
     private MachineLearningStrategy CreateMachineLearningStrategy(Dictionary<string, object> parameters)
     {
-        var buyThreshold = GetParameter<decimal>(parameters, "BuyThreshold", 0.01m);
-        var sellThreshold = GetParameter<decimal>(parameters, "SellThreshold", -0.01m);
+        var buyThreshold = GetParameter(parameters, "BuyThreshold", 0.01m);
+        var sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
         var thresholds = new PredictionThresholds(buyThreshold, sellThreshold);
 
         var logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();

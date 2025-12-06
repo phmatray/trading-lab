@@ -12,6 +12,7 @@ namespace TradingStrat.Domain.Strategies;
 /// </summary>
 public class MachineLearningStrategy : BaseStrategy
 {
+    private readonly IIndicatorCalculator _indicatorCalculator;
     private readonly PredictionThresholds _thresholds;
     private readonly ILogger<MachineLearningStrategy>? _logger;
     private readonly MLContext _mlContext;
@@ -35,6 +36,7 @@ public class MachineLearningStrategy : BaseStrategy
         ILogger<MachineLearningStrategy>? logger = null)
         : base(indicatorCalculator)
     {
+        _indicatorCalculator = indicatorCalculator;
         _thresholds = thresholds ?? new PredictionThresholds(0.01m, -0.01m);
         _logger = logger;
         _mlContext = new MLContext(seed: 42);
@@ -118,9 +120,9 @@ public class MachineLearningStrategy : BaseStrategy
                 StochRSI = CalculateStochRSI(i),
 
                 // MACD (3)
-                MACD = (float)CalculateMACD(12, 26, 9).macd[i],
-                MACDSignal = (float)CalculateMACD(12, 26, 9).signal[i],
-                MACDHistogram = (float)CalculateMACD(12, 26, 9).histogram[i],
+                MACD = (float)CalculateMACD().macd[i],
+                MACDSignal = (float)CalculateMACD().signal[i],
+                MACDHistogram = (float)CalculateMACD().histogram[i],
 
                 // Volatility (4)
                 StdDev_10 = CalculateReturnStdDev(i, 10),

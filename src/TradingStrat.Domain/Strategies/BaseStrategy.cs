@@ -4,19 +4,13 @@ using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Domain.Strategies;
 
-public abstract class BaseStrategy : IStrategy
+public abstract class BaseStrategy(IIndicatorCalculator indicatorCalculator) : IStrategy
 {
-    protected readonly IIndicatorCalculator _indicatorCalculator;
     protected IReadOnlyList<HistoricalPrice> HistoricalData { get; private set; } = null!;
     protected decimal[] ClosePrices { get; private set; } = null!;
 
     public abstract string Name { get; }
     public abstract string Description { get; }
-
-    protected BaseStrategy(IIndicatorCalculator indicatorCalculator)
-    {
-        _indicatorCalculator = indicatorCalculator;
-    }
 
     public virtual void Initialize(IReadOnlyList<HistoricalPrice> historicalData)
     {
@@ -30,19 +24,19 @@ public abstract class BaseStrategy : IStrategy
 
     // Delegate indicator calculations to IIndicatorCalculator
     protected decimal[] CalculateSMA(int period)
-        => _indicatorCalculator.CalculateSMA(ClosePrices, period);
+        => indicatorCalculator.CalculateSMA(ClosePrices, period);
 
     protected decimal[] CalculateEMA(int period)
-        => _indicatorCalculator.CalculateEMA(ClosePrices, period);
+        => indicatorCalculator.CalculateEMA(ClosePrices, period);
 
     protected decimal[] CalculateRSI(int period)
-        => _indicatorCalculator.CalculateRSI(ClosePrices, period);
+        => indicatorCalculator.CalculateRSI(ClosePrices, period);
 
     protected (decimal[] macd, decimal[] signal, decimal[] histogram) CalculateMACD(
         int fastPeriod = 12,
         int slowPeriod = 26,
         int signalPeriod = 9)
-        => _indicatorCalculator.CalculateMACD(ClosePrices, fastPeriod, slowPeriod, signalPeriod);
+        => indicatorCalculator.CalculateMACD(ClosePrices, fastPeriod, slowPeriod, signalPeriod);
 
     protected int CalculateQuantity(decimal cash, decimal price, int currentPosition)
     {

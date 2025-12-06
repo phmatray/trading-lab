@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace TradingStrat.Domain.ValueObjects;
 
 public class MarketFeatures
