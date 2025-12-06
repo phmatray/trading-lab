@@ -5,6 +5,7 @@ using TradingStrat.Models;
 using TradingStrat.Services;
 using TradingStrat.Services.Backtesting;
 using TradingStrat.Services.Strategies;
+using TradingStrat.Services.Strategies.MachineLearning;
 using TradingStrat.Utilities;
 
 namespace TradingStrat;
@@ -64,7 +65,9 @@ public static class ProgramBacktest
                         "MA Crossover (20/50)",
                         "MA Crossover (10/30)",
                         "RSI (14, 30/70)",
-                        "MACD (12/26/9)"));
+                        "MACD (12/26/9)",
+                        "ML LightGBM (1% thresholds)",
+                        "ML LightGBM (0.5% thresholds)"));
 
             IStrategy selectedStrategy = strategy switch
             {
@@ -72,6 +75,10 @@ public static class ProgramBacktest
                 "MA Crossover (10/30)" => new MovingAverageCrossoverStrategy(10, 30),
                 "RSI (14, 30/70)" => new RSIStrategy(14, 30, 70),
                 "MACD (12/26/9)" => new MACDStrategy(12, 26, 9),
+                "ML LightGBM (1% thresholds)" => new MachineLearningStrategy(
+                    new PredictionThresholds(0.01m, -0.01m), 100),
+                "ML LightGBM (0.5% thresholds)" => new MachineLearningStrategy(
+                    new PredictionThresholds(0.005m, -0.005m), 100),
                 _ => new MovingAverageCrossoverStrategy(20, 50)
             };
 

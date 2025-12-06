@@ -20,7 +20,7 @@ public abstract class BaseStrategy : IStrategy
 
     public abstract Dictionary<string, object> GetParameters();
 
-    protected decimal[] CalculateSMA(int period)
+    public decimal[] CalculateSMA(int period)
     {
         var sma = new decimal[ClosePrices.Length];
 
@@ -43,7 +43,7 @@ public abstract class BaseStrategy : IStrategy
         return sma;
     }
 
-    protected decimal[] CalculateEMA(int period)
+    public decimal[] CalculateEMA(int period)
     {
         var ema = new decimal[ClosePrices.Length];
         var multiplier = 2m / (period + 1);
@@ -74,7 +74,7 @@ public abstract class BaseStrategy : IStrategy
         return ema;
     }
 
-    protected decimal[] CalculateRSI(int period)
+    public decimal[] CalculateRSI(int period)
     {
         var rsi = new decimal[ClosePrices.Length];
 
@@ -115,7 +115,7 @@ public abstract class BaseStrategy : IStrategy
         return rsi;
     }
 
-    protected (decimal[] macd, decimal[] signal, decimal[] histogram) CalculateMACD(
+    public (decimal[] macd, decimal[] signal, decimal[] histogram) CalculateMACD(
         int fastPeriod = 12,
         int slowPeriod = 26,
         int signalPeriod = 9)
