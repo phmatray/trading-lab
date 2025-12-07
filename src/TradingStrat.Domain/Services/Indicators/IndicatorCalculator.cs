@@ -6,6 +6,12 @@ public class IndicatorCalculator : IIndicatorCalculator
 {
     public decimal[] CalculateSMA(decimal[] prices, int period)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
         decimal[] sma = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
@@ -29,6 +35,12 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateEMA(decimal[] prices, int period)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
         decimal[] ema = new decimal[prices.Length];
         decimal multiplier = 2m / (period + 1);
 
@@ -60,6 +72,12 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateRSI(decimal[] prices, int period)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
         decimal[] rsi = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
@@ -115,6 +133,20 @@ public class IndicatorCalculator : IIndicatorCalculator
         int slowPeriod = 26,
         int signalPeriod = 9)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (fastPeriod <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fastPeriod), "Fast period must be greater than zero.");
+        }
+        if (slowPeriod <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(slowPeriod), "Slow period must be greater than zero.");
+        }
+        if (signalPeriod <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(signalPeriod), "Signal period must be greater than zero.");
+        }
+
         decimal[] fastEMA = CalculateEMA(prices, fastPeriod);
         decimal[] slowEMA = CalculateEMA(prices, slowPeriod);
 
@@ -137,6 +169,12 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateATR(HistoricalPrice[] prices, int period)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
         decimal[] trueRanges = CalculateTrueRanges(prices);
         return CalculateATRFromTrueRanges(trueRanges, period);
     }
@@ -210,6 +248,12 @@ public class IndicatorCalculator : IIndicatorCalculator
 
     public decimal[] CalculateStdDev(decimal[] prices, int period)
     {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
         decimal[] stdDev = new decimal[prices.Length];
 
         for (int i = 0; i < prices.Length; i++)
