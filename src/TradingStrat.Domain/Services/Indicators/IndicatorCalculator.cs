@@ -315,4 +315,97 @@ public class IndicatorCalculator : IIndicatorCalculator
 
         return ema;
     }
+
+    public decimal[] CalculateTenkan(HistoricalPrice[] prices, int period = 9)
+    {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
+        return CalculateDonchianMidpoint(prices, period);
+    }
+
+    public decimal[] CalculateKijun(HistoricalPrice[] prices, int period = 26)
+    {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
+        return CalculateDonchianMidpoint(prices, period);
+    }
+
+    public decimal[] CalculateSenkouSpanA(decimal[] tenkan, decimal[] kijun)
+    {
+        ArgumentNullException.ThrowIfNull(tenkan);
+        ArgumentNullException.ThrowIfNull(kijun);
+        if (tenkan.Length != kijun.Length)
+        {
+            throw new ArgumentException("Tenkan and Kijun arrays must have the same length.");
+        }
+
+        decimal[] spanA = new decimal[tenkan.Length];
+        for (int i = 0; i < tenkan.Length; i++)
+        {
+            spanA[i] = (tenkan[i] + kijun[i]) / 2m;
+        }
+
+        return spanA;
+    }
+
+    public decimal[] CalculateSenkouSpanB(HistoricalPrice[] prices, int period = 52)
+    {
+        ArgumentNullException.ThrowIfNull(prices);
+        if (period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "Period must be greater than zero.");
+        }
+
+        return CalculateDonchianMidpoint(prices, period);
+    }
+
+    public decimal[] CalculateChikouSpan(HistoricalPrice[] prices)
+    {
+        ArgumentNullException.ThrowIfNull(prices);
+        return prices.Select(p => p.Close ?? 0).ToArray();
+    }
+
+    private static decimal[] CalculateDonchianMidpoint(HistoricalPrice[] prices, int period)
+    {
+        decimal[] result = new decimal[prices.Length];
+
+        for (int i = 0; i < prices.Length; i++)
+        {
+            if (i < period - 1)
+            {
+                result[i] = 0;
+                continue;
+            }
+
+            decimal highestHigh = decimal.MinValue;
+            decimal lowestLow = decimal.MaxValue;
+
+            for (int j = 0; j < period; j++)
+            {
+                decimal high = prices[i - j].High ?? 0;
+                decimal low = prices[i - j].Low ?? 0;
+
+                if (high > highestHigh)
+                {
+                    highestHigh = high;
+                }
+                if (low < lowestLow)
+                {
+                    lowestLow = low;
+                }
+            }
+
+            result[i] = (highestHigh + lowestLow) / 2m;
+        }
+
+        return result;
+    }
 }

@@ -34,6 +34,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IDataFetchingUseCase, FetchHistoricalDataUseCase>();
         services.AddScoped<IBacktestUseCase, RunBacktestUseCase>();
         services.AddScoped<ILiveAnalysisUseCase, AnalyzeCurrentPositionUseCase>();
+        services.AddScoped<IParameterOptimizationUseCase, RunParameterOptimizationUseCase>();
 
         return services;
     }
