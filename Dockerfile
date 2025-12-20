@@ -14,7 +14,10 @@ COPY src/TradingStrat.Web/tailwind.config.js ./
 COPY src/TradingStrat.Web/Styles ./Styles
 COPY src/TradingStrat.Web/wwwroot ./wwwroot
 
-# Build Tailwind CSS
+# Copy Razor components so Tailwind can scan for utility classes
+COPY src/TradingStrat.Web/Components ./Components
+
+# Build Tailwind CSS (now with access to all component files)
 RUN npm run build:css
 
 # Stage 2: .NET SDK for building the application

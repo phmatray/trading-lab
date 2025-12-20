@@ -53,7 +53,15 @@ public class Program
         }
 
         app.UseResponseCompression();
-        app.UseHttpsRedirection();
+
+        // Only redirect to HTTPS when HTTPS is actually configured
+        // Docker runs HTTP-only, so skip HTTPS redirection in that scenario
+        var urls = app.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
+        if (urls.Contains("https", StringComparison.OrdinalIgnoreCase))
+        {
+            app.UseHttpsRedirection();
+        }
+
         app.UseStaticFiles();
         app.UseAntiforgery();
 
