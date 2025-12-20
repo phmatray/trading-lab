@@ -12,6 +12,11 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       # Override database path to use Docker volume
       - Trading__Database__ConnectionString=Data Source=/app/data/trading.db
+      # AI Assistant configuration (set your Anthropic API key here)
+      - Trading__Assistant__ApiKey=${ANTHROPIC_API_KEY:-YOUR_ANTHROPIC_API_KEY_HERE}
+      - Trading__Assistant__Model=claude-sonnet-4-5-20250929
+      - Trading__Assistant__MaxTokens=2048
+      - Trading__Assistant__Temperature=0.7
     volumes:
       # Persist SQLite database
       - tradingstrat-data:/app/data

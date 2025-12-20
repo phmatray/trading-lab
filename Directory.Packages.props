@@ -10,9 +10,11 @@
 
     <!-- Entity Framework Core -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
 
     <!-- Microsoft Extensions -->
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
@@ -37,6 +39,9 @@
 
     <!-- Market Data -->
     <PackageVersion Include="YahooQuotesApi" Version="7.0.5" />
+
+    <!-- AI / LLM -->
+    <PackageVersion Include="Anthropic.SDK" Version="1.0.0" />
 
     <!-- Testing -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />

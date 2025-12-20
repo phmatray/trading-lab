@@ -30,6 +30,13 @@ public class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
+        // Add SignalR for real-time chat streaming
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = true;
+            options.MaximumReceiveMessageSize = 102400; // 100 KB
+        });
+
         // Register TradingStrat layers (hexagonal architecture)
         builder.Services
             .AddApplication(builder.Configuration)
@@ -56,7 +63,7 @@ public class Program
 
         // Only redirect to HTTPS when HTTPS is actually configured
         // Docker runs HTTP-only, so skip HTTPS redirection in that scenario
-        var urls = app.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
+        string urls = app.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
         if (urls.Contains("https", StringComparison.OrdinalIgnoreCase))
         {
             app.UseHttpsRedirection();
@@ -67,6 +74,9 @@ public class Program
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+
+        // Map SignalR hub for AI chat
+        app.MapHub<TradingStrat.Web.Hubs.ChatHub>("/chathub");
 
         // Health check endpoint for Docker/Kubernetes
         app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));

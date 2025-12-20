@@ -1,0 +1,203 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="fixed bottom-4 right-4 z-50">
+    @if (_isMinimized)
+    {
+        <!-- Minimized button -->
+        <button @onclick="ToggleMinimize"
+                class="flex items-center gap-2 px-6 py-3 bg-trading-blue text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span class="font-semibold">AI Assistant</span>
+        </button>
+    }
+    else
+    {
+        <!-- Expanded chat panel -->
+        <div class="bg-white rounded-lg shadow-2xl w-96 h-[600px] flex flex-col">
+            <!-- Header -->
+            <div class="bg-trading-blue text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <h3 class="font-semibold">Trading Assistant</h3>
+                </div>
+                <button @onclick="ToggleMinimize" 
+                        class="hover:bg-blue-700 p-1 rounded transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Messages container -->
+            <div @ref="_messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                @foreach (ChatDisplayMessage msg in _messages)
+                {
+                    <div class="flex @(msg.IsUser ? "justify-end" : "justify-start")">
+                        <div class="max-w-[80%] @(msg.IsUser ? "bg-trading-blue text-white" : "bg-white text-gray-800") rounded-lg px-4 py-2 shadow">
+                            <p class="text-sm whitespace-pre-wrap">@msg.Content</p>
+                        </div>
+                    </div>
+                }
+
+                @if (_isStreaming && !string.IsNullOrEmpty(_streamingMessage))
+                {
+                    <div class="flex justify-start">
+                        <div class="max-w-[80%] bg-white text-gray-800 rounded-lg px-4 py-2 shadow">
+                            <p class="text-sm whitespace-pre-wrap">@_streamingMessage</p>
+                            <div class="typing-indicator mt-2">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Input area -->
+            <div class="border-t border-gray-200 p-4 bg-white rounded-b-lg">
+                <div class="flex gap-2">
+                    <input @bind="_userInput" 
+                           @bind:event="oninput"
+                           @onkeypress="HandleKeyPress"
+                           type="text" 
+                           placeholder="Ask about strategies, positions, or market data..."
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-trading-blue"
+                           disabled="@_isStreaming"/>
+                    <button @onclick="SendMessageAsync" 
+                            disabled="@(_isStreaming || string.IsNullOrWhiteSpace(_userInput))"
+                            class="px-4 py-2 bg-trading-blue text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </div>
+                <button @onclick="ClearHistoryAsync" 
+                        class="text-xs text-gray-500 hover:text-gray-700 mt-2 transition-colors">
+                    Clear history
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? CurrentTicker { get; set; }
+
+    private HubConnection? _hubConnection;
+    private ElementReference _messagesContainer;
+    private bool _isMinimized = true;
+    private bool _isStreaming = false;
+    private string _userInput = string.Empty;
+    private string _streamingMessage = string.Empty;
+    private string _sessionId = Guid.NewGuid().ToString();
+    private List<ChatDisplayMessage> _messages = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<string>("ReceiveMessageToken", (token) =>
+        {
+            _streamingMessage += token;
+            InvokeAsync(StateHasChanged);
+        });
+
+        _hubConnection.On("MessageComplete", () =>
+        {
+            _messages.Add(new ChatDisplayMessage
+            {
+                Content = _streamingMessage,
+                IsUser = false
+            });
+            _streamingMessage = string.Empty;
+            _isStreaming = false;
+            InvokeAsync(StateHasChanged);
+            _ = ScrollToBottomAsync();
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    private void ToggleMinimize()
+    {
+        _isMinimized = !_isMinimized;
+    }
+
+    private async Task SendMessageAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_userInput) || _hubConnection is null)
+        {
+            return;
+        }
+
+        _messages.Add(new ChatDisplayMessage
+        {
+            Content = _userInput,
+            IsUser = true
+        });
+
+        string messageToSend = _userInput;
+        _userInput = string.Empty;
+        _isStreaming = true;
+        _streamingMessage = string.Empty;
+
+        await _hubConnection.SendAsync("SendMessage", messageToSend, CurrentTicker, _sessionId);
+        await ScrollToBottomAsync();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessageAsync();
+        }
+    }
+
+    private Task ClearHistoryAsync()
+    {
+        _messages.Clear();
+        _sessionId = Guid.NewGuid().ToString();
+        return Task.CompletedTask;
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("scrollToBottom", _messagesContainer);
+        }
+        catch
+        {
+            // JS interop may fail if component is being disposed
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+    private class ChatDisplayMessage
+    {
+        public string Content { get; set; } = string.Empty;
+        public bool IsUser { get; set; }
+    }
+}

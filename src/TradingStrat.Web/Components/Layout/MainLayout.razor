@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@using TradingStrat.Web.Components.Shared
 
 <!-- Skip to main content link for screen readers -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
@@ -33,4 +34,7 @@
             </p>
         </div>
     </footer>
+
+    <!-- AI Assistant Widget (floating, available on all pages) -->
+    <AiAssistantWidget />
 </div>

@@ -13,7 +13,7 @@
     <script src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body>
-    <Routes />
+    <Routes @rendermode="RenderMode.InteractiveServer" />
 
     <!-- Blazor error UI -->
     <div id="blazor-error-ui">
@@ -24,6 +24,7 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script src="js/tradingview.js"></script>
+    <script src="js/chat-helper.js"></script>
 </body>
 </html>
 
