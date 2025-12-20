@@ -11,7 +11,21 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        // Load environment variables from .env file (for API keys)
+        string envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env");
+        if (File.Exists(envPath))
+        {
+            DotNetEnv.Env.Load(envPath);
+
+            // Map ANTHROPIC_API_KEY from .env to Trading:Assistant:ApiKey config
+            string? apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                Environment.SetEnvironmentVariable("Trading__Assistant__ApiKey", apiKey);
+            }
+        }
+
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         // Configure Serilog (reuse CLI pattern)
         Log.Logger = new LoggerConfiguration()
@@ -43,12 +57,12 @@ public class Program
             .AddInfrastructure(builder.Configuration)
             .AddWeb();
 
-        var app = builder.Build();
+        WebApplication app = builder.Build();
 
         // Ensure database exists (same as CLI)
-        using (var scope = app.Services.CreateScope())
+        using (IServiceScope scope = app.Services.CreateScope())
         {
-            var context = scope.ServiceProvider.GetRequiredService<TradingContext>();
+            TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
             await context.Database.EnsureCreatedAsync();
         }
 

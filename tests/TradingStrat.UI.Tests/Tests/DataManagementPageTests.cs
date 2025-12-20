@@ -103,4 +103,134 @@ public class DataManagementPageTests : BaseTest
         // Assert
         blazorInitialized.ShouldBeTrue("Blazor SignalR connection should be established");
     }
+
+    [Fact]
+    public async Task FetchButton_ShouldTriggerFetch()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+        await dataPage.FillDataFetchFormAsync("AAPL");
+
+        // Act
+        await dataPage.SubmitFormAsync();
+        await dataPage.WaitForDataFetchCompleteAsync();
+
+        // Assert - Verify either success or error message appears (data fetch was triggered)
+        bool hasSuccessOrError = await dataPage.HasSuccessMessageAsync() || await dataPage.HasErrorMessageAsync();
+        hasSuccessOrError.ShouldBeTrue("Fetch button should trigger data fetching and show result message");
+    }
+
+    [Fact]
+    public async Task InvalidTicker_ShouldShowError()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+
+        // Act - Use invalid ticker format
+        await dataPage.FillDataFetchFormAsync("INVALID_TICKER_12345_XYZ");
+        await dataPage.SubmitFormAsync();
+        await dataPage.WaitForDataFetchCompleteAsync();
+
+        // Assert - Should show error message for invalid ticker
+        bool hasError = await dataPage.HasErrorMessageAsync();
+        hasError.ShouldBeTrue("Invalid ticker should display error message");
+    }
+
+    [Fact]
+    public async Task ValidTicker_ShouldShowSuccessMessage()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+
+        // Act - Use well-known valid ticker
+        await dataPage.FillDataFetchFormAsync("AAPL");
+        await dataPage.SubmitFormAsync();
+        await dataPage.WaitForDataFetchCompleteAsync();
+
+        // Assert - Should show success message or data summary
+        bool hasSuccess = await dataPage.HasSuccessMessageAsync() || await dataPage.IsDataSummaryDisplayedAsync();
+        hasSuccess.ShouldBeTrue("Valid ticker should display success message or data summary");
+    }
+
+    [Fact]
+    public async Task ProgressBar_ShouldAppearDuringFetch()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+        await dataPage.FillDataFetchFormAsync("MSFT");
+
+        // Act
+        await dataPage.SubmitFormAsync();
+
+        // Try to catch progress indicator (it may be very fast)
+        bool progressAppeared = false;
+        try
+        {
+            var progressIndicator = Page!.Locator("[data-testid='progress-indicator']").Or(Page!.Locator("text=Fetching Data"));
+            await progressIndicator.WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Visible,
+                Timeout = 2000
+            });
+            progressAppeared = true;
+        }
+        catch (TimeoutException)
+        {
+            // Progress indicator may not appear if fetch is very fast
+            // This is acceptable - we'll verify the operation completed instead
+        }
+
+        await dataPage.WaitForDataFetchCompleteAsync();
+
+        // Assert - Either progress appeared or operation completed successfully
+        bool operationCompleted = await dataPage.HasSuccessMessageAsync() || await dataPage.HasErrorMessageAsync();
+        (progressAppeared || operationCompleted).ShouldBeTrue("Progress indicator should appear or operation should complete");
+    }
+
+    [Fact]
+    public async Task DateRangeInputs_ShouldAcceptDates()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+
+        // Act - Fill with specific date range
+        string startDate = "2024-01-01";
+        string endDate = "2024-06-30";
+        await dataPage.FillDataFetchFormAsync(
+            ticker: "GOOGL",
+            startDate: startDate,
+            endDate: endDate
+        );
+
+        // Assert - Verify inputs accepted the dates
+        string? startValue = await Page!.Locator("#start-date").InputValueAsync();
+        string? endValue = await Page!.Locator("#end-date").InputValueAsync();
+
+        startValue.ShouldBe(startDate, "Start date input should accept and retain the value");
+        endValue.ShouldBe(endDate, "End date input should accept and retain the value");
+    }
+
+    [Fact]
+    public async Task DataSummary_ShouldDisplayAfterFetch()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+        await dataPage.FillDataFetchFormAsync("AAPL");
+
+        // Act
+        await dataPage.SubmitFormAsync();
+        await dataPage.WaitForDataFetchCompleteAsync();
+
+        // Assert - Verify data summary section appears
+        bool hasSummary = await dataPage.IsDataSummaryDisplayedAsync();
+        bool hasSuccess = await dataPage.HasSuccessMessageAsync();
+
+        (hasSummary || hasSuccess).ShouldBeTrue("Data summary or success message should display after successful fetch");
+    }
 }

@@ -1,33 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="css/site.css" />
-    <HeadOutlet />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    <ResourcePreloader/>
+    <link rel="stylesheet" href="@Assets["css/app.css"]"/>
+    <link rel="stylesheet" href="@Assets["css/site.css"]"/>
+    <link rel="stylesheet" href="@Assets["TradingStrat.Web.styles.css"]"/>
+    <ImportMap/>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+    <HeadOutlet @rendermode="InteractiveServer"/>
 
     <!-- TradingView Widget Script -->
-    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="@Assets["https://s3.tradingview.com/tv.js"]"></script>
 </head>
+
 <body>
-    <Routes @rendermode="RenderMode.InteractiveServer" />
+<Routes @rendermode="InteractiveServer"/>
+<ReconnectModal/>
 
-    <!-- Blazor error UI -->
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>
-
-    <script src="_framework/blazor.server.js"></script>
-    <script src="js/tradingview.js"></script>
-    <script src="js/chat-helper.js"></script>
+<script src="@Assets["_framework/blazor.web.js"]"></script>
+<script src="@Assets["js/tradingview.js"]"></script>
+<script src="@Assets["js/chat-helper.js"]"></script>
 </body>
-</html>
 
-@code {
-    // App component code-behind
-}
+</html>

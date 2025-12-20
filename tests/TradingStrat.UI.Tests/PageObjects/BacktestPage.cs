@@ -184,4 +184,23 @@ public class BacktestPage : BasePage
     {
         return await TradeTable.IsVisibleAsync();
     }
+
+    /// <summary>
+    /// Checks if a specific Ichimoku parameter input is visible.
+    /// </summary>
+    public async Task<bool> HasIchimokuParameterAsync(string parameterId)
+    {
+        var input = Page.Locator($"#{parameterId}");
+        return await input.IsVisibleAsync();
+    }
+
+    /// <summary>
+    /// Fills Ichimoku strategy parameters.
+    /// </summary>
+    public async Task FillIchimokuParametersAsync(int tenkan = 9, int kijun = 26, int senkouB = 52)
+    {
+        await Page.Locator("#tenkan-period").FillAsync(tenkan.ToString());
+        await Page.Locator("#kijun-period").FillAsync(kijun.ToString());
+        await Page.Locator("#senkou-b-period").FillAsync(senkouB.ToString());
+    }
 }

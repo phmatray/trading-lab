@@ -1,18 +1,17 @@
 @inherits LayoutComponentBase
-@using TradingStrat.Web.Components.Shared
 
 <!-- Skip to main content link for screen readers -->
-<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 dark:focus:bg-dark-accent-blue focus:text-white focus:rounded">
     Skip to main content
 </a>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg">
     <!-- Top Navigation Bar -->
-    <nav class="bg-white shadow-sm border-b border-gray-200" role="navigation" aria-label="Main navigation">
+    <nav class="bg-white dark:bg-dark-card shadow-sm border-b border-gray-200 dark:border-dark-border" role="navigation" aria-label="Main navigation">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-trading-blue">TradingStrat</h1>
+                    <h1 class="text-2xl font-bold text-trading-blue dark:text-dark-accent-blue">TradingStrat</h1>
                 </div>
                 <NavMenu />
             </div>
@@ -27,9 +26,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto py-4" role="contentinfo">
+    <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border mt-auto py-4" role="contentinfo">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">
+            <p class="text-center text-sm text-gray-500 dark:text-dark-text-secondary">
                 TradingStrat v1.0 - Built with .NET 10.0 & Blazor Server
             </p>
         </div>
@@ -37,4 +36,10 @@
 
     <!-- AI Assistant Widget (floating, available on all pages) -->
     <AiAssistantWidget />
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
 </div>

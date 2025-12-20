@@ -135,4 +135,98 @@ public class ComparisonPageTests : BaseTest
         // Assert
         blazorInitialized.ShouldBeTrue("Blazor SignalR connection should be established");
     }
+
+    [Fact]
+    public async Task SelectTwoStrategies_ShouldEnableCompare()
+    {
+        // Arrange
+        var comparisonPage = new ComparisonPage(Page!, BaseUrl);
+        await comparisonPage.NavigateAsync();
+
+        // Act - Fill common fields and select two different strategies
+        await comparisonPage.FillCommonFieldsAsync("AAPL", 10000);
+        await comparisonPage.SelectVariantAStrategyAsync("ma");
+        await comparisonPage.SelectVariantBStrategyAsync("rsi");
+        await Task.Delay(500);
+
+        // Assert - Submit button should be enabled
+        bool isDisabled = await comparisonPage.IsSubmitButtonDisabledAsync();
+        isDisabled.ShouldBeFalse("Compare button should be enabled when both strategies are selected");
+    }
+
+    [Fact]
+    public async Task CompareButton_ShouldShowResults()
+    {
+        // Arrange
+        var comparisonPage = new ComparisonPage(Page!, BaseUrl);
+        await comparisonPage.NavigateAsync();
+        await comparisonPage.FillCommonFieldsAsync("MSFT", 10000);
+        await comparisonPage.SelectVariantAStrategyAsync("ma");
+        await comparisonPage.SelectVariantBStrategyAsync("rsi");
+
+        // Act
+        await comparisonPage.SubmitFormAsync();
+        await comparisonPage.WaitForComparisonCompleteAsync();
+
+        // Assert - Results table should appear
+        bool hasResults = await comparisonPage.AreResultsDisplayedAsync();
+        hasResults.ShouldBeTrue("Results table should be displayed after comparison completes");
+    }
+
+    [Fact]
+    public async Task ResultsTable_ShouldShowSideBySide()
+    {
+        // Arrange
+        var comparisonPage = new ComparisonPage(Page!, BaseUrl);
+        await comparisonPage.NavigateAsync();
+        await comparisonPage.FillCommonFieldsAsync("GOOGL", 10000);
+        await comparisonPage.SelectVariantAStrategyAsync("rsi");
+        await comparisonPage.SelectVariantBStrategyAsync("macd");
+
+        // Act
+        await comparisonPage.SubmitFormAsync();
+        await comparisonPage.WaitForComparisonCompleteAsync();
+
+        // Assert - Both variant metrics should be displayed side by side
+        bool hasBothMetrics = await comparisonPage.AreBothVariantMetricsDisplayedAsync();
+        hasBothMetrics.ShouldBeTrue("Results should display both Variant A and Variant B metrics side by side");
+    }
+
+    [Fact]
+    public async Task MetricsDiff_ShouldHighlightBetter()
+    {
+        // Arrange
+        var comparisonPage = new ComparisonPage(Page!, BaseUrl);
+        await comparisonPage.NavigateAsync();
+        await comparisonPage.FillCommonFieldsAsync("AAPL", 10000);
+        await comparisonPage.SelectVariantAStrategyAsync("ma");
+        await comparisonPage.SelectVariantBStrategyAsync("rsi");
+
+        // Act
+        await comparisonPage.SubmitFormAsync();
+        await comparisonPage.WaitForComparisonCompleteAsync();
+
+        // Assert - Winner announcement should be displayed
+        bool hasWinner = await comparisonPage.IsWinnerAnnouncementDisplayedAsync();
+        hasWinner.ShouldBeTrue("Winner should be highlighted/announced in comparison results");
+    }
+
+    [Fact]
+    public async Task ComparisonTable_ShouldShowMetricRows()
+    {
+        // Arrange
+        var comparisonPage = new ComparisonPage(Page!, BaseUrl);
+        await comparisonPage.NavigateAsync();
+        await comparisonPage.FillCommonFieldsAsync("TSLA", 10000);
+        await comparisonPage.SelectVariantAStrategyAsync("macd");
+        await comparisonPage.SelectVariantBStrategyAsync("ma");
+
+        // Act
+        await comparisonPage.SubmitFormAsync();
+        await comparisonPage.WaitForComparisonCompleteAsync();
+
+        // Assert - Verify metrics are displayed in table rows
+        int metricCount = await comparisonPage.GetMetricRowCountAsync();
+        metricCount.ShouldBeGreaterThan(0, "Comparison table should display multiple metric rows");
+    }
 }

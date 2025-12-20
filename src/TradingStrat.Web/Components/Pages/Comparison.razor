@@ -8,8 +8,8 @@
 
 <div class="space-y-6">
     <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">A/B Strategy Comparison</h1>
-        <p class="text-gray-600">Compare two strategy variants side-by-side with detailed performance metrics.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">A/B Strategy Comparison</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Compare two strategy variants side-by-side with detailed performance metrics.</p>
     </div>
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
@@ -20,7 +20,7 @@
 
     <!-- Configuration -->
     <div class="card">
-        <h2 class="text-xl font-semibold mb-4">Test Configuration</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Test Configuration</h2>
 
         <EditForm Model="@_formModel" OnValidSubmit="@HandleRunComparison" class="space-y-6">
             <DataAnnotationsValidator />
@@ -28,17 +28,17 @@
             <!-- Common Settings -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">Ticker Symbol *</label>
+                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
-                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 mt-1" />
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
                 <div>
-                    <label for="capital" class="block text-sm font-medium text-gray-700 mb-1">Initial Capital *</label>
+                    <label for="capital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital *</label>
                     <InputNumber id="capital" @bind-Value="_formModel.InitialCapital"
-                                 class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                    <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 mt-1" />
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
                 <div class="flex items-end">
@@ -58,8 +58,8 @@
             <!-- Strategy Variants -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Variant A -->
-                <div class="border-2 border-blue-200 rounded-lg p-4">
-                    <h3 class="text-lg font-semibold mb-4 text-blue-700">Variant A</h3>
+                <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                    <h3 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</h3>
                     <StrategyForm @ref="_strategyFormA"
                                   SelectedStrategy="@_formModel.StrategyTypeA"
                                   SelectedStrategyChanged="@((value) => _formModel.StrategyTypeA = value)"
@@ -67,8 +67,8 @@
                 </div>
 
                 <!-- Variant B -->
-                <div class="border-2 border-green-200 rounded-lg p-4">
-                    <h3 class="text-lg font-semibold mb-4 text-green-700">Variant B</h3>
+                <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                    <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</h3>
                     <StrategyForm @ref="_strategyFormB"
                                   SelectedStrategy="@_formModel.StrategyTypeB"
                                   SelectedStrategyChanged="@((value) => _formModel.StrategyTypeB = value)"
@@ -86,15 +86,15 @@
         <!-- Winner Announcement -->
         @if (comparison.Winner > 0)
         {
-            <div class="card bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+            <div class="card bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-800">
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
                         🏆 Winner: @(comparison.Winner == 1 ? "Variant A" : "Variant B")
                     </h2>
-                    <p class="text-gray-600">
+                    <p class="text-gray-600 dark:text-dark-text-secondary">
                         @(comparison.Winner == 1 ? comparison.VariantA.Description : comparison.VariantB.Description)
                     </p>
-                    <p class="text-sm text-gray-500 mt-2">
+                    <p class="text-sm text-gray-500 dark:text-dark-text-secondary mt-2">
                         Execution Time: @_result.ExecutionTime.TotalSeconds.ToString("F2") seconds
                     </p>
                 </div>
@@ -103,30 +103,30 @@
 
         <!-- Side-by-Side Metrics -->
         <div class="card">
-            <h2 class="text-xl font-semibold mb-4">Performance Comparison</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Comparison</h2>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 dark:bg-dark-elevated">
                         <tr>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Metric</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-blue-700">Variant A</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-green-700">Variant B</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-500">Difference</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Metric</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-blue-700 dark:text-blue-400">Variant A</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-green-700 dark:text-green-400">Variant B</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Difference</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
                         @foreach (var (key, metricComparison) in comparison.Ranking.MetricBreakdown)
                         {
-                            <tr>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900">@key</td>
+                            <tr class="bg-white dark:bg-dark-card">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@key</td>
                                 <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold">@FormatMetricValue(key, metricComparison.VariantAValue)</span>
-                                    <span class="text-xs text-blue-600 ml-1">(@metricComparison.VariantAPoints.ToString("F1") pts)</span>
+                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@FormatMetricValue(key, metricComparison.VariantAValue)</span>
+                                    <span class="text-xs text-blue-600 dark:text-blue-400 ml-1">(@metricComparison.VariantAPoints.ToString("F1") pts)</span>
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold">@FormatMetricValue(key, metricComparison.VariantBValue)</span>
-                                    <span class="text-xs text-green-600 ml-1">(@metricComparison.VariantBPoints.ToString("F1") pts)</span>
+                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@FormatMetricValue(key, metricComparison.VariantBValue)</span>
+                                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(@metricComparison.VariantBPoints.ToString("F1") pts)</span>
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm @(metricComparison.Difference > 0 ? "metric-positive" : "metric-negative")">
                                     @(metricComparison.Difference > 0 ? "+" : "")@FormatMetricValue(key, metricComparison.Difference)
@@ -134,11 +134,11 @@
                                 </td>
                             </tr>
                         }
-                        <tr class="bg-gray-50 font-bold">
-                            <td class="px-4 py-3 text-sm">Total Score</td>
-                            <td class="px-4 py-3 text-center text-blue-700">@comparison.Ranking.VariantAScore.ToString("F1")</td>
-                            <td class="px-4 py-3 text-center text-green-700">@comparison.Ranking.VariantBScore.ToString("F1")</td>
-                            <td class="px-4 py-3 text-center">-</td>
+                        <tr class="bg-gray-50 dark:bg-dark-elevated font-bold">
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-dark-text-primary">Total Score</td>
+                            <td class="px-4 py-3 text-center text-blue-700 dark:text-blue-400">@comparison.Ranking.VariantAScore.ToString("F1")</td>
+                            <td class="px-4 py-3 text-center text-green-700 dark:text-green-400">@comparison.Ranking.VariantBScore.ToString("F1")</td>
+                            <td class="px-4 py-3 text-center text-gray-900 dark:text-dark-text-primary">-</td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,30 +149,30 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Variant A Results -->
             <div class="space-y-4">
-                <div class="card border-2 border-blue-200">
-                    <h3 class="text-lg font-semibold text-blue-700 mb-4">Variant A: @comparison.VariantA.Description</h3>
+                <div class="card border-2 border-blue-200 dark:border-blue-800">
+                    <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A: @comparison.VariantA.Description</h3>
                     <MetricsGrid Metrics="@comparison.ResultA.Metrics" />
                 </div>
                 <StrategyAnalysisPanel
                     Ticker="@comparison.ResultA.Ticker"
                     StrategyType="@GetStrategyType(comparison.ResultA.StrategyName)"
                     StrategyParameters="@comparison.ResultA.StrategyParameters" />
-                <div class="card border-2 border-blue-200">
+                <div class="card border-2 border-blue-200 dark:border-blue-800">
                     <EquityChart EquityCurve="@comparison.ResultA.EquityCurve" />
                 </div>
             </div>
 
             <!-- Variant B Results -->
             <div class="space-y-4">
-                <div class="card border-2 border-green-200">
-                    <h3 class="text-lg font-semibold text-green-700 mb-4">Variant B: @comparison.VariantB.Description</h3>
+                <div class="card border-2 border-green-200 dark:border-green-800">
+                    <h3 class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B: @comparison.VariantB.Description</h3>
                     <MetricsGrid Metrics="@comparison.ResultB.Metrics" />
                 </div>
                 <StrategyAnalysisPanel
                     Ticker="@comparison.ResultB.Ticker"
                     StrategyType="@GetStrategyType(comparison.ResultB.StrategyName)"
                     StrategyParameters="@comparison.ResultB.StrategyParameters" />
-                <div class="card border-2 border-green-200">
+                <div class="card border-2 border-green-200 dark:border-green-800">
                     <EquityChart EquityCurve="@comparison.ResultB.EquityCurve" />
                 </div>
             </div>
@@ -180,12 +180,12 @@
 
         <!-- Trade Tables -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="border-2 border-blue-200 rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-blue-700 mb-4">Variant A Trades</h3>
+            <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-card">
+                <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A Trades</h3>
                 <TradeTable Trades="@comparison.ResultA.Trades" MaxDisplayTrades="10" />
             </div>
-            <div class="border-2 border-green-200 rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-green-700 mb-4">Variant B Trades</h3>
+            <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-card">
+                <h3 class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B Trades</h3>
                 <TradeTable Trades="@comparison.ResultB.Trades" MaxDisplayTrades="10" />
             </div>
         </div>
@@ -196,11 +196,11 @@
     {
         <div class="card">
             <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No comparison results</h3>
-                <p class="mt-1 text-sm text-gray-500">Configure two strategy variants and run a comparison to see results here.</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No comparison results</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure two strategy variants and run a comparison to see results here.</p>
             </div>
         </div>
     }

@@ -207,4 +207,58 @@ public class HomePageTests : BaseTest
         // Assert
         blazorInitialized.ShouldBeTrue("Blazor SignalR connection should be established");
     }
+
+    [Fact]
+    public async Task DarkTheme_ShouldBeApplied()
+    {
+        // Arrange
+        var homePage = new HomePage(Page!, BaseUrl);
+
+        // Act
+        await homePage.NavigateAsync();
+
+        // Check if dark class is applied to the root element
+        ILocator rootElement = Page!.Locator("body > div").First;
+        string? className = await rootElement.GetAttributeAsync("class");
+
+        // Assert
+        className.ShouldNotBeNullOrEmpty("Root element should have CSS classes");
+        (className?.Contains("dark") ?? false).ShouldBeTrue("Root element should have 'dark' class for dark theme");
+    }
+
+    [Fact]
+    public async Task DarkTheme_CardsShouldHaveDarkBackground()
+    {
+        // Arrange
+        var homePage = new HomePage(Page!, BaseUrl);
+
+        // Act
+        await homePage.NavigateAsync();
+
+        // Get computed background color of a card element
+        ILocator card = Page!.Locator(".card").First;
+        string bgColor = await card.EvaluateAsync<string>("el => window.getComputedStyle(el).backgroundColor");
+
+        // Assert - Dark background should not be white (rgb(255, 255, 255))
+        bgColor.ShouldNotBe("rgb(255, 255, 255)", "Cards should have dark background, not white");
+        bgColor.ShouldNotBeNullOrEmpty("Cards should have a background color");
+    }
+
+    [Fact]
+    public async Task DarkTheme_TextShouldBeReadable()
+    {
+        // Arrange
+        var homePage = new HomePage(Page!, BaseUrl);
+
+        // Act
+        await homePage.NavigateAsync();
+
+        // Get computed color of primary text (h1)
+        ILocator heading = Page!.Locator("main h1").First;
+        string textColor = await heading.EvaluateAsync<string>("el => window.getComputedStyle(el).color");
+
+        // Assert - Text should be light colored (not dark/black: rgb(0, 0, 0))
+        textColor.ShouldNotBe("rgb(0, 0, 0)", "Text should be light colored for dark theme, not black");
+        textColor.ShouldNotBeNullOrEmpty("Heading should have a text color");
+    }
 }

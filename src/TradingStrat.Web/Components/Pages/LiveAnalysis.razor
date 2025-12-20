@@ -7,8 +7,8 @@
 
 <div class="space-y-6">
     <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Live Market Analysis</h1>
-        <p class="text-gray-600">Get ML-based predictions and technical analysis for current market positions.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Live Market Analysis</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Get ML-based predictions and technical analysis for current market positions.</p>
     </div>
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
@@ -20,39 +20,39 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Configuration -->
         <div class="card">
-            <h2 class="text-xl font-semibold mb-4">Configuration</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</h2>
 
             <EditForm Model="@_formModel" OnValidSubmit="@HandleAnalyze" class="space-y-4">
                 <DataAnnotationsValidator />
 
                 <div>
-                    <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">Ticker Symbol *</label>
+                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
-                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 mt-1" />
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
                 <div>
                     <label class="flex items-center space-x-2">
                         <InputCheckbox @bind-Value="_formModel.FetchFreshData"
-                                       class="rounded border-gray-300 text-trading-blue focus:ring-trading-blue" />
-                        <span class="text-sm font-medium text-gray-700">Fetch Fresh Data</span>
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Fetch Fresh Data</span>
                     </label>
-                    <p class="text-xs text-gray-500 mt-1">Download latest prices from Yahoo Finance</p>
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Download latest prices from Yahoo Finance</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="buy-threshold" class="block text-sm font-medium text-gray-700 mb-1">Buy Threshold (%)</label>
+                        <label for="buy-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Buy Threshold (%)</label>
                         <InputNumber id="buy-threshold" @bind-Value="_formModel.BuyThreshold"
-                                     class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                        <ValidationMessage For="@(() => _formModel.BuyThreshold)" class="text-sm text-red-600 mt-1" />
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _formModel.BuyThreshold)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
                     <div>
-                        <label for="sell-threshold" class="block text-sm font-medium text-gray-700 mb-1">Sell Threshold (%)</label>
+                        <label for="sell-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Sell Threshold (%)</label>
                         <InputNumber id="sell-threshold" @bind-Value="_formModel.SellThreshold"
-                                     class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                        <ValidationMessage For="@(() => _formModel.SellThreshold)" class="text-sm text-red-600 mt-1" />
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _formModel.SellThreshold)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
                 </div>
 
@@ -77,64 +77,64 @@
                 <div class="card">
                     <div class="grid grid-cols-2 gap-6">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500 mb-2">Current Price</h3>
-                            <p class="text-3xl font-bold text-gray-900">@_result.CurrentPrice.ToString("C2")</p>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Current Price</h3>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_result.CurrentPrice.ToString("C2")</p>
                             <p class="text-sm @(_result.DailyChangePercent >= 0 ? "metric-positive" : "metric-negative") mt-1">
                                 @(_result.DailyChangePercent >= 0 ? "+" : "")@_result.DailyChangePercent.ToString("F2")%
                                 (@(_result.DailyChange >= 0 ? "+" : "")@_result.DailyChange.ToString("C2"))
                             </p>
-                            <p class="text-xs text-gray-500 mt-2">As of @_result.LatestDataDate.ToString("yyyy-MM-dd")</p>
+                            <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-2">As of @_result.LatestDataDate.ToString("yyyy-MM-dd")</p>
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500 mb-2">ML Prediction</h3>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">ML Prediction</h3>
                             <div class="flex items-center space-x-3">
                                 <span class="text-3xl font-bold @GetSignalColorClass(_result.PredictedSignal)">
                                     @_result.PredictedSignal
                                 </span>
                                 <span class="text-2xl">@GetSignalEmoji(_result.PredictedSignal)</span>
                             </div>
-                            <p class="text-sm text-gray-600 mt-2">
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mt-2">
                                 Predicted Return: @(_result.PredictedReturn >= 0 ? "+" : "")@(_result.PredictedReturn * 100).ToString("F2")%
                             </p>
-                            <p class="text-xs text-gray-500 mt-2">@_result.PredictionReason</p>
+                            <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-2">@_result.PredictionReason</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Technical Indicators -->
                 <div class="card">
-                    <h3 class="text-lg font-semibold mb-4">Technical Indicators (26 Features)</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Technical Indicators (26 Features)</h3>
 
                     <div class="space-y-4">
                         <!-- Price-based -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">Price-Based Indicators (5)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Price-Based Indicators (5)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                                <div><span class="text-gray-600">Daily Return:</span> <span class="font-semibold">@_result.CurrentFeatures.DailyReturn.ToString("F4")</span></div>
-                                <div><span class="text-gray-600">Log Return:</span> <span class="font-semibold">@_result.CurrentFeatures.LogReturn.ToString("F4")</span></div>
-                                <div><span class="text-gray-600">High-Low Range:</span> <span class="font-semibold">@_result.CurrentFeatures.HighLowRange.ToString("F4")</span></div>
-                                <div><span class="text-gray-600">Open-Close Range:</span> <span class="font-semibold">@_result.CurrentFeatures.OpenCloseRange.ToString("F4")</span></div>
-                                <div><span class="text-gray-600">Price Position:</span> <span class="font-semibold">@_result.CurrentFeatures.PricePosition.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Daily Return:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.DailyReturn.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Log Return:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.LogReturn.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">High-Low Range:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.HighLowRange.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Open-Close Range:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.OpenCloseRange.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Price Position:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.PricePosition.ToString("F4")</span></div>
                             </div>
                         </details>
 
                         <!-- Moving Averages -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">Moving Averages (6)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Moving Averages (6)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                                <div><span class="text-gray-600">SMA 5:</span> <span class="font-semibold">@_result.CurrentFeatures.SMA_5.ToString("F2")</span></div>
-                                <div><span class="text-gray-600">SMA 10:</span> <span class="font-semibold">@_result.CurrentFeatures.SMA_10.ToString("F2")</span></div>
-                                <div><span class="text-gray-600">SMA 20:</span> <span class="font-semibold">@_result.CurrentFeatures.SMA_20.ToString("F2")</span></div>
-                                <div><span class="text-gray-600">EMA 12:</span> <span class="font-semibold">@_result.CurrentFeatures.EMA_12.ToString("F2")</span></div>
-                                <div><span class="text-gray-600">EMA 26:</span> <span class="font-semibold">@_result.CurrentFeatures.EMA_26.ToString("F2")</span></div>
-                                <div><span class="text-gray-600">Price to SMA20:</span> <span class="font-semibold">@_result.CurrentFeatures.PriceToSMA20.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 5:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.SMA_5.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 10:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.SMA_10.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 20:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.SMA_20.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">EMA 12:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.EMA_12.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">EMA 26:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.EMA_26.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Price to SMA20:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.CurrentFeatures.PriceToSMA20.ToString("F4")</span></div>
                             </div>
                         </details>
 
                         <!-- Momentum -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">Momentum Indicators (4)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Momentum Indicators (4)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                                 <div><span class="text-gray-600">RSI 14:</span> <span class="font-semibold">@_result.CurrentFeatures.RSI_14.ToString("F2")</span></div>
                                 <div><span class="text-gray-600">Momentum 5:</span> <span class="font-semibold">@_result.CurrentFeatures.Momentum_5.ToString("F4")</span></div>
@@ -144,8 +144,8 @@
                         </details>
 
                         <!-- MACD -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">MACD Indicators (3)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">MACD Indicators (3)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                                 <div><span class="text-gray-600">MACD Line:</span> <span class="font-semibold">@_result.CurrentFeatures.MACD.ToString("F4")</span></div>
                                 <div><span class="text-gray-600">Signal Line:</span> <span class="font-semibold">@_result.CurrentFeatures.MACDSignal.ToString("F4")</span></div>
@@ -154,8 +154,8 @@
                         </details>
 
                         <!-- Volatility -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">Volatility Indicators (4)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Volatility Indicators (4)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                                 <div><span class="text-gray-600">StdDev 10:</span> <span class="font-semibold">@_result.CurrentFeatures.StdDev_10.ToString("F4")</span></div>
                                 <div><span class="text-gray-600">StdDev 20:</span> <span class="font-semibold">@_result.CurrentFeatures.StdDev_20.ToString("F4")</span></div>
@@ -165,8 +165,8 @@
                         </details>
 
                         <!-- Volume -->
-                        <details class="border border-gray-200 rounded-lg p-4">
-                            <summary class="font-medium cursor-pointer">Volume Indicators (4)</summary>
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Volume Indicators (4)</summary>
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                                 <div><span class="text-gray-600">Volume Change:</span> <span class="font-semibold">@_result.CurrentFeatures.VolumeChange.ToString("F4")</span></div>
                                 <div><span class="text-gray-600">Volume MA 10:</span> <span class="font-semibold">@_result.CurrentFeatures.VolumeMA_10.ToString("F0")</span></div>
@@ -179,23 +179,23 @@
 
                 <!-- Model Info -->
                 <div class="card">
-                    <h3 class="text-lg font-semibold mb-4">Model Information</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Model Information</h3>
                     <dl class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <dt class="text-gray-600">Algorithm</dt>
-                            <dd class="font-semibold">FastTree Gradient Boosting</dd>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Algorithm</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">FastTree Gradient Boosting</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-600">Training Data Points</dt>
-                            <dd class="font-semibold">@_result.TrainingDataPoints.ToString("N0")</dd>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Training Data Points</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.TrainingDataPoints.ToString("N0")</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-600">Training Period</dt>
-                            <dd class="font-semibold">@_result.OldestTrainingDate.ToString("yyyy-MM-dd") to @_result.LatestDataDate.ToString("yyyy-MM-dd")</dd>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Training Period</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">@_result.OldestTrainingDate.ToString("yyyy-MM-dd") to @_result.LatestDataDate.ToString("yyyy-MM-dd")</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-600">Features Used</dt>
-                            <dd class="font-semibold">26 Technical Indicators</dd>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Features Used</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">26 Technical Indicators</dd>
                         </div>
                     </dl>
                 </div>
@@ -204,11 +204,11 @@
             {
                 <div class="card">
                     <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No analysis results</h3>
-                        <p class="mt-1 text-sm text-gray-500">Configure your analysis and click "Analyze Position" to see ML predictions.</p>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No analysis results</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your analysis and click "Analyze Position" to see ML predictions.</p>
                     </div>
                 </div>
             }

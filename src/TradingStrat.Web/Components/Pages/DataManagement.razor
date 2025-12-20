@@ -1,4 +1,6 @@
 @page "/data"
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
 @inject IDataFetchingUseCase DataFetchingUseCase
 @inject ProgressService ProgressService
 @implements IDisposable
@@ -7,8 +9,8 @@
 
 <div class="space-y-6">
     <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Data Management</h1>
-        <p class="text-gray-600">Fetch and manage historical market data from Yahoo Finance.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Data Management</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Fetch and manage historical market data from Yahoo Finance.</p>
     </div>
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
@@ -21,35 +23,35 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Form -->
         <div class="card">
-            <h2 class="text-xl font-semibold mb-4">Fetch Historical Data</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Fetch Historical Data</h2>
 
             <EditForm Model="@_formModel" OnValidSubmit="@HandleFetchData" class="space-y-4">
                 <DataAnnotationsValidator />
 
                 <div>
-                    <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">Ticker Symbol *</label>
+                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
-                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 mt-1" />
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
                 <div>
-                    <label for="isin" class="block text-sm font-medium text-gray-700 mb-1">ISIN (Optional)</label>
+                    <label for="isin" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">ISIN (Optional)</label>
                     <InputText id="isin" @bind-Value="_formModel.ISIN"
-                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
-                    <p class="text-xs text-gray-500 mt-1">International Securities Identification Number for ticker resolution</p>
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number for ticker resolution</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Start Date</label>
                         <InputDate id="start-date" @bind-Value="_formModel.StartDate"
-                                   class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                                   class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     </div>
                     <div>
-                        <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">End Date</label>
                         <InputDate id="end-date" @bind-Value="_formModel.EndDate"
-                                   class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                                   class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     </div>
                 </div>
 
@@ -70,30 +72,30 @@
         @if (_result != null)
         {
             <div class="card">
-                <h2 class="text-xl font-semibold mb-4">Data Summary</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Data Summary</h2>
 
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-sm font-medium text-gray-500">Ticker</dt>
-                        <dd class="text-lg font-semibold text-gray-900">@_result.Ticker</dd>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Ticker</dt>
+                        <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@_result.Ticker</dd>
                     </div>
 
                     @if (!string.IsNullOrEmpty(_result.ISIN))
                     {
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">ISIN</dt>
-                            <dd class="text-lg font-semibold text-gray-900">@_result.ISIN</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">ISIN</dt>
+                            <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@_result.ISIN</dd>
                         </div>
                     }
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">Total Records</dt>
-                            <dd class="text-2xl font-bold text-gray-900">@_result.TotalRecords.ToString("N0")</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Total Records</dt>
+                            <dd class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_result.TotalRecords.ToString("N0")</dd>
                         </div>
                         <div>
-                            <dt class="text-sm font-medium text-gray-500">New Records</dt>
-                            <dd class="text-2xl font-bold text-trading-green">+@_result.NewRecords.ToString("N0")</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">New Records</dt>
+                            <dd class="text-2xl font-bold text-trading-green dark:text-dark-success">+@_result.NewRecords.ToString("N0")</dd>
                         </div>
                     </div>
 
@@ -101,12 +103,12 @@
                     {
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Oldest Date</dt>
-                                <dd class="text-sm text-gray-900">@_result.OldestDate.Value.ToString("yyyy-MM-dd")</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Oldest Date</dt>
+                                <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@_result.OldestDate.Value.ToString("yyyy-MM-dd")</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Latest Date</dt>
-                                <dd class="text-sm text-gray-900">@_result.LatestDate.Value.ToString("yyyy-MM-dd")</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Date</dt>
+                                <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@_result.LatestDate.Value.ToString("yyyy-MM-dd")</dd>
                             </div>
                         </div>
                     }
@@ -115,16 +117,16 @@
                     {
                         <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Min Price</dt>
-                                <dd class="text-sm text-gray-900">@_result.MinPrice.Value.ToString("C2")</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Min Price</dt>
+                                <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@_result.MinPrice.Value.ToString("C2")</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Max Price</dt>
-                                <dd class="text-sm text-gray-900">@_result.MaxPrice.Value.ToString("C2")</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Max Price</dt>
+                                <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@_result.MaxPrice.Value.ToString("C2")</dd>
                             </div>
                             <div>
-                                <dt class="text-sm font-medium text-gray-500">Latest Close</dt>
-                                <dd class="text-sm font-semibold text-trading-blue">@_result.LatestClose.Value.ToString("C2")</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Close</dt>
+                                <dd class="text-sm font-semibold text-trading-blue dark:text-dark-accent-blue">@_result.LatestClose.Value.ToString("C2")</dd>
                             </div>
                         </div>
                     }

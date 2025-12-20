@@ -16,17 +16,25 @@ window.TradingView.loadChart = function (widgetId, ticker, theme) {
             "symbol": ticker,
             "interval": "D",
             "timezone": "Etc/UTC",
-            "theme": theme || "light",
+            "theme": theme || "dark",
             "style": "1",
             "locale": "en",
-            "toolbar_bg": "#f1f3f6",
+            "toolbar_bg": theme === "dark" ? "#1a1f2e" : "#f1f3f6",
             "enable_publishing": false,
             "allow_symbol_change": true,
             "container_id": `tradingview_chart_${widgetId}`,
             "studies": [
+                "IchimokuCloud@tv-basicstudies",
                 "MASimple@tv-basicstudies",
                 "RSI@tv-basicstudies"
-            ]
+            ],
+            "studies_overrides": {
+                "ichimoku cloud.tenkan.color": "#0496ff",
+                "ichimoku cloud.kijun.color": "#991515",
+                "ichimoku cloud.senkou span a.color": "#459915",
+                "ichimoku cloud.senkou span b.color": "#991515",
+                "ichimoku cloud.chikou span.color": "#9915ff"
+            }
         });
     } catch (error) {
         console.error('Error loading TradingView widget:', error);
