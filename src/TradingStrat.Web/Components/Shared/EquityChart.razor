@@ -1,0 +1,31 @@
+@using ApexCharts
+
+@if (EquityCurve != null && EquityCurve.Count > 0)
+{
+    <div class="card">
+        <h3 class="text-lg font-semibold mb-4">Equity Curve</h3>
+        <ApexChart TItem="EquityPoint"
+                   Title="Portfolio Equity Over Time"
+                   Height="400">
+
+            <ApexPointSeries TItem="EquityPoint"
+                             Items="EquityCurve"
+                             Name="Equity"
+                             SeriesType="SeriesType.Line"
+                             XValue="@(e => e.DateTime)"
+                             YValue="@(e => e.Equity)"
+                             OrderBy="e => e.X" />
+        </ApexChart>
+    </div>
+}
+else
+{
+    <div class="card">
+        <h3 class="text-lg font-semibold mb-4">Equity Curve</h3>
+        <p class="text-gray-500">No equity curve data available.</p>
+    </div>
+}
+
+@code {
+    [Parameter] public List<EquityPoint>? EquityCurve { get; set; }
+}

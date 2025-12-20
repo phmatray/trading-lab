@@ -55,8 +55,7 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand(
             "TEST",
             variantA,
-            variantB,
-            10000m);
+            variantB);
 
         // Act
         ParameterOptimizationResult result = await _useCase.ExecuteAsync(command);

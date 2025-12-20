@@ -1,0 +1,63 @@
+# .dockerignore - Exclude files from Docker build context
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.DS_Store
+
+# Node
+**/node_modules/
+npm-debug.log*
+
+# Tests
+**/TestResults/
+**/*.trx
+**/coverage/
+
+# Database files (don't include in image, use volumes)
+*.db
+*.db-shm
+*.db-wal
+
+# Logs (don't include in image, use volumes)
+**/logs/
+*.log
+
+# Exports (don't include in image, use volumes)
+**/exports/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Screenshots
+screenshots/
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Playwright
+**/playwright-report/
+**/test-results/
+
+# OS files
+Thumbs.db

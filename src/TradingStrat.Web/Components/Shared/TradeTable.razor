@@ -1,0 +1,74 @@
+@if (Trades != null && Trades.Count > 0)
+{
+    <div class="card overflow-x-auto">
+        <h3 class="text-lg font-semibold mb-4">Trade History (@Trades.Count trades)</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Net Amount</th>
+                        <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">P/L</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var trade in DisplayedTrades)
+                    {
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">@trade.DateTime.ToString("yyyy-MM-dd")</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full @(trade.Type == TradeType.Buy ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
+                                    @trade.Type
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-900 whitespace-nowrap">@trade.Price.ToString("C2")</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-900 whitespace-nowrap">@trade.Quantity</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-600 whitespace-nowrap">@trade.Commission.ToString("C2")</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-900 whitespace-nowrap">@trade.NetAmount.ToString("C2")</td>
+                            <td class="px-4 py-3 text-sm text-right whitespace-nowrap @(trade.ProfitLoss > 0 ? "metric-positive" : "metric-negative")">
+                                @(trade.ProfitLoss?.ToString("C2") ?? "-")
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <span class="line-clamp-2" title="@trade.Reason">@trade.Reason</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Trades.Count > MaxDisplayTrades)
+        {
+            <div class="mt-4 text-center">
+                <button @onclick="ToggleShowAll" class="btn-secondary">
+                    @(ShowAll ? $"Show Less ({MaxDisplayTrades} trades)" : $"Show All ({Trades.Count} trades)")
+                </button>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card">
+        <p class="text-gray-500">No trades executed.</p>
+    </div>
+}
+
+@code {
+    [Parameter] public List<Trade>? Trades { get; set; }
+    [Parameter] public int MaxDisplayTrades { get; set; } = 20;
+
+    private bool ShowAll { get; set; }
+
+    private IEnumerable<Trade> DisplayedTrades =>
+        ShowAll ? (Trades ?? new List<Trade>()) : (Trades?.Take(MaxDisplayTrades) ?? new List<Trade>());
+
+    private void ToggleShowAll()
+    {
+        ShowAll = !ShowAll;
+    }
+}

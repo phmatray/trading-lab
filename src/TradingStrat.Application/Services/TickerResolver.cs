@@ -2,7 +2,7 @@ namespace TradingStrat.Application.Services;
 
 public class TickerResolver : ITickerResolver
 {
-    private static readonly Dictionary<string, List<string>> IsinToTickersMap = new()
+    private static readonly Dictionary<string, List<string>> _isinToTickersMap = new()
     {
         // XS2399367254 is Leverage Shares 3x Long Coinbase ETP
         // Available on multiple exchanges - try them in order of liquidity
@@ -11,17 +11,17 @@ public class TickerResolver : ITickerResolver
 
     public string? ResolveTickerFromIsin(string isin)
     {
-        return IsinToTickersMap.TryGetValue(isin, out List<string>? tickers) ? tickers.First() : null;
+        return _isinToTickersMap.TryGetValue(isin, out List<string>? tickers) ? tickers.First() : null;
     }
 
     public List<string>? GetAllTickersForIsin(string isin)
     {
-        return IsinToTickersMap.TryGetValue(isin, out List<string>? tickers) ? tickers : null;
+        return _isinToTickersMap.TryGetValue(isin, out List<string>? tickers) ? tickers : null;
     }
 
     public bool TryResolveTickerFromIsin(string isin, out string? ticker)
     {
-        if (IsinToTickersMap.TryGetValue(isin, out List<string>? tickers))
+        if (_isinToTickersMap.TryGetValue(isin, out List<string>? tickers))
         {
             ticker = tickers.First();
             return true;

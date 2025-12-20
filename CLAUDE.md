@@ -34,6 +34,21 @@ dotnet test --filter "FullyQualifiedName~RSIStrategyTests"
 dotnet test --filter "FullyQualifiedName~RSIStrategyTests.GenerateSignal_WhenRSIOversold_ReturnsBuySignal"
 ```
 
+### UI Testing with Playwright
+```bash
+# Install Playwright browsers (first time only)
+pwsh tests/TradingStrat.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
+
+# Run UI tests
+dotnet test tests/TradingStrat.UI.Tests
+
+# Run specific test class
+dotnet test --filter "FullyQualifiedName~HomePageTests"
+
+# Debug tests with visible browser
+TEST_HEADLESS=false dotnet test tests/TradingStrat.UI.Tests
+```
+
 ### Building
 ```bash
 # Build entire solution
@@ -162,6 +177,26 @@ foreach (var p in savedData)
     p.ISIN.ShouldBe("TEST_ISIN");
 }
 ```
+
+## UI Testing Architecture
+
+**Test Infrastructure:**
+- **WebApplicationFixture:** Hosts Blazor Server app on Kestrel (Playwright requires real HTTP server, not TestServer)
+- **PlaywrightFixture:** Manages Chromium/Firefox/WebKit browser lifecycle
+- **BaseTest:** Base class providing browser context and page per test (isolation)
+- **Page Object Model:** Encapsulates page-specific selectors and interactions
+- **Test Configuration:** Environment-based config for CI/CD flexibility
+
+**Test Coverage (Current):**
+- HomePageTests: 13 tests covering navigation, content, Blazor connection, console errors
+- **Future:** BacktestPageTests, DataManagementPageTests, LiveAnalysisPageTests, ComparisonPageTests
+
+**Key Practices:**
+- Use `main .grid a[href='/data']` instead of just `a[href='/data']` to avoid matching navigation menu links (Playwright strict mode)
+- Always call `await Page.WaitForBlazorAsync()` after navigation to ensure SignalR connection is established
+- Filter acceptable console errors (favicon 404, sourcemaps) in error tests
+- Each test gets its own browser context for complete isolation
+- Screenshots automatically saved on test failure for debugging
 
 ## Configuration
 

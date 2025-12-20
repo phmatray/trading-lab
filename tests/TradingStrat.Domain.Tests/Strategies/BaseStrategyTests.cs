@@ -201,7 +201,7 @@ public class BaseStrategyTests
         decimal[] expectedSMA = [0m, 0m, 101m, 102m, 103m];
 
         A.CallTo(() => _fakeIndicatorCalculator.CalculateSMA(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             5))
             .Returns(expectedSMA);
 
@@ -214,7 +214,7 @@ public class BaseStrategyTests
         // Assert
         result.ShouldBe(expectedSMA);
         A.CallTo(() => _fakeIndicatorCalculator.CalculateSMA(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             5))
             .MustHaveHappenedOnceExactly();
     }
@@ -230,7 +230,7 @@ public class BaseStrategyTests
         decimal[] expectedEMA = [0m, 0m, 101m, 102.5m, 103.75m];
 
         A.CallTo(() => _fakeIndicatorCalculator.CalculateEMA(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             3))
             .Returns(expectedEMA);
 
@@ -243,7 +243,7 @@ public class BaseStrategyTests
         // Assert
         result.ShouldBe(expectedEMA);
         A.CallTo(() => _fakeIndicatorCalculator.CalculateEMA(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             3))
             .MustHaveHappenedOnceExactly();
     }
@@ -259,7 +259,7 @@ public class BaseStrategyTests
         decimal[] expectedRSI = [50m, 50m, 100m, 100m, 100m];
 
         A.CallTo(() => _fakeIndicatorCalculator.CalculateRSI(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             14))
             .Returns(expectedRSI);
 
@@ -272,7 +272,7 @@ public class BaseStrategyTests
         // Assert
         result.ShouldBe(expectedRSI);
         A.CallTo(() => _fakeIndicatorCalculator.CalculateRSI(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             14))
             .MustHaveHappenedOnceExactly();
     }
@@ -290,7 +290,7 @@ public class BaseStrategyTests
         decimal[] expectedHistogram = [0m, 0m, 1m, 1m, 1m];
 
         A.CallTo(() => _fakeIndicatorCalculator.CalculateMACD(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             12, 26, 9))
             .Returns((expectedMACD, expectedSignal, expectedHistogram));
 
@@ -305,7 +305,7 @@ public class BaseStrategyTests
         signal.ShouldBe(expectedSignal);
         histogram.ShouldBe(expectedHistogram);
         A.CallTo(() => _fakeIndicatorCalculator.CalculateMACD(
-            A<decimal[]>.That.IsSameSequenceAs(new decimal[] { 100m, 101m, 102m, 103m, 104m }),
+            A<decimal[]>.That.IsSameSequenceAs(new[] { 100m, 101m, 102m, 103m, 104m }),
             12, 26, 9))
             .MustHaveHappenedOnceExactly();
     }

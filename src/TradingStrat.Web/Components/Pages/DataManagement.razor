@@ -1,0 +1,192 @@
+@page "/data"
+@inject IDataFetchingUseCase DataFetchingUseCase
+@inject ProgressService ProgressService
+@implements IDisposable
+
+<PageTitle>Data Management - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <div class="card">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Data Management</h1>
+        <p class="text-gray-600">Fetch and manage historical market data from Yahoo Finance.</p>
+    </div>
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
+    <AlertMessage Message="@_successMessage" Type="AlertType.Success" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Form -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Fetch Historical Data</h2>
+
+            <EditForm Model="@_formModel" OnValidSubmit="@HandleFetchData" class="space-y-4">
+                <DataAnnotationsValidator />
+
+                <div>
+                    <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">Ticker Symbol *</label>
+                    <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 mt-1" />
+                </div>
+
+                <div>
+                    <label for="isin" class="block text-sm font-medium text-gray-700 mb-1">ISIN (Optional)</label>
+                    <InputText id="isin" @bind-Value="_formModel.ISIN"
+                               class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                    <p class="text-xs text-gray-500 mt-1">International Securities Identification Number for ticker resolution</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <InputDate id="start-date" @bind-Value="_formModel.StartDate"
+                                   class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                    </div>
+                    <div>
+                        <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <InputDate id="end-date" @bind-Value="_formModel.EndDate"
+                                   class="w-full rounded-lg border-gray-300 focus:border-trading-blue focus:ring-trading-blue" />
+                    </div>
+                </div>
+
+                <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
+                    @if (ProgressService.IsProcessing)
+                    {
+                        <span>Fetching Data...</span>
+                    }
+                    else
+                    {
+                        <span>Fetch Data</span>
+                    }
+                </button>
+            </EditForm>
+        </div>
+
+        <!-- Results -->
+        @if (_result != null)
+        {
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4">Data Summary</h2>
+
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Ticker</dt>
+                        <dd class="text-lg font-semibold text-gray-900">@_result.Ticker</dd>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(_result.ISIN))
+                    {
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">ISIN</dt>
+                            <dd class="text-lg font-semibold text-gray-900">@_result.ISIN</dd>
+                        </div>
+                    }
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Records</dt>
+                            <dd class="text-2xl font-bold text-gray-900">@_result.TotalRecords.ToString("N0")</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">New Records</dt>
+                            <dd class="text-2xl font-bold text-trading-green">+@_result.NewRecords.ToString("N0")</dd>
+                        </div>
+                    </div>
+
+                    @if (_result.OldestDate.HasValue && _result.LatestDate.HasValue)
+                    {
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Oldest Date</dt>
+                                <dd class="text-sm text-gray-900">@_result.OldestDate.Value.ToString("yyyy-MM-dd")</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Latest Date</dt>
+                                <dd class="text-sm text-gray-900">@_result.LatestDate.Value.ToString("yyyy-MM-dd")</dd>
+                            </div>
+                        </div>
+                    }
+
+                    @if (_result.MinPrice.HasValue && _result.MaxPrice.HasValue && _result.LatestClose.HasValue)
+                    {
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Min Price</dt>
+                                <dd class="text-sm text-gray-900">@_result.MinPrice.Value.ToString("C2")</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Max Price</dt>
+                                <dd class="text-sm text-gray-900">@_result.MaxPrice.Value.ToString("C2")</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Latest Close</dt>
+                                <dd class="text-sm font-semibold text-trading-blue">@_result.LatestClose.Value.ToString("C2")</dd>
+                            </div>
+                        </div>
+                    }
+                </dl>
+            </div>
+        }
+    </div>
+
+    @if (_result != null)
+    {
+        <TradingViewWidget Ticker="@_result.Ticker" />
+    }
+</div>
+
+@code {
+    private DataFetchFormModel _formModel = new();
+    private DataSummaryResult? _result;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override void OnInitialized()
+    {
+        ProgressService.OnProgressChanged += StateHasChanged;
+    }
+
+    private async Task HandleFetchData()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+        _result = null;
+
+        ProgressService.Reset();
+
+        var progress = new Progress<string>(message =>
+        {
+            ProgressService.UpdateProgress(message);
+        });
+
+        try
+        {
+            var command = new FetchDataCommand(
+                _formModel.Ticker,
+                _formModel.ISIN,
+                _formModel.StartDate,
+                _formModel.EndDate
+            );
+
+            _result = await DataFetchingUseCase.ExecuteAsync(command, progress);
+            _successMessage = $"Successfully fetched {_result.NewRecords} new records for {_result.Ticker}";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error fetching data: {ex.Message}";
+        }
+        finally
+        {
+            ProgressService.Reset();
+        }
+    }
+
+    public void Dispose()
+    {
+        ProgressService.OnProgressChanged -= StateHasChanged;
+    }
+}

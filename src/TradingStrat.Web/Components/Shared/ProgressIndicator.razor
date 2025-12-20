@@ -1,0 +1,25 @@
+@if (IsVisible)
+{
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div class="flex items-center space-x-3">
+            <LoadingSpinner />
+            <div class="flex-1">
+                <p class="text-sm font-medium text-gray-900">@CurrentMessage</p>
+                @if (Progress.HasValue)
+                {
+                    <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-trading-blue h-2 rounded-full transition-all duration-300"
+                             style="width: @(Progress.Value)%"></div>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">@Progress.Value%</p>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string CurrentMessage { get; set; } = "Processing...";
+    [Parameter] public int? Progress { get; set; }
+}

@@ -38,3 +38,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Playwright E2E Tests
+tests/TradingStrat.UI.Tests/Screenshots/
+tests/TradingStrat.UI.Tests/bin/Debug/**/playwright.ps1
+tests/TradingStrat.UI.Tests/bin/Release/**/playwright.ps1
+.playwright/

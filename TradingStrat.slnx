@@ -4,10 +4,12 @@
     <Project Path="src/TradingStrat.Domain/TradingStrat.Domain.csproj" />
     <Project Path="src/TradingStrat.Infrastructure/TradingStrat.Infrastructure.csproj" />
     <Project Path="src/TradingStrat.Presentation/TradingStrat.Presentation.csproj" />
+    <Project Path="src/TradingStrat.Web/TradingStrat.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TradingStrat.Application.Tests/TradingStrat.Application.Tests.csproj" />
     <Project Path="tests/TradingStrat.Domain.Tests/TradingStrat.Domain.Tests.csproj" />
     <Project Path="tests/TradingStrat.Infrastructure.Tests/TradingStrat.Infrastructure.Tests.csproj" />
+    <Project Path="tests/TradingStrat.UI.Tests/TradingStrat.UI.Tests.csproj" />
   </Folder>
 </Solution>

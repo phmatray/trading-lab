@@ -1,0 +1,28 @@
+@inject IJSRuntime JS
+
+<div class="tradingview-widget-container h-96 md:h-[600px]" role="region" aria-label="Trading chart for @Ticker">
+    <div id="tradingview_chart_@_widgetId"></div>
+</div>
+
+@code {
+    [Parameter] public string Ticker { get; set; } = "CON3.L";
+    [Parameter] public string Theme { get; set; } = "light";
+
+    private string _widgetId = Guid.NewGuid().ToString("N");
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("TradingView.loadChart", _widgetId, Ticker, Theme);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't break the page
+                Console.WriteLine($"Error loading TradingView widget: {ex.Message}");
+            }
+        }
+    }
+}
