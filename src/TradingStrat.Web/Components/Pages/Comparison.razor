@@ -237,11 +237,14 @@
 
         var progress = new Progress<OptimizationProgress>(p =>
         {
-            int percentage = p.TotalBars > 0 ? (int)((double)p.CurrentBar / p.TotalBars * 100) : 0;
-            ProgressService.UpdateProgress(
-                $"Testing {p.CurrentVariant}: Bar {p.CurrentBar}/{p.TotalBars} - {p.Trades} trades",
-                percentage
-            );
+            InvokeAsync(() =>
+            {
+                int percentage = p.TotalBars > 0 ? (int)((double)p.CurrentBar / p.TotalBars * 100) : 0;
+                ProgressService.UpdateProgress(
+                    $"Testing {p.CurrentVariant}: Bar {p.CurrentBar}/{p.TotalBars} - {p.Trades} trades",
+                    percentage
+                );
+            });
         });
 
         try

@@ -148,11 +148,14 @@
 
         var progress = new Progress<BacktestProgress>(p =>
         {
-            int percentage = p.Total > 0 ? (int)((double)p.Current / p.Total * 100) : 0;
-            ProgressService.UpdateProgress(
-                $"Processing bar {p.Current}/{p.Total} - {p.Trades} trades executed",
-                percentage
-            );
+            InvokeAsync(() =>
+            {
+                int percentage = p.Total > 0 ? (int)((double)p.Current / p.Total * 100) : 0;
+                ProgressService.UpdateProgress(
+                    $"Processing bar {p.Current}/{p.Total} - {p.Trades} trades executed",
+                    percentage
+                );
+            });
         });
 
         try

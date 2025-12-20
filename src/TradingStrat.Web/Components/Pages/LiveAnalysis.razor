@@ -242,7 +242,7 @@
 
         var progress = new Progress<string>(message =>
         {
-            ProgressService.UpdateProgress(message);
+            InvokeAsync(() => ProgressService.UpdateProgress(message));
         });
 
         try
