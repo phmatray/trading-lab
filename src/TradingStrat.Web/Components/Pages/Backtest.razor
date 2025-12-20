@@ -1,4 +1,5 @@
 @page "/backtest"
+@using TradingStrat.Web.Components.Shared
 @inject IBacktestUseCase BacktestUseCase
 @inject ProgressService ProgressService
 @implements IDisposable
@@ -89,6 +90,11 @@
 
                 <MetricsGrid Metrics="@_result.Metrics" />
 
+                <StrategyAnalysisPanel
+                    Ticker="@_result.Ticker"
+                    StrategyType="@GetStrategyType(_result.StrategyName)"
+                    StrategyParameters="@_result.StrategyParameters" />
+
                 <EquityChart EquityCurve="@_result.EquityCurve" />
 
                 <TradeTable Trades="@_result.Trades" />
@@ -170,6 +176,20 @@
         {
             ProgressService.Reset();
         }
+    }
+
+    private string GetStrategyType(string strategyName)
+    {
+        // Map strategy names to types: "Moving Average Crossover" -> "ma"
+        return strategyName.ToLowerInvariant() switch
+        {
+            var s when s.Contains("moving average") => "ma",
+            var s when s.Contains("rsi") => "rsi",
+            var s when s.Contains("macd") => "macd",
+            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
+            var s when s.Contains("ichimoku") => "ichimoku",
+            _ => "ma"
+        };
     }
 
     public void Dispose()

@@ -1,4 +1,5 @@
 @page "/comparison"
+@using TradingStrat.Web.Components.Shared
 @inject IParameterOptimizationUseCase ParameterOptimizationUseCase
 @inject ProgressService ProgressService
 @implements IDisposable
@@ -152,6 +153,10 @@
                     <h3 class="text-lg font-semibold text-blue-700 mb-4">Variant A: @comparison.VariantA.Description</h3>
                     <MetricsGrid Metrics="@comparison.ResultA.Metrics" />
                 </div>
+                <StrategyAnalysisPanel
+                    Ticker="@comparison.ResultA.Ticker"
+                    StrategyType="@GetStrategyType(comparison.ResultA.StrategyName)"
+                    StrategyParameters="@comparison.ResultA.StrategyParameters" />
                 <div class="card border-2 border-blue-200">
                     <EquityChart EquityCurve="@comparison.ResultA.EquityCurve" />
                 </div>
@@ -163,6 +168,10 @@
                     <h3 class="text-lg font-semibold text-green-700 mb-4">Variant B: @comparison.VariantB.Description</h3>
                     <MetricsGrid Metrics="@comparison.ResultB.Metrics" />
                 </div>
+                <StrategyAnalysisPanel
+                    Ticker="@comparison.ResultB.Ticker"
+                    StrategyType="@GetStrategyType(comparison.ResultB.StrategyName)"
+                    StrategyParameters="@comparison.ResultB.StrategyParameters" />
                 <div class="card border-2 border-green-200">
                     <EquityChart EquityCurve="@comparison.ResultB.EquityCurve" />
                 </div>
@@ -292,6 +301,20 @@
             : metric.Contains("%") || metric.Contains("Return") || metric.Contains("Drawdown") || metric.Contains("Rate")
                 ? $"{value:F2}%"
                 : value.ToString("F2");
+    }
+
+    private string GetStrategyType(string strategyName)
+    {
+        // Map strategy names to types: "Moving Average Crossover" -> "ma"
+        return strategyName.ToLowerInvariant() switch
+        {
+            var s when s.Contains("moving average") => "ma",
+            var s when s.Contains("rsi") => "rsi",
+            var s when s.Contains("macd") => "macd",
+            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
+            var s when s.Contains("ichimoku") => "ichimoku",
+            _ => "ma"
+        };
     }
 
     public void Dispose()
