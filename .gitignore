@@ -44,3 +44,6 @@ tests/TradingStrat.UI.Tests/Screenshots/
 tests/TradingStrat.UI.Tests/bin/Debug/**/playwright.ps1
 tests/TradingStrat.UI.Tests/bin/Release/**/playwright.ps1
 .playwright/.env
+
+# Environment variables with secrets
+.env
