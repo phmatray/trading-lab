@@ -47,3 +47,6 @@ tests/TradingStrat.UI.Tests/bin/Release/**/playwright.ps1
 
 # Environment variables with secrets
 .env
+
+# Node.js dependencies
+node_modules/

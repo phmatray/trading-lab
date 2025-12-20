@@ -11,20 +11,6 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        // Load environment variables from .env file (for API keys)
-        string envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env");
-        if (File.Exists(envPath))
-        {
-            DotNetEnv.Env.Load(envPath);
-
-            // Map ANTHROPIC_API_KEY from .env to Trading:Assistant:ApiKey config
-            string? apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
-            if (!string.IsNullOrWhiteSpace(apiKey))
-            {
-                Environment.SetEnvironmentVariable("Trading__Assistant__ApiKey", apiKey);
-            }
-        }
-
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         // Configure Serilog (reuse CLI pattern)
@@ -33,12 +19,6 @@ public class Program
             .CreateLogger();
 
         builder.Host.UseSerilog();
-
-        // Add response compression for performance
-        builder.Services.AddResponseCompression(options =>
-        {
-            options.EnableForHttps = true;
-        });
 
         // Add Blazor Server services
         builder.Services.AddRazorComponents()
@@ -69,28 +49,21 @@ public class Program
         // Configure HTTP pipeline
         if (!app.Environment.IsDevelopment())
         {
-            app.UseExceptionHandler("/Error");
+            app.UseExceptionHandler("/Error", createScopeForErrors: true);
             app.UseHsts();
         }
 
-        app.UseResponseCompression();
+        app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+        app.UseHttpsRedirection();
 
-        // Only redirect to HTTPS when HTTPS is actually configured
-        // Docker runs HTTP-only, so skip HTTPS redirection in that scenario
-        string urls = app.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
-        if (urls.Contains("https", StringComparison.OrdinalIgnoreCase))
-        {
-            app.UseHttpsRedirection();
-        }
-
-        app.UseStaticFiles();
         app.UseAntiforgery();
 
+        app.MapStaticAssets();
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
 
         // Map SignalR hub for AI chat
-        app.MapHub<TradingStrat.Web.Hubs.ChatHub>("/chathub");
+        app.MapHub<Hubs.ChatHub>("/chathub");
 
         // Health check endpoint for Docker/Kubernetes
         app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));

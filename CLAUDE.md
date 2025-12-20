@@ -214,6 +214,50 @@ All configuration is in `src/TradingStrat.Presentation/appsettings.json`:
 
 Configuration is strongly-typed and injected via `IOptions<TradingConfiguration>`.
 
+### Configuring API Keys (AI Trading Assistant)
+
+The AI Trading Assistant requires an Anthropic API key. For security, API keys should **never** be committed to source control.
+
+**Development (Recommended - User Secrets):**
+```bash
+# Initialize user secrets (first time only)
+dotnet user-secrets init --project src/TradingStrat.Web
+
+# Set the API key
+dotnet user-secrets set "Trading:Assistant:ApiKey" "sk-ant-api03-..." --project src/TradingStrat.Web
+
+# Verify it's set
+dotnet user-secrets list --project src/TradingStrat.Web
+```
+
+**Development (Environment Variable):**
+```bash
+# Set environment variable (use double underscores for nested config)
+export Trading__Assistant__ApiKey="sk-ant-api03-..."
+
+# Run the application
+dotnet run --project src/TradingStrat.Web
+```
+
+**Production (Docker/Container):**
+```bash
+docker run -e Trading__Assistant__ApiKey="sk-ant-..." tradingstrat-web
+```
+
+**Production (Systemd Service):**
+```ini
+[Service]
+Environment="Trading__Assistant__ApiKey=sk-ant-..."
+ExecStart=/usr/bin/dotnet TradingStrat.Web.dll
+```
+
+**Configuration Priority (Highest Last):**
+1. appsettings.json (base configuration)
+2. appsettings.{Environment}.json (environment-specific)
+3. User Secrets (development only)
+4. Environment Variables (all environments)
+5. Command-line arguments
+
 ## Key Domain Concepts
 
 ### IIndicatorCalculator - Single Source of Truth

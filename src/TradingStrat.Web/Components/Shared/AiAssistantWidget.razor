@@ -115,33 +115,44 @@
     private string _sessionId = Guid.NewGuid().ToString();
     private List<ChatDisplayMessage> _messages = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
-            .WithAutomaticReconnect()
-            .Build();
-
-        _hubConnection.On<string>("ReceiveMessageToken", (token) =>
+        if (firstRender)
         {
-            _streamingMessage += token;
-            InvokeAsync(StateHasChanged);
-        });
-
-        _hubConnection.On("MessageComplete", () =>
-        {
-            _messages.Add(new ChatDisplayMessage
+            try
             {
-                Content = _streamingMessage,
-                IsUser = false
-            });
-            _streamingMessage = string.Empty;
-            _isStreaming = false;
-            InvokeAsync(StateHasChanged);
-            _ = ScrollToBottomAsync();
-        });
+                _hubConnection = new HubConnectionBuilder()
+                    .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+                    .WithAutomaticReconnect()
+                    .Build();
 
-        await _hubConnection.StartAsync();
+                _hubConnection.On<string>("ReceiveMessageToken", (token) =>
+                {
+                    _streamingMessage += token;
+                    InvokeAsync(StateHasChanged);
+                });
+
+                _hubConnection.On("MessageComplete", () =>
+                {
+                    _messages.Add(new ChatDisplayMessage
+                    {
+                        Content = _streamingMessage,
+                        IsUser = false
+                    });
+                    _streamingMessage = string.Empty;
+                    _isStreaming = false;
+                    InvokeAsync(StateHasChanged);
+                    _ = ScrollToBottomAsync();
+                });
+
+                await _hubConnection.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to connect to chat hub: {ex.Message}");
+                // Connection will be retried automatically due to WithAutomaticReconnect()
+            }
+        }
     }
 
     private void ToggleMinimize()

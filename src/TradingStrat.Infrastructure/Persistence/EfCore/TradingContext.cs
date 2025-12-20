@@ -156,7 +156,13 @@ public class TradingContext : DbContext
             entity.Property(e => e.ActionItems)
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-                    v => System.Text.Json.JsonSerializer.Deserialize<List<ActionItem>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<ActionItem>());
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<ActionItem>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<ActionItem>())
+                .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<ActionItem>>(
+                    (c1, c2) => System.Text.Json.JsonSerializer.Serialize(c1, (System.Text.Json.JsonSerializerOptions?)null) == System.Text.Json.JsonSerializer.Serialize(c2, (System.Text.Json.JsonSerializerOptions?)null),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => System.Text.Json.JsonSerializer.Deserialize<List<ActionItem>>(
+                        System.Text.Json.JsonSerializer.Serialize(c, (System.Text.Json.JsonSerializerOptions?)null),
+                        (System.Text.Json.JsonSerializerOptions?)null) ?? new List<ActionItem>()));
 
             // Index for finding recent recommendations by ticker
             entity.HasIndex(e => new { e.Ticker, e.CreatedAt })
