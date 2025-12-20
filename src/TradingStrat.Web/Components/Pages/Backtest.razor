@@ -2,8 +2,14 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @rendermode InteractiveServer
 @using TradingStrat.Web.Components.Shared
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
 @inject IBacktestUseCase BacktestUseCase
 @inject ProgressService ProgressService
+@inject UserPreferencesService PreferencesService
+@inject FormStateService FormState
+@inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
 <PageTitle>Backtest - TradingStrat</PageTitle>
@@ -32,6 +38,7 @@
                     <div>
                         <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                         <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                                   @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
                                    class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
@@ -39,6 +46,7 @@
                     <div>
                         <label for="capital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital *</label>
                         <InputNumber id="capital" @bind-Value="_formModel.InitialCapital"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
                                      class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
@@ -47,11 +55,13 @@
                         <div>
                             <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Start Date</label>
                             <InputDate id="start-date" @bind-Value="_formModel.StartDate"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
                                        class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         </div>
                         <div>
                             <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">End Date</label>
                             <InputDate id="end-date" @bind-Value="_formModel.EndDate"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
                                        class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         </div>
                     </div>
@@ -71,8 +81,8 @@
 
             <StrategyForm @ref="_strategyForm"
                           SelectedStrategy="@_formModel.StrategyType"
-                          SelectedStrategyChanged="@((value) => _formModel.StrategyType = value)"
-                          ParametersChanged="@((parameters) => _formModel.StrategyParameters = parameters)" />
+                          SelectedStrategyChanged="@OnStrategyTypeChanged"
+                          ParametersChanged="@OnStrategyParametersChanged" />
         </div>
 
         <!-- Results -->
@@ -123,14 +133,46 @@
 </div>
 
 @code {
+    private const string FORM_KEY = "backtest-form";
+
     private BacktestFormModel _formModel = new();
     private StrategyForm? _strategyForm;
     private BacktestResult? _result;
     private string? _errorMessage;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
+
+        // Try to restore saved form state
+        BacktestFormModel? savedForm = await FormState.GetFormStateAsync<BacktestFormModel>(FORM_KEY);
+        if (savedForm != null)
+        {
+            _formModel = savedForm;
+        }
+        else
+        {
+            // Initialize from user preferences
+            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+            _formModel = BacktestFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+    }
+
+    private async Task OnFormFieldChanged()
+    {
+        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
+    }
+
+    private async Task OnStrategyTypeChanged(string value)
+    {
+        _formModel.StrategyType = value;
+        await OnFormFieldChanged();
+    }
+
+    private async Task OnStrategyParametersChanged(Dictionary<string, object> parameters)
+    {
+        _formModel.StrategyParameters = parameters;
+        await OnFormFieldChanged();
     }
 
     private async Task HandleRunBacktest()

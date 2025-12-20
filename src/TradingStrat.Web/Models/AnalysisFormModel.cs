@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using TradingStrat.Application.Configuration;
 using TradingStrat.Domain.ValueObjects;
+using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
 
@@ -23,6 +25,19 @@ public class AnalysisFormModel
         {
             BuyThreshold = BuyThreshold / 100m,
             SellThreshold = SellThreshold / 100m
+        };
+    }
+
+    public static AnalysisFormModel FromPreferences(
+        UserPreferences preferences,
+        TradingConfiguration config)
+    {
+        return new AnalysisFormModel
+        {
+            Ticker = preferences.DefaultTicker,
+            FetchFreshData = true,
+            BuyThreshold = config.MachineLearning.DefaultThresholds.BuyThreshold * 100m,
+            SellThreshold = config.MachineLearning.DefaultThresholds.SellThreshold * 100m
         };
     }
 }

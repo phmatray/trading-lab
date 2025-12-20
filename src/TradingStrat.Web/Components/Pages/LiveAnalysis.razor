@@ -1,6 +1,12 @@
 @page "/analysis"
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
 @inject ILiveAnalysisUseCase LiveAnalysisUseCase
 @inject ProgressService ProgressService
+@inject UserPreferencesService PreferencesService
+@inject FormStateService FormState
+@inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
 <PageTitle>Live Analysis - TradingStrat</PageTitle>
@@ -28,6 +34,7 @@
                 <div>
                     <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                               @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
@@ -35,6 +42,7 @@
                 <div>
                     <label class="flex items-center space-x-2">
                         <InputCheckbox @bind-Value="_formModel.FetchFreshData"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
                                        class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Fetch Fresh Data</span>
                     </label>
@@ -45,12 +53,14 @@
                     <div>
                         <label for="buy-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Buy Threshold (%)</label>
                         <InputNumber id="buy-threshold" @bind-Value="_formModel.BuyThreshold"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
                                      class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _formModel.BuyThreshold)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
                     <div>
                         <label for="sell-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Sell Threshold (%)</label>
                         <InputNumber id="sell-threshold" @bind-Value="_formModel.SellThreshold"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
                                      class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _formModel.SellThreshold)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
@@ -222,14 +232,34 @@
 </div>
 
 @code {
+    private const string FORM_KEY = "live-analysis-form";
+
     private AnalysisFormModel _formModel = new();
     private LiveAnalysisResult? _result;
     private string? _errorMessage;
     private string? _warningMessage;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
+
+        // Try to restore saved form state
+        AnalysisFormModel? savedForm = await FormState.GetFormStateAsync<AnalysisFormModel>(FORM_KEY);
+        if (savedForm != null)
+        {
+            _formModel = savedForm;
+        }
+        else
+        {
+            // Initialize from user preferences
+            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+            _formModel = AnalysisFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+    }
+
+    private async Task OnFormFieldChanged()
+    {
+        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
     }
 
     private async Task HandleAnalyze()

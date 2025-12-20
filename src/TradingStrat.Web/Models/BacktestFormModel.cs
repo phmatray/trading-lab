@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using TradingStrat.Application.Configuration;
+using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
 
@@ -29,4 +31,25 @@ public class BacktestFormModel
     public DateTime? StartDate { get; set; }
 
     public DateTime? EndDate { get; set; }
+
+    public static BacktestFormModel FromPreferences(
+        UserPreferences preferences,
+        TradingConfiguration config)
+    {
+        return new BacktestFormModel
+        {
+            Ticker = preferences.DefaultTicker,
+            StrategyType = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyParameters = new Dictionary<string, object>
+            {
+                ["FastPeriod"] = 20,
+                ["SlowPeriod"] = 50
+            },
+            InitialCapital = preferences.BacktestDefaults.InitialCapital,
+            CommissionPercentage = preferences.BacktestDefaults.CommissionPercentage,
+            MinimumCommission = preferences.BacktestDefaults.MinimumCommission,
+            StartDate = null,
+            EndDate = null
+        };
+    }
 }

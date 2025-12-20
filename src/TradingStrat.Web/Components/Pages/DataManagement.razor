@@ -1,8 +1,14 @@
 @page "/data"
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @rendermode InteractiveServer
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
 @inject IDataFetchingUseCase DataFetchingUseCase
 @inject ProgressService ProgressService
+@inject UserPreferencesService PreferencesService
+@inject FormStateService FormState
+@inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
 <PageTitle>Data Management - TradingStrat</PageTitle>
@@ -31,6 +37,7 @@
                 <div>
                     <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                               @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
@@ -38,6 +45,7 @@
                 <div>
                     <label for="isin" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">ISIN (Optional)</label>
                     <InputText id="isin" @bind-Value="_formModel.ISIN"
+                               @oninput="@(async (ChangeEventArgs e) => { _formModel.ISIN = e.Value?.ToString(); await OnFormFieldChanged(); })"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number for ticker resolution</p>
                 </div>
@@ -46,11 +54,13 @@
                     <div>
                         <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Start Date</label>
                         <InputDate id="start-date" @bind-Value="_formModel.StartDate"
+                                   @onchange="@(async () => await OnFormFieldChanged())"
                                    class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     </div>
                     <div>
                         <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">End Date</label>
                         <InputDate id="end-date" @bind-Value="_formModel.EndDate"
+                                   @onchange="@(async () => await OnFormFieldChanged())"
                                    class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     </div>
                 </div>
@@ -142,14 +152,34 @@
 </div>
 
 @code {
+    private const string FORM_KEY = "data-fetch-form";
+
     private DataFetchFormModel _formModel = new();
     private DataSummaryResult? _result;
     private string? _errorMessage;
     private string? _successMessage;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
+
+        // Try to restore saved form state
+        DataFetchFormModel? savedForm = await FormState.GetFormStateAsync<DataFetchFormModel>(FORM_KEY);
+        if (savedForm != null)
+        {
+            _formModel = savedForm;
+        }
+        else
+        {
+            // Initialize from user preferences
+            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+            _formModel = DataFetchFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+    }
+
+    private async Task OnFormFieldChanged()
+    {
+        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
     }
 
     private async Task HandleFetchData()

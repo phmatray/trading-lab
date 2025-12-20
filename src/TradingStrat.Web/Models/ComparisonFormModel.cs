@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using TradingStrat.Application.Configuration;
+using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
 
@@ -31,4 +33,29 @@ public class ComparisonFormModel
 
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+
+    public static ComparisonFormModel FromPreferences(
+        UserPreferences preferences,
+        TradingConfiguration config)
+    {
+        return new ComparisonFormModel
+        {
+            Ticker = preferences.DefaultTicker,
+            InitialCapital = preferences.BacktestDefaults.InitialCapital,
+            StrategyTypeA = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyParametersA = new Dictionary<string, object>
+            {
+                ["FastPeriod"] = 10,
+                ["SlowPeriod"] = 30
+            },
+            StrategyTypeB = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyParametersB = new Dictionary<string, object>
+            {
+                ["FastPeriod"] = 20,
+                ["SlowPeriod"] = 50
+            },
+            StartDate = null,
+            EndDate = null
+        };
+    }
 }

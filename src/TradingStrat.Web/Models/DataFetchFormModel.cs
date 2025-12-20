@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using TradingStrat.Application.Configuration;
+using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
 
@@ -13,4 +15,17 @@ public class DataFetchFormModel
     public DateTime? StartDate { get; set; }
 
     public DateTime? EndDate { get; set; }
+
+    public static DataFetchFormModel FromPreferences(
+        UserPreferences preferences,
+        TradingConfiguration config)
+    {
+        return new DataFetchFormModel
+        {
+            Ticker = preferences.DefaultTicker,
+            ISIN = preferences.DefaultIsin,
+            StartDate = null,
+            EndDate = null
+        };
+    }
 }

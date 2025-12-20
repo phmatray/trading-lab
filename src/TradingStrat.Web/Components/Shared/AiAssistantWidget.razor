@@ -1,6 +1,8 @@
 @using Microsoft.AspNetCore.SignalR.Client
+@using TradingStrat.Web.Services.State
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject ChatStateService ChatState
 @implements IAsyncDisposable
 
 <div class="fixed bottom-4 right-4 z-50">
@@ -121,6 +123,17 @@
         {
             try
             {
+                // Load chat history from localStorage
+                Models.State.ChatHistory history = await ChatState.GetHistoryAsync();
+                _messages = history.Messages.Select(m => new ChatDisplayMessage
+                {
+                    Content = m.Content,
+                    IsUser = m.IsUser
+                }).ToList();
+                _sessionId = history.SessionId;
+
+                StateHasChanged();
+
                 _hubConnection = new HubConnectionBuilder()
                     .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
                     .WithAutomaticReconnect()
@@ -132,17 +145,24 @@
                     InvokeAsync(StateHasChanged);
                 });
 
-                _hubConnection.On("MessageComplete", () =>
+                _hubConnection.On("MessageComplete", async () =>
                 {
-                    _messages.Add(new ChatDisplayMessage
+                    await InvokeAsync(async () =>
                     {
-                        Content = _streamingMessage,
-                        IsUser = false
+                        _messages.Add(new ChatDisplayMessage
+                        {
+                            Content = _streamingMessage,
+                            IsUser = false
+                        });
+
+                        // Save assistant message to localStorage
+                        await ChatState.AddMessageAsync(_streamingMessage, isUser: false);
+
+                        _streamingMessage = string.Empty;
+                        _isStreaming = false;
+                        StateHasChanged();
+                        _ = ScrollToBottomAsync();
                     });
-                    _streamingMessage = string.Empty;
-                    _isStreaming = false;
-                    InvokeAsync(StateHasChanged);
-                    _ = ScrollToBottomAsync();
                 });
 
                 await _hubConnection.StartAsync();
@@ -174,6 +194,10 @@
         });
 
         string messageToSend = _userInput;
+
+        // Save user message to localStorage
+        await ChatState.AddMessageAsync(messageToSend, isUser: true);
+
         _userInput = string.Empty;
         _isStreaming = true;
         _streamingMessage = string.Empty;
@@ -190,11 +214,12 @@
         }
     }
 
-    private Task ClearHistoryAsync()
+    private async Task ClearHistoryAsync()
     {
         _messages.Clear();
-        _sessionId = Guid.NewGuid().ToString();
-        return Task.CompletedTask;
+        await ChatState.ClearHistoryAsync();
+        Models.State.ChatHistory newHistory = await ChatState.GetHistoryAsync();
+        _sessionId = newHistory.SessionId;
     }
 
     private async Task ScrollToBottomAsync()

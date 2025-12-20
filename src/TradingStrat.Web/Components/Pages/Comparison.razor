@@ -1,7 +1,13 @@
 @page "/comparison"
 @using TradingStrat.Web.Components.Shared
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
 @inject IParameterOptimizationUseCase ParameterOptimizationUseCase
 @inject ProgressService ProgressService
+@inject UserPreferencesService PreferencesService
+@inject FormStateService FormState
+@inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
 <PageTitle>A/B Comparison - TradingStrat</PageTitle>
@@ -30,6 +36,7 @@
                 <div>
                     <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                               @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
@@ -37,6 +44,7 @@
                 <div>
                     <label for="capital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital *</label>
                     <InputNumber id="capital" @bind-Value="_formModel.InitialCapital"
+                                 @oninput="@(async () => await OnFormFieldChanged())"
                                  class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
@@ -62,8 +70,8 @@
                     <h3 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</h3>
                     <StrategyForm @ref="_strategyFormA"
                                   SelectedStrategy="@_formModel.StrategyTypeA"
-                                  SelectedStrategyChanged="@((value) => _formModel.StrategyTypeA = value)"
-                                  ParametersChanged="@((parameters) => _formModel.StrategyParametersA = parameters)" />
+                                  SelectedStrategyChanged="@OnStrategyTypeAChanged"
+                                  ParametersChanged="@OnStrategyParametersAChanged" />
                 </div>
 
                 <!-- Variant B -->
@@ -71,8 +79,8 @@
                     <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</h3>
                     <StrategyForm @ref="_strategyFormB"
                                   SelectedStrategy="@_formModel.StrategyTypeB"
-                                  SelectedStrategyChanged="@((value) => _formModel.StrategyTypeB = value)"
-                                  ParametersChanged="@((parameters) => _formModel.StrategyParametersB = parameters)" />
+                                  SelectedStrategyChanged="@OnStrategyTypeBChanged"
+                                  ParametersChanged="@OnStrategyParametersBChanged" />
                 </div>
             </div>
         </EditForm>
@@ -207,15 +215,59 @@
 </div>
 
 @code {
+    private const string FORM_KEY = "comparison-form";
+
     private ComparisonFormModel _formModel = new();
     private StrategyForm? _strategyFormA;
     private StrategyForm? _strategyFormB;
     private ParameterOptimizationResult? _result;
     private string? _errorMessage;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
+
+        // Try to restore saved form state
+        ComparisonFormModel? savedForm = await FormState.GetFormStateAsync<ComparisonFormModel>(FORM_KEY);
+        if (savedForm != null)
+        {
+            _formModel = savedForm;
+        }
+        else
+        {
+            // Initialize from user preferences
+            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+            _formModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+    }
+
+    private async Task OnFormFieldChanged()
+    {
+        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
+    }
+
+    private async Task OnStrategyTypeAChanged(string value)
+    {
+        _formModel.StrategyTypeA = value;
+        await OnFormFieldChanged();
+    }
+
+    private async Task OnStrategyParametersAChanged(Dictionary<string, object> parameters)
+    {
+        _formModel.StrategyParametersA = parameters;
+        await OnFormFieldChanged();
+    }
+
+    private async Task OnStrategyTypeBChanged(string value)
+    {
+        _formModel.StrategyTypeB = value;
+        await OnFormFieldChanged();
+    }
+
+    private async Task OnStrategyParametersBChanged(Dictionary<string, object> parameters)
+    {
+        _formModel.StrategyParametersB = parameters;
+        await OnFormFieldChanged();
     }
 
     private async Task HandleRunComparison()
