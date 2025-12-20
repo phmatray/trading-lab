@@ -29,7 +29,6 @@ public static class ApplicationServiceRegistration
         // Application Services
         services.AddScoped<BacktestEngine>();
         services.AddScoped<IStrategyFactory, StrategyFactory>();
-        services.AddTransient<FeatureEngineering>();
         services.AddSingleton<ITickerResolver, TickerResolver>();
         services.AddScoped<PortfolioContextBuilder>();
 
