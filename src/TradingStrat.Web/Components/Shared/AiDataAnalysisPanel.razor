@@ -1,0 +1,152 @@
+@inject IDataAnalysisService AnalysisService
+
+<div class="card mt-6" data-testid="ai-analysis-panel">
+    @if (_analysis == null && !_isAnalyzing)
+    {
+        <!-- Analyze Button -->
+        <div class="text-center py-8">
+            <button @onclick="AnalyzeAsync" class="btn-primary" data-testid="analyze-data-button">
+                🤖 Get AI Data Analysis
+            </button>
+        </div>
+    }
+    else if (_isAnalyzing)
+    {
+        <!-- Loading State -->
+        <ProgressIndicator IsVisible="true" CurrentMessage="Analyzing market data..." />
+    }
+    else if (_analysis != null)
+    {
+        <!-- Analysis Results Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Analysis Details (2/3 width) -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Header -->
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        AI ANALYSIS
+                    </h3>
+                    <button @onclick="ResetAnalysis"
+                            class="text-sm text-gray-500 dark:text-dark-text-secondary hover:text-gray-700 dark:hover:text-dark-text-primary">
+                        New Analysis
+                    </button>
+                </div>
+
+                <!-- Sentiment Badge -->
+                <div class="@GetSentimentClass() px-4 py-3 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold" data-testid="sentiment-indicator">
+                            @_analysis.Sentiment
+                        </span>
+                        @if (_analysis.Sentiment == "BULLISH")
+                        {
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        }
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="bg-blue-50 dark:bg-dark-elevated border border-blue-200 dark:border-dark-border rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-blue-900 dark:text-dark-accent-blue mb-2">
+                        Summary
+                    </h4>
+                    <p class="text-sm text-gray-700 dark:text-dark-text-secondary" data-testid="analysis-summary">
+                        @_analysis.Summary
+                    </p>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="bg-white dark:bg-dark-elevated border border-gray-200 dark:border-dark-border rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-3">
+                        Recommendations
+                    </h4>
+                    <ul class="space-y-2" data-testid="recommendations-list">
+                        @foreach (string rec in _analysis.Recommendations)
+                        {
+                            <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-dark-text-secondary">
+                                <span class="text-trading-blue dark:text-dark-accent-blue mt-0.5">•</span>
+                                <span>@rec</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Confidence Bar -->
+                <div class="bg-gray-50 dark:bg-dark-elevated border border-gray-200 dark:border-dark-border rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+                            Confidence Level
+                        </span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-dark-text-primary" data-testid="confidence-level">
+                            @_analysis.Confidence.ToString("F0")%
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-dark-border rounded-full h-3">
+                        <div class="@GetConfidenceBarClass() h-3 rounded-full transition-all duration-300"
+                             style="width: @(_analysis.Confidence)%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Robot Image (1/3 width) -->
+            <div class="lg:col-span-1 flex items-center justify-center">
+                <img src="@_analysis.RobotImage"
+                     alt="AI Robot"
+                     class="w-full max-w-xs drop-shadow-2xl"
+                     data-testid="robot-image" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required DataSummaryResult DataSummary { get; set; }
+
+    private DataAnalysisResult? _analysis;
+    private bool _isAnalyzing;
+
+    private async Task AnalyzeAsync()
+    {
+        _isAnalyzing = true;
+        StateHasChanged();
+
+        try
+        {
+            _analysis = await AnalysisService.AnalyzeDataAsync(DataSummary);
+        }
+        finally
+        {
+            _isAnalyzing = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetAnalysis()
+    {
+        _analysis = null;
+    }
+
+    private string GetSentimentClass() => _analysis?.Sentiment switch
+    {
+        "BULLISH" => "bg-green-100 dark:bg-green-900/20 border-2 border-green-500 dark:border-green-600 text-green-800 dark:text-green-300",
+        "BEARISH" => "bg-red-100 dark:bg-red-900/20 border-2 border-red-500 dark:border-red-600 text-red-800 dark:text-red-300",
+        _ => "bg-gray-100 dark:bg-gray-800 border-2 border-gray-500 text-gray-800 dark:text-gray-300"
+    };
+
+    private string GetConfidenceBarClass() => _analysis?.Confidence switch
+    {
+        >= 80 => "bg-green-600 dark:bg-green-500",
+        >= 60 => "bg-yellow-600 dark:bg-yellow-500",
+        >= 40 => "bg-orange-600 dark:bg-orange-500",
+        _ => "bg-red-600 dark:bg-red-500"
+    };
+}

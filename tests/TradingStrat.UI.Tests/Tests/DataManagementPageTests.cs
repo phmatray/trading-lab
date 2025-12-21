@@ -208,8 +208,8 @@ public class DataManagementPageTests : BaseTest
         );
 
         // Assert - Verify inputs accepted the dates
-        string? startValue = await Page!.Locator("#start-date").InputValueAsync();
-        string? endValue = await Page!.Locator("#end-date").InputValueAsync();
+        string startValue = await Page!.Locator("#start-date").InputValueAsync();
+        string endValue = await Page!.Locator("#end-date").InputValueAsync();
 
         startValue.ShouldBe(startDate, "Start date input should accept and retain the value");
         endValue.ShouldBe(endDate, "End date input should accept and retain the value");
@@ -232,5 +232,31 @@ public class DataManagementPageTests : BaseTest
         bool hasSuccess = await dataPage.HasSuccessMessageAsync();
 
         (hasSummary || hasSuccess).ShouldBeTrue("Data summary or success message should display after successful fetch");
+    }
+
+    [Fact]
+    public async Task ProgressIndicator_ShouldHideAfterDataFetchCompletes()
+    {
+        // Arrange
+        var dataPage = new DataManagementPage(Page!, BaseUrl);
+        await dataPage.NavigateAsync();
+        await dataPage.FillDataFetchFormAsync("AAPL");
+
+        // Act
+        await dataPage.SubmitFormAsync();
+        await dataPage.WaitForDataFetchCompleteAsync(timeoutMs: 30000);
+
+        // Assert - Progress indicator MUST be hidden
+        var progressIndicator = Page!.Locator("[data-testid='progress-indicator']")
+            .Or(Page!.Locator("text=Fetching Data"));
+
+        bool isHidden = await progressIndicator.IsHiddenAsync();
+        isHidden.ShouldBeTrue("Progress indicator should be hidden after fetch completes");
+
+        // Verify results appeared
+        bool hasResult = await dataPage.HasSuccessMessageAsync() ||
+                         await dataPage.HasErrorMessageAsync() ||
+                         await dataPage.IsDataSummaryDisplayedAsync();
+        hasResult.ShouldBeTrue("Should show result after fetch completes");
     }
 }

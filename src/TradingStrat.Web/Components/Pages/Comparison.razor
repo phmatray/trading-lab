@@ -1,5 +1,4 @@
 @page "/comparison"
-@using TradingStrat.Web.Components.Shared
 @using TradingStrat.Web.Services.State
 @using Microsoft.Extensions.Options
 @using TradingStrat.Application.Configuration
@@ -332,7 +331,7 @@
         }
         finally
         {
-            ProgressService.Reset();
+            await InvokeAsync(() => ProgressService.Reset());
         }
     }
 

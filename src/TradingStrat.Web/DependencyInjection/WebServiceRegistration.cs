@@ -18,6 +18,9 @@ public static class WebServiceRegistration
         services.AddScoped<ChatStateService>();
         services.AddScoped<FormStateService>();
 
+        // AI analysis service
+        services.AddScoped<IDataAnalysisService, DataAnalysisService>();
+
         services.AddHttpContextAccessor();
 
         return services;

@@ -297,7 +297,7 @@
         }
         finally
         {
-            ProgressService.Reset();
+            await InvokeAsync(() => ProgressService.Reset());
         }
     }
 

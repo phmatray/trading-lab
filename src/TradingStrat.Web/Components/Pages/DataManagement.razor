@@ -1,5 +1,4 @@
 @page "/data"
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @rendermode InteractiveServer
 @using TradingStrat.Web.Services.State
 @using Microsoft.Extensions.Options
@@ -149,6 +148,11 @@
     {
         <TradingViewWidget Ticker="@_result.Ticker" />
     }
+
+    @if (_result != null)
+    {
+        <AiDataAnalysisPanel DataSummary="_result" />
+    }
 </div>
 
 @code {
@@ -213,7 +217,7 @@
         }
         finally
         {
-            ProgressService.Reset();
+            await InvokeAsync(() => ProgressService.Reset());
         }
     }
 
