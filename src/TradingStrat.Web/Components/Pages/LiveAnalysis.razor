@@ -2,10 +2,12 @@
 @using TradingStrat.Web.Services.State
 @using Microsoft.Extensions.Options
 @using TradingStrat.Application.Configuration
+@using TradingStrat.Web.Models
 @inject ILiveAnalysisUseCase LiveAnalysisUseCase
 @inject ProgressService ProgressService
 @inject UserPreferencesService PreferencesService
 @inject FormStateService FormState
+@inject NotificationService NotificationService
 @inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
@@ -285,10 +287,41 @@
 
             _result = await LiveAnalysisUseCase.ExecuteAsync(command, progress);
 
-            // Check data freshness
+            // Trigger signal notification for Buy/Sell with high confidence
+            if (_result.PredictedSignal != SignalType.Hold)
+            {
+                float confidence = Math.Abs(_result.PredictedReturn) * 100;
+                if (confidence > 70)
+                {
+                    await NotificationService.AddNotificationAsync(
+                        NotificationType.Signal,
+                        _result.PredictedSignal == SignalType.Buy
+                            ? NotificationSeverity.Success
+                            : NotificationSeverity.Warning,
+                        $"{_result.PredictedSignal} Signal: {_result.Ticker}",
+                        $"Price: ${_result.CurrentPrice:F2} | Confidence: {confidence:F1}%",
+                        ticker: _result.Ticker
+                    );
+                }
+            }
+
+            // Check data freshness and trigger notification if needed
             if (!_result.IsDataFresh && !string.IsNullOrEmpty(_result.DataFreshnessWarning))
             {
                 _warningMessage = _result.DataFreshnessWarning;
+
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.DataFreshness,
+                    NotificationSeverity.Warning,
+                    "Stale Data Warning",
+                    _result.DataFreshnessWarning,
+                    ticker: _result.Ticker,
+                    action: new NotificationAction
+                    {
+                        Label = "Refresh Data",
+                        TargetPage = "/data"
+                    }
+                );
             }
         }
         catch (Exception ex)

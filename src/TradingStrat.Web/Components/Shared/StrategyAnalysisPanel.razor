@@ -1,6 +1,6 @@
-@using TradingStrat.Application.Ports.Inbound
-@using TradingStrat.Domain.Entities
+@using TradingStrat.Web.Models
 @inject IAnalyzeStrategyUseCase AnalyzeStrategyUseCase
+@inject NotificationService NotificationService
 
 <div class="card mt-6">
     @if (_recommendation == null && !_isAnalyzing && _error == null)
@@ -151,6 +151,17 @@
                 StrategyParameters
             );
             _recommendation = await AnalyzeStrategyUseCase.ExecuteAsync(command);
+
+            // Trigger recommendation notification
+            await NotificationService.AddNotificationAsync(
+                NotificationType.Recommendation,
+                _recommendation.Confidence >= 70
+                    ? NotificationSeverity.Info
+                    : NotificationSeverity.Warning,
+                "Strategy Recommendation",
+                _recommendation.Summary,
+                ticker: Ticker
+            );
         }
         catch (Exception ex)
         {

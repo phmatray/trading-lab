@@ -1,0 +1,52 @@
+@using TradingStrat.Web.Models
+@using TradingStrat.Web.Services
+@inject NotificationService NotificationService
+@implements IDisposable
+
+<div class="fixed top-4 right-4 z-50 flex flex-col gap-3" aria-live="polite" aria-atomic="false">
+    @foreach (var toast in _activeToasts)
+    {
+        <NotificationToast Notification="@toast"
+                          OnDismiss="@(() => RemoveToast(toast))"
+                          AutoDismissMs="5000" />
+    }
+</div>
+
+@code {
+    private const int MAX_VISIBLE_TOASTS = 3;
+    private readonly List<Notification> _activeToasts = new();
+
+    protected override void OnInitialized()
+    {
+        NotificationService.OnNotificationAdded += HandleNotificationAdded;
+    }
+
+    private void HandleNotificationAdded(Notification notification)
+    {
+        InvokeAsync(() =>
+        {
+            _activeToasts.Insert(0, notification);
+
+            if (_activeToasts.Count > MAX_VISIBLE_TOASTS)
+            {
+                _activeToasts.RemoveAt(_activeToasts.Count - 1);
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private void RemoveToast(Notification notification)
+    {
+        InvokeAsync(() =>
+        {
+            _activeToasts.Remove(notification);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnNotificationAdded -= HandleNotificationAdded;
+    }
+}

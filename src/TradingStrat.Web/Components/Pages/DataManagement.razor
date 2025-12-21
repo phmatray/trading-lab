@@ -3,10 +3,13 @@
 @using TradingStrat.Web.Services.State
 @using Microsoft.Extensions.Options
 @using TradingStrat.Application.Configuration
+@using TradingStrat.Web.Models
 @inject IDataFetchingUseCase DataFetchingUseCase
+@inject IHistoricalDataPort HistoricalDataPort
 @inject ProgressService ProgressService
 @inject UserPreferencesService PreferencesService
 @inject FormStateService FormState
+@inject NotificationService NotificationService
 @inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
@@ -178,6 +181,30 @@
             // Initialize from user preferences
             Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
             _formModel = DataFetchFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+
+        // Check data freshness for default ticker
+        string ticker = _formModel.Ticker ?? "AAPL";
+        DateTime? latestDate = await HistoricalDataPort.GetLatestDataDateAsync(ticker);
+
+        if (latestDate.HasValue)
+        {
+            int daysOld = (DateTime.Today - latestDate.Value.Date).Days;
+            if (daysOld > 1)
+            {
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.DataFreshness,
+                    daysOld > 7 ? NotificationSeverity.Warning : NotificationSeverity.Info,
+                    "Data Refresh Recommended",
+                    $"Data for {ticker} is {daysOld} day{(daysOld == 1 ? "" : "s")} old",
+                    ticker: ticker,
+                    action: new NotificationAction
+                    {
+                        Label = "Refresh Now",
+                        TargetPage = "/data"
+                    }
+                );
+            }
         }
     }
 

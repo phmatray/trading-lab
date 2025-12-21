@@ -3,10 +3,12 @@
 @using TradingStrat.Web.Services.State
 @using Microsoft.Extensions.Options
 @using TradingStrat.Application.Configuration
+@using TradingStrat.Web.Models
 @inject IBacktestUseCase BacktestUseCase
 @inject ProgressService ProgressService
 @inject UserPreferencesService PreferencesService
 @inject FormStateService FormState
+@inject NotificationService NotificationService
 @inject IOptions<TradingConfiguration> Configuration
 @implements IDisposable
 
@@ -212,6 +214,22 @@
             );
 
             _result = await BacktestUseCase.ExecuteAsync(command, progress);
+
+            // Trigger backtest completion notification
+            await NotificationService.AddNotificationAsync(
+                NotificationType.Backtest,
+                _result.Metrics.TotalReturn >= 0
+                    ? NotificationSeverity.Success
+                    : NotificationSeverity.Warning,
+                "Backtest Complete",
+                $"{_result.StrategyName} | {_result.Trades.Count} trades | {_result.Metrics.TotalReturnPercentage:+0.0;-0.0;0.0}% return",
+                ticker: _result.Ticker,
+                action: new NotificationAction
+                {
+                    Label = "View Results",
+                    TargetPage = "/backtest"
+                }
+            );
         }
         catch (Exception ex)
         {
