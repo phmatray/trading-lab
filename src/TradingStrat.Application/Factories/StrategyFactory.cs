@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
@@ -28,6 +29,7 @@ public class StrategyFactory : IStrategyFactory
             "rsi" => CreateRSIStrategy(parameters),
             "macd" => CreateMACDStrategy(parameters),
             "ml" or "machinelearning" => CreateMachineLearningStrategy(parameters),
+            "ichimoku" or "ichi" => CreateIchimokuStrategy(parameters),
             _ => throw new ArgumentException($"Unknown strategy type: {strategyType}", nameof(strategyType))
         };
     }
@@ -66,6 +68,34 @@ public class StrategyFactory : IStrategyFactory
 
         ILogger<MachineLearningStrategy> logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();
         return new MachineLearningStrategy(_indicatorCalculator, thresholds, logger);
+    }
+
+    private IchimokuStrategy CreateIchimokuStrategy(Dictionary<string, object> parameters)
+    {
+        int tenkanPeriod = GetParameter(parameters, "TenkanPeriod", 9);
+        int kijunPeriod = GetParameter(parameters, "KijunPeriod", 26);
+        int senkouBPeriod = GetParameter(parameters, "SenkouBPeriod", 52);
+        int displacement = GetParameter(parameters, "Displacement", 26);
+
+        IchimokuExitMode exitMode = GetParameter(parameters, "ExitMode", IchimokuExitMode.CloseBelowKijun);
+        IchimokuEntryMode entryMode = GetParameter(parameters, "EntryMode", IchimokuEntryMode.AllConditionsOnly);
+
+        int crossLookbackDays = GetParameter(parameters, "CrossLookbackDays", 5);
+        decimal riskPercentage = GetParameter(parameters, "RiskPercentage", 0.02m);
+
+        TimeframeAggregator timeframeAggregator = new();
+
+        return new IchimokuStrategy(
+            _indicatorCalculator,
+            timeframeAggregator,
+            tenkanPeriod,
+            kijunPeriod,
+            senkouBPeriod,
+            displacement,
+            exitMode,
+            entryMode,
+            crossLookbackDays,
+            riskPercentage);
     }
 
     private T GetParameter<T>(Dictionary<string, object> parameters, string key, T defaultValue)

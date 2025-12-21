@@ -3,6 +3,7 @@ using Spectre.Console;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Application.Services;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Presentation.Console.Presenters;
@@ -14,6 +15,7 @@ public class ProgramMenu
     private readonly IDataFetchingUseCase _dataFetchingUseCase;
     private readonly IBacktestUseCase _backtestUseCase;
     private readonly ILiveAnalysisUseCase _liveAnalysisUseCase;
+    private readonly IParameterOptimizationUseCase _parameterOptimizationUseCase;
     private readonly IExportPort _exportPort;
     private readonly IHistoricalDataPort _historicalDataPort;
     private readonly TradingConfiguration _config;
@@ -22,6 +24,7 @@ public class ProgramMenu
         IDataFetchingUseCase dataFetchingUseCase,
         IBacktestUseCase backtestUseCase,
         ILiveAnalysisUseCase liveAnalysisUseCase,
+        IParameterOptimizationUseCase parameterOptimizationUseCase,
         IExportPort exportPort,
         IHistoricalDataPort historicalDataPort,
         IOptions<TradingConfiguration> config)
@@ -29,6 +32,7 @@ public class ProgramMenu
         _dataFetchingUseCase = dataFetchingUseCase;
         _backtestUseCase = backtestUseCase;
         _liveAnalysisUseCase = liveAnalysisUseCase;
+        _parameterOptimizationUseCase = parameterOptimizationUseCase;
         _exportPort = exportPort;
         _historicalDataPort = historicalDataPort;
         _config = config.Value;
@@ -52,8 +56,9 @@ public class ProgramMenu
                     .AddChoices(
                         "1. Fetch/Update Historical Data",
                         "2. Run Backtest",
-                        "3. Analyze Current Position",
-                        "4. Exit"));
+                        "3. A/B Parameter Optimization",
+                        "4. Analyze Current Position",
+                        "5. Exit"));
 
             AnsiConsole.WriteLine();
 
@@ -65,15 +70,18 @@ public class ProgramMenu
                 case "2. Run Backtest":
                     await RunBacktestAsync();
                     break;
-                case "3. Analyze Current Position":
+                case "3. A/B Parameter Optimization":
+                    await RunParameterOptimizationAsync();
+                    break;
+                case "4. Analyze Current Position":
                     await RunAnalysisAsync();
                     break;
-                case "4. Exit":
+                case "5. Exit":
                     AnsiConsole.MarkupLine("[grey]Goodbye![/]");
                     return;
             }
 
-            if (choice != "4. Exit")
+            if (choice != "5. Exit")
             {
                 AnsiConsole.WriteLine();
                 AnsiConsole.MarkupLine("[dim]Press any key to return to menu...[/]");
@@ -241,6 +249,95 @@ public class ProgramMenu
                 AnalysisPresenter.DisplayAnalysis(result);
 
                 await HandleAnalysisExportAsync(result, ticker);
+            }
+        }
+        catch (Exception ex)
+        {
+            DisplayError(ex);
+        }
+    }
+
+    private async Task RunParameterOptimizationAsync()
+    {
+        try
+        {
+            string ticker = _config.DefaultTicker;
+
+            // Select strategy type
+            string strategyType = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Select strategy type:[/]")
+                    .PageSize(10)
+                    .AddChoices(
+                        "Moving Average Crossover",
+                        "RSI",
+                        "MACD",
+                        "ML FastTree"));
+
+            string strategyKey = strategyType switch
+            {
+                "Moving Average Crossover" => "ma",
+                "RSI" => "rsi",
+                "MACD" => "macd",
+                "ML FastTree" => "ml",
+                _ => "ma"
+            };
+
+            // Get predefined variants
+            List<(StrategyVariant VariantA, StrategyVariant VariantB)> variantPairs =
+                ParameterGenerator.GetPredefinedVariants(strategyKey);
+
+            // Let user select which A/B test to run
+            List<string> choices = variantPairs
+                .Select((pair, idx) => $"{idx + 1}. {pair.VariantA.Description} vs {pair.VariantB.Description}")
+                .ToList();
+
+            string selectedPair = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]Select parameter variants to compare:[/]")
+                    .PageSize(10)
+                    .AddChoices(choices));
+
+            int selectedIndex = int.Parse(selectedPair.Split('.')[0]) - 1;
+            (StrategyVariant variantA, StrategyVariant variantB) = variantPairs[selectedIndex];
+
+            decimal initialCapital = AnsiConsole.Ask(
+                "[yellow]Initial capital:[/]",
+                _config.Backtest.InitialCapital);
+
+            AnsiConsole.WriteLine();
+
+            ParameterOptimizationCommand command = new ParameterOptimizationCommand(
+                ticker,
+                variantA,
+                variantB,
+                initialCapital,
+                _config.Backtest.CommissionPercentage,
+                _config.Backtest.MinimumCommission);
+
+            ParameterOptimizationResult? result = null;
+
+            await AnsiConsole.Status()
+                .StartAsync("Running A/B optimization...", async ctx =>
+                {
+                    ctx.Spinner(Spinner.Known.Dots);
+                    ctx.SpinnerStyle(Style.Parse("cyan"));
+
+                    Progress<OptimizationProgress> progress = new Progress<OptimizationProgress>(p =>
+                    {
+                        ctx.Status($"{p.CurrentVariant}: {p.CurrentBar}/{p.TotalBars} bars, {p.Trades} trades");
+                    });
+
+                    result = await _parameterOptimizationUseCase.ExecuteAsync(command, progress);
+
+                    ctx.Status("[green]Optimization complete[/]");
+                    await Task.Delay(300);
+                });
+
+            if (result != null)
+            {
+                AnsiConsole.MarkupLine("[green]✓[/] A/B optimization complete\n");
+                ParameterOptimizationPresenter.DisplayResults(result);
             }
         }
         catch (Exception ex)

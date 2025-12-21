@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Infrastructure.Assistant;
 using TradingStrat.Infrastructure.Export;
 using TradingStrat.Infrastructure.MachineLearning;
 using TradingStrat.Infrastructure.MarketData;
@@ -22,11 +23,16 @@ public static class InfrastructureServiceRegistration
         services.AddDbContext<TradingContext>(options =>
             options.UseSqlite(connectionString));
 
+        // HTTP Clients
+        services.AddHttpClient("Anthropic");
+
         // Port implementations
         services.AddScoped<IHistoricalDataPort, HistoricalDataRepository>();
         services.AddScoped<IMarketDataPort, YahooFinanceAdapter>();
         services.AddScoped<IExportPort, ExportAdapter>();
         services.AddSingleton<IMLModelPort, MlNetModelAdapter>();
+        services.AddScoped<IAssistantPort, AnthropicAdapter>();
+        services.AddScoped<IChatHistoryPort, ChatHistoryRepository>();
 
         return services;
     }

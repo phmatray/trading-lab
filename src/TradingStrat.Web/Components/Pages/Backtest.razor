@@ -1,0 +1,262 @@
+@page "/backtest"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
+@using TradingStrat.Web.Models
+@inject IBacktestUseCase BacktestUseCase
+@inject ProgressService ProgressService
+@inject UserPreferencesService PreferencesService
+@inject FormStateService FormState
+@inject NotificationService NotificationService
+@inject IOptions<TradingConfiguration> Configuration
+@implements IDisposable
+
+<PageTitle>Backtest - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <div class="card">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Strategy Backtest</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Test trading strategies on historical data and analyze performance metrics.</p>
+    </div>
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Configuration Form -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="card">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</h2>
+
+                <EditForm Model="@_formModel" OnValidSubmit="@HandleRunBacktest" class="space-y-4">
+                    <DataAnnotationsValidator />
+
+                    <div>
+                        <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
+                        <InputText id="ticker" @bind-Value="_formModel.Ticker"
+                                   @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
+                                   class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+
+                    <div>
+                        <label for="capital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital *</label>
+                        <InputNumber id="capital" @bind-Value="_formModel.InitialCapital"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Start Date</label>
+                            <InputDate id="start-date" @bind-Value="_formModel.StartDate"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
+                                       class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">End Date</label>
+                            <InputDate id="end-date" @bind-Value="_formModel.EndDate"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
+                                       class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        </div>
+                    </div>
+
+                    <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
+                        @if (ProgressService.IsProcessing)
+                        {
+                            <span>Running Backtest...</span>
+                        }
+                        else
+                        {
+                            <span>Run Backtest</span>
+                        }
+                    </button>
+                </EditForm>
+            </div>
+
+            <StrategyForm @ref="_strategyForm"
+                          SelectedStrategy="@_formModel.StrategyType"
+                          SelectedStrategyChanged="@OnStrategyTypeChanged"
+                          ParametersChanged="@OnStrategyParametersChanged" />
+        </div>
+
+        <!-- Results -->
+        <div class="lg:col-span-2 space-y-6">
+            @if (_result != null)
+            {
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                        @_result.StrategyName
+                    </h2>
+                    <p class="text-gray-600 dark:text-dark-text-secondary mb-4">@_result.StrategyDescription</p>
+                    <div class="text-sm text-gray-500 dark:text-dark-text-secondary">
+                        <p>Period: @_result.StartDate.ToString("yyyy-MM-dd") to @_result.EndDate.ToString("yyyy-MM-dd")</p>
+                        <p>Initial Capital: @_result.InitialCapital.ToString("C2")</p>
+                    </div>
+                </div>
+
+                <MetricsGrid Metrics="@_result.Metrics" />
+
+                <StrategyAnalysisPanel
+                    Ticker="@_result.Ticker"
+                    StrategyType="@GetStrategyType(_result.StrategyName)"
+                    StrategyParameters="@_result.StrategyParameters" />
+
+                <EquityChart EquityCurve="@_result.EquityCurve" />
+
+                <TradeTable Trades="@_result.Trades" />
+            }
+            else
+            {
+                <div class="card">
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No backtest results</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your strategy and run a backtest to see results here.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (_result != null)
+    {
+        <TradingViewWidget Ticker="@_result.Ticker" />
+    }
+</div>
+
+@code {
+    private const string FORM_KEY = "backtest-form";
+
+    private BacktestFormModel _formModel = new();
+    private StrategyForm? _strategyForm;
+    private BacktestResult? _result;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProgressService.OnProgressChanged += StateHasChanged;
+
+        // Try to restore saved form state
+        BacktestFormModel? savedForm = await FormState.GetFormStateAsync<BacktestFormModel>(FORM_KEY);
+        if (savedForm != null)
+        {
+            _formModel = savedForm;
+        }
+        else
+        {
+            // Initialize from user preferences
+            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+            _formModel = BacktestFormModel.FromPreferences(prefs, Configuration.Value);
+        }
+    }
+
+    private async Task OnFormFieldChanged()
+    {
+        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
+    }
+
+    private async Task OnStrategyTypeChanged(string value)
+    {
+        _formModel.StrategyType = value;
+        await OnFormFieldChanged();
+    }
+
+    private async Task OnStrategyParametersChanged(Dictionary<string, object> parameters)
+    {
+        _formModel.StrategyParameters = parameters;
+        await OnFormFieldChanged();
+    }
+
+    private async Task HandleRunBacktest()
+    {
+        _errorMessage = null;
+        _result = null;
+
+        ProgressService.Reset();
+
+        // Get current strategy parameters from the form
+        if (_strategyForm != null)
+        {
+            _formModel.StrategyParameters = _strategyForm.GetCurrentParameters();
+        }
+
+        var progress = new Progress<BacktestProgress>(p =>
+        {
+            InvokeAsync(() =>
+            {
+                int percentage = p.Total > 0 ? (int)((double)p.Current / p.Total * 100) : 0;
+                ProgressService.UpdateProgress(
+                    $"Processing bar {p.Current}/{p.Total} - {p.Trades} trades executed",
+                    percentage
+                );
+            });
+        });
+
+        try
+        {
+            var command = new BacktestCommand(
+                _formModel.Ticker,
+                _formModel.StrategyType,
+                _formModel.StrategyParameters,
+                _formModel.InitialCapital,
+                _formModel.CommissionPercentage,
+                _formModel.MinimumCommission,
+                _formModel.StartDate,
+                _formModel.EndDate
+            );
+
+            _result = await BacktestUseCase.ExecuteAsync(command, progress);
+
+            // Trigger backtest completion notification
+            await NotificationService.AddNotificationAsync(
+                NotificationType.Backtest,
+                _result.Metrics.TotalReturn >= 0
+                    ? NotificationSeverity.Success
+                    : NotificationSeverity.Warning,
+                "Backtest Complete",
+                $"{_result.StrategyName} | {_result.Trades.Count} trades | {_result.Metrics.TotalReturnPercentage:+0.0;-0.0;0.0}% return",
+                ticker: _result.Ticker,
+                action: new NotificationAction
+                {
+                    Label = "View Results",
+                    TargetPage = "/backtest"
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error running backtest: {ex.Message}";
+        }
+        finally
+        {
+            await InvokeAsync(() => ProgressService.Reset());
+        }
+    }
+
+    private string GetStrategyType(string strategyName)
+    {
+        // Map strategy names to types: "Moving Average Crossover" -> "ma"
+        return strategyName.ToLowerInvariant() switch
+        {
+            var s when s.Contains("moving average") => "ma",
+            var s when s.Contains("rsi") => "rsi",
+            var s when s.Contains("macd") => "macd",
+            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
+            var s when s.Contains("ichimoku") => "ichimoku",
+            _ => "ma"
+        };
+    }
+
+    public void Dispose()
+    {
+        ProgressService.OnProgressChanged -= StateHasChanged;
+    }
+}

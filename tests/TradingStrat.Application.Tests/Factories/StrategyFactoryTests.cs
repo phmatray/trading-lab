@@ -111,7 +111,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithNullParameters_UsesDefaults()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma", null);
+        IStrategy strategy = _factory.CreateStrategy("ma");
 
         // Assert
         strategy.ShouldNotBeNull();

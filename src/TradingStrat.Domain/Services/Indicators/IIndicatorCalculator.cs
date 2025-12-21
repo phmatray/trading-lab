@@ -69,4 +69,53 @@ public interface IIndicatorCalculator
     /// <param name="period">Number of periods for standard deviation calculation.</param>
     /// <returns>Array of standard deviation values, with leading zeros where calculation is not possible.</returns>
     decimal[] CalculateStdDev(decimal[] prices, int period);
+
+    /// <summary>
+    /// Calculates Tenkan-sen (Conversion Line) - midpoint of highest high and lowest low over period.
+    /// Formula: (Highest High + Lowest Low) / 2 over period bars
+    /// </summary>
+    /// <param name="prices">Historical price data including high and low.</param>
+    /// <param name="period">Period for calculation (standard: 9).</param>
+    /// <returns>Array of Tenkan-sen values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateTenkan(HistoricalPrice[] prices, int period = 9);
+
+    /// <summary>
+    /// Calculates Kijun-sen (Base Line) - midpoint of highest high and lowest low over period.
+    /// Formula: (Highest High + Lowest Low) / 2 over period bars
+    /// </summary>
+    /// <param name="prices">Historical price data including high and low.</param>
+    /// <param name="period">Period for calculation (standard: 26).</param>
+    /// <returns>Array of Kijun-sen values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateKijun(HistoricalPrice[] prices, int period = 26);
+
+    /// <summary>
+    /// Calculates Senkou Span A (Leading Span A) - midpoint of Tenkan and Kijun.
+    /// Formula: (Tenkan-sen + Kijun-sen) / 2
+    /// Note: Traditionally shifted +26 periods for display, but this method returns unshifted values.
+    /// Strategy implementation handles shifting.
+    /// </summary>
+    /// <param name="tenkan">Tenkan-sen values.</param>
+    /// <param name="kijun">Kijun-sen values.</param>
+    /// <returns>Array of Senkou Span A values (unshifted).</returns>
+    decimal[] CalculateSenkouSpanA(decimal[] tenkan, decimal[] kijun);
+
+    /// <summary>
+    /// Calculates Senkou Span B (Leading Span B) - midpoint of highest high and lowest low over period.
+    /// Formula: (Highest High + Lowest Low) / 2 over period bars
+    /// Note: Traditionally shifted +26 periods for display, but this method returns unshifted values.
+    /// Strategy implementation handles shifting.
+    /// </summary>
+    /// <param name="prices">Historical price data including high and low.</param>
+    /// <param name="period">Period for calculation (standard: 52).</param>
+    /// <returns>Array of Senkou Span B values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateSenkouSpanB(HistoricalPrice[] prices, int period = 52);
+
+    /// <summary>
+    /// Calculates Chikou Span (Lagging Span) - current close price.
+    /// Note: Traditionally shifted -26 periods for display, but this method returns unshifted close prices.
+    /// Strategy implementation handles shifting.
+    /// </summary>
+    /// <param name="prices">Historical price data.</param>
+    /// <returns>Array of close prices (unshifted).</returns>
+    decimal[] CalculateChikouSpan(HistoricalPrice[] prices);
 }

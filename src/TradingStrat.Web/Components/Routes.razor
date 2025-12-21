@@ -1,0 +1,19 @@
+<Router AppAssembly="@typeof(Program).Assembly" NotFoundPage="@typeof(NotFound)">
+    <Found Context="routeData">
+        <ErrorBoundary>
+            <ChildContent>
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </ChildContent>
+            <ErrorContent Context="error">
+                <div class="card max-w-2xl mx-auto mt-8 bg-red-50 border-red-200">
+                    <h1 class="text-3xl font-bold text-red-900 mb-4">An Error Occurred</h1>
+                    <p class="text-red-700 mb-4">@error.Message</p>
+                    <button onclick="location.reload()" class="btn-primary bg-red-600 hover:bg-red-700">
+                        Reload Page
+                    </button>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
+    </Found>
+</Router>

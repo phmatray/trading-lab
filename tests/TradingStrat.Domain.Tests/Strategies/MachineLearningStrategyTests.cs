@@ -339,7 +339,7 @@ public class MachineLearningStrategyTests
 
         // Assert - Should successfully generate without using data beyond index 100
         signal.ShouldNotBeNull();
-        signal.Reason.ShouldNotContain("error", Case.Insensitive);
+        signal.Reason.ShouldNotContain("error");
     }
 
     [Fact]

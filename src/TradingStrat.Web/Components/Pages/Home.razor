@@ -1,0 +1,211 @@
+@page "/"
+
+<PageTitle>Home - TradingStrat</PageTitle>
+
+<div class="space-y-8">
+    <!-- Hero Section -->
+    <div class="card bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-dark-elevated dark:to-dark-card">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">TradingStrat</h1>
+            <p class="text-xl text-gray-700 dark:text-dark-text-primary mb-2">Strategy Backtesting & Machine Learning Analysis Platform</p>
+            <p class="text-gray-600 dark:text-dark-text-secondary max-w-3xl mx-auto">
+                Test trading strategies on historical data, analyze market positions with ML predictions,
+                and optimize parameters through A/B comparison. Built with hexagonal architecture for
+                clean, testable code.
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Data Sources</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">Yahoo Finance</p>
+                </div>
+                <svg class="h-12 w-12 text-blue-500 dark:text-dark-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">ML Algorithm</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">FastTree</p>
+                </div>
+                <svg class="h-12 w-12 text-green-500 dark:text-dark-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Strategies Available</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">5</p>
+                </div>
+                <svg class="h-12 w-12 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-6">Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Data Management -->
+            <a href="/data" class="card hover:shadow-lg dark:hover:shadow-2xl transition-shadow duration-200 block">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-blue-600 dark:text-dark-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Data Management</h3>
+                        <p class="text-gray-600 dark:text-dark-text-secondary">
+                            Fetch and manage historical market data from Yahoo Finance. Download OHLC data,
+                            view statistics, and keep your database up-to-date.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Backtest -->
+            <a href="/backtest" class="card hover:shadow-lg dark:hover:shadow-2xl transition-shadow duration-200 block">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-green-600 dark:text-dark-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Strategy Backtest</h3>
+                        <p class="text-gray-600 dark:text-dark-text-secondary">
+                            Test trading strategies on historical data. Supports MA Crossover, RSI, MACD,
+                            ML FastTree, and Ichimoku Cloud with comprehensive performance metrics.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Live Analysis -->
+            <a href="/analysis" class="card hover:shadow-lg dark:hover:shadow-2xl transition-shadow duration-200 block">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">Live Market Analysis</h3>
+                        <p class="text-gray-600 dark:text-dark-text-secondary">
+                            Get ML-based predictions and technical analysis for current market positions.
+                            View 26 technical indicators and predicted Buy/Sell/Hold signals.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- A/B Comparison -->
+            <a href="/comparison" class="card hover:shadow-lg dark:hover:shadow-2xl transition-shadow duration-200 block">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-2">A/B Strategy Comparison</h3>
+                        <p class="text-gray-600 dark:text-dark-text-secondary">
+                            Compare two strategy variants side-by-side with detailed performance metrics.
+                            Optimize parameters and identify the best configuration.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="card">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-6">Technology Stack</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">.NET 10.0</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Runtime</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">Blazor Server</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">UI Framework</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">ML.NET</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Machine Learning</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">SQLite</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Database</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">Tailwind CSS</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Styling</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">ApexCharts</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Charts</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">TradingView</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">Financial Charts</div>
+            </div>
+            <div class="text-center">
+                <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">EF Core</div>
+                <div class="text-xs text-gray-500 dark:text-dark-text-secondary">ORM</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="card bg-gray-50 dark:bg-dark-elevated">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-4">Hexagonal Architecture</h2>
+        <p class="text-gray-700 dark:text-dark-text-secondary mb-4">
+            This application follows the Ports & Adapters pattern with strict dependency boundaries:
+        </p>
+        <div class="bg-white dark:bg-dark-card rounded-lg p-4 border border-gray-200 dark:border-dark-border font-mono text-sm">
+            <div class="text-gray-700 dark:text-dark-text-primary">Web (Blazor Server) → Application → Domain ← Infrastructure</div>
+        </div>
+        <ul class="mt-4 space-y-2 text-gray-600 dark:text-dark-text-secondary">
+            <li class="flex items-start">
+                <svg class="h-5 w-5 text-green-500 dark:text-dark-success mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Domain layer has zero external dependencies</span>
+            </li>
+            <li class="flex items-start">
+                <svg class="h-5 w-5 text-green-500 dark:text-dark-success mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Use cases orchestrate business logic without infrastructure concerns</span>
+            </li>
+            <li class="flex items-start">
+                <svg class="h-5 w-5 text-green-500 dark:text-dark-success mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Infrastructure adapters implement domain and application ports</span>
+            </li>
+            <li class="flex items-start">
+                <svg class="h-5 w-5 text-green-500 dark:text-dark-success mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Presentation layer depends only on use case interfaces</span>
+            </li>
+        </ul>
+    </div>
+</div>

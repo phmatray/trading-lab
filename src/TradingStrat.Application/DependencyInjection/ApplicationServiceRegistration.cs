@@ -19,6 +19,8 @@ public static class ApplicationServiceRegistration
         // Configure options
         services.Configure<TradingConfiguration>(
             configuration.GetSection("Trading"));
+        services.Configure<AssistantConfiguration>(
+            configuration.GetSection("Trading:Assistant"));
 
         // Domain Services (from Domain layer)
         services.AddTransient<IIndicatorCalculator, IndicatorCalculator>();
@@ -27,13 +29,16 @@ public static class ApplicationServiceRegistration
         // Application Services
         services.AddScoped<BacktestEngine>();
         services.AddScoped<IStrategyFactory, StrategyFactory>();
-        services.AddTransient<FeatureEngineering>();
         services.AddSingleton<ITickerResolver, TickerResolver>();
+        services.AddScoped<PortfolioContextBuilder>();
 
         // Use Cases
         services.AddScoped<IDataFetchingUseCase, FetchHistoricalDataUseCase>();
         services.AddScoped<IBacktestUseCase, RunBacktestUseCase>();
         services.AddScoped<ILiveAnalysisUseCase, AnalyzeCurrentPositionUseCase>();
+        services.AddScoped<IParameterOptimizationUseCase, RunParameterOptimizationUseCase>();
+        services.AddScoped<ISendChatMessageUseCase, SendChatMessageUseCase>();
+        services.AddScoped<IAnalyzeStrategyUseCase, AnalyzeStrategyUseCase>();
 
         return services;
     }

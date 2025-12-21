@@ -1,0 +1,254 @@
+@page "/settings"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Services.State
+@using Microsoft.Extensions.Options
+@using TradingStrat.Application.Configuration
+@inject UserPreferencesService PreferencesService
+@inject LocalStorageService LocalStorage
+@inject IOptions<TradingConfiguration> Configuration
+@inject NavigationManager Navigation
+
+<PageTitle>Settings - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <div class="card">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Settings</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Configure your preferences and application defaults.</p>
+    </div>
+
+    <AlertMessage Message="@_successMessage" Type="AlertType.Success" />
+    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
+
+    <EditForm Model="@_preferences" OnValidSubmit="@HandleSaveSettings" class="space-y-6">
+        <DataAnnotationsValidator />
+
+        <!-- Appearance -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Appearance</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="theme" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Theme</label>
+                    <InputSelect id="theme" @bind-Value="_preferences.Theme"
+                                 class="w-full md:w-64 rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System</option>
+                    </InputSelect>
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Choose your preferred color theme</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Default Ticker -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Default Ticker</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="defaultTicker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol</label>
+                    <InputText id="defaultTicker" @bind-Value="_preferences.DefaultTicker"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Default ticker symbol for all forms</p>
+                </div>
+
+                <div>
+                    <label for="defaultIsin" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">ISIN (Optional)</label>
+                    <InputText id="defaultIsin" @bind-Value="_preferences.DefaultIsin"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backtest Defaults -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Backtest Defaults</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="initialCapital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital</label>
+                    <InputNumber id="initialCapital" @bind-Value="_preferences.BacktestDefaults.InitialCapital"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div>
+                    <label for="preferredStrategy" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Preferred Strategy</label>
+                    <InputSelect id="preferredStrategy" @bind-Value="_preferences.BacktestDefaults.PreferredStrategy"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="ma">Moving Average Crossover</option>
+                        <option value="rsi">RSI</option>
+                        <option value="macd">MACD</option>
+                        <option value="ml">Machine Learning</option>
+                        <option value="ichimoku">Ichimoku Cloud</option>
+                    </InputSelect>
+                </div>
+
+                <div>
+                    <label for="commissionPercentage" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Commission (%)</label>
+                    <InputNumber id="commissionPercentage" @bind-Value="_preferences.BacktestDefaults.CommissionPercentage"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div>
+                    <label for="minimumCommission" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Minimum Commission</label>
+                    <InputNumber id="minimumCommission" @bind-Value="_preferences.BacktestDefaults.MinimumCommission"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Preferences -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Chart Preferences</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <InputCheckbox @bind-Value="_preferences.ChartPreferences.ShowVolume"
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Show Volume</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <InputCheckbox @bind-Value="_preferences.ChartPreferences.ShowIndicators"
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Show Indicators</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label for="defaultInterval" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Default Interval</label>
+                    <InputSelect id="defaultInterval" @bind-Value="_preferences.ChartPreferences.DefaultInterval"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="D">Daily</option>
+                        <option value="W">Weekly</option>
+                        <option value="M">Monthly</option>
+                    </InputSelect>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="btn-primary">
+                    Save Settings
+                </button>
+
+                <button type="button" @onclick="HandleResetToDefaults" class="btn-secondary">
+                    Reset to Defaults
+                </button>
+
+                <button type="button" @onclick="HandleClearAllData" class="btn-danger">
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Models.State.UserPreferences _preferences = new();
+    private string? _successMessage;
+    private string? _errorMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _preferences = await PreferencesService.GetPreferencesAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSaveSettings()
+    {
+        Console.WriteLine("🔵 HandleSaveSettings called!");
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            Console.WriteLine($"🔵 Saving preferences: Ticker={_preferences.DefaultTicker}");
+            _preferences.LastUpdated = DateTime.UtcNow;
+            await PreferencesService.SavePreferencesAsync(_preferences);
+            _successMessage = "Settings saved successfully!";
+            Console.WriteLine("🔵 Settings saved successfully!");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"🔴 Error saving settings: {ex.Message}");
+            _errorMessage = $"Error saving settings: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleResetToDefaults()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            TradingConfiguration config = Configuration.Value;
+            _preferences = new Models.State.UserPreferences
+            {
+                DefaultTicker = config.DefaultTicker,
+                DefaultIsin = config.DefaultIsin,
+                BacktestDefaults = new Models.State.BacktestDefaults
+                {
+                    InitialCapital = config.Backtest.InitialCapital,
+                    CommissionPercentage = config.Backtest.CommissionPercentage,
+                    MinimumCommission = config.Backtest.MinimumCommission,
+                    PreferredStrategy = "ma"
+                },
+                ChartPreferences = new Models.State.ChartPreferences
+                {
+                    ShowVolume = true,
+                    ShowIndicators = true,
+                    DefaultInterval = "D"
+                },
+                Theme = "system"
+            };
+
+            await PreferencesService.SavePreferencesAsync(_preferences);
+            _successMessage = "Settings reset to defaults successfully!";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error resetting settings: {ex.Message}";
+        }
+    }
+
+    private async Task HandleClearAllData()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        try
+        {
+            // Clear all localStorage keys
+            await LocalStorage.RemoveItemAsync("tradingstrat_preferences");
+            await LocalStorage.RemoveItemAsync("tradingstrat_app_state");
+            await LocalStorage.RemoveItemAsync("tradingstrat_chat_history");
+            await LocalStorage.RemoveItemAsync("tradingstrat_form_states");
+
+            // Clear cache
+            LocalStorage.ClearCache();
+
+            _successMessage = "All data cleared successfully! Reloading page...";
+
+            // Reload page to reset state
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error clearing data: {ex.Message}";
+        }
+    }
+}

@@ -34,6 +34,21 @@ dotnet test --filter "FullyQualifiedName~RSIStrategyTests"
 dotnet test --filter "FullyQualifiedName~RSIStrategyTests.GenerateSignal_WhenRSIOversold_ReturnsBuySignal"
 ```
 
+### UI Testing with Playwright
+```bash
+# Install Playwright browsers (first time only)
+pwsh tests/TradingStrat.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
+
+# Run UI tests
+dotnet test tests/TradingStrat.UI.Tests
+
+# Run specific test class
+dotnet test --filter "FullyQualifiedName~HomePageTests"
+
+# Debug tests with visible browser
+TEST_HEADLESS=false dotnet test tests/TradingStrat.UI.Tests
+```
+
 ### Building
 ```bash
 # Build entire solution
@@ -163,6 +178,26 @@ foreach (var p in savedData)
 }
 ```
 
+## UI Testing Architecture
+
+**Test Infrastructure:**
+- **WebApplicationFixture:** Hosts Blazor Server app on Kestrel (Playwright requires real HTTP server, not TestServer)
+- **PlaywrightFixture:** Manages Chromium/Firefox/WebKit browser lifecycle
+- **BaseTest:** Base class providing browser context and page per test (isolation)
+- **Page Object Model:** Encapsulates page-specific selectors and interactions
+- **Test Configuration:** Environment-based config for CI/CD flexibility
+
+**Test Coverage (Current):**
+- HomePageTests: 13 tests covering navigation, content, Blazor connection, console errors
+- **Future:** BacktestPageTests, DataManagementPageTests, LiveAnalysisPageTests, ComparisonPageTests
+
+**Key Practices:**
+- Use `main .grid a[href='/data']` instead of just `a[href='/data']` to avoid matching navigation menu links (Playwright strict mode)
+- Always call `await Page.WaitForBlazorAsync()` after navigation to ensure SignalR connection is established
+- Filter acceptable console errors (favicon 404, sourcemaps) in error tests
+- Each test gets its own browser context for complete isolation
+- Screenshots automatically saved on test failure for debugging
+
 ## Configuration
 
 All configuration is in `src/TradingStrat.Presentation/appsettings.json`:
@@ -178,6 +213,50 @@ All configuration is in `src/TradingStrat.Presentation/appsettings.json`:
 - `Trading.Export.OutputDirectory` - Where to save CSV/JSON exports
 
 Configuration is strongly-typed and injected via `IOptions<TradingConfiguration>`.
+
+### Configuring API Keys (AI Trading Assistant)
+
+The AI Trading Assistant requires an Anthropic API key. For security, API keys should **never** be committed to source control.
+
+**Development (Recommended - User Secrets):**
+```bash
+# Initialize user secrets (first time only)
+dotnet user-secrets init --project src/TradingStrat.Web
+
+# Set the API key
+dotnet user-secrets set "Trading:Assistant:ApiKey" "sk-ant-api03-..." --project src/TradingStrat.Web
+
+# Verify it's set
+dotnet user-secrets list --project src/TradingStrat.Web
+```
+
+**Development (Environment Variable):**
+```bash
+# Set environment variable (use double underscores for nested config)
+export Trading__Assistant__ApiKey="sk-ant-api03-..."
+
+# Run the application
+dotnet run --project src/TradingStrat.Web
+```
+
+**Production (Docker/Container):**
+```bash
+docker run -e Trading__Assistant__ApiKey="sk-ant-..." tradingstrat-web
+```
+
+**Production (Systemd Service):**
+```ini
+[Service]
+Environment="Trading__Assistant__ApiKey=sk-ant-..."
+ExecStart=/usr/bin/dotnet TradingStrat.Web.dll
+```
+
+**Configuration Priority (Highest Last):**
+1. appsettings.json (base configuration)
+2. appsettings.{Environment}.json (environment-specific)
+3. User Secrets (development only)
+4. Environment Variables (all environments)
+5. Command-line arguments
 
 ## Key Domain Concepts
 
