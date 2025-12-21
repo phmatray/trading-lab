@@ -21,16 +21,18 @@ dotnet run
 
 ### Testing
 ```bash
-# Run all tests (39 total: 17 Domain + 14 Application + 8 Infrastructure)
+# Run all tests (122+ total: 46 Domain + 37 Application + 8 Infrastructure + 31+ UI)
 dotnet test
 
 # Run specific test project
-dotnet test tests/TradingStrat.Domain.Tests
-dotnet test tests/TradingStrat.Application.Tests
-dotnet test tests/TradingStrat.Infrastructure.Tests
+dotnet test tests/TradingStrat.Domain.Tests          # 46 tests (strategies, valuation, rebalancing, performance)
+dotnet test tests/TradingStrat.Application.Tests     # 37 tests (use cases with test doubles)
+dotnet test tests/TradingStrat.Infrastructure.Tests  # 8 tests (repository, adapters)
+dotnet test tests/TradingStrat.UI.Tests              # 31+ tests (E2E with Playwright)
 
 # Run a single test class
 dotnet test --filter "FullyQualifiedName~RSIStrategyTests"
+dotnet test --filter "FullyQualifiedName~PortfoliosPageTests"
 
 # Run a single test method
 dotnet test --filter "FullyQualifiedName~RSIStrategyTests.GenerateSignal_WhenRSIOversold_ReturnsBuySignal"
@@ -41,11 +43,15 @@ dotnet test --filter "FullyQualifiedName~RSIStrategyTests.GenerateSignal_WhenRSI
 # Install Playwright browsers (first time only)
 pwsh tests/TradingStrat.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
 
-# Run UI tests
+# Run UI tests (31+ E2E tests covering Home, Portfolios, Dashboard, Rebalancing, Performance)
 dotnet test tests/TradingStrat.UI.Tests
 
 # Run specific test class
 dotnet test --filter "FullyQualifiedName~HomePageTests"
+dotnet test --filter "FullyQualifiedName~PortfoliosPageTests"
+dotnet test --filter "FullyQualifiedName~PortfolioDashboardPageTests"
+dotnet test --filter "FullyQualifiedName~RebalancingPageTests"
+dotnet test --filter "FullyQualifiedName~PerformanceAnalyticsPageTests"
 
 # Debug tests with visible browser
 TEST_HEADLESS=false dotnet test tests/TradingStrat.UI.Tests
@@ -81,10 +87,13 @@ The codebase follows strict **Dependency Rule**: Presentation → Application �
                      │
 ┌────────────────────▼────────────────────────────────────┐
 │ Domain (Business Logic - ZERO external dependencies)   │
-│  ├─ Entities: HistoricalPrice, Trade, Security         │
-│  ├─ Value Objects: TradeSignal, MLFeatures             │
+│  ├─ Entities: HistoricalPrice, Trade, Security,        │
+│  │             Portfolio, Position, CashTransaction     │
+│  ├─ Value Objects: TradeSignal, MLFeatures,            │
+│  │                  PortfolioSnapshot, RebalancingPlan │
 │  ├─ Strategies: RSI, MACD, MA Crossover, ML FastTree   │
-│  └─ Services: IIndicatorCalculator, PerformanceCalc    │
+│  └─ Services: IIndicatorCalculator, PerformanceCalc,   │
+│                PortfolioValuation, Rebalancing         │
 └─────────────────────────────────────────────────────────┘
                      ▲
 ┌────────────────────┴────────────────────────────────────┐
@@ -307,8 +316,11 @@ Strategies are created via `StrategyFactory.CreateStrategy(string strategyType, 
 **Key Tables:**
 - `HistoricalPrices`: Ticker, DateTime (unique constraint), OHLC data, Volume
 - `Securities`: Ticker (unique), ISIN (unique), metadata
+- `Portfolios`: Id (PK), Name (indexed), Cash (18,2 precision), CreatedAt, LastUpdated
+- `Positions`: Id (PK), PortfolioId (FK, cascade delete), Ticker, Quantity, EntryPrice (18,6), EntryDate, Notes, unique index on (PortfolioId, Ticker)
+- `CashTransactions`: Id (PK), PortfolioId (FK, cascade delete), Type, Amount (18,2), TransactionDate, Notes, index on (PortfolioId, TransactionDate)
 
-**Important:** Never instantiate `TradingContext` directly. Always use `IHistoricalDataPort` injected via DI.
+**Important:** Never instantiate `TradingContext` directly. Always use repository ports (`IHistoricalDataPort`, `IPortfolioPort`) injected via DI.
 
 ### Walk-Forward Backtesting
 The ML strategy uses walk-forward optimization:
@@ -317,6 +329,234 @@ The ML strategy uses walk-forward optimization:
 3. Roll window forward and retrain
 
 This prevents look-ahead bias common in traditional backtesting.
+
+## Portfolio Management System
+
+The portfolio management system provides multi-asset position tracking, rebalancing, and performance analytics following hexagonal architecture.
+
+### Domain Layer
+
+**Entities:**
+- `Portfolio` - Aggregate root with Name, Description, Cash, Positions collection
+- `Position` - Ticker, Quantity, EntryPrice, EntryDate, Notes (immutable Ticker, PortfolioId, EntryDate)
+- `PortfolioCashTransaction` - Type (Deposit/Withdrawal), Amount, TransactionDate, Notes
+
+**Value Objects (Immutable Records):**
+- `PortfolioSnapshot` - Point-in-time portfolio view with TotalValue, UnrealizedGainLoss, Positions
+- `PositionSnapshot` - Individual position snapshot with MarketValue, AllocationPercentage
+- `AllocationWeights` - Target allocation configuration (Dictionary<Ticker, Percentage>)
+- `RebalancingPlan` - List<RebalancingSignal>, RequiredCash, IsExecutable
+- `PortfolioMetrics` - TotalReturn, Volatility, SharpeRatio, DiversificationRatio
+- `PortfolioPerformanceHistory` - Time series of daily portfolio values and returns
+
+**Domain Services (Zero External Dependencies):**
+- `PortfolioValuationService.CalculateSnapshot(Portfolio, Dictionary<Ticker, Price>)` - Calculates market values, allocations, unrealized gains/losses
+- `PortfolioRebalancingService.CalculateRebalancing(Snapshot, AllocationWeights, Prices, Commission)` - Generates buy/sell signals to reach target allocation
+- `PortfolioPerformanceService.CalculateMetrics(Snapshot, HistoricalPoints)` - Calculates volatility, Sharpe ratio, diversification metrics
+
+### Application Layer
+
+**Outbound Ports (Infrastructure Interfaces):**
+- `IPortfolioPort` - Portfolio CRUD, cash management, position management (14 methods)
+- `IPortfolioExportPort` - CSV import/export
+
+**Inbound Ports (Use Case Interfaces):**
+- `ICreatePortfolioUseCase` - Create new portfolio with Name, Description, InitialCash
+- `IManagePositionsUseCase` - Add, Update, Delete positions
+- `IManageCashUseCase` - Execute deposits/withdrawals, get transaction history
+- `IGetPortfolioSnapshotUseCase` - Fetch live prices and calculate current snapshot
+- `ICalculateRebalancingUseCase` - Calculate rebalancing plan with target weights
+- `IGetPortfolioPerformanceUseCase` - Get performance analytics with metrics
+
+**Key Use Case Pattern (GetPortfolioSnapshotUseCase):**
+```csharp
+public async Task<PortfolioSnapshot> ExecuteAsync(int portfolioId, IProgress<string>? progress = null)
+{
+    // 1. Load portfolio from repository
+    Portfolio portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
+
+    // 2. Extract unique tickers and fetch current prices via IMarketDataPort
+    foreach (string ticker in tickers)
+    {
+        HistoricalData data = await _marketDataPort.FetchHistoricalDataAsync(...);
+        currentPrices[ticker] = data.Latest.Close.Value;
+    }
+
+    // 3. Call domain service to calculate snapshot
+    return _valuationService.CalculateSnapshot(portfolio, currentPrices);
+}
+```
+
+### Infrastructure Layer
+
+**Database Tables (EF Core):**
+- `Portfolios` - PK on Id, Index on Name, Precision on Cash (18,2)
+- `Positions` - PK on Id, FK to Portfolio (cascade delete), Unique index on (PortfolioId, Ticker)
+- `CashTransactions` - PK on Id, FK to Portfolio (cascade delete), Index on (PortfolioId, Date)
+
+**Repository Implementation:**
+```csharp
+// PortfolioRepository uses EF Core Include() for loading positions eagerly
+public async Task<Portfolio?> GetPortfolioByIdAsync(int portfolioId)
+{
+    return await _context.Portfolios
+        .Include(p => p.Positions)
+        .FirstOrDefaultAsync(p => p.Id == portfolioId);
+}
+
+// UpdatePosition preserves immutable fields
+public async Task UpdatePositionAsync(Position position)
+{
+    Position existingPosition = await _context.Positions.FindAsync(position.Id);
+    existingPosition.Quantity = position.Quantity;
+    existingPosition.EntryPrice = position.EntryPrice;
+    existingPosition.Notes = position.Notes;
+    // Preserves: Ticker, PortfolioId, EntryDate (immutable)
+}
+```
+
+**CSV Adapter:**
+- Format: `Ticker,Quantity,EntryPrice,EntryDate,Notes`
+- Custom CSV parser handles quoted fields and escaped quotes
+- Located in `Infrastructure/Export/PortfolioCsvAdapter.cs`
+
+### Web UI Layer
+
+**Pages:**
+- `/portfolios` - Portfolio grid view with create/delete dialogs (Portfolios.razor)
+- `/portfolio/{id}` - Dashboard with metrics cards, position table, refresh prices (PortfolioDashboard.razor)
+- `/portfolio/{id}/rebalance` - Rebalancing calculator with dynamic allocations (Rebalancing.razor)
+- `/portfolio/{id}/performance` - Performance analytics with date range selector (PerformanceAnalytics.razor)
+
+**Form Models:**
+- `CreatePortfolioFormModel` - Name [Required, 3-100 chars], Description [Optional], InitialCash [0-10M]
+- `AddPositionFormModel` - Ticker [Required], Quantity [1-1M], EntryPrice [0.01-100K], EntryDate, Notes
+- `RebalancingFormModel` - List<TargetAllocationModel>, CashPercentage, CommissionPercentage, MinimumCommission
+
+**State Management:**
+```csharp
+// PortfolioStateService - Selected portfolio tracking with localStorage
+public async Task SetSelectedPortfolioAsync(int portfolioId)
+{
+    _selectedPortfolioId = portfolioId;
+    await _localStorage.SetItemAsync("tradingstrat_selected_portfolio", portfolioId);
+    OnPortfolioChanged?.Invoke(this, EventArgs.Empty);
+}
+```
+
+**Key UI Patterns:**
+- All pages use `@rendermode InteractiveServer` for Blazor SignalR
+- Progress reporting via `ProgressService.Subscribe()` / `Unsubscribe()`
+- Toast notifications via `NotificationService.ShowSuccess()` / `ShowError()`
+- Form validation with `DataAnnotationsValidator` and `ValidationMessage`
+- Responsive design with Tailwind grid and utility classes
+- Color coding: `metric-positive` (green) / `metric-negative` (red)
+
+### Testing Patterns
+
+**Domain Tests (46 tests):**
+```csharp
+[Fact]
+public void CalculateSnapshot_WithSinglePosition_CalculatesCorrectly()
+{
+    // Arrange
+    Portfolio portfolio = new() { Cash = 1000m, Positions = [...] };
+    Dictionary<string, decimal> prices = new() { ["AAPL"] = 160m };
+
+    // Act
+    PortfolioSnapshot result = _service.CalculateSnapshot(portfolio, prices);
+
+    // Assert
+    result.Positions[0].MarketValue.ShouldBe(1600m); // 10 * 160
+    result.TotalValue.ShouldBe(2600m); // 1000 cash + 1600 position
+}
+```
+
+**Application Tests (37 tests) with Test Doubles:**
+```csharp
+// InMemoryPortfolioRepository implements IPortfolioPort
+public class InMemoryPortfolioRepository : IPortfolioPort
+{
+    private readonly Dictionary<int, Portfolio> _portfolios = new();
+
+    public async Task<Portfolio> CreatePortfolioAsync(string name, string? description, decimal initialCash)
+    {
+        Portfolio portfolio = new() { Id = ++_nextId, Name = name, Cash = initialCash };
+        _portfolios[portfolio.Id] = portfolio;
+        return portfolio;
+    }
+    // ... 13 more methods
+}
+```
+
+**E2E Tests with Playwright (4 test classes, ~60 tests):**
+- `PortfoliosPageTests` - Create portfolio, list portfolios, delete portfolio, navigation
+- `PortfolioDashboardPageTests` - Display metrics, position table, refresh prices
+- `RebalancingPageTests` - Configure allocations, calculate plan, display signals
+- `PerformanceAnalyticsPageTests` - Date range selection, metrics display, historical data
+
+**Test Data Seeding (WebApplicationFixture):**
+```csharp
+// Automatically seeds 3 portfolios for E2E tests:
+// 1. Tech Growth Portfolio (MSFT, AAPL) - Cash: $5,000
+// 2. Diversified Mix (GOOGL) - Cash: $10,000
+// 3. Empty Portfolio - Cash: $25,000
+```
+
+**Page Object Model Pattern:**
+```csharp
+public class PortfoliosPage : BasePage
+{
+    protected override string PagePath => "/portfolios";
+
+    private ILocator CreatePortfolioButton => Page.Locator("button:has-text('Create Portfolio')");
+
+    public async Task CreatePortfolioAsync(string name, string? description, decimal initialCash)
+    {
+        await ClickCreatePortfolioButtonAsync();
+        await NameInput.FillAsync(name);
+        await InitialCashInput.FillAsync(initialCash.ToString());
+        await CreateSubmitButton.ClickAsync();
+        await Page.WaitForBlazorAsync();
+    }
+}
+```
+
+### Common Portfolio Operations
+
+**Creating a Portfolio:**
+```csharp
+// Use case call
+CreatePortfolioCommand command = new("My Portfolio", "Description", 10000m);
+CreatePortfolioResult result = await _createPortfolioUseCase.ExecuteAsync(command);
+```
+
+**Getting Current Portfolio Value:**
+```csharp
+// Fetches live prices and calculates snapshot
+PortfolioSnapshot snapshot = await _getSnapshotUseCase.ExecuteAsync(portfolioId);
+Console.WriteLine($"Total Value: {snapshot.TotalValue:C2}");
+Console.WriteLine($"Gain/Loss: {snapshot.UnrealizedGainLoss:C2}");
+```
+
+**Calculating Rebalancing:**
+```csharp
+// Define target allocations
+CalculateRebalancingCommand command = new()
+{
+    PortfolioId = 1,
+    TargetAllocations = new() { ["MSFT"] = 60m, ["AAPL"] = 40m },
+    CashPercentage = 0m,
+    CommissionPercentage = 0.1m,
+    MinimumCommission = 1.0m
+};
+
+RebalancingPlan plan = await _calculateRebalancingUseCase.ExecuteAsync(command);
+foreach (RebalancingSignal signal in plan.Signals)
+{
+    Console.WriteLine($"{signal.Ticker}: {signal.Action} {signal.QuantityDelta} shares");
+}
+```
 
 ## Adding New Features
 

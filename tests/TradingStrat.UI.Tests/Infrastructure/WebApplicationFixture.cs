@@ -187,6 +187,95 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         await context.SaveChangesAsync();
         int totalCount = await context.HistoricalPrices.CountAsync();
         Console.WriteLine($"[Test DB Seeder] Seed complete! Total records in database: {totalCount}");
+
+        // Seed test portfolios
+        await SeedTestPortfoliosAsync(context);
+    }
+
+    private static async Task SeedTestPortfoliosAsync(TradingContext context)
+    {
+        // Check if portfolios already exist
+        bool hasPortfolios = await context.Portfolios.AnyAsync();
+        if (hasPortfolios)
+        {
+            Console.WriteLine("[Test DB Seeder] Skipping portfolio seed - portfolios already exist");
+            return;
+        }
+
+        Console.WriteLine("[Test DB Seeder] Seeding test portfolios...");
+
+        // Portfolio 1: Tech Portfolio with positions
+        Domain.Entities.Portfolio techPortfolio = new()
+        {
+            Name = "Tech Growth Portfolio",
+            Description = "Technology stocks for growth",
+            Cash = 5000m,
+            CreatedAt = DateTime.UtcNow.AddDays(-30),
+            LastUpdated = DateTime.UtcNow.AddDays(-1),
+            Positions = new List<Domain.Entities.Position>
+            {
+                new()
+                {
+                    Ticker = "MSFT",
+                    Quantity = 10,
+                    EntryPrice = 280m,
+                    EntryDate = DateTime.UtcNow.AddDays(-20),
+                    Notes = "Microsoft - Cloud leader",
+                    CreatedAt = DateTime.UtcNow.AddDays(-20),
+                    LastUpdated = DateTime.UtcNow.AddDays(-20)
+                },
+                new()
+                {
+                    Ticker = "AAPL",
+                    Quantity = 20,
+                    EntryPrice = 145m,
+                    EntryDate = DateTime.UtcNow.AddDays(-15),
+                    Notes = "Apple - Consumer tech",
+                    CreatedAt = DateTime.UtcNow.AddDays(-15),
+                    LastUpdated = DateTime.UtcNow.AddDays(-15)
+                }
+            }
+        };
+
+        // Portfolio 2: Diversified Portfolio
+        Domain.Entities.Portfolio diversifiedPortfolio = new()
+        {
+            Name = "Diversified Mix",
+            Description = "Balanced portfolio across sectors",
+            Cash = 10000m,
+            CreatedAt = DateTime.UtcNow.AddDays(-60),
+            LastUpdated = DateTime.UtcNow.AddDays(-5),
+            Positions = new List<Domain.Entities.Position>
+            {
+                new()
+                {
+                    Ticker = "GOOGL",
+                    Quantity = 15,
+                    EntryPrice = 95m,
+                    EntryDate = DateTime.UtcNow.AddDays(-45),
+                    Notes = "Google - Search and cloud",
+                    CreatedAt = DateTime.UtcNow.AddDays(-45),
+                    LastUpdated = DateTime.UtcNow.AddDays(-45)
+                }
+            }
+        };
+
+        // Portfolio 3: Empty Portfolio
+        Domain.Entities.Portfolio emptyPortfolio = new()
+        {
+            Name = "Empty Portfolio",
+            Description = "Portfolio with no positions",
+            Cash = 25000m,
+            CreatedAt = DateTime.UtcNow.AddDays(-10),
+            LastUpdated = DateTime.UtcNow.AddDays(-10)
+        };
+
+        await context.Portfolios.AddRangeAsync(techPortfolio, diversifiedPortfolio, emptyPortfolio);
+        await context.SaveChangesAsync();
+
+        int portfolioCount = await context.Portfolios.CountAsync();
+        int positionCount = await context.Positions.CountAsync();
+        Console.WriteLine($"[Test DB Seeder] Seeded {portfolioCount} portfolios with {positionCount} total positions");
     }
 
     public new async Task DisposeAsync()

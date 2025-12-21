@@ -1,0 +1,472 @@
+@page "/portfolio/{portfolioId:int}"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Services.State
+@using TradingStrat.Web.Models
+@using TradingStrat.Domain.ValueObjects
+@using TradingStrat.Domain.Entities
+@inject IGetPortfolioSnapshotUseCase GetSnapshotUseCase
+@inject IPortfolioPort PortfolioPort
+@inject IManagePositionsUseCase ManagePositionsUseCase
+@inject PortfolioStateService PortfolioState
+@inject NotificationService NotificationService
+@inject NavigationManager Navigation
+@inject ProgressService ProgressService
+@implements IDisposable
+
+<PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="card">
+        <div class="flex justify-between items-center">
+            <div>
+                <div class="flex items-center space-x-4 mb-2">
+                    <button @onclick="NavigateBack" class="text-gray-600 dark:text-dark-text-secondary hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </button>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @(_snapshot?.PortfolioName ?? "Loading...")
+                    </h1>
+                </div>
+                @if (_portfolio != null && !string.IsNullOrEmpty(_portfolio.Description))
+                {
+                    <p class="text-gray-600 dark:text-dark-text-secondary ml-10">@_portfolio.Description</p>
+                }
+            </div>
+            <div class="flex space-x-3">
+                <button @onclick="RefreshPrices" disabled="@ProgressService.IsProcessing" class="px-4 py-2 bg-white dark:bg-dark-elevated border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh Prices
+                </button>
+                <button @onclick="OpenAddPositionDialog" class="btn-primary">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Position
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
+    <AlertMessage Message="@_successMessage" Type="AlertType.Success" />
+
+    @if (_isLoading)
+    {
+        <div class="card">
+            <div class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading portfolio...</p>
+            </div>
+        </div>
+    }
+    else if (_snapshot == null)
+    {
+        <div class="card">
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">Portfolio not found</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">The portfolio you're looking for doesn't exist.</p>
+                <div class="mt-6">
+                    <button @onclick="NavigateBack" class="btn-primary">
+                        Back to Portfolios
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Value -->
+            <div class="card">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Value</h3>
+                <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.TotalValue.ToString("C2")</p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Cash + Positions
+                </p>
+            </div>
+
+            <!-- Cash Balance -->
+            <div class="card">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash Balance</h3>
+                <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.Cash.ToString("C2")</p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    @((_snapshot.Cash / _snapshot.TotalValue * 100).ToString("F1"))% allocation
+                </p>
+            </div>
+
+            <!-- Unrealized Gain/Loss -->
+            <div class="card">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Unrealized Gain/Loss</h3>
+                <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
+                    @_snapshot.UnrealizedGainLoss.ToString("C2")
+                </p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Total cost: @_snapshot.TotalCost.ToString("C2")
+                </p>
+            </div>
+
+            <!-- Return Percentage -->
+            <div class="card">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Return %</h3>
+                <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                    @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                </p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Since inception
+                </p>
+            </div>
+        </div>
+
+        <!-- Positions Table -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Positions</h2>
+
+            @if (!_snapshot.Positions.Any())
+            {
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No positions</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Add your first position to start tracking your investments.</p>
+                    <div class="mt-6">
+                        <button @onclick="OpenAddPositionDialog" class="btn-primary">
+                            Add Position
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                        <thead class="bg-gray-50 dark:bg-dark-elevated">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Ticker</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Quantity</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Entry Price</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Current Price</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Market Value</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Gain/Loss</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Return %</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Allocation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
+                            @foreach (var position in _snapshot.Positions)
+                            {
+                                <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                        @position.Ticker
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        @position.Quantity.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        @position.EntryPrice.ToString("C2")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        @position.CurrentPrice.ToString("C2")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right font-medium">
+                                        @position.MarketValue.ToString("C2")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        <span class="@(position.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                            @position.UnrealizedGainLoss.ToString("+C2;-C2;C2")
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        <span class="@(position.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                            @position.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        @position.AllocationPercentage.ToString("F1")%
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-gray-50 dark:bg-dark-elevated">
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                    Total (@_snapshot.Positions.Count position@(_snapshot.Positions.Count == 1 ? "" : "s"))
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-dark-text-primary text-right">
+                                    @_snapshot.Positions.Sum(p => p.MarketValue).ToString("C2")
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                    <span class="@(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
+                                        @_snapshot.UnrealizedGainLoss.ToString("+C2;-C2;C2")
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                    <span class="@(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                                        @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary text-right">
+                                    100.0%
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Add Position Dialog -->
+@if (_showAddPositionDialog)
+{
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50" @onclick="CloseAddPositionDialog">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-dark-surface" @onclick:stopPropagation="true">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary">Add New Position</h3>
+                <button @onclick="CloseAddPositionDialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <EditForm Model="@_addPositionFormModel" OnValidSubmit="@HandleAddPosition" class="space-y-4">
+                <DataAnnotationsValidator />
+
+                <div>
+                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
+                    <InputText id="ticker" @bind-Value="_addPositionFormModel.Ticker"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Quantity *</label>
+                        <InputNumber id="quantity" @bind-Value="_addPositionFormModel.Quantity"
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _addPositionFormModel.Quantity)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+                    <div>
+                        <label for="entryPrice" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Entry Price *</label>
+                        <InputNumber id="entryPrice" @bind-Value="_addPositionFormModel.EntryPrice"
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _addPositionFormModel.EntryPrice)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="entryDate" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Entry Date *</label>
+                    <InputDate id="entryDate" @bind-Value="_addPositionFormModel.EntryDate"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.EntryDate)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Notes</label>
+                    <InputTextArea id="notes" @bind-Value="_addPositionFormModel.Notes"
+                                   rows="3"
+                                   class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.Notes)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" @onclick="CloseAddPositionDialog" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" disabled="@_isAddingPosition" class="flex-1 btn-primary">
+                        @if (_isAddingPosition)
+                        {
+                            <span>Adding...</span>
+                        }
+                        else
+                        {
+                            <span>Add Position</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int PortfolioId { get; set; }
+
+    private Portfolio? _portfolio;
+    private PortfolioSnapshot? _snapshot;
+    private AddPositionFormModel _addPositionFormModel = new();
+    private bool _showAddPositionDialog = false;
+    private bool _isLoading = false;
+    private bool _isAddingPosition = false;
+    private string? _errorMessage;
+    private string? _successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProgressService.OnProgressChanged += StateHasChanged;
+        await LoadPortfolioSnapshot();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Set the selected portfolio in state when navigating to this page
+        await PortfolioState.SetSelectedPortfolioAsync(PortfolioId);
+    }
+
+    private async Task LoadPortfolioSnapshot()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            // Load basic portfolio info
+            _portfolio = await PortfolioPort.GetPortfolioByIdAsync(PortfolioId);
+
+            if (_portfolio == null)
+            {
+                _errorMessage = "Portfolio not found.";
+                return;
+            }
+
+            // Get snapshot with current market prices
+            var progress = new Progress<string>(message =>
+            {
+                InvokeAsync(() => ProgressService.UpdateProgress(message));
+            });
+
+            _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading portfolio: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            await InvokeAsync(() => ProgressService.Reset());
+        }
+    }
+
+    private async Task RefreshPrices()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        ProgressService.Reset();
+
+        var progress = new Progress<string>(message =>
+        {
+            InvokeAsync(() => ProgressService.UpdateProgress(message));
+        });
+
+        try
+        {
+            _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            _successMessage = "Prices refreshed successfully.";
+
+            await NotificationService.AddNotificationAsync(
+                NotificationType.System,
+                NotificationSeverity.Success,
+                "Prices Refreshed",
+                $"Portfolio '{_snapshot.PortfolioName}' updated with latest market prices"
+            );
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error refreshing prices: {ex.Message}";
+        }
+        finally
+        {
+            await InvokeAsync(() => ProgressService.Reset());
+        }
+    }
+
+    private void OpenAddPositionDialog()
+    {
+        _addPositionFormModel = new AddPositionFormModel
+        {
+            PortfolioId = PortfolioId,
+            EntryDate = DateTime.Today
+        };
+        _showAddPositionDialog = true;
+        _errorMessage = null;
+        _successMessage = null;
+    }
+
+    private void CloseAddPositionDialog()
+    {
+        _showAddPositionDialog = false;
+    }
+
+    private async Task HandleAddPosition()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+        _isAddingPosition = true;
+
+        try
+        {
+            _addPositionFormModel.NormalizeTicker();
+
+            var command = new AddPositionCommand(
+                _addPositionFormModel.PortfolioId,
+                _addPositionFormModel.Ticker,
+                _addPositionFormModel.Quantity,
+                _addPositionFormModel.EntryPrice,
+                _addPositionFormModel.EntryDate,
+                _addPositionFormModel.Notes
+            );
+
+            var position = await ManagePositionsUseCase.AddPositionAsync(command);
+
+            decimal costBasis = position.Quantity * position.EntryPrice;
+            _successMessage = $"Position added: {position.Quantity} shares of {position.Ticker} at {position.EntryPrice:C2}";
+
+            await NotificationService.AddNotificationAsync(
+                NotificationType.System,
+                NotificationSeverity.Success,
+                "Position Added",
+                $"{position.Quantity} shares of {position.Ticker} (${costBasis:N2})",
+                ticker: position.Ticker
+            );
+
+            CloseAddPositionDialog();
+            await LoadPortfolioSnapshot();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error adding position: {ex.Message}";
+        }
+        finally
+        {
+            _isAddingPosition = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/portfolios");
+    }
+
+    public void Dispose()
+    {
+        ProgressService.OnProgressChanged -= StateHasChanged;
+    }
+}

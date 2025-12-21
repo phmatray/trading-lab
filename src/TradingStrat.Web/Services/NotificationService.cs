@@ -252,14 +252,14 @@ public class NotificationService : IDisposable
         await _localStorage.SetItemAsync(STORAGE_KEY, history, cancellationToken);
     }
 
-    private async Task CleanupIfNeededAsync(NotificationHistory history, CancellationToken cancellationToken)
+    private Task CleanupIfNeededAsync(NotificationHistory history, CancellationToken cancellationToken)
     {
         DateTime now = DateTime.UtcNow;
         double daysSinceLastCleanup = (now - history.LastCleanup).TotalDays;
 
         if (daysSinceLastCleanup < 1)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var cutoffDate = now.AddDays(-CLEANUP_DAYS);
@@ -269,6 +269,7 @@ public class NotificationService : IDisposable
             .ToList();
 
         history.LastCleanup = now;
+        return Task.CompletedTask;
     }
 
     private static string GetIconForType(NotificationType type, NotificationSeverity severity)

@@ -1,0 +1,208 @@
+using Shouldly;
+using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Tests.TestDoubles;
+using TradingStrat.Application.UseCases;
+
+namespace TradingStrat.Application.Tests.UseCases;
+
+public class CreatePortfolioUseCaseTests
+{
+    private readonly InMemoryPortfolioRepository _portfolioPort;
+    private readonly CreatePortfolioUseCase _useCase;
+
+    public CreatePortfolioUseCaseTests()
+    {
+        _portfolioPort = new InMemoryPortfolioRepository();
+        _useCase = new CreatePortfolioUseCase(_portfolioPort);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithValidData_ShouldCreatePortfolio()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "Growth Portfolio",
+            Description: "Long-term growth investments",
+            InitialCash: 10000m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.PortfolioId.ShouldBeGreaterThan(0);
+        result.Name.ShouldBe("Growth Portfolio");
+        result.InitialCash.ShouldBe(10000m);
+        result.CreatedAt.ShouldNotBe(default);
+
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        savedPortfolio.ShouldNotBeNull();
+        savedPortfolio.Name.ShouldBe("Growth Portfolio");
+        savedPortfolio.Description.ShouldBe("Long-term growth investments");
+        savedPortfolio.Cash.ShouldBe(10000m);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithZeroInitialCash_ShouldCreatePortfolio()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "Empty Portfolio",
+            Description: null,
+            InitialCash: 0m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.InitialCash.ShouldBe(0m);
+
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        savedPortfolio.ShouldNotBeNull();
+        savedPortfolio.Cash.ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithLargeInitialCash_ShouldCreatePortfolio()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "Retirement Portfolio",
+            Description: "401k rollover",
+            InitialCash: 1_000_000m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.InitialCash.ShouldBe(1_000_000m);
+
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        savedPortfolio.ShouldNotBeNull();
+        savedPortfolio.Cash.ShouldBe(1_000_000m);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithNullDescription_ShouldCreatePortfolio()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "Simple Portfolio",
+            Description: null,
+            InitialCash: 5000m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.ShouldNotBeNull();
+
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        savedPortfolio.ShouldNotBeNull();
+        savedPortfolio.Description.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_CreateMultiplePortfolios_ShouldHaveUniqueIds()
+    {
+        // Arrange
+        var command1 = new CreatePortfolioCommand("Portfolio 1", null, 1000m);
+        var command2 = new CreatePortfolioCommand("Portfolio 2", null, 2000m);
+        var command3 = new CreatePortfolioCommand("Portfolio 3", null, 3000m);
+
+        // Act
+        CreatePortfolioResult result1 = await _useCase.ExecuteAsync(command1);
+        CreatePortfolioResult result2 = await _useCase.ExecuteAsync(command2);
+        CreatePortfolioResult result3 = await _useCase.ExecuteAsync(command3);
+
+        // Assert
+        result1.PortfolioId.ShouldNotBe(result2.PortfolioId);
+        result2.PortfolioId.ShouldNotBe(result3.PortfolioId);
+        result1.PortfolioId.ShouldNotBe(result3.PortfolioId);
+
+        var allPortfolios = await _portfolioPort.GetAllPortfoliosAsync();
+        allPortfolios.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithEmptyName_ShouldThrow()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "",
+            Description: null,
+            InitialCash: 1000m);
+
+        // Act & Assert
+        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
+        ex.Message.ShouldContain("Portfolio name is required");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithWhitespaceName_ShouldThrow()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "   ",
+            Description: null,
+            InitialCash: 1000m);
+
+        // Act & Assert
+        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
+        ex.Message.ShouldContain("Portfolio name is required");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithNegativeInitialCash_ShouldThrow()
+    {
+        // Arrange
+        var command = new CreatePortfolioCommand(
+            Name: "Invalid Portfolio",
+            Description: null,
+            InitialCash: -1000m);
+
+        // Act & Assert
+        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
+        ex.Message.ShouldContain("Initial cash cannot be negative");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithLongName_ShouldCreatePortfolio()
+    {
+        // Arrange
+        string longName = new string('A', 200);
+        var command = new CreatePortfolioCommand(
+            Name: longName,
+            Description: "Test",
+            InitialCash: 1000m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe(longName);
+
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        savedPortfolio.ShouldNotBeNull();
+        savedPortfolio.Name.ShouldBe(longName);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldSetCreatedAtTimestamp()
+    {
+        // Arrange
+        var beforeCreate = DateTime.UtcNow;
+        var command = new CreatePortfolioCommand("Test", null, 1000m);
+
+        // Act
+        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var afterCreate = DateTime.UtcNow;
+
+        // Assert
+        result.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeCreate);
+        result.CreatedAt.ShouldBeLessThanOrEqualTo(afterCreate);
+    }
+}

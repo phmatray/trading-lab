@@ -13,6 +13,9 @@ public class TradingContext : DbContext
     public DbSet<Security> Securities { get; set; } = null!;
     public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
     public DbSet<StrategyRecommendation> StrategyRecommendations { get; set; } = null!;
+    public DbSet<Portfolio> Portfolios { get; set; } = null!;
+    public DbSet<Position> Positions { get; set; } = null!;
+    public DbSet<PortfolioCashTransaction> CashTransactions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -167,6 +170,103 @@ public class TradingContext : DbContext
             // Index for finding recent recommendations by ticker
             entity.HasIndex(e => new { e.Ticker, e.CreatedAt })
                 .HasDatabaseName("IX_StrategyRecommendations_Ticker_CreatedAt");
+        });
+
+        // Configure Portfolio entity
+        modelBuilder.Entity<Portfolio>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Cash)
+                .HasPrecision(18, 2);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.LastUpdated)
+                .IsRequired();
+
+            // Index on Name for lookup
+            entity.HasIndex(e => e.Name)
+                .HasDatabaseName("IX_Portfolios_Name");
+        });
+
+        // Configure Position entity
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Ticker)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.EntryPrice)
+                .HasPrecision(18, 6);
+
+            entity.Property(e => e.EntryDate)
+                .IsRequired();
+
+            entity.Property(e => e.Notes)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.LastUpdated)
+                .IsRequired();
+
+            // Relationship: Position belongs to Portfolio
+            entity.HasOne(e => e.Portfolio)
+                .WithMany(p => p.Positions)
+                .HasForeignKey(e => e.PortfolioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: one ticker per portfolio
+            entity.HasIndex(e => new { e.PortfolioId, e.Ticker })
+                .IsUnique()
+                .HasDatabaseName("IX_Positions_Portfolio_Ticker");
+        });
+
+        // Configure PortfolioCashTransaction entity
+        modelBuilder.Entity<PortfolioCashTransaction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasConversion<string>();
+
+            entity.Property(e => e.Amount)
+                .HasPrecision(18, 2);
+
+            entity.Property(e => e.TransactionDate)
+                .IsRequired();
+
+            entity.Property(e => e.Notes)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // Relationship: Transaction belongs to Portfolio
+            entity.HasOne(e => e.Portfolio)
+                .WithMany()
+                .HasForeignKey(e => e.PortfolioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Index for finding transactions by portfolio and date
+            entity.HasIndex(e => new { e.PortfolioId, e.TransactionDate })
+                .HasDatabaseName("IX_CashTransactions_Portfolio_Date");
         });
     }
 }

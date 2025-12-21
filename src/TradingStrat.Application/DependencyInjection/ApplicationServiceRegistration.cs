@@ -40,6 +40,14 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ISendChatMessageUseCase, SendChatMessageUseCase>();
         services.AddScoped<IAnalyzeStrategyUseCase, AnalyzeStrategyUseCase>();
 
+        // Portfolio Use Cases
+        services.AddScoped<ICreatePortfolioUseCase, CreatePortfolioUseCase>();
+        services.AddScoped<IManagePositionsUseCase, ManagePositionsUseCase>();
+        services.AddScoped<IManageCashUseCase, ManageCashUseCase>();
+        services.AddScoped<IGetPortfolioSnapshotUseCase, GetPortfolioSnapshotUseCase>();
+        services.AddScoped<ICalculateRebalancingUseCase, CalculateRebalancingUseCase>();
+        services.AddScoped<IGetPortfolioPerformanceUseCase, GetPortfolioPerformanceUseCase>();
+
         return services;
     }
 }

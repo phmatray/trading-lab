@@ -1,0 +1,438 @@
+@page "/portfolio/{portfolioId:int}/performance"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Services.State
+@using TradingStrat.Web.Models
+@using TradingStrat.Domain.ValueObjects
+@using TradingStrat.Domain.Entities
+@using TradingStrat.Application.Ports.Inbound
+@using TradingStrat.Application.Ports.Outbound
+@inject IGetPortfolioPerformanceUseCase GetPerformanceUseCase
+@inject IPortfolioPort PortfolioPort
+@inject PortfolioStateService PortfolioState
+@inject NotificationService NotificationService
+@inject NavigationManager Navigation
+@inject ProgressService ProgressService
+@implements IDisposable
+
+<PageTitle>Portfolio Performance - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="card">
+        <div class="flex justify-between items-center">
+            <div>
+                <div class="flex items-center space-x-4 mb-2">
+                    <button @onclick="NavigateBack" class="text-gray-600 dark:text-dark-text-secondary hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                    </button>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        Portfolio Performance
+                    </h1>
+                </div>
+                @if (_portfolio != null)
+                {
+                    <p class="text-gray-600 dark:text-dark-text-secondary ml-10">@_portfolio.Name</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
+
+    @if (_isLoading)
+    {
+        <div class="card">
+            <div class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading portfolio...</p>
+            </div>
+        </div>
+    }
+    else if (_portfolio == null)
+    {
+        <div class="card">
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">Portfolio not found</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">The portfolio you're looking for doesn't exist.</p>
+                <div class="mt-6">
+                    <button @onclick="NavigateBack" class="btn-primary">
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Date Range Selector -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Date Range</h2>
+
+            <div class="flex flex-wrap items-end gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <label for="start-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Start Date</label>
+                    <input type="date" id="start-date" @bind="_startDate"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div class="flex-1 min-w-[200px]">
+                    <label for="end-date" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">End Date</label>
+                    <input type="date" id="end-date" @bind="_endDate"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div class="flex gap-2">
+                    <button @onclick="() => SetQuickRange(1)" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">1M</button>
+                    <button @onclick="() => SetQuickRange(3)" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">3M</button>
+                    <button @onclick="() => SetQuickRange(6)" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">6M</button>
+                    <button @onclick="() => SetQuickRange(12)" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">1Y</button>
+                    <button @onclick="SetQuickRangeAll" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">All</button>
+                </div>
+
+                <button @onclick="HandleAnalyze" disabled="@ProgressService.IsProcessing" class="btn-primary">
+                    @if (ProgressService.IsProcessing)
+                    {
+                        <span>Analyzing...</span>
+                    }
+                    else
+                    {
+                        <span>Analyze</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        @if (_performanceHistory != null)
+        {
+            <!-- Performance Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Total Return -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Return</h3>
+                    <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.TotalReturn >= 0 ? "metric-positive" : "metric-negative")">
+                        @_performanceHistory.CurrentMetrics.TotalReturn.ToString("C2")
+                    </p>
+                </div>
+
+                <!-- Total Return % -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Return %</h3>
+                    <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.TotalReturnPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                        @_performanceHistory.CurrentMetrics.TotalReturnPercentage.ToString("+0.00;-0.00;0.00")%
+                    </p>
+                </div>
+
+                <!-- Daily Return -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Daily Return</h3>
+                    <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.DailyReturn >= 0 ? "metric-positive" : "metric-negative")">
+                        @_performanceHistory.CurrentMetrics.DailyReturn.ToString("C2")
+                    </p>
+                </div>
+
+                <!-- Daily Return % -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Daily Return %</h3>
+                    <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.DailyReturnPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                        @_performanceHistory.CurrentMetrics.DailyReturnPercentage.ToString("+0.00;-0.00;0.00")%
+                    </p>
+                </div>
+
+                <!-- Volatility -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Volatility</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.PortfolioVolatility.ToString("F2")%
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Annualized</p>
+                </div>
+
+                <!-- Sharpe Ratio -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Sharpe Ratio</h3>
+                    <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.PortfolioSharpeRatio >= 0 ? "metric-positive" : "metric-negative")">
+                        @_performanceHistory.CurrentMetrics.PortfolioSharpeRatio.ToString("F2")
+                    </p>
+                </div>
+
+                <!-- Diversification Ratio -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Diversification Ratio</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.DiversificationRatio.ToString("F2")
+                    </p>
+                </div>
+
+                <!-- Average Correlation -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Average Correlation</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @(_performanceHistory.CurrentMetrics.AverageCorrelation?.ToString("F2") ?? "N/A")
+                    </p>
+                </div>
+
+                <!-- Number of Positions -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Number of Positions</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.NumberOfPositions
+                    </p>
+                </div>
+
+                <!-- Cash % -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash %</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.CashPercentage.ToString("F1")%
+                    </p>
+                </div>
+
+                <!-- Largest Position % -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Largest Position %</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.LargestPositionPercentage.ToString("F1")%
+                    </p>
+                </div>
+
+                <!-- Most Valuable Position -->
+                <div class="card">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Most Valuable Position</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                        @_performanceHistory.CurrentMetrics.MostValuablePosition
+                    </p>
+                </div>
+            </div>
+
+            <!-- Historical Performance Chart -->
+            <div class="card">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Historical Performance</h2>
+
+                @if (!_performanceHistory.DataPoints.Any())
+                {
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No data available</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">No historical data found for the selected date range.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="overflow-x-auto" style="max-height: 600px;">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                            <thead class="bg-gray-50 dark:bg-dark-elevated sticky top-0">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Total Value</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Cash</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Equity Value</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Daily Return</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
+                                @foreach (var point in _performanceHistory.DataPoints.TakeLast(50))
+                                {
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary">
+                                            @point.Date.ToString("yyyy-MM-dd")
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right font-medium">
+                                            @point.TotalValue.ToString("C2")
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                            @point.Cash.ToString("C2")
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                            @point.EquityValue.ToString("C2")
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                            <span class="@(point.DailyReturn >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                                @((point.DailyReturn * 100).ToString("+0.00;-0.00;0.00"))%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (_performanceHistory.DataPoints.Count > 50)
+                    {
+                        <p class="mt-4 text-sm text-gray-500 dark:text-dark-text-secondary text-center">
+                            Showing last 50 of @_performanceHistory.DataPoints.Count data points
+                        </p>
+                    }
+                }
+            </div>
+
+            <!-- Position Beta Table -->
+            @if (_performanceHistory.CurrentMetrics.PositionBetas != null && _performanceHistory.CurrentMetrics.PositionBetas.Any())
+            {
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Position Betas</h2>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                            <thead class="bg-gray-50 dark:bg-dark-elevated">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Ticker</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Beta</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
+                                @foreach (var beta in _performanceHistory.CurrentMetrics.PositionBetas)
+                                {
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                            @beta.Key
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                            @beta.Value.ToString("F2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="card">
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No performance data</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Select a date range and click Analyze to view portfolio performance.</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int PortfolioId { get; set; }
+
+    private Portfolio? _portfolio;
+    private PortfolioPerformanceHistory? _performanceHistory;
+    private DateTime _startDate = DateTime.Today.AddYears(-1);
+    private DateTime _endDate = DateTime.Today;
+    private bool _isLoading = false;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProgressService.OnProgressChanged += StateHasChanged;
+        await LoadPortfolio();
+        await HandleAnalyze();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await PortfolioState.SetSelectedPortfolioAsync(PortfolioId);
+    }
+
+    private async Task LoadPortfolio()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _portfolio = await PortfolioPort.GetPortfolioByIdAsync(PortfolioId);
+
+            if (_portfolio == null)
+            {
+                _errorMessage = "Portfolio not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading portfolio: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleAnalyze()
+    {
+        _errorMessage = null;
+        _performanceHistory = null;
+
+        if (_portfolio == null)
+        {
+            return;
+        }
+
+        ProgressService.Reset();
+
+        var progress = new Progress<string>(message =>
+        {
+            InvokeAsync(() => ProgressService.UpdateProgress(message));
+        });
+
+        try
+        {
+            var query = new PortfolioPerformanceQuery(
+                PortfolioId,
+                _startDate,
+                _endDate
+            );
+
+            _performanceHistory = await GetPerformanceUseCase.ExecuteAsync(query, progress);
+
+            await NotificationService.AddNotificationAsync(
+                NotificationType.System,
+                NotificationSeverity.Success,
+                "Performance Analysis Complete",
+                $"{_performanceHistory.DataPoints.Count} data points | {_performanceHistory.CurrentMetrics.TotalReturnPercentage:+0.0;-0.0;0.0}% return"
+            );
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error analyzing performance: {ex.Message}";
+        }
+        finally
+        {
+            await InvokeAsync(() => ProgressService.Reset());
+        }
+    }
+
+    private void SetQuickRange(int months)
+    {
+        _endDate = DateTime.Today;
+        _startDate = DateTime.Today.AddMonths(-months);
+    }
+
+    private void SetQuickRangeAll()
+    {
+        _endDate = DateTime.Today;
+        _startDate = _portfolio?.CreatedAt.Date ?? DateTime.Today.AddYears(-10);
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo($"/portfolio/{PortfolioId}");
+    }
+
+    public void Dispose()
+    {
+        ProgressService.OnProgressChanged -= StateHasChanged;
+    }
+}
