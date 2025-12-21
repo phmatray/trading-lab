@@ -9,13 +9,14 @@ COPY src/TradingStrat.Web/package*.json ./TradingStrat.Web/
 WORKDIR /src/TradingStrat.Web
 RUN npm install
 
-# Copy Tailwind configuration and source files
-COPY src/TradingStrat.Web/tailwind.config.js ./
+# Copy Tailwind source files (v4 doesn't use tailwind.config.js)
 COPY src/TradingStrat.Web/Styles ./Styles
-COPY src/TradingStrat.Web/wwwroot ./wwwroot
 
 # Copy Razor components so Tailwind can scan for utility classes
 COPY src/TradingStrat.Web/Components ./Components
+
+# Create wwwroot/css directory for output
+RUN mkdir -p ./wwwroot/css
 
 # Build Tailwind CSS (now with access to all component files)
 RUN npm run build:css

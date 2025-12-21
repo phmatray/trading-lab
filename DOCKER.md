@@ -11,13 +11,25 @@ This guide explains how to deploy the TradingStrat web application using Docker.
 
 ### Using Docker Compose (Recommended)
 
-Build and run the application with a single command:
+1. **Set your Anthropic API key** (required for AI Trading Assistant):
+
+```bash
+# Option 1: Export as environment variable (recommended)
+export ANTHROPIC_API_KEY="sk-ant-api03-YOUR_KEY_HERE"
+
+# Option 2: Create a .env file in the project root
+echo "ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY_HERE" > .env
+```
+
+2. **Build and run** the application:
 
 ```bash
 docker-compose up -d
 ```
 
 The application will be available at `http://localhost:8080`
+
+**Note:** The `.env` file is already included in `.gitignore` to prevent accidentally committing your API key.
 
 ### Using Docker CLI
 
@@ -43,9 +55,11 @@ docker run -d \
 
 The Dockerfile uses a **multi-stage build** for optimal image size and build performance:
 
-1. **Node.js Stage** - Builds Tailwind CSS
+1. **Node.js Stage** - Builds Tailwind CSS v4 (configured via CSS imports, no tailwind.config.js)
 2. **Build Stage** - Compiles the .NET application
 3. **Runtime Stage** - Creates minimal runtime image (~200MB)
+
+**Note:** The project uses Tailwind CSS v4, which doesn't require a traditional `tailwind.config.js` file. Configuration is embedded in the CSS file itself (`Styles/app.css`).
 
 ## Data Persistence
 
@@ -102,9 +116,21 @@ Override configuration via environment variables:
 docker run -d \
   -e Trading__DefaultTicker=AAPL \
   -e Trading__Backtest__InitialCapital=50000 \
+  -e Trading__Assistant__ApiKey=sk-ant-api03-... \
   -e ASPNETCORE_ENVIRONMENT=Development \
   tradingstrat-web:latest
 ```
+
+**Important Environment Variables:**
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `Trading__Assistant__ApiKey` | Anthropic API key for AI Trading Assistant | Required |
+| `Trading__Database__ConnectionString` | SQLite database path | `Data Source=/app/data/trading.db` |
+| `Trading__DefaultTicker` | Default stock ticker | `AAPL` |
+| `Trading__Backtest__InitialCapital` | Starting capital for backtests | `100000` |
+| `ASPNETCORE_ENVIRONMENT` | Environment mode | `Production` |
+| `ASPNETCORE_URLS` | Listening URLs | `http://+:8080` |
 
 ### Custom Configuration File
 

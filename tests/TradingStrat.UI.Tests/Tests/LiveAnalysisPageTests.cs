@@ -190,8 +190,8 @@ public class LiveAnalysisPageTests : BaseTest
         );
 
         // Assert - Verify inputs accepted the values
-        string? buyValue = await Page!.Locator("#buy-threshold").InputValueAsync();
-        string? sellValue = await Page!.Locator("#sell-threshold").InputValueAsync();
+        string buyValue = await Page!.Locator("#buy-threshold").InputValueAsync();
+        string sellValue = await Page!.Locator("#sell-threshold").InputValueAsync();
 
         buyValue.ShouldBe(buyThreshold.ToString(System.Globalization.CultureInfo.InvariantCulture), "Buy threshold should accept custom value");
         sellValue.ShouldBe(sellThreshold.ToString(System.Globalization.CultureInfo.InvariantCulture), "Sell threshold should accept custom value");

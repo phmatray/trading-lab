@@ -221,22 +221,33 @@
     private StrategyForm? _strategyFormB;
     private ParameterOptimizationResult? _result;
     private string? _errorMessage;
+    private bool _hasRestoredState;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
+    }
 
-        // Try to restore saved form state
-        ComparisonFormModel? savedForm = await FormState.GetFormStateAsync<ComparisonFormModel>(FORM_KEY);
-        if (savedForm != null)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasRestoredState)
         {
-            _formModel = savedForm;
-        }
-        else
-        {
-            // Initialize from user preferences
-            Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
-            _formModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value);
+            _hasRestoredState = true;
+
+            // Try to restore saved form state
+            ComparisonFormModel? savedForm = await FormState.GetFormStateAsync<ComparisonFormModel>(FORM_KEY);
+            if (savedForm != null)
+            {
+                _formModel = savedForm;
+            }
+            else
+            {
+                // Initialize from user preferences
+                Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
+                _formModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value);
+            }
+
+            StateHasChanged();
         }
     }
 
@@ -332,6 +343,7 @@
         finally
         {
             await InvokeAsync(() => ProgressService.Reset());
+            await InvokeAsync(StateHasChanged);
         }
     }
 

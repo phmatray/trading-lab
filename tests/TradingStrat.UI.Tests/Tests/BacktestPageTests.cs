@@ -278,7 +278,7 @@ public class BacktestPageTests : BaseTest
             await Task.Delay(300);
 
             // Assert - Verify form is reset
-            string? tickerValue = await Page!.Locator("#ticker").InputValueAsync();
+            string tickerValue = await Page!.Locator("#ticker").InputValueAsync();
             tickerValue.ShouldBeNullOrEmpty("Ticker should be cleared");
         }
         else

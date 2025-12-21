@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 
 namespace TradingStrat.UI.Tests.Infrastructure;
@@ -70,7 +71,13 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            // Load test-specific configuration
+            // Clear default configuration sources and use only test configuration
+            config.Sources.Clear();
+
+            // Load base configuration first
+            config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
+
+            // Override with test-specific configuration
             config.AddJsonFile(
                 Path.Combine(AppContext.BaseDirectory, "appsettings.Test.json"),
                 optional: false,
@@ -89,17 +96,97 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
     {
         if (_kestrelHost == null)
         {
-            // Trigger server creation by creating a client
-            using HttpClient _ = CreateDefaultClient();
+            // Trigger server creation by accessing Server property
+            // This will call CreateHost() which sets up the Kestrel host
+            _ = Server;
         }
     }
 
     public async Task InitializeAsync()
     {
-        // Ensure database exists
-        using IServiceScope scope = Services.CreateScope();
-        TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
-        await context.Database.EnsureCreatedAsync();
+        // Trigger server creation first (this will call Program.cs which creates the database)
+        EnsureServer();
+
+        // Now seed test data using the Kestrel host's services
+        if (_kestrelHost != null)
+        {
+            using IServiceScope scope = _kestrelHost.Services.CreateScope();
+            TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
+
+            // Seed test data for common tickers
+            await SeedTestDataAsync(context);
+        }
+    }
+
+    private static async Task SeedTestDataAsync(TradingContext context)
+    {
+        // Log database connection
+        string? connectionString = context.Database.GetConnectionString();
+        Console.WriteLine($"[Test DB Seeder] Database connection: {connectionString}");
+
+        // Check if data already exists
+        bool hasData = await context.HistoricalPrices.AnyAsync();
+        Console.WriteLine($"[Test DB Seeder] Database has data: {hasData}");
+
+        if (hasData)
+        {
+            Console.WriteLine("[Test DB Seeder] Skipping seed - data already exists");
+            return;
+        }
+
+        Console.WriteLine("[Test DB Seeder] Starting data seed...");
+
+        // Generate 500 days of synthetic historical data for test tickers
+        string[] testTickers = { "MSFT", "AAPL", "GOOGL" };
+        DateTime startDate = DateTime.Today.AddDays(-500);
+
+        foreach (string ticker in testTickers)
+        {
+            decimal basePrice = ticker switch
+            {
+                "MSFT" => 300m,
+                "AAPL" => 150m,
+                "GOOGL" => 100m,
+                _ => 100m
+            };
+
+            List<Domain.Entities.HistoricalPrice> prices = new();
+
+            for (int i = 0; i < 500; i++)
+            {
+                DateTime date = startDate.AddDays(i);
+
+                // Generate realistic OHLCV data with some volatility
+                decimal randomFactor = 1m + ((decimal)(new Random(ticker.GetHashCode() + i).NextDouble() - 0.5) * 0.04m);
+                decimal close = basePrice * randomFactor;
+                decimal open = close * (1m + ((decimal)(new Random(i).NextDouble() - 0.5) * 0.02m));
+                decimal high = Math.Max(open, close) * (1m + (decimal)new Random(i + 1).NextDouble() * 0.03m);
+                decimal low = Math.Min(open, close) * (1m - (decimal)new Random(i + 2).NextDouble() * 0.03m);
+                long volume = 1000000 + (long)(new Random(i + 3).NextDouble() * 5000000);
+
+                prices.Add(new Domain.Entities.HistoricalPrice
+                {
+                    Ticker = ticker,
+                    DateTime = date,
+                    Open = open,
+                    High = high,
+                    Low = low,
+                    Close = close,
+                    Volume = volume,
+                    ISIN = $"{ticker}_ISIN"
+                });
+
+                // Update base price for next day (trending)
+                basePrice *= randomFactor;
+            }
+
+            Console.WriteLine($"[Test DB Seeder] Generated {prices.Count} prices for {ticker}");
+            await context.HistoricalPrices.AddRangeAsync(prices);
+        }
+
+        await context.SaveChangesAsync();
+        int totalCount = await context.HistoricalPrices.CountAsync();
+        Console.WriteLine($"[Test DB Seeder] Seed complete! Total records in database: {totalCount}");
     }
 
     public new async Task DisposeAsync()

@@ -17,7 +17,7 @@ public class ComparisonPage : BasePage
     private ILocator TickerInput => Page.Locator("#ticker");
     private ILocator CapitalInput => Page.Locator("#capital");
     private ILocator SubmitButton => Page.Locator("button[type='submit']");
-    private ILocator ProgressIndicator => Page.Locator("[data-testid='progress-indicator']").Or(Page.Locator("text=Comparing"));
+    private ILocator ProgressIndicator => Page.Locator("[data-testid='progress-indicator']");
     private ILocator ErrorMessage => Page.Locator("[role='alert']").Or(Page.Locator(".alert"));
 
     // Strategy Form Elements (two variants)
@@ -26,7 +26,7 @@ public class ComparisonPage : BasePage
     // Results Elements
     private ILocator NoResultsPlaceholder => Page.Locator("text=No comparison results");
     private ILocator WinnerAnnouncement => Page.Locator("text=/Winner:/");
-    private ILocator ComparisonTable => Page.Locator("table");
+    private ILocator ComparisonTable => Page.Locator("text=Performance Comparison").Locator("..").Locator("table");
     private ILocator MetricRows => Page.Locator("tbody tr");
     private ILocator VariantAMetrics => Page.Locator("text=Variant A:").Or(Page.Locator("text=Variant A Trades"));
     private ILocator VariantBMetrics => Page.Locator("text=Variant B:").Or(Page.Locator("text=Variant B Trades"));

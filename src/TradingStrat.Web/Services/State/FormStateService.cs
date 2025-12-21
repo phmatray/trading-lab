@@ -38,7 +38,7 @@ public class FormStateService
         return default;
     }
 
-    public async Task SaveFormStateAsync<T>(
+    public Task SaveFormStateAsync<T>(
         string formKey,
         T formModel,
         int debounceMs = 500,
@@ -61,6 +61,7 @@ public class FormStateService
         }, null, debounceMs, Timeout.Infinite);
 
         _debounceTimers[formKey] = timer;
+        return Task.CompletedTask;
     }
 
     public async Task ClearFormStateAsync(

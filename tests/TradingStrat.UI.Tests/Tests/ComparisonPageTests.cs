@@ -168,6 +168,15 @@ public class ComparisonPageTests : BaseTest
         await comparisonPage.SubmitFormAsync();
         await comparisonPage.WaitForComparisonCompleteAsync();
 
+        // Assert - Check for errors first
+        bool hasError = await comparisonPage.HasErrorMessageAsync();
+        if (hasError)
+        {
+            // If there's an error, capture it and fail the test with the error message
+            string? errorText = await Page!.Locator("[role='alert']").TextContentAsync();
+            hasError.ShouldBeFalse($"Comparison should not have errors. Error message: {errorText}");
+        }
+
         // Assert - Results table should appear
         bool hasResults = await comparisonPage.AreResultsDisplayedAsync();
         hasResults.ShouldBeTrue("Results table should be displayed after comparison completes");

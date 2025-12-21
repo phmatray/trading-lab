@@ -298,7 +298,7 @@ public class BaseStrategyTests
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
-        (decimal[] macd, decimal[] signal, decimal[] histogram) = strategy.TestCalculateMACD(12, 26, 9);
+        (decimal[] macd, decimal[] signal, decimal[] histogram) = strategy.TestCalculateMACD();
 
         // Assert
         macd.ShouldBe(expectedMACD);
