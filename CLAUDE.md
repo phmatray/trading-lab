@@ -12,9 +12,11 @@ TradingStrat is a trading strategy backtesting and analysis system built using *
 
 ### Running the Application
 ```bash
-# Run the CLI application
-cd src/TradingStrat.Presentation
+# Run the Web application
+cd src/TradingStrat.Web
 dotnet run
+
+# Open browser to https://localhost:5218 (or the URL shown in terminal)
 ```
 
 ### Testing
@@ -66,7 +68,7 @@ The codebase follows strict **Dependency Rule**: Presentation → Application �
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Presentation (CLI with Spectre.Console)                │
+│ Presentation (Blazor Server Web Application)           │
 │  └─ Depends on: Application (Use Case interfaces)      │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -126,7 +128,7 @@ When adding new features:
 2. **Define Ports** - Create interfaces in Application/Ports (Inbound for use cases, Outbound for infrastructure)
 3. **Implement Use Cases** - Orchestrate domain logic in Application/UseCases
 4. **Add Adapters** - Implement infrastructure in Infrastructure layer
-5. **Wire Up Presentation** - Connect to CLI menu
+5. **Wire Up Presentation** - Add Blazor pages/components in Web project
 
 ### Test Doubles
 The Application.Tests project contains **TestDoubles/** with in-memory implementations:
@@ -200,7 +202,7 @@ foreach (var p in savedData)
 
 ## Configuration
 
-All configuration is in `src/TradingStrat.Presentation/appsettings.json`:
+All configuration is in `src/TradingStrat.Web/appsettings.json`:
 
 **Key Settings:**
 - `Trading.DefaultTicker` / `Trading.DefaultIsin` - Default security to trade
@@ -422,7 +424,7 @@ public class MyNewUseCase : IMyNewUseCase
 
 3. **Register in Infrastructure DI configuration**
 
-4. **Wire up in Presentation/Console/ProgramMenu.cs**
+4. **Wire up in Web UI (Blazor pages/components)**
 
 ## Data Sources
 

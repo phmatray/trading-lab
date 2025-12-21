@@ -10,8 +10,8 @@ This project demonstrates a **production-grade hexagonal architecture** implemen
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Presentation Layer                         │
 │  ┌────────────┐  ┌──────────────┐  ┌────────────────┐          │
-│  │ ProgramMenu│  │  Presenters  │  │  appsettings   │          │
-│  │   (CLI)    │  │  (Spectre)   │  │     .json      │          │
+│  │  Blazor    │  │  Components  │  │  appsettings   │          │
+│  │   Server   │  │    & Pages   │  │     .json      │          │
 │  └────────────┘  └──────────────┘  └────────────────┘          │
 └────────────────────────┬────────────────────────────────────────┘
                          │ Uses
@@ -92,16 +92,18 @@ This project demonstrates a **production-grade hexagonal architecture** implemen
 ### Run the Application
 
 ```bash
-# Navigate to presentation project
-cd src/TradingStrat.Presentation
+# Navigate to web project
+cd src/TradingStrat.Web
 
 # Run the application
 dotnet run
+
+# Open browser to https://localhost:5218 (or the URL shown in terminal)
 ```
 
 ### Configuration
 
-Edit `appsettings.json` to customize:
+Edit `src/TradingStrat.Web/appsettings.json` to customize:
 
 ```json
 {
@@ -156,16 +158,18 @@ TradingStrat/
 │   │   ├── MachineLearning/              # ML.NET adapter
 │   │   └── DependencyInjection/          # Service registration
 │   │
-│   └── TradingStrat.Presentation/        # CLI interface
-│       ├── Console/                      # Menu and presenters
-│       ├── DependencyInjection/          # Presentation services
+│   └── TradingStrat.Web/                 # Blazor Server web interface
+│       ├── Components/                   # Blazor components
+│       ├── Pages/                        # Blazor pages
+│       ├── Services/                     # Web services
 │       └── appsettings.json              # Configuration file
 │
 └── tests/
     ├── TradingStrat.Domain.Tests/        # Domain unit tests
     ├── TradingStrat.Application.Tests/   # Application unit tests
     │   └── TestDoubles/                  # In-memory test implementations
-    └── TradingStrat.Infrastructure.Tests/ # Integration tests
+    ├── TradingStrat.Infrastructure.Tests/ # Integration tests
+    └── TradingStrat.UI.Tests/            # Playwright UI tests
 ```
 
 ## 🧪 Testing
@@ -259,6 +263,8 @@ public IStrategy CreateStrategy(string strategyType,
     };
 }
 ```
+
+3. **Add to Web UI**: Update strategy selection in Blazor pages
 
 ### Adding a New Indicator
 
@@ -361,7 +367,7 @@ When adding new features:
 2. **Define Ports**: Create interfaces in Application/Ports
 3. **Implement Use Cases**: Orchestrate in Application/UseCases
 4. **Add Infrastructure**: Implement adapters in Infrastructure
-5. **Update Presentation**: Wire up in CLI menu
+5. **Update Web UI**: Add Blazor pages/components
 6. **Write Tests**: Add unit and integration tests
 
 ## 📝 License

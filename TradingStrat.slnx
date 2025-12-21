@@ -3,7 +3,6 @@
     <Project Path="src/TradingStrat.Application/TradingStrat.Application.csproj" />
     <Project Path="src/TradingStrat.Domain/TradingStrat.Domain.csproj" />
     <Project Path="src/TradingStrat.Infrastructure/TradingStrat.Infrastructure.csproj" />
-    <Project Path="src/TradingStrat.Presentation/TradingStrat.Presentation.csproj" />
     <Project Path="src/TradingStrat.Web/TradingStrat.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
