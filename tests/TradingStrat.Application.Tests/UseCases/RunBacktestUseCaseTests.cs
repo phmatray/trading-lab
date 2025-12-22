@@ -3,11 +3,13 @@ using Shouldly;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
+using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -27,7 +29,8 @@ public class RunBacktestUseCaseTests
 
         var indicatorCalculator = new IndicatorCalculator();
         var loggerFactory = new NullLoggerFactory();
-        _strategyFactory = new StrategyFactory(indicatorCalculator, loggerFactory);
+        var strategyRegistry = new StrategyRegistry();
+        _strategyFactory = new StrategyFactory(indicatorCalculator, loggerFactory, strategyRegistry);
 
         _useCase = new RunBacktestUseCase(
             _historicalDataPort,
@@ -43,7 +46,7 @@ public class RunBacktestUseCaseTests
 
         var command = new BacktestCommand(
             Ticker: "TEST",
-            StrategyType: "ma",
+            StrategyType: StrategyType.MovingAverageCrossover,
             StrategyParameters: new Dictionary<string, object>
             {
                 ["FastPeriod"] = 5,
@@ -69,7 +72,7 @@ public class RunBacktestUseCaseTests
         // Arrange
         var command = new BacktestCommand(
             Ticker: "NODATA",
-            StrategyType: "ma");
+            StrategyType: StrategyType.MovingAverageCrossover);
 
         // Act & Assert
         var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
@@ -87,7 +90,7 @@ public class RunBacktestUseCaseTests
 
         var command = new BacktestCommand(
             Ticker: "TEST",
-            StrategyType: "ma",
+            StrategyType: StrategyType.MovingAverageCrossover,
             StrategyParameters: new Dictionary<string, object>
             {
                 ["FastPeriod"] = 5,
@@ -103,10 +106,10 @@ public class RunBacktestUseCaseTests
     }
 
     [Theory]
-    [InlineData("ma")]
-    [InlineData("rsi")]
-    [InlineData("macd")]
-    public async Task ExecuteAsync_WithDifferentStrategies_ShouldSucceed(string strategyType)
+    [InlineData(StrategyType.MovingAverageCrossover)]
+    [InlineData(StrategyType.RSI)]
+    [InlineData(StrategyType.MACD)]
+    public async Task ExecuteAsync_WithDifferentStrategies_ShouldSucceed(StrategyType strategyType)
     {
         // Arrange
         SeedTestData();
@@ -135,7 +138,7 @@ public class RunBacktestUseCaseTests
 
         var command = new BacktestCommand(
             Ticker: "TEST",
-            StrategyType: "ma",
+            StrategyType: StrategyType.MovingAverageCrossover,
             StartDate: startDate,
             EndDate: endDate);
 
@@ -155,7 +158,7 @@ public class RunBacktestUseCaseTests
 
         var command = new BacktestCommand(
             Ticker: "TEST",
-            StrategyType: "ma",
+            StrategyType: StrategyType.MovingAverageCrossover,
             StrategyParameters: new Dictionary<string, object>
             {
                 ["FastPeriod"] = 5,

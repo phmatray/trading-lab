@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Services;
@@ -13,14 +14,15 @@ public static class ParameterGenerator
     /// Returns common A/B test configurations based on trading best practices.
     /// </summary>
     public static List<(StrategyVariant VariantA, StrategyVariant VariantB)> GetPredefinedVariants(
-        string strategyType)
+        StrategyType strategyType)
     {
-        return strategyType.ToLowerInvariant() switch
+        return strategyType switch
         {
-            "ma" or "movingaverage" or "macrossover" => GetMovingAverageVariants(),
-            "rsi" => GetRSIVariants(),
-            "macd" => GetMACDVariants(),
-            "ml" or "machinelearning" => GetMLVariants(),
+            StrategyType.MovingAverageCrossover => GetMovingAverageVariants(),
+            StrategyType.RSI => GetRSIVariants(),
+            StrategyType.MACD => GetMACDVariants(),
+            StrategyType.MachineLearning => GetMLVariants(),
+            StrategyType.Ichimoku => GetIchimokuVariants(),
             _ => throw new ArgumentException($"Unknown strategy type: {strategyType}")
         };
     }
@@ -33,12 +35,12 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "ma",
+                    StrategyType.MovingAverageCrossover,
                     new Dictionary<string, object> { ["FastPeriod"] = 20, ["SlowPeriod"] = 50 },
                     "Conservative (20/50)"),
                 new StrategyVariant(
                     "Variant B",
-                    "ma",
+                    StrategyType.MovingAverageCrossover,
                     new Dictionary<string, object> { ["FastPeriod"] = 10, ["SlowPeriod"] = 30 },
                     "Aggressive (10/30)")
             ),
@@ -46,12 +48,12 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "ma",
+                    StrategyType.MovingAverageCrossover,
                     new Dictionary<string, object> { ["FastPeriod"] = 15, ["SlowPeriod"] = 40 },
                     "Medium (15/40)"),
                 new StrategyVariant(
                     "Variant B",
-                    "ma",
+                    StrategyType.MovingAverageCrossover,
                     new Dictionary<string, object> { ["FastPeriod"] = 30, ["SlowPeriod"] = 100 },
                     "Very Conservative (30/100)")
             )
@@ -66,7 +68,7 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "rsi",
+                    StrategyType.RSI,
                     new Dictionary<string, object>
                     {
                         ["Period"] = 14,
@@ -76,7 +78,7 @@ public static class ParameterGenerator
                     "Standard (14, 30/70)"),
                 new StrategyVariant(
                     "Variant B",
-                    "rsi",
+                    StrategyType.RSI,
                     new Dictionary<string, object>
                     {
                         ["Period"] = 14,
@@ -89,7 +91,7 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "rsi",
+                    StrategyType.RSI,
                     new Dictionary<string, object>
                     {
                         ["Period"] = 7,
@@ -99,7 +101,7 @@ public static class ParameterGenerator
                     "Fast (7, 30/70)"),
                 new StrategyVariant(
                     "Variant B",
-                    "rsi",
+                    StrategyType.RSI,
                     new Dictionary<string, object>
                     {
                         ["Period"] = 21,
@@ -119,7 +121,7 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "macd",
+                    StrategyType.MACD,
                     new Dictionary<string, object>
                     {
                         ["FastPeriod"] = 12,
@@ -129,7 +131,7 @@ public static class ParameterGenerator
                     "Standard (12/26/9)"),
                 new StrategyVariant(
                     "Variant B",
-                    "macd",
+                    StrategyType.MACD,
                     new Dictionary<string, object>
                     {
                         ["FastPeriod"] = 8,
@@ -149,7 +151,7 @@ public static class ParameterGenerator
             (
                 new StrategyVariant(
                     "Variant A",
-                    "ml",
+                    StrategyType.MachineLearning,
                     new Dictionary<string, object>
                     {
                         ["BuyThreshold"] = 0.01m,
@@ -158,13 +160,53 @@ public static class ParameterGenerator
                     "Conservative (±1%)"),
                 new StrategyVariant(
                     "Variant B",
-                    "ml",
+                    StrategyType.MachineLearning,
                     new Dictionary<string, object>
                     {
                         ["BuyThreshold"] = 0.005m,
                         ["SellThreshold"] = -0.005m
                     },
                     "Aggressive (±0.5%)")
+            )
+        };
+    }
+
+    private static List<(StrategyVariant, StrategyVariant)> GetIchimokuVariants()
+    {
+        return new List<(StrategyVariant, StrategyVariant)>
+        {
+            // Standard vs Custom
+            (
+                new StrategyVariant(
+                    "Variant A",
+                    StrategyType.Ichimoku,
+                    new Dictionary<string, object>
+                    {
+                        ["TenkanPeriod"] = 9,
+                        ["KijunPeriod"] = 26,
+                        ["SenkouBPeriod"] = 52,
+                        ["Displacement"] = 26,
+                        ["ExitMode"] = "CloseBelowKijun",
+                        ["EntryMode"] = "AllConditionsOnly",
+                        ["CrossLookbackDays"] = 5,
+                        ["RiskPercentage"] = 0.02m
+                    },
+                    "Standard (9/26/52)"),
+                new StrategyVariant(
+                    "Variant B",
+                    StrategyType.Ichimoku,
+                    new Dictionary<string, object>
+                    {
+                        ["TenkanPeriod"] = 7,
+                        ["KijunPeriod"] = 22,
+                        ["SenkouBPeriod"] = 44,
+                        ["Displacement"] = 22,
+                        ["ExitMode"] = "CloseBelowKijun",
+                        ["EntryMode"] = "AllConditionsOnly",
+                        ["CrossLookbackDays"] = 5,
+                        ["RiskPercentage"] = 0.02m
+                    },
+                    "Fast (7/22/44)")
             )
         };
     }

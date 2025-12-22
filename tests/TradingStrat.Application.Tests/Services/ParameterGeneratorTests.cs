@@ -1,5 +1,6 @@
 using Shouldly;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.Services;
@@ -7,11 +8,11 @@ namespace TradingStrat.Application.Tests.Services;
 public class ParameterGeneratorTests
 {
     [Theory]
-    [InlineData("ma")]
-    [InlineData("rsi")]
-    [InlineData("macd")]
-    [InlineData("ml")]
-    public void GetPredefinedVariants_WithValidStrategy_ShouldReturnVariants(string strategyType)
+    [InlineData(StrategyType.MovingAverageCrossover)]
+    [InlineData(StrategyType.RSI)]
+    [InlineData(StrategyType.MACD)]
+    [InlineData(StrategyType.MachineLearning)]
+    public void GetPredefinedVariants_WithValidStrategy_ShouldReturnVariants(StrategyType strategyType)
     {
         // Act
         List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants(strategyType);
@@ -33,7 +34,7 @@ public class ParameterGeneratorTests
     public void GetPredefinedVariants_ForMA_ShouldHaveDifferentPeriods()
     {
         // Act
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants("ma");
+        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants(StrategyType.MovingAverageCrossover);
         (StrategyVariant variantA, StrategyVariant variantB) = variants.First();
 
         // Assert
@@ -49,7 +50,7 @@ public class ParameterGeneratorTests
     public void GetPredefinedVariants_ForRSI_ShouldHaveDifferentThresholds()
     {
         // Act
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants("rsi");
+        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants(StrategyType.RSI);
         (StrategyVariant variantA, StrategyVariant variantB) = variants.First();
 
         // Assert
@@ -65,7 +66,7 @@ public class ParameterGeneratorTests
     public void GetPredefinedVariants_ForMACD_ShouldHaveDifferentPeriods()
     {
         // Act
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants("macd");
+        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants(StrategyType.MACD);
         (StrategyVariant variantA, StrategyVariant variantB) = variants.First();
 
         // Assert
@@ -81,7 +82,7 @@ public class ParameterGeneratorTests
     public void GetPredefinedVariants_ForML_ShouldHaveDifferentThresholds()
     {
         // Act
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants("ml");
+        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants = ParameterGenerator.GetPredefinedVariants(StrategyType.MachineLearning);
         (StrategyVariant variantA, StrategyVariant variantB) = variants.First();
 
         // Assert
@@ -91,24 +92,6 @@ public class ParameterGeneratorTests
         variantB.Parameters.ShouldContainKey("SellThreshold");
     }
 
-    [Fact]
-    public void GetPredefinedVariants_WithInvalidStrategy_ShouldThrow()
-    {
-        // Act & Assert
-        Should.Throw<ArgumentException>(() =>
-            ParameterGenerator.GetPredefinedVariants("invalid"));
-    }
-
-    [Fact]
-    public void GetPredefinedVariants_ShouldSupportAliases()
-    {
-        // Arrange & Act
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants1 = ParameterGenerator.GetPredefinedVariants("ma");
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants2 = ParameterGenerator.GetPredefinedVariants("movingaverage");
-        List<(StrategyVariant VariantA, StrategyVariant VariantB)> variants3 = ParameterGenerator.GetPredefinedVariants("macrossover");
-
-        // Assert - All aliases should return the same number of variants
-        variants1.Count.ShouldBe(variants2.Count);
-        variants1.Count.ShouldBe(variants3.Count);
-    }
+    // Note: Tests for invalid strategy types and string aliases removed
+    // because enum-based API provides compile-time safety
 }

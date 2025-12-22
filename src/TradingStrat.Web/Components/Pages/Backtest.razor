@@ -59,7 +59,7 @@
             </div>
 
             <StrategyForm @ref="_strategyForm"
-                          SelectedStrategy="@FormModel.StrategyType"
+                          SelectedStrategy="@GetStrategyKey(FormModel.StrategyType)"
                           SelectedStrategyChanged="@OnStrategyTypeChanged"
                           ParametersChanged="@OnStrategyParametersChanged" />
         </div>

@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Strategies;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
@@ -6,14 +8,14 @@ namespace TradingStrat.Domain.ValueObjects;
 /// </summary>
 public record StrategyVariant(
     string Label,
-    string StrategyType,
+    StrategyType StrategyType,
     Dictionary<string, object> Parameters,
     string Description)
 {
     /// <summary>
     /// Creates a default variant with empty parameters.
     /// </summary>
-    public StrategyVariant() : this("Default", "ma", new Dictionary<string, object>(), "Default configuration")
+    public StrategyVariant() : this("Default", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Default configuration")
     {
     }
 

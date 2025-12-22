@@ -1,4 +1,5 @@
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.Ports.Inbound;
 
@@ -24,7 +25,7 @@ public interface IBacktestUseCase
 /// Command object for executing a backtest.
 /// </summary>
 /// <param name="Ticker">Stock ticker symbol to backtest.</param>
-/// <param name="StrategyType">Strategy identifier (e.g., "ma", "rsi", "macd", "ml").</param>
+/// <param name="StrategyType">Strategy type enum (e.g., MovingAverageCrossover, RSI, MACD, MachineLearning).</param>
 /// <param name="StrategyParameters">Optional strategy-specific parameters (e.g., period lengths, thresholds).</param>
 /// <param name="InitialCapital">Starting capital for the backtest (default $10,000).</param>
 /// <param name="CommissionPercentage">Commission as a percentage of trade value (default 0.1%).</param>
@@ -33,7 +34,7 @@ public interface IBacktestUseCase
 /// <param name="EndDate">Optional end date for backtest period.</param>
 public record BacktestCommand(
     string Ticker,
-    string StrategyType,
+    StrategyType StrategyType,
     Dictionary<string, object>? StrategyParameters = null,
     decimal InitialCapital = 10000m,
     decimal CommissionPercentage = 0.001m,

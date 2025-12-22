@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
@@ -10,52 +11,45 @@ public class StrategyFactory : IStrategyFactory
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IStrategyRegistry _registry;
 
     public StrategyFactory(
         IIndicatorCalculator indicatorCalculator,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IStrategyRegistry registry)
     {
         _indicatorCalculator = indicatorCalculator;
         _loggerFactory = loggerFactory;
+        _registry = registry;
     }
 
-    public IStrategy CreateStrategy(string strategyType, Dictionary<string, object>? parameters = null)
+    public IStrategy CreateStrategy(StrategyType strategyType, Dictionary<string, object>? parameters = null)
     {
         parameters ??= new Dictionary<string, object>();
 
-        return strategyType.ToLowerInvariant() switch
+        return strategyType switch
         {
-            "ma" or "movingaverage" or "macrossover" => CreateMovingAverageCrossoverStrategy(parameters),
-            "rsi" => CreateRSIStrategy(parameters),
-            "macd" => CreateMACDStrategy(parameters),
-            "ml" or "machinelearning" => CreateMachineLearningStrategy(parameters),
-            "ichimoku" or "ichi" => CreateIchimokuStrategy(parameters),
+            StrategyType.MovingAverageCrossover => CreateMovingAverageCrossoverStrategy(parameters),
+            StrategyType.RSI => CreateRSIStrategy(parameters),
+            StrategyType.MACD => CreateMACDStrategy(parameters),
+            StrategyType.MachineLearning => CreateMachineLearningStrategy(parameters),
+            StrategyType.Ichimoku => CreateIchimokuStrategy(parameters),
             _ => throw new ArgumentException($"Unknown strategy type: {strategyType}", nameof(strategyType))
         };
     }
 
     public string MapStrategyNameToType(string strategyName)
     {
-        // Map strategy display names to canonical type codes
-        // Handles variations like "Moving Average Crossover", "moving average", "MA", etc.
-        string normalized = strategyName.ToLowerInvariant();
-
-        return normalized switch
+        // Delegate to registry for parsing, fall back to "ma" if not recognized
+        // This maintains backward compatibility with config files and user preferences
+        if (_registry.TryParseStrategyType(strategyName, out StrategyType type))
         {
-            var s when s.Contains("moving average") || s.Contains("ma crossover") => "ma",
-            var s when s.Contains("rsi") => "rsi",
-            var s when s.Contains("macd") => "macd",
-            var s when s.Contains("machine learning") || s.Contains("ml") || s.Contains("fasttree") => "ml",
-            var s when s.Contains("ichimoku") || s.Contains("ichi") => "ichimoku",
-            // If it's already a type code, return as-is
-            "ma" => "ma",
-            "rsi" => "rsi",
-            "macd" => "macd",
-            "ml" => "ml",
-            "ichimoku" => "ichimoku",
-            // Default to MA if unrecognized
-            _ => "ma"
-        };
+            StrategyDescriptor descriptor = _registry.GetDescriptor(type);
+            return descriptor.Key;
+        }
+
+        // Default to MA if unrecognized (backward compatibility)
+        return "ma";
     }
 
     private MovingAverageCrossoverStrategy CreateMovingAverageCrossoverStrategy(Dictionary<string, object> parameters)

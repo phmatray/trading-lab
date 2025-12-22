@@ -3,11 +3,13 @@ using Shouldly;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -26,7 +28,8 @@ public class RunParameterOptimizationUseCaseTests
 
         IndicatorCalculator indicatorCalculator = new IndicatorCalculator();
         NullLoggerFactory loggerFactory = new NullLoggerFactory();
-        StrategyFactory strategyFactory = new StrategyFactory(indicatorCalculator, loggerFactory);
+        StrategyRegistry strategyRegistry = new StrategyRegistry();
+        StrategyFactory strategyFactory = new StrategyFactory(indicatorCalculator, loggerFactory, strategyRegistry);
 
         _useCase = new RunParameterOptimizationUseCase(
             _historicalDataPort,
@@ -42,13 +45,13 @@ public class RunParameterOptimizationUseCaseTests
 
         StrategyVariant variantA = new StrategyVariant(
             "Variant A",
-            "ma",
+            StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 5, ["SlowPeriod"] = 10 },
             "Fast (5/10)");
 
         StrategyVariant variantB = new StrategyVariant(
             "Variant B",
-            "ma",
+            StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 10, ["SlowPeriod"] = 20 },
             "Slow (10/20)");
 
@@ -75,8 +78,8 @@ public class RunParameterOptimizationUseCaseTests
     public async Task ExecuteAsync_WithNoData_ShouldThrow()
     {
         // Arrange
-        StrategyVariant variantA = new StrategyVariant("A", "ma", new Dictionary<string, object>(), "Test");
-        StrategyVariant variantB = new StrategyVariant("B", "ma", new Dictionary<string, object>(), "Test");
+        StrategyVariant variantA = new StrategyVariant("A", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Test");
+        StrategyVariant variantB = new StrategyVariant("B", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Test");
 
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("NODATA", variantA, variantB);
 
@@ -92,9 +95,9 @@ public class RunParameterOptimizationUseCaseTests
         // Arrange
         SeedTestData();
 
-        StrategyVariant variantA = new StrategyVariant("Variant A", "ma",
+        StrategyVariant variantA = new StrategyVariant("Variant A", StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 5, ["SlowPeriod"] = 10 }, "Fast");
-        StrategyVariant variantB = new StrategyVariant("Variant B", "ma",
+        StrategyVariant variantB = new StrategyVariant("Variant B", StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 10, ["SlowPeriod"] = 20 }, "Slow");
 
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
@@ -112,10 +115,10 @@ public class RunParameterOptimizationUseCaseTests
     }
 
     [Theory]
-    [InlineData("ma")]
-    [InlineData("rsi")]
-    [InlineData("macd")]
-    public async Task ExecuteAsync_WithDifferentStrategyTypes_ShouldSucceed(string strategyType)
+    [InlineData(StrategyType.MovingAverageCrossover)]
+    [InlineData(StrategyType.RSI)]
+    [InlineData(StrategyType.MACD)]
+    public async Task ExecuteAsync_WithDifferentStrategyTypes_ShouldSucceed(StrategyType strategyType)
     {
         // Arrange
         SeedTestData();
@@ -141,13 +144,13 @@ public class RunParameterOptimizationUseCaseTests
 
         StrategyVariant variantA = new StrategyVariant(
             "Variant A",
-            "ma",
+            StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 5, ["SlowPeriod"] = 10 },
             "Fast");
 
         StrategyVariant variantB = new StrategyVariant(
             "Variant B",
-            "ma",
+            StrategyType.MovingAverageCrossover,
             new Dictionary<string, object> { ["FastPeriod"] = 10, ["SlowPeriod"] = 20 },
             "Slow");
 
@@ -169,8 +172,8 @@ public class RunParameterOptimizationUseCaseTests
         // Arrange
         SeedTestData();
 
-        StrategyVariant variantA = new StrategyVariant("A", "ma", new Dictionary<string, object>(), "Test A");
-        StrategyVariant variantB = new StrategyVariant("B", "ma", new Dictionary<string, object>(), "Test B");
+        StrategyVariant variantA = new StrategyVariant("A", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Test A");
+        StrategyVariant variantB = new StrategyVariant("B", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Test B");
 
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 

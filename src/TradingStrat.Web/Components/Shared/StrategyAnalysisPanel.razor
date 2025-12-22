@@ -1,5 +1,6 @@
 @using TradingStrat.Web.Models
 @inject IAnalyzeStrategyUseCase AnalyzeStrategyUseCase
+@inject Application.Strategies.IStrategyRegistry StrategyRegistry
 @inject NotificationService NotificationService
 
 <div class="card mt-6">
@@ -145,9 +146,12 @@
 
         try
         {
+            // Parse string strategy type to enum
+            var strategyTypeEnum = StrategyRegistry.ParseStrategyType(StrategyType);
+
             var command = new AnalyzeStrategyCommand(
                 Ticker,
-                StrategyType,
+                strategyTypeEnum,
                 StrategyParameters
             );
             _recommendation = await AnalyzeStrategyUseCase.ExecuteAsync(command);

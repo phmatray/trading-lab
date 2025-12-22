@@ -58,7 +58,7 @@
                 <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
                     <h3 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</h3>
                     <StrategyForm @ref="_strategyFormA"
-                                  SelectedStrategy="@FormModel.StrategyTypeA"
+                                  SelectedStrategy="@GetStrategyKey(FormModel.StrategyTypeA)"
                                   SelectedStrategyChanged="@OnStrategyTypeAChanged"
                                   ParametersChanged="@OnStrategyParametersAChanged" />
                 </div>
@@ -67,7 +67,7 @@
                 <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
                     <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</h3>
                     <StrategyForm @ref="_strategyFormB"
-                                  SelectedStrategy="@FormModel.StrategyTypeB"
+                                  SelectedStrategy="@GetStrategyKey(FormModel.StrategyTypeB)"
                                   SelectedStrategyChanged="@OnStrategyTypeBChanged"
                                   ParametersChanged="@OnStrategyParametersBChanged" />
                 </div>

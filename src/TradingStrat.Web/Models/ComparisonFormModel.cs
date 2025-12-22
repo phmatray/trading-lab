@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TradingStrat.Application.Configuration;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
@@ -14,7 +15,7 @@ public class ComparisonFormModel
     public decimal InitialCapital { get; set; } = 10000m;
 
     [Required(ErrorMessage = "Variant A strategy type is required")]
-    public string StrategyTypeA { get; set; } = "ma";
+    public StrategyType StrategyTypeA { get; set; } = StrategyType.MovingAverageCrossover;
 
     public Dictionary<string, object> StrategyParametersA { get; set; } = new()
     {
@@ -23,7 +24,7 @@ public class ComparisonFormModel
     };
 
     [Required(ErrorMessage = "Variant B strategy type is required")]
-    public string StrategyTypeB { get; set; } = "ma";
+    public StrategyType StrategyTypeB { get; set; } = StrategyType.MovingAverageCrossover;
 
     public Dictionary<string, object> StrategyParametersB { get; set; } = new()
     {
@@ -36,19 +37,27 @@ public class ComparisonFormModel
 
     public static ComparisonFormModel FromPreferences(
         UserPreferences preferences,
-        TradingConfiguration config)
+        TradingConfiguration config,
+        Application.Strategies.IStrategyRegistry registry)
     {
+        // Parse strategy type from string preference
+        StrategyType strategyType = StrategyType.MovingAverageCrossover; // Default fallback
+        if (!string.IsNullOrEmpty(preferences.BacktestDefaults.PreferredStrategy))
+        {
+            registry.TryParseStrategyType(preferences.BacktestDefaults.PreferredStrategy, out strategyType);
+        }
+
         return new ComparisonFormModel
         {
             Ticker = preferences.DefaultTicker,
             InitialCapital = preferences.BacktestDefaults.InitialCapital,
-            StrategyTypeA = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyTypeA = strategyType,
             StrategyParametersA = new Dictionary<string, object>
             {
                 ["FastPeriod"] = 10,
                 ["SlowPeriod"] = 30
             },
-            StrategyTypeB = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyTypeB = strategyType,
             StrategyParametersB = new Dictionary<string, object>
             {
                 ["FastPeriod"] = 20,

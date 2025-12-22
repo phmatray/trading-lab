@@ -2,6 +2,7 @@ using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Shouldly;
 using TradingStrat.Application.Factories;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 
@@ -11,6 +12,7 @@ public class StrategyFactoryTests
 {
     private readonly IIndicatorCalculator _fakeIndicatorCalculator;
     private readonly ILoggerFactory _fakeLoggerFactory;
+    private readonly IStrategyRegistry _registry;
     private readonly StrategyFactory _factory;
 
     public StrategyFactoryTests()
@@ -18,7 +20,10 @@ public class StrategyFactoryTests
         _fakeIndicatorCalculator = A.Fake<IIndicatorCalculator>();
         _fakeLoggerFactory = A.Fake<ILoggerFactory>();
         A.CallTo(() => _fakeLoggerFactory.CreateLogger(A<string>._)).Returns(A.Fake<ILogger>());
-        _factory = new StrategyFactory(_fakeIndicatorCalculator, _fakeLoggerFactory);
+
+        // Use real registry for tests (it's immutable metadata, no need to fake)
+        _registry = new StrategyRegistry();
+        _factory = new StrategyFactory(_fakeIndicatorCalculator, _fakeLoggerFactory, _registry);
     }
 
     #region Strategy Creation Tests
@@ -27,7 +32,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithMA_CreatesMovingAverageCrossoverStrategy()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover);
 
         // Assert
         strategy.ShouldBeOfType<MovingAverageCrossoverStrategy>();
@@ -38,7 +43,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithRSI_CreatesRSIStrategy()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("rsi");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.RSI);
 
         // Assert
         strategy.ShouldBeOfType<RSIStrategy>();
@@ -49,7 +54,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithMACD_CreatesMACDStrategy()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("macd");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MACD);
 
         // Assert
         strategy.ShouldBeOfType<MACDStrategy>();
@@ -60,58 +65,29 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithML_CreatesMachineLearningStrategy()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ml");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MachineLearning);
 
         // Assert
         strategy.ShouldBeOfType<MachineLearningStrategy>();
         strategy.Name.ShouldContain("ML");
     }
 
-    [Theory]
-    [InlineData("ma")]
-    [InlineData("MA")]
-    [InlineData("Ma")]
-    [InlineData("movingaverage")]
-    [InlineData("macrossover")]
-    public void CreateStrategy_CaseInsensitive_CreatesCorrectStrategy(string strategyType)
-    {
-        // Act
-        IStrategy strategy = _factory.CreateStrategy(strategyType);
-
-        // Assert
-        strategy.ShouldBeOfType<MovingAverageCrossoverStrategy>();
-    }
-
-    [Theory]
-    [InlineData("ml")]
-    [InlineData("ML")]
-    [InlineData("machinelearning")]
-    public void CreateStrategy_MLAliases_CreatesMachineLearningStrategy(string strategyType)
-    {
-        // Act
-        IStrategy strategy = _factory.CreateStrategy(strategyType);
-
-        // Assert
-        strategy.ShouldBeOfType<MachineLearningStrategy>();
-    }
-
     [Fact]
-    public void CreateStrategy_WithUnknownType_ThrowsArgumentException()
+    public void CreateStrategy_WithIchimoku_CreatesIchimokuStrategy()
     {
         // Act
-        Func<IStrategy> act = () => _factory.CreateStrategy("unknown");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.Ichimoku);
 
         // Assert
-        ArgumentException ex = Should.Throw<ArgumentException>(act);
-        ex.Message.ShouldContain("Unknown strategy type");
-        ex.ParamName.ShouldBe("strategyType");
+        strategy.ShouldBeOfType<IchimokuStrategy>();
+        strategy.Name.ShouldContain("Ichimoku");
     }
 
     [Fact]
     public void CreateStrategy_WithNullParameters_UsesDefaults()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover);
 
         // Assert
         strategy.ShouldNotBeNull();
@@ -122,7 +98,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_WithEmptyParameters_UsesDefaults()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("rsi", new Dictionary<string, object>());
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.RSI, new Dictionary<string, object>());
 
         // Assert
         strategy.ShouldNotBeNull();
@@ -133,7 +109,7 @@ public class StrategyFactoryTests
     public void CreateStrategy_InjectsIndicatorCalculator()
     {
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma");
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover);
 
         // Assert
         strategy.ShouldNotBeNull();
@@ -155,7 +131,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover, parameters);
 
         // Assert
         strategy.Name.ShouldBe("MA Crossover (10/30)");
@@ -173,7 +149,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("rsi", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.RSI, parameters);
 
         // Assert
         strategy.Name.ShouldBe("RSI (9, 20/80)");
@@ -191,7 +167,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("macd", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MACD, parameters);
 
         // Assert
         strategy.Name.ShouldBe("MACD (8/21/5)");
@@ -208,7 +184,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ml", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MachineLearning, parameters);
 
         // Assert
         strategy.ShouldBeOfType<MachineLearningStrategy>();
@@ -228,7 +204,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover, parameters);
 
         // Assert
         // Should use default for FastPeriod (20) and provided SlowPeriod (30)
@@ -245,7 +221,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover, parameters);
 
         // Assert
         // Should use provided FastPeriod (15) and default SlowPeriod (50)
@@ -265,7 +241,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("ma", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.MovingAverageCrossover, parameters);
 
         // Assert
         strategy.Name.ShouldBe("MA Crossover (10/30)");
@@ -282,7 +258,7 @@ public class StrategyFactoryTests
         };
 
         // Act
-        IStrategy strategy = _factory.CreateStrategy("rsi", parameters);
+        IStrategy strategy = _factory.CreateStrategy(StrategyType.RSI, parameters);
 
         // Assert
         strategy.Name.ShouldBe("RSI (14, 25/75)");

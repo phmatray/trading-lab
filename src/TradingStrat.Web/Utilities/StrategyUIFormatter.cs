@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Strategies;
+
 namespace TradingStrat.Web.Utilities;
 
 /// <summary>
@@ -9,19 +11,19 @@ public static class StrategyUIFormatter
     /// <summary>
     /// Generates a human-readable description for a strategy with its parameters.
     /// </summary>
-    /// <param name="strategyType">The strategy type code (ma, rsi, macd, ml, ichimoku).</param>
+    /// <param name="strategyType">The strategy type enum.</param>
     /// <param name="parameters">Dictionary of strategy parameters.</param>
     /// <returns>Formatted description string (e.g., "MA Crossover (5/20)").</returns>
-    public static string GetStrategyDescription(string strategyType, Dictionary<string, object> parameters)
+    public static string GetStrategyDescription(StrategyType strategyType, Dictionary<string, object> parameters)
     {
         return strategyType switch
         {
-            "ma" => $"MA Crossover ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")})",
-            "rsi" => $"RSI ({parameters.GetValueOrDefault("Period")}, {parameters.GetValueOrDefault("OversoldLevel")}/{parameters.GetValueOrDefault("OverboughtLevel")})",
-            "macd" => $"MACD ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")}/{parameters.GetValueOrDefault("SignalPeriod")})",
-            "ml" => $"ML FastTree ({(decimal)parameters.GetValueOrDefault("BuyThreshold", 0m) * 100:F1}%/{(decimal)parameters.GetValueOrDefault("SellThreshold", 0m) * 100:F1}%)",
-            "ichimoku" => $"Ichimoku ({parameters.GetValueOrDefault("TenkanPeriod")}/{parameters.GetValueOrDefault("KijunPeriod")})",
-            _ => strategyType
+            StrategyType.MovingAverageCrossover => $"MA Crossover ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")})",
+            StrategyType.RSI => $"RSI ({parameters.GetValueOrDefault("Period")}, {parameters.GetValueOrDefault("OversoldLevel")}/{parameters.GetValueOrDefault("OverboughtLevel")})",
+            StrategyType.MACD => $"MACD ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")}/{parameters.GetValueOrDefault("SignalPeriod")})",
+            StrategyType.MachineLearning => $"ML FastTree ({(decimal)parameters.GetValueOrDefault("BuyThreshold", 0m) * 100:F1}%/{(decimal)parameters.GetValueOrDefault("SellThreshold", 0m) * 100:F1}%)",
+            StrategyType.Ichimoku => $"Ichimoku ({parameters.GetValueOrDefault("TenkanPeriod")}/{parameters.GetValueOrDefault("KijunPeriod")})",
+            _ => strategyType.ToString()
         };
     }
 
@@ -54,17 +56,17 @@ public static class StrategyUIFormatter
     }
 
     /// <summary>
-    /// Gets a display-friendly name for a strategy type code.
+    /// Gets a display-friendly name for a strategy type.
     /// </summary>
-    /// <param name="strategyType">The strategy type code (ma, rsi, macd, ml, ichimoku).</param>
+    /// <param name="strategyType">The strategy type enum.</param>
     /// <returns>Human-readable strategy name.</returns>
-    public static string GetStrategyDisplayName(string strategyType) => strategyType switch
+    public static string GetStrategyDisplayName(StrategyType strategyType) => strategyType switch
     {
-        "ma" => "Moving Average Crossover",
-        "rsi" => "RSI Strategy",
-        "macd" => "MACD Strategy",
-        "ml" => "Machine Learning (FastTree)",
-        "ichimoku" => "Ichimoku Strategy",
-        _ => strategyType.ToUpperInvariant()
+        StrategyType.MovingAverageCrossover => "Moving Average Crossover",
+        StrategyType.RSI => "RSI Strategy",
+        StrategyType.MACD => "MACD Strategy",
+        StrategyType.MachineLearning => "Machine Learning (FastTree)",
+        StrategyType.Ichimoku => "Ichimoku Strategy",
+        _ => strategyType.ToString()
     };
 }

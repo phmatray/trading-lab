@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TradingStrat.Application.Configuration;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Models;
@@ -11,7 +12,7 @@ public class BacktestFormModel
     public string Ticker { get; set; } = "CON3.L";
 
     [Required(ErrorMessage = "Strategy type is required")]
-    public string StrategyType { get; set; } = "ma";
+    public StrategyType StrategyType { get; set; } = StrategyType.MovingAverageCrossover;
 
     public Dictionary<string, object> StrategyParameters { get; set; } = new()
     {
@@ -34,12 +35,20 @@ public class BacktestFormModel
 
     public static BacktestFormModel FromPreferences(
         UserPreferences preferences,
-        TradingConfiguration config)
+        TradingConfiguration config,
+        Application.Strategies.IStrategyRegistry registry)
     {
+        // Parse strategy type from string preference
+        StrategyType strategyType = StrategyType.MovingAverageCrossover; // Default fallback
+        if (!string.IsNullOrEmpty(preferences.BacktestDefaults.PreferredStrategy))
+        {
+            registry.TryParseStrategyType(preferences.BacktestDefaults.PreferredStrategy, out strategyType);
+        }
+
         return new BacktestFormModel
         {
             Ticker = preferences.DefaultTicker,
-            StrategyType = preferences.BacktestDefaults.PreferredStrategy,
+            StrategyType = strategyType,
             StrategyParameters = new Dictionary<string, object>
             {
                 ["FastPeriod"] = 20,

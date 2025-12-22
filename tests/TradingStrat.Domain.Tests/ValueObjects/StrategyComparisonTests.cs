@@ -1,5 +1,6 @@
 using Shouldly;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Domain.Tests.ValueObjects;
@@ -10,8 +11,8 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenVariantAWins_ShouldReturnVariantA()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 1);
@@ -28,8 +29,8 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenVariantBWins_ShouldReturnVariantB()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 2);
@@ -46,8 +47,8 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenTie_ShouldReturnNull()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 0);
@@ -64,8 +65,8 @@ public class StrategyComparisonTests
     public void WinningResult_WhenVariantAWins_ShouldReturnResultA()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 1);
@@ -81,8 +82,8 @@ public class StrategyComparisonTests
     public void WinningResult_WhenVariantBWins_ShouldReturnResultB()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 2);
@@ -98,8 +99,8 @@ public class StrategyComparisonTests
     public void WinningResult_WhenTie_ShouldReturnNull()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", "ma");
-        var variantB = CreateVariant("Variant B", "ma");
+        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         var resultA = CreateBacktestResult("Strategy A");
         var resultB = CreateBacktestResult("Strategy B");
         var ranking = CreateRanking(winnerIndex: 0);
@@ -115,8 +116,8 @@ public class StrategyComparisonTests
     public void Constructor_ShouldSetAllProperties()
     {
         // Arrange
-        StrategyVariant variantA = CreateVariant("Variant A", "ma");
-        StrategyVariant variantB = CreateVariant("Variant B", "ma");
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
         BacktestResult resultA = CreateBacktestResult("Strategy A");
         BacktestResult resultB = CreateBacktestResult("Strategy B");
         ComparisonRanking ranking = CreateRanking(winnerIndex: 1);
@@ -137,7 +138,7 @@ public class StrategyComparisonTests
         comparison.ComparisonDate.ShouldBe(comparisonDate);
     }
 
-    private StrategyVariant CreateVariant(string label, string type)
+    private StrategyVariant CreateVariant(string label, StrategyType type)
     {
         return new StrategyVariant(
             label,

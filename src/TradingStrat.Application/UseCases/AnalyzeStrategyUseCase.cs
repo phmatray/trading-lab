@@ -2,7 +2,9 @@ using System.Text.Json;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -15,15 +17,18 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
     private readonly IAssistantPort _assistantPort;
     private readonly PortfolioContextBuilder _contextBuilder;
     private readonly IBacktestUseCase _backtestUseCase;
+    private readonly IStrategyRegistry _strategyRegistry;
 
     public AnalyzeStrategyUseCase(
         IAssistantPort assistantPort,
         PortfolioContextBuilder contextBuilder,
-        IBacktestUseCase backtestUseCase)
+        IBacktestUseCase backtestUseCase,
+        IStrategyRegistry strategyRegistry)
     {
         _assistantPort = assistantPort;
         _contextBuilder = contextBuilder;
         _backtestUseCase = backtestUseCase;
+        _strategyRegistry = strategyRegistry;
     }
 
     public async Task<StrategyRecommendation> ExecuteAsync(
@@ -47,10 +52,13 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
         catch (Exception ex)
         {
             // If backtest fails, return error recommendation
+            // Convert enum to string for database storage
+            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
+
             return new StrategyRecommendation
             {
                 Ticker = command.Ticker,
-                StrategyType = command.StrategyType,
+                StrategyType = descriptor.Key,
                 Summary = $"Unable to run backtest: {ex.Message}",
                 Recommendation = "Cannot provide recommendation without backtest data. Please ensure historical data is available.",
                 ActionItems = new List<ActionItem>
@@ -111,10 +119,13 @@ Provide your analysis in the specified JSON format with actionable recommendatio
         catch (Exception ex)
         {
             // If AI call fails, return basic recommendation
+            // Convert enum to string for database storage
+            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
+
             return new StrategyRecommendation
             {
                 Ticker = command.Ticker,
-                StrategyType = command.StrategyType,
+                StrategyType = descriptor.Key,
                 Summary = $"Backtest completed with {backtestResult.Metrics.TotalReturn:P2} return over 3 months.",
                 Recommendation = $"AI analysis unavailable ({ex.Message}). Based on metrics: Sharpe {backtestResult.Metrics.SharpeRatio:F2}, Win Rate {backtestResult.Metrics.WinRate:P1}.",
                 ActionItems = new List<ActionItem>
@@ -154,10 +165,13 @@ Provide your analysis in the specified JSON format with actionable recommendatio
         catch (JsonException ex)
         {
             // If JSON parsing fails, create fallback recommendation
+            // Convert enum to string for database storage
+            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
+
             return new StrategyRecommendation
             {
                 Ticker = command.Ticker,
-                StrategyType = command.StrategyType,
+                StrategyType = descriptor.Key,
                 Summary = $"Strategy shows {backtestResult.Metrics.TotalReturn:P2} return with {backtestResult.Metrics.WinRate:P1} win rate.",
                 Recommendation = $"AI response formatting issue ({ex.Message}). Review backtest metrics directly.",
                 ActionItems = new List<ActionItem>
@@ -181,7 +195,7 @@ Provide your analysis in the specified JSON format with actionable recommendatio
 
         // Set metadata
         recommendation.Ticker = command.Ticker;
-        recommendation.StrategyType = command.StrategyType;
+        recommendation.StrategyType = _strategyRegistry.GetDescriptor(command.StrategyType).Key;
         recommendation.CreatedAt = DateTime.UtcNow;
 
         return recommendation;

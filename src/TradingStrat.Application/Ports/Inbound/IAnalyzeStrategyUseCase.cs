@@ -1,4 +1,5 @@
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.Ports.Inbound;
 
@@ -24,9 +25,9 @@ public interface IAnalyzeStrategyUseCase
 /// Command object for requesting AI strategy analysis.
 /// </summary>
 /// <param name="Ticker">Stock ticker symbol to analyze.</param>
-/// <param name="StrategyType">Strategy identifier (e.g., "ma", "rsi", "macd", "ml").</param>
+/// <param name="StrategyType">Strategy type enum (e.g., MovingAverageCrossover, RSI, MACD, MachineLearning).</param>
 /// <param name="StrategyParameters">Optional strategy-specific parameters (e.g., periods, thresholds).</param>
 public record AnalyzeStrategyCommand(
     string Ticker,
-    string StrategyType,
+    StrategyType StrategyType,
     Dictionary<string, object>? StrategyParameters = null);

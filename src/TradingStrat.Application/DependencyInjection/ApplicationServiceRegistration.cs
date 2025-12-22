@@ -4,6 +4,7 @@ using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Application.UseCases;
 
 namespace TradingStrat.Application.DependencyInjection;
@@ -22,6 +23,9 @@ public static class ApplicationServiceRegistration
 
         // Domain Services (centralized registration)
         services.AddDomainServices();
+
+        // Strategy Registry (singleton - immutable metadata)
+        services.AddSingleton<IStrategyRegistry, StrategyRegistry>();
 
         // Application Services
         services.AddScoped<BacktestEngine>();

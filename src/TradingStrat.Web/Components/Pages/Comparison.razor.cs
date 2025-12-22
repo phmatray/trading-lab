@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Components.Shared;
 using TradingStrat.Web.Models;
@@ -20,6 +21,7 @@ public partial class Comparison
 
     [Inject] private IParameterOptimizationUseCase ParameterOptimizationUseCase { get; set; } = null!;
     [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
+    [Inject] private Application.Strategies.IStrategyRegistry StrategyRegistry { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
@@ -52,7 +54,7 @@ public partial class Comparison
             {
                 // Initialize from user preferences
                 Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
-                FormModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value);
+                FormModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value, StrategyRegistry);
             }
 
             StateHasChanged();
@@ -126,13 +128,25 @@ public partial class Comparison
         => await OnPropertyChangedAsync(_ => { }); // No-op update action, just saves state
 
     private async Task OnStrategyTypeAChanged(string value)
-        => await OnPropertyChangedAsync(m => m.StrategyTypeA = value);
+    {
+        // Parse strategy type string to enum
+        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        {
+            await OnPropertyChangedAsync(m => m.StrategyTypeA = strategyType);
+        }
+    }
 
     private async Task OnStrategyParametersAChanged(Dictionary<string, object> parameters)
         => await OnPropertyChangedAsync(m => m.StrategyParametersA = parameters);
 
     private async Task OnStrategyTypeBChanged(string value)
-        => await OnPropertyChangedAsync(m => m.StrategyTypeB = value);
+    {
+        // Parse strategy type string to enum
+        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        {
+            await OnPropertyChangedAsync(m => m.StrategyTypeB = strategyType);
+        }
+    }
 
     private async Task OnStrategyParametersBChanged(Dictionary<string, object> parameters)
         => await OnPropertyChangedAsync(m => m.StrategyParametersB = parameters);
@@ -141,5 +155,11 @@ public partial class Comparison
     {
         // Delegate to StrategyFactory for canonical strategy type mapping
         return StrategyFactory.MapStrategyNameToType(strategyName);
+    }
+
+    private string GetStrategyKey(StrategyType strategyType)
+    {
+        // Convert enum to string key for StrategyForm component
+        return StrategyRegistry.GetDescriptor(strategyType).Key;
     }
 }

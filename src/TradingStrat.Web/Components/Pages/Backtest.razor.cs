@@ -3,7 +3,9 @@ using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Components.Shared;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -20,6 +22,7 @@ public partial class Backtest
 
     [Inject] private IBacktestUseCase BacktestUseCase { get; set; } = null!;
     [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
+    [Inject] private IStrategyRegistry StrategyRegistry { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
@@ -32,7 +35,7 @@ public partial class Backtest
     {
         // Initialize from user preferences
         Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
-        return BacktestFormModel.FromPreferences(prefs, Configuration.Value);
+        return BacktestFormModel.FromPreferences(prefs, Configuration.Value, StrategyRegistry);
     }
 
     protected override async Task<BacktestResult> ExecuteOperationAsync(
@@ -105,7 +108,13 @@ public partial class Backtest
         => await OnPropertyChangedAsync(_ => { }); // No-op update action, just saves state
 
     private async Task OnStrategyTypeChanged(string value)
-        => await OnPropertyChangedAsync(m => m.StrategyType = value);
+    {
+        // Parse strategy type string to enum
+        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        {
+            await OnPropertyChangedAsync(m => m.StrategyType = strategyType);
+        }
+    }
 
     private async Task OnStrategyParametersChanged(Dictionary<string, object> parameters)
         => await OnPropertyChangedAsync(m => m.StrategyParameters = parameters);
@@ -114,5 +123,11 @@ public partial class Backtest
     {
         // Delegate to StrategyFactory for canonical strategy type mapping
         return StrategyFactory.MapStrategyNameToType(strategyName);
+    }
+
+    private string GetStrategyKey(StrategyType strategyType)
+    {
+        // Convert enum to string key for StrategyForm component
+        return StrategyRegistry.GetDescriptor(strategyType).Key;
     }
 }
