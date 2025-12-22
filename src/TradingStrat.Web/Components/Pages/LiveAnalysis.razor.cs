@@ -95,22 +95,7 @@ public partial class LiveAnalysis
         return $"Analysis completed: {result.PredictedSignal} signal predicted (Return: {result.PredictedReturn * 100:+0.0;-0.0;0.0}%)";
     }
 
+    // Helper for inline Razor event handlers that update properties directly
     private async Task OnFormFieldChanged()
-    {
-        await FormState.SaveFormStateAsync(FormKey, FormModel);
-    }
-
-    private static string GetSignalColorClass(SignalType signal) => signal switch
-    {
-        SignalType.Buy => "metric-positive",
-        SignalType.Sell => "metric-negative",
-        _ => "text-gray-600"
-    };
-
-    private static string GetSignalEmoji(SignalType signal) => signal switch
-    {
-        SignalType.Buy => "📈",
-        SignalType.Sell => "📉",
-        _ => "➡️"
-    };
+        => await OnPropertyChangedAsync(_ => { }); // No-op update action, just saves state
 }

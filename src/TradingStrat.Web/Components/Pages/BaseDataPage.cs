@@ -134,6 +134,32 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
     }
 
     /// <summary>
+    /// Helper method for handling form property changes with automatic state persistence.
+    /// Eliminates repetitive OnXxxChanged handler patterns across pages.
+    /// </summary>
+    /// <param name="updateAction">Action to update a property on the FormModel.</param>
+    /// <returns>Task that completes when the state is persisted.</returns>
+    /// <example>
+    /// // Instead of:
+    /// // private async Task OnStrategyTypeChanged(string value)
+    /// // {
+    /// //     FormModel.StrategyType = value;
+    /// //     await FormState.SaveFormStateAsync(FormKey, FormModel);
+    /// //     StateHasChanged();
+    /// // }
+    /// //
+    /// // Use:
+    /// // private async Task OnStrategyTypeChanged(string value)
+    /// //     => await OnPropertyChangedAsync(m => m.StrategyType = value);
+    /// </example>
+    protected async Task OnPropertyChangedAsync(Action<TFormModel> updateAction)
+    {
+        updateAction(FormModel);
+        await FormState.SaveFormStateAsync(FormKey, FormModel);
+        StateHasChanged();
+    }
+
+    /// <summary>
     /// Disposes the component. Unsubscribes from progress updates.
     /// </summary>
     public virtual void Dispose()

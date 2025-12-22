@@ -5,8 +5,6 @@ using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.UseCases;
-using TradingStrat.Domain.Services;
-using TradingStrat.Domain.Services.Indicators;
 
 namespace TradingStrat.Application.DependencyInjection;
 
@@ -22,9 +20,8 @@ public static class ApplicationServiceRegistration
         services.Configure<AssistantConfiguration>(
             configuration.GetSection("Trading:Assistant"));
 
-        // Domain Services (from Domain layer)
-        services.AddTransient<IIndicatorCalculator, IndicatorCalculator>();
-        services.AddTransient<PerformanceCalculator>();
+        // Domain Services (centralized registration)
+        services.AddDomainServices();
 
         // Application Services
         services.AddScoped<BacktestEngine>();

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
+using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Web.Components.Shared;
@@ -18,6 +19,7 @@ public partial class Backtest
     private const string FORM_KEY = "backtest-form";
 
     [Inject] private IBacktestUseCase BacktestUseCase { get; set; } = null!;
+    [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
@@ -100,33 +102,17 @@ public partial class Backtest
     }
 
     private async Task OnFormFieldChanged()
-    {
-        await FormState.SaveFormStateAsync(FormKey, FormModel);
-    }
+        => await OnPropertyChangedAsync(_ => { }); // No-op update action, just saves state
 
     private async Task OnStrategyTypeChanged(string value)
-    {
-        FormModel.StrategyType = value;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyType = value);
 
     private async Task OnStrategyParametersChanged(Dictionary<string, object> parameters)
-    {
-        FormModel.StrategyParameters = parameters;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyParameters = parameters);
 
-    private static string GetStrategyType(string strategyName)
+    private string GetStrategyType(string strategyName)
     {
-        // Map strategy names to types: "Moving Average Crossover" -> "ma"
-        return strategyName.ToLowerInvariant() switch
-        {
-            var s when s.Contains("moving average") => "ma",
-            var s when s.Contains("rsi") => "rsi",
-            var s when s.Contains("macd") => "macd",
-            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
-            var s when s.Contains("ichimoku") => "ichimoku",
-            _ => "ma"
-        };
+        // Delegate to StrategyFactory for canonical strategy type mapping
+        return StrategyFactory.MapStrategyNameToType(strategyName);
     }
 }

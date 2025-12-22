@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
@@ -24,10 +25,13 @@ public class RSIStrategy : BaseStrategy
         decimal overboughtThreshold = 70)
         : base(indicatorCalculator)
     {
-        if (oversoldThreshold >= overboughtThreshold)
-        {
-            throw new ArgumentException("Oversold threshold must be less than overbought threshold");
-        }
+        ValidationGuard.Require(period).GreaterThan(0, "Period must be greater than 0");
+        ValidationGuard.Require(oversoldThreshold)
+            .GreaterThanOrEqual(0m, "Oversold threshold must be non-negative")
+            .LessThan(overboughtThreshold, "Oversold threshold must be less than overbought threshold");
+        ValidationGuard.Require(overboughtThreshold)
+            .GreaterThan(oversoldThreshold, "Overbought threshold must be greater than oversold threshold")
+            .LessThanOrEqual(100m, "Overbought threshold cannot exceed 100");
 
         _period = period;
         _oversoldThreshold = oversoldThreshold;

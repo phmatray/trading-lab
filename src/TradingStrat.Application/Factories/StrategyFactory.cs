@@ -34,6 +34,30 @@ public class StrategyFactory : IStrategyFactory
         };
     }
 
+    public string MapStrategyNameToType(string strategyName)
+    {
+        // Map strategy display names to canonical type codes
+        // Handles variations like "Moving Average Crossover", "moving average", "MA", etc.
+        string normalized = strategyName.ToLowerInvariant();
+
+        return normalized switch
+        {
+            var s when s.Contains("moving average") || s.Contains("ma crossover") => "ma",
+            var s when s.Contains("rsi") => "rsi",
+            var s when s.Contains("macd") => "macd",
+            var s when s.Contains("machine learning") || s.Contains("ml") || s.Contains("fasttree") => "ml",
+            var s when s.Contains("ichimoku") || s.Contains("ichi") => "ichimoku",
+            // If it's already a type code, return as-is
+            "ma" => "ma",
+            "rsi" => "rsi",
+            "macd" => "macd",
+            "ml" => "ml",
+            "ichimoku" => "ichimoku",
+            // Default to MA if unrecognized
+            _ => "ma"
+        };
+    }
+
     private MovingAverageCrossoverStrategy CreateMovingAverageCrossoverStrategy(Dictionary<string, object> parameters)
     {
         int fastPeriod = GetParameter(parameters, "FastPeriod", 20);

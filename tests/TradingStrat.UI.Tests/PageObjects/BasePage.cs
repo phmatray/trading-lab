@@ -109,4 +109,17 @@ public abstract class BasePage
         await NavMenu.Locator($"text={linkText}").ClickAsync();
         await Page.WaitForBlazorAsync();
     }
+
+    /// <summary>
+    /// Gets the value from a metric card by locating the text-3xl paragraph element.
+    /// This is a common pattern across metric cards in the application.
+    /// </summary>
+    /// <param name="cardLocator">The locator for the metric card container.</param>
+    /// <param name="valueSelector">Optional custom selector for the value element. Defaults to "p.text-3xl".</param>
+    /// <returns>The text content of the value element, or null if not found.</returns>
+    protected async Task<string?> GetCardValueAsync(ILocator cardLocator, string valueSelector = "p.text-3xl")
+    {
+        ILocator valueElement = cardLocator.Locator(valueSelector);
+        return await valueElement.TextContentAsync();
+    }
 }

@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
@@ -26,6 +27,14 @@ public class MACDStrategy : BaseStrategy
         int signalPeriod = 9)
         : base(indicatorCalculator)
     {
+        ValidationGuard.Require(fastPeriod)
+            .GreaterThan(0, "Fast period must be greater than 0")
+            .LessThan(slowPeriod, "Fast period must be less than slow period");
+        ValidationGuard.Require(slowPeriod)
+            .GreaterThan(fastPeriod, "Slow period must be greater than fast period");
+        ValidationGuard.Require(signalPeriod)
+            .GreaterThan(0, "Signal period must be greater than 0");
+
         _fastPeriod = fastPeriod;
         _slowPeriod = slowPeriod;
         _signalPeriod = signalPeriod;

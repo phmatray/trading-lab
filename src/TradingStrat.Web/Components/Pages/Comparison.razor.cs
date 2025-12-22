@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
+using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Components.Shared;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services.State;
+using TradingStrat.Web.Utilities;
 
 namespace TradingStrat.Web.Components.Pages;
 
@@ -17,6 +19,7 @@ public partial class Comparison
     private const string FORM_KEY = "comparison-form";
 
     [Inject] private IParameterOptimizationUseCase ParameterOptimizationUseCase { get; set; } = null!;
+    [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
@@ -26,11 +29,11 @@ public partial class Comparison
 
     protected override string FormKey => FORM_KEY;
 
-    protected override async Task<ComparisonFormModel?> InitializeDefaultsAsync()
+    protected override Task<ComparisonFormModel?> InitializeDefaultsAsync()
     {
         // Note: This is called by OnInitializedAsync, but we need OnAfterRenderAsync
         // for strategy form components to be ready. Return null here and handle in OnAfterRenderAsync.
-        return null;
+        return Task.FromResult<ComparisonFormModel?>(null);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -86,14 +89,14 @@ public partial class Comparison
             "Variant A",
             model.StrategyTypeA,
             model.StrategyParametersA,
-            GetStrategyDescription(model.StrategyTypeA, model.StrategyParametersA)
+            StrategyUIFormatter.GetStrategyDescription(model.StrategyTypeA, model.StrategyParametersA)
         );
 
         StrategyVariant variantB = new(
             "Variant B",
             model.StrategyTypeB,
             model.StrategyParametersB,
-            GetStrategyDescription(model.StrategyTypeB, model.StrategyParametersB)
+            StrategyUIFormatter.GetStrategyDescription(model.StrategyTypeB, model.StrategyParametersB)
         );
 
         ParameterOptimizationCommand command = new(
@@ -120,67 +123,23 @@ public partial class Comparison
     }
 
     private async Task OnFormFieldChanged()
-    {
-        await FormState.SaveFormStateAsync(FormKey, FormModel);
-    }
+        => await OnPropertyChangedAsync(_ => { }); // No-op update action, just saves state
 
     private async Task OnStrategyTypeAChanged(string value)
-    {
-        FormModel.StrategyTypeA = value;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyTypeA = value);
 
     private async Task OnStrategyParametersAChanged(Dictionary<string, object> parameters)
-    {
-        FormModel.StrategyParametersA = parameters;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyParametersA = parameters);
 
     private async Task OnStrategyTypeBChanged(string value)
-    {
-        FormModel.StrategyTypeB = value;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyTypeB = value);
 
     private async Task OnStrategyParametersBChanged(Dictionary<string, object> parameters)
-    {
-        FormModel.StrategyParametersB = parameters;
-        await OnFormFieldChanged();
-    }
+        => await OnPropertyChangedAsync(m => m.StrategyParametersB = parameters);
 
-    private static string GetStrategyDescription(string strategyType, Dictionary<string, object> parameters)
+    private string GetStrategyType(string strategyName)
     {
-        return strategyType switch
-        {
-            "ma" => $"MA Crossover ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")})",
-            "rsi" => $"RSI ({parameters.GetValueOrDefault("Period")}, {parameters.GetValueOrDefault("OversoldLevel")}/{parameters.GetValueOrDefault("OverboughtLevel")})",
-            "macd" => $"MACD ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")}/{parameters.GetValueOrDefault("SignalPeriod")})",
-            "ml" => $"ML FastTree ({(decimal)parameters.GetValueOrDefault("BuyThreshold", 0m) * 100:F1}%/{(decimal)parameters.GetValueOrDefault("SellThreshold", 0m) * 100:F1}%)",
-            "ichimoku" => $"Ichimoku ({parameters.GetValueOrDefault("TenkanPeriod")}/{parameters.GetValueOrDefault("KijunPeriod")})",
-            _ => strategyType
-        };
-    }
-
-    private static string FormatMetricValue(string metric, decimal value)
-    {
-        return metric.Contains("Sharpe") || metric.Contains("Factor")
-            ? value.ToString("F2")
-            : metric.Contains("%") || metric.Contains("Return") || metric.Contains("Drawdown") || metric.Contains("Rate")
-                ? $"{value:F2}%"
-                : value.ToString("F2");
-    }
-
-    private static string GetStrategyType(string strategyName)
-    {
-        // Map strategy names to types: "Moving Average Crossover" -> "ma"
-        return strategyName.ToLowerInvariant() switch
-        {
-            var s when s.Contains("moving average") => "ma",
-            var s when s.Contains("rsi") => "rsi",
-            var s when s.Contains("macd") => "macd",
-            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
-            var s when s.Contains("ichimoku") => "ichimoku",
-            _ => "ma"
-        };
+        // Delegate to StrategyFactory for canonical strategy type mapping
+        return StrategyFactory.MapStrategyNameToType(strategyName);
     }
 }

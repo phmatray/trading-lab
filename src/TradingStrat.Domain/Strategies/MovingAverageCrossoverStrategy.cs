@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
@@ -23,10 +24,11 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
         int slowPeriod = 50)
         : base(indicatorCalculator)
     {
-        if (fastPeriod >= slowPeriod)
-        {
-            throw new ArgumentException("Fast period must be less than slow period");
-        }
+        ValidationGuard.Require(fastPeriod)
+            .GreaterThan(0, "Fast period must be greater than 0")
+            .LessThan(slowPeriod, "Fast period must be less than slow period");
+        ValidationGuard.Require(slowPeriod)
+            .GreaterThan(fastPeriod, "Slow period must be greater than fast period");
 
         _fastPeriod = fastPeriod;
         _slowPeriod = slowPeriod;

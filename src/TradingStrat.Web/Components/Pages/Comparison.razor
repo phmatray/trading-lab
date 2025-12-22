@@ -118,15 +118,15 @@
                             <tr class="bg-white dark:bg-dark-card">
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@key</td>
                                 <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@FormatMetricValue(key, metricComparison.VariantAValue)</span>
+                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantAValue)</span>
                                     <span class="text-xs text-blue-600 dark:text-blue-400 ml-1">(@metricComparison.VariantAPoints.ToString("F1") pts)</span>
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@FormatMetricValue(key, metricComparison.VariantBValue)</span>
+                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantBValue)</span>
                                     <span class="text-xs text-green-600 dark:text-green-400 ml-1">(@metricComparison.VariantBPoints.ToString("F1") pts)</span>
                                 </td>
                                 <td class="px-4 py-3 text-center text-sm @(metricComparison.Difference > 0 ? "metric-positive" : "metric-negative")">
-                                    @(metricComparison.Difference > 0 ? "+" : "")@FormatMetricValue(key, metricComparison.Difference)
+                                    @(metricComparison.Difference > 0 ? "+" : "")@StrategyUIFormatter.FormatMetricValue(key, metricComparison.Difference)
                                     (@(metricComparison.PercentageDifference > 0 ? "+" : "")@metricComparison.PercentageDifference.ToString("F1")%)
                                 </td>
                             </tr>

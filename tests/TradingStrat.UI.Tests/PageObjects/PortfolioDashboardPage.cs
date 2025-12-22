@@ -62,8 +62,7 @@ public class PortfolioDashboardPage : BasePage
     /// </summary>
     public async Task<string?> GetTotalValueAsync()
     {
-        ILocator valueElement = TotalValueCard.Locator("p.text-3xl");
-        return await valueElement.TextContentAsync();
+        return await GetCardValueAsync(TotalValueCard);
     }
 
     /// <summary>
@@ -71,8 +70,7 @@ public class PortfolioDashboardPage : BasePage
     /// </summary>
     public async Task<string?> GetCashValueAsync()
     {
-        ILocator valueElement = CashCard.Locator("p.text-3xl");
-        return await valueElement.TextContentAsync();
+        return await GetCardValueAsync(CashCard);
     }
 
     /// <summary>
@@ -80,8 +78,7 @@ public class PortfolioDashboardPage : BasePage
     /// </summary>
     public async Task<string?> GetGainLossValueAsync()
     {
-        ILocator valueElement = GainLossCard.Locator("p.text-3xl");
-        return await valueElement.TextContentAsync();
+        return await GetCardValueAsync(GainLossCard);
     }
 
     /// <summary>
@@ -89,8 +86,7 @@ public class PortfolioDashboardPage : BasePage
     /// </summary>
     public async Task<string?> GetReturnPercentageAsync()
     {
-        ILocator valueElement = ReturnCard.Locator("p.text-3xl");
-        return await valueElement.TextContentAsync();
+        return await GetCardValueAsync(ReturnCard);
     }
 
     /// <summary>

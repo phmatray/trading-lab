@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
@@ -61,30 +62,14 @@ public class IchimokuStrategy : BaseStrategy
         decimal riskPercentage = 0.02m)
         : base(indicatorCalculator)
     {
-        if (tenkanPeriod <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(tenkanPeriod), "Must be > 0");
-        }
-        if (kijunPeriod <= tenkanPeriod)
-        {
-            throw new ArgumentException("Kijun period must be > Tenkan period");
-        }
-        if (senkouBPeriod <= kijunPeriod)
-        {
-            throw new ArgumentException("Senkou B period must be > Kijun period");
-        }
-        if (displacement <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(displacement), "Must be > 0");
-        }
-        if (crossLookbackDays <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(crossLookbackDays), "Must be > 0");
-        }
-        if (riskPercentage <= 0 || riskPercentage > 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(riskPercentage), "Must be between 0 and 1");
-        }
+        ValidationGuard.Require(tenkanPeriod).GreaterThan(0, "Tenkan period must be greater than 0");
+        ValidationGuard.Require(kijunPeriod).GreaterThan(tenkanPeriod, "Kijun period must be greater than Tenkan period");
+        ValidationGuard.Require(senkouBPeriod).GreaterThan(kijunPeriod, "Senkou B period must be greater than Kijun period");
+        ValidationGuard.Require(displacement).GreaterThan(0, "Displacement must be greater than 0");
+        ValidationGuard.Require(crossLookbackDays).GreaterThan(0, "Cross lookback days must be greater than 0");
+        ValidationGuard.Require(riskPercentage)
+            .GreaterThan(0m, "Risk percentage must be greater than 0")
+            .LessThanOrEqual(1m, "Risk percentage cannot exceed 1");
 
         _indicatorCalculator = indicatorCalculator;
         _tenkanPeriod = tenkanPeriod;
