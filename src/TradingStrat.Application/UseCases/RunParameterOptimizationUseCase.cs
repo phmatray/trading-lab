@@ -31,7 +31,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
 
     public async Task<ParameterOptimizationResult> ExecuteAsync(
         ParameterOptimizationCommand command,
-        IProgress<OptimizationProgress>? progress = null)
+        IProgress<Application.Ports.Inbound.OptimizationProgress>? progress = null)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -43,7 +43,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
         // Run backtest for Variant A
-        progress?.Report(new OptimizationProgress(
+        progress?.Report(new Application.Ports.Inbound.OptimizationProgress(
             command.VariantA.Label, 0, 0, 0));
 
         BacktestResult resultA = await RunSingleBacktest(
@@ -58,7 +58,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             progress);
 
         // Run backtest for Variant B
-        progress?.Report(new OptimizationProgress(
+        progress?.Report(new Application.Ports.Inbound.OptimizationProgress(
             command.VariantB.Label, 0, 0, 0));
 
         BacktestResult resultB = await RunSingleBacktest(
@@ -119,7 +119,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         decimal commissionPercentage,
         decimal minimumCommission,
         string variantLabel,
-        IProgress<OptimizationProgress>? progress)
+        IProgress<Application.Ports.Inbound.OptimizationProgress>? progress)
     {
         // Create strategy using factory
         IStrategy strategy = _strategyFactory.CreateStrategy(
@@ -138,7 +138,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         // Wrap progress reporter to include variant label
         Progress<(int current, int total, int trades)>? wrappedProgress = progress != null
             ? new Progress<(int current, int total, int trades)>(p =>
-                progress.Report(new OptimizationProgress(
+                progress.Report(new Application.Ports.Inbound.OptimizationProgress(
                     variantLabel, p.current, p.total, p.trades)))
             : null;
 

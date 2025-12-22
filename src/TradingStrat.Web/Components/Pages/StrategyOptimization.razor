@@ -1,0 +1,349 @@
+@page "/strategies/optimize"
+@using TradingStrat.Application.Commands
+@using TradingStrat.Application.Ports.Inbound
+@using TradingStrat.Domain.ValueObjects
+@using TradingStrat.Web.Models
+@rendermode InteractiveServer
+
+<PageTitle>Optimize Strategy | TradingStrat</PageTitle>
+
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Strategy Optimization</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
+            Find optimal parameters for your custom strategies using grid search or genetic algorithms
+        </p>
+    </div>
+
+    @if (isLoadingStrategies)
+    {
+        <LoadingState Message="Loading custom strategies..." />
+    }
+    else if (!customStrategies.Any())
+    {
+        <div class="card text-center py-12">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No Custom Strategies Found
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Create a custom strategy first to use the optimization feature.
+            </p>
+            <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
+                Create Strategy
+            </button>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="model" OnValidSubmit="HandleOptimize" FormName="optimization-form">
+            <DataAnnotationsValidator />
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Configuration Panel -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Strategy Selection -->
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            1. Select Strategy
+                        </h2>
+
+                        <div class="form-group">
+                            <label for="strategy" class="form-label">Custom Strategy</label>
+                            <select id="strategy"
+                                    class="form-control"
+                                    @bind="model.CustomStrategyId"
+                                    @bind:after="LoadStrategyParameters">
+                                <option value="0">-- Select a strategy --</option>
+                                @foreach (var strategy in customStrategies)
+                                {
+                                    <option value="@strategy.Id">@strategy.Name</option>
+                                }
+                            </select>
+                            <ValidationMessage For="() => model.CustomStrategyId" />
+                        </div>
+
+                        @if (selectedStrategy != null)
+                        {
+                            <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    <strong>Description:</strong> @selectedStrategy.Description
+                                </p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Parameter Ranges -->
+                    @if (model.ParameterRanges.Any())
+                    {
+                        <div class="card">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                                2. Configure Parameter Ranges
+                            </h2>
+
+                            <div class="space-y-4">
+                                @foreach (var param in model.ParameterRanges)
+                                {
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center">
+                                                <input type="checkbox"
+                                                       id="enable-@param.ParameterName"
+                                                       @bind="param.IsEnabled"
+                                                       class="form-checkbox" />
+                                                <label for="enable-@param.ParameterName"
+                                                       class="ml-2 font-medium text-gray-900 dark:text-white">
+                                                    @param.ParameterName
+                                                </label>
+                                            </div>
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                                Current: @param.CurrentValue
+                                            </span>
+                                        </div>
+
+                                        @if (param.IsEnabled)
+                                        {
+                                            <div class="grid grid-cols-3 gap-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Min</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Min"
+                                                           class="form-control" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Max</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Max"
+                                                           class="form-control" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Step</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Step"
+                                                           class="form-control" />
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                                Will test @CalculateStepCount(param) values
+                                            </p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Backtest Settings -->
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            3. Backtest Configuration
+                        </h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">Ticker</label>
+                                <input type="text" @bind="model.Ticker" class="form-control" />
+                                <ValidationMessage For="() => model.Ticker" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Initial Capital</label>
+                                <input type="number" @bind="model.InitialCapital" class="form-control" />
+                                <ValidationMessage For="() => model.InitialCapital" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" @bind="model.StartDate" class="form-control" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" @bind="model.EndDate" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="space-y-6">
+                    <!-- Algorithm Settings -->
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Optimization Settings
+                        </h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Algorithm</label>
+                            <select @bind="model.OptimizationType" class="form-control">
+                                <option value="@OptimizationType.GridSearch">Grid Search (Exhaustive)</option>
+                                <option value="@OptimizationType.Genetic">Genetic Algorithm</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Objective</label>
+                            <select @bind="model.Objective" class="form-control">
+                                <option value="@OptimizationObjective.MaximizeTotalReturn">Maximize Total Return</option>
+                                <option value="@OptimizationObjective.MaximizeSharpeRatio">Maximize Sharpe Ratio</option>
+                                <option value="@OptimizationObjective.MinimizeDrawdown">Minimize Drawdown</option>
+                                <option value="@OptimizationObjective.MaximizeWinRate">Maximize Win Rate</option>
+                                <option value="@OptimizationObjective.MaximizeProfitFactor">Maximize Profit Factor</option>
+                            </select>
+                        </div>
+
+                        @if (model.OptimizationType == OptimizationType.Genetic)
+                        {
+                            <div class="mt-4 space-y-3">
+                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Genetic Settings</h3>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Population Size</label>
+                                    <input type="number" @bind="model.PopulationSize" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Generations</label>
+                                    <input type="number" @bind="model.Generations" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Mutation Rate</label>
+                                    <input type="number" step="0.01" @bind="model.MutationRate" class="form-control" />
+                                </div>
+                            </div>
+                        }
+
+                        @if (estimatedIterations > 0)
+                        {
+                            <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    <strong>Estimated iterations:</strong> @estimatedIterations
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    This may take several minutes
+                                </p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Start Button -->
+                    <button type="submit"
+                            class="btn-primary w-full"
+                            disabled="@isOptimizing">
+                        @if (isOptimizing)
+                        {
+                            <span class="loading-spinner mr-2"></span>
+                            <span>Optimizing...</span>
+                        }
+                        else
+                        {
+                            <span>Start Optimization</span>
+                        }
+                    </button>
+
+                    @if (isOptimizing && optimizationProgress != null)
+                    {
+                        <div class="card">
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</h3>
+                            <div class="progress-bar mb-2">
+                                <div class="progress-bar-fill" style="width: @optimizationProgress.PercentComplete%"></div>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                @optimizationProgress.Message
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </EditForm>
+
+        <!-- Results -->
+        @if (optimizationResult != null)
+        {
+            <div class="card mt-6">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Optimization Results
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="metric-card">
+                        <div class="metric-label">Best Score</div>
+                        <div class="metric-value">@optimizationResult.BestScore.ToString("F2")</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Iterations</div>
+                        <div class="metric-value">@optimizationResult.TotalIterations</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Duration</div>
+                        <div class="metric-value">@optimizationResult.Duration.TotalSeconds.ToString("F1")s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Objective</div>
+                        <div class="metric-value text-sm">@optimizationResult.Objective.ToString()</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    @foreach (var param in optimizationResult.BestParameters)
+                    {
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <div class="text-xs text-gray-600 dark:text-gray-400">@param.Key</div>
+                            <div class="text-lg font-semibold text-gray-900 dark:text-white">@param.Value</div>
+                        </div>
+                    }
+                </div>
+
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top 5 Results</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Score</th>
+                                <th>Return</th>
+                                <th>Sharpe</th>
+                                <th>Drawdown</th>
+                                <th>Trades</th>
+                                <th>Parameters</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var iteration in optimizationResult.GetTopIterations(5).Select((it, idx) => new { it, rank = idx + 1 }))
+                            {
+                                <tr>
+                                    <td>@iteration.rank</td>
+                                    <td class="font-semibold">@iteration.it.Score.ToString("F2")</td>
+                                    <td class="@(iteration.it.TotalReturn >= 0 ? "metric-positive" : "metric-negative")">
+                                        @iteration.it.TotalReturn.ToString("F2")%
+                                    </td>
+                                    <td>@iteration.it.SharpeRatio.ToString("F2")</td>
+                                    <td class="metric-negative">@iteration.it.MaxDrawdown.ToString("F2")%</td>
+                                    <td>@iteration.it.TradeCount</td>
+                                    <td class="text-xs">
+                                        @string.Join(", ", iteration.it.Parameters.Select(p => $"{p.Key}={p.Value}"))
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button type="button" class="btn-primary" @onclick="ApplyBestParameters">
+                        Apply Best Parameters
+                    </button>
+                    <button type="button" class="btn-secondary" @onclick="NavigateToBacktest">
+                        Run Backtest with Best
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -32,6 +32,7 @@ public interface IBacktestUseCase
 /// <param name="MinimumCommission">Minimum commission per trade (default $1.00).</param>
 /// <param name="StartDate">Optional start date for backtest period.</param>
 /// <param name="EndDate">Optional end date for backtest period.</param>
+/// <param name="CustomStrategyId">Optional custom strategy ID. If set, uses custom strategy instead of built-in StrategyType.</param>
 public record BacktestCommand(
     string Ticker,
     StrategyType StrategyType,
@@ -40,7 +41,8 @@ public record BacktestCommand(
     decimal CommissionPercentage = 0.001m,
     decimal MinimumCommission = 1.0m,
     DateTime? StartDate = null,
-    DateTime? EndDate = null);
+    DateTime? EndDate = null,
+    int? CustomStrategyId = null);
 
 /// <summary>
 /// Progress update for backtest execution.

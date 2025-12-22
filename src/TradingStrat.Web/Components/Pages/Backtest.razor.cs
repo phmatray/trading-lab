@@ -27,6 +27,12 @@ public partial class Backtest
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
+    [SupplyParameterFromQuery(Name = "strategy")]
+    public string? QueryStrategy { get; set; }
+
+    [SupplyParameterFromQuery(Name = "customStrategyId")]
+    public int? QueryCustomStrategyId { get; set; }
+
     private StrategyForm? _strategyForm;
 
     protected override string FormKey => FORM_KEY;
@@ -35,7 +41,22 @@ public partial class Backtest
     {
         // Initialize from user preferences
         Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
-        return BacktestFormModel.FromPreferences(prefs, Configuration.Value, StrategyRegistry);
+        BacktestFormModel model = BacktestFormModel.FromPreferences(prefs, Configuration.Value, StrategyRegistry);
+
+        // Apply query parameters if provided
+        if (QueryCustomStrategyId.HasValue)
+        {
+            model.CustomStrategyId = QueryCustomStrategyId.Value;
+        }
+        else if (!string.IsNullOrEmpty(QueryStrategy))
+        {
+            if (StrategyRegistry.TryParseStrategyType(QueryStrategy, out StrategyType strategyType))
+            {
+                model.StrategyType = strategyType;
+            }
+        }
+
+        return model;
     }
 
     protected override async Task<BacktestResult> ExecuteOperationAsync(
@@ -70,7 +91,8 @@ public partial class Backtest
             model.CommissionPercentage,
             model.MinimumCommission,
             model.StartDate,
-            model.EndDate
+            model.EndDate,
+            model.CustomStrategyId
         );
 
         BacktestResult result = await BacktestUseCase.ExecuteAsync(command, backtestProgress);

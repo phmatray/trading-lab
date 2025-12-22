@@ -1,5 +1,8 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
@@ -12,15 +15,18 @@ public class StrategyFactory : IStrategyFactory
     private readonly IIndicatorCalculator _indicatorCalculator;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IStrategyRegistry _registry;
+    private readonly ICustomStrategyPort? _customStrategyPort;
 
     public StrategyFactory(
         IIndicatorCalculator indicatorCalculator,
         ILoggerFactory loggerFactory,
-        IStrategyRegistry registry)
+        IStrategyRegistry registry,
+        ICustomStrategyPort? customStrategyPort = null)
     {
         _indicatorCalculator = indicatorCalculator;
         _loggerFactory = loggerFactory;
         _registry = registry;
+        _customStrategyPort = customStrategyPort;
     }
 
     public IStrategy CreateStrategy(StrategyType strategyType, Dictionary<string, object>? parameters = null)
@@ -131,5 +137,51 @@ public class StrategyFactory : IStrategyFactory
         {
             return defaultValue;
         }
+    }
+
+    /// <summary>
+    /// Creates a custom strategy from a CustomStrategy entity.
+    /// The entity contains the serialized strategy definition.
+    /// </summary>
+    /// <param name="customStrategy">The custom strategy entity from the database.</param>
+    /// <returns>A CustomRuleBasedStrategy ready for backtesting.</returns>
+    public IStrategy CreateCustomStrategy(CustomStrategy customStrategy)
+    {
+        StrategyDefinition definition = JsonSerializer.Deserialize<StrategyDefinition>(
+            customStrategy.DefinitionJson)
+            ?? throw new InvalidOperationException("Failed to deserialize strategy definition");
+
+        return new CustomRuleBasedStrategy(
+            _indicatorCalculator,
+            definition,
+            customStrategy.Name,
+            customStrategy.Description);
+    }
+
+    /// <summary>
+    /// Creates a custom strategy by loading it from the database by ID.
+    /// Requires ICustomStrategyPort to be injected in the constructor.
+    /// </summary>
+    /// <param name="customStrategyId">The ID of the custom strategy to load.</param>
+    /// <returns>A CustomRuleBasedStrategy ready for backtesting.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the strategy is not found or repository not configured.</exception>
+    public async Task<IStrategy> CreateCustomStrategyFromIdAsync(int customStrategyId)
+    {
+        if (_customStrategyPort == null)
+        {
+            throw new InvalidOperationException(
+                "Cannot create custom strategy from ID: ICustomStrategyPort not configured in factory");
+        }
+
+        CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(customStrategyId);
+        if (strategy == null)
+        {
+            throw new InvalidOperationException($"Custom strategy with ID {customStrategyId} not found");
+        }
+
+        // Increment usage count
+        await _customStrategyPort.IncrementUsageCountAsync(customStrategyId);
+
+        return CreateCustomStrategy(strategy);
     }
 }

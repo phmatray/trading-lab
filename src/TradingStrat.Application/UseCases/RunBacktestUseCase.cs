@@ -42,10 +42,10 @@ public class RunBacktestUseCase : IBacktestUseCase
         DateTime endDate = command.EndDate ?? latestDate ?? DateTime.Today;
         DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
-        // Create strategy
-        IStrategy strategy = _strategyFactory.CreateStrategy(
-            command.StrategyType,
-            command.StrategyParameters);
+        // Create strategy (custom or built-in)
+        IStrategy strategy = command.CustomStrategyId.HasValue
+            ? await _strategyFactory.CreateCustomStrategyFromIdAsync(command.CustomStrategyId.Value)
+            : _strategyFactory.CreateStrategy(command.StrategyType, command.StrategyParameters);
 
         // Create backtest configuration
         var config = new BacktestConfiguration(

@@ -93,9 +93,10 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
                 services.Remove(descriptor);
             }
 
-            // Re-register with test database
+            // Re-register with test database using absolute path
+            string testDbPath = $"Data Source={TestConfiguration.TestDatabasePath}";
             services.AddDbContext<TradingContext>(options =>
-                options.UseSqlite("Data Source=test-trading.db"));
+                options.UseSqlite(testDbPath));
 
             // Override dependencies for testing
             services.AddScoped<IReadOnlyList<Domain.Entities.HistoricalPrice>>(
@@ -115,6 +116,21 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
 
     public async Task InitializeAsync()
     {
+        // Delete any existing test database before starting (ensures clean state)
+        string testDbPath = TestConfiguration.TestDatabasePath;
+        if (File.Exists(testDbPath))
+        {
+            try
+            {
+                File.Delete(testDbPath);
+                Console.WriteLine($"[WebAppFixture] Deleted existing test database: {testDbPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WebAppFixture] Failed to delete test database: {ex.Message}");
+            }
+        }
+
         // Trigger server creation first (this will call Program.cs which creates the database)
         EnsureServer();
 
@@ -304,19 +320,37 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         {
             await _kestrelHost.StopAsync();
             _kestrelHost.Dispose();
+
+            // Add delay to ensure all connections are closed
+            await Task.Delay(500);
         }
 
-        // Clean up test database
+        // Clean up test database with retry logic
         string testDbPath = TestConfiguration.TestDatabasePath;
         if (File.Exists(testDbPath))
         {
-            try
+            int retries = 3;
+            while (retries > 0)
             {
-                File.Delete(testDbPath);
-            }
-            catch
-            {
-                // Ignore cleanup errors
+                try
+                {
+                    File.Delete(testDbPath);
+                    Console.WriteLine($"[WebAppFixture] Deleted test database: {testDbPath}");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    retries--;
+                    if (retries > 0)
+                    {
+                        Console.WriteLine($"[WebAppFixture] Retry deleting database ({retries} left): {ex.Message}");
+                        await Task.Delay(500);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[WebAppFixture] Failed to delete test database: {ex.Message}");
+                    }
+                }
             }
         }
 

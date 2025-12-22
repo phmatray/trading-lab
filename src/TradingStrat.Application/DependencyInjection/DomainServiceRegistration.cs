@@ -30,6 +30,9 @@ public static class DomainServiceRegistration
         services.AddTransient<PortfolioRebalancingService>();
         services.AddTransient<PortfolioPerformanceService>();
 
+        // Parameter Optimization (used by optimization use cases)
+        services.AddTransient<IParameterOptimizer, ParameterOptimizer>();
+
         return services;
     }
 }

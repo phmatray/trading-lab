@@ -16,6 +16,7 @@ public class TradingContext : DbContext
     public DbSet<Portfolio> Portfolios { get; set; } = null!;
     public DbSet<Position> Positions { get; set; } = null!;
     public DbSet<PortfolioCashTransaction> CashTransactions { get; set; } = null!;
+    public DbSet<CustomStrategy> CustomStrategies { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -267,6 +268,49 @@ public class TradingContext : DbContext
             // Index for finding transactions by portfolio and date
             entity.HasIndex(e => new { e.PortfolioId, e.TransactionDate })
                 .HasDatabaseName("IX_CashTransactions_Portfolio_Date");
+        });
+
+        // Configure CustomStrategy entity
+        modelBuilder.Entity<CustomStrategy>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Author)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Category)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.DefinitionJson)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.LastUpdatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.LastBacktestReturn)
+                .HasPrecision(18, 4);
+
+            // Index for filtering by category
+            entity.HasIndex(e => e.Category)
+                .HasDatabaseName("IX_CustomStrategies_Category");
+
+            // Index for finding user's strategies sorted by date
+            entity.HasIndex(e => new { e.Author, e.CreatedAt })
+                .HasDatabaseName("IX_CustomStrategies_Author_CreatedAt");
         });
     }
 }

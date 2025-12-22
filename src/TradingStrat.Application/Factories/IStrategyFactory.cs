@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.Factories;
@@ -20,4 +21,18 @@ public interface IStrategyFactory
     /// <param name="strategyName">The strategy name (case-insensitive).</param>
     /// <returns>The canonical strategy type code (e.g., "ma", "rsi", "macd").</returns>
     string MapStrategyNameToType(string strategyName);
+
+    /// <summary>
+    /// Creates a custom strategy from a CustomStrategy entity.
+    /// </summary>
+    /// <param name="customStrategy">The custom strategy entity from the database.</param>
+    /// <returns>A configured strategy instance ready for backtesting.</returns>
+    IStrategy CreateCustomStrategy(CustomStrategy customStrategy);
+
+    /// <summary>
+    /// Creates a custom strategy by loading it from the database by ID.
+    /// </summary>
+    /// <param name="customStrategyId">The ID of the custom strategy to load.</param>
+    /// <returns>A configured strategy instance ready for backtesting.</returns>
+    Task<IStrategy> CreateCustomStrategyFromIdAsync(int customStrategyId);
 }

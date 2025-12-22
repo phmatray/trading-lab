@@ -1,0 +1,271 @@
+@page "/strategies/library"
+@using TradingStrat.Application.Commands
+@using TradingStrat.Application.Ports.Inbound
+@using TradingStrat.Domain.Strategies
+@rendermode InteractiveServer
+
+<PageTitle>Strategy Library | TradingStrat</PageTitle>
+
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Strategy Library</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">
+                Browse built-in strategies or create your own custom trading strategies
+            </p>
+        </div>
+        <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
+            <span class="mr-2">+</span> Create Strategy
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex space-x-8">
+            <button type="button"
+                    class="@GetTabClass(StrategyTab.BuiltIn)"
+                    @onclick="() => SetActiveTab(StrategyTab.BuiltIn)">
+                Built-in Strategies
+                <span class="ml-2 badge badge-secondary">5</span>
+            </button>
+            <button type="button"
+                    class="@GetTabClass(StrategyTab.Custom)"
+                    @onclick="() => SetActiveTab(StrategyTab.Custom)">
+                My Strategies
+                <span class="ml-2 badge badge-secondary">@customStrategies.Count</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading)
+    {
+        <LoadingState Message="Loading strategies..." />
+    }
+    else
+    {
+        <!-- Built-in Strategies Tab -->
+        @if (activeTab == StrategyTab.BuiltIn)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var strategy in builtInStrategies)
+                {
+                    <div class="card hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                    @strategy.Name
+                                </h3>
+                                <span class="badge badge-info mt-1">@strategy.Category</span>
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 min-h-[3rem]">
+                            @strategy.Description
+                        </p>
+
+                        <div class="space-y-2 mb-4 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Key:</span>
+                                <span class="font-mono text-gray-900 dark:text-white">@strategy.Key</span>
+                            </div>
+                            @if (strategy.DefaultParameters.Any())
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Parameters:</span>
+                                    <span class="text-gray-900 dark:text-white">
+                                        @string.Join(", ", strategy.DefaultParameters.Select(p => $"{p.Key}={p.Value}"))
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <button type="button"
+                                class="btn-primary w-full"
+                                @onclick="() => NavigateToBacktest(strategy.Key)">
+                            Run Backtest
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Custom Strategies Tab -->
+        @if (activeTab == StrategyTab.Custom)
+        {
+            @if (!customStrategies.Any())
+            {
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        No Custom Strategies Yet
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Create your first custom strategy to get started
+                    </p>
+                    <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
+                        <span class="mr-2">+</span> Create Your First Strategy
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach (var strategy in customStrategies)
+                    {
+                        <div class="card hover:shadow-lg transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        @strategy.Name
+                                    </h3>
+                                    <span class="badge badge-primary mt-1">@strategy.Category</span>
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    @strategy.LastUpdatedAt.ToString("MMM d, yyyy")
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(strategy.Description))
+                            {
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 min-h-[3rem]">
+                                    @strategy.Description
+                                </p>
+                            }
+
+                            <div class="space-y-2 mb-4 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Author:</span>
+                                    <span class="text-gray-900 dark:text-white">@strategy.Author</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Entry Rules:</span>
+                                    <span class="text-gray-900 dark:text-white">@strategy.Definition.EntryRules.Count</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Exit Rules:</span>
+                                    <span class="text-gray-900 dark:text-white">@strategy.Definition.ExitRules.Count</span>
+                                </div>
+                                @if (strategy.TimesUsed > 0)
+                                {
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Times Used:</span>
+                                        <span class="text-gray-900 dark:text-white">@strategy.TimesUsed</span>
+                                    </div>
+                                }
+                                @if (strategy.LastBacktestReturn.HasValue)
+                                {
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Last Return:</span>
+                                        <span class="@(strategy.LastBacktestReturn.Value >= 0 ? "metric-positive" : "metric-negative")">
+                                            @strategy.LastBacktestReturn.Value.ToString("P2")
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button"
+                                        class="btn-secondary text-sm py-2"
+                                        @onclick="() => NavigateToEdit(strategy.Id)"
+                                        title="Edit strategy">
+                                    Edit
+                                </button>
+                                <button type="button"
+                                        class="btn-secondary text-sm py-2"
+                                        @onclick="() => CloneStrategy(strategy.Id)"
+                                        title="Clone strategy">
+                                    Clone
+                                </button>
+                                <button type="button"
+                                        class="btn-info text-sm py-2"
+                                        @onclick="() => NavigateToOptimize(strategy.Id)"
+                                        title="Optimize parameters">
+                                    Optimize
+                                </button>
+                                <button type="button"
+                                        class="btn-primary text-sm py-2"
+                                        @onclick="() => NavigateToBacktestWithCustom(strategy.Id)"
+                                        title="Run backtest">
+                                    Test
+                                </button>
+                            </div>
+
+                            <button type="button"
+                                    class="btn-danger w-full mt-2 text-sm py-2"
+                                    @onclick="() => DeleteStrategy(strategy.Id)">
+                                Delete
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+</div>
+
+@code {
+    private enum StrategyTab
+    {
+        BuiltIn,
+        Custom
+    }
+
+    private StrategyTab activeTab = StrategyTab.BuiltIn;
+    private bool isLoading = false;
+    private List<CustomStrategyResult> customStrategies = [];
+
+    private readonly List<BuiltInStrategyInfo> builtInStrategies = new()
+    {
+        new BuiltInStrategyInfo
+        {
+            Name = "Moving Average Crossover",
+            Key = "ma",
+            Category = "Trend Following",
+            Description = "Generates buy/sell signals when a fast moving average crosses above/below a slow moving average. Classic trend-following strategy.",
+            DefaultParameters = new() { ["FastPeriod"] = "20", ["SlowPeriod"] = "50" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "RSI Strategy",
+            Key = "rsi",
+            Category = "Momentum",
+            Description = "Buys when RSI is oversold (<30) and sells when overbought (>70). Identifies potential reversal points.",
+            DefaultParameters = new() { ["Period"] = "14", ["OversoldThreshold"] = "30", ["OverboughtThreshold"] = "70" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "MACD Strategy",
+            Key = "macd",
+            Category = "Momentum",
+            Description = "Generates signals based on MACD line crossing the signal line. Captures momentum shifts.",
+            DefaultParameters = new() { ["FastPeriod"] = "12", ["SlowPeriod"] = "26", ["SignalPeriod"] = "9" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "Machine Learning (FastTree)",
+            Key = "ml",
+            Category = "AI/ML",
+            Description = "Uses ML.NET FastTree gradient boosting with 26 technical indicators to predict next-day returns.",
+            DefaultParameters = new() { ["BuyThreshold"] = "0.01", ["SellThreshold"] = "-0.01" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "Ichimoku Cloud",
+            Key = "ichimoku",
+            Category = "Trend Following",
+            Description = "Japanese charting technique using Tenkan, Kijun, and Senkou spans to identify trend direction and support/resistance.",
+            DefaultParameters = new() { ["TenkanPeriod"] = "9", ["KijunPeriod"] = "26", ["SenkouBPeriod"] = "52" }
+        }
+    };
+
+    private class BuiltInStrategyInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Key { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public Dictionary<string, string> DefaultParameters { get; set; } = new();
+    }
+}

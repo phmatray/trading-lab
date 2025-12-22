@@ -14,6 +14,11 @@ public class BacktestFormModel
     [Required(ErrorMessage = "Strategy type is required")]
     public StrategyType StrategyType { get; set; } = StrategyType.MovingAverageCrossover;
 
+    /// <summary>
+    /// Optional: If set, uses a custom strategy instead of built-in StrategyType.
+    /// </summary>
+    public int? CustomStrategyId { get; set; }
+
     public Dictionary<string, object> StrategyParameters { get; set; } = new()
     {
         ["FastPeriod"] = 20,

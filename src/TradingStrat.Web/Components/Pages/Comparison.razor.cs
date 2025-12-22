@@ -76,7 +76,7 @@ public partial class Comparison
         }
 
         // Convert string progress to OptimizationProgress for the use case
-        IProgress<OptimizationProgress> optimizationProgress = new Progress<OptimizationProgress>(p =>
+        IProgress<Application.Ports.Inbound.OptimizationProgress> optimizationProgress = new Progress<Application.Ports.Inbound.OptimizationProgress>(p =>
         {
             int percentage = p.TotalBars > 0 ? (int)((double)p.CurrentBar / p.TotalBars * 100) : 0;
             progress.Report($"Testing {p.CurrentVariant}: Bar {p.CurrentBar}/{p.TotalBars} - {p.Trades} trades");

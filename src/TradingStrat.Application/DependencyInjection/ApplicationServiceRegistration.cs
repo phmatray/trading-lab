@@ -49,6 +49,10 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ICalculateRebalancingUseCase, CalculateRebalancingUseCase>();
         services.AddScoped<IGetPortfolioPerformanceUseCase, GetPortfolioPerformanceUseCase>();
 
+        // Custom Strategy Use Cases
+        services.AddScoped<ICustomStrategyManagementUseCase, CustomStrategyManagementUseCase>();
+        services.AddScoped<IOptimizeStrategyParametersUseCase, OptimizeStrategyParametersUseCase>();
+
         return services;
     }
 }

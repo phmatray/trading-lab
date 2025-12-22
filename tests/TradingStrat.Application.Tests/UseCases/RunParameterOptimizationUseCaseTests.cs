@@ -102,8 +102,8 @@ public class RunParameterOptimizationUseCaseTests
 
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
-        List<OptimizationProgress> progressReports = new List<OptimizationProgress>();
-        Progress<OptimizationProgress> progress = new Progress<OptimizationProgress>(p => progressReports.Add(p));
+        List<Application.Ports.Inbound.OptimizationProgress> progressReports = new List<Application.Ports.Inbound.OptimizationProgress>();
+        Progress<Application.Ports.Inbound.OptimizationProgress> progress = new Progress<Application.Ports.Inbound.OptimizationProgress>(p => progressReports.Add(p));
 
         // Act
         await _useCase.ExecuteAsync(command, progress);

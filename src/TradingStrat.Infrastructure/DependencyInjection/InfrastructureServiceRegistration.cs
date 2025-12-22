@@ -35,6 +35,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IChatHistoryPort, ChatHistoryRepository>();
         services.AddScoped<IPortfolioPort, PortfolioRepository>();
         services.AddScoped<IPortfolioExportPort, PortfolioCsvAdapter>();
+        services.AddScoped<ICustomStrategyPort, CustomStrategyRepository>();
 
         return services;
     }
