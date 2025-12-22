@@ -22,6 +22,9 @@ public static class WebServiceRegistration
         // Notification service
         services.AddScoped<NotificationService>();
 
+        // Data freshness service
+        services.AddScoped<IDataFreshnessService, DataFreshnessService>();
+
         // AI analysis service
         services.AddScoped<IDataAnalysisService, DataAnalysisService>();
 

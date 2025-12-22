@@ -4,43 +4,61 @@ using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Services.State;
 
-public class UserPreferencesService
+/// <summary>
+/// Service for managing user preferences with localStorage persistence.
+/// Initializes preferences from application configuration if no saved preferences exist.
+/// </summary>
+public class UserPreferencesService : StateServiceBase<UserPreferences>
 {
     private const string STORAGE_KEY = "tradingstrat_preferences";
-    private readonly LocalStorageService _localStorage;
     private readonly TradingConfiguration _configuration;
-    private UserPreferences? _cachedPreferences;
 
-    public event Action? OnPreferencesChanged;
+    /// <summary>
+    /// Event raised when preferences change. Alias for OnStateChanged.
+    /// </summary>
+    public event Action? OnPreferencesChanged
+    {
+        add => OnStateChanged += value;
+        remove => OnStateChanged -= value;
+    }
 
     public UserPreferencesService(
         LocalStorageService localStorage,
         IOptions<TradingConfiguration> configuration)
+        : base(localStorage, STORAGE_KEY)
     {
-        _localStorage = localStorage;
         _configuration = configuration.Value;
     }
 
-    public async Task<UserPreferences> GetPreferencesAsync(
+    /// <summary>
+    /// Gets user preferences. Alias for GetStateAsync.
+    /// </summary>
+    public Task<UserPreferences> GetPreferencesAsync(CancellationToken cancellationToken = default)
+        => GetStateAsync(cancellationToken);
+
+    /// <summary>
+    /// Saves user preferences and updates the LastUpdated timestamp.
+    /// </summary>
+    public async Task SavePreferencesAsync(
+        UserPreferences preferences,
         CancellationToken cancellationToken = default)
     {
-        if (_cachedPreferences != null)
-        {
-            return _cachedPreferences;
-        }
+        preferences.LastUpdated = DateTime.UtcNow;
+        await SaveStateAsync(preferences, cancellationToken);
+    }
 
-        UserPreferences? stored = await _localStorage.GetItemAsync<UserPreferences>(
-            STORAGE_KEY,
-            cancellationToken);
+    /// <summary>
+    /// Resets preferences to configuration defaults.
+    /// </summary>
+    public Task ResetToDefaultsAsync(CancellationToken cancellationToken = default)
+        => ClearStateAsync(cancellationToken);
 
-        if (stored != null)
-        {
-            _cachedPreferences = stored;
-            return stored;
-        }
-
-        // Initialize from configuration defaults
-        _cachedPreferences = new UserPreferences
+    /// <summary>
+    /// Creates default preferences from application configuration.
+    /// </summary>
+    protected override Task<UserPreferences> CreateDefaultStateAsync()
+    {
+        UserPreferences defaults = new()
         {
             DefaultTicker = _configuration.DefaultTicker,
             DefaultIsin = _configuration.DefaultIsin,
@@ -52,31 +70,6 @@ public class UserPreferencesService
             }
         };
 
-        // Save initialized preferences
-        await SavePreferencesAsync(_cachedPreferences, cancellationToken);
-
-        return _cachedPreferences;
-    }
-
-    public async Task SavePreferencesAsync(
-        UserPreferences preferences,
-        CancellationToken cancellationToken = default)
-    {
-        preferences.LastUpdated = DateTime.UtcNow;
-        await _localStorage.SetItemAsync(STORAGE_KEY, preferences, cancellationToken);
-        _cachedPreferences = preferences;
-        NotifyPreferencesChanged();
-    }
-
-    public async Task ResetToDefaultsAsync(CancellationToken cancellationToken = default)
-    {
-        _cachedPreferences = null;
-        await _localStorage.RemoveItemAsync(STORAGE_KEY, cancellationToken);
-        NotifyPreferencesChanged();
-    }
-
-    private void NotifyPreferencesChanged()
-    {
-        OnPreferencesChanged?.Invoke();
+        return Task.FromResult(defaults);
     }
 }

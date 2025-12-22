@@ -16,75 +16,46 @@
 <PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
 
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="card">
-        <div class="flex justify-between items-center">
-            <div>
-                <div class="flex items-center space-x-4 mb-2">
-                    <button @onclick="NavigateBack" class="text-gray-600 dark:text-dark-text-secondary hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                    </button>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">
-                        @(_snapshot?.PortfolioName ?? "Loading...")
-                    </h1>
-                </div>
-                @if (_portfolio != null && !string.IsNullOrEmpty(_portfolio.Description))
-                {
-                    <p class="text-gray-600 dark:text-dark-text-secondary ml-10">@_portfolio.Description</p>
-                }
-            </div>
-            <div class="flex space-x-3">
-                <button @onclick="RefreshPrices" disabled="@ProgressService.IsProcessing" class="px-4 py-2 bg-white dark:bg-dark-elevated border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Refresh Prices
-                </button>
-                <button @onclick="OpenAddPositionDialog" class="btn-primary">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Add Position
-                </button>
-            </div>
-        </div>
-    </div>
+    <PageHeader Title="@(_snapshot?.PortfolioName ?? "Loading...")"
+                Description="@(_portfolio?.Description)"
+                OnBack="NavigateBack">
+        <Actions>
+            <button @onclick="RefreshPrices" disabled="@ProgressService.IsProcessing" class="px-4 py-2 bg-white dark:bg-dark-elevated border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refresh Prices
+            </button>
+            <button @onclick="OpenAddPositionDialog" class="btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Position
+            </button>
+        </Actions>
+    </PageHeader>
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
                        CurrentMessage="ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
-    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
-    <AlertMessage Message="@_successMessage" Type="AlertType.Success" />
-
-    @if (_isLoading)
-    {
-        <div class="card">
-            <div class="text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
-                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading portfolio...</p>
-            </div>
-        </div>
-    }
-    else if (_snapshot == null)
-    {
-        <div class="card">
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">Portfolio not found</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">The portfolio you're looking for doesn't exist.</p>
-                <div class="mt-6">
+    <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
+        @if (_isLoading)
+        {
+            <LoadingState Message="Loading portfolio..." />
+        }
+        else if (_snapshot == null)
+        {
+            <EmptyState Icon="alert"
+                        Title="Portfolio not found"
+                        Description="The portfolio you're looking for doesn't exist.">
+                <Actions>
                     <button @onclick="NavigateBack" class="btn-primary">
                         Back to Portfolios
                     </button>
-                </div>
-            </div>
-        </div>
-    }
+                </Actions>
+            </EmptyState>
+        }
     else
     {
         <!-- Metrics Cards -->
@@ -136,18 +107,15 @@
 
             @if (!_snapshot.Positions.Any())
             {
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No positions</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Add your first position to start tracking your investments.</p>
-                    <div class="mt-6">
+                <EmptyState Icon="document"
+                            Title="No positions"
+                            Description="Add your first position to start tracking your investments.">
+                    <Actions>
                         <button @onclick="OpenAddPositionDialog" class="btn-primary">
                             Add Position
                         </button>
-                    </div>
-                </div>
+                    </Actions>
+                </EmptyState>
             }
             else
             {
@@ -227,24 +195,14 @@
                 </div>
             }
         </div>
-    }
+        }
+    </FormWrapper>
 </div>
 
 <!-- Add Position Dialog -->
-@if (_showAddPositionDialog)
-{
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50" @onclick="CloseAddPositionDialog">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-dark-surface" @onclick:stopPropagation="true">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary">Add New Position</h3>
-                <button @onclick="CloseAddPositionDialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <EditForm Model="@_addPositionFormModel" OnValidSubmit="@HandleAddPosition" class="space-y-4">
+<Dialog IsOpen="@_showAddPositionDialog" OnClose="@CloseAddPositionDialog" Title="Add New Position">
+    <ChildContent>
+        <EditForm Model="@_addPositionFormModel" OnValidSubmit="@HandleAddPosition" class="space-y-4">
                 <DataAnnotationsValidator />
 
                 <div>
@@ -284,25 +242,26 @@
                     <ValidationMessage For="@(() => _addPositionFormModel.Notes)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
-                <div class="flex space-x-3 pt-4">
-                    <button type="button" @onclick="CloseAddPositionDialog" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" disabled="@_isAddingPosition" class="flex-1 btn-primary">
-                        @if (_isAddingPosition)
-                        {
-                            <span>Adding...</span>
-                        }
-                        else
-                        {
-                            <span>Add Position</span>
-                        }
-                    </button>
-                </div>
-            </EditForm>
+        </EditForm>
+    </ChildContent>
+    <Footer>
+        <div class="flex space-x-3">
+            <button type="button" @onclick="CloseAddPositionDialog" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                Cancel
+            </button>
+            <button type="submit" @onclick="HandleAddPosition" disabled="@_isAddingPosition" class="flex-1 btn-primary">
+                @if (_isAddingPosition)
+                {
+                    <span>Adding...</span>
+                }
+                else
+                {
+                    <span>Add Position</span>
+                }
+            </button>
         </div>
-    </div>
-}
+    </Footer>
+</Dialog>
 
 @code {
     [Parameter]

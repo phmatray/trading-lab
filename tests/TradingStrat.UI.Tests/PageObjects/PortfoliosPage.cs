@@ -19,15 +19,15 @@ public class PortfoliosPage : BasePage
     private ILocator PortfolioCards => Page.Locator(".grid .card");
 
     // Create Portfolio Dialog
-    private ILocator CreateDialog => Page.Locator(".fixed.inset-0.z-50");
-    private ILocator NameInput => CreateDialog.Locator("input[type='text']").First;
-    private ILocator DescriptionTextarea => CreateDialog.Locator("textarea");
-    private ILocator InitialCashInput => CreateDialog.Locator("input[type='number']");
-    private ILocator CreateSubmitButton => CreateDialog.Locator("button:has-text('Create')");
-    private ILocator CancelButton => CreateDialog.Locator("button:has-text('Cancel')");
+    private ILocator CreateDialog => Page.Locator("[data-testid='dialog']");
+    private ILocator NameInput => CreateDialog.Locator("#name");
+    private ILocator DescriptionTextarea => CreateDialog.Locator("#description");
+    private ILocator InitialCashInput => CreateDialog.Locator("#initialCash");
+    private ILocator CreateSubmitButton => CreateDialog.Locator("button[type='submit']");
+    private ILocator CancelButton => CreateDialog.Locator("button[type='button']:has-text('Cancel')");
 
     // Delete Confirmation Dialog
-    private ILocator DeleteDialog => Page.Locator(".fixed.inset-0.z-50");
+    private ILocator DeleteDialog => Page.Locator("[data-testid='dialog']");
     private ILocator ConfirmDeleteButton => DeleteDialog.Locator("button:has-text('Delete')");
     private ILocator CancelDeleteButton => DeleteDialog.Locator("button:has-text('Cancel')");
 

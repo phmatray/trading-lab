@@ -1,0 +1,114 @@
+@* Dialog Component - Reusable modal dialog with backdrop, header, content, and footer *@
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50"
+         @onclick="HandleBackdropClick"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="dialog-title"
+         data-testid="dialog">
+        <div class="relative top-20 mx-auto p-5 border @Width shadow-lg rounded-md bg-white dark:bg-dark-surface"
+             @onclick:stopPropagation="true"
+             data-testid="dialog-content">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="dialog-title" class="text-lg font-medium text-gray-900 dark:text-dark-text-primary">@Title</h3>
+                @if (HeaderActions != null)
+                {
+                    @HeaderActions
+                }
+                else
+                {
+                    <button @onclick="HandleClose"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            aria-label="Close dialog"
+                            type="button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                }
+            </div>
+
+            <!-- Content -->
+            <div class="dialog-content">
+                @ChildContent
+            </div>
+
+            <!-- Footer -->
+            @if (Footer != null)
+            {
+                <div class="dialog-footer mt-4">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Controls the visibility of the dialog
+    /// </summary>
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    /// <summary>
+    /// Dialog title displayed in the header
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Callback invoked when the dialog should be closed
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    /// <summary>
+    /// Main content of the dialog
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Footer content (typically action buttons)
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    /// <summary>
+    /// Optional custom header actions (replaces default close button)
+    /// </summary>
+    [Parameter]
+    public RenderFragment? HeaderActions { get; set; }
+
+    /// <summary>
+    /// Width of the dialog (Tailwind class, e.g., "w-96", "w-[500px]")
+    /// </summary>
+    [Parameter]
+    public string Width { get; set; } = "w-96";
+
+    /// <summary>
+    /// Whether clicking the backdrop should close the dialog
+    /// </summary>
+    [Parameter]
+    public bool CloseOnBackdropClick { get; set; } = true;
+
+    private async Task HandleClose()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        if (CloseOnBackdropClick)
+        {
+            await HandleClose();
+        }
+    }
+}

@@ -19,11 +19,11 @@ public class BacktestPage : BasePage
     private ILocator StartDateInput => Page.Locator("#start-date");
     private ILocator EndDateInput => Page.Locator("#end-date");
     private ILocator SubmitButton => Page.Locator("button[type='submit']");
-    private ILocator ProgressIndicator => Page.Locator("[data-testid='progress-indicator']").Or(Page.Locator("text=Running Backtest"));
+    private ILocator ProgressIndicator => Page.Locator("[data-testid='progress-indicator']");
     private ILocator ErrorMessage => Page.Locator("[role='alert']").Or(Page.Locator(".alert"));
 
     // Strategy Form Elements
-    private ILocator StrategySelect => Page.Locator("select").First;
+    private ILocator StrategySelect => Page.Locator("#strategy-select");
 
     // Results Elements
     private ILocator NoResultsPlaceholder => Page.Locator("text=No backtest results");

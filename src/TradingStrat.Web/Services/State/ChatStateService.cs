@@ -2,42 +2,43 @@ using TradingStrat.Web.Models.State;
 
 namespace TradingStrat.Web.Services.State;
 
-public class ChatStateService
+/// <summary>
+/// Service for managing AI chat history with localStorage persistence.
+/// </summary>
+public class ChatStateService : StateServiceBase<ChatHistory>
 {
     private const string STORAGE_KEY = "tradingstrat_chat_history";
     private const int MAX_MESSAGES = 50;
-    private readonly LocalStorageService _localStorage;
-    private ChatHistory? _cachedHistory;
 
-    public event Action? OnHistoryChanged;
+    /// <summary>
+    /// Event raised when chat history changes. Alias for OnStateChanged.
+    /// </summary>
+    public event Action? OnHistoryChanged
+    {
+        add => OnStateChanged += value;
+        remove => OnStateChanged -= value;
+    }
 
     public ChatStateService(LocalStorageService localStorage)
+        : base(localStorage, STORAGE_KEY)
     {
-        _localStorage = localStorage;
     }
 
-    public async Task<ChatHistory> GetHistoryAsync(
-        CancellationToken cancellationToken = default)
-    {
-        if (_cachedHistory != null)
-        {
-            return _cachedHistory;
-        }
+    /// <summary>
+    /// Gets the chat history. Alias for GetStateAsync.
+    /// </summary>
+    public Task<ChatHistory> GetHistoryAsync(CancellationToken cancellationToken = default)
+        => GetStateAsync(cancellationToken);
 
-        var stored = await _localStorage.GetItemAsync<ChatHistory>(
-            STORAGE_KEY,
-            cancellationToken);
-
-        _cachedHistory = stored ?? new ChatHistory();
-        return _cachedHistory;
-    }
-
+    /// <summary>
+    /// Adds a message to chat history and enforces the maximum message limit.
+    /// </summary>
     public async Task AddMessageAsync(
         string content,
         bool isUser,
         CancellationToken cancellationToken = default)
     {
-        var history = await GetHistoryAsync(cancellationToken);
+        ChatHistory history = await GetStateAsync(cancellationToken);
 
         history.Messages.Add(new ChatMessage
         {
@@ -53,22 +54,12 @@ public class ChatStateService
         }
 
         history.LastUpdated = DateTime.UtcNow;
-
-        await _localStorage.SetItemAsync(STORAGE_KEY, history, cancellationToken);
-        _cachedHistory = history;
-
-        NotifyHistoryChanged();
+        await SaveStateAsync(history, cancellationToken);
     }
 
-    public async Task ClearHistoryAsync(CancellationToken cancellationToken = default)
-    {
-        _cachedHistory = new ChatHistory();
-        await _localStorage.SetItemAsync(STORAGE_KEY, _cachedHistory, cancellationToken);
-        NotifyHistoryChanged();
-    }
-
-    private void NotifyHistoryChanged()
-    {
-        OnHistoryChanged?.Invoke();
-    }
+    /// <summary>
+    /// Clears all chat history.
+    /// </summary>
+    public Task ClearHistoryAsync(CancellationToken cancellationToken = default)
+        => ClearStateAsync(cancellationToken);
 }

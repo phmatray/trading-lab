@@ -74,18 +74,29 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
             // Clear default configuration sources and use only test configuration
             config.Sources.Clear();
 
-            // Load base configuration first
-            config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
-
-            // Override with test-specific configuration
+            // Load ONLY test-specific configuration (no base appsettings.json)
+            // This ensures tests use test-trading.db instead of production trading.db
             config.AddJsonFile(
                 Path.Combine(AppContext.BaseDirectory, "appsettings.Test.json"),
                 optional: false,
                 reloadOnChange: false);
         });
 
-        builder.ConfigureServices(services =>
+        builder.ConfigureServices((context, services) =>
         {
+            // Override the database connection to use the test database
+            // Remove the existing TradingContext registration
+            ServiceDescriptor? descriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(DbContextOptions<TradingContext>));
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+
+            // Re-register with test database
+            services.AddDbContext<TradingContext>(options =>
+                options.UseSqlite("Data Source=test-trading.db"));
+
             // Override dependencies for testing
             services.AddScoped<IReadOnlyList<Domain.Entities.HistoricalPrice>>(
                 _ => new List<Domain.Entities.HistoricalPrice>());
@@ -112,6 +123,14 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         {
             using IServiceScope scope = _kestrelHost.Services.CreateScope();
             TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
+
+            // Ensure database is created (use EnsureCreated for tests, not migrations)
+            // EnsureCreated creates all tables based on the model without tracking migrations
+            string? connectionString = context.Database.GetConnectionString();
+            Console.WriteLine($"[WebAppFixture] About to create database: {connectionString}");
+
+            bool wasCreated = await context.Database.EnsureCreatedAsync();
+            Console.WriteLine($"[WebAppFixture] Database created: {wasCreated}");
 
             // Seed test data for common tickers
             await SeedTestDataAsync(context);

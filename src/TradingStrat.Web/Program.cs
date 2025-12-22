@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TradingStrat.Application.DependencyInjection;
 using TradingStrat.Infrastructure.DependencyInjection;
@@ -39,11 +40,16 @@ public class Program
 
         WebApplication app = builder.Build();
 
-        // Ensure database exists (same as CLI)
-        using (IServiceScope scope = app.Services.CreateScope())
+        // Apply database migrations (ensure all tables exist including new ones like Portfolios)
+        // Skip migrations in test environment (tests use EnsureCreated instead)
+        string? connectionString = builder.Configuration.GetValue<string>("Trading:Database:ConnectionString");
+        bool isTestDatabase = connectionString?.Contains("test-trading.db") ?? false;
+
+        if (!isTestDatabase)
         {
+            using IServiceScope scope = app.Services.CreateScope();
             TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
-            await context.Database.EnsureCreatedAsync();
+            await context.Database.MigrateAsync();
         }
 
         // Configure HTTP pipeline

@@ -17,60 +17,31 @@
 <PageTitle>Portfolio Performance - TradingStrat</PageTitle>
 
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="card">
-        <div class="flex justify-between items-center">
-            <div>
-                <div class="flex items-center space-x-4 mb-2">
-                    <button @onclick="NavigateBack" class="text-gray-600 dark:text-dark-text-secondary hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                    </button>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">
-                        Portfolio Performance
-                    </h1>
-                </div>
-                @if (_portfolio != null)
-                {
-                    <p class="text-gray-600 dark:text-dark-text-secondary ml-10">@_portfolio.Name</p>
-                }
-            </div>
-        </div>
-    </div>
+    <PageHeader Title="Portfolio Performance"
+                Description="@(_portfolio?.Name)"
+                OnBack="NavigateBack" />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
                        CurrentMessage="ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
-    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
-
-    @if (_isLoading)
-    {
-        <div class="card">
-            <div class="text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
-                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading portfolio...</p>
-            </div>
-        </div>
-    }
-    else if (_portfolio == null)
-    {
-        <div class="card">
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">Portfolio not found</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">The portfolio you're looking for doesn't exist.</p>
-                <div class="mt-6">
+    <FormWrapper ErrorMessage="@_errorMessage">
+        @if (_isLoading)
+        {
+            <LoadingState Message="Loading portfolio..." />
+        }
+        else if (_portfolio == null)
+        {
+            <EmptyState Icon="alert"
+                        Title="Portfolio not found"
+                        Description="The portfolio you're looking for doesn't exist.">
+                <Actions>
                     <button @onclick="NavigateBack" class="btn-primary">
                         Back to Dashboard
                     </button>
-                </div>
-            </div>
-        </div>
-    }
+                </Actions>
+            </EmptyState>
+        }
     else
     {
         <!-- Date Range Selector -->
@@ -320,7 +291,8 @@
                 </div>
             </div>
         }
-    }
+        }
+    </FormWrapper>
 </div>
 
 @code {

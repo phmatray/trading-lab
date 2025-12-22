@@ -1,0 +1,103 @@
+@* DataTable Component - Generic table with empty/loading states *@
+
+<div class="card overflow-hidden" data-testid="data-table">
+    @if (IsLoading)
+    {
+        <!-- Loading State -->
+        <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+            <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading data...</p>
+        </div>
+    }
+    else if (IsEmpty)
+    {
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@EmptyMessage</h3>
+            @if (EmptyActions != null)
+            {
+                <div class="mt-6">
+                    @EmptyActions
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+                <!-- Header -->
+                @if (TableHeader != null)
+                {
+                    <thead class="bg-gray-50 dark:bg-dark-elevated">
+                        @TableHeader
+                    </thead>
+                }
+
+                <!-- Body -->
+                @if (TableBody != null)
+                {
+                    <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
+                        @TableBody
+                    </tbody>
+                }
+
+                <!-- Footer -->
+                @if (TableFooter != null)
+                {
+                    <tfoot class="bg-gray-50 dark:bg-dark-elevated">
+                        @TableFooter
+                    </tfoot>
+                }
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Table header content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? TableHeader { get; set; }
+
+    /// <summary>
+    /// Table body content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? TableBody { get; set; }
+
+    /// <summary>
+    /// Optional table footer content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? TableFooter { get; set; }
+
+    /// <summary>
+    /// Whether the table is in a loading state
+    /// </summary>
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    /// <summary>
+    /// Whether the table has no data
+    /// </summary>
+    [Parameter]
+    public bool IsEmpty { get; set; }
+
+    /// <summary>
+    /// Message to display when empty
+    /// </summary>
+    [Parameter]
+    public string EmptyMessage { get; set; } = "No data available";
+
+    /// <summary>
+    /// Optional actions to display in empty state
+    /// </summary>
+    [Parameter]
+    public RenderFragment? EmptyActions { get; set; }
+}

@@ -1,0 +1,115 @@
+@* TickerInput Component - Specialized input for ticker symbols with auto-uppercase *@
+@using System.Linq.Expressions
+
+<div data-testid="ticker-input">
+    <label for="@_inputId" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">
+        @Label @(Required ? "*" : "")
+    </label>
+
+    <input type="text"
+           id="@_inputId"
+           value="@CurrentValue"
+           @oninput="HandleInput"
+           placeholder="@Placeholder"
+           required="@Required"
+           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue uppercase"
+           aria-label="@Label" />
+
+    @if (ShowValidation && For != null)
+    {
+        <ValidationMessage For="@For" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+    }
+
+    @if (!string.IsNullOrEmpty(HelpText))
+    {
+        <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">@HelpText</p>
+    }
+</div>
+
+@code {
+    private string _inputId = $"ticker-{Guid.NewGuid():N}";
+    private string? _currentValue;
+
+    /// <summary>
+    /// Current value of the ticker input
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>
+    /// Callback when value changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Expression for validation
+    /// </summary>
+    [Parameter]
+    public Expression<Func<string>>? For { get; set; }
+
+    /// <summary>
+    /// Label text
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Ticker Symbol";
+
+    /// <summary>
+    /// Placeholder text
+    /// </summary>
+    [Parameter]
+    public string Placeholder { get; set; } = "e.g., AAPL";
+
+    /// <summary>
+    /// Whether the field is required
+    /// </summary>
+    [Parameter]
+    public bool Required { get; set; } = true;
+
+    /// <summary>
+    /// Whether to show validation messages
+    /// </summary>
+    [Parameter]
+    public bool ShowValidation { get; set; } = true;
+
+    /// <summary>
+    /// Optional help text
+    /// </summary>
+    [Parameter]
+    public string? HelpText { get; set; }
+
+    /// <summary>
+    /// Optional callback invoked when the input value changes
+    /// </summary>
+    [Parameter]
+    public EventCallback OnInputChanged { get; set; }
+
+    private string? CurrentValue
+    {
+        get => _currentValue;
+        set
+        {
+            if (_currentValue != value)
+            {
+                _currentValue = value;
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        _currentValue = Value;
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString()?.ToUpperInvariant();
+        _currentValue = newValue;
+        await ValueChanged.InvokeAsync(newValue);
+
+        if (OnInputChanged.HasDelegate)
+        {
+            await OnInputChanged.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,82 @@
+@using TradingStrat.Application.Ports.Outbound
+@using TradingStrat.Web.Utilities
+
+@* DataSummaryCard - Displays data fetching results in a standardized format *@
+
+@if (Summary != null)
+{
+    <div class="@TailwindStyles.Card">
+        <h2 class="@TailwindStyles.CardHeader">Data Summary</h2>
+
+        <dl class="space-y-3">
+            <!-- Ticker -->
+            <div>
+                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Ticker</dt>
+                <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.Ticker</dd>
+            </div>
+
+            <!-- ISIN (optional) -->
+            @if (!string.IsNullOrEmpty(Summary.ISIN))
+            {
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">ISIN</dt>
+                    <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.ISIN</dd>
+                </div>
+            }
+
+            <!-- Total and New Records -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Total Records</dt>
+                    <dd class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@Summary.TotalRecords.ToString("N0")</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">New Records</dt>
+                    <dd class="text-2xl font-bold text-trading-green dark:text-dark-success">+@Summary.NewRecords.ToString("N0")</dd>
+                </div>
+            </div>
+
+            <!-- Date Range (optional) -->
+            @if (Summary.OldestDate.HasValue && Summary.LatestDate.HasValue)
+            {
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Oldest Date</dt>
+                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.OldestDate.Value.ToString("yyyy-MM-dd")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Date</dt>
+                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.LatestDate.Value.ToString("yyyy-MM-dd")</dd>
+                    </div>
+                </div>
+            }
+
+            <!-- Price Statistics (optional) -->
+            @if (Summary.MinPrice.HasValue && Summary.MaxPrice.HasValue && Summary.LatestClose.HasValue)
+            {
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Min Price</dt>
+                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MinPrice.Value.ToString("C2")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Max Price</dt>
+                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MaxPrice.Value.ToString("C2")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Close</dt>
+                        <dd class="text-sm font-semibold text-trading-blue dark:text-dark-accent-blue">@Summary.LatestClose.Value.ToString("C2")</dd>
+                    </div>
+                </div>
+            }
+        </dl>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// The data summary result to display.
+    /// </summary>
+    [Parameter]
+    public DataSummaryResult? Summary { get; set; }
+}

@@ -1,52 +1,42 @@
 @page "/comparison"
-@using TradingStrat.Web.Services.State
-@using Microsoft.Extensions.Options
-@using TradingStrat.Application.Configuration
-@inject IParameterOptimizationUseCase ParameterOptimizationUseCase
-@inject ProgressService ProgressService
-@inject UserPreferencesService PreferencesService
-@inject FormStateService FormState
-@inject IOptions<TradingConfiguration> Configuration
-@implements IDisposable
+@rendermode InteractiveServer
+@using TradingStrat.Web.Models
+@using TradingStrat.Web.Utilities
+@inherits BaseDataPage<ComparisonFormModel, ParameterOptimizationResult>
 
 <PageTitle>A/B Comparison - TradingStrat</PageTitle>
 
 <div class="space-y-6">
-    <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">A/B Strategy Comparison</h1>
-        <p class="text-gray-600 dark:text-dark-text-secondary">Compare two strategy variants side-by-side with detailed performance metrics.</p>
-    </div>
+    <PageHeader Title="A/B Strategy Comparison"
+                Description="Compare two strategy variants side-by-side with detailed performance metrics." />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
                        CurrentMessage="ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
-    <AlertMessage Message="@_errorMessage" Type="AlertType.Error" />
-
-    <!-- Configuration -->
+    <FormWrapper ErrorMessage="@ErrorMessage">
+        <!-- Configuration -->
     <div class="card">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Test Configuration</h2>
 
-        <EditForm Model="@_formModel" OnValidSubmit="@HandleRunComparison" class="space-y-6">
+        <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-6">
             <DataAnnotationsValidator />
 
             <!-- Common Settings -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
-                    <InputText id="ticker" @bind-Value="_formModel.Ticker"
-                               @oninput="@(async (ChangeEventArgs e) => { _formModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
-                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
-                    <ValidationMessage For="@(() => _formModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    <TickerInput @bind-Value="FormModel.Ticker"
+                                 Label="Ticker Symbol *"
+                                 For="@(() => FormModel.Ticker)"
+                                 OnInputChanged="@(async () => await OnFormFieldChanged())" />
                 </div>
 
-                <div>
-                    <label for="capital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital *</label>
-                    <InputNumber id="capital" @bind-Value="_formModel.InitialCapital"
+                <FormInputGroup Label="Initial Capital"
+                                ValidationFor="@(() => FormModel.InitialCapital)">
+                    <InputNumber id="capital" @bind-Value="FormModel.InitialCapital"
                                  @oninput="@(async () => await OnFormFieldChanged())"
-                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
-                    <ValidationMessage For="@(() => _formModel.InitialCapital)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
-                </div>
+                                 class="@TailwindStyles.InputNumber" />
+                </FormInputGroup>
 
                 <div class="flex items-end">
                     <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
@@ -68,7 +58,7 @@
                 <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
                     <h3 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</h3>
                     <StrategyForm @ref="_strategyFormA"
-                                  SelectedStrategy="@_formModel.StrategyTypeA"
+                                  SelectedStrategy="@FormModel.StrategyTypeA"
                                   SelectedStrategyChanged="@OnStrategyTypeAChanged"
                                   ParametersChanged="@OnStrategyParametersAChanged" />
                 </div>
@@ -77,7 +67,7 @@
                 <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
                     <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</h3>
                     <StrategyForm @ref="_strategyFormB"
-                                  SelectedStrategy="@_formModel.StrategyTypeB"
+                                  SelectedStrategy="@FormModel.StrategyTypeB"
                                   SelectedStrategyChanged="@OnStrategyTypeBChanged"
                                   ParametersChanged="@OnStrategyParametersBChanged" />
                 </div>
@@ -86,9 +76,9 @@
     </div>
 
     <!-- Results -->
-    @if (_result != null && _result.Comparison != null)
+    @if (Result != null && Result.Comparison != null)
     {
-        var comparison = _result.Comparison;
+        var comparison = Result.Comparison;
 
         <!-- Winner Announcement -->
         @if (comparison.Winner > 0)
@@ -102,7 +92,7 @@
                         @(comparison.Winner == 1 ? comparison.VariantA.Description : comparison.VariantB.Description)
                     </p>
                     <p class="text-sm text-gray-500 dark:text-dark-text-secondary mt-2">
-                        Execution Time: @_result.ExecutionTime.TotalSeconds.ToString("F2") seconds
+                        Execution Time: @Result.ExecutionTime.TotalSeconds.ToString("F2") seconds
                     </p>
                 </div>
             </div>
@@ -201,190 +191,9 @@
     }
     else if (!ProgressService.IsProcessing)
     {
-        <div class="card">
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No comparison results</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure two strategy variants and run a comparison to see results here.</p>
-            </div>
-        </div>
+        <EmptyState Icon="chart"
+                    Title="No comparison results"
+                    Description="Configure two strategy variants and run a comparison to see results here." />
     }
+    </FormWrapper>
 </div>
-
-@code {
-    private const string FORM_KEY = "comparison-form";
-
-    private ComparisonFormModel _formModel = new();
-    private StrategyForm? _strategyFormA;
-    private StrategyForm? _strategyFormB;
-    private ParameterOptimizationResult? _result;
-    private string? _errorMessage;
-    private bool _hasRestoredState;
-
-    protected override void OnInitialized()
-    {
-        ProgressService.OnProgressChanged += StateHasChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_hasRestoredState)
-        {
-            _hasRestoredState = true;
-
-            // Try to restore saved form state
-            ComparisonFormModel? savedForm = await FormState.GetFormStateAsync<ComparisonFormModel>(FORM_KEY);
-            if (savedForm != null)
-            {
-                _formModel = savedForm;
-            }
-            else
-            {
-                // Initialize from user preferences
-                Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
-                _formModel = ComparisonFormModel.FromPreferences(prefs, Configuration.Value);
-            }
-
-            StateHasChanged();
-        }
-    }
-
-    private async Task OnFormFieldChanged()
-    {
-        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
-    }
-
-    private async Task OnStrategyTypeAChanged(string value)
-    {
-        _formModel.StrategyTypeA = value;
-        await OnFormFieldChanged();
-    }
-
-    private async Task OnStrategyParametersAChanged(Dictionary<string, object> parameters)
-    {
-        _formModel.StrategyParametersA = parameters;
-        await OnFormFieldChanged();
-    }
-
-    private async Task OnStrategyTypeBChanged(string value)
-    {
-        _formModel.StrategyTypeB = value;
-        await OnFormFieldChanged();
-    }
-
-    private async Task OnStrategyParametersBChanged(Dictionary<string, object> parameters)
-    {
-        _formModel.StrategyParametersB = parameters;
-        await OnFormFieldChanged();
-    }
-
-    private async Task HandleRunComparison()
-    {
-        _errorMessage = null;
-        _result = null;
-
-        ProgressService.Reset();
-
-        // Get current strategy parameters from both forms
-        if (_strategyFormA != null)
-        {
-            _formModel.StrategyParametersA = _strategyFormA.GetCurrentParameters();
-        }
-        if (_strategyFormB != null)
-        {
-            _formModel.StrategyParametersB = _strategyFormB.GetCurrentParameters();
-        }
-
-        var progress = new Progress<OptimizationProgress>(p =>
-        {
-            InvokeAsync(() =>
-            {
-                int percentage = p.TotalBars > 0 ? (int)((double)p.CurrentBar / p.TotalBars * 100) : 0;
-                ProgressService.UpdateProgress(
-                    $"Testing {p.CurrentVariant}: Bar {p.CurrentBar}/{p.TotalBars} - {p.Trades} trades",
-                    percentage
-                );
-            });
-        });
-
-        try
-        {
-            var variantA = new StrategyVariant(
-                "Variant A",
-                _formModel.StrategyTypeA,
-                _formModel.StrategyParametersA,
-                GetStrategyDescription(_formModel.StrategyTypeA, _formModel.StrategyParametersA)
-            );
-
-            var variantB = new StrategyVariant(
-                "Variant B",
-                _formModel.StrategyTypeB,
-                _formModel.StrategyParametersB,
-                GetStrategyDescription(_formModel.StrategyTypeB, _formModel.StrategyParametersB)
-            );
-
-            var command = new ParameterOptimizationCommand(
-                _formModel.Ticker,
-                variantA,
-                variantB,
-                _formModel.InitialCapital,
-                StartDate: _formModel.StartDate,
-                EndDate: _formModel.EndDate
-            );
-
-            _result = await ParameterOptimizationUseCase.ExecuteAsync(command, progress);
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Error running comparison: {ex.Message}";
-        }
-        finally
-        {
-            await InvokeAsync(() => ProgressService.Reset());
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private string GetStrategyDescription(string strategyType, Dictionary<string, object> parameters)
-    {
-        return strategyType switch
-        {
-            "ma" => $"MA Crossover ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")})",
-            "rsi" => $"RSI ({parameters.GetValueOrDefault("Period")}, {parameters.GetValueOrDefault("OversoldLevel")}/{parameters.GetValueOrDefault("OverboughtLevel")})",
-            "macd" => $"MACD ({parameters.GetValueOrDefault("FastPeriod")}/{parameters.GetValueOrDefault("SlowPeriod")}/{parameters.GetValueOrDefault("SignalPeriod")})",
-            "ml" => $"ML FastTree ({(decimal)parameters.GetValueOrDefault("BuyThreshold", 0m) * 100:F1}%/{(decimal)parameters.GetValueOrDefault("SellThreshold", 0m) * 100:F1}%)",
-            "ichimoku" => $"Ichimoku ({parameters.GetValueOrDefault("TenkanPeriod")}/{parameters.GetValueOrDefault("KijunPeriod")})",
-            _ => strategyType
-        };
-    }
-
-    private string FormatMetricValue(string metric, decimal value)
-    {
-        return metric.Contains("Sharpe") || metric.Contains("Factor")
-            ? value.ToString("F2")
-            : metric.Contains("%") || metric.Contains("Return") || metric.Contains("Drawdown") || metric.Contains("Rate")
-                ? $"{value:F2}%"
-                : value.ToString("F2");
-    }
-
-    private string GetStrategyType(string strategyName)
-    {
-        // Map strategy names to types: "Moving Average Crossover" -> "ma"
-        return strategyName.ToLowerInvariant() switch
-        {
-            var s when s.Contains("moving average") => "ma",
-            var s when s.Contains("rsi") => "rsi",
-            var s when s.Contains("macd") => "macd",
-            var s when s.Contains("machine learning") || s.Contains("ml") => "ml",
-            var s when s.Contains("ichimoku") => "ichimoku",
-            _ => "ma"
-        };
-    }
-
-    public void Dispose()
-    {
-        ProgressService.OnProgressChanged -= StateHasChanged;
-    }
-}

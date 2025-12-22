@@ -1,43 +1,45 @@
 @inherits LayoutComponentBase
+@inject Services.LocalStorageService LocalStorage
+@implements IAsyncDisposable
 
 <!-- Skip to main content link for screen readers -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 dark:focus:bg-dark-accent-blue focus:text-white focus:rounded">
     Skip to main content
 </a>
 
-<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg">
-    <!-- Top Navigation Bar -->
-    <nav class="bg-white dark:bg-dark-card shadow-sm border-b border-gray-200 dark:border-dark-border" role="navigation" aria-label="Main navigation">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-trading-blue dark:text-dark-accent-blue">TradingStrat AI</h1>
-                </div>
-                <NavMenu />
-            </div>
-        </div>
-    </nav>
+<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg flex flex-col">
+    <!-- Top Bar (64px fixed) -->
+    <TopBar SelectedPortfolioName="@_selectedPortfolioName"
+            PortfolioValue="@_portfolioValue"
+            YTDPerformance="@_ytdPerformance" />
 
-    <!-- Main Content -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main" aria-label="Main content">
-        <div class="space-y-6">
+    <!-- Main Container (below TopBar) -->
+    <div class="flex flex-1 overflow-hidden pt-16">
+        <!-- Left Sidebar -->
+        <LeftSidebar IsCollapsed="_sidebarCollapsed"
+                     IsCollapsedChanged="OnSidebarCollapsedChanged" />
+
+        <!-- Main Content Area (flexible width) -->
+        <main id="main-content"
+              class="flex-1 overflow-y-auto p-6 transition-all duration-300"
+              style="margin-left: @(_sidebarCollapsed ? "4rem" : "16rem"); margin-right: @(_aiPanelCollapsed ? "3rem" : "24rem");"
+              role="main"
+              aria-label="Main content">
             @Body
-        </div>
-    </main>
+        </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border mt-auto py-4" role="contentinfo">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500 dark:text-dark-text-secondary">
-                TradingStrat v1.0 - Built with .NET 10.0 & Blazor Server
-            </p>
-        </div>
-    </footer>
+        <!-- Right AI Panel -->
+        <AiPanel IsCollapsed="_aiPanelCollapsed"
+                 IsCollapsedChanged="OnAiPanelCollapsedChanged"
+                 CurrentTicker="@_currentTicker"
+                 CurrentContext="@_currentContext"
+                 CurrentRegime="@_currentRegime"
+                 CurrentRecommendation="@_currentRecommendation"
+                 Confidence="@_confidence"
+                 Reasons="@_reasons" />
+    </div>
 
-    <!-- AI Assistant Widget (floating, available on all pages) -->
-    <AiAssistantWidget />
-
-    <!-- Notification Toast Container (fixed, top-right) -->
+    <!-- Notification Toast Container (preserved) -->
     <NotificationToastContainer />
 </div>
 
@@ -46,3 +48,66 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    // Layout state
+    private bool _sidebarCollapsed = false;
+    private bool _aiPanelCollapsed = false;
+
+#pragma warning disable CS0649 // Field is never assigned to (placeholder for future implementation)
+    // TopBar data (placeholder - will be populated from services)
+    private string? _selectedPortfolioName = null;
+    private decimal? _portfolioValue = null;
+    private decimal? _ytdPerformance = null;
+
+    // AI Panel data (placeholder - will be populated from context)
+    private string? _currentTicker = null;
+    private string? _currentContext = null;
+    private string _currentRegime = "NEUTRAL";
+    private string? _currentRecommendation = null;
+    private int? _confidence = null;
+    private List<string>? _reasons = null;
+#pragma warning restore CS0649
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Load collapse states from localStorage (must be in OnAfterRenderAsync for JS interop)
+            var sidebarState = await LocalStorage.GetItemAsync<bool?>("layout_sidebar_collapsed");
+            if (sidebarState.HasValue && sidebarState.Value != _sidebarCollapsed)
+            {
+                _sidebarCollapsed = sidebarState.Value;
+                StateHasChanged();
+            }
+
+            var aiPanelState = await LocalStorage.GetItemAsync<bool?>("layout_aipanel_collapsed");
+            if (aiPanelState.HasValue && aiPanelState.Value != _aiPanelCollapsed)
+            {
+                _aiPanelCollapsed = aiPanelState.Value;
+                StateHasChanged();
+            }
+
+            // TODO: Load portfolio data from PortfolioStateService
+            // TODO: Load AI recommendations from appropriate service
+        }
+    }
+
+    private async Task OnSidebarCollapsedChanged(bool value)
+    {
+        _sidebarCollapsed = value;
+        await LocalStorage.SetItemAsync("layout_sidebar_collapsed", _sidebarCollapsed);
+    }
+
+    private async Task OnAiPanelCollapsedChanged(bool value)
+    {
+        _aiPanelCollapsed = value;
+        await LocalStorage.SetItemAsync("layout_aipanel_collapsed", _aiPanelCollapsed);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Cleanup if needed
+        await Task.CompletedTask;
+    }
+}

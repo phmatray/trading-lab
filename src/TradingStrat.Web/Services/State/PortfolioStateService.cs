@@ -1,76 +1,66 @@
+using TradingStrat.Web.Models.State;
+
 namespace TradingStrat.Web.Services.State;
 
 /// <summary>
-/// Service for managing portfolio state in the application.
+/// Service for managing selected portfolio state with localStorage persistence.
 /// </summary>
-public class PortfolioStateService
+public class PortfolioStateService : StateServiceBase<PortfolioState>
 {
     private const string STORAGE_KEY = "tradingstrat_selected_portfolio";
-    private readonly LocalStorageService _localStorage;
 
     /// <summary>
-    /// Event raised when the selected portfolio changes.
+    /// Event raised when the selected portfolio changes. Provides EventArgs for compatibility.
     /// </summary>
     public event EventHandler? OnPortfolioChanged;
 
     /// <summary>
-    /// Gets or sets the selected portfolio ID.
+    /// Gets the selected portfolio ID from memory.
     /// </summary>
     public int? SelectedPortfolioId { get; private set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PortfolioStateService"/> class.
-    /// </summary>
-    /// <param name="localStorage">The local storage service.</param>
     public PortfolioStateService(LocalStorageService localStorage)
+        : base(localStorage, STORAGE_KEY)
     {
-        _localStorage = localStorage;
+        // Subscribe to base class state change to update cached property
+        OnStateChanged += () =>
+        {
+            OnPortfolioChanged?.Invoke(this, EventArgs.Empty);
+        };
     }
 
     /// <summary>
     /// Sets the selected portfolio ID and persists it to local storage.
     /// </summary>
-    /// <param name="portfolioId">The portfolio ID to select.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
     public async Task SetSelectedPortfolioAsync(
         int portfolioId,
         CancellationToken cancellationToken = default)
     {
         SelectedPortfolioId = portfolioId;
-        await _localStorage.SetItemAsync(STORAGE_KEY, portfolioId, cancellationToken);
-        OnPortfolioChanged?.Invoke(this, EventArgs.Empty);
+        await SaveStateAsync(new PortfolioState { SelectedPortfolioId = portfolioId }, cancellationToken);
     }
 
     /// <summary>
     /// Clears the selected portfolio from memory and local storage.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    public async Task ClearSelectedPortfolioAsync(
-        CancellationToken cancellationToken = default)
+    public async Task ClearSelectedPortfolioAsync(CancellationToken cancellationToken = default)
     {
         SelectedPortfolioId = null;
-        await _localStorage.RemoveItemAsync(STORAGE_KEY, cancellationToken);
-        OnPortfolioChanged?.Invoke(this, EventArgs.Empty);
+        await ClearStateAsync(cancellationToken);
     }
 
     /// <summary>
     /// Gets the selected portfolio ID from local storage.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The selected portfolio ID, or null if none is selected.</returns>
-    public async Task<int?> GetSelectedPortfolioIdAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<int?> GetSelectedPortfolioIdAsync(CancellationToken cancellationToken = default)
     {
         if (SelectedPortfolioId.HasValue)
         {
             return SelectedPortfolioId;
         }
 
-        int? portfolioId = await _localStorage.GetItemAsync<int?>(
-            STORAGE_KEY,
-            cancellationToken);
-
-        SelectedPortfolioId = portfolioId;
-        return portfolioId;
+        PortfolioState state = await GetStateAsync(cancellationToken);
+        SelectedPortfolioId = state.SelectedPortfolioId;
+        return SelectedPortfolioId;
     }
 }

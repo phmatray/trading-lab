@@ -1,0 +1,72 @@
+@* BottomPanel Component - Optional collapsible panel for signals/logs/audit trail *@
+
+@if (IsVisible)
+{
+    <div class="@GetPanelClasses()"
+         data-testid="bottom-panel"
+         role="complementary"
+         aria-label="Additional information">
+        <!-- Panel Header -->
+        <div class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                @Title
+            </h3>
+
+            <button @onclick="HandleClose"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    aria-label="Close panel"
+                    type="button">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Panel Content -->
+        <div class="overflow-y-auto bg-white dark:bg-dark-card" style="height: @(Height)px;">
+            @ChildContent
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Whether the panel is visible
+    /// </summary>
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    /// <summary>
+    /// Callback when visibility changes
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    /// <summary>
+    /// Panel content
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Panel title
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Additional Information";
+
+    /// <summary>
+    /// Panel height in pixels
+    /// </summary>
+    [Parameter]
+    public int Height { get; set; } = 200;
+
+    private string GetPanelClasses()
+    {
+        return "fixed bottom-0 left-0 right-0 z-20 border-t border-gray-200 dark:border-dark-border shadow-lg";
+    }
+
+    private async Task HandleClose()
+    {
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

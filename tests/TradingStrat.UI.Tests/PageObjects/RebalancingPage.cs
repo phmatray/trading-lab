@@ -17,10 +17,10 @@ public class RebalancingPage : BasePage
 
     // Page Elements
     private ILocator PageTitle => Page.Locator("main h1");
-    private ILocator BackButton => Page.Locator("a:has-text('← Back to Dashboard')");
+    private ILocator BackButton => Page.Locator("button[aria-label='Go back']");
 
     // Target Allocations Section
-    private ILocator AddAllocationButton => Page.Locator("button:has-text('Add Allocation')");
+    private ILocator AddAllocationButton => Page.Locator("button:has-text('+ Add Position')");
     private ILocator AllocationInputs => Page.Locator(".grid.grid-cols-12");
 
     // Commission Settings
