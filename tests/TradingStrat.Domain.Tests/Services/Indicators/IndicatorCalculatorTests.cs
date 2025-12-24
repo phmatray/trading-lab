@@ -1063,7 +1063,7 @@ public class IndicatorCalculatorTests
     #region Ichimoku Tests (15 tests)
 
     [Fact]
-    public void CalculateTenkan_WithValidData_ReturnsCorrectMidpoint()
+    public void CalculateConversionLine_WithValidData_ReturnsCorrectMidpoint()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1078,7 +1078,7 @@ public class IndicatorCalculatorTests
         }
 
         // Act
-        decimal[] result = _calculator.CalculateTenkan(prices.ToArray());
+        decimal[] result = _calculator.CalculateConversionLine(prices.ToArray());
 
         // Assert
         result.Length.ShouldBe(10);
@@ -1090,7 +1090,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateKijun_WithValidData_ReturnsCorrectMidpoint()
+    public void CalculateBaseLine_WithValidData_ReturnsCorrectMidpoint()
     {
         // Arrange - need at least 26 bars
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1098,7 +1098,7 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act
-        decimal[] result = _calculator.CalculateKijun(prices.ToArray());
+        decimal[] result = _calculator.CalculateBaseLine(prices.ToArray());
 
         // Assert
         result.Length.ShouldBe(30);
@@ -1107,14 +1107,14 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateSenkouSpanA_WithValidInputs_ReturnsAverage()
+    public void CalculateLeadingSpanA_WithValidInputs_ReturnsAverage()
     {
         // Arrange
         decimal[] tenkan = [0m, 0m, 0m, 100m, 102m, 104m];
         decimal[] kijun = [0m, 0m, 0m, 98m, 100m, 102m];
 
         // Act
-        decimal[] result = _calculator.CalculateSenkouSpanA(tenkan, kijun);
+        decimal[] result = _calculator.CalculateLeadingSpanA(tenkan, kijun);
 
         // Assert
         result.Length.ShouldBe(6);
@@ -1124,7 +1124,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateSenkouSpanB_WithValidData_ReturnsCorrectMidpoint()
+    public void CalculateLeadingSpanB_WithValidData_ReturnsCorrectMidpoint()
     {
         // Arrange - need at least 52 bars
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1132,7 +1132,7 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act
-        decimal[] result = _calculator.CalculateSenkouSpanB(prices.ToArray());
+        decimal[] result = _calculator.CalculateLeadingSpanB(prices.ToArray());
 
         // Assert
         result.Length.ShouldBe(60);
@@ -1141,7 +1141,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateChikouSpan_ReturnsClosePrices()
+    public void CalculateLaggingSpan_ReturnsClosePrices()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1149,7 +1149,7 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act
-        decimal[] result = _calculator.CalculateChikouSpan(prices.ToArray());
+        decimal[] result = _calculator.CalculateLaggingSpan(prices.ToArray());
 
         // Assert
         result.Length.ShouldBe(5);
@@ -1161,7 +1161,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateTenkan_WithInsufficientData_ReturnsZeros()
+    public void CalculateConversionLine_WithInsufficientData_ReturnsZeros()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1169,14 +1169,14 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act
-        decimal[] result = _calculator.CalculateTenkan(prices.ToArray());
+        decimal[] result = _calculator.CalculateConversionLine(prices.ToArray());
 
         // Assert
         result.ShouldAllBe(v => v == 0);
     }
 
     [Fact]
-    public void CalculateKijun_WithInsufficientData_ReturnsZeros()
+    public void CalculateBaseLine_WithInsufficientData_ReturnsZeros()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1184,32 +1184,32 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act
-        decimal[] result = _calculator.CalculateKijun(prices.ToArray());
+        decimal[] result = _calculator.CalculateBaseLine(prices.ToArray());
 
         // Assert
         result.ShouldAllBe(v => v == 0);
     }
 
     [Fact]
-    public void CalculateSenkouSpanA_WithMismatchedLengths_Throws()
+    public void CalculateLeadingSpanA_WithMismatchedLengths_Throws()
     {
         // Arrange
         decimal[] tenkan = [100m, 101m, 102m];
         decimal[] kijun = [100m, 101m]; // Different length
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => _calculator.CalculateSenkouSpanA(tenkan, kijun));
+        Should.Throw<ArgumentException>(() => _calculator.CalculateLeadingSpanA(tenkan, kijun));
     }
 
     [Fact]
-    public void CalculateTenkan_WithNullPrices_ThrowsArgumentNullException()
+    public void CalculateConversionLine_WithNullPrices_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => _calculator.CalculateTenkan(null!));
+        Should.Throw<ArgumentNullException>(() => _calculator.CalculateConversionLine(null!));
     }
 
     [Fact]
-    public void CalculateKijun_WithNegativePeriod_ThrowsArgumentOutOfRangeException()
+    public void CalculateBaseLine_WithNegativePeriod_ThrowsArgumentOutOfRangeException()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1217,27 +1217,27 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act & Assert
-        Should.Throw<ArgumentOutOfRangeException>(() => _calculator.CalculateKijun(prices.ToArray(), -1));
+        Should.Throw<ArgumentOutOfRangeException>(() => _calculator.CalculateBaseLine(prices.ToArray(), -1));
     }
 
     [Fact]
-    public void CalculateSenkouSpanB_WithEmptyArray_ReturnsEmptyArray()
+    public void CalculateLeadingSpanB_WithEmptyArray_ReturnsEmptyArray()
     {
         // Arrange
         HistoricalPrice[] emptyPrices = [];
 
         // Act
-        decimal[] result = _calculator.CalculateSenkouSpanB(emptyPrices);
+        decimal[] result = _calculator.CalculateLeadingSpanB(emptyPrices);
 
         // Assert
         result.Length.ShouldBe(0);
     }
 
     [Fact]
-    public void CalculateChikouSpan_WithNullPrices_ThrowsArgumentNullException()
+    public void CalculateLaggingSpan_WithNullPrices_ThrowsArgumentNullException()
     {
         // Act & Assert
-        Should.Throw<ArgumentNullException>(() => _calculator.CalculateChikouSpan(null!));
+        Should.Throw<ArgumentNullException>(() => _calculator.CalculateLaggingSpan(null!));
     }
 
     [Fact]
@@ -1249,9 +1249,9 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act - calculate Tenkan (9), Kijun (26), and Senkou B (52)
-        decimal[] tenkan = _calculator.CalculateTenkan(prices.ToArray());
-        decimal[] kijun = _calculator.CalculateKijun(prices.ToArray());
-        decimal[] senkouB = _calculator.CalculateSenkouSpanB(prices.ToArray());
+        decimal[] tenkan = _calculator.CalculateConversionLine(prices.ToArray());
+        decimal[] kijun = _calculator.CalculateBaseLine(prices.ToArray());
+        decimal[] senkouB = _calculator.CalculateLeadingSpanB(prices.ToArray());
 
         // Assert - all should use same Donchian midpoint logic
         tenkan[8].ShouldBeGreaterThan(0);  // Valid at index 8
@@ -1271,11 +1271,11 @@ public class IndicatorCalculatorTests
             .Build();
 
         // Act - calculate full Ichimoku suite
-        decimal[] tenkan = _calculator.CalculateTenkan(prices.ToArray());
-        decimal[] kijun = _calculator.CalculateKijun(prices.ToArray());
-        decimal[] senkouA = _calculator.CalculateSenkouSpanA(tenkan, kijun);
-        decimal[] senkouB = _calculator.CalculateSenkouSpanB(prices.ToArray());
-        decimal[] chikou = _calculator.CalculateChikouSpan(prices.ToArray());
+        decimal[] tenkan = _calculator.CalculateConversionLine(prices.ToArray());
+        decimal[] kijun = _calculator.CalculateBaseLine(prices.ToArray());
+        decimal[] senkouA = _calculator.CalculateLeadingSpanA(tenkan, kijun);
+        decimal[] senkouB = _calculator.CalculateLeadingSpanB(prices.ToArray());
+        decimal[] chikou = _calculator.CalculateLaggingSpan(prices.ToArray());
 
         // Assert - all arrays should have correct length
         tenkan.Length.ShouldBe(100);
@@ -1301,11 +1301,11 @@ public class IndicatorCalculatorTests
         DateTime start = DateTime.Now;
 
         // Act - calculate all Ichimoku components
-        decimal[] tenkan = _calculator.CalculateTenkan(prices.ToArray());
-        decimal[] kijun = _calculator.CalculateKijun(prices.ToArray());
-        decimal[] senkouA = _calculator.CalculateSenkouSpanA(tenkan, kijun);
-        decimal[] senkouB = _calculator.CalculateSenkouSpanB(prices.ToArray());
-        decimal[] chikou = _calculator.CalculateChikouSpan(prices.ToArray());
+        decimal[] tenkan = _calculator.CalculateConversionLine(prices.ToArray());
+        decimal[] kijun = _calculator.CalculateBaseLine(prices.ToArray());
+        decimal[] senkouA = _calculator.CalculateLeadingSpanA(tenkan, kijun);
+        decimal[] senkouB = _calculator.CalculateLeadingSpanB(prices.ToArray());
+        decimal[] chikou = _calculator.CalculateLaggingSpan(prices.ToArray());
 
         // Assert - should complete in reasonable time
         TimeSpan elapsed = DateTime.Now - start;

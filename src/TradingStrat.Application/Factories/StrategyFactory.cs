@@ -96,12 +96,12 @@ public class StrategyFactory : IStrategyFactory
 
     private IchimokuStrategy CreateIchimokuStrategy(Dictionary<string, object> parameters)
     {
-        int tenkanPeriod = GetParameter(parameters, "TenkanPeriod", 9);
-        int kijunPeriod = GetParameter(parameters, "KijunPeriod", 26);
-        int senkouBPeriod = GetParameter(parameters, "SenkouBPeriod", 52);
+        int conversionLinePeriod = GetParameter(parameters, "ConversionLinePeriod", 9);
+        int baseLinePeriod = GetParameter(parameters, "BaseLinePeriod", 26);
+        int leadingSpanBPeriod = GetParameter(parameters, "LeadingSpanBPeriod", 52);
         int displacement = GetParameter(parameters, "Displacement", 26);
 
-        IchimokuExitMode exitMode = GetParameter(parameters, "ExitMode", IchimokuExitMode.CloseBelowKijun);
+        IchimokuExitMode exitMode = GetParameter(parameters, "ExitMode", IchimokuExitMode.CloseBelowBaseLine);
         IchimokuEntryMode entryMode = GetParameter(parameters, "EntryMode", IchimokuEntryMode.AllConditionsOnly);
 
         int crossLookbackDays = GetParameter(parameters, "CrossLookbackDays", 5);
@@ -112,9 +112,9 @@ public class StrategyFactory : IStrategyFactory
         return new IchimokuStrategy(
             _indicatorCalculator,
             timeframeAggregator,
-            tenkanPeriod,
-            kijunPeriod,
-            senkouBPeriod,
+            conversionLinePeriod,
+            baseLinePeriod,
+            leadingSpanBPeriod,
             displacement,
             exitMode,
             entryMode,

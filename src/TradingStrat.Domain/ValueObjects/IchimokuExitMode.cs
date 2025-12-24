@@ -6,10 +6,10 @@ namespace TradingStrat.Domain.ValueObjects;
 public enum IchimokuExitMode
 {
     /// <summary>
-    /// Exit when price closes below Kijun-sen (base line).
-    /// Conservative - allows some breathing room above Kijun.
+    /// Exit when price closes below Base Line (Kijun-sen).
+    /// Conservative - allows some breathing room above Base Line.
     /// </summary>
-    CloseBelowKijun,
+    CloseBelowBaseLine,
 
     /// <summary>
     /// Exit when price enters the Kumo (cloud).
@@ -18,8 +18,8 @@ public enum IchimokuExitMode
     PriceIntoKumo,
 
     /// <summary>
-    /// Exit when Tenkan crosses below Kijun (bearish crossover).
+    /// Exit when Conversion Line (Tenkan-sen) crosses below Base Line (Kijun-sen) - bearish crossover.
     /// Very aggressive - exits on momentum shift, not price action.
     /// </summary>
-    TenkanKijunBearishCross
+    ConversionBaseBearishCross
 }

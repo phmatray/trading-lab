@@ -6,18 +6,18 @@ namespace TradingStrat.Domain.ValueObjects;
 /// </summary>
 internal record IchimokuSignals(
     decimal Price,
-    decimal Tenkan,
-    decimal Kijun,
-    decimal SenkouA,
-    decimal SenkouB,
-    decimal Chikou,
-    decimal PriceAtChikouPosition, // Price 26 bars ago (for Chikou comparison)
+    decimal ConversionLine,
+    decimal BaseLine,
+    decimal LeadingSpanA,
+    decimal LeadingSpanB,
+    decimal LaggingSpan,
+    decimal PriceAtLaggingSpanPosition, // Price 26 bars ago (for LaggingSpan comparison)
     decimal KumoTop,
     decimal KumoBottom,
     bool PriceAboveKumo,
     bool PriceBelowKumo,
     bool PriceInKumo,
-    bool TenkanAboveKijun,
-    bool ChikouAbovePriceHistory,
+    bool ConversionLineAboveBaseLine,
+    bool LaggingSpanAbovePriceHistory,
     TrendState WeeklyTrend
 );

@@ -316,7 +316,7 @@ public class IndicatorCalculator : IIndicatorCalculator
         return ema;
     }
 
-    public decimal[] CalculateTenkan(HistoricalPrice[] prices, int period = 9)
+    public decimal[] CalculateConversionLine(HistoricalPrice[] prices, int period = 9)
     {
         ArgumentNullException.ThrowIfNull(prices);
         if (period <= 0)
@@ -327,7 +327,7 @@ public class IndicatorCalculator : IIndicatorCalculator
         return CalculateDonchianMidpoint(prices, period);
     }
 
-    public decimal[] CalculateKijun(HistoricalPrice[] prices, int period = 26)
+    public decimal[] CalculateBaseLine(HistoricalPrice[] prices, int period = 26)
     {
         ArgumentNullException.ThrowIfNull(prices);
         if (period <= 0)
@@ -338,25 +338,25 @@ public class IndicatorCalculator : IIndicatorCalculator
         return CalculateDonchianMidpoint(prices, period);
     }
 
-    public decimal[] CalculateSenkouSpanA(decimal[] tenkan, decimal[] kijun)
+    public decimal[] CalculateLeadingSpanA(decimal[] conversionLine, decimal[] baseLine)
     {
-        ArgumentNullException.ThrowIfNull(tenkan);
-        ArgumentNullException.ThrowIfNull(kijun);
-        if (tenkan.Length != kijun.Length)
+        ArgumentNullException.ThrowIfNull(conversionLine);
+        ArgumentNullException.ThrowIfNull(baseLine);
+        if (conversionLine.Length != baseLine.Length)
         {
-            throw new ArgumentException("Tenkan and Kijun arrays must have the same length.");
+            throw new ArgumentException("ConversionLine and BaseLine arrays must have the same length.");
         }
 
-        decimal[] spanA = new decimal[tenkan.Length];
-        for (int i = 0; i < tenkan.Length; i++)
+        decimal[] leadingSpanA = new decimal[conversionLine.Length];
+        for (int i = 0; i < conversionLine.Length; i++)
         {
-            spanA[i] = (tenkan[i] + kijun[i]) / 2m;
+            leadingSpanA[i] = (conversionLine[i] + baseLine[i]) / 2m;
         }
 
-        return spanA;
+        return leadingSpanA;
     }
 
-    public decimal[] CalculateSenkouSpanB(HistoricalPrice[] prices, int period = 52)
+    public decimal[] CalculateLeadingSpanB(HistoricalPrice[] prices, int period = 52)
     {
         ArgumentNullException.ThrowIfNull(prices);
         if (period <= 0)
@@ -367,7 +367,7 @@ public class IndicatorCalculator : IIndicatorCalculator
         return CalculateDonchianMidpoint(prices, period);
     }
 
-    public decimal[] CalculateChikouSpan(HistoricalPrice[] prices)
+    public decimal[] CalculateLaggingSpan(HistoricalPrice[] prices)
     {
         ArgumentNullException.ThrowIfNull(prices);
         return prices.Select(p => p.Close ?? 0).ToArray();

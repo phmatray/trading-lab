@@ -71,51 +71,51 @@ public interface IIndicatorCalculator
     decimal[] CalculateStdDev(decimal[] prices, int period);
 
     /// <summary>
-    /// Calculates Tenkan-sen (Conversion Line) - midpoint of highest high and lowest low over period.
+    /// Calculates Conversion Line (Tenkan-sen) - midpoint of highest high and lowest low over period.
     /// Formula: (Highest High + Lowest Low) / 2 over period bars
     /// </summary>
     /// <param name="prices">Historical price data including high and low.</param>
     /// <param name="period">Period for calculation (standard: 9).</param>
-    /// <returns>Array of Tenkan-sen values (unshifted), with leading zeros where calculation is not possible.</returns>
-    decimal[] CalculateTenkan(HistoricalPrice[] prices, int period = 9);
+    /// <returns>Array of Conversion Line values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateConversionLine(HistoricalPrice[] prices, int period = 9);
 
     /// <summary>
-    /// Calculates Kijun-sen (Base Line) - midpoint of highest high and lowest low over period.
+    /// Calculates Base Line (Kijun-sen) - midpoint of highest high and lowest low over period.
     /// Formula: (Highest High + Lowest Low) / 2 over period bars
     /// </summary>
     /// <param name="prices">Historical price data including high and low.</param>
     /// <param name="period">Period for calculation (standard: 26).</param>
-    /// <returns>Array of Kijun-sen values (unshifted), with leading zeros where calculation is not possible.</returns>
-    decimal[] CalculateKijun(HistoricalPrice[] prices, int period = 26);
+    /// <returns>Array of Base Line values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateBaseLine(HistoricalPrice[] prices, int period = 26);
 
     /// <summary>
-    /// Calculates Senkou Span A (Leading Span A) - midpoint of Tenkan and Kijun.
-    /// Formula: (Tenkan-sen + Kijun-sen) / 2
+    /// Calculates Leading Span A (Senkou Span A) - midpoint of Conversion Line and Base Line.
+    /// Formula: (Conversion Line + Base Line) / 2
     /// Note: Traditionally shifted +26 periods for display, but this method returns unshifted values.
     /// Strategy implementation handles shifting.
     /// </summary>
-    /// <param name="tenkan">Tenkan-sen values.</param>
-    /// <param name="kijun">Kijun-sen values.</param>
-    /// <returns>Array of Senkou Span A values (unshifted).</returns>
-    decimal[] CalculateSenkouSpanA(decimal[] tenkan, decimal[] kijun);
+    /// <param name="conversionLine">Conversion Line (Tenkan-sen) values.</param>
+    /// <param name="baseLine">Base Line (Kijun-sen) values.</param>
+    /// <returns>Array of Leading Span A values (unshifted).</returns>
+    decimal[] CalculateLeadingSpanA(decimal[] conversionLine, decimal[] baseLine);
 
     /// <summary>
-    /// Calculates Senkou Span B (Leading Span B) - midpoint of highest high and lowest low over period.
+    /// Calculates Leading Span B (Senkou Span B) - midpoint of highest high and lowest low over period.
     /// Formula: (Highest High + Lowest Low) / 2 over period bars
     /// Note: Traditionally shifted +26 periods for display, but this method returns unshifted values.
     /// Strategy implementation handles shifting.
     /// </summary>
     /// <param name="prices">Historical price data including high and low.</param>
     /// <param name="period">Period for calculation (standard: 52).</param>
-    /// <returns>Array of Senkou Span B values (unshifted), with leading zeros where calculation is not possible.</returns>
-    decimal[] CalculateSenkouSpanB(HistoricalPrice[] prices, int period = 52);
+    /// <returns>Array of Leading Span B values (unshifted), with leading zeros where calculation is not possible.</returns>
+    decimal[] CalculateLeadingSpanB(HistoricalPrice[] prices, int period = 52);
 
     /// <summary>
-    /// Calculates Chikou Span (Lagging Span) - current close price.
+    /// Calculates Lagging Span (Chikou Span) - current close price.
     /// Note: Traditionally shifted -26 periods for display, but this method returns unshifted close prices.
     /// Strategy implementation handles shifting.
     /// </summary>
     /// <param name="prices">Historical price data.</param>
     /// <returns>Array of close prices (unshifted).</returns>
-    decimal[] CalculateChikouSpan(HistoricalPrice[] prices);
+    decimal[] CalculateLaggingSpan(HistoricalPrice[] prices);
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using TradingStrat.Domain.ValueObjects;
+using static TradingStrat.Web.Services.DebugLogger;
 
 namespace TradingStrat.Web.Models;
 
@@ -47,7 +48,7 @@ public class StrategyFormModel
         {
             PositionSizingMode.FixedPercentage => new Dictionary<string, decimal>
             {
-                ["Percentage"] = FixedPercentage
+                ["Percentage"] = FixedPercentage / 100m  // Convert from 1-100 scale to 0-1 scale
             },
             PositionSizingMode.FixedQuantity => new Dictionary<string, decimal>
             {
@@ -55,7 +56,7 @@ public class StrategyFormModel
             },
             PositionSizingMode.RiskBased => new Dictionary<string, decimal>
             {
-                ["RiskPercentage"] = RiskPercentage
+                ["RiskPercentage"] = RiskPercentage / 100m  // Convert from 1-100 scale to 0-1 scale
             },
             _ => throw new InvalidOperationException($"Unknown sizing mode: {SizingMode}")
         };
@@ -66,6 +67,22 @@ public class StrategyFormModel
     /// </summary>
     public StrategyDefinition ToStrategyDefinition()
     {
+        Log($"[StrategyFormModel] Converting to StrategyDefinition...");
+        Log($"[StrategyFormModel] Entry rules count: {EntryRules.Count}");
+        Log($"[StrategyFormModel] Exit rules count: {ExitRules.Count}");
+
+        for (int i = 0; i < EntryRules.Count; i++)
+        {
+            var rule = EntryRules[i];
+            Log($"[StrategyFormModel] Entry rule {i}: Indicator={rule.IndicatorName}, Operator={rule.Operator}, ValueType={rule.ValueType}, ConstantValue={rule.ConstantValue}, Params={rule.IndicatorParameters.Count}");
+        }
+
+        for (int i = 0; i < ExitRules.Count; i++)
+        {
+            var rule = ExitRules[i];
+            Log($"[StrategyFormModel] Exit rule {i}: Indicator={rule.IndicatorName}, Operator={rule.Operator}, ValueType={rule.ValueType}, ConstantValue={rule.ConstantValue}, Params={rule.IndicatorParameters.Count}");
+        }
+
         return new StrategyDefinition(
             EntryRules.Select(r => r.ToStrategyRule()).ToList(),
             ExitRules.Select(r => r.ToStrategyRule()).ToList(),

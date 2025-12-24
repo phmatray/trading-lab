@@ -14,9 +14,9 @@ namespace TradingStrat.Domain.Strategies;
 public class IchimokuStrategy : BaseStrategy
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
-    private readonly int _tenkanPeriod;
-    private readonly int _kijunPeriod;
-    private readonly int _senkouBPeriod;
+    private readonly int _conversionLinePeriod;
+    private readonly int _baseLinePeriod;
+    private readonly int _leadingSpanBPeriod;
     private readonly int _displacement;
     private readonly IchimokuExitMode _exitMode;
     private readonly IchimokuEntryMode _entryMode;
@@ -25,24 +25,24 @@ public class IchimokuStrategy : BaseStrategy
     private readonly TimeframeAggregator _timeframeAggregator;
 
     // Daily indicators (calculated once in Initialize)
-    private decimal[] _dailyTenkan = null!;
-    private decimal[] _dailyKijun = null!;
-    private decimal[] _dailySenkouA = null!;
-    private decimal[] _dailySenkouB = null!;
-    private decimal[] _dailyChikou = null!;
+    private decimal[] _dailyConversionLine = null!;
+    private decimal[] _dailyBaseLine = null!;
+    private decimal[] _dailyLeadingSpanA = null!;
+    private decimal[] _dailyLeadingSpanB = null!;
+    private decimal[] _dailyLaggingSpan = null!;
 
     // Weekly indicators
     private HistoricalPrice[] _weeklyPrices = null!;
-    private decimal[] _weeklyTenkan = null!;
-    private decimal[] _weeklyKijun = null!;
-    private decimal[] _weeklySenkouA = null!;
-    private decimal[] _weeklySenkouB = null!;
+    private decimal[] _weeklyConversionLine = null!;
+    private decimal[] _weeklyBaseLine = null!;
+    private decimal[] _weeklyLeadingSpanA = null!;
+    private decimal[] _weeklyLeadingSpanB = null!;
 
     // Weekly trend mapped to each daily bar
     private TrendState[] _weeklyTrendByDailyBar = null!;
 
     public override string Name =>
-        $"Ichimoku ({_tenkanPeriod}/{_kijunPeriod}/{_senkouBPeriod}) {_exitMode} {_entryMode}";
+        $"Ichimoku ({_conversionLinePeriod}/{_baseLinePeriod}/{_leadingSpanBPeriod}) {_exitMode} {_entryMode}";
 
     public override string Description =>
         $"Ichimoku Cloud strategy with multi-timeframe analysis. " +
@@ -52,19 +52,19 @@ public class IchimokuStrategy : BaseStrategy
     public IchimokuStrategy(
         IIndicatorCalculator indicatorCalculator,
         TimeframeAggregator timeframeAggregator,
-        int tenkanPeriod = 9,
-        int kijunPeriod = 26,
-        int senkouBPeriod = 52,
+        int conversionLinePeriod = 9,
+        int baseLinePeriod = 26,
+        int leadingSpanBPeriod = 52,
         int displacement = 26,
-        IchimokuExitMode exitMode = IchimokuExitMode.CloseBelowKijun,
+        IchimokuExitMode exitMode = IchimokuExitMode.CloseBelowBaseLine,
         IchimokuEntryMode entryMode = IchimokuEntryMode.AllConditionsOnly,
         int crossLookbackDays = 5,
         decimal riskPercentage = 0.02m)
         : base(indicatorCalculator)
     {
-        ValidationGuard.Require(tenkanPeriod).GreaterThan(0, "Tenkan period must be greater than 0");
-        ValidationGuard.Require(kijunPeriod).GreaterThan(tenkanPeriod, "Kijun period must be greater than Tenkan period");
-        ValidationGuard.Require(senkouBPeriod).GreaterThan(kijunPeriod, "Senkou B period must be greater than Kijun period");
+        ValidationGuard.Require(conversionLinePeriod).GreaterThan(0, "Conversion Line period must be greater than 0");
+        ValidationGuard.Require(baseLinePeriod).GreaterThan(conversionLinePeriod, "Base Line period must be greater than Conversion Line period");
+        ValidationGuard.Require(leadingSpanBPeriod).GreaterThan(baseLinePeriod, "Leading Span B period must be greater than Base Line period");
         ValidationGuard.Require(displacement).GreaterThan(0, "Displacement must be greater than 0");
         ValidationGuard.Require(crossLookbackDays).GreaterThan(0, "Cross lookback days must be greater than 0");
         ValidationGuard.Require(riskPercentage)
@@ -72,9 +72,9 @@ public class IchimokuStrategy : BaseStrategy
             .LessThanOrEqual(1m, "Risk percentage cannot exceed 1");
 
         _indicatorCalculator = indicatorCalculator;
-        _tenkanPeriod = tenkanPeriod;
-        _kijunPeriod = kijunPeriod;
-        _senkouBPeriod = senkouBPeriod;
+        _conversionLinePeriod = conversionLinePeriod;
+        _baseLinePeriod = baseLinePeriod;
+        _leadingSpanBPeriod = leadingSpanBPeriod;
         _displacement = displacement;
         _exitMode = exitMode;
         _entryMode = entryMode;
@@ -89,18 +89,18 @@ public class IchimokuStrategy : BaseStrategy
 
         // Calculate Daily Ichimoku indicators
         HistoricalPrice[] dailyPricesArray = historicalData.ToArray();
-        _dailyTenkan = _indicatorCalculator.CalculateTenkan(dailyPricesArray, _tenkanPeriod);
-        _dailyKijun = _indicatorCalculator.CalculateKijun(dailyPricesArray, _kijunPeriod);
-        _dailySenkouA = _indicatorCalculator.CalculateSenkouSpanA(_dailyTenkan, _dailyKijun);
-        _dailySenkouB = _indicatorCalculator.CalculateSenkouSpanB(dailyPricesArray, _senkouBPeriod);
-        _dailyChikou = _indicatorCalculator.CalculateChikouSpan(dailyPricesArray);
+        _dailyConversionLine = _indicatorCalculator.CalculateConversionLine(dailyPricesArray, _conversionLinePeriod);
+        _dailyBaseLine = _indicatorCalculator.CalculateBaseLine(dailyPricesArray, _baseLinePeriod);
+        _dailyLeadingSpanA = _indicatorCalculator.CalculateLeadingSpanA(_dailyConversionLine, _dailyBaseLine);
+        _dailyLeadingSpanB = _indicatorCalculator.CalculateLeadingSpanB(dailyPricesArray, _leadingSpanBPeriod);
+        _dailyLaggingSpan = _indicatorCalculator.CalculateLaggingSpan(dailyPricesArray);
 
         // Aggregate to Weekly timeframe
         _weeklyPrices = _timeframeAggregator.AggregateToWeekly(historicalData);
-        _weeklyTenkan = _indicatorCalculator.CalculateTenkan(_weeklyPrices, _tenkanPeriod);
-        _weeklyKijun = _indicatorCalculator.CalculateKijun(_weeklyPrices, _kijunPeriod);
-        _weeklySenkouA = _indicatorCalculator.CalculateSenkouSpanA(_weeklyTenkan, _weeklyKijun);
-        _weeklySenkouB = _indicatorCalculator.CalculateSenkouSpanB(_weeklyPrices, _senkouBPeriod);
+        _weeklyConversionLine = _indicatorCalculator.CalculateConversionLine(_weeklyPrices, _conversionLinePeriod);
+        _weeklyBaseLine = _indicatorCalculator.CalculateBaseLine(_weeklyPrices, _baseLinePeriod);
+        _weeklyLeadingSpanA = _indicatorCalculator.CalculateLeadingSpanA(_weeklyConversionLine, _weeklyBaseLine);
+        _weeklyLeadingSpanB = _indicatorCalculator.CalculateLeadingSpanB(_weeklyPrices, _leadingSpanBPeriod);
 
         // Map weekly trend state to each daily bar
         _weeklyTrendByDailyBar = MapWeeklyTrendToDaily(historicalData, _weeklyPrices);
@@ -108,9 +108,9 @@ public class IchimokuStrategy : BaseStrategy
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
     {
-        // Minimum data requirement: need displacement bars ahead for Senkou Spans
-        // and displacement bars behind for Chikou
-        int minBars = Math.Max(_senkouBPeriod, _displacement) + _displacement;
+        // Minimum data requirement: need displacement bars ahead for Leading Spans
+        // and displacement bars behind for Lagging Span
+        int minBars = Math.Max(_leadingSpanBPeriod, _displacement) + _displacement;
         if (currentIndex < minBars)
         {
             return new TradeSignal(SignalType.Hold, 0, 0, "Insufficient data for Ichimoku");
@@ -145,7 +145,7 @@ public class IchimokuStrategy : BaseStrategy
                 int quantity = CalculateRiskBasedQuantity(
                     currentCash,
                     currentPrice,
-                    signals.Kijun);
+                    signals.BaseLine);
 
                 if (quantity > 0)
                 {
@@ -171,42 +171,42 @@ public class IchimokuStrategy : BaseStrategy
     {
         decimal price = ClosePrices[currentIndex];
 
-        // Get shifted Senkou Span values (look back displacement periods)
-        int senkouIndex = currentIndex - _displacement;
-        decimal senkouA = senkouIndex >= 0 ? _dailySenkouA[senkouIndex] : 0;
-        decimal senkouB = senkouIndex >= 0 ? _dailySenkouB[senkouIndex] : 0;
+        // Get shifted Leading Span values (look back displacement periods)
+        int leadingSpanIndex = currentIndex - _displacement;
+        decimal leadingSpanA = leadingSpanIndex >= 0 ? _dailyLeadingSpanA[leadingSpanIndex] : 0;
+        decimal leadingSpanB = leadingSpanIndex >= 0 ? _dailyLeadingSpanB[leadingSpanIndex] : 0;
 
         // Kumo boundaries
-        decimal kumoTop = Math.Max(senkouA, senkouB);
-        decimal kumoBottom = Math.Min(senkouA, senkouB);
+        decimal kumoTop = Math.Max(leadingSpanA, leadingSpanB);
+        decimal kumoBottom = Math.Min(leadingSpanA, leadingSpanB);
 
-        // Chikou comparison (price 26 bars ago)
-        int chikouCompareIndex = currentIndex - _displacement;
-        decimal priceAtChikouPosition = chikouCompareIndex >= 0 ? ClosePrices[chikouCompareIndex] : 0;
-        decimal chikou = _dailyChikou[currentIndex];
+        // Lagging Span comparison (price 26 bars ago)
+        int laggingSpanCompareIndex = currentIndex - _displacement;
+        decimal priceAtLaggingSpanPosition = laggingSpanCompareIndex >= 0 ? ClosePrices[laggingSpanCompareIndex] : 0;
+        decimal laggingSpan = _dailyLaggingSpan[currentIndex];
 
-        // Current Tenkan/Kijun
-        decimal tenkan = _dailyTenkan[currentIndex];
-        decimal kijun = _dailyKijun[currentIndex];
+        // Current Conversion Line/Base Line
+        decimal conversionLine = _dailyConversionLine[currentIndex];
+        decimal baseLine = _dailyBaseLine[currentIndex];
 
         // Weekly trend
         TrendState weeklyTrend = _weeklyTrendByDailyBar[currentIndex];
 
         return new IchimokuSignals(
             Price: price,
-            Tenkan: tenkan,
-            Kijun: kijun,
-            SenkouA: senkouA,
-            SenkouB: senkouB,
-            Chikou: chikou,
-            PriceAtChikouPosition: priceAtChikouPosition,
+            ConversionLine: conversionLine,
+            BaseLine: baseLine,
+            LeadingSpanA: leadingSpanA,
+            LeadingSpanB: leadingSpanB,
+            LaggingSpan: laggingSpan,
+            PriceAtLaggingSpanPosition: priceAtLaggingSpanPosition,
             KumoTop: kumoTop,
             KumoBottom: kumoBottom,
             PriceAboveKumo: price > kumoTop,
             PriceBelowKumo: price < kumoBottom,
             PriceInKumo: price >= kumoBottom && price <= kumoTop,
-            TenkanAboveKijun: tenkan > kijun,
-            ChikouAbovePriceHistory: chikou > priceAtChikouPosition,
+            ConversionLineAboveBaseLine: conversionLine > baseLine,
+            LaggingSpanAbovePriceHistory: laggingSpan > priceAtLaggingSpanPosition,
             WeeklyTrend: weeklyTrend
         );
     }
@@ -215,20 +215,20 @@ public class IchimokuStrategy : BaseStrategy
     {
         // Entry conditions (all must be true):
         // 1. Price above Kumo
-        // 2. Tenkan > Kijun (bullish momentum)
-        // 3. Chikou > price history (no resistance)
+        // 2. Conversion Line > Base Line (bullish momentum)
+        // 3. Lagging Span > price history (no resistance)
         // 4. Weekly trend is bullish
-        // 5. If RequireRecentCross mode: Tenkan crossed above Kijun in last N days
+        // 5. If RequireRecentCross mode: Conversion Line crossed above Base Line in last N days
 
         if (!signals.PriceAboveKumo)
         {
             return false;
         }
-        if (!signals.TenkanAboveKijun)
+        if (!signals.ConversionLineAboveBaseLine)
         {
             return false;
         }
-        if (!signals.ChikouAbovePriceHistory)
+        if (!signals.LaggingSpanAbovePriceHistory)
         {
             return false;
         }
@@ -254,16 +254,16 @@ public class IchimokuStrategy : BaseStrategy
     {
         return _exitMode switch
         {
-            IchimokuExitMode.CloseBelowKijun => signals.Price < signals.Kijun,
+            IchimokuExitMode.CloseBelowBaseLine => signals.Price < signals.BaseLine,
             IchimokuExitMode.PriceIntoKumo => signals.PriceInKumo || signals.PriceBelowKumo,
-            IchimokuExitMode.TenkanKijunBearishCross => DetectBearishCross(currentIndex),
+            IchimokuExitMode.ConversionBaseBearishCross => DetectBearishCross(currentIndex),
             _ => false
         };
     }
 
     private bool DetectBullishCrossInLast(int currentIndex, int lookbackDays)
     {
-        // Look back up to N days for Tenkan crossing above Kijun
+        // Look back up to N days for Conversion Line crossing above Base Line
         for (int i = 1; i <= lookbackDays && currentIndex - i >= 0; i++)
         {
             int prevIndex = currentIndex - i;
@@ -272,13 +272,13 @@ public class IchimokuStrategy : BaseStrategy
                 break;
             }
 
-            decimal tenkanPrev = _dailyTenkan[prevIndex - 1];
-            decimal kijunPrev = _dailyKijun[prevIndex - 1];
-            decimal tenkanCurr = _dailyTenkan[prevIndex];
-            decimal kijunCurr = _dailyKijun[prevIndex];
+            decimal conversionLinePrev = _dailyConversionLine[prevIndex - 1];
+            decimal baseLinePrev = _dailyBaseLine[prevIndex - 1];
+            decimal conversionLineCurr = _dailyConversionLine[prevIndex];
+            decimal baseLineCurr = _dailyBaseLine[prevIndex];
 
-            // Bullish cross: Tenkan was <= Kijun, then crosses above
-            if (tenkanPrev <= kijunPrev && tenkanCurr > kijunCurr)
+            // Bullish cross: Conversion Line was <= Base Line, then crosses above
+            if (conversionLinePrev <= baseLinePrev && conversionLineCurr > baseLineCurr)
             {
                 return true;
             }
@@ -294,13 +294,13 @@ public class IchimokuStrategy : BaseStrategy
             return false;
         }
 
-        decimal tenkanPrev = _dailyTenkan[currentIndex - 1];
-        decimal kijunPrev = _dailyKijun[currentIndex - 1];
-        decimal tenkanCurr = _dailyTenkan[currentIndex];
-        decimal kijunCurr = _dailyKijun[currentIndex];
+        decimal conversionLinePrev = _dailyConversionLine[currentIndex - 1];
+        decimal baseLinePrev = _dailyBaseLine[currentIndex - 1];
+        decimal conversionLineCurr = _dailyConversionLine[currentIndex];
+        decimal baseLineCurr = _dailyBaseLine[currentIndex];
 
-        // Bearish cross: Tenkan was >= Kijun, now crosses below
-        return tenkanPrev >= kijunPrev && tenkanCurr < kijunCurr;
+        // Bearish cross: Conversion Line was >= Base Line, now crosses below
+        return conversionLinePrev >= baseLinePrev && conversionLineCurr < baseLineCurr;
     }
 
     private int CalculateRiskBasedQuantity(decimal cash, decimal entryPrice, decimal kijunStop)
@@ -338,7 +338,7 @@ public class IchimokuStrategy : BaseStrategy
             // Find weekly bar that contains this daily bar
             int weeklyIndex = FindWeeklyBarIndex(dailyDate, weeklyPrices);
 
-            if (weeklyIndex >= 0 && weeklyIndex < _weeklyTenkan.Length)
+            if (weeklyIndex >= 0 && weeklyIndex < _weeklyConversionLine.Length)
             {
                 dailyTrends[i] = DetermineWeeklyTrend(weeklyIndex);
             }
@@ -384,29 +384,29 @@ public class IchimokuStrategy : BaseStrategy
 
         decimal weeklyPrice = _weeklyPrices[weeklyIndex].Close ?? 0;
 
-        // Get shifted Senkou values
-        int senkouIndex = weeklyIndex - _displacement;
-        if (senkouIndex < 0)
+        // Get shifted Leading Span values
+        int leadingSpanIndex = weeklyIndex - _displacement;
+        if (leadingSpanIndex < 0)
         {
             return TrendState.Neutral;
         }
 
-        decimal senkouA = _weeklySenkouA[senkouIndex];
-        decimal senkouB = _weeklySenkouB[senkouIndex];
-        decimal kumoTop = Math.Max(senkouA, senkouB);
-        decimal kumoBottom = Math.Min(senkouA, senkouB);
+        decimal leadingSpanA = _weeklyLeadingSpanA[leadingSpanIndex];
+        decimal leadingSpanB = _weeklyLeadingSpanB[leadingSpanIndex];
+        decimal kumoTop = Math.Max(leadingSpanA, leadingSpanB);
+        decimal kumoBottom = Math.Min(leadingSpanA, leadingSpanB);
 
-        decimal tenkan = _weeklyTenkan[weeklyIndex];
-        decimal kijun = _weeklyKijun[weeklyIndex];
+        decimal conversionLine = _weeklyConversionLine[weeklyIndex];
+        decimal baseLine = _weeklyBaseLine[weeklyIndex];
 
-        // Bullish: Price > Kumo AND Tenkan > Kijun
-        if (weeklyPrice > kumoTop && tenkan > kijun)
+        // Bullish: Price > Kumo AND Conversion Line > Base Line
+        if (weeklyPrice > kumoTop && conversionLine > baseLine)
         {
             return TrendState.Bullish;
         }
 
-        // Bearish: Price < Kumo OR Tenkan < Kijun
-        if (weeklyPrice < kumoBottom || tenkan < kijun)
+        // Bearish: Price < Kumo OR Conversion Line < Base Line
+        if (weeklyPrice < kumoBottom || conversionLine < baseLine)
         {
             return TrendState.Bearish;
         }
@@ -418,7 +418,7 @@ public class IchimokuStrategy : BaseStrategy
     {
         return $"Ichimoku bullish entry - " +
                $"Price {signals.Price:F2} > Kumo ({signals.KumoBottom:F2}-{signals.KumoTop:F2}), " +
-               $"Tenkan {signals.Tenkan:F2} > Kijun {signals.Kijun:F2}, " +
+               $"Conversion Line {signals.ConversionLine:F2} > Base Line {signals.BaseLine:F2}, " +
                $"Weekly trend: {signals.WeeklyTrend}";
     }
 
@@ -426,12 +426,12 @@ public class IchimokuStrategy : BaseStrategy
     {
         return mode switch
         {
-            IchimokuExitMode.CloseBelowKijun =>
-                $"Price {signals.Price:F2} closed below Kijun {signals.Kijun:F2}",
+            IchimokuExitMode.CloseBelowBaseLine =>
+                $"Price {signals.Price:F2} closed below Base Line {signals.BaseLine:F2}",
             IchimokuExitMode.PriceIntoKumo =>
                 $"Price {signals.Price:F2} entered Kumo ({signals.KumoBottom:F2}-{signals.KumoTop:F2})",
-            IchimokuExitMode.TenkanKijunBearishCross =>
-                $"Tenkan {signals.Tenkan:F2} crossed below Kijun {signals.Kijun:F2}",
+            IchimokuExitMode.ConversionBaseBearishCross =>
+                $"Conversion Line {signals.ConversionLine:F2} crossed below Base Line {signals.BaseLine:F2}",
             _ => "Exit condition met"
         };
     }
@@ -440,9 +440,9 @@ public class IchimokuStrategy : BaseStrategy
     {
         return new Dictionary<string, object>
         {
-            { "TenkanPeriod", _tenkanPeriod },
-            { "KijunPeriod", _kijunPeriod },
-            { "SenkouBPeriod", _senkouBPeriod },
+            { "ConversionLinePeriod", _conversionLinePeriod },
+            { "BaseLinePeriod", _baseLinePeriod },
+            { "LeadingSpanBPeriod", _leadingSpanBPeriod },
             { "Displacement", _displacement },
             { "ExitMode", _exitMode.ToString() },
             { "EntryMode", _entryMode.ToString() },

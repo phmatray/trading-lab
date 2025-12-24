@@ -30,7 +30,7 @@
     }
     else
     {
-        <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit" class="space-y-6">
+        <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" class="space-y-6">
             <DataAnnotationsValidator />
 
             <!-- Strategy Metadata Card -->
@@ -39,24 +39,27 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Strategy Name *</label>
-                        <InputText @bind-Value="formModel.Name"
+                        <label for="Name" class="block text-sm font-medium mb-1">Strategy Name *</label>
+                        <InputText id="Name"
+                                   @bind-Value="formModel.Name"
                                    class="input-field w-full"
                                    placeholder="e.g., My RSI Strategy" />
                         <ValidationMessage For="@(() => formModel.Name)" class="text-red-600 text-sm mt-1" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-1">Author *</label>
-                        <InputText @bind-Value="formModel.Author"
+                        <label for="Author" class="block text-sm font-medium mb-1">Author *</label>
+                        <InputText id="Author"
+                                   @bind-Value="formModel.Author"
                                    class="input-field w-full"
                                    placeholder="Your name" />
                         <ValidationMessage For="@(() => formModel.Author)" class="text-red-600 text-sm mt-1" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-1">Category *</label>
-                        <InputText @bind-Value="formModel.Category"
+                        <label for="Category" class="block text-sm font-medium mb-1">Category *</label>
+                        <InputText id="Category"
+                                   @bind-Value="formModel.Category"
                                    class="input-field w-full"
                                    placeholder="e.g., Momentum, Trend Following" />
                         <ValidationMessage For="@(() => formModel.Category)" class="text-red-600 text-sm mt-1" />
@@ -64,8 +67,9 @@
                 </div>
 
                 <div class="mt-4">
-                    <label class="block text-sm font-medium mb-1">Description</label>
-                    <InputTextArea @bind-Value="formModel.Description"
+                    <label for="Description" class="block text-sm font-medium mb-1">Description</label>
+                    <InputTextArea id="Description"
+                                   @bind-Value="formModel.Description"
                                    class="input-field w-full h-24 resize-none"
                                    placeholder="Describe your strategy logic and goals..." />
                     <ValidationMessage For="@(() => formModel.Description)" class="text-red-600 text-sm mt-1" />

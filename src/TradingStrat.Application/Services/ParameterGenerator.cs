@@ -182,11 +182,11 @@ public static class ParameterGenerator
                     StrategyType.Ichimoku,
                     new Dictionary<string, object>
                     {
-                        ["TenkanPeriod"] = 9,
-                        ["KijunPeriod"] = 26,
-                        ["SenkouBPeriod"] = 52,
+                        ["ConversionLinePeriod"] = 9,
+                        ["BaseLinePeriod"] = 26,
+                        ["LeadingSpanBPeriod"] = 52,
                         ["Displacement"] = 26,
-                        ["ExitMode"] = "CloseBelowKijun",
+                        ["ExitMode"] = "CloseBelowBaseLine",
                         ["EntryMode"] = "AllConditionsOnly",
                         ["CrossLookbackDays"] = 5,
                         ["RiskPercentage"] = 0.02m
@@ -197,11 +197,11 @@ public static class ParameterGenerator
                     StrategyType.Ichimoku,
                     new Dictionary<string, object>
                     {
-                        ["TenkanPeriod"] = 7,
-                        ["KijunPeriod"] = 22,
-                        ["SenkouBPeriod"] = 44,
+                        ["ConversionLinePeriod"] = 7,
+                        ["BaseLinePeriod"] = 22,
+                        ["LeadingSpanBPeriod"] = 44,
                         ["Displacement"] = 22,
-                        ["ExitMode"] = "CloseBelowKijun",
+                        ["ExitMode"] = "CloseBelowBaseLine",
                         ["EntryMode"] = "AllConditionsOnly",
                         ["CrossLookbackDays"] = 5,
                         ["RiskPercentage"] = 0.02m

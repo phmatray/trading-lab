@@ -28,9 +28,9 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 9,
-            kijunPeriod: 26,
-            senkouBPeriod: 52);
+            conversionLinePeriod: 9,
+            baseLinePeriod: 26,
+            leadingSpanBPeriod: 52);
 
         // Assert
         strategy.ShouldNotBeNull();
@@ -44,7 +44,7 @@ public class IchimokuStrategyTests
         Func<IchimokuStrategy> act = () => new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 0);
+            conversionLinePeriod: 0);
 
         // Assert
         ArgumentOutOfRangeException ex = Should.Throw<ArgumentOutOfRangeException>(act);
@@ -59,8 +59,8 @@ public class IchimokuStrategyTests
         Func<IchimokuStrategy> act = () => new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 26,
-            kijunPeriod: 26);
+            conversionLinePeriod: 26,
+            baseLinePeriod: 26);
 
         // Assert
         ArgumentException ex = Should.Throw<ArgumentException>(act);
@@ -74,9 +74,9 @@ public class IchimokuStrategyTests
         Func<IchimokuStrategy> act = () => new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 9,
-            kijunPeriod: 26,
-            senkouBPeriod: 26);
+            conversionLinePeriod: 9,
+            baseLinePeriod: 26,
+            leadingSpanBPeriod: 26);
 
         // Assert
         ArgumentException ex = Should.Throw<ArgumentException>(act);
@@ -167,9 +167,9 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 9,
-            kijunPeriod: 26,
-            senkouBPeriod: 52);
+            conversionLinePeriod: 9,
+            baseLinePeriod: 26,
+            leadingSpanBPeriod: 52);
 
         strategy.Initialize(prices.AsReadOnly());
 
@@ -274,7 +274,7 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            exitMode: IchimokuExitMode.CloseBelowKijun);
+            exitMode: IchimokuExitMode.CloseBelowBaseLine);
 
         strategy.Initialize(prices.AsReadOnly());
 
@@ -338,7 +338,7 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            exitMode: IchimokuExitMode.TenkanKijunBearishCross);
+            exitMode: IchimokuExitMode.ConversionBaseBearishCross);
 
         strategy.Initialize(prices.AsReadOnly());
 
@@ -438,9 +438,9 @@ public class IchimokuStrategyTests
     #region Parameter Tests
 
     [Theory]
-    [InlineData(9, 26, 52, IchimokuExitMode.CloseBelowKijun, IchimokuEntryMode.AllConditionsOnly)]
+    [InlineData(9, 26, 52, IchimokuExitMode.CloseBelowBaseLine, IchimokuEntryMode.AllConditionsOnly)]
     [InlineData(12, 30, 60, IchimokuExitMode.PriceIntoKumo, IchimokuEntryMode.RequireRecentCross)]
-    [InlineData(7, 22, 44, IchimokuExitMode.TenkanKijunBearishCross, IchimokuEntryMode.AllConditionsOnly)]
+    [InlineData(7, 22, 44, IchimokuExitMode.ConversionBaseBearishCross, IchimokuEntryMode.AllConditionsOnly)]
     public void Constructor_WithDifferentParameters_ShouldCreateStrategy(
         int tenkan,
         int kijun,
@@ -452,9 +452,9 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: tenkan,
-            kijunPeriod: kijun,
-            senkouBPeriod: senkouB,
+            conversionLinePeriod: tenkan,
+            baseLinePeriod: kijun,
+            leadingSpanBPeriod: senkouB,
             exitMode: exitMode,
             entryMode: entryMode);
 
@@ -472,11 +472,11 @@ public class IchimokuStrategyTests
         var strategy = new IchimokuStrategy(
             _indicatorCalculator,
             _timeframeAggregator,
-            tenkanPeriod: 9,
-            kijunPeriod: 26,
-            senkouBPeriod: 52,
+            conversionLinePeriod: 9,
+            baseLinePeriod: 26,
+            leadingSpanBPeriod: 52,
             displacement: 26,
-            exitMode: IchimokuExitMode.CloseBelowKijun,
+            exitMode: IchimokuExitMode.CloseBelowBaseLine,
             entryMode: IchimokuEntryMode.RequireRecentCross,
             crossLookbackDays: 5,
             riskPercentage: 0.02m);

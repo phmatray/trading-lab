@@ -72,7 +72,7 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Assert
-        await Page.Locator("select").First.ShouldBeVisibleAsync();
+        await Page.Locator("[data-testid='rule-0-indicator']").ShouldBeVisibleAsync();
         await Page.Locator("text=Indicator").ShouldBeVisibleAsync();
         await Page.Locator("text=Operator").ShouldBeVisibleAsync();
     }
@@ -86,7 +86,7 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Act
-        ILocator indicatorSelect = Page.Locator("select").First;
+        ILocator indicatorSelect = Page.Locator("[data-testid='rule-0-indicator']");
         await indicatorSelect.ClickAsync();
 
         // Assert - Check for indicator categories
@@ -103,7 +103,7 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Act
-        await Page.Locator("select").First.SelectOptionAsync("RSI");
+        await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
 
         // Assert
@@ -122,7 +122,7 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Act
-        ILocator operatorSelect = Page.Locator("select").Nth(1); // Second select is operator
+        ILocator operatorSelect = Page.Locator("[data-testid='rule-0-operator']"); // Second select is operator
         await operatorSelect.ClickAsync();
 
         // Assert
@@ -165,9 +165,9 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Assert - Should show AND/OR radio buttons
-        await Page.Locator("text=AND").ShouldBeVisibleAsync();
-        await Page.Locator("text=OR").ShouldBeVisibleAsync();
         await Page.Locator("input[type='radio'][value='And']").ShouldBeVisibleAsync();
+        await Page.Locator("input[type='radio'][value='Or']").ShouldBeVisibleAsync();
+        await Page.Locator("span.font-semibold:has-text('AND')").ShouldBeVisibleAsync();
     }
 
     [Fact]
@@ -235,29 +235,27 @@ public class StrategyBuilderPageTests : BaseTest
         // Add entry rule: RSI < 30
         await Page.Locator("button:has-text('Add First Rule')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").First.SelectOptionAsync("RSI");
+        await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").Nth(1).SelectOptionAsync("LessThan");
-        await Page.Locator("input[type='number']").Last.FillAsync("30");
+        await Page.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("LessThan");
+        await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule: RSI > 70
-        var exitSection = Page.Locator("text=Exit Rules").Locator("..");
+        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
-        var exitSelects = Page.Locator("select");
-        int selectCount = await exitSelects.CountAsync();
-        await exitSelects.Nth(selectCount - 3).SelectOptionAsync("RSI"); // Last indicator select
+        await exitSection.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await exitSelects.Nth(selectCount - 2).SelectOptionAsync("GreaterThan"); // Last operator select
-        await Page.Locator("input[type='number']").Last.FillAsync("70");
+        await exitSection.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("GreaterThan");
+        await exitSection.Locator("[data-testid='rule-0-value']").FillAsync("70");
 
         // Submit
         await Page.Locator("button[type='submit']:has-text('Create Strategy')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Task.Delay(1000); // Wait for navigation
 
         // Assert - Should navigate to library
+        await Page.WaitForURLAsync("**/strategies/library");
         Page.Url.ShouldContain("/strategies/library");
     }
 

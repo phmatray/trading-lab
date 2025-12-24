@@ -247,33 +247,33 @@ public sealed class StrategyRegistry : IStrategyRegistry
         Category = "Trend",
         Parameters = new Dictionary<string, ParameterSchema>
         {
-            ["TenkanPeriod"] = new()
+            ["ConversionLinePeriod"] = new()
             {
-                Name = "TenkanPeriod",
+                Name = "ConversionLinePeriod",
                 ParameterType = typeof(int),
                 DefaultValue = 9,
-                DisplayName = "Tenkan Period",
-                Description = "Period for Tenkan-sen (conversion line)",
+                DisplayName = "Conversion Line Period",
+                Description = "Period for Conversion Line (Tenkan-sen)",
                 MinValue = 1,
                 MaxValue = 100
             },
-            ["KijunPeriod"] = new()
+            ["BaseLinePeriod"] = new()
             {
-                Name = "KijunPeriod",
+                Name = "BaseLinePeriod",
                 ParameterType = typeof(int),
                 DefaultValue = 26,
-                DisplayName = "Kijun Period",
-                Description = "Period for Kijun-sen (base line)",
+                DisplayName = "Base Line Period",
+                Description = "Period for Base Line (Kijun-sen)",
                 MinValue = 1,
                 MaxValue = 100
             },
-            ["SenkouBPeriod"] = new()
+            ["LeadingSpanBPeriod"] = new()
             {
-                Name = "SenkouBPeriod",
+                Name = "LeadingSpanBPeriod",
                 ParameterType = typeof(int),
                 DefaultValue = 52,
-                DisplayName = "Senkou B Period",
-                Description = "Period for Senkou Span B (cloud boundary)",
+                DisplayName = "Leading Span B Period",
+                Description = "Period for Leading Span B (Senkou Span B - cloud boundary)",
                 MinValue = 1,
                 MaxValue = 200
             },
@@ -283,7 +283,7 @@ public sealed class StrategyRegistry : IStrategyRegistry
                 ParameterType = typeof(int),
                 DefaultValue = 26,
                 DisplayName = "Displacement",
-                Description = "Chikou Span displacement (days shifted)",
+                Description = "Lagging Span (Chikou Span) displacement (days shifted)",
                 MinValue = 1,
                 MaxValue = 100
             },
@@ -291,9 +291,9 @@ public sealed class StrategyRegistry : IStrategyRegistry
             {
                 Name = "ExitMode",
                 ParameterType = typeof(string),
-                DefaultValue = "CloseBelowKijun",
+                DefaultValue = "CloseBelowBaseLine",
                 DisplayName = "Exit Mode",
-                Description = "Exit signal mode (CloseBelowKijun, PriceBelowCloud, TenkanBelowKijun)"
+                Description = "Exit signal mode (CloseBelowBaseLine, PriceIntoKumo, ConversionBaseBearishCross)"
             },
             ["EntryMode"] = new()
             {
@@ -301,7 +301,7 @@ public sealed class StrategyRegistry : IStrategyRegistry
                 ParameterType = typeof(string),
                 DefaultValue = "AllConditionsOnly",
                 DisplayName = "Entry Mode",
-                Description = "Entry signal mode (AllConditionsOnly, ChikouOnly, TenkanKijunOnly)"
+                Description = "Entry signal mode (AllConditionsOnly, LaggingSpanOnly, ConversionBaseOnly)"
             },
             ["CrossLookbackDays"] = new()
             {

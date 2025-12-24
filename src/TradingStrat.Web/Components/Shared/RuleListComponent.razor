@@ -1,6 +1,7 @@
 @using TradingStrat.Web.Models
 @using TradingStrat.Domain.ValueObjects
 @using TradingStrat.Web.Services
+@using static TradingStrat.Web.Services.DebugLogger
 @inject IndicatorMetadataService IndicatorService
 
 <div class="rule-list">
@@ -31,6 +32,7 @@
                         <div class="col-span-12 md:col-span-3">
                             <label class="block text-sm font-medium mb-1">Indicator</label>
                             <select class="input-field w-full"
+                                    data-testid="rule-@index-indicator"
                                     value="@rule.IndicatorName"
                                     @onchange="e => OnIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
                                 <option value="">Select indicator...</option>
@@ -66,6 +68,7 @@
                         <div class="col-span-12 md:col-span-2">
                             <label class="block text-sm font-medium mb-1">Operator</label>
                             <select class="input-field w-full"
+                                    data-testid="rule-@index-operator"
                                     value="@rule.Operator.ToString()"
                                     @onchange="e => OnOperatorChanged(index, e.Value?.ToString() ?? string.Empty)">
                                 <option value="@ComparisonOperator.GreaterThan">&gt;</option>
@@ -82,6 +85,7 @@
                         <div class="col-span-12 md:col-span-2">
                             <label class="block text-sm font-medium mb-1">Compare To</label>
                             <select class="input-field w-full"
+                                    data-testid="rule-@index-value-type"
                                     value="@rule.ValueType.ToString()"
                                     @onchange="e => OnValueTypeChanged(index, e.Value?.ToString() ?? string.Empty)">
                                 <option value="@RuleValueType.Constant">Number</option>
@@ -98,6 +102,7 @@
                                 <input type="number"
                                        step="0.01"
                                        class="input-field w-full"
+                                       data-testid="rule-@index-value"
                                        value="@rule.ConstantValue"
                                        @onchange="e => OnConstantValueChanged(index, e.Value)" />
                             }
@@ -111,6 +116,7 @@
                             else if (rule.ValueType == RuleValueType.Indicator)
                             {
                                 <select class="input-field w-full"
+                                        data-testid="rule-@index-second-indicator"
                                         value="@(rule.SecondIndicatorName ?? string.Empty)"
                                         @onchange="e => OnSecondIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
                                     <option value="">Select...</option>
@@ -188,14 +194,16 @@
 
     private async Task AddRule()
     {
-        Rules.Add(new RuleFormModel
+        var newRule = new RuleFormModel
         {
             IndicatorName = string.Empty,
             Operator = ComparisonOperator.GreaterThan,
             ValueType = RuleValueType.Constant,
             ConstantValue = 0,
             LogicalOperator = Rules.Count > 0 ? LogicalOperator.And : LogicalOperator.None
-        });
+        };
+        Rules.Add(newRule);
+        Log($"[RuleListComponent] Added new rule at index {Rules.Count - 1}. Total rules: {Rules.Count}");
 
         await NotifyChanged();
     }
@@ -215,13 +223,20 @@
 
     private async Task OnIndicatorChanged(int index, string indicatorName)
     {
+        Log($"[RuleListComponent] OnIndicatorChanged: index={index}, indicator={indicatorName}");
         Rules[index].IndicatorName = indicatorName;
         Rules[index].IndicatorParameters = IndicatorService.GetDefaultParameters(indicatorName);
+        Log($"[RuleListComponent]   Parameters count: {Rules[index].IndicatorParameters.Count}");
+        foreach (var param in Rules[index].IndicatorParameters)
+        {
+            Log($"[RuleListComponent]     {param.Key} = {param.Value}");
+        }
         await NotifyChanged();
     }
 
     private async Task OnParameterChanged(int index, string paramName, object? value)
     {
+        Log($"[RuleListComponent] OnParameterChanged: index={index}, param={paramName}, value={value}");
         if (value != null && int.TryParse(value.ToString(), out int intValue))
         {
             Rules[index].IndicatorParameters[paramName] = intValue;
@@ -231,15 +246,18 @@
 
     private async Task OnOperatorChanged(int index, string operatorValue)
     {
+        Log($"[RuleListComponent] OnOperatorChanged: index={index}, operator={operatorValue}");
         if (Enum.TryParse<ComparisonOperator>(operatorValue, out var op))
         {
             Rules[index].Operator = op;
+            Log($"[RuleListComponent]   Parsed to: {op}");
             await NotifyChanged();
         }
     }
 
     private async Task OnValueTypeChanged(int index, string valueType)
     {
+        Log($"[RuleListComponent] OnValueTypeChanged: index={index}, valueType={valueType}");
         if (Enum.TryParse<RuleValueType>(valueType, out var vt))
         {
             Rules[index].ValueType = vt;
@@ -267,10 +285,16 @@
 
     private async Task OnConstantValueChanged(int index, object? value)
     {
+        Log($"[RuleListComponent] OnConstantValueChanged: index={index}, value={value}, type={value?.GetType().Name}");
         if (value != null && decimal.TryParse(value.ToString(), out decimal decValue))
         {
             Rules[index].ConstantValue = decValue;
+            Log($"[RuleListComponent]   Parsed to decimal: {decValue}");
             await NotifyChanged();
+        }
+        else
+        {
+            Log($"[RuleListComponent]   FAILED to parse to decimal!");
         }
     }
 

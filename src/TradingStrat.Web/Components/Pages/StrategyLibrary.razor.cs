@@ -4,6 +4,7 @@ using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
+using static TradingStrat.Web.Services.DebugLogger;
 
 namespace TradingStrat.Web.Components.Pages;
 
@@ -32,16 +33,28 @@ public partial class StrategyLibrary
 
         try
         {
+            Log("[StrategyLibrary] Loading custom strategies...");
             List<CustomStrategyResult> strategies = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            Log($"[StrategyLibrary] Loaded {strategies.Count} strategies");
+
             customStrategies = strategies.OrderByDescending(s => s.LastUpdatedAt).ToList();
+            Log("[StrategyLibrary] Strategies sorted and assigned");
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Failed to load custom strategies: {ex.Message}");
+            Log($"[StrategyLibrary] ERROR loading strategies: {ex.GetType().Name}: {ex.Message}");
+            Log($"[StrategyLibrary] Stack: {ex.StackTrace}");
+
+            // Initialize to empty list on error so page can still load
+            customStrategies = new List<CustomStrategyResult>();
+
+            // Fire-and-forget notification (don't block page load on JSInterop)
+            _ = ShowErrorAsync($"Failed to load custom strategies: {ex.Message}");
         }
         finally
         {
             isLoading = false;
+            Log("[StrategyLibrary] Load custom strategies complete");
         }
     }
 
@@ -95,19 +108,19 @@ public partial class StrategyLibrary
             CustomStrategyResult? original = customStrategies.FirstOrDefault(s => s.Id == strategyId);
             if (original == null)
             {
-                await ShowErrorAsync("Strategy not found");
+                _ = ShowErrorAsync("Strategy not found");
                 return;
             }
 
             string newName = $"{original.Name} (Copy)";
             CustomStrategyResult cloned = await CustomStrategyUseCase.CloneStrategyAsync(strategyId, newName);
 
-            await ShowSuccessAsync($"Strategy cloned successfully as '{newName}'");
             await LoadCustomStrategies();
+            _ = ShowSuccessAsync($"Strategy cloned successfully as '{newName}'");
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Failed to clone strategy: {ex.Message}");
+            _ = ShowErrorAsync($"Failed to clone strategy: {ex.Message}");
         }
     }
 
@@ -132,12 +145,12 @@ public partial class StrategyLibrary
         try
         {
             await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
-            await ShowSuccessAsync($"Strategy '{strategy.Name}' deleted successfully");
             await LoadCustomStrategies();
+            _ = ShowSuccessAsync($"Strategy '{strategy.Name}' deleted successfully");
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync($"Failed to delete strategy: {ex.Message}");
+            _ = ShowErrorAsync($"Failed to delete strategy: {ex.Message}");
         }
     }
 

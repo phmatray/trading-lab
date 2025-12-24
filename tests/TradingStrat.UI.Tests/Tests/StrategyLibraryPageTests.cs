@@ -133,26 +133,27 @@ public class StrategyLibraryPageTests : BaseTest
         // Add entry rule
         await Page.Locator("button:has-text('Add First Rule')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").First.SelectOptionAsync("RSI");
+        await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").Nth(1).SelectOptionAsync("LessThan");
-        await Page.Locator("input[type='number']").Last.FillAsync("30");
+        await Page.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("LessThan");
+        await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule
-        var exitSection = Page.Locator("text=Exit Rules").Locator("..");
+        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        var exitSelects = Page.Locator("select");
-        int selectCount = await exitSelects.CountAsync();
-        await exitSelects.Nth(selectCount - 3).SelectOptionAsync("RSI");
+        await exitSection.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await exitSelects.Nth(selectCount - 2).SelectOptionAsync("GreaterThan");
-        await Page.Locator("input[type='number']").Last.FillAsync("70");
+        await exitSection.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("GreaterThan");
+        await exitSection.Locator("[data-testid='rule-0-value']").FillAsync("70");
 
         // Submit
         await Page.Locator("button[type='submit']:has-text('Create Strategy')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Task.Delay(1000);
+
+        // Wait for navigation to library page
+        await Page.WaitForURLAsync("**/strategies/library");
+        await Page.WaitForBlazorAsync();
 
         // Act - Switch to My Strategies tab
         await Page.Locator("button:has-text('My Strategies')").ClickAsync();
@@ -308,16 +309,19 @@ public class StrategyLibraryPageTests : BaseTest
         // Add minimal rules
         await Page.Locator("button:has-text('Add First Rule')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").First.SelectOptionAsync("RSI");
+        await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
 
-        var exitSection = Page.Locator("text=Exit Rules").Locator("..");
+        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
         await Page.Locator("button[type='submit']:has-text('Create Strategy')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Task.Delay(1000);
+
+        // Wait for navigation to library page
+        await Page.WaitForURLAsync("**/strategies/library");
+        await Page.WaitForBlazorAsync();
 
         // Act
         await Page.Locator("button:has-text('My Strategies')").ClickAsync();
@@ -374,25 +378,26 @@ public class StrategyLibraryPageTests : BaseTest
         // Add entry rule
         await Page.Locator("button:has-text('Add First Rule')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").First.SelectOptionAsync("RSI");
+        await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await Page.Locator("select").Nth(1).SelectOptionAsync("LessThan");
-        await Page.Locator("input[type='number']").Last.FillAsync("30");
+        await Page.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("LessThan");
+        await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule
-        var exitSection = Page.Locator("text=Exit Rules").Locator("..");
+        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        var exitSelects = Page.Locator("select");
-        int selectCount = await exitSelects.CountAsync();
-        await exitSelects.Nth(selectCount - 3).SelectOptionAsync("RSI");
+        await exitSection.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
-        await exitSelects.Nth(selectCount - 2).SelectOptionAsync("GreaterThan");
-        await Page.Locator("input[type='number']").Last.FillAsync("70");
+        await exitSection.Locator("[data-testid='rule-0-operator']").SelectOptionAsync("GreaterThan");
+        await exitSection.Locator("[data-testid='rule-0-value']").FillAsync("70");
 
         // Submit
         await Page.Locator("button[type='submit']:has-text('Create Strategy')").ClickAsync();
         await Page.WaitForBlazorAsync();
-        await Task.Delay(1000);
+
+        // Wait for navigation to library page
+        await Page.WaitForURLAsync("**/strategies/library");
+        await Page.WaitForBlazorAsync();
     }
 }
