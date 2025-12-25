@@ -1,7 +1,3 @@
-@using TradingStrat.Web.Services
-@inject NotificationService NotificationService
-@implements IDisposable
-
 <div class="relative">
     <button @onclick="ToggleNotificationCenter"
             class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-elevated transition-colors focus:outline-none focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue"
@@ -30,49 +26,3 @@
     <!-- Notification Center Panel -->
     <NotificationCenter IsOpen="@_isOpen" IsOpenChanged="@HandleIsOpenChanged" />
 </div>
-
-@code {
-    private bool _isOpen = false;
-    private int _unreadCount = 0;
-    private bool _hasLoadedCount = false;
-
-    protected override void OnInitialized()
-    {
-        NotificationService.OnUnreadCountChanged += HandleUnreadCountChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_hasLoadedCount)
-        {
-            _hasLoadedCount = true;
-            _unreadCount = await NotificationService.GetUnreadCountAsync();
-            StateHasChanged();
-        }
-    }
-
-    private void ToggleNotificationCenter()
-    {
-        _isOpen = !_isOpen;
-    }
-
-    private void HandleIsOpenChanged(bool isOpen)
-    {
-        _isOpen = isOpen;
-        StateHasChanged();
-    }
-
-    private void HandleUnreadCountChanged(int count)
-    {
-        InvokeAsync(() =>
-        {
-            _unreadCount = count;
-            StateHasChanged();
-        });
-    }
-
-    public void Dispose()
-    {
-        NotificationService.OnUnreadCountChanged -= HandleUnreadCountChanged;
-    }
-}

@@ -1,0 +1,69 @@
+using Microsoft.AspNetCore.Components;
+
+namespace TradingStrat.Web.Components.Shared;
+
+public partial class EmptyState : ComponentBase
+{
+    /// <summary>
+    /// Icon to display (folder, document, chart, portfolio, alert, search, database)
+    /// </summary>
+    [Parameter]
+    public string Icon { get; set; } = "folder";
+
+    /// <summary>
+    /// Main title text
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "No data";
+
+    /// <summary>
+    /// Optional description text
+    /// </summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Optional action buttons or links
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+
+    /// <summary>
+    /// Size of the icon (small: 8x8, medium: 12x12, large: 16x16)
+    /// </summary>
+    [Parameter]
+    public string Size { get; set; } = "medium";
+
+    private string GetSizeClass()
+    {
+        return Size.ToLowerInvariant() switch
+        {
+            "small" => "h-8 w-8",
+            "large" => "h-16 w-16",
+            _ => "h-12 w-12" // medium (default)
+        };
+    }
+
+    private RenderFragment GetIconPath() => builder =>
+    {
+        string iconType = Icon.ToLowerInvariant();
+        string path = iconType switch
+        {
+            "folder" => "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z",
+            "document" => "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+            "chart" => "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+            "portfolio" => "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+            "alert" => "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
+            "search" => "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
+            "database" => "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4",
+            _ => "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" // default to folder
+        };
+
+        builder.OpenElement(0, "path");
+        builder.AddAttribute(1, "stroke-linecap", "round");
+        builder.AddAttribute(2, "stroke-linejoin", "round");
+        builder.AddAttribute(3, "stroke-width", "2");
+        builder.AddAttribute(4, "d", path);
+        builder.CloseElement();
+    };
+}

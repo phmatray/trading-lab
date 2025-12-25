@@ -1,8 +1,5 @@
 @page "/strategies/builder"
 @page "/strategies/builder/{Id:int}"
-@using TradingStrat.Web.Models
-@using TradingStrat.Web.Services
-@using TradingStrat.Domain.ValueObjects
 @rendermode InteractiveServer
 
 <PageTitle>@(IsEditMode ? "Edit Strategy" : "Strategy Builder") | TradingStrat</PageTitle>
@@ -24,13 +21,13 @@
     </div>
 
     <!-- Loading State -->
-    @if (isLoading)
+    @if (_isLoading)
     {
-        <LoadingState Message="@loadingMessage" />
+        <LoadingState Message="@_loadingMessage" />
     }
     else
     {
-        <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" class="space-y-6">
+        <EditForm Model="@_formModel" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" class="space-y-6">
             <DataAnnotationsValidator />
 
             <!-- Strategy Metadata Card -->
@@ -41,38 +38,38 @@
                     <div>
                         <label for="Name" class="block text-sm font-medium mb-1">Strategy Name *</label>
                         <InputText id="Name"
-                                   @bind-Value="formModel.Name"
+                                   @bind-Value="_formModel.Name"
                                    class="input-field w-full"
                                    placeholder="e.g., My RSI Strategy" />
-                        <ValidationMessage For="@(() => formModel.Name)" class="text-red-600 text-sm mt-1" />
+                        <ValidationMessage For="@(() => _formModel.Name)" class="text-red-600 text-sm mt-1" />
                     </div>
 
                     <div>
                         <label for="Author" class="block text-sm font-medium mb-1">Author *</label>
                         <InputText id="Author"
-                                   @bind-Value="formModel.Author"
+                                   @bind-Value="_formModel.Author"
                                    class="input-field w-full"
                                    placeholder="Your name" />
-                        <ValidationMessage For="@(() => formModel.Author)" class="text-red-600 text-sm mt-1" />
+                        <ValidationMessage For="@(() => _formModel.Author)" class="text-red-600 text-sm mt-1" />
                     </div>
 
                     <div>
                         <label for="Category" class="block text-sm font-medium mb-1">Category *</label>
                         <InputText id="Category"
-                                   @bind-Value="formModel.Category"
+                                   @bind-Value="_formModel.Category"
                                    class="input-field w-full"
                                    placeholder="e.g., Momentum, Trend Following" />
-                        <ValidationMessage For="@(() => formModel.Category)" class="text-red-600 text-sm mt-1" />
+                        <ValidationMessage For="@(() => _formModel.Category)" class="text-red-600 text-sm mt-1" />
                     </div>
                 </div>
 
                 <div class="mt-4">
                     <label for="Description" class="block text-sm font-medium mb-1">Description</label>
                     <InputTextArea id="Description"
-                                   @bind-Value="formModel.Description"
+                                   @bind-Value="_formModel.Description"
                                    class="input-field w-full h-24 resize-none"
                                    placeholder="Describe your strategy logic and goals..." />
-                    <ValidationMessage For="@(() => formModel.Description)" class="text-red-600 text-sm mt-1" />
+                    <ValidationMessage For="@(() => _formModel.Description)" class="text-red-600 text-sm mt-1" />
                 </div>
             </div>
 
@@ -83,42 +80,42 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Sizing Mode *</label>
-                        <InputSelect @bind-Value="formModel.SizingMode" class="input-field w-full">
+                        <InputSelect @bind-Value="_formModel.SizingMode" class="input-field w-full">
                             <option value="@PositionSizingMode.FixedPercentage">Fixed Percentage</option>
                             <option value="@PositionSizingMode.FixedQuantity">Fixed Quantity</option>
                             <option value="@PositionSizingMode.RiskBased">Risk-Based</option>
                         </InputSelect>
                     </div>
 
-                    @if (formModel.SizingMode == PositionSizingMode.FixedPercentage)
+                    @if (_formModel.SizingMode == PositionSizingMode.FixedPercentage)
                     {
                         <div>
                             <label class="block text-sm font-medium mb-1">Percentage of Capital (%)</label>
-                            <InputNumber @bind-Value="formModel.FixedPercentage"
+                            <InputNumber @bind-Value="_formModel.FixedPercentage"
                                          class="input-field w-full"
                                          step="0.1" />
-                            <ValidationMessage For="@(() => formModel.FixedPercentage)" class="text-red-600 text-sm mt-1" />
+                            <ValidationMessage For="@(() => _formModel.FixedPercentage)" class="text-red-600 text-sm mt-1" />
                             <p class="text-xs text-gray-500 mt-1">Use 1-100% of available capital per trade</p>
                         </div>
                     }
-                    else if (formModel.SizingMode == PositionSizingMode.FixedQuantity)
+                    else if (_formModel.SizingMode == PositionSizingMode.FixedQuantity)
                     {
                         <div>
                             <label class="block text-sm font-medium mb-1">Fixed Quantity (shares)</label>
-                            <InputNumber @bind-Value="formModel.FixedQuantity"
+                            <InputNumber @bind-Value="_formModel.FixedQuantity"
                                          class="input-field w-full" />
-                            <ValidationMessage For="@(() => formModel.FixedQuantity)" class="text-red-600 text-sm mt-1" />
+                            <ValidationMessage For="@(() => _formModel.FixedQuantity)" class="text-red-600 text-sm mt-1" />
                             <p class="text-xs text-gray-500 mt-1">Buy fixed number of shares per trade</p>
                         </div>
                     }
-                    else if (formModel.SizingMode == PositionSizingMode.RiskBased)
+                    else if (_formModel.SizingMode == PositionSizingMode.RiskBased)
                     {
                         <div>
                             <label class="block text-sm font-medium mb-1">Risk per Trade (%)</label>
-                            <InputNumber @bind-Value="formModel.RiskPercentage"
+                            <InputNumber @bind-Value="_formModel.RiskPercentage"
                                          class="input-field w-full"
                                          step="0.001" />
-                            <ValidationMessage For="@(() => formModel.RiskPercentage)" class="text-red-600 text-sm mt-1" />
+                            <ValidationMessage For="@(() => _formModel.RiskPercentage)" class="text-red-600 text-sm mt-1" />
                             <p class="text-xs text-gray-500 mt-1">Risk 0.1-10% of capital per trade</p>
                         </div>
                     }
@@ -134,10 +131,10 @@
                             Define when to open a position (buy signal)
                         </p>
                     </div>
-                    <span class="badge badge-primary">@formModel.EntryRules.Count rule(s)</span>
+                    <span class="badge badge-primary">@_formModel.EntryRules.Count rule(s)</span>
                 </div>
 
-                <RuleListComponent Rules="@formModel.EntryRules"
+                <RuleListComponent Rules="@_formModel.EntryRules"
                                    EmptyStateMessage="No entry rules defined. Add rules to specify when to buy."
                                    OnRulesChanged="StateHasChanged" />
             </div>
@@ -151,10 +148,10 @@
                             Define when to close a position (sell signal)
                         </p>
                     </div>
-                    <span class="badge badge-primary">@formModel.ExitRules.Count rule(s)</span>
+                    <span class="badge badge-primary">@_formModel.ExitRules.Count rule(s)</span>
                 </div>
 
-                <RuleListComponent Rules="@formModel.ExitRules"
+                <RuleListComponent Rules="@_formModel.ExitRules"
                                    EmptyStateMessage="No exit rules defined. Add rules to specify when to sell."
                                    OnRulesChanged="StateHasChanged" />
             </div>
@@ -172,8 +169,8 @@
                             Delete Strategy
                         </button>
                     }
-                    <button type="submit" class="btn-primary" disabled="@isSaving">
-                        @if (isSaving)
+                    <button type="submit" class="btn-primary" disabled="@_isSaving">
+                        @if (_isSaving)
                         {
                             <span>Saving...</span>
                         }
@@ -186,12 +183,12 @@
             </div>
 
             <!-- Validation Summary -->
-            @if (validationErrors.Any())
+            @if (_validationErrors.Any())
             {
                 <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                     <h3 class="font-semibold text-red-800 dark:text-red-200 mb-2">Please fix the following errors:</h3>
                     <ul class="list-disc list-inside text-red-700 dark:text-red-300 text-sm space-y-1">
-                        @foreach (var error in validationErrors)
+                        @foreach (var error in _validationErrors)
                         {
                             <li>@error</li>
                         }

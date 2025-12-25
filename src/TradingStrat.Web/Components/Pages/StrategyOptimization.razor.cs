@@ -7,7 +7,7 @@ using TradingStrat.Web.Services;
 
 namespace TradingStrat.Web.Components.Pages;
 
-public partial class StrategyOptimization
+public partial class StrategyOptimization : IDisposable
 {
     [Inject] private ICustomStrategyManagementUseCase CustomStrategyUseCase { get; set; } = default!;
     [Inject] private IOptimizeStrategyParametersUseCase OptimizeUseCase { get; set; } = default!;
@@ -27,6 +27,7 @@ public partial class StrategyOptimization
 
     protected override async Task OnInitializedAsync()
     {
+        ProgressService.OnProgressChanged += StateHasChanged;
         await LoadCustomStrategiesAsync();
     }
 
@@ -155,7 +156,8 @@ public partial class StrategyOptimization
 
         try
         {
-            ProgressService.UpdateProgress("Starting optimization...", 0);
+            await InvokeAsync(() => ProgressService.Reset());
+            await InvokeAsync(() => ProgressService.UpdateProgress("Starting optimization...", 0));
 
             // Create progress reporter
             Progress<Domain.ValueObjects.OptimizationProgress> progress = new(p =>
@@ -173,15 +175,14 @@ public partial class StrategyOptimization
             optimizationResult = await OptimizeUseCase.ExecuteAsync(command, progress);
 
             await ShowSuccessAsync($"Optimization complete! Best score: {optimizationResult.BestScore:F2}");
-            ProgressService.Reset();
         }
         catch (Exception ex)
         {
             await ShowErrorAsync($"Optimization failed: {ex.Message}");
-            ProgressService.Reset();
         }
         finally
         {
+            await InvokeAsync(() => ProgressService.Reset());
             isOptimizing = false;
         }
     }
@@ -306,5 +307,11 @@ public partial class StrategyOptimization
             "Warning",
             message
         );
+    }
+
+    public void Dispose()
+    {
+        ProgressService.OnProgressChanged -= StateHasChanged;
+        GC.SuppressFinalize(this);
     }
 }

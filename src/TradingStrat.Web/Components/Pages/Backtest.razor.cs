@@ -75,9 +75,8 @@ public partial class Backtest
         {
             lastProgress = p;
             int percentage = p.Total > 0 ? (int)((double)p.Current / p.Total * 100) : 0;
-            progress.Report($"Processing bar {p.Current}/{p.Total} - {p.Trades} trades executed");
 
-            // Update progress service directly for percentage
+            // Report with percentage (single update, no duplication)
             InvokeAsync(() => ProgressService.UpdateProgress(
                 $"Processing bar {p.Current}/{p.Total} - {p.Trades} trades executed",
                 percentage));

@@ -22,6 +22,69 @@ public partial class StrategyLibrary
     [Inject]
     private IJSRuntime JSRuntime { get; set; } = null!;
 
+    private enum StrategyTab
+    {
+        BuiltIn,
+        Custom
+    }
+
+    private StrategyTab activeTab = StrategyTab.BuiltIn;
+    private bool isLoading = false;
+    private List<CustomStrategyResult> customStrategies = [];
+
+    private readonly List<BuiltInStrategyInfo> builtInStrategies = new()
+    {
+        new BuiltInStrategyInfo
+        {
+            Name = "Moving Average Crossover",
+            Key = "ma",
+            Category = "Trend Following",
+            Description = "Generates buy/sell signals when a fast moving average crosses above/below a slow moving average. Classic trend-following strategy.",
+            DefaultParameters = new() { ["FastPeriod"] = "20", ["SlowPeriod"] = "50" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "RSI Strategy",
+            Key = "rsi",
+            Category = "Momentum",
+            Description = "Buys when RSI is oversold (<30) and sells when overbought (>70). Identifies potential reversal points.",
+            DefaultParameters = new() { ["Period"] = "14", ["OversoldThreshold"] = "30", ["OverboughtThreshold"] = "70" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "MACD Strategy",
+            Key = "macd",
+            Category = "Momentum",
+            Description = "Generates signals based on MACD line crossing the signal line. Captures momentum shifts.",
+            DefaultParameters = new() { ["FastPeriod"] = "12", ["SlowPeriod"] = "26", ["SignalPeriod"] = "9" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "Machine Learning (FastTree)",
+            Key = "ml",
+            Category = "AI/ML",
+            Description = "Uses ML.NET FastTree gradient boosting with 26 technical indicators to predict next-day returns.",
+            DefaultParameters = new() { ["BuyThreshold"] = "0.01", ["SellThreshold"] = "-0.01" }
+        },
+        new BuiltInStrategyInfo
+        {
+            Name = "Ichimoku Cloud",
+            Key = "ichimoku",
+            Category = "Trend Following",
+            Description = "Japanese charting technique using Tenkan, Kijun, and Senkou spans to identify trend direction and support/resistance.",
+            DefaultParameters = new() { ["TenkanPeriod"] = "9", ["KijunPeriod"] = "26", ["SenkouBPeriod"] = "52" }
+        }
+    };
+
+    private class BuiltInStrategyInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Key { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public Dictionary<string, string> DefaultParameters { get; set; } = new();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadCustomStrategies();

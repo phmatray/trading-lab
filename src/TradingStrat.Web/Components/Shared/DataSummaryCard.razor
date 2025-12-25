@@ -1,4 +1,3 @@
-@using TradingStrat.Application.Ports.Outbound
 @using TradingStrat.Web.Utilities
 
 @* DataSummaryCard - Displays data fetching results in a standardized format *@
@@ -71,12 +70,4 @@
             }
         </dl>
     </div>
-}
-
-@code {
-    /// <summary>
-    /// The data summary result to display.
-    /// </summary>
-    [Parameter]
-    public DataSummaryResult? Summary { get; set; }
 }

@@ -1,6 +1,4 @@
 @inherits LayoutComponentBase
-@inject Services.LocalStorageService LocalStorage
-@implements IAsyncDisposable
 
 <!-- Skip to main content link for screen readers -->
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 dark:focus:bg-dark-accent-blue focus:text-white focus:rounded">
@@ -49,65 +47,3 @@
     <span class="dismiss">🗙</span>
 </div>
 
-@code {
-    // Layout state
-    private bool _sidebarCollapsed = false;
-    private bool _aiPanelCollapsed = false;
-
-#pragma warning disable CS0649 // Field is never assigned to (placeholder for future implementation)
-    // TopBar data (placeholder - will be populated from services)
-    private string? _selectedPortfolioName = null;
-    private decimal? _portfolioValue = null;
-    private decimal? _ytdPerformance = null;
-
-    // AI Panel data (placeholder - will be populated from context)
-    private string? _currentTicker = null;
-    private string? _currentContext = null;
-    private string _currentRegime = "NEUTRAL";
-    private string? _currentRecommendation = null;
-    private int? _confidence = null;
-    private List<string>? _reasons = null;
-#pragma warning restore CS0649
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Load collapse states from localStorage (must be in OnAfterRenderAsync for JS interop)
-            var sidebarState = await LocalStorage.GetItemAsync<bool?>("layout_sidebar_collapsed");
-            if (sidebarState.HasValue && sidebarState.Value != _sidebarCollapsed)
-            {
-                _sidebarCollapsed = sidebarState.Value;
-                StateHasChanged();
-            }
-
-            var aiPanelState = await LocalStorage.GetItemAsync<bool?>("layout_aipanel_collapsed");
-            if (aiPanelState.HasValue && aiPanelState.Value != _aiPanelCollapsed)
-            {
-                _aiPanelCollapsed = aiPanelState.Value;
-                StateHasChanged();
-            }
-
-            // TODO: Load portfolio data from PortfolioStateService
-            // TODO: Load AI recommendations from appropriate service
-        }
-    }
-
-    private async Task OnSidebarCollapsedChanged(bool value)
-    {
-        _sidebarCollapsed = value;
-        await LocalStorage.SetItemAsync("layout_sidebar_collapsed", _sidebarCollapsed);
-    }
-
-    private async Task OnAiPanelCollapsedChanged(bool value)
-    {
-        _aiPanelCollapsed = value;
-        await LocalStorage.SetItemAsync("layout_aipanel_collapsed", _aiPanelCollapsed);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        // Cleanup if needed
-        await Task.CompletedTask;
-    }
-}

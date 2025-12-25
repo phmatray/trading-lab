@@ -2,15 +2,3 @@
     <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">@Label</p>
     <p class="text-2xl font-bold @GetColorClass()">@Value</p>
 </div>
-
-@code {
-    [Parameter] public string Label { get; set; } = string.Empty;
-    [Parameter] public string Value { get; set; } = string.Empty;
-    [Parameter] public bool? IsPositive { get; set; }
-
-    private string GetColorClass()
-    {
-        if (!IsPositive.HasValue) return "text-gray-900 dark:text-dark-text-primary";
-        return IsPositive.Value ? "metric-positive" : "metric-negative";
-    }
-}

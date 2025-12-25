@@ -1,5 +1,4 @@
 @* TopBar Component - Fixed top bar with portfolio info and quick actions *@
-@inject NavigationManager Navigation
 
 <div class="h-16 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border fixed top-0 left-0 right-0 z-40"
      data-testid="top-bar"
@@ -60,42 +59,3 @@
     </div>
 </div>
 
-@code {
-    /// <summary>
-    /// Selected portfolio name
-    /// </summary>
-    [Parameter]
-    public string? SelectedPortfolioName { get; set; }
-
-    /// <summary>
-    /// Current portfolio value
-    /// </summary>
-    [Parameter]
-    public decimal? PortfolioValue { get; set; }
-
-    /// <summary>
-    /// Year-to-date performance percentage
-    /// </summary>
-    [Parameter]
-    public decimal? YTDPerformance { get; set; }
-
-    /// <summary>
-    /// Whether to show the AI mode selector
-    /// </summary>
-    [Parameter]
-    public bool ShowAiModeSelector { get; set; } = true;
-
-    private string GetPerformanceClass()
-    {
-        if (!YTDPerformance.HasValue) return "";
-
-        return YTDPerformance.Value >= 0
-            ? "metric-positive text-sm font-semibold"
-            : "metric-negative text-sm font-semibold";
-    }
-
-    private void NavigateToSettings()
-    {
-        Navigation.NavigateTo("/settings");
-    }
-}
