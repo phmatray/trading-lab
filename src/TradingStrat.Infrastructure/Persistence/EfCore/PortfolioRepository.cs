@@ -177,6 +177,12 @@ public class PortfolioRepository : IPortfolioPort
     }
 
     /// <inheritdoc />
+    public async Task<Position?> GetPositionByIdAsync(int positionId)
+    {
+        return await _context.Positions.FindAsync(positionId);
+    }
+
+    /// <inheritdoc />
     public async Task DeletePositionAsync(int positionId)
     {
         var position = await _context.Positions.FindAsync(positionId);

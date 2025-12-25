@@ -196,23 +196,27 @@ public class BacktestEngine
 
         HistoricalPrice lastBar = filteredData[^1];
         decimal lastPrice = lastBar.Close ?? 0;
+
+        // Capture position quantity before selling
+        int quantityToClose = portfolio.Position;
+
         decimal commission = CalculateCommission(
-            portfolio.Position * lastPrice,
+            quantityToClose * lastPrice,
             configuration.CommissionPercentage,
             configuration.MinimumCommission);
 
-        decimal grossAmount = portfolio.Position * lastPrice;
+        decimal grossAmount = quantityToClose * lastPrice;
         decimal netAmount = grossAmount - commission;
-        decimal profitLoss = (lastPrice - portfolio.AverageEntryPrice) * portfolio.Position - commission;
+        decimal profitLoss = (lastPrice - portfolio.AverageEntryPrice) * quantityToClose - commission;
 
-        portfolio.ExecuteSell(portfolio.Position, lastPrice, commission);
+        portfolio.ExecuteSell(quantityToClose, lastPrice, commission);
 
         trades.Add(new Trade
         {
             DateTime = lastBar.DateTime,
             Type = TradeType.Sell,
             Price = lastPrice,
-            Quantity = portfolio.Position,
+            Quantity = quantityToClose,
             Commission = commission,
             GrossAmount = grossAmount,
             NetAmount = netAmount,

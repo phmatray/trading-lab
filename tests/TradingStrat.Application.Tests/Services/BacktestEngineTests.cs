@@ -152,7 +152,7 @@ public class BacktestEngineTests
                 Open = 100m,
                 High = 105m,
                 Low = 95m,
-                Close = 100m + i,
+                Close = 100m,
                 Volume = 1000000
             });
         }

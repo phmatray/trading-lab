@@ -1,4 +1,5 @@
 using FakeItEasy;
+using FakeItEasy.Core;
 using Shouldly;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -208,17 +209,29 @@ public class AggregateRepositoryTests
         };
         portfolio.AddPosition(position);
 
+        // Verify there's 1 uncommitted event before saving
+        portfolio.GetDomainEvents().Count.ShouldBe(1);
+        portfolio.GetDomainEvents()[0].ShouldBeOfType<PositionAddedEvent>();
+
         // Act
         await _repository.SaveAsync(portfolio);
 
-        // Assert
-        A.CallTo(() => _fakeEventStore.AppendEventsAsync(
-            "1",
-            A<IEnumerable<DomainEvent>>.That.Matches(events =>
-                events.Count() == 1 &&
-                events.First() is PositionAddedEvent),
-            A<int>._))
-            .MustHaveHappenedOnceExactly();
+        // Assert - Capture what was actually called
+        List<ICompletedFakeObjectCall> calls = Fake.GetCalls(_fakeEventStore).ToList();
+        calls.Count.ShouldBe(1);
+
+        ICompletedFakeObjectCall call = calls[0];
+        call.Method.Name.ShouldBe("AppendEventsAsync");
+
+        string? streamId = call.Arguments[0] as string;
+        IEnumerable<DomainEvent>? events = call.Arguments[1] as IEnumerable<DomainEvent>;
+        object? expectedVersion = call.Arguments[2];
+
+        streamId.ShouldBe("1");
+        events.ShouldNotBeNull();
+        events.Count().ShouldBe(1);
+        events.First().ShouldBeOfType<PositionAddedEvent>();
+        expectedVersion.ShouldBe(0);
     }
 
     [Fact]

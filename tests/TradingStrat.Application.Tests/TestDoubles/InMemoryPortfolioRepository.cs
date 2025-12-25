@@ -213,6 +213,13 @@ public class InMemoryPortfolioRepository : IPortfolioPort
         return Task.CompletedTask;
     }
 
+    public Task<Position?> GetPositionByIdAsync(int positionId)
+    {
+        return Task.FromResult(_positions.TryGetValue(positionId, out Position? position)
+            ? position
+            : null);
+    }
+
     public Task DeletePositionAsync(int positionId)
     {
         if (_positions.ContainsKey(positionId))

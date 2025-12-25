@@ -26,6 +26,13 @@ public interface IMLModelPort
     /// <param name="features">Market features for the current time point (26 technical indicators).</param>
     /// <returns>Predicted next-day return as a decimal value.</returns>
     float Predict(ITransformer model, MarketFeatures features);
+
+    /// <summary>
+    /// Converts market features array to ML.NET IDataView format for training.
+    /// </summary>
+    /// <param name="features">Array of market features with technical indicators.</param>
+    /// <returns>ML.NET DataView ready for model training.</returns>
+    IDataView CreateDataView(MarketFeatures[] features);
 }
 
 /// <summary>

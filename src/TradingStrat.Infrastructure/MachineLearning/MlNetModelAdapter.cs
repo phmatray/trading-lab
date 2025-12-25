@@ -112,4 +112,22 @@ public class MlNetModelAdapter : IMLModelPort
             throw new InvalidOperationException($"Failed to make prediction: {ex.Message}", ex);
         }
     }
+
+    public IDataView CreateDataView(MarketFeatures[] features)
+    {
+        try
+        {
+            _logger.LogDebug("Converting {FeatureCount} market features to IDataView", features.Length);
+
+            // Load features into ML.NET IDataView
+            IDataView dataView = _mlContext.Data.LoadFromEnumerable(features);
+
+            return dataView;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create IDataView from market features");
+            throw new InvalidOperationException($"Failed to create IDataView: {ex.Message}", ex);
+        }
+    }
 }

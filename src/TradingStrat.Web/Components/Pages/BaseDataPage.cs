@@ -85,6 +85,9 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
         ErrorMessage = null;
         SuccessMessage = null;
 
+        // Reset progress indicator (defensive cleanup)
+        await InvokeAsync(() => ProgressService.Reset());
+
         // Create progress reporter that updates ProgressService
         IProgress<string> progress = new Progress<string>(msg =>
             InvokeAsync(() => ProgressService.UpdateProgress(msg)));

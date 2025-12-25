@@ -83,11 +83,15 @@ public class AggregateRepository<T> : IAggregateRepository<T> where T : IEventSo
             return;
         }
 
+        // Create a copy of the events to avoid issues with the read-only collection
+        // being backed by the internal list that gets cleared after save
+        List<DomainEvent> eventsCopy = uncommittedEvents.ToList();
+
         string aggregateId = aggregate.AggregateId;
-        int expectedVersion = aggregate.Version - uncommittedEvents.Count;
+        int expectedVersion = aggregate.Version - eventsCopy.Count;
 
         // Append events to event store (will throw ConcurrencyException if version mismatch)
-        await _eventStore.AppendEventsAsync(aggregateId, uncommittedEvents, expectedVersion);
+        await _eventStore.AppendEventsAsync(aggregateId, eventsCopy, expectedVersion);
 
         // Clear uncommitted events after successful persistence
         aggregate.ClearDomainEvents();

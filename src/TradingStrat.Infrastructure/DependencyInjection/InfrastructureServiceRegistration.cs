@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Application.Services;
+using TradingStrat.Domain.Services;
 using TradingStrat.Infrastructure.Assistant;
 using TradingStrat.Infrastructure.Export;
 using TradingStrat.Infrastructure.MachineLearning;
@@ -40,6 +42,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IMarketDataPort>(sp => sp.GetRequiredService<YahooFinanceAdapter>());
         services.AddScoped<IExportPort, ExportAdapter>();
         services.AddSingleton<IMLModelPort, MlNetModelAdapter>();
+        services.AddScoped<IMLPredictionService, MLPredictionService>();
         services.AddScoped<IAssistantPort, AnthropicAdapter>();
         services.AddScoped<IChatHistoryPort, ChatHistoryRepository>();
         services.AddScoped<IPortfolioPort, PortfolioRepository>();

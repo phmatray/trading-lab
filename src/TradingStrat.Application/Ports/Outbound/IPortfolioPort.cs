@@ -91,6 +91,13 @@ public interface IPortfolioPort
     Task DeletePositionAsync(int positionId);
 
     /// <summary>
+    /// Gets a position by ID.
+    /// </summary>
+    /// <param name="positionId">The position ID.</param>
+    /// <returns>The position or null if not found.</returns>
+    Task<Position?> GetPositionByIdAsync(int positionId);
+
+    /// <summary>
     /// Gets all positions for a portfolio.
     /// </summary>
     /// <param name="portfolioId">The portfolio ID.</param>

@@ -71,24 +71,20 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
             throw new ArgumentException("Entry price must be positive", nameof(command));
         }
 
-        // Note: This is a limitation in the design. The repository's UpdatePositionAsync
-        // should load the existing position and only update the specified fields.
-        // For now, we create a placeholder position object with required fields.
-        // TODO: Improve this by having the repository load and update only changed fields.
-
-        var position = new Position
+        // Load existing position to preserve immutable fields
+        Position? existingPosition = await _portfolioPort.GetPositionByIdAsync(command.PositionId);
+        if (existingPosition == null)
         {
-            Id = command.PositionId,
-            PortfolioId = 0, // Placeholder - repository should preserve existing value
-            Ticker = string.Empty, // Placeholder - repository should preserve existing value
-            Quantity = command.Quantity,
-            EntryPrice = command.EntryPrice,
-            EntryDate = DateTime.MinValue, // Placeholder - repository should preserve existing value
-            Notes = command.Notes
-        };
+            throw new InvalidOperationException($"Position {command.PositionId} not found");
+        }
 
-        await _portfolioPort.UpdatePositionAsync(position);
-        return position;
+        // Update only mutable fields
+        existingPosition.Quantity = command.Quantity;
+        existingPosition.EntryPrice = command.EntryPrice;
+        existingPosition.Notes = command.Notes;
+
+        await _portfolioPort.UpdatePositionAsync(existingPosition);
+        return existingPosition;
     }
 
     /// <inheritdoc />
