@@ -1,28 +1,33 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Web.Services;
+using TradingStrat.Web.Services.State;
 
 namespace TradingStrat.Web.Components.Layout;
 
 public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
 {
     [Inject] private LocalStorageService LocalStorage { get; set; } = null!;
+    [Inject] private AiInsightsService AiInsights { get; set; } = null!;
+    [Inject] private PortfolioStateService PortfolioState { get; set; } = null!;
+    [Inject] private IPortfolioPort PortfolioPort { get; set; } = null!;
 
     // Layout state
     private bool _sidebarCollapsed = false;
     private bool _aiPanelCollapsed = false;
 
-    // TopBar data (placeholder - will be populated from services)
-    private readonly string? _selectedPortfolioName = null;
-    private readonly decimal? _portfolioValue = null;
-    private readonly decimal? _ytdPerformance = null;
+    // TopBar data
+    private string? _selectedPortfolioName = null;
+    private decimal? _portfolioValue = null;
+    private decimal? _ytdPerformance = null;
 
-    // AI Panel data (placeholder - will be populated from context)
+    // AI Panel data
     private readonly string? _currentTicker = null;
     private readonly string? _currentContext = null;
-    private readonly string _currentRegime = "NEUTRAL";
-    private readonly string? _currentRecommendation = null;
-    private readonly int? _confidence = null;
-    private readonly List<string>? _reasons = null;
+    private string _currentRegime = "NEUTRAL";
+    private string? _currentRecommendation = null;
+    private int? _confidence = null;
+    private List<string>? _reasons = null;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -43,8 +48,74 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
                 StateHasChanged();
             }
 
-            // TODO: Load portfolio data from PortfolioStateService
-            // TODO: Load AI recommendations from appropriate service
+            // Load portfolio data and AI insights
+            await LoadPortfolioDataAsync();
+            await LoadAiInsightsAsync();
+
+            // Subscribe to portfolio changes to refresh AI insights
+            PortfolioState.OnPortfolioChanged += OnPortfolioChanged;
+        }
+    }
+
+    private async void OnPortfolioChanged(object? sender, EventArgs e)
+    {
+        await LoadPortfolioDataAsync();
+        await LoadAiInsightsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadPortfolioDataAsync()
+    {
+        try
+        {
+            int? portfolioId = await PortfolioState.GetSelectedPortfolioIdAsync();
+            if (portfolioId.HasValue)
+            {
+                Domain.Entities.Portfolio? portfolio = await PortfolioPort.GetPortfolioByIdAsync(portfolioId.Value);
+                if (portfolio != null)
+                {
+                    _selectedPortfolioName = portfolio.Name;
+                    // Portfolio value and YTD performance would require additional calculations
+                    // For now, just showing the name
+                }
+            }
+            else
+            {
+                _selectedPortfolioName = null;
+                _portfolioValue = null;
+                _ytdPerformance = null;
+            }
+        }
+        catch
+        {
+            _selectedPortfolioName = null;
+            _portfolioValue = null;
+            _ytdPerformance = null;
+        }
+    }
+
+    private async Task LoadAiInsightsAsync()
+    {
+        try
+        {
+            // Load market regime
+            var regime = await AiInsights.GetCurrentRegimeAsync();
+            _currentRegime = regime.Regime;
+
+            // Load recommendation
+            var recommendation = await AiInsights.GetCurrentRecommendationAsync();
+            _currentRecommendation = recommendation.Action;
+            _confidence = recommendation.Confidence;
+            _reasons = recommendation.Reasons;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            _currentRegime = "NEUTRAL";
+            _currentRecommendation = null;
+            _confidence = null;
+            _reasons = null;
         }
     }
 
@@ -62,7 +133,8 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        // Cleanup if needed
+        // Unsubscribe from portfolio changes
+        PortfolioState.OnPortfolioChanged -= OnPortfolioChanged;
         await Task.CompletedTask;
     }
 }

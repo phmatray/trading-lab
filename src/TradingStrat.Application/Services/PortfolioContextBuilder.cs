@@ -1,26 +1,34 @@
 using System.Text;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Services;
 
 /// <summary>
 /// Service for building rich market context to provide to the AI assistant.
-/// Aggregates historical price data, technical indicators, and market statistics
+/// Aggregates historical price data, technical indicators, portfolio holdings, and market statistics
 /// into a formatted string suitable for LLM consumption.
 /// </summary>
 public class PortfolioContextBuilder
 {
     private readonly IHistoricalDataPort _historicalDataPort;
     private readonly IIndicatorCalculator _indicatorCalculator;
+    private readonly IPortfolioPort _portfolioPort;
+    private readonly PortfolioValuationService _valuationService;
 
     public PortfolioContextBuilder(
         IHistoricalDataPort historicalDataPort,
-        IIndicatorCalculator indicatorCalculator)
+        IIndicatorCalculator indicatorCalculator,
+        IPortfolioPort portfolioPort,
+        PortfolioValuationService valuationService)
     {
         _historicalDataPort = historicalDataPort;
         _indicatorCalculator = indicatorCalculator;
+        _portfolioPort = portfolioPort;
+        _valuationService = valuationService;
     }
 
     /// <summary>
@@ -123,6 +131,123 @@ public class PortfolioContextBuilder
         context.AppendLine("- 26 technical indicators available for deeper analysis");
         context.AppendLine("- Strategies: Moving Average Crossover, RSI, MACD, ML FastTree, Ichimoku Cloud");
         context.AppendLine("- Backtest capabilities with performance metrics (Sharpe ratio, max drawdown, win rate)");
+
+        return context.ToString().Trim();
+    }
+
+    /// <summary>
+    /// Builds comprehensive portfolio context including all holdings, valuations, and technical analysis.
+    /// Includes portfolio summary, position details, and technical indicators for each holding.
+    /// </summary>
+    /// <param name="portfolioId">Portfolio ID to analyze.</param>
+    /// <param name="daysBack">Number of days of historical data to include (default 30).</param>
+    /// <returns>Formatted context string with portfolio data and market analysis.</returns>
+    public async Task<string> BuildContextForPortfolio(int portfolioId, int daysBack = 30)
+    {
+        var portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
+        if (portfolio == null)
+        {
+            return $"Portfolio with ID {portfolioId} not found.";
+        }
+
+        var context = new StringBuilder();
+        context.AppendLine($"PORTFOLIO: {portfolio.Name}");
+        if (!string.IsNullOrEmpty(portfolio.Description))
+        {
+            context.AppendLine($"DESCRIPTION: {portfolio.Description}");
+        }
+        context.AppendLine($"CASH BALANCE: ${portfolio.Cash:N2}");
+        context.AppendLine($"NUMBER OF POSITIONS: {portfolio.Positions.Count}");
+        context.AppendLine($"LAST UPDATED: {portfolio.LastUpdated:yyyy-MM-dd HH:mm:ss}");
+        context.AppendLine();
+
+        if (portfolio.Positions.Count == 0)
+        {
+            context.AppendLine("No positions in portfolio.");
+            return context.ToString().Trim();
+        }
+
+        // Fetch current prices for all positions
+        var currentPrices = new Dictionary<string, decimal>();
+        foreach (var position in portfolio.Positions)
+        {
+            try
+            {
+                var endDate = DateTime.Today;
+                var startDate = endDate.AddDays(-daysBack);
+                var prices = await _historicalDataPort.GetHistoricalDataAsync(
+                    position.Ticker,
+                    TimeFrame.D1,
+                    startDate,
+                    endDate);
+
+                if (prices.Count > 0)
+                {
+                    currentPrices[position.Ticker] = prices[^1].Close ?? 0;
+                }
+            }
+            catch
+            {
+                // Skip positions with missing data
+            }
+        }
+
+        // Calculate portfolio snapshot
+        var snapshotResult = _valuationService.CalculateSnapshot(portfolio, currentPrices);
+        if (snapshotResult.IsSuccess)
+        {
+            var snapshot = snapshotResult.Value;
+            decimal cashAllocation = snapshot.TotalValue > 0 ? (snapshot.Cash / snapshot.TotalValue * 100) : 0;
+
+            context.AppendLine("PORTFOLIO SUMMARY:");
+            context.AppendLine($"- Total Value: ${snapshot.TotalValue:N2}");
+            context.AppendLine($"- Total Cost Basis: ${snapshot.TotalCost:N2}");
+            context.AppendLine($"- Unrealized Gain/Loss: ${snapshot.UnrealizedGainLoss:N2} ({snapshot.UnrealizedGainLossPercentage:+0.00;-0.00}%)");
+            context.AppendLine($"- Cash Allocation: {cashAllocation:F2}%");
+            context.AppendLine();
+
+            context.AppendLine("POSITIONS:");
+            foreach (var posSnapshot in snapshot.Positions)
+            {
+                context.AppendLine($"\n{posSnapshot.Ticker}:");
+                context.AppendLine($"  Quantity: {posSnapshot.Quantity}");
+                context.AppendLine($"  Entry Price: ${posSnapshot.EntryPrice:F2}");
+                context.AppendLine($"  Current Price: ${posSnapshot.CurrentPrice:F2}");
+                context.AppendLine($"  Market Value: ${posSnapshot.MarketValue:N2}");
+                context.AppendLine($"  Cost Basis: ${posSnapshot.CostBasis:N2}");
+                context.AppendLine($"  Gain/Loss: ${posSnapshot.UnrealizedGainLoss:N2} ({posSnapshot.UnrealizedGainLossPercentage:+0.00;-0.00}%)");
+                context.AppendLine($"  Portfolio Allocation: {posSnapshot.AllocationPercentage:F2}%");
+            }
+            context.AppendLine();
+        }
+
+        // Add technical analysis for top 3 holdings by allocation
+        var topHoldings = portfolio.Positions
+            .Where(p => currentPrices.ContainsKey(p.Ticker))
+            .OrderByDescending(p => p.Quantity * currentPrices[p.Ticker])
+            .Take(3)
+            .ToList();
+
+        if (topHoldings.Any())
+        {
+            context.AppendLine("TOP HOLDINGS TECHNICAL ANALYSIS:");
+            context.AppendLine();
+
+            foreach (var position in topHoldings)
+            {
+                try
+                {
+                    string tickerContext = await BuildContextForTicker(position.Ticker, daysBack);
+                    context.AppendLine(tickerContext);
+                    context.AppendLine();
+                }
+                catch (Exception ex)
+                {
+                    context.AppendLine($"{position.Ticker}: Unable to load technical analysis ({ex.Message})");
+                    context.AppendLine();
+                }
+            }
+        }
 
         return context.ToString().Trim();
     }

@@ -32,6 +32,8 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IStrategyFactory, StrategyFactory>();
         services.AddSingleton<ITickerResolver, TickerResolver>();
         services.AddScoped<PortfolioContextBuilder>();
+        services.AddScoped<MarketRegimeDetector>();
+        services.AddScoped<AiRecommendationService>();
 
         // Use Cases
         services.AddScoped<IDataFetchingUseCase, FetchHistoricalDataUseCase>();

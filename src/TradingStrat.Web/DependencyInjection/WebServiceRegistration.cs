@@ -30,6 +30,7 @@ public static class WebServiceRegistration
 
         // AI analysis service
         services.AddScoped<IDataAnalysisService, DataAnalysisService>();
+        services.AddScoped<AiInsightsService>();
 
         services.AddHttpContextAccessor();
 
