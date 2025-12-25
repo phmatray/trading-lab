@@ -166,6 +166,14 @@ public partial class Portfolios : ComponentBase, IDisposable
         Navigation.NavigateTo($"/portfolio/{portfolioId}");
     }
 
+    private void HandleCardKeyDown(KeyboardEventArgs e, int portfolioId)
+    {
+        if (e.Code == "Enter" || e.Code == "Space")
+        {
+            NavigateToPortfolio(portfolioId);
+        }
+    }
+
     public void Dispose()
     {
         // Cleanup if needed

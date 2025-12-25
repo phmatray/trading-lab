@@ -44,7 +44,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach (var portfolio in _portfolios)
             {
-                <div class="card cursor-pointer hover:shadow-lg transition-shadow" @onclick="() => NavigateToPortfolio(portfolio.Id)">
+                <div class="card cursor-pointer hover:shadow-lg transition-shadow focus-within:ring-2 focus-within:ring-trading-blue dark:focus-within:ring-dark-accent-blue"
+                     role="button"
+                     tabindex="0"
+                     @onclick="() => NavigateToPortfolio(portfolio.Id)"
+                     @onkeydown="@(e => HandleCardKeyDown(e, portfolio.Id))"
+                     aria-label="View portfolio: @portfolio.Name">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex-1">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-1">

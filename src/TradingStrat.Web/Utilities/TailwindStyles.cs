@@ -215,4 +215,120 @@ public static class TailwindStyles
     /// Table row styling with hover effect.
     /// </summary>
     public const string TableRow = "hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors";
+
+    // ========== Button Size Variants ==========
+
+    /// <summary>
+    /// Small button - compact actions (delete, inline controls).
+    /// WCAG: Achieves ~36px height.
+    /// </summary>
+    public const string ButtonSizeSmall = "px-3 py-1.5 text-sm";
+
+    /// <summary>
+    /// Medium button - standard actions (form submits, secondary).
+    /// WCAG: Achieves ~44px height (minimum touch target).
+    /// </summary>
+    public const string ButtonSizeMedium = "px-4 py-2 text-base";
+
+    /// <summary>
+    /// Large button - primary CTAs (Create Portfolio, Start Backtest).
+    /// WCAG: Achieves ~52px height.
+    /// </summary>
+    public const string ButtonSizeLarge = "px-6 py-3 text-lg";
+
+    /// <summary>
+    /// Icon-only button - square 44x44px touch target.
+    /// WCAG: Exact 44x44px for accessibility.
+    /// </summary>
+    public const string ButtonSizeIcon = "p-2.5 w-11 h-11";
+
+    // ========== Container Spacing ==========
+
+    /// <summary>
+    /// Compact padding (alerts, toasts, nested cards).
+    /// </summary>
+    public const string SpacingCompact = "p-4";
+
+    /// <summary>
+    /// Standard padding (cards, forms, main content).
+    /// </summary>
+    public const string SpacingStandard = "p-6";
+
+    /// <summary>
+    /// Spacious padding (page sections, hero areas).
+    /// </summary>
+    public const string SpacingSpacious = "p-8";
+
+    // ========== Icon Sizes ==========
+
+    /// <summary>
+    /// Small icon - inline with text. 16x16px.
+    /// </summary>
+    public const string IconSizeSmall = "w-4 h-4";
+
+    /// <summary>
+    /// Medium icon - buttons, menu items. 20x20px.
+    /// </summary>
+    public const string IconSizeMedium = "w-5 h-5";
+
+    /// <summary>
+    /// Large icon - page headers, dialogs. 24x24px.
+    /// </summary>
+    public const string IconSizeLarge = "w-6 h-6";
+
+    /// <summary>
+    /// Extra large - status indicators. 32x32px.
+    /// </summary>
+    public const string IconSizeXLarge = "w-8 h-8";
+
+    /// <summary>
+    /// Hero icon - empty states. 48x48px.
+    /// </summary>
+    public const string IconSizeHero = "w-12 h-12";
+
+    // ========== Table Spacing ==========
+
+    /// <summary>
+    /// Standard table header cell padding.
+    /// </summary>
+    public const string TableHeaderCell = "px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider";
+
+    /// <summary>
+    /// Standard table body cell padding.
+    /// </summary>
+    public const string TableBodyCell = "px-6 py-4 text-sm text-gray-900 dark:text-dark-text-primary";
+
+    /// <summary>
+    /// Compact table cells (dense data).
+    /// </summary>
+    public const string TableCellCompact = "px-4 py-2 text-sm";
+
+    // ========== Validation States ==========
+
+    /// <summary>
+    /// Input success state border (green for validated fields).
+    /// </summary>
+    public const string InputSuccess = "border-green-500 dark:border-green-600 focus:border-green-500 dark:focus:border-green-600 focus:ring-green-500 dark:focus:ring-green-600";
+
+    /// <summary>
+    /// Success checkmark icon for validated fields.
+    /// </summary>
+    public const string ValidationSuccessIcon = "text-green-600 dark:text-green-400";
+
+    // ========== Combined Button Utilities ==========
+
+    /// <summary>
+    /// Primary button with medium sizing.
+    /// </summary>
+    public const string ButtonPrimaryMedium = "btn-primary px-4 py-2 text-base";
+
+    /// <summary>
+    /// Primary button with large sizing.
+    /// </summary>
+    public const string ButtonPrimaryLarge = "btn-primary px-6 py-3 text-lg";
+
+    /// <summary>
+    /// Secondary button with medium sizing.
+    /// </summary>
+    public const string ButtonSecondaryMedium = "btn-secondary px-4 py-2 text-base";
 }
