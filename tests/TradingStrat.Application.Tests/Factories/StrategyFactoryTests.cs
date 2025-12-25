@@ -1,8 +1,8 @@
 using FakeItEasy;
-using Microsoft.Extensions.Logging;
 using Shouldly;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 
@@ -11,19 +11,18 @@ namespace TradingStrat.Application.Tests.Factories;
 public class StrategyFactoryTests
 {
     private readonly IIndicatorCalculator _fakeIndicatorCalculator;
-    private readonly ILoggerFactory _fakeLoggerFactory;
+    private readonly IMLPredictionService _fakeMLPredictionService;
     private readonly IStrategyRegistry _registry;
     private readonly StrategyFactory _factory;
 
     public StrategyFactoryTests()
     {
         _fakeIndicatorCalculator = A.Fake<IIndicatorCalculator>();
-        _fakeLoggerFactory = A.Fake<ILoggerFactory>();
-        A.CallTo(() => _fakeLoggerFactory.CreateLogger(A<string>._)).Returns(A.Fake<ILogger>());
+        _fakeMLPredictionService = A.Fake<IMLPredictionService>();
 
         // Use real registry for tests (it's immutable metadata, no need to fake)
         _registry = new StrategyRegistry();
-        _factory = new StrategyFactory(_fakeIndicatorCalculator, _fakeLoggerFactory, _registry);
+        _factory = new StrategyFactory(_fakeIndicatorCalculator, _registry, _fakeMLPredictionService);
     }
 
     #region Strategy Creation Tests

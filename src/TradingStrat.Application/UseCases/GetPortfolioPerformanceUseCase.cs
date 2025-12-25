@@ -143,7 +143,15 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             {
                 try
                 {
-                    var snapshot = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
+                    var result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
+
+                    if (result.IsFailure)
+                    {
+                        progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} - failed to calculate snapshot");
+                        continue;
+                    }
+
+                    var snapshot = result.Value;
                     decimal dailyReturn = previousValue > 0
                         ? (snapshot.TotalValue - previousValue) / previousValue
                         : 0m;

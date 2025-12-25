@@ -22,7 +22,7 @@ public class IchimokuStrategy : BaseStrategy
     private readonly IchimokuEntryMode _entryMode;
     private readonly int _crossLookbackDays;
     private readonly decimal _riskPercentage;
-    private readonly TimeframeAggregator _timeframeAggregator;
+    private readonly TimeFrameAggregator _timeframeAggregator;
 
     // Daily indicators (calculated once in Initialize)
     private decimal[] _dailyConversionLine = null!;
@@ -51,7 +51,7 @@ public class IchimokuStrategy : BaseStrategy
 
     public IchimokuStrategy(
         IIndicatorCalculator indicatorCalculator,
-        TimeframeAggregator timeframeAggregator,
+        TimeFrameAggregator timeframeAggregator,
         int conversionLinePeriod = 9,
         int baseLinePeriod = 26,
         int leadingSpanBPeriod = 52,

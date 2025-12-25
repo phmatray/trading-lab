@@ -114,9 +114,15 @@ public sealed record TimeFrame
     /// </summary>
     /// <param name="value">String representation (e.g., "M1", "H1", "D1").</param>
     /// <returns>The corresponding TimeFrame instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when value is null.</exception>
     /// <exception cref="ArgumentException">Thrown when the value is not a valid timeframe.</exception>
     public static TimeFrame FromString(string value)
     {
+        if (value == null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
+
         return value.ToUpperInvariant() switch
         {
             "M1" => M1,

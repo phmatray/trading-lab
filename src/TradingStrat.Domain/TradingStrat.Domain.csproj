@@ -1,9 +1,3 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="Microsoft.ML" />
-    <PackageReference Include="Microsoft.ML.FastTree" />
-  </ItemGroup>
-
 </Project>

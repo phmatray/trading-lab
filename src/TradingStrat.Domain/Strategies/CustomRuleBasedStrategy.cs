@@ -1,4 +1,5 @@
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
 
@@ -37,6 +38,9 @@ public class CustomRuleBasedStrategy : BaseStrategy
     public override void Initialize(IReadOnlyList<HistoricalPrice> historicalData)
     {
         base.Initialize(historicalData);
+
+        // Clear cache on re-initialization to ensure fresh calculations with new data
+        _indicatorCache.Clear();
 
         // Pre-calculate all indicators referenced in entry and exit rules
         PreCalculateIndicators(_definition.EntryRules);
@@ -198,14 +202,12 @@ public class CustomRuleBasedStrategy : BaseStrategy
             ComparisonOperator.LessThanOrEqual => leftValue <= rightValue,
             ComparisonOperator.Equal => Math.Abs(leftValue - rightValue) < 0.0001m,
 
-            // Crossover detection requires previous bar's value
+            // Crossover detection using CrossoverDetector service
             ComparisonOperator.CrossesAbove =>
-                leftValue > rightValue &&
-                indicatorValues[currentIndex - 1] <= rightValue,
+                CrossoverDetector.DetectCrossAbove(indicatorValues, currentIndex, rightValue),
 
             ComparisonOperator.CrossesBelow =>
-                leftValue < rightValue &&
-                indicatorValues[currentIndex - 1] >= rightValue,
+                CrossoverDetector.DetectCrossBelow(indicatorValues, currentIndex, rightValue),
 
             _ => false
         };

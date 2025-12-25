@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
 using FakeItEasy;
 using Shouldly;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.Tests.Builders;
@@ -12,25 +12,38 @@ namespace TradingStrat.Domain.Tests.Strategies;
 public class MachineLearningStrategyTests
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
-    private readonly ILogger<MachineLearningStrategy> _fakeLogger;
+    private readonly IMLPredictionService _fakePredictionService;
 
     public MachineLearningStrategyTests()
     {
         _indicatorCalculator = new IndicatorCalculator();
-        _fakeLogger = A.Fake<ILogger<MachineLearningStrategy>>();
+        _fakePredictionService = A.Fake<IMLPredictionService>();
+
+        // Configure fake to return a small positive prediction by default
+        A.CallTo(() => _fakePredictionService.Predict(A<MarketFeatures>._))
+            .Returns(0.005m); // 0.5% predicted return
     }
 
     #region Constructor & Initialization Tests
 
     [Fact]
+    public void Constructor_WithNullPredictor_ThrowsArgumentNullException()
+    {
+        // Arrange & Act & Assert
+        Should.Throw<ArgumentNullException>(() =>
+            new MachineLearningStrategy(_indicatorCalculator, null!)
+        );
+    }
+
+    [Fact]
     public void Constructor_WithDefaultThresholds_CreatesStrategy()
     {
         // Arrange & Act
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
 
         // Assert
         strategy.ShouldNotBeNull();
-        strategy.Name.ShouldBe("ML FastTree (Walk-Forward)");
+        strategy.Name.ShouldContain("ML");
         strategy.Description.ShouldContain("walk-forward validation");
     }
 
@@ -41,7 +54,7 @@ public class MachineLearningStrategyTests
         PredictionThresholds thresholds = new(0.02m, -0.02m);
 
         // Act
-        MachineLearningStrategy strategy = new(_indicatorCalculator, thresholds, _fakeLogger);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService, thresholds);
 
         // Assert
         strategy.ShouldNotBeNull();
@@ -55,7 +68,7 @@ public class MachineLearningStrategyTests
             .WithPrices(100m, 101m, 102m, 103m, 104m)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
 
         // Act
         strategy.Initialize(prices.AsReadOnly());
@@ -70,7 +83,7 @@ public class MachineLearningStrategyTests
     {
         // Arrange
         PredictionThresholds thresholds = new(0.015m, -0.015m);
-        MachineLearningStrategy strategy = new(_indicatorCalculator, thresholds);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService, thresholds);
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
             .WithPrices(100m, 101m, 102m)
             .Build();
@@ -104,7 +117,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -129,7 +142,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act - Call at index 100 (minimum required)
@@ -154,7 +167,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -173,7 +186,7 @@ public class MachineLearningStrategyTests
             .WithPrices(100m)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -202,7 +215,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -227,7 +240,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -252,7 +265,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -277,7 +290,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator, new PredictionThresholds(0.01m, -0.01m));
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService, new PredictionThresholds(0.01m, -0.01m));
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -302,7 +315,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act
@@ -331,7 +344,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act - Generate signal at index 100
@@ -356,7 +369,7 @@ public class MachineLearningStrategyTests
             .WithPrices(priceValues)
             .Build();
 
-        MachineLearningStrategy strategy = new(_indicatorCalculator);
+        MachineLearningStrategy strategy = new(_indicatorCalculator, _fakePredictionService);
         strategy.Initialize(prices.AsReadOnly());
 
         // Act - Generate signals at different time points

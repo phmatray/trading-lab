@@ -1,3 +1,4 @@
+using FakeItEasy;
 using Shouldly;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
@@ -619,6 +620,293 @@ public class CustomRuleBasedStrategyTests
             SizingMode: PositionSizingMode.FixedPercentage,
             SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
+    }
+
+    #endregion
+
+    #region Indicator Caching Verification Tests
+
+    [Fact]
+    public void CachingVerification_SameIndicatorUsedTwice_CalculatedOnlyOnce()
+    {
+        // Arrange - Strategy with 3 rules all using RSI(14)
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+        decimal[] rsiValues = new decimal[100];
+        for (int i = 0; i < 100; i++)
+        {
+            rsiValues[i] = 50m + (i % 20); // Generate test data
+        }
+
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .Returns(rsiValues);
+
+        StrategyDefinition definition = new(
+            EntryRules: new List<StrategyRule>
+            {
+                new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
+                    RuleValueType.Constant, 30, null, null, LogicalOperator.And),
+                new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
+                    RuleValueType.Constant, 20, null, null, LogicalOperator.None)
+            },
+            ExitRules: new List<StrategyRule>
+            {
+                new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
+                    RuleValueType.Constant, 70, null, null, LogicalOperator.None)
+            },
+            SizingMode: PositionSizingMode.FixedPercentage,
+            SizingParameters: new() { ["Percentage"] = 0.1m }
+        );
+
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Caching Test",
+            "Tests indicator caching");
+
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+
+        // Act
+        strategy.Initialize(prices);
+
+        // Assert - Should only call CalculateRSI once despite 3 rules using RSI(14)
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void Initialize_WithDifferentParameters_CreatesSeparateCacheEntries()
+    {
+        // Arrange - Strategy with RSI(14) and RSI(21)
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+        decimal[] rsi14 = new decimal[100];
+        decimal[] rsi21 = new decimal[100];
+
+        for (int i = 0; i < 100; i++)
+        {
+            rsi14[i] = 40m + (i % 20);
+            rsi21[i] = 50m + (i % 20);
+        }
+
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .Returns(rsi14);
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 21))
+            .Returns(rsi21);
+
+        StrategyDefinition definition = new(
+            EntryRules: new List<StrategyRule>
+            {
+                new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
+                    RuleValueType.Constant, 30, null, null, LogicalOperator.And),
+                new("RSI", new() { ["Period"] = 21 }, ComparisonOperator.LessThan,
+                    RuleValueType.Constant, 30, null, null, LogicalOperator.None)
+            },
+            ExitRules: new List<StrategyRule>(),
+            SizingMode: PositionSizingMode.FixedPercentage,
+            SizingParameters: new() { ["Percentage"] = 0.1m }
+        );
+
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Multi-param Test",
+            "Tests different parameters");
+
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+
+        // Act
+        strategy.Initialize(prices);
+
+        // Assert - Should call CalculateRSI twice (once for each parameter set)
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 21))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void ReInitialize_ClearsCacheAndRecalculates()
+    {
+        // Arrange
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+        decimal[] rsiValues = new decimal[100];
+        for (int i = 0; i < 100; i++)
+        {
+            rsiValues[i] = 50m + (i % 20);
+        }
+
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .Returns(rsiValues);
+
+        StrategyDefinition definition = CreateSimpleRSIDefinition();
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Re-init Test",
+            "Tests cache clearing");
+
+        List<HistoricalPrice> prices1 = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+        List<HistoricalPrice> prices2 = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 150m + i).ToArray())
+            .Build();
+
+        // Act - Initialize twice with different data
+        strategy.Initialize(prices1);
+        strategy.Initialize(prices2);
+
+        // Assert - Should call CalculateRSI twice (once per initialization)
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .MustHaveHappenedTwiceExactly();
+    }
+
+    [Fact]
+    public void GenerateSignal_UsesCachedIndicators_DoesNotRecalculate()
+    {
+        // Arrange
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+        decimal[] rsiValues = new decimal[100];
+        for (int i = 0; i < 100; i++)
+        {
+            rsiValues[i] = 25m; // Below 30 = oversold
+        }
+
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, 14))
+            .Returns(rsiValues);
+
+        StrategyDefinition definition = CreateSimpleRSIDefinition();
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Signal Test",
+            "Tests caching during signals");
+
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+
+        strategy.Initialize(prices.AsReadOnly());
+
+        // Reset call count after initialization
+        Fake.ClearRecordedCalls(fakeCalculator);
+
+        // Act - Generate multiple signals
+        strategy.GenerateSignal(50, 10000m, 0);
+        strategy.GenerateSignal(51, 10000m, 0);
+        strategy.GenerateSignal(52, 10000m, 0);
+
+        // Assert - Should NOT call CalculateRSI again (uses cached values)
+        A.CallTo(() => fakeCalculator.CalculateRSI(A<decimal[]>._, A<int>._))
+            .MustNotHaveHappened();
+    }
+
+    [Fact]
+    public void Initialize_WithTwoIndicatorComparison_CachesBothIndicators()
+    {
+        // Arrange - Strategy comparing SMA(20) vs SMA(50)
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+        decimal[] sma20 = new decimal[100];
+        decimal[] sma50 = new decimal[100];
+
+        for (int i = 0; i < 100; i++)
+        {
+            sma20[i] = 100m + i;
+            sma50[i] = 105m + i;
+        }
+
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 20))
+            .Returns(sma20);
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 50))
+            .Returns(sma50);
+
+        StrategyDefinition definition = new(
+            EntryRules: new List<StrategyRule>
+            {
+                new("SMA", new() { ["Period"] = 20 },
+                    ComparisonOperator.GreaterThan,
+                    RuleValueType.Indicator,
+                    null,
+                    "SMA",
+                    new() { ["Period"] = 50 },
+                    LogicalOperator.None)
+            },
+            ExitRules: new List<StrategyRule>(),
+            SizingMode: PositionSizingMode.FixedPercentage,
+            SizingParameters: new() { ["Percentage"] = 0.1m }
+        );
+
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Two Indicator Test",
+            "Tests two-indicator caching");
+
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+
+        // Act
+        strategy.Initialize(prices);
+
+        // Assert - Should call both SMA calculations once each
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 20))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 50))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public void CacheKey_WithSameIndicatorDifferentParams_CreatesUniqueCacheEntries()
+    {
+        // Arrange - Multiple SMA with different periods
+        IIndicatorCalculator fakeCalculator = A.Fake<IIndicatorCalculator>();
+
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 10))
+            .Returns(new decimal[100]);
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 20))
+            .Returns(new decimal[100]);
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 50))
+            .Returns(new decimal[100]);
+
+        StrategyDefinition definition = new(
+            EntryRules: new List<StrategyRule>
+            {
+                new("SMA", new() { ["Period"] = 10 }, ComparisonOperator.GreaterThan,
+                    RuleValueType.Constant, 100, null, null, LogicalOperator.And),
+                new("SMA", new() { ["Period"] = 20 }, ComparisonOperator.GreaterThan,
+                    RuleValueType.Constant, 100, null, null, LogicalOperator.And),
+                new("SMA", new() { ["Period"] = 50 }, ComparisonOperator.GreaterThan,
+                    RuleValueType.Constant, 100, null, null, LogicalOperator.None)
+            },
+            ExitRules: new List<StrategyRule>(),
+            SizingMode: PositionSizingMode.FixedPercentage,
+            SizingParameters: new() { ["Percentage"] = 0.1m }
+        );
+
+        var strategy = new CustomRuleBasedStrategy(
+            fakeCalculator,
+            definition,
+            "Multiple SMA Test",
+            "Tests unique cache keys");
+
+        List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
+            .WithPrices(Enumerable.Range(0, 100).Select(i => 100m + i).ToArray())
+            .Build();
+
+        // Act
+        strategy.Initialize(prices);
+
+        // Assert - Should call CalculateSMA three times (once for each unique parameter set)
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 10))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 20))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => fakeCalculator.CalculateSMA(A<decimal[]>._, 50))
+            .MustHaveHappenedOnceExactly();
     }
 
     #endregion

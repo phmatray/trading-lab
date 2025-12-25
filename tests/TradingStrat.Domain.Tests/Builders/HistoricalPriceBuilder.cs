@@ -55,8 +55,13 @@ public class HistoricalPriceBuilder
         {
             decimal close = _closePrices[i];
             decimal open = i > 0 ? _closePrices[i - 1] : close * 0.99m;
-            decimal high = Math.Max(open, close) * 1.01m;
-            decimal low = Math.Min(open, close) * 0.99m;
+
+            // Ensure High >= Close and Low <= Close for valid OHLC
+            decimal high = Math.Max(open, close) * 1.02m; // 2% above to ensure it's higher
+            decimal low = Math.Min(open, close) * 0.98m;  // 2% below to ensure it's lower
+
+            // Clamp close to be within high/low to guarantee validity
+            close = Math.Min(Math.Max(close, low), high);
 
             result.Add(new HistoricalPrice
             {

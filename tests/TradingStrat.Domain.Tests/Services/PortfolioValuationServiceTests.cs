@@ -1,4 +1,5 @@
 using Shouldly;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
@@ -17,7 +18,7 @@ public class PortfolioValuationServiceTests
     #region CalculateSnapshot - Null Checks
 
     [Fact]
-    public void CalculateSnapshot_WithNullPortfolio_ShouldThrow()
+    public void CalculateSnapshot_WithNullPortfolio_ShouldReturnFailure()
     {
         // Arrange
         var currentPrices = new Dictionary<string, decimal>
@@ -26,15 +27,17 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        Func<PortfolioSnapshot> act = () => _service.CalculateSnapshot(null!, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(null!, currentPrices);
 
         // Assert
-        ArgumentNullException ex = Should.Throw<ArgumentNullException>(act);
-        ex.ParamName.ShouldBe("portfolio");
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Type.ShouldBe(ErrorType.Validation);
+        result.Errors[0].Code.ShouldBe("PORTFOLIO_REQUIRED");
     }
 
     [Fact]
-    public void CalculateSnapshot_WithNullCurrentPrices_ShouldThrow()
+    public void CalculateSnapshot_WithNullCurrentPrices_ShouldReturnFailure()
     {
         // Arrange
         var portfolio = new Portfolio
@@ -45,11 +48,13 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        Func<PortfolioSnapshot> act = () => _service.CalculateSnapshot(portfolio, null!);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, null!);
 
         // Assert
-        ArgumentNullException ex = Should.Throw<ArgumentNullException>(act);
-        ex.ParamName.ShouldBe("currentPrices");
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Type.ShouldBe(ErrorType.Validation);
+        result.Errors[0].Code.ShouldBe("CURRENT_PRICES_REQUIRED");
     }
 
     #endregion
@@ -57,33 +62,33 @@ public class PortfolioValuationServiceTests
     #region CalculateSnapshot - Missing Price Data
 
     [Fact]
-    public void CalculateSnapshot_WithMissingPriceForPosition_ShouldThrow()
+    public void CalculateSnapshot_WithMissingPriceForPosition_ShouldReturnFailure()
     {
         // Arrange
         var portfolio = new Portfolio
         {
             Id = 1,
             Name = "Test Portfolio",
-            Cash = 10000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 100m
-                }
-            }
+            Cash = 10000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 100m
+        });
 
         var currentPrices = new Dictionary<string, decimal>(); // Empty - no price for AAPL
 
         // Act
-        Func<PortfolioSnapshot> act = () => _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
 
         // Assert
-        InvalidOperationException ex = Should.Throw<InvalidOperationException>(act);
-        ex.Message.ShouldContain("No current price available for AAPL");
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Type.ShouldBe(ErrorType.InsufficientData);
+        result.Errors[0].Message.ShouldContain("No current price available for AAPL");
     }
 
     #endregion
@@ -98,16 +103,17 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Cash Only Portfolio",
-            Cash = 10000m,
-            Positions = new List<Position>()
+            Cash = 10000m
         };
 
         var currentPrices = new Dictionary<string, decimal>();
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
 
         // Assert
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
         snapshot.ShouldNotBeNull();
         snapshot.PortfolioId.ShouldBe(1);
         snapshot.PortfolioName.ShouldBe("Cash Only Portfolio");
@@ -131,17 +137,15 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Test Portfolio",
-            Cash = 5000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 100m
-                }
-            }
+            Cash = 5000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 100m
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -149,9 +153,11 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
 
         // Assert
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
         snapshot.ShouldNotBeNull();
         snapshot.Cash.ShouldBe(5000m);
         snapshot.Positions.Count.ShouldBe(1);
@@ -184,29 +190,29 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Diversified Portfolio",
-            Cash = 10000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 100m
-                },
-                new Position
-                {
-                    Ticker = "MSFT",
-                    Quantity = 20,
-                    EntryPrice = 200m
-                },
-                new Position
-                {
-                    Ticker = "GOOGL",
-                    Quantity = 5,
-                    EntryPrice = 1000m
-                }
-            }
+            Cash = 10000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 100m
+        });
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "MSFT",
+            Quantity = 20,
+            EntryPrice = 200m
+        });
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "GOOGL",
+            Quantity = 5,
+            EntryPrice = 1000m
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -216,7 +222,9 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         snapshot.ShouldNotBeNull();
@@ -246,23 +254,22 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Test Portfolio",
-            Cash = 5000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 100m
-                },
-                new Position
-                {
-                    Ticker = "MSFT",
-                    Quantity = 10,
-                    EntryPrice = 100m
-                }
-            }
+            Cash = 5000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 100m
+        });
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "MSFT",
+            Quantity = 10,
+            EntryPrice = 100m
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -275,7 +282,9 @@ public class PortfolioValuationServiceTests
         // MSFT allocation = (1000 / 7500) * 100 = 13.333...%
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         PositionSnapshot applePosition = snapshot.Positions.First(p => p.Ticker == "AAPL");
@@ -297,17 +306,15 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Loss Portfolio",
-            Cash = 5000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 200m
-                }
-            }
+            Cash = 5000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 200m
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -315,7 +322,9 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         var position = snapshot.Positions[0];
@@ -324,24 +333,22 @@ public class PortfolioValuationServiceTests
     }
 
     [Fact]
-    public void CalculateSnapshot_WithZeroCostBasis_ShouldHandleGracefully()
+    public void CalculateSnapshot_WithLowCostBasis_ShouldHandleGracefully()
     {
         // Arrange
         var portfolio = new Portfolio
         {
             Id = 1,
             Name = "Test Portfolio",
-            Cash = 5000m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "FREE",
-                    Quantity = 10,
-                    EntryPrice = 0m
-                }
-            }
+            Cash = 5000m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "FREE",
+            Quantity = 10,
+            EntryPrice = 0.01m // Very low entry price (near-free stock)
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -349,13 +356,15 @@ public class PortfolioValuationServiceTests
         };
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         var position = snapshot.Positions[0];
-        position.CostBasis.ShouldBe(0m);
-        position.UnrealizedGainLoss.ShouldBe(1000m);
-        position.UnrealizedGainLossPercentage.ShouldBe(0m); // Avoid division by zero
+        position.CostBasis.ShouldBe(0.10m); // 10 * 0.01
+        position.UnrealizedGainLoss.ShouldBe(999.90m); // 1000 - 0.10
+        position.UnrealizedGainLossPercentage.ShouldBe(999900m); // (999.90 / 0.10) * 100
     }
 
     #endregion
@@ -486,14 +495,15 @@ public class PortfolioValuationServiceTests
         {
             Id = 42,
             Name = "My Growth Portfolio",
-            Cash = 10000m,
-            Positions = new List<Position>()
+            Cash = 10000m
         };
 
         var currentPrices = new Dictionary<string, decimal>();
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         snapshot.PortfolioId.ShouldBe(42);
@@ -515,25 +525,25 @@ public class PortfolioValuationServiceTests
         {
             Id = 1,
             Name = "Empty Portfolio",
-            Cash = 0m,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Ticker = "ZERO",
-                    Quantity = 10,
-                    EntryPrice = 0m
-                }
-            }
+            Cash = 0m
         };
+
+        portfolio.AddPosition(new Position
+        {
+            Ticker = "ZERO",
+            Quantity = 10,
+            EntryPrice = 0.01m // Must be positive, but price drops to 0
+        });
 
         var currentPrices = new Dictionary<string, decimal>
         {
-            ["ZERO"] = 0m
+            ["ZERO"] = 0m // Current price is 0 (stock worthless)
         };
 
         // Act
-        var snapshot = _service.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _service.CalculateSnapshot(portfolio, currentPrices);
+        result.IsSuccess.ShouldBeTrue();
+        PortfolioSnapshot snapshot = result.Value;
 
         // Assert
         snapshot.TotalValue.ShouldBe(0m);

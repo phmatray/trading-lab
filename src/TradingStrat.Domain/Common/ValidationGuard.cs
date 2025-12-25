@@ -178,4 +178,18 @@ public class ValidationContext<T>
         }
         return this;
     }
+
+    /// <summary>
+    /// Validates that a string is not null, empty, or whitespace.
+    /// </summary>
+    /// <returns>This context for chaining.</returns>
+    /// <exception cref="ArgumentException">Thrown when string is null, empty, or whitespace.</exception>
+    public ValidationContext<T> NotNullOrWhiteSpace()
+    {
+        if (_value == null || (_value is string str && string.IsNullOrWhiteSpace(str)))
+        {
+            throw new ArgumentException($"{_parameterName} cannot be null, empty, or whitespace", _parameterName);
+        }
+        return this;
+    }
 }

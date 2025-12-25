@@ -108,10 +108,15 @@ public class GetPortfolioSnapshotUseCase : IGetPortfolioSnapshotUseCase
         progress?.Report("Calculating portfolio valuation...");
 
         // Calculate snapshot using domain service
-        var snapshot = _valuationService.CalculateSnapshot(portfolio, currentPrices);
+        var result = _valuationService.CalculateSnapshot(portfolio, currentPrices);
+
+        if (result.IsFailure)
+        {
+            throw new InvalidOperationException($"Failed to calculate portfolio snapshot: {string.Join(", ", result.Errors.Select(e => e.Message))}");
+        }
 
         progress?.Report("Portfolio snapshot complete");
 
-        return snapshot;
+        return result.Value;
     }
 }

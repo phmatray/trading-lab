@@ -9,7 +9,7 @@ namespace TradingStrat.Domain.Services;
 /// Supports both fixed-period aggregation (M5 -> M15, H1 -> H4) and calendar-based aggregation (daily -> weekly/monthly).
 /// Uses ISO 8601 week calculation for consistent week boundaries.
 /// </summary>
-public class TimeframeAggregator
+public class TimeFrameAggregator
 {
     /// <summary>
     /// Aggregates lower timeframe bars to a higher target timeframe.

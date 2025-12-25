@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -14,33 +15,39 @@ public class PortfolioValuationService
     /// </summary>
     /// <param name="portfolio">The portfolio to value.</param>
     /// <param name="currentPrices">Dictionary of ticker to current market price.</param>
-    /// <returns>Immutable portfolio snapshot.</returns>
-    /// <exception cref="ArgumentNullException">If portfolio or currentPrices is null.</exception>
-    /// <exception cref="InvalidOperationException">If current price is not available for a position.</exception>
-    public PortfolioSnapshot CalculateSnapshot(
+    /// <returns>Result containing immutable portfolio snapshot or errors.</returns>
+    public Result<PortfolioSnapshot> CalculateSnapshot(
         Portfolio portfolio,
         Dictionary<string, decimal> currentPrices)
     {
+        List<Error> errors = new();
+
         if (portfolio == null)
         {
-            throw new ArgumentNullException(nameof(portfolio));
+            errors.Add(Error.Validation("Portfolio is required", "PORTFOLIO_REQUIRED"));
         }
 
         if (currentPrices == null)
         {
-            throw new ArgumentNullException(nameof(currentPrices));
+            errors.Add(Error.Validation("Current prices are required", "CURRENT_PRICES_REQUIRED"));
         }
 
+        if (errors.Any())
+        {
+            return Result<PortfolioSnapshot>.Failure(errors);
+        }
+
+        // Null-forgiving operators safe here because validation above ensures non-null
         var positionSnapshots = new List<PositionSnapshot>();
-        decimal totalMarketValue = portfolio.Cash;
+        decimal totalMarketValue = portfolio!.Cash;
         decimal totalCost = portfolio.Cash;
 
         foreach (var position in portfolio.Positions)
         {
-            if (!currentPrices.TryGetValue(position.Ticker, out decimal currentPrice))
+            if (!currentPrices!.TryGetValue(position.Ticker, out decimal currentPrice))
             {
-                throw new InvalidOperationException(
-                    $"No current price available for {position.Ticker}");
+                return Result<PortfolioSnapshot>.Failure(
+                    Error.InsufficientData($"No current price available for {position.Ticker}"));
             }
 
             decimal marketValue = position.Quantity * currentPrice;
@@ -79,7 +86,7 @@ public class PortfolioValuationService
             ? (totalGainLoss / totalCost) * 100
             : 0;
 
-        return new PortfolioSnapshot(
+        PortfolioSnapshot snapshot = new(
             portfolio.Id,
             portfolio.Name,
             DateTime.UtcNow,
@@ -90,6 +97,8 @@ public class PortfolioValuationService
             totalGainLoss,
             totalGainLossPercent
         );
+
+        return Result<PortfolioSnapshot>.Success(snapshot);
     }
 
     /// <summary>

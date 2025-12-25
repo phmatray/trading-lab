@@ -1,5 +1,6 @@
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
 
@@ -51,10 +52,10 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
         decimal currentPrice = ClosePrices[currentIndex];
         decimal fastCurrent = _fastMA[currentIndex];
         decimal slowCurrent = _slowMA[currentIndex];
-        decimal fastPrevious = _fastMA[currentIndex - 1];
-        decimal slowPrevious = _slowMA[currentIndex - 1];
 
-        if (fastPrevious <= slowPrevious && fastCurrent > slowCurrent && currentPosition == 0)
+        // Buy when fast MA crosses above slow MA
+        if (CrossoverDetector.DetectCrossBetween(_fastMA, _slowMA, currentIndex, CrossDirection.Above)
+            && currentPosition == 0)
         {
             int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
@@ -68,7 +69,9 @@ public class MovingAverageCrossoverStrategy : BaseStrategy
             }
         }
 
-        if (fastPrevious >= slowPrevious && fastCurrent < slowCurrent && currentPosition > 0)
+        // Sell when fast MA crosses below slow MA
+        if (CrossoverDetector.DetectCrossBetween(_fastMA, _slowMA, currentIndex, CrossDirection.Below)
+            && currentPosition > 0)
         {
             return new TradeSignal(
                 SignalType.Sell,

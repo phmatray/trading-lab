@@ -206,6 +206,9 @@ namespace TradingStrat.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -387,6 +390,61 @@ namespace TradingStrat.Infrastructure.Migrations
                         .HasDatabaseName("IX_StrategyRecommendations_Ticker_CreatedAt");
 
                     b.ToTable("StrategyRecommendations");
+                });
+
+            modelBuilder.Entity("TradingStrat.Infrastructure.Persistence.EventStore.EventRecord", b =>
+                {
+                    b.Property<string>("StreamId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EventData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StreamId", "Version");
+
+                    b.HasIndex("StreamId", "Version")
+                        .HasDatabaseName("IX_Events_StreamId_Version");
+
+                    b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("TradingStrat.Infrastructure.Persistence.EventStore.SnapshotRecord", b =>
+                {
+                    b.Property<string>("AggregateId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AggregateType")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SnapshotData")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AggregateId");
+
+                    b.ToTable("Snapshots");
                 });
 
             modelBuilder.Entity("TradingStrat.Domain.Entities.PortfolioCashTransaction", b =>

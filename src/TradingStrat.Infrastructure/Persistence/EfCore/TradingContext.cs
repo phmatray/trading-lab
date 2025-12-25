@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Infrastructure.Persistence.EventStore;
 
 namespace TradingStrat.Infrastructure.Persistence.EfCore;
 
@@ -17,6 +18,10 @@ public class TradingContext : DbContext
     public DbSet<Position> Positions { get; set; } = null!;
     public DbSet<PortfolioCashTransaction> CashTransactions { get; set; } = null!;
     public DbSet<CustomStrategy> CustomStrategies { get; set; } = null!;
+
+    // Event Sourcing
+    public DbSet<EventRecord> Events { get; set; } = null!;
+    public DbSet<SnapshotRecord> Snapshots { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -320,6 +325,59 @@ public class TradingContext : DbContext
             // Index for finding user's strategies sorted by date
             entity.HasIndex(e => new { e.Author, e.CreatedAt })
                 .HasDatabaseName("IX_CustomStrategies_Author_CreatedAt");
+        });
+
+        // Configure EventRecord entity (Event Sourcing)
+        modelBuilder.Entity<EventRecord>(entity =>
+        {
+            // Composite primary key: StreamId + Version
+            entity.HasKey(e => new { e.StreamId, e.Version });
+
+            entity.Property(e => e.StreamId)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Version)
+                .IsRequired();
+
+            entity.Property(e => e.EventType)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(e => e.EventData)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.Timestamp)
+                .IsRequired();
+
+            // Index for efficient event stream queries
+            entity.HasIndex(e => new { e.StreamId, e.Version })
+                .HasDatabaseName("IX_Events_StreamId_Version");
+        });
+
+        // Configure SnapshotRecord entity (Event Sourcing)
+        modelBuilder.Entity<SnapshotRecord>(entity =>
+        {
+            entity.HasKey(e => e.AggregateId);
+
+            entity.Property(e => e.AggregateId)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.AggregateType)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Version)
+                .IsRequired();
+
+            entity.Property(e => e.SnapshotData)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
         });
     }
 }

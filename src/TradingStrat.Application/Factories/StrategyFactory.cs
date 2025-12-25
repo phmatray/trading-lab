@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Entities;
@@ -13,19 +12,19 @@ namespace TradingStrat.Application.Factories;
 public class StrategyFactory : IStrategyFactory
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
-    private readonly ILoggerFactory _loggerFactory;
     private readonly IStrategyRegistry _registry;
     private readonly ICustomStrategyPort? _customStrategyPort;
+    private readonly IMLPredictionService _mlPredictionService;
 
     public StrategyFactory(
         IIndicatorCalculator indicatorCalculator,
-        ILoggerFactory loggerFactory,
         IStrategyRegistry registry,
+        IMLPredictionService mlPredictionService,
         ICustomStrategyPort? customStrategyPort = null)
     {
         _indicatorCalculator = indicatorCalculator;
-        _loggerFactory = loggerFactory;
         _registry = registry;
+        _mlPredictionService = mlPredictionService;
         _customStrategyPort = customStrategyPort;
     }
 
@@ -90,8 +89,7 @@ public class StrategyFactory : IStrategyFactory
         decimal sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
         var thresholds = new PredictionThresholds(buyThreshold, sellThreshold);
 
-        ILogger<MachineLearningStrategy> logger = _loggerFactory.CreateLogger<MachineLearningStrategy>();
-        return new MachineLearningStrategy(_indicatorCalculator, thresholds, logger);
+        return new MachineLearningStrategy(_indicatorCalculator, _mlPredictionService, thresholds);
     }
 
     private IchimokuStrategy CreateIchimokuStrategy(Dictionary<string, object> parameters)
@@ -107,7 +105,7 @@ public class StrategyFactory : IStrategyFactory
         int crossLookbackDays = GetParameter(parameters, "CrossLookbackDays", 5);
         decimal riskPercentage = GetParameter(parameters, "RiskPercentage", 0.02m);
 
-        TimeframeAggregator timeframeAggregator = new();
+        TimeFrameAggregator timeframeAggregator = new();
 
         return new IchimokuStrategy(
             _indicatorCalculator,

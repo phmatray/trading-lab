@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.Entities;
 
 /// <summary>
@@ -21,6 +23,10 @@ public enum TransactionType
 /// </summary>
 public class PortfolioCashTransaction
 {
+    private int _portfolioId;
+    private decimal _amount;
+    private DateTime _transactionDate;
+
     /// <summary>
     /// Gets or sets the unique identifier for the transaction.
     /// </summary>
@@ -28,8 +34,17 @@ public class PortfolioCashTransaction
 
     /// <summary>
     /// Gets or sets the ID of the portfolio for this transaction.
+    /// Must be greater than zero.
     /// </summary>
-    public int PortfolioId { get; set; }
+    public int PortfolioId
+    {
+        get => _portfolioId;
+        set
+        {
+            ValidationGuard.Require(value).GreaterThan(0);
+            _portfolioId = value;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the type of transaction (Deposit or Withdrawal).
@@ -38,13 +53,31 @@ public class PortfolioCashTransaction
 
     /// <summary>
     /// Gets or sets the transaction amount.
+    /// Must be greater than zero.
     /// </summary>
-    public decimal Amount { get; set; }
+    public decimal Amount
+    {
+        get => _amount;
+        set
+        {
+            ValidationGuard.Require(value).GreaterThan(0m);
+            _amount = value;
+        }
+    }
 
     /// <summary>
     /// Gets or sets the date and time of the transaction.
+    /// Cannot be a future date.
     /// </summary>
-    public DateTime TransactionDate { get; set; }
+    public DateTime TransactionDate
+    {
+        get => _transactionDate;
+        set
+        {
+            ValidationGuard.Require(value).LessThanOrEqual(DateTime.Today, "Transaction date cannot be in the future");
+            _transactionDate = value;
+        }
+    }
 
     /// <summary>
     /// Gets or sets optional notes about the transaction.

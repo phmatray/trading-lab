@@ -1,5 +1,6 @@
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
 
@@ -57,10 +58,10 @@ public class MACDStrategy : BaseStrategy
         decimal currentPrice = ClosePrices[currentIndex];
         decimal macdCurrent = _macd[currentIndex];
         decimal signalCurrent = _signal[currentIndex];
-        decimal macdPrevious = _macd[currentIndex - 1];
-        decimal signalPrevious = _signal[currentIndex - 1];
 
-        if (macdPrevious <= signalPrevious && macdCurrent > signalCurrent && currentPosition == 0)
+        // Buy when MACD line crosses above signal line
+        if (CrossoverDetector.DetectCrossBetween(_macd, _signal, currentIndex, CrossDirection.Above)
+            && currentPosition == 0)
         {
             int quantity = CalculateQuantity(currentCash, currentPrice, currentPosition);
             if (quantity > 0)
@@ -74,7 +75,9 @@ public class MACDStrategy : BaseStrategy
             }
         }
 
-        if (macdPrevious >= signalPrevious && macdCurrent < signalCurrent && currentPosition > 0)
+        // Sell when MACD line crosses below signal line
+        if (CrossoverDetector.DetectCrossBetween(_macd, _signal, currentIndex, CrossDirection.Below)
+            && currentPosition > 0)
         {
             return new TradeSignal(
                 SignalType.Sell,

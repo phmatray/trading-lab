@@ -11,12 +11,12 @@ namespace TradingStrat.Domain.Tests.Strategies;
 public class IchimokuStrategyTests
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
-    private readonly TimeframeAggregator _timeframeAggregator;
+    private readonly TimeFrameAggregator _timeframeAggregator;
 
     public IchimokuStrategyTests()
     {
         _indicatorCalculator = new IndicatorCalculator();
-        _timeframeAggregator = new TimeframeAggregator();
+        _timeframeAggregator = new TimeFrameAggregator();
     }
 
     #region Constructor Validation Tests

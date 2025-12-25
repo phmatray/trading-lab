@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+using FakeItEasy;
 using Shouldly;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
@@ -27,9 +27,9 @@ public class RunParameterOptimizationUseCaseTests
         BacktestEngine backtestEngine = new BacktestEngine(_historicalDataPort, performanceCalculator);
 
         IndicatorCalculator indicatorCalculator = new IndicatorCalculator();
-        NullLoggerFactory loggerFactory = new NullLoggerFactory();
         StrategyRegistry strategyRegistry = new StrategyRegistry();
-        StrategyFactory strategyFactory = new StrategyFactory(indicatorCalculator, loggerFactory, strategyRegistry);
+        IMLPredictionService mlPredictionService = A.Fake<IMLPredictionService>();
+        StrategyFactory strategyFactory = new StrategyFactory(indicatorCalculator, strategyRegistry, mlPredictionService);
 
         _useCase = new RunParameterOptimizationUseCase(
             _historicalDataPort,

@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using Microsoft.ML.Trainers.FastTree;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
 
@@ -15,9 +13,8 @@ namespace TradingStrat.Domain.Strategies;
 public class MachineLearningStrategy : BaseStrategy
 {
     private readonly IIndicatorCalculator _indicatorCalculator;
+    private readonly IMLPredictionService _predictionService;
     private readonly PredictionThresholds _thresholds;
-    private readonly ILogger<MachineLearningStrategy>? _logger;
-    private readonly MLContext _mlContext;
     private const int MinTrainingBars = 100;
 
     private decimal[] _highPrices = null!;
@@ -28,20 +25,22 @@ public class MachineLearningStrategy : BaseStrategy
     public override string Name => "ML FastTree (Walk-Forward)";
 
     public override string Description =>
-        "Machine learning strategy using FastTree gradient boosting with walk-forward validation. " +
+        "Machine learning strategy using gradient boosting with walk-forward validation. " +
         "Trains a new model at each time step to avoid look-ahead bias. " +
         "Note: This is computationally expensive as it trains hundreds of models during backtesting.";
 
     public MachineLearningStrategy(
         IIndicatorCalculator indicatorCalculator,
-        PredictionThresholds? thresholds = null,
-        ILogger<MachineLearningStrategy>? logger = null)
+        IMLPredictionService predictionService,
+        PredictionThresholds? thresholds = null)
         : base(indicatorCalculator)
     {
+        ValidationGuard.Require(indicatorCalculator).NotNull();
+        ValidationGuard.Require(predictionService).NotNull();
+
         _indicatorCalculator = indicatorCalculator;
+        _predictionService = predictionService;
         _thresholds = thresholds ?? new PredictionThresholds(0.01m, -0.01m);
-        _logger = logger;
-        _mlContext = new MLContext(seed: 42);
     }
 
     public override void Initialize(IReadOnlyList<HistoricalPrice> historicalData)
@@ -52,9 +51,6 @@ public class MachineLearningStrategy : BaseStrategy
         _lowPrices = historicalData.Select(h => h.Low ?? 0).ToArray();
         _openPrices = historicalData.Select(h => h.Open ?? 0).ToArray();
         _volumes = historicalData.Select(h => h.Volume ?? 0).ToArray();
-
-        _logger?.LogDebug("Initialized ML strategy with {DataPoints} data points, min training bars: {MinBars}",
-            historicalData.Count, MinTrainingBars);
     }
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
@@ -64,32 +60,21 @@ public class MachineLearningStrategy : BaseStrategy
         // Need minimum training data
         if (currentIndex < MinTrainingBars)
         {
-            _logger?.LogDebug("Insufficient training data at index {Index} (need {MinBars})", currentIndex, MinTrainingBars);
             return new TradeSignal(SignalType.Hold, currentPrice, 0, "Insufficient training data");
         }
 
-        try
-        {
-            // Build features for training (all data up to currentIndex)
-            MarketFeatures[] features = BuildFeatures(currentIndex + 1);
+        // Build features for training (all data up to currentIndex)
+        MarketFeatures[] features = BuildFeatures(currentIndex + 1);
 
-            // Train model with walk-forward approach (exclude last feature which is for prediction)
-            ITransformer model = TrainModel(features, currentIndex);
+        // Train model with walk-forward approach (exclude last feature which is for prediction)
+        _predictionService.Train(features, currentIndex);
 
-            // Predict for current bar (last feature in the array)
-            MarketFeatures currentFeature = features[^1];
-            float predictedReturn = Predict(model, currentFeature);
+        // Predict for current bar (last feature in the array)
+        MarketFeatures currentFeature = features[^1];
+        decimal predictedReturn = _predictionService.Predict(currentFeature);
 
-            _logger?.LogDebug("Prediction at index {Index}: {Return:F4}", currentIndex, predictedReturn);
-
-            // Convert prediction to signal
-            return GenerateSignalFromPrediction(predictedReturn, currentPrice, currentCash, currentPosition);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Error generating ML signal at index {Index}", currentIndex);
-            return new TradeSignal(SignalType.Hold, currentPrice, 0, $"ML error: {ex.Message}");
-        }
+        // Convert prediction to signal
+        return GenerateSignalFromPrediction((float)predictedReturn, currentPrice, currentCash, currentPosition);
     }
 
     private MarketFeatures[] BuildFeatures(int upToIndex)
@@ -148,48 +133,6 @@ public class MachineLearningStrategy : BaseStrategy
         return features.ToArray();
     }
 
-    private ITransformer TrainModel(MarketFeatures[] features, int currentIndex)
-    {
-        // Exclude the last feature (current bar) from training since it has no target
-        MarketFeatures[] trainingFeatures = features.Take(features.Length - 1).ToArray();
-        IDataView? trainingData = _mlContext.Data.LoadFromEnumerable(trainingFeatures);
-
-        _logger?.LogDebug("Training model with {Count} samples", trainingFeatures.Length);
-
-        EstimatorChain<RegressionPredictionTransformer<FastTreeRegressionModelParameters>>? pipeline = _mlContext.Transforms
-            .Concatenate("Features",
-                nameof(MarketFeatures.DailyReturn), nameof(MarketFeatures.LogReturn),
-                nameof(MarketFeatures.HighLowRange), nameof(MarketFeatures.OpenCloseRange),
-                nameof(MarketFeatures.PricePosition),
-                nameof(MarketFeatures.SMA_5), nameof(MarketFeatures.SMA_10),
-                nameof(MarketFeatures.SMA_20), nameof(MarketFeatures.EMA_12),
-                nameof(MarketFeatures.EMA_26), nameof(MarketFeatures.PriceToSMA20),
-                nameof(MarketFeatures.RSI_14), nameof(MarketFeatures.Momentum_5),
-                nameof(MarketFeatures.ROC_10), nameof(MarketFeatures.StochRSI),
-                nameof(MarketFeatures.MACD), nameof(MarketFeatures.MACDSignal),
-                nameof(MarketFeatures.MACDHistogram),
-                nameof(MarketFeatures.StdDev_10), nameof(MarketFeatures.StdDev_20),
-                nameof(MarketFeatures.ATR_14), nameof(MarketFeatures.BollingerPosition),
-                nameof(MarketFeatures.VolumeChange), nameof(MarketFeatures.VolumeMA_10),
-                nameof(MarketFeatures.VolumeRatio), nameof(MarketFeatures.PriceVolumeCorrelation))
-            .Append(_mlContext.Transforms.NormalizeMinMax("Features"))
-            .Append(_mlContext.Regression.Trainers.FastTree(
-                labelColumnName: nameof(MarketFeatures.NextDayReturn),
-                featureColumnName: "Features",
-                numberOfLeaves: 31,
-                minimumExampleCountPerLeaf: 20,
-                learningRate: 0.1,
-                numberOfTrees: 100));
-
-        return pipeline.Fit(trainingData);
-    }
-
-    private float Predict(ITransformer model, MarketFeatures features)
-    {
-        PredictionEngine<MarketFeatures, PricePrediction>? predictionEngine = _mlContext.Model.CreatePredictionEngine<MarketFeatures, PricePrediction>(model);
-        PricePrediction? prediction = predictionEngine.Predict(features);
-        return prediction.Score;
-    }
 
     private TradeSignal GenerateSignalFromPrediction(float predictedReturn, decimal currentPrice, decimal currentCash, int currentPosition)
     {
@@ -479,20 +422,11 @@ public class MachineLearningStrategy : BaseStrategy
     {
         return new Dictionary<string, object>
         {
-            { "Algorithm", "FastTree Gradient Boosting (Walk-Forward)" },
-            { "NumberOfLeaves", 31 },
-            { "MinimumExampleCountPerLeaf", 20 },
-            { "LearningRate", 0.1 },
-            { "NumberOfTrees", 100 },
+            { "Algorithm", "Machine Learning (Walk-Forward)" },
             { "BuyThreshold", _thresholds.BuyThreshold },
             { "SellThreshold", _thresholds.SellThreshold },
             { "MinTrainingBars", MinTrainingBars },
             { "ValidationMethod", "Walk-Forward" }
         };
     }
-}
-
-public record PricePrediction
-{
-    public float Score { get; set; }
 }
