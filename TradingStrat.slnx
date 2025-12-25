@@ -12,4 +12,21 @@
     <Project Path="tests/TradingStrat.Infrastructure.Tests/TradingStrat.Infrastructure.Tests.csproj" />
     <Project Path="tests/TradingStrat.UI.Tests/TradingStrat.UI.Tests.csproj" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <Folder Name="Documentation">
+      <SolutionItem Path="README.md" />
+      <SolutionItem Path="CLAUDE.md" />
+      <SolutionItem Path="DOCKER.md" />
+    </Folder>
+    <Folder Name="Configuration">
+      <SolutionItem Path=".editorconfig" />
+      <SolutionItem Path="Directory.Build.props" />
+      <SolutionItem Path="Directory.Packages.props" />
+      <SolutionItem Path="global.json" />
+    </Folder>
+    <Folder Name="Docker">
+      <SolutionItem Path="docker-compose.yml" />
+      <SolutionItem Path=".env.example" />
+    </Folder>
+  </Folder>
 </Solution>
