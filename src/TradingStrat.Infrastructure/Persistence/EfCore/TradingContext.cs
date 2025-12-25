@@ -34,6 +34,11 @@ public class TradingContext : DbContext
             entity.Property(e => e.ISIN)
                 .HasMaxLength(12);
 
+            entity.Property(e => e.TimeFrame)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(10);
+
             entity.Property(e => e.DateTime)
                 .IsRequired();
 
@@ -56,10 +61,14 @@ public class TradingContext : DbContext
                 .IsRequired()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            // Unique constraint on Ticker and DateTime
-            entity.HasIndex(e => new { e.Ticker, e.DateTime })
+            // Unique constraint on Ticker, TimeFrame, and DateTime
+            entity.HasIndex(e => new { e.Ticker, e.TimeFrame, e.DateTime })
                 .IsUnique()
-                .HasDatabaseName("IX_HistoricalPrices_Ticker_DateTime");
+                .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame_DateTime");
+
+            // Index for fast timeframe queries
+            entity.HasIndex(e => new { e.Ticker, e.TimeFrame })
+                .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame");
 
             // Index for ISIN lookups
             entity.HasIndex(e => e.ISIN)

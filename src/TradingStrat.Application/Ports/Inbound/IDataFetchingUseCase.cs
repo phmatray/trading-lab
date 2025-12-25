@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
 
@@ -27,8 +28,10 @@ public interface IDataFetchingUseCase
 /// <param name="Isin">Optional ISIN code for ticker resolution (e.g., "XS2399367254").</param>
 /// <param name="StartDate">Optional start date for data fetch (defaults to 2 years ago if not specified).</param>
 /// <param name="EndDate">Optional end date for data fetch (defaults to today if not specified).</param>
+/// <param name="TimeFrame">Timeframe for the data (default D1 - daily).</param>
 public record FetchDataCommand(
     string Ticker,
     string? Isin = null,
     DateTime? StartDate = null,
-    DateTime? EndDate = null);
+    DateTime? EndDate = null,
+    TimeFrame? TimeFrame = null);

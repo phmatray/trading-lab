@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.TestDoubles;
 
@@ -18,6 +19,7 @@ public class FakeMarketDataAdapter : IMarketDataPort
 
     public Task<IReadOnlyList<HistoricalPrice>> FetchHistoricalDataAsync(
         string ticker,
+        TimeFrame timeFrame,
         DateTime startDate,
         DateTime endDate)
     {
@@ -32,7 +34,8 @@ public class FakeMarketDataAdapter : IMarketDataPort
                 Low = p.Low,
                 Close = p.Close,
                 AdjustedClose = p.AdjustedClose,
-                Volume = p.Volume
+                Volume = p.Volume,
+                TimeFrame = timeFrame.Unit
             })
             .ToList();
 
@@ -57,7 +60,8 @@ public class FakeMarketDataAdapter : IMarketDataPort
             Low = latest.Low,
             Close = latest.Close,
             AdjustedClose = latest.AdjustedClose,
-            Volume = latest.Volume
+            Volume = latest.Volume,
+            TimeFrame = TimeFrameUnit.D1
         });
     }
 
@@ -85,7 +89,8 @@ public class FakeMarketDataAdapter : IMarketDataPort
                 Low = low,
                 Close = close,
                 AdjustedClose = close,
-                Volume = 1000000 + i * 10000
+                Volume = 1000000 + i * 10000,
+                TimeFrame = TimeFrameUnit.D1
             });
         }
 

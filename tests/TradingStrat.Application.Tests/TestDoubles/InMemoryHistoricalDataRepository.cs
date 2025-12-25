@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.TestDoubles;
 
@@ -9,63 +10,69 @@ namespace TradingStrat.Application.Tests.TestDoubles;
 /// </summary>
 public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 {
-    private readonly Dictionary<string, List<HistoricalPrice>> _data = new();
+    // Dictionary key is (Ticker, TimeFrame) tuple
+    private readonly Dictionary<(string ticker, TimeFrameUnit timeFrame), List<HistoricalPrice>> _data = new();
 
-    public Task SaveHistoricalDataAsync(string ticker, string? isin, IEnumerable<HistoricalPrice> data)
+    public Task SaveHistoricalDataAsync(string ticker, string? isin, TimeFrame timeFrame, IEnumerable<HistoricalPrice> data)
     {
-        if (!_data.ContainsKey(ticker))
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key))
         {
-            _data[ticker] = new List<HistoricalPrice>();
+            _data[key] = new List<HistoricalPrice>();
         }
 
         var dataList = data.ToList();
 
-        // Update ticker and ISIN for all entries
+        // Update ticker, ISIN, and TimeFrame for all entries
         foreach (HistoricalPrice price in dataList)
         {
             price.Ticker = ticker;
             price.ISIN = isin;
+            price.TimeFrame = timeFrame.Unit;
             price.CreatedAt = DateTime.UtcNow;
         }
 
-        // Filter out duplicates (same date)
-        var existingDates = _data[ticker].Select(p => p.DateTime).ToHashSet();
+        // Filter out duplicates (same date and timeframe)
+        var existingDates = _data[key].Select(p => p.DateTime).ToHashSet();
         var newRecords = dataList.Where(p => !existingDates.Contains(p.DateTime)).ToList();
 
-        _data[ticker].AddRange(newRecords);
-        _data[ticker] = _data[ticker].OrderBy(p => p.DateTime).ToList();
+        _data[key].AddRange(newRecords);
+        _data[key] = _data[key].OrderBy(p => p.DateTime).ToList();
 
         return Task.CompletedTask;
     }
 
-    public Task<DateTime?> GetLatestDataDateAsync(string ticker)
+    public Task<DateTime?> GetLatestDataDateAsync(string ticker, TimeFrame timeFrame)
     {
-        if (!_data.ContainsKey(ticker) || !_data[ticker].Any())
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key) || !_data[key].Any())
         {
             return Task.FromResult<DateTime?>(null);
         }
 
-        return Task.FromResult<DateTime?>(_data[ticker].Max(p => p.DateTime));
+        return Task.FromResult<DateTime?>(_data[key].Max(p => p.DateTime));
     }
 
-    public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker)
+    public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker, TimeFrame timeFrame)
     {
-        if (!_data.ContainsKey(ticker))
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key))
         {
             return Task.FromResult(new List<HistoricalPrice>());
         }
 
-        return Task.FromResult(_data[ticker].OrderBy(p => p.DateTime).ToList());
+        return Task.FromResult(_data[key].OrderBy(p => p.DateTime).ToList());
     }
 
-    public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker, DateTime start, DateTime end)
+    public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker, TimeFrame timeFrame, DateTime start, DateTime end)
     {
-        if (!_data.ContainsKey(ticker))
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key))
         {
             return Task.FromResult(new List<HistoricalPrice>());
         }
 
-        var filtered = _data[ticker]
+        var filtered = _data[key]
             .Where(p => p.DateTime >= start && p.DateTime <= end)
             .OrderBy(p => p.DateTime)
             .ToList();
@@ -73,14 +80,15 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         return Task.FromResult(filtered);
     }
 
-    public Task<DataSummaryResult> GetDataSummaryAsync(string ticker)
+    public Task<DataSummaryResult> GetDataSummaryAsync(string ticker, TimeFrame timeFrame)
     {
-        if (!_data.ContainsKey(ticker) || !_data[ticker].Any())
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key) || !_data[key].Any())
         {
             return Task.FromResult(new DataSummaryResult(ticker, null, 0, 0, null, null, null, null, null));
         }
 
-        List<HistoricalPrice> data = _data[ticker];
+        List<HistoricalPrice> data = _data[key];
         string? isin = data.FirstOrDefault()?.ISIN;
         int totalRecords = data.Count;
         DateTime oldestDate = data.Min(p => p.DateTime);
@@ -101,11 +109,23 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
             latestClose));
     }
 
+    public Task<List<TimeFrame>> GetAvailableTimeFramesAsync(string ticker)
+    {
+        var timeFrames = _data.Keys
+            .Where(k => k.ticker == ticker)
+            .Select(k => new TimeFrame { Unit = k.timeFrame })
+            .OrderBy(tf => tf.ToMinutes())
+            .ToList();
+
+        return Task.FromResult(timeFrames);
+    }
+
     // Test helper methods
     public void Clear() => _data.Clear();
 
-    public void SeedData(string ticker, List<HistoricalPrice> prices)
+    public void SeedData(string ticker, TimeFrameUnit timeFrame, List<HistoricalPrice> prices)
     {
-        _data[ticker] = prices.OrderBy(p => p.DateTime).ToList();
+        var key = (ticker, timeFrame);
+        _data[key] = prices.OrderBy(p => p.DateTime).ToList();
     }
 }

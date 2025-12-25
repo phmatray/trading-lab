@@ -30,7 +30,8 @@ public record ParameterOptimizationCommand(
     decimal CommissionPercentage = 0.001m,
     decimal MinimumCommission = 1.0m,
     DateTime? StartDate = null,
-    DateTime? EndDate = null);
+    DateTime? EndDate = null,
+    TimeFrame? TimeFrame = null);
 
 /// <summary>
 /// Result object containing comparison between two strategy variants.

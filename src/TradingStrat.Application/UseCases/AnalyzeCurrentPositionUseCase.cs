@@ -36,10 +36,13 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         AnalysisCommand command,
         IProgress<string>? progress = null)
     {
+        // Default to D1 (daily) if no timeframe specified
+        var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+
         progress?.Report("Loading historical data from database...");
 
         // Step 1: Load historical data from database
-        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
+        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker, timeFrame);
 
         if (historicalData.Count < 30)
         {
@@ -56,7 +59,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         if (command.FetchFreshData)
         {
             progress?.Report("Fetching latest market data...");
-            (List<HistoricalPrice> freshData, isFresh, warning) = await FetchLatestDataAsync(command.Ticker);
+            (List<HistoricalPrice> freshData, isFresh, warning) = await FetchLatestDataAsync(command.Ticker, timeFrame);
 
             progress?.Report("Merging and preparing data...");
             completeData = MergeHistoricalData(historicalData, freshData);
@@ -131,14 +134,14 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
     }
 
     private async Task<(List<HistoricalPrice> data, bool isFresh, string? warning)>
-        FetchLatestDataAsync(string ticker)
+        FetchLatestDataAsync(string ticker, Domain.ValueObjects.TimeFrame timeFrame)
     {
         try
         {
             DateTime today = DateTime.Today;
             DateTime startDate = today.AddDays(-7);
 
-            IReadOnlyList<HistoricalPrice> freshData = await _marketDataPort.FetchHistoricalDataAsync(ticker, startDate, today);
+            IReadOnlyList<HistoricalPrice> freshData = await _marketDataPort.FetchHistoricalDataAsync(ticker, timeFrame, startDate, today);
 
             if (freshData.Count == 0)
             {

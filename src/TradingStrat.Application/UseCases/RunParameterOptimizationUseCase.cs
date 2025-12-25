@@ -33,13 +33,16 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         ParameterOptimizationCommand command,
         IProgress<Application.Ports.Inbound.OptimizationProgress>? progress = null)
     {
+        // Default to D1 (daily) if no timeframe specified
+        TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         // Validate data exists
-        await ValidateHistoricalDataExists(command.Ticker);
+        await ValidateHistoricalDataExists(command.Ticker, timeFrame);
 
         // Determine date range
-        DateTime endDate = command.EndDate ?? await GetLatestDateAsync(command.Ticker);
+        DateTime endDate = command.EndDate ?? await GetLatestDateAsync(command.Ticker, timeFrame);
         DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
         // Run backtest for Variant A
@@ -49,6 +52,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         BacktestResult resultA = await RunSingleBacktest(
             command.VariantA,
             command.Ticker,
+            timeFrame,
             startDate,
             endDate,
             command.InitialCapital,
@@ -64,6 +68,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         BacktestResult resultB = await RunSingleBacktest(
             command.VariantB,
             command.Ticker,
+            timeFrame,
             startDate,
             endDate,
             command.InitialCapital,
@@ -92,27 +97,28 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         return new ParameterOptimizationResult(comparison, stopwatch.Elapsed);
     }
 
-    private async Task ValidateHistoricalDataExists(string ticker)
+    private async Task ValidateHistoricalDataExists(string ticker, TimeFrame timeFrame)
     {
-        List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker);
+        List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
 
         if (data.Count == 0)
         {
             throw new InvalidOperationException(
-                $"No historical data found for {ticker}. " +
+                $"No historical data found for {ticker} ({timeFrame}). " +
                 "Please run the data fetcher first to download historical data.");
         }
     }
 
-    private async Task<DateTime> GetLatestDateAsync(string ticker)
+    private async Task<DateTime> GetLatestDateAsync(string ticker, TimeFrame timeFrame)
     {
-        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker);
+        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker, timeFrame);
         return latestDate ?? DateTime.Today;
     }
 
     private async Task<BacktestResult> RunSingleBacktest(
         StrategyVariant variant,
         string ticker,
+        TimeFrame timeFrame,
         DateTime startDate,
         DateTime endDate,
         decimal initialCapital,
@@ -133,7 +139,8 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             EndDate: endDate,
             InitialCapital: initialCapital,
             CommissionPercentage: commissionPercentage,
-            MinimumCommission: minimumCommission);
+            MinimumCommission: minimumCommission,
+            TimeFrame: timeFrame);
 
         // Wrap progress reporter to include variant label
         Progress<(int current, int total, int trades)>? wrappedProgress = progress != null

@@ -35,7 +35,7 @@ public class PortfolioContextBuilder
         var endDate = DateTime.Today;
         var startDate = endDate.AddDays(-daysBack);
 
-        var prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, startDate, endDate);
+        var prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, Domain.ValueObjects.TimeFrame.D1, startDate, endDate);
 
         if (prices.Count == 0)
         {
@@ -63,15 +63,15 @@ public class PortfolioContextBuilder
 
         // Calculate price changes
         decimal dailyReturn = 0;
-        if (prices.Count > 1 && latest.Close.HasValue && prices[^2].Close.HasValue && prices[^2].Close != 0)
+        if (prices.Count > 1 && latest.Close is { } currentClose && prices[^2].Close is { } previousClose && previousClose != 0)
         {
-            dailyReturn = (latest.Close.Value - prices[^2].Close!.Value) / prices[^2].Close!.Value * 100;
+            dailyReturn = (currentClose - previousClose) / previousClose * 100;
         }
 
         decimal weekChange = 0;
-        if (prices.Count > 5 && latest.Close.HasValue && prices[^6].Close.HasValue && prices[^6].Close != 0)
+        if (prices.Count > 5 && latest.Close is { } currentClose2 && prices[^6].Close is { } weekAgoClose && weekAgoClose != 0)
         {
-            weekChange = (latest.Close.Value - prices[^6].Close!.Value) / prices[^6].Close!.Value * 100;
+            weekChange = (currentClose2 - weekAgoClose) / weekAgoClose * 100;
         }
 
         // Build formatted context

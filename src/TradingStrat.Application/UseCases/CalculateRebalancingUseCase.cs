@@ -62,6 +62,7 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
             {
                 var historicalData = await _marketDataPort.FetchHistoricalDataAsync(
                     ticker,
+                    Domain.ValueObjects.TimeFrame.D1,
                     DateTime.Today.AddDays(-7),
                     DateTime.Today);
 

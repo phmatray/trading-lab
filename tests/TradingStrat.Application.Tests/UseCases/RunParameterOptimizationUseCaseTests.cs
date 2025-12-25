@@ -205,6 +205,6 @@ public class RunParameterOptimizationUseCaseTests
             });
         }
 
-        _historicalDataPort.SeedData("TEST", data);
+        _historicalDataPort.SeedData("TEST", TimeFrameUnit.D1, data);
     }
 }

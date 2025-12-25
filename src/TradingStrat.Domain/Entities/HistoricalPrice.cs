@@ -1,9 +1,12 @@
+using TradingStrat.Domain.ValueObjects;
+
 namespace TradingStrat.Domain.Entities;
 
 /// <summary>
 /// Domain entity representing a single bar of historical price data (OHLCV - Open, High, Low, Close, Volume).
 /// Used for both backtesting and live analysis.
 /// Maps to the HistoricalPrices table in the SQLite database.
+/// Supports multiple timeframes (M1, M5, M15, M30, H1, H4, D1, W1, MN1).
 /// </summary>
 public class HistoricalPrice
 {
@@ -25,7 +28,15 @@ public class HistoricalPrice
     public string? ISIN { get; set; }
 
     /// <summary>
-    /// Date and time for this price bar (typically daily granularity).
+    /// Timeframe for this price bar (M1, M5, M15, M30, H1, H4, D1, W1, MN1).
+    /// Defaults to D1 (daily) for backward compatibility.
+    /// Combined with Ticker and DateTime to form unique constraint in database.
+    /// </summary>
+    public TimeFrameUnit TimeFrame { get; set; } = TimeFrameUnit.D1;
+
+    /// <summary>
+    /// Date and time for this price bar.
+    /// The granularity depends on the TimeFrame property.
     /// </summary>
     public DateTime DateTime { get; set; }
 

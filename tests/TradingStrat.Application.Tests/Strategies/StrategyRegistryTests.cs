@@ -192,9 +192,9 @@ public class StrategyRegistryTests
 
         // Assert
         descriptor.Parameters.Count.ShouldBe(8);
-        descriptor.Parameters.ShouldContainKey("TenkanPeriod");
-        descriptor.Parameters.ShouldContainKey("KijunPeriod");
-        descriptor.Parameters.ShouldContainKey("SenkouBPeriod");
+        descriptor.Parameters.ShouldContainKey("ConversionLinePeriod");
+        descriptor.Parameters.ShouldContainKey("BaseLinePeriod");
+        descriptor.Parameters.ShouldContainKey("LeadingSpanBPeriod");
         descriptor.Parameters.ShouldContainKey("Displacement");
         descriptor.Parameters.ShouldContainKey("ExitMode");
         descriptor.Parameters.ShouldContainKey("EntryMode");

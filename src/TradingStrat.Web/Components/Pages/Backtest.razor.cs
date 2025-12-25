@@ -92,7 +92,9 @@ public partial class Backtest
             model.MinimumCommission,
             model.StartDate,
             model.EndDate,
-            model.CustomStrategyId
+            TimeFrame: null,  // Will default to D1 in use case
+            TradingStyle: null,  // No trading style selected
+            CustomStrategyId: model.CustomStrategyId
         );
 
         BacktestResult result = await BacktestUseCase.ExecuteAsync(command, backtestProgress);

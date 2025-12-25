@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 
 namespace TradingStrat.Infrastructure.Tests.Persistence;
@@ -59,10 +60,10 @@ public class HistoricalDataRepositoryTests : IDisposable
         };
 
         // Act
-        await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", data);
+        await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", TimeFrame.D1, data);
 
         // Assert
-        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST", TimeFrame.D1);
         savedData.Count.ShouldBe(2);
         foreach (HistoricalPrice p in savedData)
         {
@@ -85,7 +86,7 @@ public class HistoricalDataRepositoryTests : IDisposable
             }
         };
 
-        await _repository.SaveHistoricalDataAsync("TEST", null, initialData);
+        await _repository.SaveHistoricalDataAsync("TEST", null, TimeFrame.D1, initialData);
 
         var duplicateData = new List<HistoricalPrice>
         {
@@ -104,10 +105,10 @@ public class HistoricalDataRepositoryTests : IDisposable
         };
 
         // Act
-        await _repository.SaveHistoricalDataAsync("TEST", null, duplicateData);
+        await _repository.SaveHistoricalDataAsync("TEST", null, TimeFrame.D1, duplicateData);
 
         // Assert
-        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _repository.GetHistoricalDataAsync("TEST", TimeFrame.D1);
         savedData.Count.ShouldBe(2);  // Should have 2 records (1 original + 1 new)
 
         // Original record should remain unchanged
@@ -126,10 +127,10 @@ public class HistoricalDataRepositoryTests : IDisposable
             new() { Ticker = "TEST", DateTime = new DateTime(2024, 1, 2), Close = 101m }
         };
 
-        await _repository.SaveHistoricalDataAsync("TEST", null, data);
+        await _repository.SaveHistoricalDataAsync("TEST", null, TimeFrame.D1, data);
 
         // Act
-        DateTime? latestDate = await _repository.GetLatestDataDateAsync("TEST");
+        DateTime? latestDate = await _repository.GetLatestDataDateAsync("TEST", TimeFrame.D1);
 
         // Assert
         latestDate.ShouldBe(new DateTime(2024, 1, 3));
@@ -139,7 +140,7 @@ public class HistoricalDataRepositoryTests : IDisposable
     public async Task GetLatestDataDateAsync_WhenNoData_ShouldReturnNull()
     {
         // Act
-        DateTime? latestDate = await _repository.GetLatestDataDateAsync("NODATA");
+        DateTime? latestDate = await _repository.GetLatestDataDateAsync("NODATA", TimeFrame.D1);
 
         // Assert
         latestDate.ShouldBeNull();
@@ -160,11 +161,12 @@ public class HistoricalDataRepositoryTests : IDisposable
             });
         }
 
-        await _repository.SaveHistoricalDataAsync("TEST", null, data);
+        await _repository.SaveHistoricalDataAsync("TEST", null, TimeFrame.D1, data);
 
         // Act
         List<HistoricalPrice> filtered = await _repository.GetHistoricalDataAsync(
             "TEST",
+            TimeFrame.D1,
             new DateTime(2024, 1, 3),
             new DateTime(2024, 1, 7));
 
@@ -206,10 +208,10 @@ public class HistoricalDataRepositoryTests : IDisposable
             }
         };
 
-        await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", data);
+        await _repository.SaveHistoricalDataAsync("TEST", "TEST_ISIN", TimeFrame.D1, data);
 
         // Act
-        DataSummaryResult summary = await _repository.GetDataSummaryAsync("TEST");
+        DataSummaryResult summary = await _repository.GetDataSummaryAsync("TEST", TimeFrame.D1);
 
         // Assert
         summary.Ticker.ShouldBe("TEST");
@@ -226,7 +228,7 @@ public class HistoricalDataRepositoryTests : IDisposable
     public async Task GetDataSummaryAsync_WhenNoData_ShouldReturnEmptySummary()
     {
         // Act
-        DataSummaryResult summary = await _repository.GetDataSummaryAsync("NODATA");
+        DataSummaryResult summary = await _repository.GetDataSummaryAsync("NODATA", TimeFrame.D1);
 
         // Assert
         summary.Ticker.ShouldBe("NODATA");
@@ -250,12 +252,12 @@ public class HistoricalDataRepositoryTests : IDisposable
         };
 
         // Act
-        await _repository.SaveHistoricalDataAsync("TICKER1", null, ticker1Data);
-        await _repository.SaveHistoricalDataAsync("TICKER2", null, ticker2Data);
+        await _repository.SaveHistoricalDataAsync("TICKER1", null, TimeFrame.D1, ticker1Data);
+        await _repository.SaveHistoricalDataAsync("TICKER2", null, TimeFrame.D1, ticker2Data);
 
         // Assert
-        List<HistoricalPrice> ticker1Retrieved = await _repository.GetHistoricalDataAsync("TICKER1");
-        List<HistoricalPrice> ticker2Retrieved = await _repository.GetHistoricalDataAsync("TICKER2");
+        List<HistoricalPrice> ticker1Retrieved = await _repository.GetHistoricalDataAsync("TICKER1", TimeFrame.D1);
+        List<HistoricalPrice> ticker2Retrieved = await _repository.GetHistoricalDataAsync("TICKER2", TimeFrame.D1);
 
         ticker1Retrieved.Count.ShouldBe(1);
         ticker1Retrieved[0].Close.ShouldBe(100m);

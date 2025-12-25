@@ -83,6 +83,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
 
             var data = await _historicalDataPort.GetHistoricalDataAsync(
                 ticker,
+                Domain.ValueObjects.TimeFrame.D1,
                 startDate,
                 endDate);
 

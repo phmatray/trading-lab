@@ -1,5 +1,6 @@
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
 
@@ -32,6 +33,8 @@ public interface IBacktestUseCase
 /// <param name="MinimumCommission">Minimum commission per trade (default $1.00).</param>
 /// <param name="StartDate">Optional start date for backtest period.</param>
 /// <param name="EndDate">Optional end date for backtest period.</param>
+/// <param name="TimeFrame">Timeframe for historical data (default D1 - daily). Determines bar granularity.</param>
+/// <param name="TradingStyle">Optional trading style for applying intelligent defaults.</param>
 /// <param name="CustomStrategyId">Optional custom strategy ID. If set, uses custom strategy instead of built-in StrategyType.</param>
 public record BacktestCommand(
     string Ticker,
@@ -42,6 +45,8 @@ public record BacktestCommand(
     decimal MinimumCommission = 1.0m,
     DateTime? StartDate = null,
     DateTime? EndDate = null,
+    TimeFrame? TimeFrame = null,
+    TradingStyle? TradingStyle = null,
     int? CustomStrategyId = null);
 
 /// <summary>

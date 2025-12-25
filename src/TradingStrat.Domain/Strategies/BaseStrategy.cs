@@ -9,6 +9,13 @@ public abstract class BaseStrategy(IIndicatorCalculator indicatorCalculator) : I
     protected IReadOnlyList<HistoricalPrice> HistoricalData { get; private set; } = null!;
     protected decimal[] ClosePrices { get; private set; } = null!;
 
+    /// <summary>
+    /// The timeframe of the historical data used by this strategy instance.
+    /// Populated during Initialize() if all data bars have consistent timeframe.
+    /// Null if data contains mixed timeframes (should not happen in normal use).
+    /// </summary>
+    protected TimeFrame? DataTimeFrame { get; private set; }
+
     public abstract string Name { get; }
     public abstract string Description { get; }
 
@@ -16,6 +23,18 @@ public abstract class BaseStrategy(IIndicatorCalculator indicatorCalculator) : I
     {
         HistoricalData = historicalData;
         ClosePrices = historicalData.Select(h => h.Close ?? 0).ToArray();
+
+        // Extract timeframe if data is consistent
+        if (historicalData.Count > 0)
+        {
+            TimeFrameUnit firstTimeFrame = historicalData[0].TimeFrame;
+            bool allSameTimeFrame = historicalData.All(h => h.TimeFrame == firstTimeFrame);
+
+            if (allSameTimeFrame)
+            {
+                DataTimeFrame = new TimeFrame { Unit = firstTimeFrame };
+            }
+        }
     }
 
     public abstract TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition);

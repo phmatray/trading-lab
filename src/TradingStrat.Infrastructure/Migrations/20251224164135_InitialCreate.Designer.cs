@@ -11,8 +11,8 @@ using TradingStrat.Infrastructure.Persistence.EfCore;
 namespace TradingStrat.Infrastructure.Migrations
 {
     [DbContext(typeof(TradingContext))]
-    [Migration("20251221134445_AddPortfolioManagement")]
-    partial class AddPortfolioManagement
+    [Migration("20251224164135_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,6 +55,65 @@ namespace TradingStrat.Infrastructure.Migrations
                         .HasDatabaseName("IX_ChatMessages_Session_Timestamp");
 
                     b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("TradingStrat.Domain.Entities.CustomStrategy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("DefinitionJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastBacktestDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("LastBacktestReturn")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TimesUsed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("IX_CustomStrategies_Category");
+
+                    b.HasIndex("Author", "CreatedAt")
+                        .HasDatabaseName("IX_CustomStrategies_Author_CreatedAt");
+
+                    b.ToTable("CustomStrategies");
                 });
 
             modelBuilder.Entity("TradingStrat.Domain.Entities.HistoricalPrice", b =>
@@ -100,6 +159,11 @@ namespace TradingStrat.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TimeFrame")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("Volume")
                         .HasColumnType("INTEGER");
 
@@ -108,9 +172,12 @@ namespace TradingStrat.Infrastructure.Migrations
                     b.HasIndex("ISIN")
                         .HasDatabaseName("IX_HistoricalPrices_ISIN");
 
-                    b.HasIndex("Ticker", "DateTime")
+                    b.HasIndex("Ticker", "TimeFrame")
+                        .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame");
+
+                    b.HasIndex("Ticker", "TimeFrame", "DateTime")
                         .IsUnique()
-                        .HasDatabaseName("IX_HistoricalPrices_Ticker_DateTime");
+                        .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame_DateTime");
 
                     b.ToTable("HistoricalPrices");
                 });

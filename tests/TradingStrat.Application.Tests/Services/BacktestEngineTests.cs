@@ -156,11 +156,11 @@ public class BacktestEngineTests
                 Volume = 1000000
             });
         }
-        await _repository.SaveHistoricalDataAsync("TEST", null, prices);
+        await _repository.SaveHistoricalDataAsync("TEST", null, TimeFrame.D1, prices);
     }
 
     private BacktestConfiguration CreateConfig() =>
-        new("TEST", DateTime.Today.AddDays(-9), DateTime.Today, 10000m, 0.001m, 1m);
+        new("TEST", DateTime.Today.AddDays(-9), DateTime.Today, 10000m, 0.001m, 1m, TimeFrame.D1);
 
     private class SimpleHoldStrategy : IStrategy
     {

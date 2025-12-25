@@ -1,6 +1,7 @@
 using NodaTime;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 using YahooQuotesApi;
 
 namespace TradingStrat.Infrastructure.MarketData;
@@ -9,9 +10,18 @@ public class YahooFinanceAdapter : IMarketDataPort
 {
     public async Task<IReadOnlyList<HistoricalPrice>> FetchHistoricalDataAsync(
         string ticker,
+        TimeFrame timeFrame,
         DateTime startDate,
         DateTime endDate)
     {
+        // Yahoo Finance only supports daily, weekly, and monthly data
+        if (timeFrame.IsIntraday())
+        {
+            throw new NotSupportedException(
+                $"Yahoo Finance does not support intraday timeframes ({timeFrame}). " +
+                "Please use Alpha Vantage adapter for intraday data (M1, M5, M15, M30, H1, H4).");
+        }
+
         try
         {
             // Convert DateTime to NodaTime Instant
@@ -44,6 +54,7 @@ public class YahooFinanceAdapter : IMarketDataPort
                     Close = (decimal)tick.Close,
                     AdjustedClose = (decimal)tick.AdjustedClose,
                     Volume = tick.Volume,
+                    TimeFrame = timeFrame.Unit,
                     CreatedAt = DateTime.UtcNow
                 })
                 .ToList();
@@ -65,7 +76,7 @@ public class YahooFinanceAdapter : IMarketDataPort
             DateTime endDate = DateTime.Today;
             DateTime startDate = endDate.AddDays(-7);
 
-            IReadOnlyList<HistoricalPrice> data = await FetchHistoricalDataAsync(ticker, startDate, endDate);
+            IReadOnlyList<HistoricalPrice> data = await FetchHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate);
 
             // Return the most recent data point
             return data.OrderByDescending(d => d.DateTime).FirstOrDefault();

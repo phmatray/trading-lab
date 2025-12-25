@@ -56,7 +56,8 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             EndDate: command.BacktestSettings.EndDate,
             InitialCapital: command.BacktestSettings.InitialCapital,
             CommissionPercentage: command.BacktestSettings.CommissionPercentage,
-            MinimumCommission: command.BacktestSettings.MinimumCommission
+            MinimumCommission: command.BacktestSettings.MinimumCommission,
+            TimeFrame: Domain.ValueObjects.TimeFrame.D1
         );
 
         // Create parameter evaluator function that runs backtests

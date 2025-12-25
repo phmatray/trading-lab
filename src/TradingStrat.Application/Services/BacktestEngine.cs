@@ -45,7 +45,9 @@ public class BacktestEngine
 
     private async Task<List<HistoricalPrice>> LoadAndFilterData(BacktestConfiguration configuration)
     {
-        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(configuration.Ticker);
+        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(
+            configuration.Ticker,
+            configuration.TimeFrame);
 
         var filteredData = historicalData
             .Where(h => h.DateTime >= configuration.StartDate && h.DateTime <= configuration.EndDate)
@@ -55,7 +57,7 @@ public class BacktestEngine
         if (filteredData.Count == 0)
         {
             throw new InvalidOperationException(
-                $"No historical data found for {configuration.Ticker} " +
+                $"No historical data found for {configuration.Ticker} ({configuration.TimeFrame}) " +
                 $"between {configuration.StartDate:yyyy-MM-dd} and {configuration.EndDate:yyyy-MM-dd}");
         }
 

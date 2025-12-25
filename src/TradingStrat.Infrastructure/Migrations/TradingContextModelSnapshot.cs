@@ -156,6 +156,11 @@ namespace TradingStrat.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TimeFrame")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("Volume")
                         .HasColumnType("INTEGER");
 
@@ -164,9 +169,12 @@ namespace TradingStrat.Infrastructure.Migrations
                     b.HasIndex("ISIN")
                         .HasDatabaseName("IX_HistoricalPrices_ISIN");
 
-                    b.HasIndex("Ticker", "DateTime")
+                    b.HasIndex("Ticker", "TimeFrame")
+                        .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame");
+
+                    b.HasIndex("Ticker", "TimeFrame", "DateTime")
                         .IsUnique()
-                        .HasDatabaseName("IX_HistoricalPrices_Ticker_DateTime");
+                        .HasDatabaseName("IX_HistoricalPrices_Ticker_TimeFrame_DateTime");
 
                     b.ToTable("HistoricalPrices");
                 });

@@ -27,18 +27,23 @@ public class RunBacktestUseCase : IBacktestUseCase
         BacktestCommand command,
         IProgress<BacktestProgress>? progress = null)
     {
+        // Default to D1 (daily) if no timeframe specified
+        var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+
         // Check if data exists
-        List<HistoricalPrice> allData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker);
+        List<HistoricalPrice> allData = await _historicalDataPort.GetHistoricalDataAsync(
+            command.Ticker,
+            timeFrame);
 
         if (allData.Count == 0)
         {
             throw new InvalidOperationException(
-                $"No historical data found for {command.Ticker}. " +
+                $"No historical data found for {command.Ticker} ({timeFrame}). " +
                 "Please run the data fetcher first to download historical data.");
         }
 
         // Determine date range
-        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(command.Ticker);
+        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(command.Ticker, timeFrame);
         DateTime endDate = command.EndDate ?? latestDate ?? DateTime.Today;
         DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
@@ -54,7 +59,9 @@ public class RunBacktestUseCase : IBacktestUseCase
             EndDate: endDate,
             InitialCapital: command.InitialCapital,
             CommissionPercentage: command.CommissionPercentage,
-            MinimumCommission: command.MinimumCommission);
+            MinimumCommission: command.MinimumCommission,
+            TimeFrame: timeFrame,
+            TradingStyle: command.TradingStyle);
 
         // Run backtest
         Progress<(int current, int total, int trades)>? internalProgress = progress != null

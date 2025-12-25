@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 
 namespace TradingStrat.Web.Services;
@@ -26,7 +27,8 @@ public class DataFreshnessService : IDataFreshnessService
     /// </summary>
     public async Task CheckAndNotifyAsync(string ticker, CancellationToken cancellationToken = default)
     {
-        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker);
+        // Check D1 (daily) data freshness by default
+        DateTime? latestDate = await _historicalDataPort.GetLatestDataDateAsync(ticker, TimeFrame.D1);
 
         if (!latestDate.HasValue)
         {

@@ -1141,7 +1141,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateLaggingSpan_ReturnsClosePrices()
+    public void CalculateChikouSpan_ReturnsClosePrices()
     {
         // Arrange
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -1234,7 +1234,7 @@ public class IndicatorCalculatorTests
     }
 
     [Fact]
-    public void CalculateLaggingSpan_WithNullPrices_ThrowsArgumentNullException()
+    public void CalculateChikouSpan_WithNullPrices_ThrowsArgumentNullException()
     {
         // Act & Assert
         Should.Throw<ArgumentNullException>(() => _calculator.CalculateLaggingSpan(null!));

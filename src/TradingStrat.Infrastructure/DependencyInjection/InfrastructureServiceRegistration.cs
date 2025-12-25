@@ -25,10 +25,19 @@ public static class InfrastructureServiceRegistration
 
         // HTTP Clients
         services.AddHttpClient("Anthropic");
+        services.AddHttpClient<YahooFinanceAdapter>();
+        services.AddHttpClient<AlphaVantageAdapter>();
 
         // Port implementations
         services.AddScoped<IHistoricalDataPort, HistoricalDataRepository>();
-        services.AddScoped<IMarketDataPort, YahooFinanceAdapter>();
+
+        // Market Data Adapters (register both, factory will select based on timeframe)
+        services.AddScoped<YahooFinanceAdapter>();
+        services.AddScoped<AlphaVantageAdapter>();
+        services.AddScoped<MarketDataPortFactory>();
+
+        // Keep default IMarketDataPort for backward compatibility (uses Yahoo Finance)
+        services.AddScoped<IMarketDataPort>(sp => sp.GetRequiredService<YahooFinanceAdapter>());
         services.AddScoped<IExportPort, ExportAdapter>();
         services.AddSingleton<IMLModelPort, MlNetModelAdapter>();
         services.AddScoped<IAssistantPort, AnthropicAdapter>();

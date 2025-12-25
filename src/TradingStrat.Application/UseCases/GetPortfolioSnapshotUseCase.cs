@@ -71,6 +71,7 @@ public class GetPortfolioSnapshotUseCase : IGetPortfolioSnapshotUseCase
                 // Fetch recent data (last 7 days to ensure we get the latest price)
                 var historicalData = await _marketDataPort.FetchHistoricalDataAsync(
                     ticker,
+                    Domain.ValueObjects.TimeFrame.D1,
                     DateTime.Today.AddDays(-7),
                     DateTime.Today);
 

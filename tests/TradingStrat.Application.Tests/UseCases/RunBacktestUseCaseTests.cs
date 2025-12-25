@@ -10,6 +10,7 @@ using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.Strategies;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -196,6 +197,6 @@ public class RunBacktestUseCaseTests
             });
         }
 
-        _historicalDataPort.SeedData("TEST", data);
+        _historicalDataPort.SeedData("TEST", TimeFrameUnit.D1, data);
     }
 }

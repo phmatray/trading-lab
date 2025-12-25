@@ -9,6 +9,7 @@ public class TradingConfiguration
     public MLSettings MachineLearning { get; set; } = new();
     public ExportSettings Export { get; set; } = new();
     public YahooFinanceSettings YahooFinance { get; set; } = new();
+    public AlphaVantageSettings AlphaVantage { get; set; } = new();
 }
 
 public class DatabaseSettings
@@ -56,4 +57,13 @@ public class YahooFinanceSettings
 {
     public int TimeoutSeconds { get; set; } = 30;
     public int MaxRetries { get; set; } = 3;
+}
+
+public class AlphaVantageSettings
+{
+    public string ApiKey { get; set; } = string.Empty;
+    public int TimeoutSeconds { get; set; } = 30;
+    public int MaxRetries { get; set; } = 3;
+    public int MaxCallsPerMinute { get; set; } = 5;  // Free tier limit
+    public int MaxCallsPerDay { get; set; } = 500;   // Free tier limit
 }

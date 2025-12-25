@@ -6,6 +6,7 @@ using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -46,7 +47,7 @@ public class FetchHistoricalDataUseCaseTests
         result.Ticker.ShouldBe("TEST");
         result.TotalRecords.ShouldBeGreaterThan(0);
 
-        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);
         savedData.ShouldNotBeEmpty();
     }
 
@@ -82,7 +83,7 @@ public class FetchHistoricalDataUseCaseTests
             new() { Ticker = "TEST", DateTime = new DateTime(2024, 1, 2), Close = 101m }
         };
 
-        _historicalDataPort.SeedData("TEST", existingData);
+        _historicalDataPort.SeedData("TEST", TimeFrameUnit.D1, existingData);
 
         var command = new FetchDataCommand(
             Ticker: "TEST",
@@ -93,7 +94,7 @@ public class FetchHistoricalDataUseCaseTests
         DataSummaryResult result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST");
+        List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);
 
         // Should not have duplicates for existing dates
         savedData.GroupBy(p => p.DateTime)
@@ -109,7 +110,7 @@ public class FetchHistoricalDataUseCaseTests
             new() { Ticker = "TEST", DateTime = DateTime.Today.AddDays(10), Close = 100m }
         };
 
-        _historicalDataPort.SeedData("TEST", futureData);
+        _historicalDataPort.SeedData("TEST", TimeFrameUnit.D1, futureData);
 
         var command = new FetchDataCommand(
             Ticker: "TEST",

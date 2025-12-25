@@ -29,7 +29,9 @@ public interface ILiveAnalysisUseCase
 /// <param name="Ticker">Stock ticker symbol to analyze.</param>
 /// <param name="Thresholds">Optional ML prediction thresholds for buy/sell signals (uses defaults if null).</param>
 /// <param name="FetchFreshData">Whether to fetch the latest price from external source (true) or use stored data (false).</param>
+/// <param name="TimeFrame">Timeframe for the data (default D1 - daily).</param>
 public record AnalysisCommand(
     string Ticker,
     PredictionThresholds? Thresholds = null,
-    bool FetchFreshData = true);
+    bool FetchFreshData = true,
+    TimeFrame? TimeFrame = null);

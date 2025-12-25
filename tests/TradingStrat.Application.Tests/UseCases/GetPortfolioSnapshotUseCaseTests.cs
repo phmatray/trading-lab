@@ -66,6 +66,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Mock market data to return current price of $160
         A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync(
                 "AAPL",
+                A<TimeFrame>.Ignored,
                 A<DateTime>.Ignored,
                 A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
@@ -102,6 +103,7 @@ public class GetPortfolioSnapshotUseCaseTests
 
         A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync(
                 "AAPL",
+                A<TimeFrame>.Ignored,
                 A<DateTime>.Ignored,
                 A<DateTime>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -141,13 +143,13 @@ public class GetPortfolioSnapshotUseCaseTests
         });
 
         // Mock market data
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice> { new() { Ticker = "AAPL", DateTime = DateTime.Today, Close = 155m } });
 
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("MSFT", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("MSFT", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice> { new() { Ticker = "MSFT", DateTime = DateTime.Today, Close = 310m } });
 
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("GOOGL", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("GOOGL", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice> { new() { Ticker = "GOOGL", DateTime = DateTime.Today, Close = 2450m } });
 
         // Act
@@ -192,7 +194,7 @@ public class GetPortfolioSnapshotUseCaseTests
         });
 
         // Price doubled
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("TSLA", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("TSLA", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
             {
                 new() { Ticker = "TSLA", DateTime = DateTime.Today, Close = 400m }
@@ -225,7 +227,7 @@ public class GetPortfolioSnapshotUseCaseTests
         });
 
         // Price halved
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("SNAP", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("SNAP", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
             {
                 new() { Ticker = "SNAP", DateTime = DateTime.Today, Close = 25m }
@@ -268,6 +270,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Mock market data returning empty result
         A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync(
                 "UNKNOWN",
+                A<TimeFrame>.Ignored,
                 A<DateTime>.Ignored,
                 A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>());
@@ -295,6 +298,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Mock market data returning data with null Close price
         A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync(
                 "INVALID",
+                A<TimeFrame>.Ignored,
                 A<DateTime>.Ignored,
                 A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
@@ -327,7 +331,7 @@ public class GetPortfolioSnapshotUseCaseTests
             EntryDate = DateTime.Today
         });
 
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
             {
                 new() { Ticker = "AAPL", DateTime = DateTime.Today, Close = 160m }
@@ -362,7 +366,7 @@ public class GetPortfolioSnapshotUseCaseTests
             EntryDate = DateTime.Today
         });
 
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice>
             {
                 new() { Ticker = "AAPL", DateTime = DateTime.Today, Close = 160m }
@@ -374,6 +378,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Assert - verify that it fetches last 7 days of data
         A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync(
                 "AAPL",
+                A<TimeFrame>.Ignored,
                 A<DateTime>.That.Matches(d => d >= DateTime.Today.AddDays(-8) && d <= DateTime.Today.AddDays(-6)),
                 DateTime.Today))
             .MustHaveHappenedOnceExactly();
@@ -404,10 +409,10 @@ public class GetPortfolioSnapshotUseCaseTests
         });
 
         // Current prices same as entry (no gain/loss)
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("AAPL", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice> { new() { Ticker = "AAPL", DateTime = DateTime.Today, Close = 150m } });
 
-        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("MSFT", A<DateTime>.Ignored, A<DateTime>.Ignored))
+        A.CallTo(() => _marketDataPortFake.FetchHistoricalDataAsync("MSFT", A<TimeFrame>.Ignored, A<DateTime>.Ignored, A<DateTime>.Ignored))
             .Returns(new List<HistoricalPrice> { new() { Ticker = "MSFT", DateTime = DateTime.Today, Close = 300m } });
 
         // Act
