@@ -7,25 +7,55 @@
     <div class="h-full flex flex-col bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border">
         <!-- Navigation Items -->
         <nav class="flex-1 py-4 space-y-1 overflow-y-auto">
-            @foreach (var item in _navItems)
-            {
-                <NavLink href="@item.Href"
-                         class="@GetNavLinkClass()"
-                         Match="@item.Match"
-                         title="@item.Label">
-                    <div class="flex items-center @(IsCollapsed ? "justify-center" : "px-4") py-3">
-                        <!-- Icon -->
-                        <svg class="w-5 h-5 @(IsCollapsed ? "" : "mr-3")" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            @GetIconPath(item.Icon)
-                        </svg>
+            @{
+                var groups = _navItems.GroupBy(i => i.Group);
+                bool isFirstGroup = true;
+            }
 
-                        <!-- Label (hidden when collapsed) -->
-                        @if (!IsCollapsed)
-                        {
-                            <span>@item.Label</span>
-                        }
+            @foreach (var group in groups)
+            {
+                @* Group divider (collapsed) or header (expanded) *@
+                @if (!isFirstGroup)
+                {
+                    @if (IsCollapsed)
+                    {
+                        <div class="mx-2 border-t border-gray-200 dark:border-dark-border my-2"></div>
+                    }
+                }
+
+                @if (!IsCollapsed)
+                {
+                    <div class="px-4 pt-4 pb-2">
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                            @group.Key
+                        </h3>
                     </div>
-                </NavLink>
+                }
+
+                @* Menu items *@
+                @foreach (var item in group)
+                {
+                    <NavLink href="@item.Href"
+                             class="@GetNavLinkClass()"
+                             Match="@item.Match"
+                             title="@GetTooltipText(item)"
+                             aria-label="@GetTooltipText(item)">
+                        <div class="flex items-center @(IsCollapsed ? "justify-center" : "px-4") py-3">
+                            <!-- Icon -->
+                            <svg class="w-5 h-5 @(IsCollapsed ? "" : "mr-3")" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                @GetIconPath(item.Icon)
+                            </svg>
+
+                            <!-- Label (hidden when collapsed) -->
+                            @if (!IsCollapsed)
+                            {
+                                <span>@item.Label</span>
+                            }
+                        </div>
+                    </NavLink>
+                }
+
+                isFirstGroup = false;
             }
         </nav>
 
