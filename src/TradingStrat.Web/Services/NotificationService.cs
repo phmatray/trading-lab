@@ -23,7 +23,7 @@ public class NotificationService : IDisposable
         _localStorage = localStorage;
     }
 
-    public async Task<Notification> AddNotificationAsync(
+    public virtual async Task<Notification> AddNotificationAsync(
         NotificationType type,
         NotificationSeverity severity,
         string title,
@@ -60,7 +60,7 @@ public class NotificationService : IDisposable
         return notification;
     }
 
-    public async Task<List<Notification>> GetNotificationsAsync(
+    public virtual async Task<List<Notification>> GetNotificationsAsync(
         bool unreadOnly = false,
         CancellationToken cancellationToken = default)
     {
@@ -72,7 +72,7 @@ public class NotificationService : IDisposable
             : notifications;
     }
 
-    public async Task MarkAsReadAsync(
+    public virtual async Task MarkAsReadAsync(
         string notificationId,
         CancellationToken cancellationToken = default)
     {
@@ -91,7 +91,7 @@ public class NotificationService : IDisposable
         }
     }
 
-    public async Task MarkAllAsReadAsync(CancellationToken cancellationToken = default)
+    public virtual async Task MarkAllAsReadAsync(CancellationToken cancellationToken = default)
     {
         var history = await GetHistoryAsync(cancellationToken);
 
@@ -106,7 +106,7 @@ public class NotificationService : IDisposable
         OnUnreadCountChanged?.Invoke(0);
     }
 
-    public async Task ClearAllAsync(CancellationToken cancellationToken = default)
+    public virtual async Task ClearAllAsync(CancellationToken cancellationToken = default)
     {
         var history = new NotificationHistory();
         await SaveHistoryAsync(history, cancellationToken);
@@ -115,7 +115,7 @@ public class NotificationService : IDisposable
         OnUnreadCountChanged?.Invoke(0);
     }
 
-    public async Task<int> GetUnreadCountAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<int> GetUnreadCountAsync(CancellationToken cancellationToken = default)
     {
         var history = await GetHistoryAsync(cancellationToken);
         return history.Notifications.Count(n => !n.IsRead);

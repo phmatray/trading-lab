@@ -4,7 +4,7 @@
             type="button"
             aria-label="Notifications"
             aria-describedby="notification-count"
-            aria-expanded="@_isOpen"
+            aria-expanded="@(_isOpen.ToString().ToLower())"
             data-testid="notification-bell">
         <!-- Bell Icon -->
         <svg class="w-6 h-6 text-gray-600 dark:text-dark-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TradingStrat.Application.Tests/TradingStrat.Application.Tests.csproj" />
+    <Project Path="tests/TradingStrat.ComponentTests/TradingStrat.ComponentTests.csproj" />
     <Project Path="tests/TradingStrat.Domain.Tests/TradingStrat.Domain.Tests.csproj" />
     <Project Path="tests/TradingStrat.Infrastructure.Tests/TradingStrat.Infrastructure.Tests.csproj" />
     <Project Path="tests/TradingStrat.UI.Tests/TradingStrat.UI.Tests.csproj" />
