@@ -120,6 +120,17 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         return Task.FromResult(timeFrames);
     }
 
+    public Task<List<string>> GetAllTickersAsync()
+    {
+        var tickers = _data.Keys
+            .Select(k => k.ticker)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToList();
+
+        return Task.FromResult(tickers);
+    }
+
     // Test helper methods
     public void Clear() => _data.Clear();
 

@@ -59,6 +59,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IGetDashboardStatsUseCase, GetDashboardStatsUseCase>();
         services.AddScoped<IGetRecentActivityUseCase, GetRecentActivityUseCase>();
         services.AddScoped<IGetTopStrategiesUseCase, GetTopStrategiesUseCase>();
+        services.AddScoped<IGetAllDataStatusUseCase, GetAllDataStatusUseCase>();
 
         return services;
     }

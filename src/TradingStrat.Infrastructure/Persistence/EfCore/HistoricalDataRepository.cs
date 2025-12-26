@@ -119,4 +119,13 @@ public class HistoricalDataRepository : IHistoricalDataPort
             .OrderBy(tf => tf.ToMinutes())
             .ToList();
     }
+
+    public async Task<List<string>> GetAllTickersAsync()
+    {
+        return await _context.HistoricalPrices
+            .Select(p => p.Ticker)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToListAsync();
+    }
 }

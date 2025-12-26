@@ -61,6 +61,12 @@ public interface IHistoricalDataPort
     /// <param name="ticker">Stock ticker symbol.</param>
     /// <returns>List of timeframes with available data.</returns>
     Task<List<TimeFrame>> GetAvailableTimeFramesAsync(string ticker);
+
+    /// <summary>
+    /// Gets all unique tickers that have historical data in the database.
+    /// </summary>
+    /// <returns>List of unique ticker symbols.</returns>
+    Task<List<string>> GetAllTickersAsync();
 }
 
 /// <summary>
