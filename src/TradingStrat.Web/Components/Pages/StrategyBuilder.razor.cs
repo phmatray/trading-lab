@@ -34,6 +34,13 @@ public partial class StrategyBuilder
     private string _loadingMessage = "Loading...";
     private readonly List<string> _validationErrors = [];
 
+    private List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Strategy Library", Href = "/strategies/library" },
+        new() { Label = "Strategy Builder", Href = "/strategies/builder" }
+    };
+
     protected override async Task OnInitializedAsync()
     {
         if (IsEditMode)
@@ -92,6 +99,14 @@ public partial class StrategyBuilder
             _formModel.ExitRules = result.Definition.ExitRules
                 .Select(RuleFormModel.FromStrategyRule)
                 .ToList();
+
+            // Update breadcrumbs for edit mode
+            _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
+            {
+                new() { Label = "Dashboard", Href = "/" },
+                new() { Label = "Strategy Library", Href = "/strategies/library" },
+                new() { Label = result.Name, Href = $"/strategies/builder/{Id}" }
+            };
         }
         catch (Exception ex)
         {

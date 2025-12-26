@@ -28,6 +28,14 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
     private bool _isLoading = false;
     private string? _errorMessage;
 
+    private List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Portfolios", Href = "/portfolios" },
+        new() { Label = "Loading...", Href = "" },
+        new() { Label = "Performance", Href = "" }
+    };
+
     protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
@@ -52,6 +60,17 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
             if (_portfolio == null)
             {
                 _errorMessage = "Portfolio not found.";
+            }
+            else
+            {
+                // Update breadcrumbs with portfolio name
+                _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
+                {
+                    new() { Label = "Dashboard", Href = "/" },
+                    new() { Label = "Portfolios", Href = "/portfolios" },
+                    new() { Label = _portfolio.Name, Href = $"/portfolio/{PortfolioId}" },
+                    new() { Label = "Performance", Href = $"/portfolio/{PortfolioId}/performance" }
+                };
             }
         }
         catch (Exception ex)

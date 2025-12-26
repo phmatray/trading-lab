@@ -30,6 +30,14 @@ public partial class Rebalancing : ComponentBase, IDisposable
     private string? _errorMessage;
     private string? _warningMessage;
 
+    private List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Portfolios", Href = "/portfolios" },
+        new() { Label = "Loading...", Href = "" },
+        new() { Label = "Rebalancing", Href = "" }
+    };
+
     protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
@@ -64,6 +72,18 @@ public partial class Rebalancing : ComponentBase, IDisposable
             });
 
             _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+
+            // Update breadcrumbs with portfolio name
+            if (_portfolio != null)
+            {
+                _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
+                {
+                    new() { Label = "Dashboard", Href = "/" },
+                    new() { Label = "Portfolios", Href = "/portfolios" },
+                    new() { Label = _portfolio.Name, Href = $"/portfolio/{PortfolioId}" },
+                    new() { Label = "Rebalancing", Href = $"/portfolio/{PortfolioId}/rebalance" }
+                };
+            }
 
             // Initialize form with current positions
             if (_snapshot != null)

@@ -4,6 +4,9 @@
 <PageTitle>Portfolio Performance - TradingStrat</PageTitle>
 
 <div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <PageHeader Title="Portfolio Performance"
                 Description="@(_portfolio?.Name)"
                 OnBack="NavigateBack" />

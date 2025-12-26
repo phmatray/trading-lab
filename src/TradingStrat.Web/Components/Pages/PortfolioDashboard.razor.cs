@@ -31,6 +31,13 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
     private string? _errorMessage;
     private string? _successMessage;
 
+    private List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Portfolios", Href = "/portfolios" },
+        new() { Label = "Loading...", Href = "" }
+    };
+
     protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
@@ -72,6 +79,17 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
             });
 
             _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+
+            // Update breadcrumbs with portfolio name
+            if (_portfolio != null)
+            {
+                _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
+                {
+                    new() { Label = "Dashboard", Href = "/" },
+                    new() { Label = "Portfolios", Href = "/portfolios" },
+                    new() { Label = _portfolio.Name, Href = $"/portfolio/{PortfolioId}" }
+                };
+            }
         }
         catch (Exception ex)
         {

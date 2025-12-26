@@ -4,6 +4,7 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
+using AppStateService = TradingStrat.Web.Services.State.AppStateService;
 
 namespace TradingStrat.Web.Components.Pages;
 
@@ -14,6 +15,7 @@ public partial class StrategyOptimization : IDisposable
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private NotificationService NotificationService { get; set; } = default!;
     [Inject] private ProgressService ProgressService { get; set; } = default!;
+    [Inject] private AppStateService AppState { get; set; } = default!;
 
     private readonly OptimizationFormModel model = new();
     private List<CustomStrategyResult> customStrategies = new();
@@ -24,6 +26,13 @@ public partial class StrategyOptimization : IDisposable
     private bool isLoadingStrategies = true;
     private bool isOptimizing = false;
     private int estimatedIterations = 0;
+
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Strategy Library", Href = "/strategies/library" },
+        new() { Label = "Strategy Optimization", Href = "/strategies/optimize" }
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -175,6 +184,16 @@ public partial class StrategyOptimization : IDisposable
             optimizationResult = await OptimizeUseCase.ExecuteAsync(command, progress);
 
             await ShowSuccessAsync($"Optimization complete! Best score: {optimizationResult.BestScore:F2}");
+
+            // Save optimization context for quick actions
+            var optimizationContext = new Models.State.OptimizationContext
+            {
+                CustomStrategyId = model.CustomStrategyId,
+                BestParameters = optimizationResult.BestParameters,
+                BestObjectiveValue = optimizationResult.BestScore,
+                OptimizationAlgorithm = model.OptimizationType.ToString()
+            };
+            await AppState.SetOptimizationContextAsync(optimizationContext);
         }
         catch (Exception ex)
         {
@@ -276,6 +295,67 @@ public partial class StrategyOptimization : IDisposable
         if (selectedStrategy != null)
         {
             NavigationManager.NavigateTo($"/backtest?customStrategyId={selectedStrategy.Id}");
+        }
+    }
+
+    // Quick Actions navigation methods
+    private void CreatePortfolioFromStrategy()
+    {
+        if (optimizationResult == null || selectedStrategy == null)
+        {
+            return;
+        }
+
+        // Navigate to portfolios page
+        // TODO: Pre-populate portfolio with optimized strategy when AppState context is implemented
+        NavigationManager.NavigateTo("/portfolios");
+    }
+
+    private void CompareVariations()
+    {
+        if (optimizationResult == null || selectedStrategy == null)
+        {
+            return;
+        }
+
+        // Navigate to strategy comparison page
+        NavigationManager.NavigateTo("/strategies/compare");
+    }
+
+    private async Task SaveAsNewStrategy()
+    {
+        if (optimizationResult == null || selectedStrategy == null)
+        {
+            return;
+        }
+
+        try
+        {
+            // Create updated strategy definition with best parameters
+            StrategyDefinition optimizedDefinition = ApplyParametersToDefinition(
+                selectedStrategy.Definition,
+                optimizationResult.BestParameters
+            );
+
+            // Create new strategy with optimized parameters
+            CreateCustomStrategyCommand command = new(
+                Name: $"{selectedStrategy.Name} (Optimized)",
+                Description: $"{selectedStrategy.Description} - Optimized with {model.Objective} objective. Best score: {optimizationResult.BestScore:F2}",
+                Category: selectedStrategy.Category,
+                Author: selectedStrategy.Author,
+                Definition: optimizedDefinition
+            );
+
+            CustomStrategyResult newStrategy = await CustomStrategyUseCase.CreateStrategyAsync(command);
+
+            await ShowSuccessAsync($"New strategy '{newStrategy.Name}' created successfully!");
+
+            // Reload strategies list
+            await LoadCustomStrategiesAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync($"Failed to create new strategy: {ex.Message}");
         }
     }
 

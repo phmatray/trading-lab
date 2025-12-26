@@ -4,6 +4,9 @@
 <PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
 
 <div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <PageHeader Title="@(_snapshot?.PortfolioName ?? "Loading...")"
                 Description="@(_portfolio?.Description)"
                 OnBack="NavigateBack">

@@ -4,6 +4,9 @@
 <PageTitle>Optimize Strategy | TradingStrat</PageTitle>
 
 <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <!-- Page Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">Strategy Optimization</h1>
@@ -331,13 +334,40 @@
                     </table>
                 </div>
 
-                <div class="mt-6 flex gap-3">
-                    <button type="button" class="btn-primary" @onclick="ApplyBestParameters">
-                        Apply Best Parameters
-                    </button>
-                    <button type="button" class="btn-secondary" @onclick="NavigateToBacktest">
-                        Run Backtest with Best
-                    </button>
+                <div class="card mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <button type="button" @onclick="ApplyBestParameters" class="btn-primary">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Apply Best Parameters
+                        </button>
+                        <button type="button" @onclick="NavigateToBacktest" class="btn-secondary">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Run Backtest with Best
+                        </button>
+                        <button type="button" @onclick="CreatePortfolioFromStrategy" class="btn-secondary">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Create Portfolio
+                        </button>
+                        <button type="button" @onclick="CompareVariations" class="btn-secondary">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Compare Variations
+                        </button>
+                        <button type="button" @onclick="SaveAsNewStrategy" class="btn-secondary">
+                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            Save as New Strategy
+                        </button>
+                    </div>
                 </div>
             </div>
         }

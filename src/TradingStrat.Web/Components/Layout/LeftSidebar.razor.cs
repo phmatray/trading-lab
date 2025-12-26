@@ -19,39 +19,39 @@ public partial class LeftSidebar : ComponentBase
 
     private readonly List<NavItem> _navItems = new()
     {
-        // Analysis Group
-        new() { Icon = "home", Label = "Home", Href = "/", Match = NavLinkMatch.All,
-                Group = "Analysis", Description = "Overview and quick actions" },
-        new() { Icon = "database", Label = "Data", Href = "/data",
-                Group = "Analysis", Description = "Import and manage historical data" },
-        new() { Icon = "status", Label = "Data Status", Href = "/data/status",
-                Group = "Analysis", Description = "View data coverage and quality" },
-        new() { Icon = "chart", Label = "Backtest", Href = "/backtest",
-                Group = "Analysis", Description = "Test strategies on historical data" },
-        new() { Icon = "archive", Label = "Backtest Archive", Href = "/backtests",
-                Group = "Analysis", Description = "View backtest history and results" },
-        new() { Icon = "lightbulb", Label = "Live Analysis", Href = "/analysis",
-                Group = "Analysis", Description = "Real-time market analysis" },
-        new() { Icon = "calculator", Label = "A/B Test", Href = "/comparison",
-                Group = "Analysis", Description = "Compare strategy performance" },
-
-        // Strategies Group
+        // Workspace Group - Primary user workflows
+        new() { Icon = "home", Label = "Dashboard", Href = "/", Match = NavLinkMatch.All,
+                Group = "Workspace", Description = "Overview and quick actions" },
         new() { Icon = "workspace", Label = "Strategy Workspace", Href = "/workspace",
-                Group = "Strategies", Description = "Unified workflow for Define → Test → Optimize → Deploy" },
-        new() { Icon = "library", Label = "Strategy Library", Href = "/strategies/library",
-                Group = "Strategies", Description = "Browse built-in and custom strategies" },
-        new() { Icon = "builder", Label = "Strategy Builder", Href = "/strategies/builder",
-                Group = "Strategies", Description = "Create custom trading strategies" },
-        new() { Icon = "compare", Label = "Compare Strategies", Href = "/strategies/compare",
-                Group = "Strategies", Description = "Compare multiple strategies side-by-side" },
-        new() { Icon = "optimize", Label = "Strategy Optimization", Href = "/strategies/optimize",
-                Group = "Strategies", Description = "Optimize strategy parameters" },
+                Group = "Workspace", Description = "Unified workflow: Define → Test → Optimize → Deploy" },
 
-        // Portfolio Group
+        // Strategy Research Group - Analysis and comparison tools
+        new() { Icon = "library", Label = "Strategy Library", Href = "/strategies/library",
+                Group = "Strategy Research", Description = "Browse built-in and custom strategies" },
+        new() { Icon = "builder", Label = "Strategy Builder", Href = "/strategies/builder",
+                Group = "Strategy Research", Description = "Create custom trading strategies" },
+        new() { Icon = "compare", Label = "Compare Strategies", Href = "/strategies/compare",
+                Group = "Strategy Research", Description = "Compare multiple strategies side-by-side" },
+        new() { Icon = "optimize", Label = "Strategy Optimization", Href = "/strategies/optimize",
+                Group = "Strategy Research", Description = "Optimize strategy parameters" },
+        new() { Icon = "chart", Label = "Backtest", Href = "/backtest",
+                Group = "Strategy Research", Description = "Test strategies on historical data" },
+        new() { Icon = "archive", Label = "Backtest Archive", Href = "/backtests",
+                Group = "Strategy Research", Description = "View backtest history and results" },
+        new() { Icon = "lightbulb", Label = "Live Analysis", Href = "/analysis",
+                Group = "Strategy Research", Description = "Real-time market analysis" },
+
+        // Data Management Group - Data operations
+        new() { Icon = "database", Label = "Fetch Data", Href = "/data",
+                Group = "Data Management", Description = "Import historical market data" },
+        new() { Icon = "status", Label = "Data Status", Href = "/data/status",
+                Group = "Data Management", Description = "View data coverage and quality" },
+
+        // Portfolio Group - Portfolio management
         new() { Icon = "portfolio", Label = "Portfolios", Href = "/portfolios",
                 Group = "Portfolio", Description = "Manage your portfolios" },
 
-        // System Group
+        // System Group - Configuration
         new() { Icon = "settings", Label = "Settings", Href = "/settings",
                 Group = "System", Description = "Application configuration" }
     };

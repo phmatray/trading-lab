@@ -28,6 +28,8 @@ public partial class Backtest
     [Inject] private IStrategyRegistry StrategyRegistry { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private NotificationService NotificationService { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private AppStateService AppState { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
     [SupplyParameterFromQuery(Name = "strategy")]
@@ -153,6 +155,24 @@ public partial class Backtest
             }
         );
 
+        // Save backtest context for quick actions
+        var backtestContext = new Models.State.BacktestContext
+        {
+            Ticker = result.Ticker,
+            StrategyName = result.StrategyName,
+            StrategyParameters = model.StrategyParameters,
+            Config = new BacktestConfig(
+                Ticker: model.Ticker,
+                StartDate: model.StartDate ?? DateTime.Today.AddYears(-2),
+                EndDate: model.EndDate ?? DateTime.Today,
+                InitialCapital: model.InitialCapital,
+                CommissionPercentage: model.CommissionPercentage,
+                MinimumCommission: model.MinimumCommission
+            ),
+            Result = result
+        };
+        await AppState.SetBacktestContextAsync(backtestContext);
+
         return result;
     }
 
@@ -191,5 +211,52 @@ public partial class Backtest
     {
         // Convert enum to string key for StrategyForm component
         return StrategyRegistry.GetDescriptor(strategyType).Key;
+    }
+
+    // Quick Actions navigation methods
+    private void CreatePortfolioFromStrategy()
+    {
+        if (Result == null)
+        {
+            return;
+        }
+
+        // Navigate to portfolios page
+        // TODO: Pre-populate portfolio with current ticker when AppState context is implemented
+        Navigation.NavigateTo("/portfolios");
+    }
+
+    private void CompareWithOthers()
+    {
+        if (Result == null)
+        {
+            return;
+        }
+
+        // Navigate to strategy comparison page
+        Navigation.NavigateTo("/strategies/compare");
+    }
+
+    private void OptimizeParameters()
+    {
+        if (Result == null)
+        {
+            return;
+        }
+
+        // Navigate to optimization page with current strategy as query parameter
+        string strategyKey = GetStrategyKey(FormModel.StrategyType);
+        Navigation.NavigateTo($"/strategies/optimize?strategy={strategyKey}");
+    }
+
+    private void ViewInArchive()
+    {
+        if (Result == null)
+        {
+            return;
+        }
+
+        // Navigate to backtest archive page
+        Navigation.NavigateTo("/backtests");
     }
 }
