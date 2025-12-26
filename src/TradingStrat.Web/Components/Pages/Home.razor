@@ -1,11 +1,2 @@
 @page "/"
-@inject NavigationManager Navigation
 @rendermode InteractiveServer
-
-@code {
-    protected override void OnInitialized()
-    {
-        // Redirect to dashboard on page load
-        Navigation.NavigateTo("/dashboard", replace: true);
-    }
-}

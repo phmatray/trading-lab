@@ -1,9 +1,3 @@
-@using TradingStrat.Application.Ports.Inbound
-@using TradingStrat.Domain.Entities
-@using TradingStrat.Web.Models
-@inject ICustomStrategyManagementUseCase CustomStrategyUseCase
-@inject NotificationService Notifications
-
 <div class="space-y-6">
     <div class="card">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
@@ -105,67 +99,3 @@
         }
     </div>
 </div>
-
-@code {
-    [Parameter] public EventCallback<CustomStrategy> OnStrategyCreated { get; set; }
-
-    private bool _showStrategyLibrary;
-    private List<CustomStrategyResult>? _strategies;
-
-    private async Task LoadExistingStrategy()
-    {
-        _showStrategyLibrary = true;
-
-        try
-        {
-            _strategies = await CustomStrategyUseCase.GetAllStrategiesAsync();
-        }
-        catch (Exception ex)
-        {
-            await Notifications.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Error,
-                "Load Failed",
-                $"Failed to load strategies: {ex.Message}");
-        }
-    }
-
-    private async Task SelectStrategy(int strategyId)
-    {
-        try
-        {
-            CustomStrategyResult strategyResult = await CustomStrategyUseCase.GetStrategyByIdAsync(strategyId);
-
-            // Convert result to entity for workspace state
-            CustomStrategy strategy = new()
-            {
-                Id = strategyResult.Id,
-                Name = strategyResult.Name,
-                Description = strategyResult.Description,
-                Author = strategyResult.Author,
-                Category = strategyResult.Category,
-                DefinitionJson = System.Text.Json.JsonSerializer.Serialize(strategyResult.Definition),
-                CreatedAt = strategyResult.CreatedAt,
-                LastUpdatedAt = strategyResult.LastUpdatedAt,
-                TimesUsed = strategyResult.TimesUsed,
-                LastBacktestReturn = strategyResult.LastBacktestReturn,
-                LastBacktestDate = strategyResult.LastBacktestDate
-            };
-
-            await OnStrategyCreated.InvokeAsync(strategy);
-            await Notifications.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Success,
-                "Strategy Loaded",
-                $"Strategy '{strategy.Name}' loaded successfully");
-        }
-        catch (Exception ex)
-        {
-            await Notifications.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Error,
-                "Load Failed",
-                $"Failed to load strategy: {ex.Message}");
-        }
-    }
-}

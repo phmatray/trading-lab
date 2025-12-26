@@ -1,5 +1,3 @@
-@using TradingStrat.Domain.Entities
-
 @* Activity feed list component *@
 
 @if (Activities == null || !Activities.Any())
@@ -78,36 +76,4 @@ else
             }
         </ul>
     </div>
-}
-
-@code {
-    [Parameter] public List<ActivityEvent> Activities { get; set; } = new();
-
-    private string GetEventIconBackground(string eventType)
-    {
-        return eventType switch
-        {
-            "Backtest" => "bg-green-500",
-            "Strategy" => "bg-blue-500",
-            "Portfolio" => "bg-purple-500",
-            "Data" => "bg-orange-500",
-            _ => "bg-gray-500"
-        };
-    }
-
-    private string GetRelativeTime(DateTime timestamp)
-    {
-        var timespan = DateTime.Now - timestamp;
-
-        if (timespan.TotalMinutes < 1)
-            return "just now";
-        if (timespan.TotalMinutes < 60)
-            return $"{(int)timespan.TotalMinutes}m ago";
-        if (timespan.TotalHours < 24)
-            return $"{(int)timespan.TotalHours}h ago";
-        if (timespan.TotalDays < 7)
-            return $"{(int)timespan.TotalDays}d ago";
-
-        return timestamp.ToString("MMM d");
-    }
 }

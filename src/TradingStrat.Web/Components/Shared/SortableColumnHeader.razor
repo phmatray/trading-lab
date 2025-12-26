@@ -1,5 +1,3 @@
-@using TradingStrat.Application.Ports.Inbound
-
 <th
     scope="col"
     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
@@ -28,63 +26,3 @@
         }
     </div>
 </th>
-
-@code {
-    /// <summary>
-    /// The display label for the column header.
-    /// </summary>
-    [Parameter, EditorRequired]
-    public required string Label { get; set; }
-
-    /// <summary>
-    /// The column identifier that this header represents.
-    /// </summary>
-    [Parameter, EditorRequired]
-    public required SortColumn Column { get; set; }
-
-    /// <summary>
-    /// The currently active sort column.
-    /// </summary>
-    [Parameter]
-    public SortColumn? CurrentSortColumn { get; set; }
-
-    /// <summary>
-    /// The current sort direction.
-    /// </summary>
-    [Parameter]
-    public SortDirection CurrentSortDirection { get; set; } = SortDirection.Ascending;
-
-    /// <summary>
-    /// Callback invoked when the user clicks to sort by this column.
-    /// </summary>
-    [Parameter]
-    public EventCallback<(SortColumn Column, SortDirection Direction)> OnSort { get; set; }
-
-    private async Task HandleClick()
-    {
-        SortDirection newDirection;
-
-        if (CurrentSortColumn == Column)
-        {
-            // Toggle direction if already sorting by this column
-            newDirection = CurrentSortDirection == SortDirection.Ascending
-                ? SortDirection.Descending
-                : SortDirection.Ascending;
-        }
-        else
-        {
-            // Default to ascending when clicking a new column
-            newDirection = SortDirection.Ascending;
-        }
-
-        await OnSort.InvokeAsync((Column, newDirection));
-    }
-
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" || e.Key == " ")
-        {
-            await HandleClick();
-        }
-    }
-}

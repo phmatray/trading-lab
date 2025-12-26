@@ -1,5 +1,3 @@
-@using TradingStrat.Application.Ports.Inbound
-
 @* Top strategies table component *@
 
 @if (Strategies == null || !Strategies.Any())
@@ -60,8 +58,4 @@ else
             </tbody>
         </table>
     </div>
-}
-
-@code {
-    [Parameter] public List<TopStrategyResult> Strategies { get; set; } = new();
 }

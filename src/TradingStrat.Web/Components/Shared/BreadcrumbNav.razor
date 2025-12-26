@@ -29,13 +29,3 @@
         }
     }
 </nav>
-
-@code {
-    [Parameter] public List<Breadcrumb> Breadcrumbs { get; set; } = new();
-
-    public class Breadcrumb
-    {
-        public string Label { get; set; } = string.Empty;
-        public string Href { get; set; } = string.Empty;
-    }
-}

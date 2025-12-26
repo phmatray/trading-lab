@@ -1,0 +1,93 @@
+using Microsoft.AspNetCore.Components;
+using TradingStrat.Domain.ValueObjects;
+
+namespace TradingStrat.Web.Components.Shared;
+
+/// <summary>
+/// Timeframe selector component for chart and analysis views.
+/// </summary>
+public partial class TimeFrameSelector : ComponentBase
+{
+    #region Parameters
+
+    /// <summary>
+    /// Label text for the selector.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Timeframe:";
+
+    /// <summary>
+    /// The currently selected timeframe.
+    /// </summary>
+    [Parameter]
+    public TimeFrame? SelectedTimeFrame { get; set; }
+
+    /// <summary>
+    /// Available timeframe options. Defaults to all timeframes.
+    /// </summary>
+    [Parameter]
+    public TimeFrameUnit[] AvailableTimeFrames { get; set; } =
+    [
+        TimeFrameUnit.M1,
+        TimeFrameUnit.M5,
+        TimeFrameUnit.M15,
+        TimeFrameUnit.M30,
+        TimeFrameUnit.H1,
+        TimeFrameUnit.H4,
+        TimeFrameUnit.D1,
+        TimeFrameUnit.W1,
+        TimeFrameUnit.MN1
+    ];
+
+    /// <summary>
+    /// Callback invoked when the timeframe selection changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TimeFrame> OnTimeFrameChanged { get; set; }
+
+    #endregion
+
+    #region Lifecycle Methods
+
+    protected override void OnInitialized()
+    {
+        // Default to D1 if not specified
+        SelectedTimeFrame ??= new TimeFrame { Unit = TimeFrameUnit.D1 };
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    private async Task HandleTimeFrameChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<TimeFrameUnit>(e.Value?.ToString(), out TimeFrameUnit selectedUnit))
+        {
+            TimeFrame newTimeFrame = new() { Unit = selectedUnit };
+            await OnTimeFrameChanged.InvokeAsync(newTimeFrame);
+        }
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private static string GetTimeFrameDisplayName(TimeFrameUnit unit)
+    {
+        return unit switch
+        {
+            TimeFrameUnit.M1 => "1 Minute (M1)",
+            TimeFrameUnit.M5 => "5 Minutes (M5)",
+            TimeFrameUnit.M15 => "15 Minutes (M15)",
+            TimeFrameUnit.M30 => "30 Minutes (M30)",
+            TimeFrameUnit.H1 => "1 Hour (H1)",
+            TimeFrameUnit.H4 => "4 Hours (H4)",
+            TimeFrameUnit.D1 => "Daily (D1)",
+            TimeFrameUnit.W1 => "Weekly (W1)",
+            TimeFrameUnit.MN1 => "Monthly (MN1)",
+            _ => unit.ToString()
+        };
+    }
+
+    #endregion
+}

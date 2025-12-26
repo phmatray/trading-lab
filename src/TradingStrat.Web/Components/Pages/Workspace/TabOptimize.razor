@@ -1,7 +1,3 @@
-@using TradingStrat.Domain.Entities
-@using TradingStrat.Web.Services.State
-@inject NotificationService Notifications
-
 <div class="space-y-6">
     @if (Strategy == null)
     {
@@ -90,15 +86,3 @@
         </div>
     }
 </div>
-
-@code {
-    [Parameter] public CustomStrategy? Strategy { get; set; }
-    [Parameter] public EventCallback<WorkspaceOptimizationResult> OnOptimizationComplete { get; set; }
-
-#pragma warning disable CS0649  // Field is never assigned to (intentionally - set externally if needed)
-    private WorkspaceOptimizationResult? _optimizationResult;
-#pragma warning restore CS0649
-
-    // This tab primarily serves as a gateway to the full optimization page
-    // The actual optimization logic is handled in /strategies/optimize
-}
