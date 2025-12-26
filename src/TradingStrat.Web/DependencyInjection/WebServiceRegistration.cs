@@ -21,6 +21,7 @@ public static class WebServiceRegistration
         services.AddScoped<ChatStateService>();
         services.AddScoped<FormStateService>();
         services.AddScoped<PortfolioStateService>();
+        services.AddScoped<WorkspaceStateService>();
 
         // Notification service
         services.AddScoped<NotificationService>();

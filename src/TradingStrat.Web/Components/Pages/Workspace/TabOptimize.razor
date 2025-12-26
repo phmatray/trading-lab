@@ -1,0 +1,104 @@
+@using TradingStrat.Domain.Entities
+@using TradingStrat.Web.Services.State
+@inject NotificationService Notifications
+
+<div class="space-y-6">
+    @if (Strategy == null)
+    {
+        <div class="card text-center py-12">
+            <p class="text-gray-600 dark:text-dark-text-secondary">
+                No strategy selected. Please define a strategy first.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                Optimize Strategy Parameters
+            </h2>
+            <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
+                Find the best parameters for <strong>@Strategy.Name</strong> using optimization algorithms.
+            </p>
+
+            <!-- Quick Link to Full Optimization Page -->
+            <div class="p-6 border-2 border-dashed border-gray-300 dark:border-dark-border rounded-lg text-center">
+                <svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+                <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                    Parameter Optimization
+                </h3>
+                <p class="text-gray-600 dark:text-dark-text-secondary mb-4">
+                    Use the full optimization interface to configure parameter ranges and run grid search or genetic algorithms.
+                </p>
+                <a href="/strategies/optimize"
+                   class="inline-flex items-center gap-2 px-6 py-3 bg-trading-blue dark:bg-dark-accent-blue text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                    <span>Open Optimization Tool</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+
+            @if (_optimizationResult != null)
+            {
+                <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <h4 class="font-semibold text-green-800 dark:text-green-400 mb-2">
+                        Optimization Complete
+                    </h4>
+                    <div class="text-sm text-green-700 dark:text-green-300">
+                        <p>Best Score: <strong>@_optimizationResult.BestScore.ToString("F2")</strong></p>
+                        <p>Objective: @_optimizationResult.Objective</p>
+                        <p>Total Runs: @_optimizationResult.TotalRuns</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Optimization Tips -->
+        <div class="card">
+            <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                Optimization Tips
+            </h3>
+            <ul class="space-y-2 text-sm text-gray-600 dark:text-dark-text-secondary">
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-trading-blue dark:text-dark-accent-blue mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Grid Search:</strong> Systematically tests all parameter combinations. Best for 1-3 parameters.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-trading-blue dark:text-dark-accent-blue mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Genetic Algorithm:</strong> Evolutionary approach for large parameter spaces (4+ parameters).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-trading-blue dark:text-dark-accent-blue mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Avoid Overfitting:</strong> Test optimized parameters on out-of-sample data.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-trading-blue dark:text-dark-accent-blue mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Objective Functions:</strong> Choose based on your goals (Sharpe for risk-adjusted, Return for pure profit).</span>
+                </li>
+            </ul>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public CustomStrategy? Strategy { get; set; }
+    [Parameter] public EventCallback<WorkspaceOptimizationResult> OnOptimizationComplete { get; set; }
+
+#pragma warning disable CS0649  // Field is never assigned to (intentionally - set externally if needed)
+    private WorkspaceOptimizationResult? _optimizationResult;
+#pragma warning restore CS0649
+
+    // This tab primarily serves as a gateway to the full optimization page
+    // The actual optimization logic is handled in /strategies/optimize
+}
