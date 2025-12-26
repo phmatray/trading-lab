@@ -122,6 +122,67 @@
   }
 }
 
+@utility btn-danger {
+  background-color: theme(colors.red.600);
+  color: theme(colors.white);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:hover {
+    background-color: theme(colors.red.700);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:where(.dark, .dark *) {
+    background-color: theme(colors.dark-danger);
+
+    &:hover {
+      background-color: theme(colors.red.700);
+    }
+  }
+}
+
+@utility btn-info {
+  background-color: theme(colors.blue.100);
+  color: theme(colors.blue.800);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &:hover {
+    background-color: theme(colors.blue.200);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:where(.dark, .dark *) {
+    background-color: theme(colors.blue.900 / 30%);
+    color: theme(colors.blue.300);
+
+    &:hover {
+      background-color: theme(colors.blue.800);
+    }
+  }
+}
+
 @utility card {
   background-color: theme(colors.white);
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);

@@ -26,9 +26,9 @@
                         Title="Portfolio not found"
                         Description="The portfolio you're looking for doesn't exist.">
                 <Actions>
-                    <button @onclick="NavigateBack" class="btn-primary">
-                        Back to Dashboard
-                    </button>
+                    <Button Variant="@ButtonVariant.Primary"
+                            OnClick="@NavigateBack"
+                            Text="Back to Dashboard"></Button>
                 </Actions>
             </EmptyState>
         }
@@ -59,16 +59,11 @@
                     <button @onclick="SetQuickRangeAll" class="px-4 py-2 bg-gray-100 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">All</button>
                 </div>
 
-                <button @onclick="HandleAnalyze" disabled="@ProgressService.IsProcessing" class="btn-primary">
-                    @if (ProgressService.IsProcessing)
-                    {
-                        <span>Analyzing...</span>
-                    }
-                    else
-                    {
-                        <span>Analyze</span>
-                    }
-                </button>
+                <Button Variant="@ButtonVariant.Primary"
+                        OnClick="@HandleAnalyze"
+                        IsLoading="@ProgressService.IsProcessing"
+                        Text="Analyze"
+                        LoadingText="Analyzing..."></Button>
             </div>
         </div>
 

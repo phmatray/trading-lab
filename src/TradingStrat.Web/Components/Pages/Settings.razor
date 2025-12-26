@@ -127,24 +127,19 @@
         <!-- Actions -->
         <div class="card">
             <div class="flex flex-wrap gap-4">
-                <button type="submit" class="btn-primary" disabled="@_isSaving">
-                    @if (_isSaving)
-                    {
-                        <span>Saving...</span>
-                    }
-                    else
-                    {
-                        <span>Save Settings</span>
-                    }
-                </button>
+                <Button Type="@ButtonType.Submit"
+                        Variant="@ButtonVariant.Primary"
+                        IsLoading="@_isSaving"
+                        Text="Save Settings"
+                        LoadingText="Saving..."></Button>
 
-                <button type="button" @onclick="HandleResetToDefaults" class="btn-secondary">
-                    Reset to Defaults
-                </button>
+                <Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@HandleResetToDefaults"
+                        Text="Reset to Defaults"></Button>
 
-                <button type="button" @onclick="HandleClearAllData" class="btn-danger">
-                    Clear All Data
-                </button>
+                <Button Variant="@ButtonVariant.Danger"
+                        OnClick="@HandleClearAllData"
+                        Text="Clear All Data"></Button>
             </div>
         </div>
         </EditForm>

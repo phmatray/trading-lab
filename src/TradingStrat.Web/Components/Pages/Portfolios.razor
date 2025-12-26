@@ -8,12 +8,15 @@
     <PageHeader Title="Portfolios"
                 Description="Manage your investment portfolios and track performance.">
         <Actions>
-            <button @onclick="OpenCreateDialog" class="btn-primary">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Create Portfolio
-            </button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@OpenCreateDialog"
+                    Text="Create Portfolio">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </Button>
         </Actions>
     </PageHeader>
 
@@ -33,9 +36,9 @@
                     Title="No portfolios"
                     Description="Get started by creating a new portfolio.">
             <Actions>
-                <button @onclick="OpenCreateDialog" class="btn-primary">
-                    Create Portfolio
-                </button>
+                <Button Variant="@ButtonVariant.Primary"
+                        OnClick="@OpenCreateDialog"
+                        Text="Create Portfolio"></Button>
             </Actions>
         </EmptyState>
     }

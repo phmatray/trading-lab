@@ -1,0 +1,94 @@
+@* Reusable Button component with variants, sizes, loading states, and icons *@
+
+<button type="@Type.ToHtmlType()"
+        @onclick="OnClick"
+        disabled="@(Disabled || IsLoading)"
+        class="@GetButtonClasses()"
+        aria-label="@AriaLabel"
+        @attributes="AdditionalAttributes">
+
+    @if (IsLoading)
+    {
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    }
+    else if (LeadingIcon != null)
+    {
+        @LeadingIcon
+    }
+
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <span>@(IsLoading && !string.IsNullOrEmpty(LoadingText) ? LoadingText : Text)</span>
+    }
+    else
+    {
+        @ChildContent
+    }
+
+    @if (TrailingIcon != null && !IsLoading)
+    {
+        @TrailingIcon
+    }
+</button>
+
+@code {
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool FullWidth { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? LoadingText { get; set; }
+    [Parameter] public RenderFragment? LeadingIcon { get; set; }
+    [Parameter] public RenderFragment? TrailingIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetButtonClasses()
+    {
+        var classes = new List<string>();
+
+        // Variant class
+        classes.Add(Variant switch
+        {
+            ButtonVariant.Primary => "btn-primary",
+            ButtonVariant.Secondary => "btn-secondary",
+            ButtonVariant.Danger => "btn-danger",
+            ButtonVariant.Success => "btn-success",
+            ButtonVariant.Info => "btn-info",
+            ButtonVariant.Ghost => "hover:bg-gray-100 dark:hover:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg transition-colors",
+            _ => "btn-primary"
+        });
+
+        // Size classes (override default padding from variant)
+        if (Size != ButtonSize.Medium)
+        {
+            classes.Add(Size switch
+            {
+                ButtonSize.Small => "!px-3 !py-1.5 text-sm",
+                ButtonSize.Large => "!px-6 !py-3 text-lg",
+                _ => ""
+            });
+        }
+
+        // Full width
+        if (FullWidth)
+        {
+            classes.Add("w-full");
+        }
+
+        // Flex for icon alignment
+        if (LeadingIcon != null || TrailingIcon != null || IsLoading)
+        {
+            classes.Add("inline-flex items-center");
+        }
+
+        return string.Join(" ", classes.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

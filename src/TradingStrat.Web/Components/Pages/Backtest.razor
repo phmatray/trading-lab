@@ -45,16 +45,12 @@
                     <DateRangeInput @bind-StartDate="FormModel.StartDate"
                                     @bind-EndDate="FormModel.EndDate" />
 
-                    <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
-                        @if (ProgressService.IsProcessing)
-                        {
-                            <span>Running Backtest...</span>
-                        }
-                        else
-                        {
-                            <span>Run Backtest</span>
-                        }
-                    </button>
+                    <Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            FullWidth="@true"
+                            IsLoading="@ProgressService.IsProcessing"
+                            Text="Run Backtest"
+                            LoadingText="Running Backtest..."></Button>
                 </EditForm>
             </div>
 
@@ -93,30 +89,42 @@
                 <div class="card">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</h3>
                     <div class="flex flex-wrap gap-3">
-                        <button @onclick="CreatePortfolioFromStrategy" class="btn-secondary">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Create Portfolio
-                        </button>
-                        <button @onclick="CompareWithOthers" class="btn-secondary">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                            Compare Strategies
-                        </button>
-                        <button @onclick="OptimizeParameters" class="btn-secondary">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            Optimize Parameters
-                        </button>
-                        <button @onclick="ViewInArchive" class="btn-secondary">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-                            </svg>
-                            View in Archive
-                        </button>
+                        <Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CreatePortfolioFromStrategy"
+                                Text="Create Portfolio">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </Button>
+                        <Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CompareWithOthers"
+                                Text="Compare Strategies">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </Button>
+                        <Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@OptimizeParameters"
+                                Text="Optimize Parameters">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </Button>
+                        <Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@ViewInArchive"
+                                Text="View in Archive">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </Button>
                     </div>
                 </div>
             }

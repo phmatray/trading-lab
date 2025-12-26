@@ -1,0 +1,35 @@
+@* Simple SVG icon wrapper for consistency *@
+
+<svg class="@GetIconClasses()" fill="@Fill" stroke="@Stroke" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" @attributes="AdditionalAttributes">
+    @ChildContent
+</svg>
+
+@code {
+    [Parameter] public IconSize Size { get; set; } = IconSize.Medium;
+    [Parameter] public string Fill { get; set; } = "none";
+    [Parameter] public string Stroke { get; set; } = "currentColor";
+    [Parameter] public string? CustomClasses { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetIconClasses()
+    {
+        var classes = new List<string>();
+
+        classes.Add(Size switch
+        {
+            IconSize.Small => "w-4 h-4",
+            IconSize.Medium => "w-5 h-5",
+            IconSize.Large => "w-6 h-6",
+            IconSize.Hero => "w-12 h-12",
+            _ => "w-5 h-5"
+        });
+
+        if (!string.IsNullOrEmpty(CustomClasses))
+        {
+            classes.Add(CustomClasses);
+        }
+
+        return string.Join(" ", classes);
+    }
+}

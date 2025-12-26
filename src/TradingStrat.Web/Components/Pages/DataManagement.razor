@@ -38,16 +38,12 @@
                 <DateRangeInput @bind-StartDate="_formModel.StartDate"
                                 @bind-EndDate="_formModel.EndDate" />
 
-                <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
-                    @if (ProgressService.IsProcessing)
-                    {
-                        <span>Fetching Data...</span>
-                    }
-                    else
-                    {
-                        <span>Fetch Data</span>
-                    }
-                </button>
+                <Button Type="@ButtonType.Submit"
+                        Variant="@ButtonVariant.Primary"
+                        FullWidth="@true"
+                        IsLoading="@ProgressService.IsProcessing"
+                        Text="Fetch Data"
+                        LoadingText="Fetching Data..."></Button>
             </EditForm>
         </div>
 

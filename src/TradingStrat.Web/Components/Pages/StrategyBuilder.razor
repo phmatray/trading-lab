@@ -150,27 +150,23 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-between items-center">
-                <button type="button" class="btn-secondary" @onclick="NavigateToLibrary">
-                    Cancel
-                </button>
+                <Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@NavigateToLibrary"
+                        Text="Cancel"></Button>
 
                 <div class="flex gap-3">
                     @if (IsEditMode)
                     {
-                        <button type="button" class="btn-danger" @onclick="HandleDelete" aria-label="Delete this strategy">
-                            Delete Strategy
-                        </button>
+                        <Button Variant="@ButtonVariant.Danger"
+                                OnClick="@HandleDelete"
+                                AriaLabel="Delete this strategy"
+                                Text="Delete Strategy"></Button>
                     }
-                    <button type="submit" class="btn-primary" disabled="@_isSaving">
-                        @if (_isSaving)
-                        {
-                            <span>Saving...</span>
-                        }
-                        else
-                        {
-                            <span>@(IsEditMode ? "Update Strategy" : "Create Strategy")</span>
-                        }
-                    </button>
+                    <Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            IsLoading="@_isSaving"
+                            Text="@(IsEditMode ? "Update Strategy" : "Create Strategy")"
+                            LoadingText="Saving..."></Button>
                 </div>
             </div>
 

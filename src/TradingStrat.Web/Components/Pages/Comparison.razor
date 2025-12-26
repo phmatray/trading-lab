@@ -39,16 +39,12 @@
                 </FormInputGroup>
 
                 <div class="flex items-end">
-                    <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
-                        @if (ProgressService.IsProcessing)
-                        {
-                            <span>Comparing...</span>
-                        }
-                        else
-                        {
-                            <span>Run Comparison</span>
-                        }
-                    </button>
+                    <Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            FullWidth="@true"
+                            IsLoading="@ProgressService.IsProcessing"
+                            Text="Run Comparison"
+                            LoadingText="Comparing..."></Button>
                 </div>
             </div>
 

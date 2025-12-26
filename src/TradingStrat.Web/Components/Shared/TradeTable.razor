@@ -44,9 +44,9 @@
         @if (Trades.Count > MaxDisplayTrades)
         {
             <div class="mt-4 text-center">
-                <button @onclick="ToggleShowAll" class="btn-secondary">
-                    @(ShowAll ? $"Show Less ({MaxDisplayTrades} trades)" : $"Show All ({Trades.Count} trades)")
-                </button>
+                <Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@ToggleShowAll"
+                        Text="@(ShowAll ? $"Show Less ({MaxDisplayTrades} trades)" : $"Show All ({Trades.Count} trades)")"></Button>
             </div>
         }
     </div>

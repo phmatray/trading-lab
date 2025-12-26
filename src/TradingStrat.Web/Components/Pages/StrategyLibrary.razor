@@ -11,9 +11,13 @@
     <PageHeader Title="Strategy Library"
                 Description="Browse built-in strategies or create your own custom trading strategies">
         <Actions>
-            <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
-                <span class="mr-2">+</span> Create Strategy
-            </button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@NavigateToBuilder"
+                    Text="Create Strategy">
+                <LeadingIcon>
+                    <span class="mr-2">+</span>
+                </LeadingIcon>
+            </Button>
         </Actions>
     </PageHeader>
 
@@ -78,11 +82,10 @@
                             }
                         </div>
 
-                        <button type="button"
-                                class="btn-primary w-full"
-                                @onclick="() => NavigateToBacktest(strategy.Key)">
-                            Run Backtest
-                        </button>
+                        <Button Variant="@ButtonVariant.Primary"
+                                FullWidth="@true"
+                                OnClick="@(() => NavigateToBacktest(strategy.Key))"
+                                Text="Run Backtest"></Button>
                     </div>
                 }
             </div>
@@ -101,9 +104,13 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">
                         Create your first custom strategy to get started
                     </p>
-                    <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
-                        <span class="mr-2">+</span> Create Your First Strategy
-                    </button>
+                    <Button Variant="@ButtonVariant.Primary"
+                            OnClick="@NavigateToBuilder"
+                            Text="Create Your First Strategy">
+                        <LeadingIcon>
+                            <span class="mr-2">+</span>
+                        </LeadingIcon>
+                    </Button>
                 </div>
             }
             else
@@ -163,37 +170,35 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-2">
-                                <button type="button"
-                                        class="btn-secondary text-sm py-2"
-                                        @onclick="() => NavigateToEdit(strategy.Id)"
-                                        title="Edit strategy">
-                                    Edit
-                                </button>
-                                <button type="button"
-                                        class="btn-secondary text-sm py-2"
-                                        @onclick="() => CloneStrategy(strategy.Id)"
-                                        title="Clone strategy">
-                                    Clone
-                                </button>
-                                <button type="button"
-                                        class="btn-info text-sm py-2"
-                                        @onclick="() => NavigateToOptimize(strategy.Id)"
-                                        title="Optimize parameters">
-                                    Optimize
-                                </button>
-                                <button type="button"
-                                        class="btn-primary text-sm py-2"
-                                        @onclick="() => NavigateToBacktestWithCustom(strategy.Id)"
-                                        title="Run backtest">
-                                    Test
-                                </button>
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        Size="@ButtonSize.Small"
+                                        OnClick="@(() => NavigateToEdit(strategy.Id))"
+                                        AriaLabel="Edit strategy"
+                                        Text="Edit"></Button>
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        Size="@ButtonSize.Small"
+                                        OnClick="@(() => CloneStrategy(strategy.Id))"
+                                        AriaLabel="Clone strategy"
+                                        Text="Clone"></Button>
+                                <Button Variant="@ButtonVariant.Info"
+                                        Size="@ButtonSize.Small"
+                                        OnClick="@(() => NavigateToOptimize(strategy.Id))"
+                                        AriaLabel="Optimize parameters"
+                                        Text="Optimize"></Button>
+                                <Button Variant="@ButtonVariant.Primary"
+                                        Size="@ButtonSize.Small"
+                                        OnClick="@(() => NavigateToBacktestWithCustom(strategy.Id))"
+                                        AriaLabel="Run backtest"
+                                        Text="Test"></Button>
                             </div>
 
-                            <button type="button"
-                                    class="btn-danger w-full mt-2 text-sm py-2"
-                                    @onclick="() => DeleteStrategy(strategy.Id)">
-                                Delete
-                            </button>
+                            <Button Variant="@ButtonVariant.Danger"
+                                    Size="@ButtonSize.Small"
+                                    FullWidth="@true"
+                                    OnClick="@(() => DeleteStrategy(strategy.Id))"
+                                    AriaLabel="Delete strategy"
+                                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "mt-2" } })"
+                                    Text="Delete"></Button>
                         </div>
                     }
                 </div>

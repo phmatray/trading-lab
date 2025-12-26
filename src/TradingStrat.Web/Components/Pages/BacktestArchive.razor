@@ -13,27 +13,26 @@
     <PageHeader Title="Backtest Archive"
                 Description="History of all backtest runs with filtering and sorting">
         <Actions>
-            <button @onclick="LoadArchiveAsync"
-                    class="btn-secondary"
-                    disabled="@_isLoading">
-                @if (_isLoading)
-                {
-                    <span>Refreshing...</span>
-                }
-                else
-                {
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@LoadArchiveAsync"
+                    IsLoading="@_isLoading"
+                    Text="Refresh"
+                    LoadingText="Refreshing...">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span>Refresh</span>
-                }
-            </button>
-            <button @onclick="NavigateToBacktest" class="btn-primary">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                New Backtest
-            </button>
+                    </Icon>
+                </LeadingIcon>
+            </Button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@NavigateToBacktest"
+                    Text="New Backtest">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </Button>
         </Actions>
     </PageHeader>
 
@@ -129,12 +128,12 @@
                 </div>
             </div>
             <div class="mt-4 flex gap-3">
-                <button @onclick="ApplyFiltersAsync" class="btn-primary">
-                    Apply Filters
-                </button>
-                <button @onclick="ClearFiltersAsync" class="btn-secondary">
-                    Clear Filters
-                </button>
+                <Button Variant="@ButtonVariant.Primary"
+                        OnClick="@ApplyFiltersAsync"
+                        Text="Apply Filters"></Button>
+                <Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@ClearFiltersAsync"
+                        Text="Clear Filters"></Button>
             </div>
         </div>
 
@@ -270,9 +269,9 @@
                         <span>You haven't run any backtests yet. Start by running your first backtest.</span>
                     }
                 </p>
-                <button @onclick="NavigateToBacktest" class="btn-primary">
-                    Run First Backtest
-                </button>
+                <Button Variant="@ButtonVariant.Primary"
+                        OnClick="@NavigateToBacktest"
+                        Text="Run First Backtest"></Button>
             </div>
         }
     }

@@ -64,10 +64,10 @@
                             <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                                 Start a portfolio based on this strategy with real capital allocation.
                             </p>
-                            <button @onclick="CreatePortfolio"
-                                    class="btn-primary w-full">
-                                Create Portfolio
-                            </button>
+                            <Button Variant="@ButtonVariant.Primary"
+                                    FullWidth="@true"
+                                    OnClick="@CreatePortfolio"
+                                    Text="Create Portfolio"></Button>
                         </div>
                     </div>
                 </div>
@@ -88,14 +88,14 @@
                                 Download backtest results as CSV or JSON for further analysis.
                             </p>
                             <div class="flex gap-2">
-                                <button @onclick="ExportCSV"
-                                        class="btn-secondary flex-1">
-                                    Export CSV
-                                </button>
-                                <button @onclick="ExportJSON"
-                                        class="btn-secondary flex-1">
-                                    Export JSON
-                                </button>
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        OnClick="@ExportCSV"
+                                        AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                                        Text="Export CSV"></Button>
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        OnClick="@ExportJSON"
+                                        AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                                        Text="Export JSON"></Button>
                             </div>
                         </div>
                     </div>
@@ -116,10 +116,10 @@
                             <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                                 Run side-by-side comparison with other strategies.
                             </p>
-                            <button @onclick="CompareStrategies"
-                                    class="btn-secondary w-full">
-                                Open Comparison
-                            </button>
+                            <Button Variant="@ButtonVariant.Secondary"
+                                    FullWidth="@true"
+                                    OnClick="@CompareStrategies"
+                                    Text="Open Comparison"></Button>
                         </div>
                     </div>
                 </div>
@@ -139,10 +139,10 @@
                             <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                                 This backtest is automatically saved. View all historical runs.
                             </p>
-                            <button @onclick="ViewArchive"
-                                    class="btn-secondary w-full">
-                                View Archive
-                            </button>
+                            <Button Variant="@ButtonVariant.Secondary"
+                                    FullWidth="@true"
+                                    OnClick="@ViewArchive"
+                                    Text="View Archive"></Button>
                         </div>
                     </div>
                 </div>

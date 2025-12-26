@@ -74,9 +74,10 @@
                         <!-- Action Button (appears for high-confidence bullish recommendations) -->
                         @if (_recommendation.Confidence >= 70 && _recommendation.Recommendation.Contains("BUY", StringComparison.OrdinalIgnoreCase))
                         {
-                            <button class="btn-success w-full mt-4">
-                                📈 PLACE BUY ORDER
-                            </button>
+                            <Button Variant="@ButtonVariant.Success"
+                                    FullWidth="@true"
+                                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "mt-4" } })"
+                                    Text="📈 PLACE BUY ORDER"></Button>
                         }
                     </div>
                 </div>

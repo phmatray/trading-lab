@@ -26,9 +26,9 @@
                         Title="Portfolio not found"
                         Description="The portfolio you're looking for doesn't exist.">
                 <Actions>
-                    <button @onclick="NavigateBack" class="btn-primary">
-                        Back to Dashboard
-                    </button>
+                    <Button Variant="@ButtonVariant.Primary"
+                            OnClick="@NavigateBack"
+                            Text="Back to Dashboard"></Button>
                 </Actions>
             </EmptyState>
         }
@@ -117,16 +117,12 @@
                             }
                         </div>
 
-                        <button type="submit" disabled="@ProgressService.IsProcessing" class="btn-primary w-full">
-                            @if (ProgressService.IsProcessing)
-                            {
-                                <span>Calculating...</span>
-                            }
-                            else
-                            {
-                                <span>Calculate Rebalancing Plan</span>
-                            }
-                        </button>
+                        <Button Type="@ButtonType.Submit"
+                                Variant="@ButtonVariant.Primary"
+                                FullWidth="@true"
+                                IsLoading="@ProgressService.IsProcessing"
+                                Text="Calculate Rebalancing Plan"
+                                LoadingText="Calculating..."></Button>
                     </EditForm>
                 </div>
             </div>

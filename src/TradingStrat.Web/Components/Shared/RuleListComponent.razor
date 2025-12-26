@@ -5,9 +5,13 @@
             <p class="text-gray-500 dark:text-gray-400 mb-4">
                 @EmptyStateMessage
             </p>
-            <button type="button" class="btn-primary" @onclick="AddRule">
-                <span class="mr-2">+</span> Add First Rule
-            </button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@AddRule"
+                    Text="Add First Rule">
+                <LeadingIcon>
+                    <span class="mr-2">+</span>
+                </LeadingIcon>
+            </Button>
         </div>
     }
     else
@@ -129,12 +133,14 @@
 
                         <!-- Remove Button -->
                         <div class="col-span-12 md:col-span-1 flex items-end">
-                            <button type="button"
-                                    class="btn-danger w-full md:w-auto"
-                                    @onclick="() => RemoveRule(index)"
-                                    title="Remove rule">
-                                <span class="text-lg">×</span>
-                            </button>
+                            <Button Variant="@ButtonVariant.Danger"
+                                    OnClick="@(() => RemoveRule(index))"
+                                    AriaLabel="Remove rule"
+                                    AdditionalAttributes="@(new Dictionary<string, object> { { "title", "Remove rule" }, { "class", "w-full md:w-auto" } })">
+                                <ChildContent>
+                                    <span class="text-lg">×</span>
+                                </ChildContent>
+                            </Button>
                         </div>
                     </div>
 
@@ -169,9 +175,13 @@
         </div>
 
         <div class="mt-4">
-            <button type="button" class="btn-secondary" @onclick="AddRule">
-                <span class="mr-2">+</span> Add Another Rule
-            </button>
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@AddRule"
+                    Text="Add Another Rule">
+                <LeadingIcon>
+                    <span class="mr-2">+</span>
+                </LeadingIcon>
+            </Button>
         </div>
     }
 </div>

@@ -5,6 +5,7 @@
 @inject IBacktestUseCase BacktestUseCase
 @inject NotificationService Notifications
 @inject ProgressService ProgressService
+@inject NavigationManager NavigationManager
 
 <div class="space-y-6">
     @if (Strategy == null)
@@ -93,21 +94,11 @@
                 </div>
 
                 <div class="flex justify-end pt-4">
-                    <button type="submit"
-                            disabled="@_isRunning"
-                            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
-                        @if (_isRunning)
-                        {
-                            <span class="flex items-center gap-2">
-                                <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                                Running Backtest...
-                            </span>
-                        }
-                        else
-                        {
-                            <span>Run Backtest</span>
-                        }
-                    </button>
+                    <Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            IsLoading="@_isRunning"
+                            Text="Run Backtest"
+                            LoadingText="Running Backtest..."></Button>
                 </div>
             </EditForm>
         </div>
@@ -152,13 +143,12 @@
                 </div>
 
                 <div class="flex gap-4">
-                    <button @onclick="() => OnTestComplete.InvokeAsync(_result)"
-                            class="btn-primary">
-                        Continue to Deploy →
-                    </button>
-                    <a href="/backtests" class="btn-secondary">
-                        View in Archive
-                    </a>
+                    <Button Variant="@ButtonVariant.Primary"
+                            OnClick="@(() => OnTestComplete.InvokeAsync(_result))"
+                            Text="Continue to Deploy →"></Button>
+                    <Button Variant="@ButtonVariant.Secondary"
+                            OnClick="@(() => NavigationManager.NavigateTo("/backtests"))"
+                            Text="View in Archive"></Button>
                 </div>
             </div>
         }

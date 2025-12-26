@@ -11,18 +11,25 @@
                 Description="@(_portfolio?.Description)"
                 OnBack="NavigateBack">
         <Actions>
-            <button @onclick="RefreshPrices" disabled="@ProgressService.IsProcessing" class="px-4 py-2 bg-white dark:bg-dark-elevated border border-gray-300 dark:border-dark-border text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                Refresh Prices
-            </button>
-            <button @onclick="OpenAddPositionDialog" class="btn-primary">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Position
-            </button>
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@RefreshPrices"
+                    Disabled="@ProgressService.IsProcessing"
+                    Text="Refresh Prices">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </Icon>
+                </LeadingIcon>
+            </Button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@OpenAddPositionDialog"
+                    Text="Add Position">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </Button>
         </Actions>
     </PageHeader>
 
@@ -41,9 +48,9 @@
                         Title="Portfolio not found"
                         Description="The portfolio you're looking for doesn't exist.">
                 <Actions>
-                    <button @onclick="NavigateBack" class="btn-primary">
-                        Back to Portfolios
-                    </button>
+                    <Button Variant="@ButtonVariant.Primary"
+                            OnClick="@NavigateBack"
+                            Text="Back to Portfolios"></Button>
                 </Actions>
             </EmptyState>
         }
@@ -102,9 +109,9 @@
                             Title="No positions"
                             Description="Add your first position to start tracking your investments.">
                     <Actions>
-                        <button @onclick="OpenAddPositionDialog" class="btn-primary">
-                            Add Position
-                        </button>
+                        <Button Variant="@ButtonVariant.Primary"
+                                OnClick="@OpenAddPositionDialog"
+                                Text="Add Position"></Button>
                     </Actions>
                 </EmptyState>
             }
@@ -237,19 +244,17 @@
     </ChildContent>
     <Footer>
         <div class="flex space-x-3">
-            <button type="button" @onclick="CloseAddPositionDialog" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-                Cancel
-            </button>
-            <button type="submit" @onclick="HandleAddPosition" disabled="@_isAddingPosition" class="flex-1 btn-primary">
-                @if (_isAddingPosition)
-                {
-                    <span>Adding...</span>
-                }
-                else
-                {
-                    <span>Add Position</span>
-                }
-            </button>
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@CloseAddPositionDialog"
+                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                    Text="Cancel"></Button>
+            <Button Type="@ButtonType.Submit"
+                    Variant="@ButtonVariant.Primary"
+                    OnClick="@HandleAddPosition"
+                    IsLoading="@_isAddingPosition"
+                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                    Text="Add Position"
+                    LoadingText="Adding..."></Button>
         </div>
     </Footer>
 </Dialog>

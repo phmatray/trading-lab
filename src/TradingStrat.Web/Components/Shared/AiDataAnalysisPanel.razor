@@ -3,9 +3,10 @@
     {
         <!-- Analyze Button -->
         <div class="text-center py-8">
-            <button @onclick="AnalyzeAsync" class="btn-primary" data-testid="analyze-data-button">
-                🤖 Get AI Data Analysis
-            </button>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@AnalyzeAsync"
+                    AdditionalAttributes="@(new Dictionary<string, object> { { "data-testid", "analyze-data-button" } })"
+                    Text="🤖 Get AI Data Analysis"></Button>
         </div>
     }
     else if (_isAnalyzing)
