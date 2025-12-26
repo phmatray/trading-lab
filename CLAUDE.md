@@ -200,7 +200,15 @@ foreach (var p in savedData)
 
 **Test Coverage (Current):**
 - HomePageTests: 13 tests covering navigation, content, Blazor connection, console errors
-- **Future:** BacktestPageTests, DataManagementPageTests, LiveAnalysisPageTests, ComparisonPageTests
+- PortfoliosPageTests: Tests for portfolio list, creation, deletion
+- PortfolioDashboardPageTests: Tests for portfolio metrics, positions, refresh
+- RebalancingPageTests: Tests for rebalancing calculator
+- PerformanceAnalyticsPageTests: Tests for performance charts and metrics
+- DataStatusPageTests: 8 tests for data coverage display and refresh
+- BacktestArchivePageTests: 10 tests for backtest history, filtering, sorting
+- StrategyComparisonPageTests: 12 tests for multi-strategy comparison
+- StrategyWorkspacePageTests: 15 tests for tabbed workflow interface
+- **Future:** BacktestPageTests, LiveAnalysisPageTests, StrategyBuilderPageTests
 
 **Key Practices:**
 - Use `main .grid a[href='/data']` instead of just `a[href='/data']` to avoid matching navigation menu links (Playwright strict mode)
@@ -208,6 +216,73 @@ foreach (var p in savedData)
 - Filter acceptable console errors (favicon 404, sourcemaps) in error tests
 - Each test gets its own browser context for complete isolation
 - Screenshots automatically saved on test failure for debugging
+
+## Application Navigation Structure
+
+The application features a reorganized navigation system designed for strategy developers and researchers, with logical grouping of related functionality.
+
+### Navigation Groups (Left Sidebar)
+
+**1. Workspace (Primary Entry Points)**
+- `/` - Dashboard (overview, quick stats, recent activity)
+- `/workspace` - Strategy Workspace (unified Define → Test → Optimize → Deploy interface)
+
+**2. Strategy Research (Analysis & Development)**
+- `/strategies/library` - Strategy Library (browse built-in and custom strategies)
+- `/strategies/builder` - Strategy Builder (create/edit custom strategies with visual rule editor)
+- `/strategies/compare` - Compare Strategies (side-by-side comparison of multiple strategies)
+- `/strategies/optimize` - Strategy Optimization (parameter optimization with grid search/genetic algorithms)
+- `/backtest` - Backtest (test strategies on historical data)
+- `/backtests` - Backtest Archive (history of all backtest runs with filtering/sorting)
+- `/analysis` - Live Analysis (real-time market analysis)
+
+**3. Data Management**
+- `/data` - Fetch Data (import historical market data from Yahoo Finance)
+- `/data/status` - Data Status (data coverage overview with gap detection)
+
+**4. Portfolio**
+- `/portfolios` - Portfolios (list/create/manage portfolios)
+- `/portfolio/{id}` - Portfolio Dashboard (positions, metrics, current value)
+- `/portfolio/{id}/rebalance` - Rebalancing (calculate rebalancing signals)
+- `/portfolio/{id}/performance` - Performance Analytics (historical performance metrics)
+
+**5. System**
+- `/settings` - Settings (application configuration)
+
+### Quick Actions
+
+Quick action buttons appear after completing backtests or optimizations to enable seamless workflows:
+
+**Backtest Page Quick Actions:**
+- Create Portfolio - Navigate to `/portfolios`
+- Compare Strategies - Navigate to `/strategies/compare`
+- Optimize Parameters - Navigate to `/strategies/optimize` with current strategy
+- View in Archive - Navigate to `/backtests`
+
+**Strategy Optimization Quick Actions:**
+- Apply Best Parameters - Update strategy with optimized values
+- Run Backtest with Best - Test optimized strategy
+- Create Portfolio - Navigate to `/portfolios`
+- Compare Variations - Navigate to `/strategies/compare`
+- Save as New Strategy - Clone strategy with optimized parameters
+
+### Context Preservation
+
+The application preserves execution context via `AppStateService` (persisted to localStorage):
+
+- **BacktestContext**: Saved after each backtest (ticker, strategy, parameters, config, results)
+- **OptimizationContext**: Saved after optimization (custom strategy ID, best parameters, objective value)
+- **RecentTickers**: Tracks last 10 tickers used (most recent first)
+
+This enables quick actions to pre-populate forms with relevant context when navigating between pages.
+
+### Breadcrumb Navigation
+
+Hierarchical breadcrumbs are displayed on key pages for context and easy navigation:
+
+- Strategy Builder: Dashboard → Strategy Library → Strategy Builder (or strategy name in edit mode)
+- Strategy Optimization: Dashboard → Strategy Library → Strategy Optimization
+- Portfolio Pages: Dashboard → Portfolios → {Portfolio Name} → {Action}
 
 ## Configuration
 

@@ -129,6 +129,146 @@ Edit `src/TradingStrat.Web/appsettings.json` to customize:
 }
 ```
 
+## 🧭 New User Workflow
+
+This guide walks you through creating, testing, and deploying your first trading strategy in ~5 minutes.
+
+### Option 1: Quick Workflow (Unified Interface)
+
+**Strategy Workspace** (`/workspace`) provides a single-page tabbed interface for the complete workflow:
+
+1. **Navigate to Strategy Workspace** - Click "Strategy Workspace" in the left sidebar
+2. **Define Tab** - Create a custom strategy using the visual rule builder
+   - Add entry rules (e.g., RSI < 30)
+   - Add exit rules (e.g., RSI > 70)
+   - Configure position sizing
+   - Save your strategy
+3. **Test Tab** - Backtest your strategy
+   - Select ticker and date range
+   - Review performance metrics
+   - Analyze equity curve
+4. **Optimize Tab** - Fine-tune parameters
+   - Select parameters to optimize
+   - Choose algorithm (Grid Search or Genetic)
+   - Review best parameters
+5. **Deploy Tab** - Put your strategy to work
+   - Create portfolio with optimized strategy
+   - Export configuration
+   - Schedule automatic trading (future)
+
+**Context Preserved:** Your strategy, ticker, and parameters carry across tabs automatically - no re-entering data!
+
+### Option 2: Step-by-Step Workflow (Individual Pages)
+
+For users who prefer detailed control at each step:
+
+#### Step 1: Fetch Historical Data (`/data`)
+1. Navigate to **Data Management** → **Fetch Data**
+2. Enter a ticker symbol (e.g., `AAPL`, `MSFT`, `CON3.L`)
+3. Select date range (default: last 2 years)
+4. Click **Fetch Data**
+5. Verify data coverage in **Data Status** (`/data/status`)
+
+#### Step 2: Create a Custom Strategy (`/strategies/builder`)
+1. Navigate to **Strategy Research** → **Strategy Builder**
+2. Enter strategy name and description
+3. Add entry rules using visual builder:
+   - Select indicator (RSI, SMA, MACD, etc.)
+   - Set parameters (e.g., RSI Period: 14)
+   - Choose comparison operator (e.g., < 30)
+   - Add multiple rules with AND/OR logic
+4. Add exit rules similarly
+5. Configure position sizing (fixed %, risk-based, etc.)
+6. Click **Save Strategy**
+
+#### Step 3: Backtest Your Strategy (`/backtest`)
+1. Navigate to **Strategy Research** → **Backtest**
+2. Select your custom strategy from dropdown
+3. Configure:
+   - Ticker symbol
+   - Initial capital ($10,000 default)
+   - Date range
+4. Click **Run Backtest**
+5. Review results:
+   - Total Return, Sharpe Ratio, Max Drawdown
+   - Equity curve chart
+   - Trade-by-trade breakdown
+6. Use **Quick Actions**:
+   - Create Portfolio
+   - Compare with other strategies
+   - Optimize parameters
+   - View in archive
+
+#### Step 4: Optimize Parameters (`/strategies/optimize`)
+1. Navigate to **Strategy Research** → **Strategy Optimization**
+2. Select your custom strategy
+3. Configure parameter ranges:
+   - RSI Period: Min 10, Max 20, Step 1
+   - Enable/disable parameters to optimize
+4. Choose optimization algorithm:
+   - **Grid Search**: Exhaustive (slower, thorough)
+   - **Genetic Algorithm**: Heuristic (faster, good for large spaces)
+5. Select objective (Sharpe Ratio, Total Return, etc.)
+6. Click **Start Optimization**
+7. Review results:
+   - Best parameters found
+   - Top 5 parameter combinations
+   - Performance comparison
+8. Use **Quick Actions**:
+   - Apply best parameters to strategy
+   - Run backtest with best
+   - Save as new strategy
+
+#### Step 5: Compare Strategies (`/strategies/compare`)
+1. Navigate to **Strategy Research** → **Compare Strategies**
+2. Select up to 5 strategies (built-in or custom)
+3. Click **Compare**
+4. Review comparison matrix:
+   - Side-by-side metrics
+   - Equity curve overlay
+   - "Best" column highlighting
+5. Export results to CSV
+
+#### Step 6: Create Portfolio (`/portfolios`)
+1. Navigate to **Portfolio** → **Portfolios**
+2. Click **Create Portfolio**
+3. Enter portfolio name and initial cash
+4. Add positions manually or import from backtest results
+5. View portfolio dashboard (`/portfolio/{id}`):
+   - Current value and allocation
+   - Unrealized gains/losses
+   - Position details
+6. **Rebalance** (`/portfolio/{id}/rebalance`):
+   - Set target allocations
+   - Calculate rebalancing signals
+   - Review buy/sell recommendations
+7. **Performance Analytics** (`/portfolio/{id}/performance`):
+   - Historical portfolio value
+   - Cumulative returns
+   - Risk metrics
+
+### Quick Tips
+
+- **Recent Tickers**: Your last 10 tickers are saved for quick selection
+- **Backtest Archive** (`/backtests`): All backtest runs are automatically saved with filters and sorting
+- **Breadcrumbs**: Use breadcrumb navigation at the top to quickly navigate back
+- **Quick Actions**: Buttons after backtests/optimizations enable one-click navigation
+- **Context Preservation**: Strategy and ticker selections carry across pages
+
+### Example: 5-Minute RSI Strategy
+
+1. **Fetch Data** (`/data`): `AAPL`, last 2 years → 504 records fetched
+2. **Build Strategy** (`/strategies/builder`):
+   - Entry: RSI(14) < 30
+   - Exit: RSI(14) > 70
+   - Position Sizing: 10% of capital
+3. **Backtest** (`/backtest`): $10,000, 2 years → +15.3% return, Sharpe 1.42
+4. **Optimize** (`/strategies/optimize`): RSI Period 10-20 → Best: 12 (Sharpe 1.67)
+5. **Apply & Re-test**: Updated strategy → +18.7% return, Sharpe 1.67 ✅
+6. **Create Portfolio** (`/portfolios`): "AAPL RSI Strategy", $10,000 initial
+
+Total time: **~5 minutes** from idea to deployed portfolio!
+
 ## 📁 Project Structure
 
 ```
