@@ -7,10 +7,12 @@
 <PageTitle>Live Analysis - TradingStrat</PageTitle>
 
 <div class="space-y-6">
-    <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Live Market Analysis</h1>
-        <p class="text-gray-600 dark:text-dark-text-secondary">Get ML-based predictions and technical analysis for current market positions.</p>
-    </div>
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Live Market Analysis"
+                Description="Get ML-based predictions and technical analysis for current market positions." />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
                        CurrentMessage="ProgressService.CurrentMessage"

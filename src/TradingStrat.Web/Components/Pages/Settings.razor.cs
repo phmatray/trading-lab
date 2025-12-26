@@ -18,6 +18,12 @@ public partial class Settings : ComponentBase
     private string? _errorMessage;
     private bool _isSaving = false;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Settings", Href = "/settings" }
+    };
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

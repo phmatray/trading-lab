@@ -1,46 +1,20 @@
 @* PageHeader Component - Standardized page title, description, and action buttons *@
 
-<div class="card" data-testid="page-header">
-    <div class="flex justify-between items-center">
-        <div class="flex items-center gap-3 flex-1">
-            @if (OnBack.HasDelegate)
-            {
-                <button @onclick="HandleBack"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                        aria-label="Go back"
-                        type="button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </button>
-            }
-
-            <div class="flex-1">
-                <!-- Breadcrumbs (if provided) -->
-                @if (Breadcrumbs != null)
-                {
-                    <nav class="mb-2" aria-label="Breadcrumb">
-                        @Breadcrumbs
-                    </nav>
-                }
-
-                <!-- Title -->
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">@Title</h1>
-
-                <!-- Description -->
-                @if (!string.IsNullOrEmpty(Description))
-                {
-                    <p class="text-gray-600 dark:text-dark-text-secondary">@Description</p>
-                }
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        @if (Actions != null)
+<div class="flex items-center justify-between" data-testid="page-header">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Title</h1>
+        @if (!string.IsNullOrEmpty(Description))
         {
-            <div class="flex items-center gap-3">
-                @Actions
-            </div>
+            <p class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
+                @Description
+            </p>
         }
     </div>
+
+    @if (Actions != null)
+    {
+        <div class="flex items-center gap-3">
+            @Actions
+        </div>
+    }
 </div>

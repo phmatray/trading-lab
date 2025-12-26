@@ -13,6 +13,12 @@ public partial class DataStatus : BaseComponent
     private bool _isLoading = true;
     private string? _errorMessage;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Data Status", Href = "/data/status" }
+    };
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataStatusAsync();

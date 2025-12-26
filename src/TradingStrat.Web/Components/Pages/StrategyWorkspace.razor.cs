@@ -13,6 +13,12 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
     private int _activeTab;
     private string _progressMessage = string.Empty;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Strategy Workspace", Href = "/workspace" }
+    };
+
     protected override void OnInitialized()
     {
         _activeTab = _workspaceState.State.ActiveTab;

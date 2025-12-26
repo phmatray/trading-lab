@@ -5,10 +5,12 @@
 <PageTitle>Backtest - TradingStrat</PageTitle>
 
 <div class="space-y-6">
-    <div class="card">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Strategy Backtest</h1>
-        <p class="text-gray-600 dark:text-dark-text-secondary">Test trading strategies on historical data and analyze performance metrics.</p>
-    </div>
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Strategy Backtest"
+                Description="Test trading strategies on historical data and analyze performance metrics." />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
                        CurrentMessage="ProgressService.CurrentMessage"

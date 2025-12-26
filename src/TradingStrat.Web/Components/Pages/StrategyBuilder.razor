@@ -4,24 +4,13 @@
 
 <PageTitle>@(IsEditMode ? "Edit Strategy" : "Strategy Builder") | TradingStrat</PageTitle>
 
-<div class="container mx-auto px-4 py-6 max-w-7xl">
+<div class="space-y-6">
     <!-- Breadcrumb Navigation -->
     <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
 
     <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                @(IsEditMode ? "Edit Strategy" : "Create Custom Strategy")
-            </h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">
-                Build your own trading strategy using technical indicators and rules
-            </p>
-        </div>
-        <button type="button" class="btn-secondary" @onclick="NavigateToLibrary">
-            ← Back to Library
-        </button>
-    </div>
+    <PageHeader Title="@(IsEditMode ? "Edit Strategy" : "Create Custom Strategy")"
+                Description="Build your own trading strategy using technical indicators and rules" />
 
     <!-- Loading State -->
     @if (_isLoading)

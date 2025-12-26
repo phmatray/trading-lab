@@ -32,6 +32,12 @@ public partial class StrategyLibrary
     private bool isLoading = false;
     private List<CustomStrategyResult> customStrategies = [];
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Strategy Library", Href = "/strategies/library" }
+    };
+
     private readonly List<BuiltInStrategyInfo> builtInStrategies = new()
     {
         new BuiltInStrategyInfo

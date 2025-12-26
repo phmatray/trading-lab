@@ -18,6 +18,12 @@ public partial class StrategyComparison : BaseComponent
     private bool _isLoading;
     private string? _errorMessage;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Compare Strategies", Href = "/strategies/compare" }
+    };
+
     // Form inputs
     private string _ticker = "";
     private DateTime _startDate = DateTime.Today.AddYears(-2);

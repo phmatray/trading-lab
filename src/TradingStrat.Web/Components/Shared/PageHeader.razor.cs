@@ -21,24 +21,4 @@ public partial class PageHeader : ComponentBase
     /// </summary>
     [Parameter]
     public RenderFragment? Actions { get; set; }
-
-    /// <summary>
-    /// Optional breadcrumbs
-    /// </summary>
-    [Parameter]
-    public RenderFragment? Breadcrumbs { get; set; }
-
-    /// <summary>
-    /// Optional back button callback
-    /// </summary>
-    [Parameter]
-    public EventCallback OnBack { get; set; }
-
-    private async Task HandleBack()
-    {
-        if (OnBack.HasDelegate)
-        {
-            await OnBack.InvokeAsync();
-        }
-    }
 }

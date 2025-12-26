@@ -3,19 +3,19 @@
 
 <PageTitle>Strategy Library | TradingStrat</PageTitle>
 
-<div class="container mx-auto px-4 py-6 max-w-7xl">
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Strategy Library</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">
-                Browse built-in strategies or create your own custom trading strategies
-            </p>
-        </div>
-        <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
-            <span class="mr-2">+</span> Create Strategy
-        </button>
-    </div>
+    <PageHeader Title="Strategy Library"
+                Description="Browse built-in strategies or create your own custom trading strategies">
+        <Actions>
+            <button type="button" class="btn-primary" @onclick="NavigateToBuilder">
+                <span class="mr-2">+</span> Create Strategy
+            </button>
+        </Actions>
+    </PageHeader>
 
     <!-- Tabs -->
     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">

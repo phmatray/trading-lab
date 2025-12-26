@@ -6,16 +6,13 @@
 
 <PageTitle>Strategy Workspace - TradingStrat</PageTitle>
 
-<div class="container mx-auto px-4 py-6">
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
-            Strategy Workspace
-        </h1>
-        <p class="text-gray-600 dark:text-dark-text-secondary">
-            Unified workflow for Define → Test → Optimize → Deploy
-        </p>
-    </div>
+    <PageHeader Title="Strategy Workspace"
+                Description="Unified workflow for Define → Test → Optimize → Deploy" />
 
     <!-- Progress Indicator -->
     @if (!string.IsNullOrEmpty(_progressMessage))

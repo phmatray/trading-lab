@@ -6,15 +6,13 @@
 <PageTitle>Backtest Archive - TradingStrat</PageTitle>
 
 <div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <!-- Page Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">Backtest Archive</h1>
-            <p class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
-                History of all backtest runs with filtering and sorting
-            </p>
-        </div>
-        <div class="flex gap-3">
+    <PageHeader Title="Backtest Archive"
+                Description="History of all backtest runs with filtering and sorting">
+        <Actions>
             <button @onclick="LoadArchiveAsync"
                     class="btn-secondary"
                     disabled="@_isLoading">
@@ -36,8 +34,8 @@
                 </svg>
                 New Backtest
             </button>
-        </div>
-    </div>
+        </Actions>
+    </PageHeader>
 
     @if (_isLoading)
     {

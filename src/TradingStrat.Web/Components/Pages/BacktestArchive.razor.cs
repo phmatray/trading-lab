@@ -13,6 +13,12 @@ public partial class BacktestArchive : BaseComponent
     private bool _isLoading;
     private string? _errorMessage;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Backtest Archive", Href = "/backtests" }
+    };
+
     // Filter state
     private string? _filterTicker;
     private string? _filterStrategy;

@@ -6,15 +6,13 @@
 <PageTitle>Data Status - TradingStrat</PageTitle>
 
 <div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
     <!-- Page Header -->
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">Data Status</h1>
-            <p class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
-                Overview of historical data coverage and quality
-            </p>
-        </div>
-        <div class="flex gap-3">
+    <PageHeader Title="Data Status"
+                Description="Overview of historical data coverage and quality">
+        <Actions>
             <button @onclick="LoadDataStatusAsync"
                     class="btn-secondary"
                     disabled="@_isLoading">
@@ -36,8 +34,8 @@
                 </svg>
                 Fetch Data
             </button>
-        </div>
-    </div>
+        </Actions>
+    </PageHeader>
 
     @if (_isLoading)
     {

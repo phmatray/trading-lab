@@ -22,6 +22,12 @@ public partial class LiveAnalysis
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
+    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    {
+        new() { Label = "Dashboard", Href = "/" },
+        new() { Label = "Live Analysis", Href = "/analysis" }
+    };
+
     private string? _warningMessage;
 
     protected override string FormKey => FORM_KEY;
