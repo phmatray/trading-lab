@@ -1,0 +1,139 @@
+@using TradingStrat.Application.Ports.Inbound
+
+@* Performance comparison matrix table showing all strategy metrics *@
+
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
+        <thead class="bg-gray-50 dark:bg-dark-bg-tertiary">
+            <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Strategy
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Total Return
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Sharpe Ratio
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Max Drawdown
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Win Rate
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Total Trades
+                </th>
+                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                    Profit Factor
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-dark-border">
+            @foreach (var strategy in ComparisonResult.Strategies)
+            {
+                <tr class="@GetRowClass(strategy)">
+                    <!-- Strategy Name -->
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                            @strategy.StrategyName
+                        </div>
+                    </td>
+
+                    <!-- Total Return -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm font-medium @GetPerformanceClass(strategy.Metrics.TotalReturnPercentage)">
+                            @strategy.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
+                            @if (IsBestByReturn(strategy))
+                            {
+                                <span class="ml-1 text-yellow-500">★</span>
+                            }
+                        </span>
+                    </td>
+
+                    <!-- Sharpe Ratio -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm @GetPerformanceClass(strategy.Metrics.SharpeRatio)">
+                            @strategy.Metrics.SharpeRatio.ToString("F2")
+                            @if (IsBestBySharpe(strategy))
+                            {
+                                <span class="ml-1 text-yellow-500">★</span>
+                            }
+                        </span>
+                    </td>
+
+                    <!-- Max Drawdown -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm text-red-600 dark:text-red-400">
+                            @strategy.Metrics.MaxDrawdown.ToString("F2%")
+                            @if (IsBestByDrawdown(strategy))
+                            {
+                                <span class="ml-1 text-yellow-500">★</span>
+                            }
+                        </span>
+                    </td>
+
+                    <!-- Win Rate -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm text-gray-900 dark:text-dark-text-primary">
+                            @strategy.Metrics.WinRate.ToString("F1%")
+                        </span>
+                    </td>
+
+                    <!-- Total Trades -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm text-gray-900 dark:text-dark-text-primary">
+                            @strategy.TotalTrades
+                        </span>
+                        <div class="text-xs text-gray-500 dark:text-dark-text-muted">
+                            @strategy.WinningTrades W / @strategy.LosingTrades L
+                        </div>
+                    </td>
+
+                    <!-- Profit Factor -->
+                    <td class="px-4 py-3 whitespace-nowrap text-right">
+                        <span class="text-sm @GetPerformanceClass(strategy.Metrics.ProfitFactor - 1)">
+                            @strategy.Metrics.ProfitFactor.ToString("F2")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter] public MultiStrategyComparisonResult ComparisonResult { get; set; } = null!;
+
+    private string GetRowClass(StrategyComparisonItem strategy)
+    {
+        return "hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary";
+    }
+
+    private string GetPerformanceClass(decimal value)
+    {
+        if (value == 0)
+        {
+            return "text-gray-600 dark:text-dark-text-secondary";
+        }
+
+        return value > 0
+            ? "text-green-600 dark:text-green-400"
+            : "text-red-600 dark:text-red-400";
+    }
+
+    private bool IsBestByReturn(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestByReturn?.StrategyName == strategy.StrategyName;
+    }
+
+    private bool IsBestBySharpe(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestBySharpe?.StrategyName == strategy.StrategyName;
+    }
+
+    private bool IsBestByDrawdown(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestByDrawdown?.StrategyName == strategy.StrategyName;
+    }
+}

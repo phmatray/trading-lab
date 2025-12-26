@@ -65,6 +65,9 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ISaveBacktestRunUseCase, SaveBacktestRunUseCase>();
         services.AddScoped<IGetBacktestArchiveUseCase, GetBacktestArchiveUseCase>();
 
+        // Strategy Comparison Use Cases
+        services.AddScoped<IMultiStrategyComparisonUseCase, MultiStrategyComparisonUseCase>();
+
         return services;
     }
 }
