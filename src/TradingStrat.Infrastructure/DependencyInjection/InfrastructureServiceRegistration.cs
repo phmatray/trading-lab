@@ -8,6 +8,7 @@ using TradingStrat.Infrastructure.Assistant;
 using TradingStrat.Infrastructure.Export;
 using TradingStrat.Infrastructure.MachineLearning;
 using TradingStrat.Infrastructure.MarketData;
+using TradingStrat.Infrastructure.Persistence;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 
 namespace TradingStrat.Infrastructure.DependencyInjection;
@@ -48,6 +49,8 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IPortfolioPort, PortfolioRepository>();
         services.AddScoped<IPortfolioExportPort, PortfolioCsvAdapter>();
         services.AddScoped<ICustomStrategyPort, CustomStrategyRepository>();
+        services.AddScoped<IBacktestArchivePort, BacktestArchiveRepository>();
+        services.AddScoped<IActivityEventPort, ActivityEventRepository>();
 
         return services;
     }

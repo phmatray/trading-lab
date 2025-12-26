@@ -1,0 +1,41 @@
+@* Breadcrumb Navigation Component *@
+
+<nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary mb-4"
+     aria-label="Breadcrumb"
+     role="navigation">
+    @foreach (var (crumb, index) in Breadcrumbs.Select((c, i) => (c, i)))
+    {
+        @if (index > 0)
+        {
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        }
+
+        @if (index == Breadcrumbs.Count - 1)
+        {
+            @* Current page - not clickable *@
+            <span class="font-medium text-gray-900 dark:text-dark-text-primary" aria-current="page">
+                @crumb.Label
+            </span>
+        }
+        else
+        {
+            @* Clickable breadcrumb *@
+            <a href="@crumb.Href"
+               class="hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
+                @crumb.Label
+            </a>
+        }
+    }
+</nav>
+
+@code {
+    [Parameter] public List<Breadcrumb> Breadcrumbs { get; set; } = new();
+
+    public class Breadcrumb
+    {
+        public string Label { get; set; } = string.Empty;
+        public string Href { get; set; } = string.Empty;
+    }
+}

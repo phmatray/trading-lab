@@ -64,7 +64,11 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
             // Get snapshot with current market prices
             var progress = new Progress<string>(message =>
             {
-                InvokeAsync(() => ProgressService.UpdateProgress(message));
+                InvokeAsync(async () =>
+                {
+                    ProgressService.UpdateProgress(message);
+                    await InvokeAsync(StateHasChanged);
+                });
             });
 
             _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);

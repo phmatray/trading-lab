@@ -16,6 +16,7 @@ public partial class Settings : ComponentBase
     private Models.State.UserPreferences _preferences = new();
     private string? _successMessage;
     private string? _errorMessage;
+    private bool _isSaving = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -31,6 +32,7 @@ public partial class Settings : ComponentBase
         Console.WriteLine("🔵 HandleSaveSettings called!");
         _errorMessage = null;
         _successMessage = null;
+        _isSaving = true;
 
         try
         {
@@ -46,6 +48,10 @@ public partial class Settings : ComponentBase
             Console.WriteLine($"🔴 Error saving settings: {ex.Message}");
             _errorMessage = $"Error saving settings: {ex.Message}";
             StateHasChanged();
+        }
+        finally
+        {
+            _isSaving = false;
         }
     }
 

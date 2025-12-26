@@ -91,12 +91,19 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
 
             _performanceHistory = await GetPerformanceUseCase.ExecuteAsync(query, progress);
 
-            await NotificationService.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Success,
-                "Performance Analysis Complete",
-                $"{_performanceHistory.DataPoints.Count} data points | {_performanceHistory.CurrentMetrics.TotalReturnPercentage:+0.0;-0.0;0.0}% return"
-            );
+            if (_performanceHistory != null)
+            {
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Success,
+                    "Performance Analysis Complete",
+                    $"{_performanceHistory.DataPoints.Count} data points | {_performanceHistory.CurrentMetrics.TotalReturnPercentage:+0.0;-0.0;0.0}% return"
+                );
+            }
+            else
+            {
+                _errorMessage = "No performance data available for the selected date range.";
+            }
         }
         catch (Exception ex)
         {

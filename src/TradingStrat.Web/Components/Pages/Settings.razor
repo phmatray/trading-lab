@@ -123,8 +123,15 @@
         <!-- Actions -->
         <div class="card">
             <div class="flex flex-wrap gap-4">
-                <button type="submit" class="btn-primary">
-                    Save Settings
+                <button type="submit" class="btn-primary" disabled="@_isSaving">
+                    @if (_isSaving)
+                    {
+                        <span>Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Settings</span>
+                    }
                 </button>
 
                 <button type="button" @onclick="HandleResetToDefaults" class="btn-secondary">

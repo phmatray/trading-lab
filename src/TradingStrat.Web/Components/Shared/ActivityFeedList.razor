@@ -1,0 +1,113 @@
+@using TradingStrat.Domain.Entities
+
+@* Activity feed list component *@
+
+@if (Activities == null || !Activities.Any())
+{
+    <div class="text-center py-8 text-gray-500 dark:text-dark-text-muted">
+        <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p>No recent activity</p>
+        <p class="text-sm mt-1">Activity will appear here as you use the application</p>
+    </div>
+}
+else
+{
+    <div class="flow-root">
+        <ul role="list" class="-mb-8">
+            @for (int i = 0; i < Activities.Count; i++)
+            {
+                var activity = Activities[i];
+                var isLast = i == Activities.Count - 1;
+
+                <li>
+                    <div class="relative pb-8">
+                        @if (!isLast)
+                        {
+                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-dark-border" aria-hidden="true"></span>
+                        }
+                        <div class="relative flex space-x-3">
+                            <div>
+                                <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-dark-bg-secondary @GetEventIconBackground(activity.EventType)">
+                                    @if (activity.EventType == "Backtest")
+                                    {
+                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    }
+                                    else if (activity.EventType == "Strategy")
+                                    {
+                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                        </svg>
+                                    }
+                                    else if (activity.EventType == "Portfolio")
+                                    {
+                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    }
+                                </span>
+                            </div>
+                            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                <div>
+                                    <p class="text-sm text-gray-900 dark:text-dark-text-primary font-medium">
+                                        @activity.Title
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(activity.Description))
+                                    {
+                                        <p class="text-xs text-gray-500 dark:text-dark-text-muted mt-0.5">
+                                            @activity.Description
+                                        </p>
+                                    }
+                                </div>
+                                <div class="text-right text-xs text-gray-400 dark:text-dark-text-muted whitespace-nowrap">
+                                    @GetRelativeTime(activity.Timestamp)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter] public List<ActivityEvent> Activities { get; set; } = new();
+
+    private string GetEventIconBackground(string eventType)
+    {
+        return eventType switch
+        {
+            "Backtest" => "bg-green-500",
+            "Strategy" => "bg-blue-500",
+            "Portfolio" => "bg-purple-500",
+            "Data" => "bg-orange-500",
+            _ => "bg-gray-500"
+        };
+    }
+
+    private string GetRelativeTime(DateTime timestamp)
+    {
+        var timespan = DateTime.Now - timestamp;
+
+        if (timespan.TotalMinutes < 1)
+            return "just now";
+        if (timespan.TotalMinutes < 60)
+            return $"{(int)timespan.TotalMinutes}m ago";
+        if (timespan.TotalHours < 24)
+            return $"{(int)timespan.TotalHours}h ago";
+        if (timespan.TotalDays < 7)
+            return $"{(int)timespan.TotalDays}d ago";
+
+        return timestamp.ToString("MMM d");
+    }
+}

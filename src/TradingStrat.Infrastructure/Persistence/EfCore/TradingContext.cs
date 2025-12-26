@@ -18,6 +18,8 @@ public class TradingContext : DbContext
     public DbSet<Position> Positions { get; set; } = null!;
     public DbSet<PortfolioCashTransaction> CashTransactions { get; set; } = null!;
     public DbSet<CustomStrategy> CustomStrategies { get; set; } = null!;
+    public DbSet<BacktestRun> BacktestRuns { get; set; } = null!;
+    public DbSet<ActivityEvent> ActivityEvents { get; set; } = null!;
 
     // Event Sourcing
     public DbSet<EventRecord> Events { get; set; } = null!;
@@ -378,6 +380,99 @@ public class TradingContext : DbContext
 
             entity.Property(e => e.CreatedAt)
                 .IsRequired();
+        });
+
+        // Configure BacktestRun entity
+        modelBuilder.Entity<BacktestRun>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Ticker)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.StrategyType)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.StrategyName)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.StrategyParametersJson)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.ConfigJson)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.ResultsJson)
+                .IsRequired()
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.ExecutedAt)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.ExecutionTimeMs)
+                .IsRequired();
+
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.ErrorMessage)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Tags)
+                .HasMaxLength(500);
+
+            // Index for filtering by ticker
+            entity.HasIndex(e => e.Ticker)
+                .HasDatabaseName("IX_BacktestRuns_Ticker");
+
+            // Index for sorting by execution date
+            entity.HasIndex(e => e.ExecutedAt)
+                .HasDatabaseName("IX_BacktestRuns_ExecutedAt");
+
+            // Index for filtering by strategy type
+            entity.HasIndex(e => e.StrategyType)
+                .HasDatabaseName("IX_BacktestRuns_StrategyType");
+        });
+
+        // Configure ActivityEvent entity
+        modelBuilder.Entity<ActivityEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.EventType)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.EntityId);
+
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Metadata)
+                .HasColumnType("TEXT");
+
+            entity.Property(e => e.Timestamp)
+                .IsRequired()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            // Index for sorting by timestamp (descending)
+            entity.HasIndex(e => e.Timestamp)
+                .HasDatabaseName("IX_ActivityEvents_Timestamp");
+
+            // Index for filtering by event type
+            entity.HasIndex(e => e.EventType)
+                .HasDatabaseName("IX_ActivityEvents_EventType");
         });
     }
 }

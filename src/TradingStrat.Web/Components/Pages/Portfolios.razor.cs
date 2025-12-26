@@ -111,7 +111,7 @@ public partial class Portfolios : ComponentBase, IDisposable
     private void ConfirmDelete(int portfolioId, string portfolioName, MouseEventArgs e)
     {
         _portfolioIdToDelete = portfolioId;
-        _portfolioToDelete = portfolioName;
+        _portfolioToDelete = portfolioName ?? "Unknown Portfolio";
         _showDeleteDialog = true;
         _errorMessage = null;
         _successMessage = null;

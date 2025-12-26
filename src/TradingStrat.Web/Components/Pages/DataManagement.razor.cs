@@ -79,7 +79,7 @@ public partial class DataManagement : ComponentBase, IDisposable
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Error fetching data: {ex.Message}";
+            _errorMessage = $"Error fetching data for {_formModel.Ticker}: {ex.Message}";
         }
         finally
         {

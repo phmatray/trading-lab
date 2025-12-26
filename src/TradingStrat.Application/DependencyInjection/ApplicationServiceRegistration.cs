@@ -55,6 +55,11 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ICustomStrategyManagementUseCase, CustomStrategyManagementUseCase>();
         services.AddScoped<IOptimizeStrategyParametersUseCase, OptimizeStrategyParametersUseCase>();
 
+        // Dashboard Use Cases
+        services.AddScoped<IGetDashboardStatsUseCase, GetDashboardStatsUseCase>();
+        services.AddScoped<IGetRecentActivityUseCase, GetRecentActivityUseCase>();
+        services.AddScoped<IGetTopStrategiesUseCase, GetTopStrategiesUseCase>();
+
         return services;
     }
 }

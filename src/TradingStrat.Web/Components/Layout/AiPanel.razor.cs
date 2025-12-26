@@ -136,7 +136,12 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
         {
             await JS.InvokeVoidAsync("scrollToBottom", _messagesContainer);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            // JS interop errors are often transient (e.g., element not yet rendered in DOM)
+            // Log for debugging but don't notify user
+            Console.WriteLine($"[JS INTEROP WARNING] ScrollToBottom failed: {ex.Message}");
+        }
     }
 
     public async ValueTask DisposeAsync()
