@@ -61,6 +61,10 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IGetTopStrategiesUseCase, GetTopStrategiesUseCase>();
         services.AddScoped<IGetAllDataStatusUseCase, GetAllDataStatusUseCase>();
 
+        // Backtest Archive Use Cases
+        services.AddScoped<ISaveBacktestRunUseCase, SaveBacktestRunUseCase>();
+        services.AddScoped<IGetBacktestArchiveUseCase, GetBacktestArchiveUseCase>();
+
         return services;
     }
 }

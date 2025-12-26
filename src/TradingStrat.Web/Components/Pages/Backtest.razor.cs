@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
@@ -6,6 +7,7 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Components.Shared;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -21,6 +23,7 @@ public partial class Backtest
     private const string FORM_KEY = "backtest-form";
 
     [Inject] private IBacktestUseCase BacktestUseCase { get; set; } = null!;
+    [Inject] private ISaveBacktestRunUseCase SaveBacktestRunUseCase { get; set; } = null!;
     [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
     [Inject] private IStrategyRegistry StrategyRegistry { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
@@ -63,6 +66,9 @@ public partial class Backtest
         BacktestFormModel model,
         IProgress<string> progress)
     {
+        // Start timing execution
+        var stopwatch = Stopwatch.StartNew();
+
         // Get current strategy parameters from the form
         if (_strategyForm != null)
         {
@@ -97,6 +103,39 @@ public partial class Backtest
         );
 
         BacktestResult result = await BacktestUseCase.ExecuteAsync(command, backtestProgress);
+
+        stopwatch.Stop();
+
+        // Auto-save backtest run to archive
+        try
+        {
+            var saveCommand = new SaveBacktestRunCommand(
+                Ticker: result.Ticker,
+                StrategyType: model.StrategyType.ToString().ToLowerInvariant(),
+                StrategyName: result.StrategyName,
+                Config: new BacktestConfig(
+                    Ticker: model.Ticker,
+                    StartDate: model.StartDate ?? DateTime.Today.AddYears(-2),
+                    EndDate: model.EndDate ?? DateTime.Today,
+                    InitialCapital: model.InitialCapital,
+                    CommissionPercentage: model.CommissionPercentage,
+                    MinimumCommission: model.MinimumCommission
+                ),
+                Result: result,
+                StrategyParameters: model.StrategyParameters,
+                ExecutionTimeMs: (int)stopwatch.ElapsedMilliseconds,
+                Status: "Success",
+                ErrorMessage: null,
+                Tags: null
+            );
+
+            await SaveBacktestRunUseCase.ExecuteAsync(saveCommand);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't fail the backtest if archiving fails
+            Console.WriteLine($"[WARNING] Failed to save backtest run to archive: {ex.Message}");
+        }
 
         // Trigger backtest completion notification
         await NotificationService.AddNotificationAsync(
