@@ -34,9 +34,14 @@ public static class ApplicationServiceRegistration
         services.AddScoped<PortfolioContextBuilder>();
         services.AddScoped<MarketRegimeDetector>();
         services.AddScoped<AiRecommendationService>();
+        services.AddScoped<IDataRefreshService, DataRefreshService>();
+        services.AddSingleton<ICsvTickerParser, CsvTickerParser>();
 
         // Use Cases
         services.AddScoped<IDataFetchingUseCase, FetchHistoricalDataUseCase>();
+        services.AddScoped<IBulkDataFetchingUseCase, BulkFetchHistoricalDataUseCase>();
+        services.AddScoped<IDeleteHistoricalDataUseCase, DeleteHistoricalDataUseCase>();
+        services.AddScoped<IExportHistoricalDataUseCase, ExportHistoricalDataUseCase>();
         services.AddScoped<IBacktestUseCase, RunBacktestUseCase>();
         services.AddScoped<ILiveAnalysisUseCase, AnalyzeCurrentPositionUseCase>();
         services.AddScoped<IParameterOptimizationUseCase, RunParameterOptimizationUseCase>();

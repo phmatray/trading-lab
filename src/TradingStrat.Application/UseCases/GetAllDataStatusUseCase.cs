@@ -7,60 +7,152 @@ namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case for retrieving comprehensive data status for all tickers.
+/// Supports filtering, sorting, and pagination.
 /// </summary>
 public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
 {
     private readonly IHistoricalDataPort _historicalDataPort;
-    private static readonly TimeFrame D1_TIMEFRAME = new() { Unit = TimeFrameUnit.D1 };
 
     public GetAllDataStatusUseCase(IHistoricalDataPort historicalDataPort)
     {
         _historicalDataPort = historicalDataPort;
     }
 
-    public async Task<AllDataStatusResult> ExecuteAsync()
+    public async Task<AllDataStatusResult> ExecuteAsync(DataStatusQuery? query = null)
     {
-        // Get all unique tickers
-        List<string> tickers = await _historicalDataPort.GetAllTickersAsync();
+        // Use default query if not provided
+        query ??= new DataStatusQuery();
 
-        if (!tickers.Any())
+        // Determine timeframe (default to D1)
+        TimeFrame timeFrame = query.TimeFrame ?? new TimeFrame { Unit = TimeFrameUnit.D1 };
+
+        // Get all ticker summaries for the specified timeframe (efficient single query)
+        List<TickerSummary> summaries = await _historicalDataPort.GetAllTickerSummariesAsync(timeFrame);
+
+        if (!summaries.Any())
         {
             return new AllDataStatusResult(
                 TotalTickers: 0,
                 TotalRecords: 0,
                 AverageCoveragePercentage: 0m,
-                TickerStatuses: new List<TickerDataStatus>()
+                TickerStatuses: new List<TickerDataStatus>(),
+                TotalPages: 0,
+                CurrentPage: 1,
+                PageSize: query.PageSize
             );
         }
 
-        // Get status for each ticker in parallel
-        var statusTasks = tickers.Select(async ticker =>
+        // Convert summaries to full status objects (with gap detection)
+        var statusTasks = summaries.Select(async summary =>
         {
-            return await GetTickerStatusAsync(ticker);
+            return await GetTickerStatusAsync(summary.Ticker, timeFrame);
         });
 
-        List<TickerDataStatus> tickerStatuses = (await Task.WhenAll(statusTasks)).ToList();
+        List<TickerDataStatus> allStatuses = (await Task.WhenAll(statusTasks)).ToList();
 
-        int totalRecords = tickerStatuses.Sum(s => s.RecordCount);
-        decimal avgCoverage = tickerStatuses.Any()
-            ? tickerStatuses.Average(s => s.CoveragePercentage)
+        // Apply filters
+        IEnumerable<TickerDataStatus> filteredStatuses = ApplyFilters(allStatuses, query);
+
+        // Calculate totals before pagination
+        int totalTickers = filteredStatuses.Count();
+        int totalRecords = filteredStatuses.Sum(s => s.RecordCount);
+        decimal avgCoverage = filteredStatuses.Any()
+            ? filteredStatuses.Average(s => s.CoveragePercentage)
             : 0m;
 
+        // Apply sorting
+        IEnumerable<TickerDataStatus> sortedStatuses = ApplySorting(filteredStatuses, query);
+
+        // Apply pagination
+        int totalPages = (int)Math.Ceiling((double)totalTickers / query.PageSize);
+        int skip = (query.PageNumber - 1) * query.PageSize;
+        List<TickerDataStatus> pagedStatuses = sortedStatuses
+            .Skip(skip)
+            .Take(query.PageSize)
+            .ToList();
+
         return new AllDataStatusResult(
-            TotalTickers: tickers.Count,
+            TotalTickers: totalTickers,
             TotalRecords: totalRecords,
             AverageCoveragePercentage: avgCoverage,
-            TickerStatuses: tickerStatuses.OrderBy(s => s.Ticker).ToList()
+            TickerStatuses: pagedStatuses,
+            TotalPages: totalPages,
+            CurrentPage: query.PageNumber,
+            PageSize: query.PageSize
         );
     }
 
-    private async Task<TickerDataStatus> GetTickerStatusAsync(string ticker)
+    private IEnumerable<TickerDataStatus> ApplyFilters(
+        IEnumerable<TickerDataStatus> statuses,
+        DataStatusQuery query)
     {
-        // Get data summary for daily timeframe
-        DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, D1_TIMEFRAME);
+        // Filter by search term
+        if (!string.IsNullOrWhiteSpace(query.SearchTicker))
+        {
+            string searchTerm = query.SearchTicker.ToUpperInvariant();
+            statuses = statuses.Where(s => s.Ticker.ToUpperInvariant().Contains(searchTerm));
+        }
+
+        // Filter by status
+        if (query.StatusFilter.HasValue && query.StatusFilter != DataStatusFilter.All)
+        {
+            statuses = query.StatusFilter.Value switch
+            {
+                DataStatusFilter.Complete => statuses.Where(s => s.CoveragePercentage >= 95m),
+                DataStatusFilter.Partial => statuses.Where(s => s.CoveragePercentage >= 80m && s.CoveragePercentage < 95m),
+                DataStatusFilter.WithGaps => statuses.Where(s => s.CoveragePercentage < 80m),
+                _ => statuses
+            };
+        }
+
+        // Filter by coverage range
+        if (query.MinCoverage.HasValue)
+        {
+            statuses = statuses.Where(s => s.CoveragePercentage >= query.MinCoverage.Value);
+        }
+
+        if (query.MaxCoverage.HasValue)
+        {
+            statuses = statuses.Where(s => s.CoveragePercentage <= query.MaxCoverage.Value);
+        }
+
+        return statuses;
+    }
+
+    private IEnumerable<TickerDataStatus> ApplySorting(
+        IEnumerable<TickerDataStatus> statuses,
+        DataStatusQuery query)
+    {
+        IOrderedEnumerable<TickerDataStatus> orderedStatuses = query.SortBy switch
+        {
+            SortColumn.Ticker => query.SortDirection == SortDirection.Ascending
+                ? statuses.OrderBy(s => s.Ticker)
+                : statuses.OrderByDescending(s => s.Ticker),
+            SortColumn.RecordCount => query.SortDirection == SortDirection.Ascending
+                ? statuses.OrderBy(s => s.RecordCount)
+                : statuses.OrderByDescending(s => s.RecordCount),
+            SortColumn.Coverage => query.SortDirection == SortDirection.Ascending
+                ? statuses.OrderBy(s => s.CoveragePercentage)
+                : statuses.OrderByDescending(s => s.CoveragePercentage),
+            SortColumn.OldestDate => query.SortDirection == SortDirection.Ascending
+                ? statuses.OrderBy(s => s.OldestDate)
+                : statuses.OrderByDescending(s => s.OldestDate),
+            SortColumn.LatestDate => query.SortDirection == SortDirection.Ascending
+                ? statuses.OrderBy(s => s.LatestDate)
+                : statuses.OrderByDescending(s => s.LatestDate),
+            _ => statuses.OrderBy(s => s.Ticker)
+        };
+
+        return orderedStatuses;
+    }
+
+    private async Task<TickerDataStatus> GetTickerStatusAsync(string ticker, TimeFrame timeFrame)
+    {
+        // Get data summary
+        DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
 
         // Get all historical prices to detect gaps
-        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, D1_TIMEFRAME);
+        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
 
         List<DateGap> gaps = DetectGaps(prices);
 

@@ -1,0 +1,128 @@
+@if (SelectedCount > 0)
+{
+    <div class="sticky bottom-0 left-0 right-0 bg-blue-600 dark:bg-blue-700 border-t-2 border-blue-700 dark:border-blue-800 shadow-lg z-10">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <!-- Selection Count -->
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 rounded-full">
+                        <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                            @SelectedCount
+                        </span>
+                    </div>
+                    <span class="text-white font-medium">
+                        @(SelectedCount == 1 ? "item selected" : "items selected")
+                    </span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-2">
+                    @if (ShowRefreshAction)
+                    {
+                        <Button
+                            Text="Refresh Selected"
+                            OnClick="OnRefreshSelected"
+                            Variant="ButtonVariant.Ghost"
+                            Size="ButtonSize.Small"
+                            IconName="arrow-path"
+                        />
+                    }
+
+                    @if (ShowDeleteAction)
+                    {
+                        <Button
+                            Text="Delete Selected"
+                            OnClick="OnDeleteSelected"
+                            Variant="ButtonVariant.Danger"
+                            Size="ButtonSize.Small"
+                            IconName="trash"
+                        />
+                    }
+
+                    @if (ShowExportAction)
+                    {
+                        <Button
+                            Text="Export Selected"
+                            OnClick="OnExportSelected"
+                            Variant="ButtonVariant.Ghost"
+                            Size="ButtonSize.Small"
+                            IconName="arrow-down-tray"
+                        />
+                    }
+
+                    <!-- Custom Actions -->
+                    @if (CustomActions != null)
+                    {
+                        @CustomActions
+                    }
+
+                    <!-- Clear Selection -->
+                    <button
+                        type="button"
+                        @onclick="OnClearSelection"
+                        class="ml-4 px-3 py-1.5 text-sm font-medium text-white hover:text-gray-200 border border-white/30 rounded-lg hover:bg-white/10 transition-colors"
+                        aria-label="Clear selection"
+                    >
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Number of items currently selected.
+    /// </summary>
+    [Parameter]
+    public int SelectedCount { get; set; }
+
+    /// <summary>
+    /// Whether to show the Refresh action button.
+    /// </summary>
+    [Parameter]
+    public bool ShowRefreshAction { get; set; } = true;
+
+    /// <summary>
+    /// Whether to show the Delete action button.
+    /// </summary>
+    [Parameter]
+    public bool ShowDeleteAction { get; set; } = true;
+
+    /// <summary>
+    /// Whether to show the Export action button.
+    /// </summary>
+    [Parameter]
+    public bool ShowExportAction { get; set; } = true;
+
+    /// <summary>
+    /// Optional custom actions to display.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? CustomActions { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the user clicks "Refresh Selected".
+    /// </summary>
+    [Parameter]
+    public EventCallback OnRefreshSelected { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the user clicks "Delete Selected".
+    /// </summary>
+    [Parameter]
+    public EventCallback OnDeleteSelected { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the user clicks "Export Selected".
+    /// </summary>
+    [Parameter]
+    public EventCallback OnExportSelected { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the user clicks "Clear".
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClearSelection { get; set; }
+}

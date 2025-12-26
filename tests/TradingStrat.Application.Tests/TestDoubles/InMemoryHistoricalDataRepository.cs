@@ -131,6 +131,142 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         return Task.FromResult(tickers);
     }
 
+    public async Task<Dictionary<string, DataSummaryResult>> GetDataSummariesAsync(
+        IEnumerable<string> tickers,
+        TimeFrame timeFrame)
+    {
+        var result = new Dictionary<string, DataSummaryResult>();
+
+        foreach (string ticker in tickers)
+        {
+            DataSummaryResult summary = await GetDataSummaryAsync(ticker, timeFrame);
+            result[ticker] = summary;
+        }
+
+        return result;
+    }
+
+    public async Task BulkSaveHistoricalDataAsync(
+        Dictionary<string, (string? isin, IEnumerable<HistoricalPrice> data)> tickerDataMap,
+        TimeFrame timeFrame,
+        IProgress<BulkSaveProgress>? progress = null)
+    {
+        int totalTickers = tickerDataMap.Count;
+        int completedTickers = 0;
+        int totalRecordsSaved = 0;
+
+        foreach (var kvp in tickerDataMap)
+        {
+            string ticker = kvp.Key;
+            string? isin = kvp.Value.isin;
+            var data = kvp.Value.data;
+
+            progress?.Report(new BulkSaveProgress(
+                totalTickers,
+                completedTickers,
+                ticker,
+                totalRecordsSaved));
+
+            await SaveHistoricalDataAsync(ticker, isin, timeFrame, data);
+
+            completedTickers++;
+            totalRecordsSaved += data.Count();
+        }
+
+        progress?.Report(new BulkSaveProgress(
+            totalTickers,
+            completedTickers,
+            string.Empty,
+            totalRecordsSaved));
+    }
+
+    public Task<int> DeleteTickerDataAsync(string ticker, TimeFrame? timeFrame = null)
+    {
+        int deletedCount = 0;
+
+        if (timeFrame == null)
+        {
+            // Delete all timeframes for this ticker
+            var keysToRemove = _data.Keys
+                .Where(k => k.ticker == ticker)
+                .ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                deletedCount += _data[key].Count;
+                _data.Remove(key);
+            }
+        }
+        else
+        {
+            // Delete specific timeframe
+            var key = (ticker, timeFrame.Unit);
+            if (_data.ContainsKey(key))
+            {
+                deletedCount = _data[key].Count;
+                _data.Remove(key);
+            }
+        }
+
+        return Task.FromResult(deletedCount);
+    }
+
+    public Task<int> DeleteDateRangeAsync(
+        string ticker,
+        TimeFrame timeFrame,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        var key = (ticker, timeFrame.Unit);
+        if (!_data.ContainsKey(key))
+        {
+            return Task.FromResult(0);
+        }
+
+        var recordsToKeep = _data[key]
+            .Where(p => p.DateTime < startDate || p.DateTime > endDate)
+            .ToList();
+
+        int deletedCount = _data[key].Count - recordsToKeep.Count;
+        _data[key] = recordsToKeep;
+
+        return Task.FromResult(deletedCount);
+    }
+
+    public Task<List<TickerSummary>> GetAllTickerSummariesAsync(TimeFrame timeFrame)
+    {
+        var summaries = _data
+            .Where(kvp => kvp.Key.timeFrame == timeFrame.Unit)
+            .Select(kvp =>
+            {
+                var data = kvp.Value;
+                return new TickerSummary(
+                    kvp.Key.ticker,
+                    data.FirstOrDefault()?.ISIN,
+                    data.Count,
+                    data.Any() ? data.Min(p => p.DateTime) : (DateTime?)null,
+                    data.Any() ? data.Max(p => p.DateTime) : (DateTime?)null);
+            })
+            .OrderBy(t => t.Ticker)
+            .ToList();
+
+        return Task.FromResult(summaries);
+    }
+
+    public Task<DateTime?> GetDatabaseLastModifiedAsync()
+    {
+        if (!_data.Any())
+        {
+            return Task.FromResult<DateTime?>(null);
+        }
+
+        DateTime? maxCreatedAt = _data.Values
+            .SelectMany(list => list)
+            .Max(p => (DateTime?)p.CreatedAt);
+
+        return Task.FromResult(maxCreatedAt);
+    }
+
     // Test helper methods
     public void Clear() => _data.Clear();
 

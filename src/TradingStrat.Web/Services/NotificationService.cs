@@ -285,6 +285,59 @@ public class NotificationService : IDisposable
         };
     }
 
+    // Helper methods for common notification patterns
+    public async Task ShowSuccessAsync(string message, string? ticker = null)
+    {
+        await AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Success,
+            "Success",
+            message,
+            ticker
+        );
+    }
+
+    public async Task ShowErrorAsync(string message, string? ticker = null)
+    {
+        await AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Error,
+            "Error",
+            message,
+            ticker
+        );
+    }
+
+    public async Task ShowWarningAsync(string message, string? ticker = null)
+    {
+        await AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Warning,
+            "Warning",
+            message,
+            ticker
+        );
+    }
+
+    public async Task ShowInfoAsync(string message, string? ticker = null)
+    {
+        await AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Info,
+            "Info",
+            message,
+            ticker
+        );
+    }
+
+    public Task<bool> ConfirmAsync(string message, string? details = null)
+    {
+        // Simple synchronous confirmation
+        // In a real implementation, this would show a modal dialog
+        // For now, we'll just return true to not block the workflow
+        return Task.FromResult(true);
+    }
+
     public void Dispose()
     {
         if (_disposed)

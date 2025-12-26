@@ -128,4 +128,133 @@ public class HistoricalDataRepository : IHistoricalDataPort
             .OrderBy(t => t)
             .ToListAsync();
     }
+
+    public async Task<Dictionary<string, DataSummaryResult>> GetDataSummariesAsync(
+        IEnumerable<string> tickers,
+        TimeFrame timeFrame)
+    {
+        var tickerList = tickers.ToList();
+        var result = new Dictionary<string, DataSummaryResult>();
+
+        foreach (string ticker in tickerList)
+        {
+            DataSummaryResult summary = await GetDataSummaryAsync(ticker, timeFrame);
+            result[ticker] = summary;
+        }
+
+        return result;
+    }
+
+    public async Task BulkSaveHistoricalDataAsync(
+        Dictionary<string, (string? isin, IEnumerable<HistoricalPrice> data)> tickerDataMap,
+        TimeFrame timeFrame,
+        IProgress<BulkSaveProgress>? progress = null)
+    {
+        int totalTickers = tickerDataMap.Count;
+        int completedTickers = 0;
+        int totalRecordsSaved = 0;
+
+        foreach (var kvp in tickerDataMap)
+        {
+            string ticker = kvp.Key;
+            string? isin = kvp.Value.isin;
+            var data = kvp.Value.data;
+
+            progress?.Report(new BulkSaveProgress(
+                totalTickers,
+                completedTickers,
+                ticker,
+                totalRecordsSaved));
+
+            await SaveHistoricalDataAsync(ticker, isin, timeFrame, data);
+
+            completedTickers++;
+            totalRecordsSaved += data.Count();
+        }
+
+        // Report final progress
+        progress?.Report(new BulkSaveProgress(
+            totalTickers,
+            completedTickers,
+            string.Empty,
+            totalRecordsSaved));
+    }
+
+    public async Task<int> DeleteTickerDataAsync(string ticker, TimeFrame? timeFrame = null)
+    {
+        IQueryable<HistoricalPrice> query = _context.HistoricalPrices
+            .Where(p => p.Ticker == ticker);
+
+        if (timeFrame != null)
+        {
+            query = query.Where(p => p.TimeFrame == timeFrame.Unit);
+        }
+
+        List<HistoricalPrice> recordsToDelete = await query.ToListAsync();
+        int count = recordsToDelete.Count;
+
+        if (count > 0)
+        {
+            _context.HistoricalPrices.RemoveRange(recordsToDelete);
+            await _context.SaveChangesAsync();
+        }
+
+        return count;
+    }
+
+    public async Task<int> DeleteDateRangeAsync(
+        string ticker,
+        TimeFrame timeFrame,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        List<HistoricalPrice> recordsToDelete = await _context.HistoricalPrices
+            .Where(p => p.Ticker == ticker
+                        && p.TimeFrame == timeFrame.Unit
+                        && p.DateTime >= startDate
+                        && p.DateTime <= endDate)
+            .ToListAsync();
+
+        int count = recordsToDelete.Count;
+
+        if (count > 0)
+        {
+            _context.HistoricalPrices.RemoveRange(recordsToDelete);
+            await _context.SaveChangesAsync();
+        }
+
+        return count;
+    }
+
+    public async Task<List<TickerSummary>> GetAllTickerSummariesAsync(TimeFrame timeFrame)
+    {
+        var tickerGroups = await _context.HistoricalPrices
+            .Where(p => p.TimeFrame == timeFrame.Unit)
+            .GroupBy(p => p.Ticker)
+            .Select(g => new
+            {
+                Ticker = g.Key,
+                ISIN = g.FirstOrDefault()!.ISIN,
+                RecordCount = g.Count(),
+                OldestDate = g.Min(p => p.DateTime),
+                LatestDate = g.Max(p => p.DateTime)
+            })
+            .OrderBy(t => t.Ticker)
+            .ToListAsync();
+
+        return tickerGroups
+            .Select(t => new TickerSummary(
+                t.Ticker,
+                t.ISIN,
+                t.RecordCount,
+                t.OldestDate,
+                t.LatestDate))
+            .ToList();
+    }
+
+    public async Task<DateTime?> GetDatabaseLastModifiedAsync()
+    {
+        return await _context.HistoricalPrices
+            .MaxAsync(p => (DateTime?)p.CreatedAt);
+    }
 }

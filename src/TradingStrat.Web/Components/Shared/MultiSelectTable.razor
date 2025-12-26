@@ -1,0 +1,148 @@
+@typeparam TItem
+
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-800">
+            <tr>
+                @if (AllowSelectAll)
+                {
+                    <th scope="col" class="px-6 py-3 w-12">
+                        <input
+                            type="checkbox"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                            checked="@IsAllSelected"
+                            @onchange="HandleSelectAllChanged"
+                            aria-label="Select all items"
+                        />
+                    </th>
+                }
+
+                @HeaderContent
+            </tr>
+        </thead>
+
+        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+            @foreach (TItem item in Items)
+            {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 @(IsSelected(item) ? "bg-blue-50 dark:bg-blue-900/20" : "")">
+                    @if (AllowSelectAll)
+                    {
+                        <td class="px-6 py-4 w-12">
+                            <input
+                                type="checkbox"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                                checked="@IsSelected(item)"
+                                @onchange="@(e => HandleRowSelectionChanged(item, e))"
+                                aria-label="@($"Select {GetItemKey(item)}")"
+                            />
+                        </td>
+                    }
+
+                    @RowContent(item)
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Items.Any())
+    {
+        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <Icon Name="inbox" Size="IconSize.Large" Class="mx-auto mb-4 text-gray-400" />
+            <p class="text-sm">@EmptyMessage</p>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The items to display in the table.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required IEnumerable<TItem> Items { get; set; }
+
+    /// <summary>
+    /// Set of keys for selected items.
+    /// </summary>
+    [Parameter]
+    public HashSet<string> SelectedKeys { get; set; } = new();
+
+    /// <summary>
+    /// Function to extract the unique key from an item.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required Func<TItem, string> GetItemKey { get; set; }
+
+    /// <summary>
+    /// Whether to show the "Select All" checkbox in the header.
+    /// </summary>
+    [Parameter]
+    public bool AllowSelectAll { get; set; } = true;
+
+    /// <summary>
+    /// Template for table header columns (excluding checkbox column).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment HeaderContent { get; set; }
+
+    /// <summary>
+    /// Template for each row's content (excluding checkbox column).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment<TItem> RowContent { get; set; }
+
+    /// <summary>
+    /// Message to display when there are no items.
+    /// </summary>
+    [Parameter]
+    public string EmptyMessage { get; set; } = "No items to display";
+
+    /// <summary>
+    /// Callback invoked when selection changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<HashSet<string>> OnSelectionChanged { get; set; }
+
+    private bool IsAllSelected =>
+        Items.Any() && Items.All(item => SelectedKeys.Contains(GetItemKey(item)));
+
+    private bool IsSelected(TItem item) =>
+        SelectedKeys.Contains(GetItemKey(item));
+
+    private async Task HandleSelectAllChanged(ChangeEventArgs e)
+    {
+        bool isChecked = (bool)(e.Value ?? false);
+
+        if (isChecked)
+        {
+            // Select all
+            foreach (TItem item in Items)
+            {
+                SelectedKeys.Add(GetItemKey(item));
+            }
+        }
+        else
+        {
+            // Deselect all
+            SelectedKeys.Clear();
+        }
+
+        await OnSelectionChanged.InvokeAsync(SelectedKeys);
+    }
+
+    private async Task HandleRowSelectionChanged(TItem item, ChangeEventArgs e)
+    {
+        bool isChecked = (bool)(e.Value ?? false);
+        string key = GetItemKey(item);
+
+        if (isChecked)
+        {
+            SelectedKeys.Add(key);
+        }
+        else
+        {
+            SelectedKeys.Remove(key);
+        }
+
+        await OnSelectionChanged.InvokeAsync(SelectedKeys);
+    }
+}

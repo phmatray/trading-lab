@@ -5,6 +5,8 @@ using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Domain.Services;
 using TradingStrat.Infrastructure.Assistant;
+using TradingStrat.Infrastructure.BackgroundServices;
+using TradingStrat.Infrastructure.Configuration;
 using TradingStrat.Infrastructure.Export;
 using TradingStrat.Infrastructure.MachineLearning;
 using TradingStrat.Infrastructure.MarketData;
@@ -41,7 +43,8 @@ public static class InfrastructureServiceRegistration
 
         // Keep default IMarketDataPort for backward compatibility (uses Yahoo Finance)
         services.AddScoped<IMarketDataPort>(sp => sp.GetRequiredService<YahooFinanceAdapter>());
-        services.AddScoped<IExportPort, ExportAdapter>();
+        services.AddScoped<ICoverageReportExporter, CoverageReportCsvAdapter>();
+        services.AddScoped<IHistoricalDataExporter, HistoricalDataExportAdapter>();
         services.AddSingleton<IMLModelPort, MlNetModelAdapter>();
         services.AddScoped<IMLPredictionService, MLPredictionService>();
         services.AddScoped<IAssistantPort, AnthropicAdapter>();
@@ -51,6 +54,11 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<ICustomStrategyPort, CustomStrategyRepository>();
         services.AddScoped<IBacktestArchivePort, BacktestArchiveRepository>();
         services.AddScoped<IActivityEventPort, ActivityEventRepository>();
+
+        // Data Refresh Background Service
+        services.Configure<DataRefreshConfiguration>(
+            configuration.GetSection("Trading:DataRefresh"));
+        services.AddHostedService<DataRefreshBackgroundService>();
 
         return services;
     }

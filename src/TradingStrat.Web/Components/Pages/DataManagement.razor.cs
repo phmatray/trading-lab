@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
 using TradingStrat.Web.Services.State;
@@ -12,24 +13,52 @@ namespace TradingStrat.Web.Components.Pages;
 public partial class DataManagement : ComponentBase, IDisposable
 {
     [Inject] private IDataFetchingUseCase DataFetchingUseCase { get; set; } = null!;
+    [Inject] private IBulkDataFetchingUseCase BulkDataFetchingUseCase { get; set; } = null!;
     [Inject] private ProgressService ProgressService { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private FormStateService FormState { get; set; } = null!;
     [Inject] private IDataFreshnessService DataFreshnessService { get; set; } = null!;
+    [Inject] private AppStateService AppState { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
     private const string FORM_KEY = "data-fetch-form";
+    private const string BULK_FORM_KEY = "bulk-fetch-form";
+    private const string TIMEFRAME_KEY = "data-management-timeframe";
 
+    private enum TabType { SingleTicker, BulkFetch }
+
+    private TabType _activeTab = TabType.SingleTicker;
+    private TimeFrame _selectedTimeFrame = new() { Unit = TimeFrameUnit.D1 };
+    private bool _showCsvDialog = false;
+
+    // Single ticker state
     private DataFetchFormModel _formModel = new();
     private DataSummaryResult? _result;
     private string? _errorMessage;
     private string? _successMessage;
 
+    // Bulk fetch state
+    private BulkFetchFormModel _bulkFormModel = new();
+    private BulkFetchResult? _bulkResult;
+    private string? _bulkErrorMessage;
+    private string? _bulkSuccessMessage;
+    private bool _isBulkFetching = false;
+    private List<string> _recentTickers = new();
+
+    private int ParsedTickerCount => ParseTickerList(_bulkFormModel.TickerList ?? "").Count;
+
     protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
 
-        // Try to restore saved form state
+        // Restore selected timeframe from localStorage
+        string? savedTimeFrame = await FormState.GetFormStateAsync<string>(TIMEFRAME_KEY);
+        if (savedTimeFrame != null && Enum.TryParse<TimeFrameUnit>(savedTimeFrame, out TimeFrameUnit unit))
+        {
+            _selectedTimeFrame = new TimeFrame { Unit = unit };
+        }
+
+        // Restore single ticker form state
         DataFetchFormModel? savedForm = await FormState.GetFormStateAsync<DataFetchFormModel>(FORM_KEY);
         if (savedForm != null)
         {
@@ -37,16 +66,40 @@ public partial class DataManagement : ComponentBase, IDisposable
         }
         else
         {
-            // Initialize from user preferences
             Models.State.UserPreferences prefs = await PreferencesService.GetPreferencesAsync();
             _formModel = DataFetchFormModel.FromPreferences(prefs, Configuration.Value);
         }
+
+        // Restore bulk fetch form state
+        BulkFetchFormModel? savedBulkForm = await FormState.GetFormStateAsync<BulkFetchFormModel>(BULK_FORM_KEY);
+        if (savedBulkForm != null)
+        {
+            _bulkFormModel = savedBulkForm;
+        }
+
+        // Load recent tickers from app state
+        _recentTickers = await AppState.GetRecentTickersAsync();
 
         // Check data freshness for default ticker
         string ticker = _formModel.Ticker ?? "AAPL";
         await DataFreshnessService.CheckAndNotifyAsync(ticker);
     }
 
+    private async Task HandleTimeFrameChanged(TimeFrame timeFrame)
+    {
+        _selectedTimeFrame = timeFrame;
+        await FormState.SaveFormStateAsync(TIMEFRAME_KEY, timeFrame.Unit.ToString());
+    }
+
+    private string GetTabClasses(TabType tab)
+    {
+        bool isActive = _activeTab == tab;
+        return isActive
+            ? "flex items-center border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600 dark:text-blue-400"
+            : "flex items-center border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300";
+    }
+
+    // Single ticker methods
     private async Task OnFormFieldChanged()
     {
         await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
@@ -60,14 +113,14 @@ public partial class DataManagement : ComponentBase, IDisposable
 
         await InvokeAsync(() => ProgressService.Reset());
 
-        var progress = new Progress<string>(message =>
+        Progress<string> progress = new(message =>
         {
             InvokeAsync(() => ProgressService.UpdateProgress(message));
         });
 
         try
         {
-            var command = new FetchDataCommand(
+            FetchDataCommand command = new(
                 _formModel.Ticker,
                 _formModel.ISIN,
                 _formModel.StartDate,
@@ -76,6 +129,13 @@ public partial class DataManagement : ComponentBase, IDisposable
 
             _result = await DataFetchingUseCase.ExecuteAsync(command, progress);
             _successMessage = $"Successfully fetched {_result.NewRecords} new records for {_result.Ticker}";
+
+            // Add to recent tickers
+            if (!string.IsNullOrEmpty(_result.Ticker))
+            {
+                await AppState.AddRecentTickerAsync(_result.Ticker);
+                _recentTickers = await AppState.GetRecentTickersAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -87,8 +147,120 @@ public partial class DataManagement : ComponentBase, IDisposable
         }
     }
 
+    // Bulk fetch methods
+    private async Task HandleBulkFetchData()
+    {
+        _bulkErrorMessage = null;
+        _bulkSuccessMessage = null;
+        _bulkResult = null;
+        _isBulkFetching = true;
+
+        await InvokeAsync(() => ProgressService.Reset());
+
+        Progress<BulkFetchProgress> progress = new(p =>
+        {
+            string message = $"Processing {p.CompletedTickers + 1}/{p.TotalTickers}: {p.CurrentTicker} ({p.ProgressPercentage:F0}%)";
+            InvokeAsync(() => ProgressService.UpdateProgress(message, p.ProgressPercentage));
+        });
+
+        try
+        {
+            List<string> tickers = ParseTickerList(_bulkFormModel.TickerList ?? "");
+
+            if (tickers.Count == 0)
+            {
+                _bulkErrorMessage = "Please enter at least one ticker symbol.";
+                return;
+            }
+
+            BulkFetchDataCommand command = new(
+                Tickers: tickers,
+                TimeFrame: _selectedTimeFrame,
+                StartDate: _bulkFormModel.StartDate,
+                EndDate: _bulkFormModel.EndDate,
+                SkipExisting: _bulkFormModel.SkipExisting
+            );
+
+            _bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command, progress);
+
+            _bulkSuccessMessage = $"Completed: {_bulkResult.SuccessfulTickers} successful, " +
+                                  $"{_bulkResult.FailedTickers} failed, " +
+                                  $"{_bulkResult.SkippedTickers} skipped";
+
+            // Add successful tickers to recent list
+            foreach (string ticker in _bulkResult.SuccessfulResults.Keys)
+            {
+                await AppState.AddRecentTickerAsync(ticker);
+            }
+            _recentTickers = await AppState.GetRecentTickersAsync();
+
+            // Save form state
+            await FormState.SaveFormStateAsync(BULK_FORM_KEY, _bulkFormModel);
+        }
+        catch (Exception ex)
+        {
+            _bulkErrorMessage = $"Error during bulk fetch: {ex.Message}";
+        }
+        finally
+        {
+            _isBulkFetching = false;
+            await InvokeAsync(() => ProgressService.Reset());
+        }
+    }
+
+    private List<string> ParseTickerList(string tickerList)
+    {
+        if (string.IsNullOrWhiteSpace(tickerList))
+        {
+            return new List<string>();
+        }
+
+        // Split by newlines and commas
+        string[] parts = tickerList.Split(new[] { '\r', '\n', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+        // Clean up and deduplicate
+        HashSet<string> uniqueTickers = new(StringComparer.OrdinalIgnoreCase);
+        foreach (string part in parts)
+        {
+            string ticker = part.Trim().ToUpperInvariant();
+            if (!string.IsNullOrEmpty(ticker))
+            {
+                uniqueTickers.Add(ticker);
+            }
+        }
+
+        return uniqueTickers.OrderBy(t => t).ToList();
+    }
+
+    private void AddTickerToList(string ticker)
+    {
+        List<string> currentTickers = ParseTickerList(_bulkFormModel.TickerList ?? "");
+        if (!currentTickers.Contains(ticker, StringComparer.OrdinalIgnoreCase))
+        {
+            string newList = string.IsNullOrEmpty(_bulkFormModel.TickerList)
+                ? ticker
+                : _bulkFormModel.TickerList + "\n" + ticker;
+            _bulkFormModel.TickerList = newList;
+        }
+    }
+
+    private async Task HandleCsvImported(List<string> tickers)
+    {
+        _bulkFormModel.TickerList = string.Join("\n", tickers);
+        await FormState.SaveFormStateAsync(BULK_FORM_KEY, _bulkFormModel);
+    }
+
     public void Dispose()
     {
         ProgressService.OnProgressChanged -= StateHasChanged;
     }
+}
+
+// Form models
+public class BulkFetchFormModel
+{
+    public string? TickerList { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public bool SkipExisting { get; set; } = false;
 }

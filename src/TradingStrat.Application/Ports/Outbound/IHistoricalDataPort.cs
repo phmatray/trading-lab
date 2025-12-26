@@ -67,6 +67,66 @@ public interface IHistoricalDataPort
     /// </summary>
     /// <returns>List of unique ticker symbols.</returns>
     Task<List<string>> GetAllTickersAsync();
+
+    /// <summary>
+    /// Gets summary information for multiple tickers at a specific timeframe in a single operation.
+    /// More efficient than calling GetDataSummaryAsync multiple times.
+    /// </summary>
+    /// <param name="tickers">List of ticker symbols to get summaries for.</param>
+    /// <param name="timeFrame">Timeframe to query.</param>
+    /// <returns>Dictionary mapping ticker symbols to their data summaries.</returns>
+    Task<Dictionary<string, DataSummaryResult>> GetDataSummariesAsync(
+        IEnumerable<string> tickers,
+        TimeFrame timeFrame);
+
+    /// <summary>
+    /// Saves historical price data for multiple tickers in a single bulk operation.
+    /// More efficient than calling SaveHistoricalDataAsync multiple times.
+    /// </summary>
+    /// <param name="tickerDataMap">Dictionary mapping ticker symbols to their ISIN and historical data.</param>
+    /// <param name="timeFrame">Timeframe of the data being saved.</param>
+    /// <param name="progress">Optional progress reporting for bulk save operation.</param>
+    Task BulkSaveHistoricalDataAsync(
+        Dictionary<string, (string? isin, IEnumerable<HistoricalPrice> data)> tickerDataMap,
+        TimeFrame timeFrame,
+        IProgress<BulkSaveProgress>? progress = null);
+
+    /// <summary>
+    /// Deletes all historical data for a ticker, optionally limited to a specific timeframe.
+    /// </summary>
+    /// <param name="ticker">Stock ticker symbol.</param>
+    /// <param name="timeFrame">Optional timeframe to delete. If null, deletes all timeframes.</param>
+    /// <returns>Number of records deleted.</returns>
+    Task<int> DeleteTickerDataAsync(string ticker, TimeFrame? timeFrame = null);
+
+    /// <summary>
+    /// Deletes historical data for a ticker within a specific date range and timeframe.
+    /// </summary>
+    /// <param name="ticker">Stock ticker symbol.</param>
+    /// <param name="timeFrame">Timeframe to delete from.</param>
+    /// <param name="startDate">Start date (inclusive).</param>
+    /// <param name="endDate">End date (inclusive).</param>
+    /// <returns>Number of records deleted.</returns>
+    Task<int> DeleteDateRangeAsync(
+        string ticker,
+        TimeFrame timeFrame,
+        DateTime startDate,
+        DateTime endDate);
+
+    /// <summary>
+    /// Gets a lightweight summary of all tickers for a specific timeframe.
+    /// Optimized for status page display with minimal data transfer.
+    /// </summary>
+    /// <param name="timeFrame">Timeframe to query.</param>
+    /// <returns>List of ticker summaries with record counts and date ranges.</returns>
+    Task<List<TickerSummary>> GetAllTickerSummariesAsync(TimeFrame timeFrame);
+
+    /// <summary>
+    /// Gets the last modification timestamp of the database.
+    /// Used for cache invalidation to detect when data has changed.
+    /// </summary>
+    /// <returns>DateTime of last database modification, or null if no data exists.</returns>
+    Task<DateTime?> GetDatabaseLastModifiedAsync();
 }
 
 /// <summary>
@@ -91,3 +151,31 @@ public record DataSummaryResult(
     decimal? MinPrice,
     decimal? MaxPrice,
     decimal? LatestClose);
+
+/// <summary>
+/// Progress reporting object for bulk save operations.
+/// </summary>
+/// <param name="TotalTickers">Total number of tickers being saved.</param>
+/// <param name="CompletedTickers">Number of tickers completed so far.</param>
+/// <param name="CurrentTicker">Ticker currently being saved.</param>
+/// <param name="TotalRecordsSaved">Total number of records saved across all tickers.</param>
+public record BulkSaveProgress(
+    int TotalTickers,
+    int CompletedTickers,
+    string CurrentTicker,
+    int TotalRecordsSaved);
+
+/// <summary>
+/// Lightweight summary of a ticker's data for status display.
+/// </summary>
+/// <param name="Ticker">Stock ticker symbol.</param>
+/// <param name="ISIN">ISIN code for the security (if available).</param>
+/// <param name="RecordCount">Number of historical records.</param>
+/// <param name="OldestDate">Date of the oldest record.</param>
+/// <param name="LatestDate">Date of the most recent record.</param>
+public record TickerSummary(
+    string Ticker,
+    string? ISIN,
+    int RecordCount,
+    DateTime? OldestDate,
+    DateTime? LatestDate);

@@ -1,4 +1,5 @@
 @page "/data/status"
+@using TradingStrat.Application.Ports.Inbound
 @using TradingStrat.Web.Components.Base
 @inherits BaseComponent
 @rendermode InteractiveServer
@@ -10,31 +11,57 @@
     <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
 
     <!-- Page Header -->
-    <PageHeader Title="Data Status"
-                Description="Overview of historical data coverage and quality">
-        <Actions>
+    <div class="flex items-center justify-between">
+        <PageHeader Title="Data Status"
+                    Description="Overview of historical data coverage and quality" />
+
+        <div class="flex items-center gap-3">
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@ExportCoverageReport"
+                    Text="Export Report"
+                    IconName="arrow-down-tray" />
+
             <Button Variant="@ButtonVariant.Secondary"
                     OnClick="@LoadDataStatusAsync"
                     IsLoading="@_isLoading"
                     Text="Refresh"
-                    LoadingText="Refreshing...">
-                <LeadingIcon>
-                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </Icon>
-                </LeadingIcon>
-            </Button>
+                    LoadingText="Refreshing..."
+                    IconName="arrow-path" />
+
             <Button Variant="@ButtonVariant.Primary"
                     OnClick="@NavigateToDataManagement"
-                    Text="Fetch Data">
-                <LeadingIcon>
-                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </Icon>
-                </LeadingIcon>
-            </Button>
-        </Actions>
-    </PageHeader>
+                    Text="Fetch Data"
+                    IconName="plus" />
+        </div>
+    </div>
+
+    <!-- Timeframe Selector -->
+    <div class="card">
+        <TimeFrameSelector
+            Label="Timeframe:"
+            SelectedTimeFrame="@_query.TimeFrame"
+            OnTimeFrameChanged="@HandleTimeFrameChanged" />
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="space-y-4">
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <SearchInput
+                    Value="@_query.SearchTicker"
+                    ValueChanged="@HandleSearchChanged"
+                    Placeholder="Search by ticker symbol..."
+                    DebounceMs="300" />
+            </div>
+        </div>
+
+        <FilterPanel
+            StatusFilter="@_query.StatusFilter"
+            MinCoverage="@_query.MinCoverage"
+            MaxCoverage="@_query.MaxCoverage"
+            OnFilterChanged="@HandleFilterChanged"
+            OnReset="@HandleFilterReset" />
+    </div>
 
     @if (_isLoading)
     {
@@ -53,7 +80,7 @@
     }
     else if (_dataStatus != null)
     {
-        <!-- Summary Stats -->
+        <!-- Summary Stats (Filtered) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="card">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Total Tickers</p>
@@ -71,24 +98,149 @@
 
         @if (_dataStatus.TickerStatuses.Any())
         {
-            <!-- Data Coverage Table -->
+            <!-- Enhanced Data Table -->
             <div class="card">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-                    Ticker Coverage Details
-                </h2>
-                <DataCoverageTable TickerStatuses="@_dataStatus.TickerStatuses" />
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                        Ticker Coverage Details
+                    </h2>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Showing @_dataStatus.TickerStatuses.Count of @_dataStatus.TotalTickers tickers
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 w-12">
+                                    <input
+                                        type="checkbox"
+                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                        checked="@_isAllSelected"
+                                        @onchange="HandleSelectAll"
+                                        aria-label="Select all" />
+                                </th>
+
+                                <SortableColumnHeader
+                                    Label="Ticker"
+                                    Column="SortColumn.Ticker"
+                                    CurrentSortColumn="@_query.SortBy"
+                                    CurrentSortDirection="@_query.SortDirection"
+                                    OnSort="@HandleSort" />
+
+                                <SortableColumnHeader
+                                    Label="Records"
+                                    Column="SortColumn.RecordCount"
+                                    CurrentSortColumn="@_query.SortBy"
+                                    CurrentSortDirection="@_query.SortDirection"
+                                    OnSort="@HandleSort" />
+
+                                <SortableColumnHeader
+                                    Label="Coverage %"
+                                    Column="SortColumn.Coverage"
+                                    CurrentSortColumn="@_query.SortBy"
+                                    CurrentSortDirection="@_query.SortDirection"
+                                    OnSort="@HandleSort" />
+
+                                <SortableColumnHeader
+                                    Label="Oldest Date"
+                                    Column="SortColumn.OldestDate"
+                                    CurrentSortColumn="@_query.SortBy"
+                                    CurrentSortDirection="@_query.SortDirection"
+                                    OnSort="@HandleSort" />
+
+                                <SortableColumnHeader
+                                    Label="Latest Date"
+                                    Column="SortColumn.LatestDate"
+                                    CurrentSortColumn="@_query.SortBy"
+                                    CurrentSortDirection="@_query.SortDirection"
+                                    OnSort="@HandleSort" />
+
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                            @foreach (TickerDataStatus status in _dataStatus.TickerStatuses)
+                            {
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 @(IsSelected(status.Ticker) ? "bg-blue-50 dark:bg-blue-900/20" : "")">
+                                    <td class="px-6 py-4 w-12">
+                                        <input
+                                            type="checkbox"
+                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                            checked="@IsSelected(status.Ticker)"
+                                            @onchange="@(e => HandleRowSelectionChanged(status.Ticker, e))"
+                                            aria-label="@($"Select {status.Ticker}")" />
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                        @status.Ticker
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        @status.RecordCount.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="@GetCoverageColorClass(status.CoveragePercentage)">
+                                            @status.CoveragePercentage.ToString("F1")%
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        @status.OldestDate?.ToString("yyyy-MM-dd")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        @status.LatestDate?.ToString("yyyy-MM-dd")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="@GetStatusBadgeClass(status.CoveragePercentage)">
+                                            @GetStatusText(status.CoveragePercentage)
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                @onclick="@(() => RefreshTicker(status.Ticker))"
+                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                                title="Refresh">
+                                                <Icon Name="arrow-path" Size="IconSize.Small" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @onclick="@(() => DeleteTicker(status.Ticker))"
+                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                title="Delete">
+                                                <Icon Name="trash" Size="IconSize.Small" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <PaginationControls
+                    TotalPages="@_dataStatus.TotalPages"
+                    CurrentPage="@_dataStatus.CurrentPage"
+                    PageSize="@_dataStatus.PageSize"
+                    OnPageChanged="@HandlePageChanged"
+                    OnPageSizeChanged="@HandlePageSizeChanged" />
             </div>
         }
         else
         {
             <!-- Empty State -->
             <div class="card text-center py-12">
-                <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-dark-text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                </svg>
+                <Icon Name="inbox" Size="IconSize.Large" Class="mx-auto mb-4 text-gray-400" />
                 <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Data Available</h3>
                 <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
-                    You haven't fetched any historical data yet. Start by importing data for your favorite tickers.
+                    @(string.IsNullOrEmpty(_query.SearchTicker) ? "You haven't fetched any historical data yet." : "No tickers match your search criteria.")
                 </p>
                 <Button Variant="@ButtonVariant.Primary"
                         OnClick="@NavigateToDataManagement"
@@ -97,3 +249,14 @@
         }
     }
 </div>
+
+<!-- Bulk Action Bar -->
+<BulkActionBar
+    SelectedCount="@_selectedTickers.Count"
+    ShowRefreshAction="true"
+    ShowDeleteAction="true"
+    ShowExportAction="true"
+    OnRefreshSelected="@RefreshSelectedTickers"
+    OnDeleteSelected="@DeleteSelectedTickers"
+    OnExportSelected="@ExportSelectedTickers"
+    OnClearSelection="@ClearSelection" />

@@ -58,27 +58,6 @@ public class PageHeaderTests : BunitTestContext
     }
 
     [Fact]
-    public void PageHeader_WithBreadcrumbs_RendersBreadcrumbsNav()
-    {
-        // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
-            .Add(p => p.Title, "Portfolio Details")
-            .Add(p => p.Breadcrumbs, builder =>
-            {
-                builder.OpenElement(0, "ol");
-                builder.OpenElement(1, "li");
-                builder.AddContent(2, "Home > Portfolios");
-                builder.CloseElement();
-                builder.CloseElement();
-            }));
-
-        // Assert
-        var nav = cut.Find("nav[aria-label='Breadcrumb']");
-        nav.ShouldNotBeNull();
-        nav.TextContent.ShouldContain("Home > Portfolios");
-    }
-
-    [Fact]
     public void PageHeader_WithActions_RendersActionButtons()
     {
         // Arrange & Act
@@ -99,49 +78,19 @@ public class PageHeaderTests : BunitTestContext
     }
 
     [Fact]
-    public void PageHeader_WithOnBack_DisplaysBackButton()
-    {
-        // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
-            .Add(p => p.Title, "Strategy Details")
-            .Add(p => p.OnBack, () => { }));
-
-        // Assert
-        var backButton = cut.Find("button[aria-label='Go back']");
-        backButton.ShouldNotBeNull();
-
-        var svg = backButton.QuerySelector("svg");
-        svg.ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void PageHeader_BackButton_InvokesCallback()
-    {
-        // Arrange
-        bool backCalled = false;
-
-        // Act
-        var cut = Render<PageHeader>(parameters => parameters
-            .Add(p => p.Title, "Details")
-            .Add(p => p.OnBack, () => backCalled = true));
-
-        var backButton = cut.Find("button[aria-label='Go back']");
-        backButton.Click();
-
-        // Assert
-        backCalled.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void PageHeader_WithoutOnBack_DoesNotDisplayBackButton()
+    public void PageHeader_WithoutActions_DoesNotRenderActionsContainer()
     {
         // Arrange & Act
         var cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Dashboard"));
 
-        // Assert
-        var backButtons = cut.FindAll("button[aria-label='Go back']");
-        backButtons.ShouldBeEmpty();
+        // Assert - should only have the header div, not the actions div
+        var headerDiv = cut.Find("[data-testid='page-header']");
+        headerDiv.ShouldNotBeNull();
+
+        // Should not have action buttons container
+        var actionButtons = cut.FindAll("button");
+        actionButtons.ShouldBeEmpty();
     }
 
     [Fact]
@@ -154,7 +103,9 @@ public class PageHeaderTests : BunitTestContext
         // Assert
         var container = cut.Find("[data-testid='page-header']");
         container.ShouldNotBeNull();
-        container.ClassList.ShouldContain("card");
+        container.ClassList.ShouldContain("flex");
+        container.ClassList.ShouldContain("items-center");
+        container.ClassList.ShouldContain("justify-between");
     }
 
     [Fact]
@@ -164,11 +115,6 @@ public class PageHeaderTests : BunitTestContext
         var cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Portfolio Details")
             .Add(p => p.Description, "View and manage your portfolio")
-            .Add(p => p.OnBack, () => { })
-            .Add(p => p.Breadcrumbs, builder =>
-            {
-                builder.AddContent(0, "Home > Portfolios > Details");
-            })
             .Add(p => p.Actions, builder =>
             {
                 builder.OpenElement(0, "button");
@@ -179,8 +125,10 @@ public class PageHeaderTests : BunitTestContext
         // Assert
         cut.Find("h1").TextContent.ShouldBe("Portfolio Details");
         cut.Find("p").TextContent.ShouldBe("View and manage your portfolio");
-        cut.Find("nav").ShouldNotBeNull();
-        cut.Find("button[aria-label='Go back']").ShouldNotBeNull();
         cut.Markup.ShouldContain("Edit");
+
+        // Should have the main container
+        var header = cut.Find("[data-testid='page-header']");
+        header.ShouldNotBeNull();
     }
 }

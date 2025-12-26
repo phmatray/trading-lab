@@ -1,0 +1,116 @@
+@using System.Timers
+
+<div class="relative">
+    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <Icon Name="search" Size="IconSize.Small" Class="text-gray-400 dark:text-gray-500" />
+    </div>
+
+    <input
+        type="text"
+        class="block w-full pl-10 pr-10 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="@Placeholder"
+        value="@_currentValue"
+        @oninput="HandleInput"
+        aria-label="@(AriaLabel ?? Placeholder ?? "Search")"
+    />
+
+    @if (!string.IsNullOrEmpty(_currentValue))
+    {
+        <button
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            @onclick="ClearSearch"
+            aria-label="Clear search"
+        >
+            <Icon Name="x-mark" Size="IconSize.Small" />
+        </button>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The current search value.
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the value changes (after debounce).
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Placeholder text for the input.
+    /// </summary>
+    [Parameter]
+    public string? Placeholder { get; set; } = "Search...";
+
+    /// <summary>
+    /// Debounce delay in milliseconds. Default is 300ms.
+    /// </summary>
+    [Parameter]
+    public int DebounceMs { get; set; } = 300;
+
+    /// <summary>
+    /// ARIA label for accessibility.
+    /// </summary>
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    private string? _currentValue;
+    private Timer? _debounceTimer;
+
+    protected override void OnInitialized()
+    {
+        _currentValue = Value;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_currentValue != Value)
+        {
+            _currentValue = Value;
+        }
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        _currentValue = e.Value?.ToString();
+
+        // Reset the debounce timer
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+
+        _debounceTimer = new Timer(DebounceMs);
+        _debounceTimer.Elapsed += async (sender, args) =>
+        {
+            _debounceTimer?.Stop();
+            _debounceTimer?.Dispose();
+
+            await InvokeAsync(async () =>
+            {
+                await ValueChanged.InvokeAsync(_currentValue);
+            });
+        };
+        _debounceTimer.AutoReset = false;
+        _debounceTimer.Start();
+    }
+
+    private async Task ClearSearch()
+    {
+        _currentValue = string.Empty;
+
+        // Cancel any pending debounce
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+
+        await ValueChanged.InvokeAsync(_currentValue);
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+    }
+}
