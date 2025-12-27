@@ -246,18 +246,18 @@ public class BulkFetchHistoricalDataUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithEmptyTickerList_ThrowsArgumentException()
+    public void ExecuteAsync_WithEmptyTickerList_ThrowsArgumentException()
     {
         // Arrange
         TimeFrame timeFrame = new() { Unit = TimeFrameUnit.D1 };
         List<string> tickers = new();
-        BulkFetchDataCommand command = new(tickers, timeFrame);
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.ExecuteAsync(command));
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new BulkFetchDataCommand(tickers, timeFrame));
 
-        ex.Message.ShouldContain("Tickers list cannot be null or empty");
+        ex.Message.ShouldContain("Tickers list cannot be empty");
+        ex.ParamName.ShouldBe("Tickers");
     }
 
     [Fact]

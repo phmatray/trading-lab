@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Domain.Common;
 using TradingStrat.Web.Services;
 using TradingStrat.Web.Services.State;
 
@@ -7,6 +8,7 @@ namespace TradingStrat.Web.Components.Pages;
 /// <summary>
 /// Abstract base class for pages that perform data operations (fetch, backtest, analysis, etc.).
 /// Centralizes common patterns: progress reporting, form state persistence, error handling, and lifecycle management.
+/// Supports Result&lt;T&gt; pattern for consistent error handling.
 /// </summary>
 /// <typeparam name="TFormModel">The type of form model used by the page.</typeparam>
 /// <typeparam name="TResult">The type of result returned by the operation.</typeparam>
@@ -57,8 +59,8 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
     /// </summary>
     /// <param name="model">The form model with user input.</param>
     /// <param name="progress">Progress reporter for status updates.</param>
-    /// <returns>The result of the operation.</returns>
-    protected abstract Task<TResult> ExecuteOperationAsync(TFormModel model, IProgress<string> progress);
+    /// <returns>A Result containing the operation result, or errors if the operation failed.</returns>
+    protected abstract Task<Result<TResult>> ExecuteOperationAsync(TFormModel model, IProgress<string> progress);
 
     /// <summary>
     /// Initializes the component. Subscribes to progress updates and restores form state.
@@ -78,6 +80,7 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
     /// <summary>
     /// Handles form submission. Orchestrates progress reporting, operation execution,
     /// success/error handling, and cleanup.
+    /// Automatically handles Result&lt;T&gt; pattern for consistent error handling.
     /// </summary>
     protected async Task HandleSubmitAsync()
     {
@@ -94,19 +97,31 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
 
         try
         {
-            // Execute the operation
-            Result = await ExecuteOperationAsync(FormModel, progress);
+            // Execute the operation (returns Result<TResult>)
+            Result<TResult> result = await ExecuteOperationAsync(FormModel, progress);
 
-            // Display success message
-            SuccessMessage = GetSuccessMessage(Result);
+            if (result.IsSuccess)
+            {
+                // Extract the value from the successful result
+                Result = result.Value;
 
-            // Persist form state for next visit
-            await FormState.SaveFormStateAsync(FormKey, FormModel);
+                // Display success message
+                SuccessMessage = GetSuccessMessage(Result);
+
+                // Persist form state for next visit
+                await FormState.SaveFormStateAsync(FormKey, FormModel);
+            }
+            else
+            {
+                // Display structured error messages from Result<T>
+                ErrorMessage = FormatErrors(result.Errors);
+            }
         }
         catch (Exception ex)
         {
-            // Display error message
-            ErrorMessage = $"Error: {ex.Message}";
+            // This catch block now only handles unexpected system errors
+            // (business logic errors should be returned as Result<T>.Failure)
+            ErrorMessage = $"Unexpected error: {ex.Message}";
         }
         finally
         {
@@ -134,6 +149,28 @@ public abstract class BaseDataPage<TFormModel, TResult> : ComponentBase, IDispos
     protected virtual string GetSuccessMessage(TResult? result)
     {
         return "Operation completed successfully.";
+    }
+
+    /// <summary>
+    /// Formats a list of errors into a user-friendly error message.
+    /// Override to provide custom error formatting.
+    /// </summary>
+    /// <param name="errors">The list of errors from a failed Result.</param>
+    /// <returns>A formatted error message string.</returns>
+    protected virtual string FormatErrors(IReadOnlyList<Error> errors)
+    {
+        if (errors.Count == 0)
+        {
+            return "An unknown error occurred.";
+        }
+
+        if (errors.Count == 1)
+        {
+            return $"Error: {errors[0].Message}";
+        }
+
+        // Multiple errors - format as bullet list
+        return "Errors:\n" + string.Join("\n", errors.Select((e, i) => $"• {e.Message}"));
     }
 
     /// <summary>

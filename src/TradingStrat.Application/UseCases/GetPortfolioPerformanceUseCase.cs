@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
@@ -59,7 +60,14 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
         {
             progress?.Report("Portfolio has no positions");
 
-            var currentSnapshot = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+            Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+
+            if (snapshotResult.IsFailure)
+            {
+                throw new InvalidOperationException($"Failed to get portfolio snapshot: {string.Join(", ", snapshotResult.Errors.Select(e => e.Message))}");
+            }
+
+            PortfolioSnapshot currentSnapshot = snapshotResult.Value;
             var emptyMetrics = _performanceService.CalculateMetrics(currentSnapshot);
 
             return new PortfolioPerformanceHistory(
@@ -176,7 +184,14 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
         progress?.Report("Calculating performance metrics...");
 
         // Get current snapshot for metrics
-        var currentSnapshotForMetrics = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+        Result<PortfolioSnapshot> metricsSnapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+
+        if (metricsSnapshotResult.IsFailure)
+        {
+            throw new InvalidOperationException($"Failed to get portfolio snapshot for metrics: {string.Join(", ", metricsSnapshotResult.Errors.Select(e => e.Message))}");
+        }
+
+        PortfolioSnapshot currentSnapshotForMetrics = metricsSnapshotResult.Value;
 
         // Calculate metrics with historical data
         var metrics = _performanceService.CalculateMetrics(

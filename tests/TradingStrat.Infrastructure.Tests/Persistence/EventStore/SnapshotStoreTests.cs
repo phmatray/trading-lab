@@ -43,20 +43,20 @@ public class SnapshotStoreTests : IDisposable
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        portfolio.AddPosition(position);
 
         // Manually set version for testing
         typeof(Portfolio).GetProperty("Version")!.SetValue(portfolio, 5);
@@ -127,20 +127,21 @@ public class SnapshotStoreTests : IDisposable
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        originalPortfolio.AddPosition(position);
+
         typeof(Portfolio).GetProperty("Version")!.SetValue(originalPortfolio, 5);
         await _snapshotStore.SaveSnapshotAsync(originalPortfolio);
 

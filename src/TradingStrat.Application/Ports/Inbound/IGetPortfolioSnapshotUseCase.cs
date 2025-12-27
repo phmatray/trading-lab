@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -12,8 +13,8 @@ public interface IGetPortfolioSnapshotUseCase
     /// </summary>
     /// <param name="portfolioId">The portfolio ID.</param>
     /// <param name="progress">Optional progress reporter for price fetching.</param>
-    /// <returns>The portfolio snapshot.</returns>
-    Task<PortfolioSnapshot> ExecuteAsync(
+    /// <returns>Result containing the portfolio snapshot, or errors if operation failed.</returns>
+    Task<Result<PortfolioSnapshot>> ExecuteAsync(
         int portfolioId,
         IProgress<string>? progress = null);
 }

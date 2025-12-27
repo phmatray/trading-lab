@@ -18,16 +18,7 @@ public class CreatePortfolioUseCase : ICreatePortfolioUseCase
     /// <inheritdoc />
     public async Task<CreatePortfolioResult> ExecuteAsync(CreatePortfolioCommand command)
     {
-        // Validate input
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            throw new ArgumentException("Portfolio name is required", nameof(command));
-        }
-
-        if (command.InitialCash < 0)
-        {
-            throw new ArgumentException("Initial cash cannot be negative", nameof(command));
-        }
+        // Command validation happens in constructor - command is guaranteed to be valid here
 
         // Create portfolio via repository
         var portfolio = await _portfolioPort.CreatePortfolioAsync(

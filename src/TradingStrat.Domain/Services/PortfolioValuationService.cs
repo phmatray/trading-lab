@@ -50,10 +50,11 @@ public class PortfolioValuationService
                     Error.InsufficientData($"No current price available for {position.Ticker}"));
             }
 
-            decimal marketValue = position.Quantity * currentPrice;
-            decimal costBasis = position.Quantity * position.EntryPrice;
-            decimal gainLoss = marketValue - costBasis;
-            decimal gainLossPercent = costBasis > 0 ? (gainLoss / costBasis) * 100 : 0;
+            // Use enriched Position entity's domain behaviors
+            decimal marketValue = position.CalculateMarketValue(currentPrice);
+            decimal costBasis = position.CalculateCostBasis();
+            decimal gainLoss = position.CalculateUnrealizedGainLoss(currentPrice);
+            decimal gainLossPercent = position.CalculateGainLossPercentage(currentPrice);
 
             positionSnapshots.Add(new PositionSnapshot(
                 position.Ticker,
@@ -119,7 +120,8 @@ public class PortfolioValuationService
         {
             if (currentPrices.TryGetValue(position.Ticker, out decimal currentPrice))
             {
-                totalValue += position.Quantity * currentPrice;
+                // Use enriched Position entity's domain behavior
+                totalValue += position.CalculateMarketValue(currentPrice);
             }
         }
 

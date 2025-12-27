@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -24,18 +25,65 @@ public interface IBulkDataFetchingUseCase
 
 /// <summary>
 /// Command for bulk data fetching operation.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="Tickers">List of ticker symbols to fetch data for.</param>
-/// <param name="TimeFrame">Timeframe for historical data (M1, M5, H1, D1, W1, MN1).</param>
-/// <param name="StartDate">Optional start date. If null, uses incremental update from latest data.</param>
-/// <param name="EndDate">Optional end date. If null, uses today.</param>
-/// <param name="SkipExisting">If true, skips tickers that already have up-to-date data.</param>
-public record BulkFetchDataCommand(
-    List<string> Tickers,
-    TimeFrame TimeFrame,
-    DateTime? StartDate = null,
-    DateTime? EndDate = null,
-    bool SkipExisting = false);
+public record BulkFetchDataCommand
+{
+    public List<string> Tickers { get; init; }
+    public TimeFrame TimeFrame { get; init; }
+    public DateTime? StartDate { get; init; }
+    public DateTime? EndDate { get; init; }
+    public bool SkipExisting { get; init; }
+
+    public BulkFetchDataCommand(
+        List<string> Tickers,
+        TimeFrame TimeFrame,
+        DateTime? StartDate = null,
+        DateTime? EndDate = null,
+        bool SkipExisting = false)
+    {
+        // Validate parameters
+        ValidationGuard.Require(Tickers).NotNull();
+        ValidationGuard.Require(Tickers.Count > 0, "Tickers list cannot be empty", nameof(Tickers));
+
+        // Validate each ticker is not empty
+        foreach (string ticker in Tickers)
+        {
+            ValidationGuard.Require(ticker).NotNullOrWhiteSpace();
+        }
+
+        // Validate date range if both are provided
+        if (StartDate.HasValue && EndDate.HasValue)
+        {
+            ValidationGuard.Require(StartDate.Value <= EndDate.Value,
+                "Start date must be before or equal to end date",
+                nameof(StartDate));
+        }
+
+        // Validate end date is not in the future
+        if (EndDate.HasValue)
+        {
+            ValidationGuard.Require(EndDate.Value <= DateTime.Today,
+                "End date cannot be in the future",
+                nameof(EndDate));
+        }
+
+        // Validate start date is not in the future
+        if (StartDate.HasValue)
+        {
+            ValidationGuard.Require(StartDate.Value <= DateTime.Today,
+                "Start date cannot be in the future",
+                nameof(StartDate));
+        }
+
+        // Assign validated values (normalize tickers)
+        this.Tickers = Tickers.Select(t => t.ToUpperInvariant().Trim()).ToList();
+        this.TimeFrame = TimeFrame;
+        this.StartDate = StartDate;
+        this.EndDate = EndDate;
+        this.SkipExisting = SkipExisting;
+    }
+}
 
 /// <summary>
 /// Result of bulk data fetching operation.

@@ -102,8 +102,7 @@ public partial class BacktestArchive : BaseComponent
 
     private void ViewBacktestDetails(int backtestId)
     {
-        // TODO: Navigate to backtest details page when implemented
-        // For now, we could reload the backtest in the backtest page
+        // Navigate to backtest page with run ID to reload the backtest
         Navigation.NavigateTo($"/backtest?runId={backtestId}");
     }
 

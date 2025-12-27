@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
@@ -39,7 +40,7 @@ public partial class LiveAnalysis
         return AnalysisFormModel.FromPreferences(prefs, Configuration.Value);
     }
 
-    protected override async Task<LiveAnalysisResult> ExecuteOperationAsync(
+    protected override async Task<Result<LiveAnalysisResult>> ExecuteOperationAsync(
         AnalysisFormModel model,
         IProgress<string> progress)
     {
@@ -88,7 +89,7 @@ public partial class LiveAnalysis
             );
         }
 
-        return result;
+        return Result<LiveAnalysisResult>.Success(result);
     }
 
     protected override string GetSuccessMessage(LiveAnalysisResult? result)

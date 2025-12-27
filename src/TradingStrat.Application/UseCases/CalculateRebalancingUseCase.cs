@@ -1,5 +1,7 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
@@ -13,15 +15,18 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
 {
     private readonly IGetPortfolioSnapshotUseCase _snapshotUseCase;
     private readonly IMarketDataPort _marketDataPort;
+    private readonly MarketPriceService _priceService;
     private readonly PortfolioRebalancingService _rebalancingService;
 
     public CalculateRebalancingUseCase(
         IGetPortfolioSnapshotUseCase snapshotUseCase,
         IMarketDataPort marketDataPort,
+        MarketPriceService priceService,
         PortfolioRebalancingService rebalancingService)
     {
         _snapshotUseCase = snapshotUseCase ?? throw new ArgumentNullException(nameof(snapshotUseCase));
         _marketDataPort = marketDataPort ?? throw new ArgumentNullException(nameof(marketDataPort));
+        _priceService = priceService ?? throw new ArgumentNullException(nameof(priceService));
         _rebalancingService = rebalancingService ?? throw new ArgumentNullException(nameof(rebalancingService));
     }
 
@@ -39,14 +44,21 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
         progress?.Report("Getting current portfolio snapshot...");
 
         // Get current portfolio snapshot (with current prices for existing positions)
-        var snapshot = await _snapshotUseCase.ExecuteAsync(
+        Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(
             command.PortfolioId,
             progress);
+
+        if (snapshotResult.IsFailure)
+        {
+            throw new InvalidOperationException($"Failed to get portfolio snapshot: {string.Join(", ", snapshotResult.Errors.Select(e => e.Message))}");
+        }
+
+        PortfolioSnapshot snapshot = snapshotResult.Value;
 
         progress?.Report("Fetching prices for target positions...");
 
         // Build complete price dictionary (existing positions + new target tickers)
-        var currentPrices = snapshot.Positions.ToDictionary(
+        Dictionary<string, decimal> currentPrices = snapshot.Positions.ToDictionary(
             p => p.Ticker,
             p => p.CurrentPrice);
 
@@ -54,44 +66,24 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
         var targetTickers = command.TargetWeights.TargetPercentages.Keys.ToList();
         var newTickers = targetTickers.Except(currentPrices.Keys).ToList();
 
-        foreach (string ticker in newTickers)
+        if (newTickers.Any())
         {
-            progress?.Report($"Fetching price for {ticker}...");
+            // Fetch prices for new tickers using the centralized service
+            var priceResult = await _priceService.GetCurrentPricesAsync(
+                newTickers,
+                _marketDataPort,
+                progress);
 
-            try
+            if (priceResult.IsFailure)
             {
-                var historicalData = await _marketDataPort.FetchHistoricalDataAsync(
-                    ticker,
-                    Domain.ValueObjects.TimeFrame.D1,
-                    DateTime.Today.AddDays(-7),
-                    DateTime.Today);
-
-                if (historicalData.Any())
-                {
-                    var latestPrice = historicalData
-                        .OrderByDescending(p => p.DateTime)
-                        .First();
-
-                    if (latestPrice.Close.HasValue)
-                    {
-                        currentPrices[ticker] = latestPrice.Close.Value;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"No closing price available for {ticker}");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Unable to fetch price data for {ticker}");
-                }
+                string errorMessages = string.Join(", ", priceResult.Errors.Select(e => e.Message));
+                throw new InvalidOperationException($"Failed to fetch prices for target tickers: {errorMessages}");
             }
-            catch (Exception ex)
+
+            // Merge new prices into the current prices dictionary
+            foreach ((string ticker, decimal price) in priceResult.Value)
             {
-                throw new InvalidOperationException(
-                    $"Failed to fetch price for {ticker}: {ex.Message}", ex);
+                currentPrices[ticker] = price;
             }
         }
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
@@ -15,16 +16,19 @@ public class StrategyFactory : IStrategyFactory
     private readonly IStrategyRegistry _registry;
     private readonly ICustomStrategyPort? _customStrategyPort;
     private readonly IMLPredictionService _mlPredictionService;
+    private readonly StrategyParameterDefaults _parameterDefaults;
 
     public StrategyFactory(
         IIndicatorCalculator indicatorCalculator,
         IStrategyRegistry registry,
         IMLPredictionService mlPredictionService,
+        StrategyParameterDefaults parameterDefaults,
         ICustomStrategyPort? customStrategyPort = null)
     {
         _indicatorCalculator = indicatorCalculator;
         _registry = registry;
         _mlPredictionService = mlPredictionService;
+        _parameterDefaults = parameterDefaults;
         _customStrategyPort = customStrategyPort;
     }
 
@@ -59,34 +63,44 @@ public class StrategyFactory : IStrategyFactory
 
     private MovingAverageCrossoverStrategy CreateMovingAverageCrossoverStrategy(Dictionary<string, object> parameters)
     {
-        int fastPeriod = GetParameter(parameters, "FastPeriod", 20);
-        int slowPeriod = GetParameter(parameters, "SlowPeriod", 50);
+        int fastPeriod = GetParameterWithDefault<int>(
+            parameters, "FastPeriod", StrategyType.MovingAverageCrossover);
+        int slowPeriod = GetParameterWithDefault<int>(
+            parameters, "SlowPeriod", StrategyType.MovingAverageCrossover);
 
         return new MovingAverageCrossoverStrategy(_indicatorCalculator, fastPeriod, slowPeriod);
     }
 
     private RSIStrategy CreateRSIStrategy(Dictionary<string, object> parameters)
     {
-        int period = GetParameter(parameters, "Period", 14);
-        decimal oversoldThreshold = GetParameter<decimal>(parameters, "OversoldThreshold", 30);
-        decimal overboughtThreshold = GetParameter<decimal>(parameters, "OverboughtThreshold", 70);
+        int period = GetParameterWithDefault<int>(
+            parameters, "Period", StrategyType.RSI);
+        decimal oversoldThreshold = GetParameterWithDefault<decimal>(
+            parameters, "OversoldThreshold", StrategyType.RSI);
+        decimal overboughtThreshold = GetParameterWithDefault<decimal>(
+            parameters, "OverboughtThreshold", StrategyType.RSI);
 
         return new RSIStrategy(_indicatorCalculator, period, oversoldThreshold, overboughtThreshold);
     }
 
     private MACDStrategy CreateMACDStrategy(Dictionary<string, object> parameters)
     {
-        int fastPeriod = GetParameter(parameters, "FastPeriod", 12);
-        int slowPeriod = GetParameter(parameters, "SlowPeriod", 26);
-        int signalPeriod = GetParameter(parameters, "SignalPeriod", 9);
+        int fastPeriod = GetParameterWithDefault<int>(
+            parameters, "FastPeriod", StrategyType.MACD);
+        int slowPeriod = GetParameterWithDefault<int>(
+            parameters, "SlowPeriod", StrategyType.MACD);
+        int signalPeriod = GetParameterWithDefault<int>(
+            parameters, "SignalPeriod", StrategyType.MACD);
 
         return new MACDStrategy(_indicatorCalculator, fastPeriod, slowPeriod, signalPeriod);
     }
 
     private MachineLearningStrategy CreateMachineLearningStrategy(Dictionary<string, object> parameters)
     {
-        decimal buyThreshold = GetParameter(parameters, "BuyThreshold", 0.01m);
-        decimal sellThreshold = GetParameter(parameters, "SellThreshold", -0.01m);
+        decimal buyThreshold = GetParameterWithDefault<decimal>(
+            parameters, "BuyThreshold", StrategyType.MachineLearning);
+        decimal sellThreshold = GetParameterWithDefault<decimal>(
+            parameters, "SellThreshold", StrategyType.MachineLearning);
         var thresholds = new PredictionThresholds(buyThreshold, sellThreshold);
 
         return new MachineLearningStrategy(_indicatorCalculator, _mlPredictionService, thresholds);
@@ -94,16 +108,22 @@ public class StrategyFactory : IStrategyFactory
 
     private IchimokuStrategy CreateIchimokuStrategy(Dictionary<string, object> parameters)
     {
-        int conversionLinePeriod = GetParameter(parameters, "ConversionLinePeriod", 9);
-        int baseLinePeriod = GetParameter(parameters, "BaseLinePeriod", 26);
-        int leadingSpanBPeriod = GetParameter(parameters, "LeadingSpanBPeriod", 52);
-        int displacement = GetParameter(parameters, "Displacement", 26);
+        int conversionLinePeriod = GetParameterWithDefault<int>(
+            parameters, "ConversionLinePeriod", StrategyType.Ichimoku);
+        int baseLinePeriod = GetParameterWithDefault<int>(
+            parameters, "BaseLinePeriod", StrategyType.Ichimoku);
+        int leadingSpanBPeriod = GetParameterWithDefault<int>(
+            parameters, "LeadingSpanBPeriod", StrategyType.Ichimoku);
+        int displacement = GetParameterWithDefault<int>(
+            parameters, "Displacement", StrategyType.Ichimoku);
 
         IchimokuExitMode exitMode = GetParameter(parameters, "ExitMode", IchimokuExitMode.CloseBelowBaseLine);
         IchimokuEntryMode entryMode = GetParameter(parameters, "EntryMode", IchimokuEntryMode.AllConditionsOnly);
 
-        int crossLookbackDays = GetParameter(parameters, "CrossLookbackDays", 5);
-        decimal riskPercentage = GetParameter(parameters, "RiskPercentage", 0.02m);
+        int crossLookbackDays = GetParameterWithDefault<int>(
+            parameters, "CrossLookbackDays", StrategyType.Ichimoku);
+        decimal riskPercentage = GetParameterWithDefault<decimal>(
+            parameters, "RiskPercentage", StrategyType.Ichimoku);
 
         TimeFrameAggregator timeframeAggregator = new();
 
@@ -120,6 +140,34 @@ public class StrategyFactory : IStrategyFactory
             riskPercentage);
     }
 
+    /// <summary>
+    /// Gets a parameter value with default from the StrategyParameterDefaults service.
+    /// </summary>
+    private T GetParameterWithDefault<T>(
+        Dictionary<string, object> parameters,
+        string key,
+        StrategyType strategyType)
+    {
+        // Try to get from provided parameters first
+        if (parameters.TryGetValue(key, out object? value))
+        {
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch
+            {
+                // Fall through to default
+            }
+        }
+
+        // Get default from centralized service
+        return _parameterDefaults.GetDefault<T>(strategyType, key);
+    }
+
+    /// <summary>
+    /// Legacy method for parameters not (yet) in StrategyParameterDefaults (e.g., enum types).
+    /// </summary>
     private T GetParameter<T>(Dictionary<string, object> parameters, string key, T defaultValue)
     {
         if (!parameters.TryGetValue(key, out object? value))

@@ -50,14 +50,13 @@ public class Portfolio : AggregateRoot
 
     /// <summary>
     /// Gets the read-only collection of positions in this portfolio.
-    /// External code should use AddPosition/RemovePosition methods to modify positions.
-    /// Setter provided for backward compatibility with existing tests.
-    /// TODO: Refactor tests to use AddPosition() and remove setter.
+    /// Use AddPosition/RemovePosition/UpdatePositionQuantity methods to modify positions after initialization.
+    /// Init setter provided for JSON deserialization and testing infrastructure.
     /// </summary>
     public IReadOnlyList<Position> Positions
     {
         get => _positions.AsReadOnly();
-        set
+        init
         {
             _positions.Clear();
             _positions.AddRange(value);

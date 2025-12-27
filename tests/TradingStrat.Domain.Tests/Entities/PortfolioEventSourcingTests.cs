@@ -60,20 +60,21 @@ public class PortfolioEventSourcingTests
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        portfolio.AddPosition(position);
+        portfolio.ClearDomainEvents(); // Clear the AddPosition event before testing RemovePosition
 
         // Act
         portfolio.RemovePosition("AAPL");
@@ -96,20 +97,21 @@ public class PortfolioEventSourcingTests
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        portfolio.AddPosition(position);
+        portfolio.ClearDomainEvents(); // Clear the AddPosition event
 
         // Act
         portfolio.UpdatePositionQuantity("AAPL", 15);
@@ -426,20 +428,21 @@ public class PortfolioEventSourcingTests
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        portfolio.AddPosition(position);
+        portfolio.ClearDomainEvents(); // Clear the AddPosition event before testing duplicate behavior
 
         var duplicatePosition = new Position
         {
@@ -457,7 +460,7 @@ public class PortfolioEventSourcingTests
 
         exception.Ticker.ShouldBe("AAPL");
 
-        // No event should be raised
+        // No event should be raised for the failed duplicate addition
         portfolio.GetDomainEvents().ShouldBeEmpty();
     }
 

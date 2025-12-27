@@ -27,8 +27,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
             Description = description,
             Cash = initialCash,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = []
+            LastUpdated = DateTime.UtcNow
         };
 
         _portfolios[portfolio.Id] = portfolio;
@@ -42,10 +41,11 @@ public class InMemoryPortfolioRepository : IPortfolioPort
             return Task.FromResult<Portfolio?>(null);
         }
 
-        // Load positions for this portfolio
-        portfolio.Positions = _positions.Values
+        // Load positions for this portfolio using reflection (test infrastructure only)
+        List<Position> positions = _positions.Values
             .Where(p => p.PortfolioId == portfolioId)
             .ToList();
+        LoadPositionsIntoPortfolio(portfolio, positions);
 
         return Task.FromResult<Portfolio?>(portfolio);
     }
@@ -56,12 +56,13 @@ public class InMemoryPortfolioRepository : IPortfolioPort
             .OrderByDescending(p => p.LastUpdated)
             .ToList();
 
-        // Load positions for each portfolio
+        // Load positions for each portfolio using reflection (test infrastructure only)
         foreach (Portfolio portfolio in portfolios)
         {
-            portfolio.Positions = _positions.Values
+            List<Position> positions = _positions.Values
                 .Where(p => p.PortfolioId == portfolio.Id)
                 .ToList();
+            LoadPositionsIntoPortfolio(portfolio, positions);
         }
 
         return Task.FromResult(portfolios);
@@ -243,6 +244,24 @@ public class InMemoryPortfolioRepository : IPortfolioPort
     #endregion
 
     #region Test Helper Methods
+
+    /// <summary>
+    /// Loads positions into a portfolio using reflection.
+    /// This is needed because Portfolio.Positions is read-only to enforce encapsulation.
+    /// In production, EF Core's Include() handles this. For testing, we use reflection.
+    /// </summary>
+    private static void LoadPositionsIntoPortfolio(Portfolio portfolio, List<Position> positions)
+    {
+        var positionsField = typeof(Portfolio).GetField("_positions",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        if (positionsField != null)
+        {
+            var positionsList = (List<Position>)positionsField.GetValue(portfolio)!;
+            positionsList.Clear();
+            positionsList.AddRange(positions);
+        }
+    }
 
     /// <summary>
     /// Clear all data from the repository.

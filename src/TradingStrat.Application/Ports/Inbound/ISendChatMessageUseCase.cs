@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Application.Ports.Inbound;
 
 /// <summary>
@@ -20,11 +22,25 @@ public interface ISendChatMessageUseCase
 
 /// <summary>
 /// Command object for sending a chat message to the AI assistant.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="UserMessage">The user's message/question to send to the assistant.</param>
-/// <param name="Ticker">Optional ticker symbol for context-aware responses about specific securities.</param>
-/// <param name="SessionId">Optional session identifier to maintain conversation history (auto-generated if not provided).</param>
-public record SendChatMessageCommand(
-    string UserMessage,
-    string? Ticker = null,
-    string? SessionId = null);
+public record SendChatMessageCommand
+{
+    public string UserMessage { get; init; }
+    public string? Ticker { get; init; }
+    public string? SessionId { get; init; }
+
+    public SendChatMessageCommand(
+        string UserMessage,
+        string? Ticker = null,
+        string? SessionId = null)
+    {
+        // Validate parameters
+        ValidationGuard.Require(UserMessage).NotNullOrWhiteSpace();
+
+        // Assign validated values
+        this.UserMessage = UserMessage.Trim();
+        this.Ticker = Ticker?.ToUpperInvariant().Trim();
+        this.SessionId = SessionId?.Trim();
+    }
+}

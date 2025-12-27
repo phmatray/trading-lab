@@ -33,6 +33,8 @@ public static class ApplicationServiceRegistration
         services.AddSingleton<ITickerResolver, TickerResolver>();
         services.AddScoped<PortfolioContextBuilder>();
         services.AddScoped<MarketRegimeDetector>();
+        services.AddScoped<MarketPriceService>();
+        services.AddSingleton<StrategyParameterDefaults>();
         services.AddScoped<AiRecommendationService>();
         services.AddScoped<IDataRefreshService, DataRefreshService>();
         services.AddSingleton<ICsvTickerParser, CsvTickerParser>();

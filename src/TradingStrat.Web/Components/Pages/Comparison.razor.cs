@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Components.Shared;
@@ -61,7 +62,7 @@ public partial class Comparison
         }
     }
 
-    protected override async Task<ParameterOptimizationResult> ExecuteOperationAsync(
+    protected override async Task<Result<ParameterOptimizationResult>> ExecuteOperationAsync(
         ComparisonFormModel model,
         IProgress<string> progress)
     {
@@ -110,7 +111,8 @@ public partial class Comparison
             EndDate: model.EndDate
         );
 
-        return await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
+        ParameterOptimizationResult result = await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
+        return Result<ParameterOptimizationResult>.Success(result);
     }
 
     protected override string GetSuccessMessage(ParameterOptimizationResult? result)

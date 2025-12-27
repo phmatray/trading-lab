@@ -355,7 +355,8 @@ public class PortfolioPerformanceServiceTests
         var metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
-        // TODO: These features are not yet implemented
+        // AverageCorrelation and PositionBetas are null (require historical position-level data)
+        // See PortfolioPerformanceService.cs for implementation prerequisites and benefits
         metrics.AverageCorrelation.ShouldBeNull();
         metrics.PositionBetas.ShouldBeNull();
     }

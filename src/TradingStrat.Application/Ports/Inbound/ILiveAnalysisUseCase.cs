@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -25,13 +26,28 @@ public interface ILiveAnalysisUseCase
 
 /// <summary>
 /// Command object for live market position analysis.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="Ticker">Stock ticker symbol to analyze.</param>
-/// <param name="Thresholds">Optional ML prediction thresholds for buy/sell signals (uses defaults if null).</param>
-/// <param name="FetchFreshData">Whether to fetch the latest price from external source (true) or use stored data (false).</param>
-/// <param name="TimeFrame">Timeframe for the data (default D1 - daily).</param>
-public record AnalysisCommand(
-    string Ticker,
-    PredictionThresholds? Thresholds = null,
-    bool FetchFreshData = true,
-    TimeFrame? TimeFrame = null);
+public record AnalysisCommand
+{
+    public string Ticker { get; init; }
+    public PredictionThresholds? Thresholds { get; init; }
+    public bool FetchFreshData { get; init; }
+    public TimeFrame? TimeFrame { get; init; }
+
+    public AnalysisCommand(
+        string Ticker,
+        PredictionThresholds? Thresholds = null,
+        bool FetchFreshData = true,
+        TimeFrame? TimeFrame = null)
+    {
+        // Validate parameters
+        ValidationGuard.Require(Ticker).NotNullOrWhiteSpace();
+
+        // Assign validated values
+        this.Ticker = Ticker.ToUpperInvariant().Trim();
+        this.Thresholds = Thresholds;
+        this.FetchFreshData = FetchFreshData;
+        this.TimeFrame = TimeFrame;
+    }
+}

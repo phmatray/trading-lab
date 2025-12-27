@@ -19,11 +19,7 @@ public class ManageCashUseCase : IManageCashUseCase
     /// <inheritdoc />
     public async Task ExecuteAsync(CashTransactionCommand command)
     {
-        // Validate input
-        if (command.Amount <= 0)
-        {
-            throw new ArgumentException("Amount must be positive", nameof(command));
-        }
+        // Command validation happens in constructor - command is guaranteed to be valid here
 
         // Verify portfolio exists
         var portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);

@@ -306,8 +306,7 @@ public partial class StrategyOptimization : IDisposable
             return;
         }
 
-        // Navigate to portfolios page
-        // TODO: Pre-populate portfolio with optimized strategy when AppState context is implemented
+        // Navigate to portfolios page (optimization context already saved via AppState)
         NavigationManager.NavigateTo("/portfolios");
     }
 

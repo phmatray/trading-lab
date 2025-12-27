@@ -12,17 +12,20 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
     private readonly ICustomStrategyPort _customStrategyPort;
     private readonly IBacktestArchivePort _backtestArchivePort;
     private readonly IPortfolioPort _portfolioPort;
+    private readonly IHistoricalDataPort _historicalDataPort;
 
     private const int BUILT_IN_STRATEGY_COUNT = 4; // RSI, MACD, MA Crossover, ML FastTree
 
     public GetDashboardStatsUseCase(
         ICustomStrategyPort customStrategyPort,
         IBacktestArchivePort backtestArchivePort,
-        IPortfolioPort portfolioPort)
+        IPortfolioPort portfolioPort,
+        IHistoricalDataPort historicalDataPort)
     {
         _customStrategyPort = customStrategyPort;
         _backtestArchivePort = backtestArchivePort;
         _portfolioPort = portfolioPort;
+        _historicalDataPort = historicalDataPort;
     }
 
     public async Task<DashboardStatsResult> ExecuteAsync()
@@ -32,22 +35,33 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
         var backtestCountTask = _backtestArchivePort.GetBacktestRunCountAsync();
         var portfoliosTask = _portfolioPort.GetAllPortfoliosAsync();
         var lastBacktestDateTask = _backtestArchivePort.GetLastBacktestDateAsync();
+        var allTickersTask = _historicalDataPort.GetAllTickersAsync();
+        var tickerSummariesTask = _historicalDataPort.GetAllTickerSummariesAsync(Domain.ValueObjects.TimeFrame.D1);
+        var lastDataUpdateTask = _historicalDataPort.GetDatabaseLastModifiedAsync();
 
-        await Task.WhenAll(customStrategiesTask, backtestCountTask, portfoliosTask, lastBacktestDateTask);
+        await Task.WhenAll(
+            customStrategiesTask,
+            backtestCountTask,
+            portfoliosTask,
+            lastBacktestDateTask,
+            allTickersTask,
+            tickerSummariesTask,
+            lastDataUpdateTask);
 
         List<Domain.Entities.CustomStrategy> customStrategies = await customStrategiesTask;
         int backtestCount = await backtestCountTask;
         List<Domain.Entities.Portfolio> portfolios = await portfoliosTask;
         DateTime? lastBacktestDate = await lastBacktestDateTask;
+        List<string> allTickers = await allTickersTask;
+        List<TickerSummary> tickerSummaries = await tickerSummariesTask;
+        DateTime? lastDataUpdate = await lastDataUpdateTask;
 
         int totalStrategies = BUILT_IN_STRATEGY_COUNT + customStrategies.Count;
         int totalPortfolios = portfolios.Count;
+        int totalSecurities = allTickers.Count;
 
-        // TODO: Implement proper securities count and data coverage calculation
-        // For now, return placeholder values
-        int totalSecurities = 0;
-        decimal dataCoveragePercentage = 0m;
-        DateTime? lastDataUpdate = null;
+        // Calculate data coverage: % of tickers with data in the last 7 days
+        decimal dataCoveragePercentage = CalculateDataCoverage(tickerSummaries);
 
         return new DashboardStatsResult(
             TotalStrategies: totalStrategies,
@@ -58,5 +72,19 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
             LastBacktestDate: lastBacktestDate,
             LastDataUpdate: lastDataUpdate
         );
+    }
+
+    private static decimal CalculateDataCoverage(List<TickerSummary> tickerSummaries)
+    {
+        if (tickerSummaries.Count == 0)
+        {
+            return 0m;
+        }
+
+        DateTime sevenDaysAgo = DateTime.Today.AddDays(-7);
+        int tickersWithRecentData = tickerSummaries.Count(t =>
+            t.LatestDate.HasValue && t.LatestDate.Value >= sevenDaysAgo);
+
+        return (decimal)tickersWithRecentData / tickerSummaries.Count * 100m;
     }
 }

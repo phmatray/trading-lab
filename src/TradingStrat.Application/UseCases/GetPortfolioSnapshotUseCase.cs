@@ -1,5 +1,8 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
@@ -8,42 +11,47 @@ namespace TradingStrat.Application.UseCases;
 /// <summary>
 /// Use case for getting a portfolio snapshot with current market prices.
 /// Orchestrates portfolio loading, price fetching, and valuation calculation.
+/// Uses Result pattern for consistent error handling without exceptions.
 /// </summary>
 public class GetPortfolioSnapshotUseCase : IGetPortfolioSnapshotUseCase
 {
     private readonly IPortfolioPort _portfolioPort;
     private readonly IMarketDataPort _marketDataPort;
+    private readonly MarketPriceService _priceService;
     private readonly PortfolioValuationService _valuationService;
 
     public GetPortfolioSnapshotUseCase(
         IPortfolioPort portfolioPort,
         IMarketDataPort marketDataPort,
+        MarketPriceService priceService,
         PortfolioValuationService valuationService)
     {
         _portfolioPort = portfolioPort ?? throw new ArgumentNullException(nameof(portfolioPort));
         _marketDataPort = marketDataPort ?? throw new ArgumentNullException(nameof(marketDataPort));
+        _priceService = priceService ?? throw new ArgumentNullException(nameof(priceService));
         _valuationService = valuationService ?? throw new ArgumentNullException(nameof(valuationService));
     }
 
     /// <inheritdoc />
-    public async Task<PortfolioSnapshot> ExecuteAsync(
+    public async Task<Result<PortfolioSnapshot>> ExecuteAsync(
         int portfolioId,
         IProgress<string>? progress = null)
     {
         progress?.Report("Loading portfolio...");
 
         // Load portfolio with positions
-        var portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
         if (portfolio == null)
         {
-            throw new InvalidOperationException($"Portfolio {portfolioId} not found");
+            return Result<PortfolioSnapshot>.Failure(
+                Error.NotFound($"Portfolio {portfolioId} not found", "PORTFOLIO_NOT_FOUND"));
         }
 
         // Handle empty portfolio (cash only)
         if (!portfolio.Positions.Any())
         {
             progress?.Report("Portfolio has no positions");
-            return new PortfolioSnapshot(
+            PortfolioSnapshot emptySnapshot = new PortfolioSnapshot(
                 portfolio.Id,
                 portfolio.Name,
                 DateTime.UtcNow,
@@ -53,70 +61,38 @@ public class GetPortfolioSnapshotUseCase : IGetPortfolioSnapshotUseCase
                 portfolio.Cash,
                 0m,
                 0m);
+
+            return Result<PortfolioSnapshot>.Success(emptySnapshot);
         }
 
         progress?.Report("Fetching current market prices...");
 
         // Get unique tickers
-        var tickers = portfolio.Positions.Select(p => p.Ticker).Distinct().ToList();
-        var currentPrices = new Dictionary<string, decimal>();
+        List<string> tickers = portfolio.Positions.Select(p => p.Ticker).Distinct().ToList();
 
-        // Fetch current prices for each ticker
-        foreach (string ticker in tickers)
+        // Fetch current prices using the centralized service
+        Result<Dictionary<string, decimal>> priceResult = await _priceService.GetCurrentPricesAsync(
+            tickers,
+            _marketDataPort,
+            progress);
+
+        if (priceResult.IsFailure)
         {
-            progress?.Report($"Fetching price for {ticker}...");
-
-            try
-            {
-                // Fetch recent data (last 7 days to ensure we get the latest price)
-                var historicalData = await _marketDataPort.FetchHistoricalDataAsync(
-                    ticker,
-                    Domain.ValueObjects.TimeFrame.D1,
-                    DateTime.Today.AddDays(-7),
-                    DateTime.Today);
-
-                if (historicalData.Any())
-                {
-                    // Get most recent closing price
-                    var latestPrice = historicalData
-                        .OrderByDescending(p => p.DateTime)
-                        .First();
-
-                    if (latestPrice.Close.HasValue)
-                    {
-                        currentPrices[ticker] = latestPrice.Close.Value;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"No closing price available for {ticker}");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Unable to fetch price data for {ticker}");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException(
-                    $"Failed to fetch price for {ticker}: {ex.Message}", ex);
-            }
+            return Result<PortfolioSnapshot>.Failure(priceResult.Errors);
         }
+
+        Dictionary<string, decimal> currentPrices = priceResult.Value;
 
         progress?.Report("Calculating portfolio valuation...");
 
         // Calculate snapshot using domain service
-        var result = _valuationService.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, currentPrices);
 
-        if (result.IsFailure)
+        if (result.IsSuccess)
         {
-            throw new InvalidOperationException($"Failed to calculate portfolio snapshot: {string.Join(", ", result.Errors.Select(e => e.Message))}");
+            progress?.Report("Portfolio snapshot complete");
         }
 
-        progress?.Report("Portfolio snapshot complete");
-
-        return result.Value;
+        return result;
     }
 }

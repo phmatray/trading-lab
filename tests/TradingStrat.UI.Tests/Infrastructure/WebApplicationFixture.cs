@@ -246,31 +246,32 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
             Description = "Technology stocks for growth",
             Cash = 5000m,
             CreatedAt = DateTime.UtcNow.AddDays(-30),
-            LastUpdated = DateTime.UtcNow.AddDays(-1),
-            Positions = new List<Domain.Entities.Position>
-            {
-                new()
-                {
-                    Ticker = "MSFT",
-                    Quantity = 10,
-                    EntryPrice = 280m,
-                    EntryDate = DateTime.UtcNow.AddDays(-20),
-                    Notes = "Microsoft - Cloud leader",
-                    CreatedAt = DateTime.UtcNow.AddDays(-20),
-                    LastUpdated = DateTime.UtcNow.AddDays(-20)
-                },
-                new()
-                {
-                    Ticker = "AAPL",
-                    Quantity = 20,
-                    EntryPrice = 145m,
-                    EntryDate = DateTime.UtcNow.AddDays(-15),
-                    Notes = "Apple - Consumer tech",
-                    CreatedAt = DateTime.UtcNow.AddDays(-15),
-                    LastUpdated = DateTime.UtcNow.AddDays(-15)
-                }
-            }
+            LastUpdated = DateTime.UtcNow.AddDays(-1)
         };
+
+        var msftPosition = new Domain.Entities.Position
+        {
+            Ticker = "MSFT",
+            Quantity = 10,
+            EntryPrice = 280m,
+            EntryDate = DateTime.UtcNow.AddDays(-20),
+            Notes = "Microsoft - Cloud leader",
+            CreatedAt = DateTime.UtcNow.AddDays(-20),
+            LastUpdated = DateTime.UtcNow.AddDays(-20)
+        };
+        techPortfolio.AddPosition(msftPosition);
+
+        var aaplPosition = new Domain.Entities.Position
+        {
+            Ticker = "AAPL",
+            Quantity = 20,
+            EntryPrice = 145m,
+            EntryDate = DateTime.UtcNow.AddDays(-15),
+            Notes = "Apple - Consumer tech",
+            CreatedAt = DateTime.UtcNow.AddDays(-15),
+            LastUpdated = DateTime.UtcNow.AddDays(-15)
+        };
+        techPortfolio.AddPosition(aaplPosition);
 
         // Portfolio 2: Diversified Portfolio
         Domain.Entities.Portfolio diversifiedPortfolio = new()
@@ -279,21 +280,20 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
             Description = "Balanced portfolio across sectors",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow.AddDays(-60),
-            LastUpdated = DateTime.UtcNow.AddDays(-5),
-            Positions = new List<Domain.Entities.Position>
-            {
-                new()
-                {
-                    Ticker = "GOOGL",
-                    Quantity = 15,
-                    EntryPrice = 95m,
-                    EntryDate = DateTime.UtcNow.AddDays(-45),
-                    Notes = "Google - Search and cloud",
-                    CreatedAt = DateTime.UtcNow.AddDays(-45),
-                    LastUpdated = DateTime.UtcNow.AddDays(-45)
-                }
-            }
+            LastUpdated = DateTime.UtcNow.AddDays(-5)
         };
+
+        var googlPosition = new Domain.Entities.Position
+        {
+            Ticker = "GOOGL",
+            Quantity = 15,
+            EntryPrice = 95m,
+            EntryDate = DateTime.UtcNow.AddDays(-45),
+            Notes = "Google - Search and cloud",
+            CreatedAt = DateTime.UtcNow.AddDays(-45),
+            LastUpdated = DateTime.UtcNow.AddDays(-45)
+        };
+        diversifiedPortfolio.AddPosition(googlPosition);
 
         // Portfolio 3: Empty Portfolio
         Domain.Entities.Portfolio emptyPortfolio = new()

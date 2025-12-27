@@ -19,21 +19,7 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     /// <inheritdoc />
     public async Task<Position> AddPositionAsync(AddPositionCommand command)
     {
-        // Validate input
-        if (string.IsNullOrWhiteSpace(command.Ticker))
-        {
-            throw new ArgumentException("Ticker is required", nameof(command));
-        }
-
-        if (command.Quantity <= 0)
-        {
-            throw new ArgumentException("Quantity must be positive", nameof(command));
-        }
-
-        if (command.EntryPrice <= 0)
-        {
-            throw new ArgumentException("Entry price must be positive", nameof(command));
-        }
+        // Command validation happens in constructor - command is guaranteed to be valid here
 
         // Verify portfolio exists
         var portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
@@ -42,11 +28,11 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
             throw new InvalidOperationException($"Portfolio {command.PortfolioId} not found");
         }
 
-        // Create position entity
+        // Create position entity (Ticker is already normalized by command)
         var position = new Position
         {
             PortfolioId = command.PortfolioId,
-            Ticker = command.Ticker.ToUpperInvariant(),
+            Ticker = command.Ticker,
             Quantity = command.Quantity,
             EntryPrice = command.EntryPrice,
             EntryDate = command.EntryDate,
@@ -60,16 +46,7 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     /// <inheritdoc />
     public async Task<Position> UpdatePositionAsync(UpdatePositionCommand command)
     {
-        // Validate input
-        if (command.Quantity <= 0)
-        {
-            throw new ArgumentException("Quantity must be positive", nameof(command));
-        }
-
-        if (command.EntryPrice <= 0)
-        {
-            throw new ArgumentException("Entry price must be positive", nameof(command));
-        }
+        // Command validation happens in constructor - command is guaranteed to be valid here
 
         // Load existing position to preserve immutable fields
         Position? existingPosition = await _portfolioPort.GetPositionByIdAsync(command.PositionId);

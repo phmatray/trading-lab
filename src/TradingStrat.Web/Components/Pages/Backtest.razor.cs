@@ -5,6 +5,7 @@ using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
@@ -70,7 +71,7 @@ public partial class Backtest
         return model;
     }
 
-    protected override async Task<BacktestResult> ExecuteOperationAsync(
+    protected override async Task<Result<BacktestResult>> ExecuteOperationAsync(
         BacktestFormModel model,
         IProgress<string> progress)
     {
@@ -179,7 +180,7 @@ public partial class Backtest
         };
         await AppState.SetBacktestContextAsync(backtestContext);
 
-        return result;
+        return Result<BacktestResult>.Success(result);
     }
 
     protected override string GetSuccessMessage(BacktestResult? result)
@@ -227,8 +228,7 @@ public partial class Backtest
             return;
         }
 
-        // Navigate to portfolios page
-        // TODO: Pre-populate portfolio with current ticker when AppState context is implemented
+        // Navigate to portfolios page (backtest context already saved via AppState)
         Navigation.NavigateTo("/portfolios");
     }
 

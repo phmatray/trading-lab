@@ -127,45 +127,43 @@ public class CreatePortfolioUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithEmptyName_ShouldThrow()
+    public void ExecuteAsync_WithEmptyName_ShouldThrow()
     {
-        // Arrange
-        var command = new CreatePortfolioCommand(
-            Name: "",
-            Description: null,
-            InitialCash: 1000m);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new CreatePortfolioCommand(
+                Name: "",
+                Description: null,
+                InitialCash: 1000m));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("Portfolio name is required");
+        ex.ParamName.ShouldBe("Name");
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithWhitespaceName_ShouldThrow()
+    public void ExecuteAsync_WithWhitespaceName_ShouldThrow()
     {
-        // Arrange
-        var command = new CreatePortfolioCommand(
-            Name: "   ",
-            Description: null,
-            InitialCash: 1000m);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new CreatePortfolioCommand(
+                Name: "   ",
+                Description: null,
+                InitialCash: 1000m));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("Portfolio name is required");
+        ex.ParamName.ShouldBe("Name");
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNegativeInitialCash_ShouldThrow()
+    public void ExecuteAsync_WithNegativeInitialCash_ShouldThrow()
     {
-        // Arrange
-        var command = new CreatePortfolioCommand(
-            Name: "Invalid Portfolio",
-            Description: null,
-            InitialCash: -1000m);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new CreatePortfolioCommand(
+                Name: "Invalid Portfolio",
+                Description: null,
+                InitialCash: -1000m));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(async () => await _useCase.ExecuteAsync(command));
         ex.Message.ShouldContain("Initial cash cannot be negative");
+        ex.ParamName.ShouldBe("InitialCash");
     }
 
     [Fact]

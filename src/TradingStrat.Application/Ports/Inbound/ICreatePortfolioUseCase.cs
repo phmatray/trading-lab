@@ -1,16 +1,32 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Application.Ports.Inbound;
 
 /// <summary>
 /// Command to create a new portfolio.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="Name">Portfolio name (required).</param>
-/// <param name="Description">Optional portfolio description.</param>
-/// <param name="InitialCash">Initial cash balance.</param>
-public record CreatePortfolioCommand(
-    string Name,
-    string? Description,
-    decimal InitialCash
-);
+public record CreatePortfolioCommand
+{
+    public string Name { get; init; }
+    public string? Description { get; init; }
+    public decimal InitialCash { get; init; }
+
+    public CreatePortfolioCommand(
+        string Name,
+        string? Description = null,
+        decimal InitialCash = 0m)
+    {
+        // Validate parameters
+        ValidationGuard.Require(Name).NotNullOrWhiteSpace();
+        ValidationGuard.Require(InitialCash).GreaterThanOrEqual(0m, "Initial cash cannot be negative");
+
+        // Assign validated values
+        this.Name = Name.Trim();
+        this.Description = Description?.Trim();
+        this.InitialCash = InitialCash;
+    }
+}
 
 /// <summary>
 /// Result of creating a portfolio.

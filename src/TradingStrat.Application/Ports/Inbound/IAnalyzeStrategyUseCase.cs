@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 
@@ -23,11 +24,25 @@ public interface IAnalyzeStrategyUseCase
 
 /// <summary>
 /// Command object for requesting AI strategy analysis.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="Ticker">Stock ticker symbol to analyze.</param>
-/// <param name="StrategyType">Strategy type enum (e.g., MovingAverageCrossover, RSI, MACD, MachineLearning).</param>
-/// <param name="StrategyParameters">Optional strategy-specific parameters (e.g., periods, thresholds).</param>
-public record AnalyzeStrategyCommand(
-    string Ticker,
-    StrategyType StrategyType,
-    Dictionary<string, object>? StrategyParameters = null);
+public record AnalyzeStrategyCommand
+{
+    public string Ticker { get; init; }
+    public StrategyType StrategyType { get; init; }
+    public Dictionary<string, object>? StrategyParameters { get; init; }
+
+    public AnalyzeStrategyCommand(
+        string Ticker,
+        StrategyType StrategyType,
+        Dictionary<string, object>? StrategyParameters = null)
+    {
+        // Validate parameters
+        ValidationGuard.Require(Ticker).NotNullOrWhiteSpace();
+
+        // Assign validated values
+        this.Ticker = Ticker.ToUpperInvariant().Trim();
+        this.StrategyType = StrategyType;
+        this.StrategyParameters = StrategyParameters;
+    }
+}

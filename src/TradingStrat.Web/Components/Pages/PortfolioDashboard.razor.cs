@@ -78,7 +78,15 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
                 });
             });
 
-            _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            var snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+
+            if (snapshotResult.IsFailure)
+            {
+                _errorMessage = $"Failed to load portfolio snapshot: {string.Join(", ", snapshotResult.Errors.Select(e => e.Message))}";
+                return;
+            }
+
+            _snapshot = snapshotResult.Value;
 
             // Update breadcrumbs with portfolio name
             if (_portfolio != null)
@@ -116,7 +124,15 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
 
         try
         {
-            _snapshot = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            var snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+
+            if (snapshotResult.IsFailure)
+            {
+                _errorMessage = $"Failed to refresh prices: {string.Join(", ", snapshotResult.Errors.Select(e => e.Message))}";
+                return;
+            }
+
+            _snapshot = snapshotResult.Value;
             _successMessage = "Prices refreshed successfully.";
 
             await NotificationService.AddNotificationAsync(

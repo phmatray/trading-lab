@@ -85,20 +85,21 @@ public class AggregateRepositoryTests
             Name = "Test Portfolio",
             Cash = 10000m,
             CreatedAt = DateTime.UtcNow,
-            LastUpdated = DateTime.UtcNow,
-            Positions = new List<Position>
-            {
-                new Position
-                {
-                    Id = 1,
-                    PortfolioId = 1,
-                    Ticker = "AAPL",
-                    Quantity = 10,
-                    EntryPrice = 150m,
-                    EntryDate = DateTime.Today.AddDays(-1)
-                }
-            }
+            LastUpdated = DateTime.UtcNow
         };
+
+        var position = new Position
+        {
+            Id = 1,
+            PortfolioId = 1,
+            Ticker = "AAPL",
+            Quantity = 10,
+            EntryPrice = 150m,
+            EntryDate = DateTime.Today.AddDays(-1)
+        };
+
+        snapshotPortfolio.AddPosition(position);
+
         typeof(Portfolio).GetProperty("Version")!.SetValue(snapshotPortfolio, 2);
 
         var snapshot = new AggregateSnapshot<Portfolio>

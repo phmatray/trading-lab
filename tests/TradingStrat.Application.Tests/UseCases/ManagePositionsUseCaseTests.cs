@@ -144,98 +144,87 @@ public class ManagePositionsUseCaseTests
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithEmptyTicker_ShouldThrow()
+    public void AddPositionAsync_WithEmptyTicker_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command = new AddPositionCommand(
-            PortfolioId: portfolio.Id,
-            Ticker: "",
-            Quantity: 100,
-            EntryPrice: 150m,
-            EntryDate: DateTime.Today,
-            Notes: null);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new AddPositionCommand(
+                PortfolioId: 1,
+                Ticker: "",
+                Quantity: 100,
+                EntryPrice: 150m,
+                EntryDate: DateTime.Today,
+                Notes: null));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.AddPositionAsync(command));
-        ex.Message.ShouldContain("Ticker is required");
+        ex.ParamName.ShouldBe("Ticker");
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithZeroQuantity_ShouldThrow()
+    public void AddPositionAsync_WithZeroQuantity_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command = new AddPositionCommand(
-            PortfolioId: portfolio.Id,
-            Ticker: "AAPL",
-            Quantity: 0,
-            EntryPrice: 150m,
-            EntryDate: DateTime.Today,
-            Notes: null);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new AddPositionCommand(
+                PortfolioId: 1,
+                Ticker: "AAPL",
+                Quantity: 0,
+                EntryPrice: 150m,
+                EntryDate: DateTime.Today,
+                Notes: null));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.AddPositionAsync(command));
         ex.Message.ShouldContain("Quantity must be positive");
+        ex.ParamName.ShouldBe("Quantity");
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithNegativeQuantity_ShouldThrow()
+    public void AddPositionAsync_WithNegativeQuantity_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command = new AddPositionCommand(
-            PortfolioId: portfolio.Id,
-            Ticker: "AAPL",
-            Quantity: -100,
-            EntryPrice: 150m,
-            EntryDate: DateTime.Today,
-            Notes: null);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new AddPositionCommand(
+                PortfolioId: 1,
+                Ticker: "AAPL",
+                Quantity: -100,
+                EntryPrice: 150m,
+                EntryDate: DateTime.Today,
+                Notes: null));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.AddPositionAsync(command));
         ex.Message.ShouldContain("Quantity must be positive");
+        ex.ParamName.ShouldBe("Quantity");
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithZeroEntryPrice_ShouldThrow()
+    public void AddPositionAsync_WithZeroEntryPrice_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command = new AddPositionCommand(
-            PortfolioId: portfolio.Id,
-            Ticker: "AAPL",
-            Quantity: 100,
-            EntryPrice: 0m,
-            EntryDate: DateTime.Today,
-            Notes: null);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new AddPositionCommand(
+                PortfolioId: 1,
+                Ticker: "AAPL",
+                Quantity: 100,
+                EntryPrice: 0m,
+                EntryDate: DateTime.Today,
+                Notes: null));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.AddPositionAsync(command));
         ex.Message.ShouldContain("Entry price must be positive");
+        ex.ParamName.ShouldBe("EntryPrice");
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithNegativeEntryPrice_ShouldThrow()
+    public void AddPositionAsync_WithNegativeEntryPrice_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command = new AddPositionCommand(
-            PortfolioId: portfolio.Id,
-            Ticker: "AAPL",
-            Quantity: 100,
-            EntryPrice: -150m,
-            EntryDate: DateTime.Today,
-            Notes: null);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new AddPositionCommand(
+                PortfolioId: 1,
+                Ticker: "AAPL",
+                Quantity: 100,
+                EntryPrice: -150m,
+                EntryDate: DateTime.Today,
+                Notes: null));
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.AddPositionAsync(command));
         ex.Message.ShouldContain("Entry price must be positive");
+        ex.ParamName.ShouldBe("EntryPrice");
     }
 
     [Fact]
@@ -263,35 +252,33 @@ public class ManagePositionsUseCaseTests
     }
 
     [Fact]
-    public async Task UpdatePositionAsync_WithZeroQuantity_ShouldThrow()
+    public void UpdatePositionAsync_WithZeroQuantity_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var addedPosition = await _useCase.AddPositionAsync(addCommand);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new UpdatePositionCommand(
+                PositionId: 1,
+                Quantity: 0,
+                EntryPrice: 150m,
+                Notes: null));
 
-        var updateCommand = new UpdatePositionCommand(addedPosition.Id, 0, 150m, null);
-
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.UpdatePositionAsync(updateCommand));
         ex.Message.ShouldContain("Quantity must be positive");
+        ex.ParamName.ShouldBe("Quantity");
     }
 
     [Fact]
-    public async Task UpdatePositionAsync_WithZeroEntryPrice_ShouldThrow()
+    public void UpdatePositionAsync_WithZeroEntryPrice_ShouldThrow()
     {
-        // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var addedPosition = await _useCase.AddPositionAsync(addCommand);
+        // Act & Assert - validation happens in command constructor
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
+            new UpdatePositionCommand(
+                PositionId: 1,
+                Quantity: 100,
+                EntryPrice: 0m,
+                Notes: null));
 
-        var updateCommand = new UpdatePositionCommand(addedPosition.Id, 100, 0m, null);
-
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.UpdatePositionAsync(updateCommand));
         ex.Message.ShouldContain("Entry price must be positive");
+        ex.ParamName.ShouldBe("EntryPrice");
     }
 
     [Fact]

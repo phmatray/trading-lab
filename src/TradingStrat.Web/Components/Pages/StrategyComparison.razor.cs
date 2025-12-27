@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Components.Base;
@@ -13,6 +14,7 @@ public partial class StrategyComparison : BaseComponent
     [Inject] private IMultiStrategyComparisonUseCase ComparisonUseCase { get; set; } = null!;
     [Inject] private IStrategyRegistry StrategyRegistry { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
+    [Inject] private StrategyParameterDefaults ParameterDefaults { get; set; } = null!;
 
     private MultiStrategyComparisonResult? _comparisonResult;
     private bool _isLoading;
@@ -92,27 +94,8 @@ public partial class StrategyComparison : BaseComponent
 
     private Dictionary<string, object> GetDefaultParameters(StrategyType strategyType)
     {
-        return strategyType switch
-        {
-            StrategyType.MovingAverageCrossover => new Dictionary<string, object>
-            {
-                ["FastPeriod"] = 5,
-                ["SlowPeriod"] = 20
-            },
-            StrategyType.RSI => new Dictionary<string, object>
-            {
-                ["Period"] = 14,
-                ["Oversold"] = 30,
-                ["Overbought"] = 70
-            },
-            StrategyType.MACD => new Dictionary<string, object>
-            {
-                ["FastPeriod"] = 12,
-                ["SlowPeriod"] = 26,
-                ["SignalPeriod"] = 9
-            },
-            _ => new Dictionary<string, object>()
-        };
+        // Use centralized defaults service - single source of truth
+        return ParameterDefaults.GetAllDefaults(strategyType);
     }
 
     private async Task RunComparisonAsync()

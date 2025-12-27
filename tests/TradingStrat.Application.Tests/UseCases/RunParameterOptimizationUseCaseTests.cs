@@ -29,7 +29,12 @@ public class RunParameterOptimizationUseCaseTests
         IndicatorCalculator indicatorCalculator = new IndicatorCalculator();
         StrategyRegistry strategyRegistry = new StrategyRegistry();
         IMLPredictionService mlPredictionService = A.Fake<IMLPredictionService>();
-        StrategyFactory strategyFactory = new StrategyFactory(indicatorCalculator, strategyRegistry, mlPredictionService);
+        StrategyParameterDefaults parameterDefaults = new StrategyParameterDefaults();
+        StrategyFactory strategyFactory = new StrategyFactory(
+            indicatorCalculator,
+            strategyRegistry,
+            mlPredictionService,
+            parameterDefaults);
 
         _useCase = new RunParameterOptimizationUseCase(
             _historicalDataPort,

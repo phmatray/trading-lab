@@ -68,11 +68,39 @@ public class PortfolioPerformanceService
             }
         }
 
-        // Calculate average correlation (requires at least 2 positions and historical data)
+        // Future Enhancement: Correlation and Beta Calculations
+        //
+        // These advanced portfolio metrics require historical position-level data (individual security prices over time),
+        // which is not currently tracked. The system currently only maintains portfolio-level historical data.
+        //
+        // AverageCorrelation:
+        //   - Measures the average pairwise correlation between positions in the portfolio
+        //   - Range: -1 (perfect negative correlation) to +1 (perfect positive correlation)
+        //   - Lower correlation indicates better diversification
+        //   - Requires: Daily returns for each position over a common time period (typically 30-90 days)
+        //   - Calculation: Pearson correlation coefficient for each pair, then average
+        //
+        // PositionBetas:
+        //   - Dictionary mapping each ticker to its beta coefficient
+        //   - Beta measures a position's volatility relative to the overall portfolio
+        //   - Beta > 1: More volatile than portfolio, Beta < 1: Less volatile than portfolio
+        //   - Requires: Daily returns for each position and portfolio returns over same period
+        //   - Calculation: Covariance(position_returns, portfolio_returns) / Variance(portfolio_returns)
+        //
+        // Implementation Prerequisites:
+        //   1. Create PositionPerformancePoint value object (Ticker, Date, Price, DailyReturn)
+        //   2. Track historical position data in PortfolioPerformancePoint
+        //   3. Add GetPositionHistoricalData() method to IPortfolioPort
+        //   4. Implement CalculateCorrelationMatrix() and CalculatePositionBetas() methods in this service
+        //   5. Update PortfolioPerformancePoint to include position-level returns dictionary
+        //
+        // Benefits:
+        //   - Identify positions driving portfolio volatility (high beta positions)
+        //   - Assess true diversification (low average correlation)
+        //   - Optimize position weights for risk-adjusted returns
+        //   - Detect concentrated risk from highly correlated positions
         decimal? averageCorrelation = null;
         Dictionary<string, decimal>? positionBetas = null;
-
-        // TODO: Implement correlation and beta calculations when historical position-level data is available
 
         return new PortfolioMetrics(
             TotalValue: snapshot.TotalValue,

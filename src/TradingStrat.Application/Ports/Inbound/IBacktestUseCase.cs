@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
@@ -24,30 +25,78 @@ public interface IBacktestUseCase
 
 /// <summary>
 /// Command object for executing a backtest.
+/// Validates all parameters to ensure only valid commands can be created.
 /// </summary>
-/// <param name="Ticker">Stock ticker symbol to backtest.</param>
-/// <param name="StrategyType">Strategy type enum (e.g., MovingAverageCrossover, RSI, MACD, MachineLearning).</param>
-/// <param name="StrategyParameters">Optional strategy-specific parameters (e.g., period lengths, thresholds).</param>
-/// <param name="InitialCapital">Starting capital for the backtest (default $10,000).</param>
-/// <param name="CommissionPercentage">Commission as a percentage of trade value (default 0.1%).</param>
-/// <param name="MinimumCommission">Minimum commission per trade (default $1.00).</param>
-/// <param name="StartDate">Optional start date for backtest period.</param>
-/// <param name="EndDate">Optional end date for backtest period.</param>
-/// <param name="TimeFrame">Timeframe for historical data (default D1 - daily). Determines bar granularity.</param>
-/// <param name="TradingStyle">Optional trading style for applying intelligent defaults.</param>
-/// <param name="CustomStrategyId">Optional custom strategy ID. If set, uses custom strategy instead of built-in StrategyType.</param>
-public record BacktestCommand(
-    string Ticker,
-    StrategyType StrategyType,
-    Dictionary<string, object>? StrategyParameters = null,
-    decimal InitialCapital = 10000m,
-    decimal CommissionPercentage = 0.001m,
-    decimal MinimumCommission = 1.0m,
-    DateTime? StartDate = null,
-    DateTime? EndDate = null,
-    TimeFrame? TimeFrame = null,
-    TradingStyle? TradingStyle = null,
-    int? CustomStrategyId = null);
+public record BacktestCommand
+{
+    public string Ticker { get; init; }
+    public StrategyType StrategyType { get; init; }
+    public Dictionary<string, object>? StrategyParameters { get; init; }
+    public decimal InitialCapital { get; init; }
+    public decimal CommissionPercentage { get; init; }
+    public decimal MinimumCommission { get; init; }
+    public DateTime? StartDate { get; init; }
+    public DateTime? EndDate { get; init; }
+    public TimeFrame? TimeFrame { get; init; }
+    public TradingStyle? TradingStyle { get; init; }
+    public int? CustomStrategyId { get; init; }
+
+    public BacktestCommand(
+        string Ticker,
+        StrategyType StrategyType,
+        Dictionary<string, object>? StrategyParameters = null,
+        decimal InitialCapital = 10000m,
+        decimal CommissionPercentage = 0.001m,
+        decimal MinimumCommission = 1.0m,
+        DateTime? StartDate = null,
+        DateTime? EndDate = null,
+        TimeFrame? TimeFrame = null,
+        TradingStyle? TradingStyle = null,
+        int? CustomStrategyId = null)
+    {
+        // Validate parameters
+        ValidationGuard.Require(Ticker).NotNullOrWhiteSpace();
+        ValidationGuard.Require(InitialCapital).GreaterThan(0m, "Initial capital must be positive");
+        ValidationGuard.Require(CommissionPercentage).GreaterThanOrEqual(0m, "Commission percentage cannot be negative");
+        ValidationGuard.Require(CommissionPercentage).LessThan(1m, "Commission percentage must be less than 100%");
+        ValidationGuard.Require(MinimumCommission).GreaterThanOrEqual(0m, "Minimum commission cannot be negative");
+
+        // Validate date range if both are provided
+        if (StartDate.HasValue && EndDate.HasValue)
+        {
+            ValidationGuard.Require(StartDate.Value <= EndDate.Value,
+                "Start date must be before or equal to end date",
+                nameof(StartDate));
+        }
+
+        // Validate end date is not in the future
+        if (EndDate.HasValue)
+        {
+            ValidationGuard.Require(EndDate.Value <= DateTime.Today,
+                "End date cannot be in the future",
+                nameof(EndDate));
+        }
+
+        // Validate CustomStrategyId if provided
+        if (CustomStrategyId.HasValue)
+        {
+            ValidationGuard.Require(CustomStrategyId.Value).GreaterThan(0, "Custom strategy ID must be positive");
+        }
+
+        // Assign validated values
+        this.Ticker = Ticker.ToUpperInvariant().Trim();
+        this.StrategyType = StrategyType;
+        this.StrategyParameters = StrategyParameters;
+        this.InitialCapital = InitialCapital;
+        this.CommissionPercentage = CommissionPercentage;
+        this.MinimumCommission = MinimumCommission;
+        this.StartDate = StartDate;
+        this.EndDate = EndDate;
+        this.TimeFrame = TimeFrame;
+        this.TradingStyle = TradingStyle;
+        this.CustomStrategyId = CustomStrategyId;
+    }
+}
 
 /// <summary>
 /// Progress update for backtest execution.
