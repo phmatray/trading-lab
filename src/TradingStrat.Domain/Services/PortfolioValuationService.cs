@@ -42,7 +42,7 @@ public class PortfolioValuationService
         decimal totalMarketValue = portfolio!.Cash;
         decimal totalCost = portfolio.Cash;
 
-        foreach (var position in portfolio.Positions)
+        foreach (Position position in portfolio.Positions)
         {
             if (!currentPrices!.TryGetValue(position.Ticker, out decimal currentPrice))
             {
@@ -116,7 +116,7 @@ public class PortfolioValuationService
     {
         decimal totalValue = cash;
 
-        foreach (var position in positions)
+        foreach (Position position in positions)
         {
             if (currentPrices.TryGetValue(position.Ticker, out decimal currentPrice))
             {

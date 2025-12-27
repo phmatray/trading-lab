@@ -19,7 +19,7 @@ public class PortfolioRebalancingServiceTests
     public void CalculateRebalancing_WithInvalidTargetWeights_ShouldThrow()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>
@@ -52,7 +52,7 @@ public class PortfolioRebalancingServiceTests
     public void CalculateRebalancing_WithMissingPriceForTargetTicker_ShouldThrow()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>
@@ -142,13 +142,13 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         plan.ShouldNotBeNull();
         plan.Signals.Count.ShouldBe(1);
 
-        var signal = plan.Signals[0];
+        RebalancingSignal signal = plan.Signals[0];
         signal.Ticker.ShouldBe("AAPL");
         signal.Action.ShouldBe(RebalancingAction.Buy);
         signal.CurrentQuantity.ShouldBe(0);
@@ -192,7 +192,7 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.01m, 5m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.01m, 5m);
 
         // Assert
         // Needs to buy AAPL but doesn't have enough cash (even after selling 1 share of MSFT)
@@ -234,12 +234,12 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         plan.Signals.Count.ShouldBe(1);
 
-        var signal = plan.Signals[0];
+        RebalancingSignal signal = plan.Signals[0];
         signal.Ticker.ShouldBe("AAPL");
         signal.Action.ShouldBe(RebalancingAction.Sell);
         signal.CurrentQuantity.ShouldBe(10);
@@ -280,10 +280,10 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
-        var signal = plan.Signals[0];
+        RebalancingSignal signal = plan.Signals[0];
         signal.Action.ShouldBe(RebalancingAction.Sell);
         signal.CurrentQuantity.ShouldBe(20);
         signal.TargetQuantity.ShouldBe(10); // (8000 * 0.1875) / 150 = 10
@@ -326,10 +326,10 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
-        var signal = plan.Signals[0];
+        RebalancingSignal signal = plan.Signals[0];
         signal.Action.ShouldBe(RebalancingAction.Hold);
         signal.QuantityDelta.ShouldBe(0);
     }
@@ -342,7 +342,7 @@ public class PortfolioRebalancingServiceTests
     public void CalculateRebalancing_ShouldApplyCommissionPercentage()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>
@@ -357,7 +357,7 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.01m, 0m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.01m, 0m);
 
         // Assert
         RebalancingSignal signal = plan.Signals[0];
@@ -370,7 +370,7 @@ public class PortfolioRebalancingServiceTests
     public void CalculateRebalancing_ShouldApplyMinimumCommission()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>
@@ -385,10 +385,10 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 10m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 10m);
 
         // Assert
-        var signal = plan.Signals[0];
+        RebalancingSignal signal = plan.Signals[0];
         // Even though percentage commission would be tiny, minimum commission applies
         signal.EstimatedCost.ShouldBeGreaterThan(10m);
     }
@@ -434,7 +434,7 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         plan.Signals.Count.ShouldBe(3);
@@ -480,7 +480,7 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         // Should be ordered by absolute cost: GOOGL (largest), MSFT, AAPL (smallest)
@@ -497,7 +497,7 @@ public class PortfolioRebalancingServiceTests
     public void CalculateRebalancing_ShouldCapturePlanMetadata()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>(),
@@ -506,7 +506,7 @@ public class PortfolioRebalancingServiceTests
         var currentPrices = new Dictionary<string, decimal>();
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         plan.PortfolioId.ShouldBe(1);
@@ -549,7 +549,7 @@ public class PortfolioRebalancingServiceTests
         };
 
         // Act
-        var plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
+        RebalancingPlan plan = _service.CalculateRebalancing(snapshot, targetWeights, currentPrices, 0.001m, 1m);
 
         // Assert
         plan.IsExecutable.ShouldBeTrue();

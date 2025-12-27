@@ -29,12 +29,12 @@ public class ParameterOptimizer : IParameterOptimizer
         decimal bestScore = decimal.MinValue;
         Dictionary<string, decimal>? bestParameters = null;
 
-        foreach (var parameters in parameterCombinations)
+        foreach (Dictionary<string, decimal> parameters in parameterCombinations)
         {
             iterationNumber++;
 
             // Evaluate this parameter set
-            var (totalReturn, sharpeRatio, maxDrawdown, tradeCount) = await evaluator(parameters);
+            (decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount) = await evaluator(parameters);
 
             var iteration = new OptimizationIteration(
                 IterationNumber: iterationNumber,
@@ -131,12 +131,12 @@ public class ParameterOptimizer : IParameterOptimizer
             // Evaluate fitness for all individuals
             var evaluatedPopulation = new List<(Dictionary<string, decimal> parameters, decimal score)>();
 
-            foreach (var parameters in population)
+            foreach (Dictionary<string, decimal> parameters in population)
             {
                 iterationNumber++;
 
                 // Evaluate this parameter set
-                var (totalReturn, sharpeRatio, maxDrawdown, tradeCount) = await evaluator(parameters);
+                (decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount) = await evaluator(parameters);
 
                 var iteration = new OptimizationIteration(
                     IterationNumber: iterationNumber,
@@ -272,7 +272,7 @@ public class ParameterOptimizer : IParameterOptimizer
         for (int i = 0; i < populationSize; i++)
         {
             var individual = new Dictionary<string, decimal>();
-            foreach (var (paramName, range) in parameterRanges)
+            foreach ((string paramName, ParameterRange range) in parameterRanges)
             {
                 // Random value within range
                 decimal randomValue = range.Min + (decimal)_random.NextDouble() * (range.Max - range.Min);
@@ -306,8 +306,8 @@ public class ParameterOptimizer : IParameterOptimizer
         while (nextGeneration.Count < config.PopulationSize)
         {
             // Tournament selection for parents
-            var parent1 = TournamentSelection(sorted, 3);
-            var parent2 = TournamentSelection(sorted, 3);
+            Dictionary<string, decimal> parent1 = TournamentSelection(sorted, 3);
+            Dictionary<string, decimal> parent2 = TournamentSelection(sorted, 3);
 
             // Crossover
             Dictionary<string, decimal> offspring = _random.NextDouble() < (double)config.CrossoverRate

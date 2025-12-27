@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Shouldly;
@@ -18,7 +19,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_RendersWithAllFilterControls()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
@@ -34,7 +35,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_StartsExpanded()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
@@ -46,19 +47,19 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_CollapseButtonTogglesVisibility()
     {
         // Arrange
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Act - Click collapse button
-        var collapseButton = cut.Find("button[aria-label*='Collapse']");
+        IElement collapseButton = cut.Find("button[aria-label*='Collapse']");
         collapseButton.Click();
 
         // Assert - Filter controls should be hidden
         cut.FindAll("select#status-filter").ShouldBeEmpty();
 
         // Act - Click expand button
-        var expandButton = cut.Find("button[aria-label*='Expand']");
+        IElement expandButton = cut.Find("button[aria-label*='Expand']");
         expandButton.Click();
 
         // Assert - Filter controls should be visible again
@@ -70,12 +71,12 @@ public class FilterPanelTests : BunitTestContext
     {
         // Arrange
         FilterValues? capturedValues = null;
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, values => capturedValues = values))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var select = cut.Find("select#status-filter");
+        IElement select = cut.Find("select#status-filter");
         select.Change(DataStatusFilter.Complete.ToString());
 
         // Assert
@@ -88,12 +89,12 @@ public class FilterPanelTests : BunitTestContext
     {
         // Arrange
         FilterValues? capturedValues = null;
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, values => capturedValues = values))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var input = cut.Find("input#min-coverage");
+        IElement input = cut.Find("input#min-coverage");
         input.Change("80");
 
         // Assert
@@ -106,12 +107,12 @@ public class FilterPanelTests : BunitTestContext
     {
         // Arrange
         FilterValues? capturedValues = null;
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, values => capturedValues = values))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var input = cut.Find("input#max-coverage");
+        IElement input = cut.Find("input#max-coverage");
         input.Change("95");
 
         // Assert
@@ -123,7 +124,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_ResetButtonHiddenWhenNoFilters()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
@@ -135,7 +136,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_ResetButtonAppearsWhenStatusFilterActive()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.StatusFilter, DataStatusFilter.Complete)
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
@@ -148,7 +149,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_ResetButtonAppearsWhenMinCoverageActive()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.MinCoverage, 50m)
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
@@ -161,7 +162,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_ResetButtonAppearsWhenMaxCoverageActive()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.MaxCoverage, 90m)
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
@@ -175,14 +176,14 @@ public class FilterPanelTests : BunitTestContext
     {
         // Arrange
         bool resetCalled = false;
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.StatusFilter, DataStatusFilter.Complete)
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => resetCalled = true)));
 
         // Act - Find the Reset button by its aria-label or data attribute
-        var buttons = cut.FindComponents<Button>();
-        var resetButton = buttons.First(b => b.Instance.Text == "Reset");
+        IReadOnlyList<IRenderedComponent<Button>> buttons = cut.FindComponents<Button>();
+        IRenderedComponent<Button> resetButton = buttons.First(b => b.Instance.Text == "Reset");
         resetButton.Find("button").Click();
 
         // Assert
@@ -193,13 +194,13 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_StatusFilterHasAllOptions()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var select = cut.Find("select#status-filter");
-        var options = select.QuerySelectorAll("option");
+        IElement select = cut.Find("select#status-filter");
+        IHtmlCollection<IElement> options = select.QuerySelectorAll("option");
         options.Length.ShouldBe(4); // All Statuses, Complete, Partial, WithGaps
 
         cut.Markup.ShouldContain("All Statuses");
@@ -212,17 +213,17 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_CoverageInputsHaveCorrectRange()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var minInput = cut.Find("input#min-coverage");
+        IElement minInput = cut.Find("input#min-coverage");
         minInput.GetAttribute("min").ShouldBe("0");
         minInput.GetAttribute("max").ShouldBe("100");
         minInput.GetAttribute("step").ShouldBe("1");
 
-        var maxInput = cut.Find("input#max-coverage");
+        IElement maxInput = cut.Find("input#max-coverage");
         maxInput.GetAttribute("min").ShouldBe("0");
         maxInput.GetAttribute("max").ShouldBe("100");
         maxInput.GetAttribute("step").ShouldBe("1");
@@ -232,7 +233,7 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_PreservesFilterValuesOnRender()
     {
         // Arrange & Act
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.StatusFilter, DataStatusFilter.Partial)
             .Add(p => p.MinCoverage, 60m)
             .Add(p => p.MaxCoverage, 85m)
@@ -240,13 +241,13 @@ public class FilterPanelTests : BunitTestContext
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var statusSelect = cut.Find("select#status-filter");
+        IElement statusSelect = cut.Find("select#status-filter");
         statusSelect.GetAttribute("value").ShouldBe("Partial");
 
-        var minInput = cut.Find("input#min-coverage");
+        IElement minInput = cut.Find("input#min-coverage");
         minInput.GetAttribute("value").ShouldBe("60");
 
-        var maxInput = cut.Find("input#max-coverage");
+        IElement maxInput = cut.Find("input#max-coverage");
         maxInput.GetAttribute("value").ShouldBe("85");
     }
 
@@ -254,19 +255,19 @@ public class FilterPanelTests : BunitTestContext
     public void FilterPanel_CollapseButtonHasCorrectAriaLabel()
     {
         // Arrange
-        var cut = Render<FilterPanel>(parameters => parameters
+        IRenderedComponent<FilterPanel> cut = Render<FilterPanel>(parameters => parameters
             .Add(p => p.OnFilterChanged, EventCallback.Factory.Create<FilterValues>(this, _ => { }))
             .Add(p => p.OnReset, EventCallback.Factory.Create(this, () => { })));
 
         // Assert - Initially expanded
-        var collapseButton = cut.Find("button[aria-label*='filters']");
+        IElement collapseButton = cut.Find("button[aria-label*='filters']");
         collapseButton.GetAttribute("aria-label").ShouldBe("Collapse filters");
 
         // Act - Collapse
         collapseButton.Click();
 
         // Assert - Now collapsed
-        var expandButton = cut.Find("button[aria-label*='filters']");
+        IElement expandButton = cut.Find("button[aria-label*='filters']");
         expandButton.GetAttribute("aria-label").ShouldBe("Expand filters");
     }
 }

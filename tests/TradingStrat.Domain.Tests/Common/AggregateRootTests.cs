@@ -44,7 +44,7 @@ public class AggregateRootTests
         aggregate.DoSomething();
 
         // Assert
-        var events = aggregate.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = aggregate.GetDomainEvents();
         events.Count.ShouldBe(1);
         events[0].ShouldBeOfType<TestEvent>();
         ((TestEvent)events[0]).Message.ShouldBe("Something happened");
@@ -60,7 +60,7 @@ public class AggregateRootTests
         aggregate.DoMultipleThings();
 
         // Assert
-        var events = aggregate.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = aggregate.GetDomainEvents();
         events.Count.ShouldBe(3);
         ((TestEvent)events[0]).Message.ShouldBe("First thing");
         ((TestEvent)events[1]).Message.ShouldBe("Second thing");
@@ -90,7 +90,7 @@ public class AggregateRootTests
         aggregate.DoSomething();
 
         // Act
-        var events = aggregate.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = aggregate.GetDomainEvents();
 
         // Assert
         events.ShouldBeAssignableTo<IReadOnlyList<DomainEvent>>();

@@ -76,7 +76,7 @@ public class ResultTests
         var result = Result<int>.Failure(error);
 
         // Act & Assert
-        var exception = Should.Throw<InvalidOperationException>(() => result.Value);
+        InvalidOperationException exception = Should.Throw<InvalidOperationException>(() => result.Value);
         exception.Message.ShouldContain("Cannot access Value on failed result");
     }
 

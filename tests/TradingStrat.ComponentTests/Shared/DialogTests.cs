@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,7 +16,7 @@ public class DialogTests : BunitTestContext
     public void Dialog_WhenClosed_RendersNothing()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, false)
             .Add(p => p.Title, "Test Dialog"));
 
@@ -27,12 +28,12 @@ public class DialogTests : BunitTestContext
     public void Dialog_WhenOpen_RendersDialog()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Test Dialog"));
 
         // Assert
-        var dialog = cut.Find("[data-testid='dialog']");
+        IElement dialog = cut.Find("[data-testid='dialog']");
         dialog.ShouldNotBeNull();
         dialog.GetAttribute("role").ShouldBe("dialog");
         dialog.GetAttribute("aria-modal").ShouldBe("true");
@@ -45,12 +46,12 @@ public class DialogTests : BunitTestContext
         string title = "Confirm Action";
 
         // Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, title));
 
         // Assert
-        var titleElement = cut.Find("#dialog-title");
+        IElement titleElement = cut.Find("#dialog-title");
         titleElement.TextContent.ShouldBe(title);
         titleElement.ClassList.ShouldContain("text-lg");
         titleElement.ClassList.ShouldContain("font-medium");
@@ -60,7 +61,7 @@ public class DialogTests : BunitTestContext
     public void Dialog_WithChildContent_RendersContent()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.ChildContent, builder =>
@@ -72,7 +73,7 @@ public class DialogTests : BunitTestContext
             }));
 
         // Assert
-        var content = cut.Find("p.test-content");
+        IElement content = cut.Find("p.test-content");
         content.ShouldNotBeNull();
         content.TextContent.ShouldBe("Dialog content here");
     }
@@ -81,7 +82,7 @@ public class DialogTests : BunitTestContext
     public void Dialog_WithFooter_RendersFooter()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.Footer, builder =>
@@ -93,10 +94,10 @@ public class DialogTests : BunitTestContext
             }));
 
         // Assert
-        var footer = cut.Find("div.dialog-footer");
+        IElement footer = cut.Find("div.dialog-footer");
         footer.ShouldNotBeNull();
 
-        var button = cut.Find("button.test-footer-btn");
+        IElement button = cut.Find("button.test-footer-btn");
         button.ShouldNotBeNull();
         button.TextContent.ShouldBe("OK");
     }
@@ -105,12 +106,12 @@ public class DialogTests : BunitTestContext
     public void Dialog_WithoutFooter_DoesNotRenderFooter()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog"));
 
         // Assert
-        var footers = cut.FindAll("div.dialog-footer");
+        IReadOnlyList<IElement> footers = cut.FindAll("div.dialog-footer");
         footers.ShouldBeEmpty();
     }
 
@@ -121,12 +122,12 @@ public class DialogTests : BunitTestContext
         bool closeCalled = false;
 
         // Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.OnClose, () => closeCalled = true));
 
-        var closeButton = cut.Find("button[aria-label='Close dialog']");
+        IElement closeButton = cut.Find("button[aria-label='Close dialog']");
         closeButton.Click();
 
         // Assert
@@ -140,13 +141,13 @@ public class DialogTests : BunitTestContext
         bool closeCalled = false;
 
         // Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.CloseOnBackdropClick, true)
             .Add(p => p.OnClose, () => closeCalled = true));
 
-        var backdrop = cut.Find("[data-testid='dialog']");
+        IElement backdrop = cut.Find("[data-testid='dialog']");
         backdrop.Click();
 
         // Assert
@@ -160,13 +161,13 @@ public class DialogTests : BunitTestContext
         bool closeCalled = false;
 
         // Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.CloseOnBackdropClick, false)
             .Add(p => p.OnClose, () => closeCalled = true));
 
-        var backdrop = cut.Find("[data-testid='dialog']");
+        IElement backdrop = cut.Find("[data-testid='dialog']");
         backdrop.Click();
 
         // Assert
@@ -177,12 +178,12 @@ public class DialogTests : BunitTestContext
     public void Dialog_DialogContent_HasStopPropagation()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.CloseOnBackdropClick, true));
 
-        var content = cut.Find("[data-testid='dialog-content']");
+        IElement content = cut.Find("[data-testid='dialog-content']");
 
         // Assert - Verify that the dialog content has onclick:stoppropagation
         // This prevents clicks on the dialog content from bubbling to the backdrop
@@ -193,13 +194,13 @@ public class DialogTests : BunitTestContext
     public void Dialog_WithCustomWidth_AppliesWidthClass()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.Width, "w-[600px]"));
 
         // Assert
-        var dialogContent = cut.Find("[data-testid='dialog-content']");
+        IElement dialogContent = cut.Find("[data-testid='dialog-content']");
         dialogContent.ClassList.ShouldContain("w-[600px]");
     }
 
@@ -207,7 +208,7 @@ public class DialogTests : BunitTestContext
     public void Dialog_WithHeaderActions_ReplacesDefaultCloseButton()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Dialog")
             .Add(p => p.HeaderActions, builder =>
@@ -219,12 +220,12 @@ public class DialogTests : BunitTestContext
             }));
 
         // Assert
-        var customButton = cut.Find("button.custom-header-btn");
+        IElement customButton = cut.Find("button.custom-header-btn");
         customButton.ShouldNotBeNull();
         customButton.TextContent.ShouldBe("Custom Action");
 
         // Default close button should not exist
-        var defaultCloseButtons = cut.FindAll("button[aria-label='Close dialog']");
+        IReadOnlyList<IElement> defaultCloseButtons = cut.FindAll("button[aria-label='Close dialog']");
         defaultCloseButtons.ShouldBeEmpty();
     }
 
@@ -232,12 +233,12 @@ public class DialogTests : BunitTestContext
     public void Dialog_HasAccessibilityAttributes()
     {
         // Arrange & Act
-        var cut = Render<Dialog>(parameters => parameters
+        IRenderedComponent<Dialog> cut = Render<Dialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Accessible Dialog"));
 
         // Assert
-        var dialog = cut.Find("[role='dialog']");
+        IElement dialog = cut.Find("[role='dialog']");
         dialog.ShouldNotBeNull();
         dialog.GetAttribute("aria-modal").ShouldBe("true");
         dialog.GetAttribute("aria-labelledby").ShouldBe("dialog-title");

@@ -6,6 +6,7 @@ using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
@@ -66,7 +67,7 @@ public class RunParameterOptimizationUseCaseTests
             variantB);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<ParameterOptimizationResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -89,7 +90,7 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("NODATA", variantA, variantB);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<ParameterOptimizationResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -137,7 +138,7 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<ParameterOptimizationResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.ShouldNotBeNull();
@@ -165,7 +166,7 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<ParameterOptimizationResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Sharpe Ratio");
@@ -186,7 +187,7 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<ParameterOptimizationResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.Comparison.Ticker.ShouldBe("TEST");

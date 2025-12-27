@@ -64,8 +64,8 @@ public class BacktestArchivePage : BasePage
 
     public async Task<string?> GetFirstBacktestTicker()
     {
-        var firstCard = BacktestCards.First;
-        var tickerElement = firstCard.Locator("text=/^[A-Z]{1,5}$/");
+        ILocator firstCard = BacktestCards.First;
+        ILocator tickerElement = firstCard.Locator("text=/^[A-Z]{1,5}$/");
         return await tickerElement.TextContentAsync();
     }
 

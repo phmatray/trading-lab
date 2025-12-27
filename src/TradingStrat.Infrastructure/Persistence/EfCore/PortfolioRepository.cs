@@ -64,7 +64,7 @@ public class PortfolioRepository : IPortfolioPort
     /// <inheritdoc />
     public async Task DeletePortfolioAsync(int portfolioId)
     {
-        var portfolio = await _context.Portfolios.FindAsync(portfolioId);
+        Portfolio? portfolio = await _context.Portfolios.FindAsync(portfolioId);
         if (portfolio != null)
         {
             _context.Portfolios.Remove(portfolio);
@@ -79,7 +79,7 @@ public class PortfolioRepository : IPortfolioPort
     /// <inheritdoc />
     public async Task AddCashAsync(int portfolioId, decimal amount, string? notes)
     {
-        var portfolio = await GetPortfolioByIdAsync(portfolioId);
+        Portfolio? portfolio = await GetPortfolioByIdAsync(portfolioId);
         if (portfolio == null)
         {
             throw new InvalidOperationException($"Portfolio {portfolioId} not found");
@@ -103,7 +103,7 @@ public class PortfolioRepository : IPortfolioPort
     /// <inheritdoc />
     public async Task WithdrawCashAsync(int portfolioId, decimal amount, string? notes)
     {
-        var portfolio = await GetPortfolioByIdAsync(portfolioId);
+        Portfolio? portfolio = await GetPortfolioByIdAsync(portfolioId);
         if (portfolio == null)
         {
             throw new InvalidOperationException($"Portfolio {portfolioId} not found");
@@ -159,7 +159,7 @@ public class PortfolioRepository : IPortfolioPort
     public async Task UpdatePositionAsync(Position position)
     {
         // Load the existing position from database
-        var existingPosition = await _context.Positions.FindAsync(position.Id);
+        Position? existingPosition = await _context.Positions.FindAsync(position.Id);
         if (existingPosition == null)
         {
             throw new InvalidOperationException($"Position {position.Id} not found");
@@ -185,7 +185,7 @@ public class PortfolioRepository : IPortfolioPort
     /// <inheritdoc />
     public async Task DeletePositionAsync(int positionId)
     {
-        var position = await _context.Positions.FindAsync(positionId);
+        Position? position = await _context.Positions.FindAsync(positionId);
         if (position != null)
         {
             _context.Positions.Remove(position);

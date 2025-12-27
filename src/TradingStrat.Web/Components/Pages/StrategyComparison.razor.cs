@@ -4,6 +4,7 @@ using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Components.Base;
 
@@ -138,7 +139,7 @@ public partial class StrategyComparison : BaseComponent
                 InvokeAsync(StateHasChanged);
             });
 
-            var result = await ComparisonUseCase.ExecuteAsync(command, progress);
+            Result<MultiStrategyComparisonResult> result = await ComparisonUseCase.ExecuteAsync(command, progress);
 
             if (result.IsFailure)
             {

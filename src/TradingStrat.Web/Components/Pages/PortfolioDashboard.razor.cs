@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
@@ -79,7 +80,7 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
                 });
             });
 
-            var snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            Result<PortfolioSnapshot> snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
 
             if (snapshotResult.IsFailure)
             {
@@ -125,7 +126,7 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
 
         try
         {
-            var snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            Result<PortfolioSnapshot> snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
 
             if (snapshotResult.IsFailure)
             {
@@ -189,11 +190,11 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
                 _addPositionFormModel.Notes
             );
 
-            var result = await ManagePositionsUseCase.AddPositionAsync(command);
+            Result<Position> result = await ManagePositionsUseCase.AddPositionAsync(command);
 
             if (result.IsSuccess)
             {
-                var position = result.Value;
+                Position position = result.Value;
                 decimal costBasis = position.Quantity * position.EntryPrice;
                 _successMessage = $"Position added: {position.Quantity} shares of {position.Ticker} at {position.EntryPrice:C2}";
 

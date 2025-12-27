@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -61,7 +62,7 @@ public partial class StrategyBuilder
 
         try
         {
-            var getResult = await CustomStrategyUseCase.GetStrategyByIdAsync(Id!.Value);
+            Result<CustomStrategyResult> getResult = await CustomStrategyUseCase.GetStrategyByIdAsync(Id!.Value);
 
             if (getResult.IsFailure)
             {
@@ -202,7 +203,7 @@ public partial class StrategyBuilder
                 );
 
                 Log($"[StrategyBuilder] Updating strategy {Id.Value}...");
-                var updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
+                Result<CustomStrategyResult> updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
 
                 if (updateResult.IsFailure)
                 {
@@ -221,7 +222,7 @@ public partial class StrategyBuilder
                 );
 
                 Log($"[StrategyBuilder] Creating new strategy '{_formModel.Name}'...");
-                var createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
+                Result<CustomStrategyResult> createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
 
                 if (createResult.IsFailure)
                 {
@@ -286,7 +287,7 @@ public partial class StrategyBuilder
 
         try
         {
-            var deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(Id!.Value);
+            Result<bool> deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(Id!.Value);
 
             if (deleteResult.IsFailure)
             {

@@ -20,7 +20,7 @@ public class EventStoreRepositoryTests : IDisposable
     public EventStoreRepositoryTests()
     {
         // Use in-memory database for testing
-        var options = new DbContextOptionsBuilder<TradingContext>()
+        DbContextOptions<TradingContext> options = new DbContextOptionsBuilder<TradingContext>()
             .UseInMemoryDatabase($"EventStoreTests_{Guid.NewGuid()}")
             .Options;
 
@@ -50,7 +50,7 @@ public class EventStoreRepositoryTests : IDisposable
         await _eventStore.AppendEventsAsync(TestStreamId, events, expectedVersion: 0);
 
         // Assert
-        var storedEvents = await _context.Events.Where(e => e.StreamId == TestStreamId).ToListAsync();
+        List<EventRecord> storedEvents = await _context.Events.Where(e => e.StreamId == TestStreamId).ToListAsync();
         storedEvents.Count.ShouldBe(2);
         storedEvents[0].Version.ShouldBe(1);
         storedEvents[1].Version.ShouldBe(2);
@@ -68,7 +68,7 @@ public class EventStoreRepositoryTests : IDisposable
         var secondEvent = new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.UtcNow);
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<ConcurrencyException>(async () =>
+        ConcurrencyException exception = await Should.ThrowAsync<ConcurrencyException>(async () =>
             await _eventStore.AppendEventsAsync(TestStreamId, new[] { secondEvent }, expectedVersion: 0)
         );
 
@@ -87,7 +87,7 @@ public class EventStoreRepositoryTests : IDisposable
         await _eventStore.AppendEventsAsync(TestStreamId, emptyEvents, expectedVersion: 0);
 
         // Assert
-        var storedEvents = await _context.Events.Where(e => e.StreamId == TestStreamId).ToListAsync();
+        List<EventRecord> storedEvents = await _context.Events.Where(e => e.StreamId == TestStreamId).ToListAsync();
         storedEvents.ShouldBeEmpty();
     }
 
@@ -95,7 +95,7 @@ public class EventStoreRepositoryTests : IDisposable
     public async Task AppendEventsAsync_WithNullStreamId_ThrowsArgumentException()
     {
         // Arrange
-        var events = new[] { new PortfolioCreatedEvent(1, "Test", 10000m) };
+        PortfolioCreatedEvent[] events = new[] { new PortfolioCreatedEvent(1, "Test", 10000m) };
 
         // Act & Assert
         await Should.ThrowAsync<ArgumentException>(async () =>
@@ -129,7 +129,7 @@ public class EventStoreRepositoryTests : IDisposable
         await _eventStore.AppendEventsAsync(TestStreamId, events, expectedVersion: 0);
 
         // Act
-        var retrievedEvents = await _eventStore.GetEventsAsync(TestStreamId);
+        List<DomainEvent> retrievedEvents = await _eventStore.GetEventsAsync(TestStreamId);
 
         // Assert
         retrievedEvents.Count.ShouldBe(3);
@@ -157,7 +157,7 @@ public class EventStoreRepositoryTests : IDisposable
         await _eventStore.AppendEventsAsync(TestStreamId, events, expectedVersion: 0);
 
         // Act - Get events from version 1 onwards
-        var retrievedEvents = await _eventStore.GetEventsAsync(TestStreamId, fromVersion: 1);
+        List<DomainEvent> retrievedEvents = await _eventStore.GetEventsAsync(TestStreamId, fromVersion: 1);
 
         // Assert
         retrievedEvents.Count.ShouldBe(2);
@@ -169,7 +169,7 @@ public class EventStoreRepositoryTests : IDisposable
     public async Task GetEventsAsync_ForNonExistentStream_ReturnsEmptyList()
     {
         // Act
-        var events = await _eventStore.GetEventsAsync("non-existent-stream");
+        List<DomainEvent> events = await _eventStore.GetEventsAsync("non-existent-stream");
 
         // Assert
         events.ShouldBeEmpty();
@@ -215,7 +215,7 @@ public class EventStoreRepositoryTests : IDisposable
     public async Task StreamExistsAsync_ForExistingStream_ReturnsTrue()
     {
         // Arrange
-        var events = new[] { new PortfolioCreatedEvent(1, "Test Portfolio", 10000m) };
+        PortfolioCreatedEvent[] events = new[] { new PortfolioCreatedEvent(1, "Test Portfolio", 10000m) };
         await _eventStore.AppendEventsAsync(TestStreamId, events, expectedVersion: 0);
 
         // Act

@@ -59,13 +59,13 @@ public class DataStatusPage : BasePage
 
     public async Task<bool> HasTableHeadersAsync()
     {
-        var headers = await DataCoverageTable.Locator("thead th").AllAsync();
+        IReadOnlyList<ILocator> headers = await DataCoverageTable.Locator("thead th").AllAsync();
         return headers.Count >= 5; // Ticker, Records, Start Date, End Date, Coverage
     }
 
     public async Task<string?> GetFirstTickerAsync()
     {
-        var firstRow = TableRows.First;
+        ILocator firstRow = TableRows.First;
         return await firstRow.Locator("td").First.TextContentAsync();
     }
 }

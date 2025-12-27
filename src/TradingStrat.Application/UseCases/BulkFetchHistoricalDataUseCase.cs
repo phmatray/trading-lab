@@ -36,49 +36,49 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
                     Error.Validation("Tickers list cannot be null or empty", "TICKERS_REQUIRED"));
             }
 
-        int totalTickers = command.Tickers.Count;
-        int completedTickers = 0;
-        var successfulResults = new Dictionary<string, DataSummaryResult>();
-        var failedResults = new Dictionary<string, string>();
-        var skippedResults = new List<string>();
+            int totalTickers = command.Tickers.Count;
+            int completedTickers = 0;
+            var successfulResults = new Dictionary<string, DataSummaryResult>();
+            var failedResults = new Dictionary<string, string>();
+            var skippedResults = new List<string>();
 
-        foreach (string ticker in command.Tickers)
-        {
-            if (cancellationToken.IsCancellationRequested)
+            foreach (string ticker in command.Tickers)
             {
-                break;
-            }
-
-            try
-            {
-                // Report progress: Starting ticker
-                ReportProgress(progress, totalTickers, completedTickers, ticker, "Checking data freshness...");
-
-                // Check if we should skip this ticker (already up-to-date)
-                if (command.SkipExisting && await IsDataUpToDateAsync(ticker, command.TimeFrame, command.EndDate))
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    skippedResults.Add(ticker);
-                    completedTickers++;
-                    ReportProgress(progress, totalTickers, completedTickers, ticker, "Skipped (up-to-date)");
-                    continue;
+                    break;
                 }
 
-                // Fetch data for this ticker
-                ReportProgress(progress, totalTickers, completedTickers, ticker, "Fetching data...");
-                DataSummaryResult result = await FetchSingleTickerAsync(ticker, command, progress);
+                try
+                {
+                    // Report progress: Starting ticker
+                    ReportProgress(progress, totalTickers, completedTickers, ticker, "Checking data freshness...");
 
-                successfulResults[ticker] = result;
-                ReportProgress(progress, totalTickers, completedTickers, ticker, $"Success ({result.NewRecords} new records)");
-            }
-            catch (Exception ex)
-            {
-                // Log the error but continue processing other tickers (graceful failure)
-                failedResults[ticker] = ex.Message;
-                ReportProgress(progress, totalTickers, completedTickers, ticker, $"Failed: {ex.Message}");
-            }
+                    // Check if we should skip this ticker (already up-to-date)
+                    if (command.SkipExisting && await IsDataUpToDateAsync(ticker, command.TimeFrame, command.EndDate))
+                    {
+                        skippedResults.Add(ticker);
+                        completedTickers++;
+                        ReportProgress(progress, totalTickers, completedTickers, ticker, "Skipped (up-to-date)");
+                        continue;
+                    }
 
-            completedTickers++;
-        }
+                    // Fetch data for this ticker
+                    ReportProgress(progress, totalTickers, completedTickers, ticker, "Fetching data...");
+                    DataSummaryResult result = await FetchSingleTickerAsync(ticker, command, progress);
+
+                    successfulResults[ticker] = result;
+                    ReportProgress(progress, totalTickers, completedTickers, ticker, $"Success ({result.NewRecords} new records)");
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but continue processing other tickers (graceful failure)
+                    failedResults[ticker] = ex.Message;
+                    ReportProgress(progress, totalTickers, completedTickers, ticker, $"Failed: {ex.Message}");
+                }
+
+                completedTickers++;
+            }
 
             // Final progress report
             ReportProgress(progress, totalTickers, completedTickers, string.Empty, "Completed");

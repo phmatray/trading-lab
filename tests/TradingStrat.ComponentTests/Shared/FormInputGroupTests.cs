@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,13 +16,13 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithLabel_DisplaysLabel()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Username")
             .Add(p => p.Id, "username-input"));
 
         // Assert
         cut.Markup.ShouldContain("Username");
-        var label = cut.Find("label");
+        IElement label = cut.Find("label");
         label.ShouldNotBeNull();
         label.GetAttribute("for").ShouldBe("username-input");
     }
@@ -30,7 +31,7 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithIsOptionalTrue_DisplaysOptionalIndicator()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Optional Field")
             .Add(p => p.Id, "optional-field")
             .Add(p => p.IsOptional, true));
@@ -43,7 +44,7 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithIsOptionalFalse_DoesNotDisplayOptionalIndicator()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Required Field")
             .Add(p => p.Id, "required-field")
             .Add(p => p.IsOptional, false));
@@ -56,14 +57,14 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithHelpText_DisplaysHelpText()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Email")
             .Add(p => p.Id, "email")
             .Add(p => p.HelpText, "We'll never share your email"));
 
         // Assert
         cut.Markup.ShouldContain("We'll never share your email");
-        var helpText = cut.Find("p.text-xs");
+        IElement helpText = cut.Find("p.text-xs");
         helpText.ShouldNotBeNull();
     }
 
@@ -71,12 +72,12 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithoutHelpText_DoesNotDisplayHelpText()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Email")
             .Add(p => p.Id, "email"));
 
         // Assert
-        var helpTexts = cut.FindAll("p.text-xs");
+        IReadOnlyList<IElement> helpTexts = cut.FindAll("p.text-xs");
         helpTexts.ShouldBeEmpty();
     }
 
@@ -84,7 +85,7 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_RendersChildContent()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Input")
             .Add(p => p.Id, "input")
             .Add(p => p.ChildContent, builder =>
@@ -96,7 +97,7 @@ public class FormInputGroupTests : BunitTestContext
             }));
 
         // Assert
-        var input = cut.Find("input#test-input");
+        IElement input = cut.Find("input#test-input");
         input.ShouldNotBeNull();
         input.ClassList.ShouldContain("form-input");
     }
@@ -105,7 +106,7 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_WithAllFeatures_RendersCorrectly()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Full Name")
             .Add(p => p.Id, "fullname")
             .Add(p => p.IsOptional, true)
@@ -121,7 +122,7 @@ public class FormInputGroupTests : BunitTestContext
         cut.Markup.ShouldContain("Full Name");
         cut.Markup.ShouldContain("(Optional)");
         cut.Markup.ShouldContain("Enter your full legal name");
-        var input = cut.Find("input#fullname");
+        IElement input = cut.Find("input#fullname");
         input.ShouldNotBeNull();
     }
 
@@ -129,12 +130,12 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_LabelHasCorrectForAttribute()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Password")
             .Add(p => p.Id, "password-field"));
 
         // Assert
-        var label = cut.Find("label");
+        IElement label = cut.Find("label");
         label.GetAttribute("for").ShouldBe("password-field");
     }
 
@@ -142,12 +143,12 @@ public class FormInputGroupTests : BunitTestContext
     public void FormInputGroup_LabelHasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<FormInputGroup>(parameters => parameters
+        IRenderedComponent<FormInputGroup> cut = Render<FormInputGroup>(parameters => parameters
             .Add(p => p.Label, "Test")
             .Add(p => p.Id, "test"));
 
         // Assert
-        var label = cut.Find("label");
+        IElement label = cut.Find("label");
         label.ClassList.ShouldContain("block");
         label.ClassList.ShouldContain("text-sm");
         label.ClassList.ShouldContain("font-medium");

@@ -1,7 +1,9 @@
 using FakeItEasy;
 using Shouldly;
+using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
@@ -37,7 +39,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act (default query: page 1, 25 items per page)
-        var result = await _useCase.ExecuteAsync();
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync();
 
         // Assert
         result.ShouldNotBeNull();
@@ -62,7 +64,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TickerStatuses.Count.ShouldBe(10);
@@ -84,7 +86,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TickerStatuses.Count.ShouldBe(10);
@@ -113,7 +115,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -161,7 +163,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -206,7 +208,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -245,7 +247,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -283,7 +285,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -320,7 +322,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(1);
@@ -348,7 +350,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TickerStatuses[0].Ticker.ShouldBe("AAPL");
@@ -376,7 +378,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TickerStatuses[0].RecordCount.ShouldBe(250); // MSFT
@@ -404,7 +406,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TickerStatuses[0].Ticker.ShouldBe("LOW");
@@ -436,7 +438,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync(query);
 
         // Assert
         result.Value.TotalTickers.ShouldBe(2); // Only AAPL and GOOGL (complete tickers)
@@ -453,7 +455,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
             .Returns(new List<TickerSummary>());
 
         // Act
-        var result = await _useCase.ExecuteAsync();
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync();
 
         // Assert
         result.ShouldNotBeNull();
@@ -481,7 +483,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         SetupHistoricalDataForSummaries(summaries, timeFrame);
 
         // Act
-        var result = await _useCase.ExecuteAsync();
+        Result<AllDataStatusResult> result = await _useCase.ExecuteAsync();
 
         // Assert
         result.Value.AverageCoveragePercentage.ShouldBeGreaterThan(0m);

@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -16,12 +17,12 @@ public class EquityChartTests : BunitTestContext
     public void EquityChart_WithNullData_DisplaysEmptyState()
     {
         // Arrange & Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, null));
 
         // Assert
         cut.Markup.ShouldContain("No equity curve data available.");
-        var emptyMessage = cut.Find(".text-gray-500");
+        IElement emptyMessage = cut.Find(".text-gray-500");
         emptyMessage.ShouldNotBeNull();
     }
 
@@ -29,7 +30,7 @@ public class EquityChartTests : BunitTestContext
     public void EquityChart_WithEmptyList_DisplaysEmptyState()
     {
         // Arrange & Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, new List<EquityPoint>()));
 
         // Assert
@@ -50,11 +51,11 @@ public class EquityChartTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, equityCurve));
 
         // Assert
-        var title = cut.Find("h3");
+        IElement title = cut.Find("h3");
         title.TextContent.ShouldBe("Equity Curve");
     }
 
@@ -70,11 +71,11 @@ public class EquityChartTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, equityCurve));
 
         // Assert
-        var card = cut.Find("div.card");
+        IElement card = cut.Find("div.card");
         card.ShouldNotBeNull();
     }
 
@@ -90,7 +91,7 @@ public class EquityChartTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, equityCurve));
 
         // Assert
@@ -109,7 +110,7 @@ public class EquityChartTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, equityCurve));
 
         // Assert
@@ -134,12 +135,12 @@ public class EquityChartTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<EquityChart>(parameters => parameters
+        IRenderedComponent<EquityChart> cut = Render<EquityChart>(parameters => parameters
             .Add(p => p.EquityCurve, equityCurve));
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var title = cut.Find("h3");
+        IElement title = cut.Find("h3");
         title.TextContent.ShouldBe("Equity Curve");
     }
 }

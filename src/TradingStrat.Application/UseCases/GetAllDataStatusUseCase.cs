@@ -55,7 +55,7 @@ public class GetAllDataStatusUseCase : BaseUseCase<DataStatusQuery?, AllDataStat
         }
 
         // Convert summaries to full status objects (with gap detection)
-        var statusTasks = summaries.Select(async summary =>
+        IEnumerable<Task<TickerDataStatus>> statusTasks = summaries.Select(async summary =>
         {
             return await GetTickerStatusAsync(summary.Ticker, timeFrame);
         });

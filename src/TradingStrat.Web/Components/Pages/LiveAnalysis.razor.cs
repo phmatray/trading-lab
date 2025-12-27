@@ -50,7 +50,7 @@ public partial class LiveAnalysis
             model.FetchFreshData
         );
 
-        var analysisResult = await LiveAnalysisUseCase.ExecuteAsync(command, progress);
+        Result<LiveAnalysisResult> analysisResult = await LiveAnalysisUseCase.ExecuteAsync(command, progress);
 
         if (analysisResult.IsFailure)
         {

@@ -35,7 +35,7 @@ public class ChatHistoryRepository : IChatHistoryPort
 
     public async Task ClearHistoryAsync(string sessionId)
     {
-        var messages = await _context.ChatMessages
+        List<ChatMessage> messages = await _context.ChatMessages
             .Where(m => m.SessionId == sessionId)
             .ToListAsync();
 

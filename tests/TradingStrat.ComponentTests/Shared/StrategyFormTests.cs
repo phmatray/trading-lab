@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,17 +16,17 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_InitialRender_DisplaysMovingAverageByDefault()
     {
         // Arrange & Act
-        var cut = Render<StrategyForm>();
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
 
         // Assert
         cut.Markup.ShouldContain("Strategy Configuration");
         cut.Markup.ShouldContain("Strategy Type");
 
         // Should display MA parameter inputs
-        var fastPeriodInput = cut.Find("#fast-period");
+        IElement fastPeriodInput = cut.Find("#fast-period");
         fastPeriodInput.ShouldNotBeNull();
 
-        var slowPeriodInput = cut.Find("#slow-period");
+        IElement slowPeriodInput = cut.Find("#slow-period");
         slowPeriodInput.ShouldNotBeNull();
     }
 
@@ -33,10 +34,10 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_StrategySelector_HasAllStrategyOptions()
     {
         // Arrange & Act
-        var cut = Render<StrategyForm>();
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
 
         // Assert
-        var select = cut.Find("#strategy-select");
+        IElement select = cut.Find("#strategy-select");
         cut.Markup.ShouldContain("Moving Average Crossover");
         cut.Markup.ShouldContain("RSI Strategy");
         cut.Markup.ShouldContain("MACD Strategy");
@@ -48,20 +49,20 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_SelectRSI_DisplaysRSIParameters()
     {
         // Arrange
-        var cut = Render<StrategyForm>();
-        var select = cut.Find("#strategy-select");
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("rsi");
 
         // Assert
-        var periodInput = cut.Find("#rsi-period");
+        IElement periodInput = cut.Find("#rsi-period");
         periodInput.ShouldNotBeNull();
 
-        var oversoldInput = cut.Find("#oversold");
+        IElement oversoldInput = cut.Find("#oversold");
         oversoldInput.ShouldNotBeNull();
 
-        var overboughtInput = cut.Find("#overbought");
+        IElement overboughtInput = cut.Find("#overbought");
         overboughtInput.ShouldNotBeNull();
 
         // Should NOT display MA inputs
@@ -72,20 +73,20 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_SelectMACD_DisplaysMACDParameters()
     {
         // Arrange
-        var cut = Render<StrategyForm>();
-        var select = cut.Find("#strategy-select");
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("macd");
 
         // Assert
-        var fastInput = cut.Find("#macd-fast");
+        IElement fastInput = cut.Find("#macd-fast");
         fastInput.ShouldNotBeNull();
 
-        var slowInput = cut.Find("#macd-slow");
+        IElement slowInput = cut.Find("#macd-slow");
         slowInput.ShouldNotBeNull();
 
-        var signalInput = cut.Find("#macd-signal");
+        IElement signalInput = cut.Find("#macd-signal");
         signalInput.ShouldNotBeNull();
     }
 
@@ -93,17 +94,17 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_SelectML_DisplaysMLParameters()
     {
         // Arrange
-        var cut = Render<StrategyForm>();
-        var select = cut.Find("#strategy-select");
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("ml");
 
         // Assert
-        var buyThresholdInput = cut.Find("#buy-threshold");
+        IElement buyThresholdInput = cut.Find("#buy-threshold");
         buyThresholdInput.ShouldNotBeNull();
 
-        var sellThresholdInput = cut.Find("#sell-threshold");
+        IElement sellThresholdInput = cut.Find("#sell-threshold");
         sellThresholdInput.ShouldNotBeNull();
     }
 
@@ -111,8 +112,8 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_SelectIchimoku_DisplaysIchimokuParameters()
     {
         // Arrange
-        var cut = Render<StrategyForm>();
-        var select = cut.Find("#strategy-select");
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("ichimoku");
@@ -133,10 +134,10 @@ public class StrategyFormTests : BunitTestContext
     {
         // Arrange
         string? selectedStrategy = null;
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategyChanged, (string strategy) => selectedStrategy = strategy));
 
-        var select = cut.Find("#strategy-select");
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("rsi");
@@ -150,10 +151,10 @@ public class StrategyFormTests : BunitTestContext
     {
         // Arrange
         Dictionary<string, object>? parameters = null;
-        var cut = Render<StrategyForm>(builder => builder
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(builder => builder
             .Add(p => p.ParametersChanged, (Dictionary<string, object> p) => parameters = p));
 
-        var select = cut.Find("#strategy-select");
+        IElement select = cut.Find("#strategy-select");
 
         // Act
         select.Change("rsi");
@@ -169,12 +170,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_MAParameters_HaveCorrectDefaultValues()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ma"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         currentParams["FastPeriod"].ShouldBe(20);
@@ -185,12 +186,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_RSIParameters_HaveCorrectDefaultValues()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "rsi"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         currentParams["Period"].ShouldBe(14);
@@ -202,12 +203,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_MACDParameters_HaveCorrectDefaultValues()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "macd"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         currentParams["FastPeriod"].ShouldBe(12);
@@ -219,12 +220,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_MLParameters_HaveCorrectDefaultValues()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ml"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         // ML thresholds are divided by 100 in GetCurrentParameters
@@ -236,12 +237,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_IchimokuParameters_HaveCorrectDefaultValues()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ichimoku"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         currentParams["TenkanPeriod"].ShouldBe(9);
@@ -258,12 +259,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_MAInputs_HaveCorrectValidationAttributes()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ma"));
 
         // Act
-        var fastPeriod = cut.Find("#fast-period");
-        var slowPeriod = cut.Find("#slow-period");
+        IElement fastPeriod = cut.Find("#fast-period");
+        IElement slowPeriod = cut.Find("#slow-period");
 
         // Assert
         fastPeriod.GetAttribute("type").ShouldBe("number");
@@ -279,13 +280,13 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_RSIInputs_HaveCorrectValidationAttributes()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "rsi"));
 
         // Act
-        var periodInput = cut.Find("#rsi-period");
-        var oversoldInput = cut.Find("#oversold");
-        var overboughtInput = cut.Find("#overbought");
+        IElement periodInput = cut.Find("#rsi-period");
+        IElement oversoldInput = cut.Find("#oversold");
+        IElement overboughtInput = cut.Find("#overbought");
 
         // Assert
         periodInput.GetAttribute("min").ShouldBe("1");
@@ -302,12 +303,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_MLInputs_HaveStepAttribute()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ml"));
 
         // Act
-        var buyThreshold = cut.Find("#buy-threshold");
-        var sellThreshold = cut.Find("#sell-threshold");
+        IElement buyThreshold = cut.Find("#buy-threshold");
+        IElement sellThreshold = cut.Find("#sell-threshold");
 
         // Assert
         buyThreshold.GetAttribute("step").ShouldBe("0.1");
@@ -323,7 +324,7 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_IchimokuExitMode_HasCorrectOptions()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ichimoku"));
 
         // Act & Assert
@@ -336,7 +337,7 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_IchimokuEntryMode_HasCorrectOptions()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "ichimoku"));
 
         // Act & Assert
@@ -349,10 +350,10 @@ public class StrategyFormTests : BunitTestContext
     {
         // Arrange
         Dictionary<string, object>? parameters = null;
-        var cut = Render<StrategyForm>(builder => builder
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(builder => builder
             .Add(p => p.ParametersChanged, (Dictionary<string, object> p) => parameters = p));
 
-        var select = cut.Find("#strategy-select");
+        IElement select = cut.Find("#strategy-select");
 
         // Act - Switch from MA to RSI
         select.Change("rsi");
@@ -376,12 +377,12 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_GetCurrentParameters_ReturnsEmptyForUnknownStrategy()
     {
         // Arrange
-        var cut = Render<StrategyForm>(parameters => parameters
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
             .Add(p => p.SelectedStrategy, "unknown"));
 
         // Act
-        var instance = cut.Instance;
-        var currentParams = instance.GetCurrentParameters();
+        StrategyForm instance = cut.Instance;
+        Dictionary<string, object> currentParams = instance.GetCurrentParameters();
 
         // Assert
         currentParams.ShouldBeEmpty();
@@ -391,10 +392,10 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_HasCardStyling()
     {
         // Arrange & Act
-        var cut = Render<StrategyForm>();
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
 
         // Assert
-        var card = cut.Find(".card");
+        IElement card = cut.Find(".card");
         card.ShouldNotBeNull();
     }
 
@@ -402,10 +403,10 @@ public class StrategyFormTests : BunitTestContext
     public void StrategyForm_StrategySelector_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<StrategyForm>();
+        IRenderedComponent<StrategyForm> cut = Render<StrategyForm>();
 
         // Assert
-        var select = cut.Find("#strategy-select");
+        IElement select = cut.Find("#strategy-select");
         select.ClassList.ShouldContain("w-full");
         select.ClassList.ShouldContain("rounded-lg");
     }

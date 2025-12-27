@@ -6,6 +6,7 @@ using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
@@ -30,7 +31,7 @@ public class RunBacktestUseCaseTests
 
         var indicatorCalculator = new IndicatorCalculator();
         var strategyRegistry = new StrategyRegistry();
-        var mlPredictionService = A.Fake<IMLPredictionService>();
+        IMLPredictionService mlPredictionService = A.Fake<IMLPredictionService>();
         var parameterDefaults = new StrategyParameterDefaults();
         _strategyFactory = new StrategyFactory(
             indicatorCalculator,
@@ -63,7 +64,7 @@ public class RunBacktestUseCaseTests
             EndDate: new DateTime(2024, 3, 31));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BacktestResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -81,7 +82,7 @@ public class RunBacktestUseCaseTests
             StrategyType: StrategyType.MovingAverageCrossover);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BacktestResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -130,7 +131,7 @@ public class RunBacktestUseCaseTests
             InitialCapital: 10000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BacktestResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -153,7 +154,7 @@ public class RunBacktestUseCaseTests
             EndDate: endDate);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BacktestResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.StartDate.ShouldBe(startDate);
@@ -179,7 +180,7 @@ public class RunBacktestUseCaseTests
             MinimumCommission: 5.0m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BacktestResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();

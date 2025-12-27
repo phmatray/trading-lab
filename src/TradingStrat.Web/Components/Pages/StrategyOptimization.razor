@@ -279,7 +279,7 @@
 
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    @foreach (var param in optimizationResult.BestParameters)
+                    @foreach (KeyValuePair<string, decimal> param in optimizationResult.BestParameters)
                     {
                         <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                             <div class="text-xs text-gray-600 dark:text-gray-400">@param.Key</div>

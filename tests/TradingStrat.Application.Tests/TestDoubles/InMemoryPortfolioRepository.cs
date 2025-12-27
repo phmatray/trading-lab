@@ -1,3 +1,4 @@
+using System.Reflection;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
 
@@ -252,7 +253,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
     /// </summary>
     private static void LoadPositionsIntoPortfolio(Portfolio portfolio, List<Position> positions)
     {
-        var positionsField = typeof(Portfolio).GetField("_positions",
+        FieldInfo? positionsField = typeof(Portfolio).GetField("_positions",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         if (positionsField != null)

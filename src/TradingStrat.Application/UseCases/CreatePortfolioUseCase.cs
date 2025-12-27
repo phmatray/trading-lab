@@ -3,6 +3,7 @@ using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -26,7 +27,7 @@ public class CreatePortfolioUseCase : BaseUseCase<CreatePortfolioCommand, Create
     private async Task<CreatePortfolioResult> ExecuteCoreAsync(CreatePortfolioCommand command)
     {
         // Create portfolio via repository
-        var portfolio = await _portfolioPort.CreatePortfolioAsync(
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync(
             command.Name,
             command.Description,
             command.InitialCash);

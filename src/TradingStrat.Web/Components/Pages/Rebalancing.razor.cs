@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
@@ -72,7 +73,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
                 InvokeAsync(() => ProgressService.UpdateProgress(message));
             });
 
-            var snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
+            Result<PortfolioSnapshot> snapshotResult = await GetSnapshotUseCase.ExecuteAsync(PortfolioId, progress);
 
             if (snapshotResult.IsFailure)
             {
@@ -162,7 +163,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
                 _formModel.MinimumCommission
             );
 
-            var result = await CalculateRebalancingUseCase.ExecuteAsync(command, progress);
+            Result<RebalancingPlan> result = await CalculateRebalancingUseCase.ExecuteAsync(command, progress);
 
             if (result.IsSuccess)
             {

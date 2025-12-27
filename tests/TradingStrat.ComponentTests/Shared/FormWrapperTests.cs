@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,7 +16,7 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_RendersChildContent()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ChildContent, builder =>
             {
                 builder.OpenElement(0, "div");
@@ -25,7 +26,7 @@ public class FormWrapperTests : BunitTestContext
             }));
 
         // Assert
-        var child = cut.Find("div.test-child");
+        IElement child = cut.Find("div.test-child");
         child.ShouldNotBeNull();
         child.TextContent.ShouldBe("Test Content");
     }
@@ -34,12 +35,12 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithErrorMessage_DisplaysErrorAlert()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ErrorMessage, "An error occurred"));
 
         // Assert
         cut.Markup.ShouldContain("An error occurred");
-        var alert = cut.FindComponent<AlertMessage>();
+        IRenderedComponent<AlertMessage> alert = cut.FindComponent<AlertMessage>();
         alert.ShouldNotBeNull();
     }
 
@@ -47,12 +48,12 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithWarningMessage_DisplaysWarningAlert()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.WarningMessage, "This is a warning"));
 
         // Assert
         cut.Markup.ShouldContain("This is a warning");
-        var alert = cut.FindComponent<AlertMessage>();
+        IRenderedComponent<AlertMessage> alert = cut.FindComponent<AlertMessage>();
         alert.ShouldNotBeNull();
     }
 
@@ -60,12 +61,12 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithSuccessMessage_DisplaysSuccessAlert()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.SuccessMessage, "Operation successful"));
 
         // Assert
         cut.Markup.ShouldContain("Operation successful");
-        var alert = cut.FindComponent<AlertMessage>();
+        IRenderedComponent<AlertMessage> alert = cut.FindComponent<AlertMessage>();
         alert.ShouldNotBeNull();
     }
 
@@ -73,10 +74,10 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithoutMessages_DoesNotDisplayAlerts()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>();
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>();
 
         // Assert
-        var alerts = cut.FindComponents<AlertMessage>();
+        IReadOnlyList<IRenderedComponent<AlertMessage>> alerts = cut.FindComponents<AlertMessage>();
         alerts.ShouldBeEmpty();
     }
 
@@ -84,11 +85,11 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithShowProgressIndicatorTrue_DisplaysProgressIndicator()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ShowProgressIndicator, true));
 
         // Assert
-        var progressIndicator = cut.FindComponent<ProgressIndicator>();
+        IRenderedComponent<ProgressIndicator> progressIndicator = cut.FindComponent<ProgressIndicator>();
         progressIndicator.ShouldNotBeNull();
     }
 
@@ -96,11 +97,11 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithShowProgressIndicatorFalse_DoesNotDisplayProgressIndicator()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ShowProgressIndicator, false));
 
         // Assert
-        var progressIndicators = cut.FindComponents<ProgressIndicator>();
+        IReadOnlyList<IRenderedComponent<ProgressIndicator>> progressIndicators = cut.FindComponents<ProgressIndicator>();
         progressIndicators.ShouldBeEmpty();
     }
 
@@ -108,7 +109,7 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithMultipleMessages_DisplaysAllMessages()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ErrorMessage, "Error occurred")
             .Add(p => p.WarningMessage, "Warning message")
             .Add(p => p.SuccessMessage, "Success message"));
@@ -123,7 +124,7 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_MessagesDisplayInCorrectOrder()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ErrorMessage, "Error")
             .Add(p => p.WarningMessage, "Warning")
             .Add(p => p.SuccessMessage, "Success"));
@@ -142,13 +143,13 @@ public class FormWrapperTests : BunitTestContext
     public void FormWrapper_WithEmptyStringMessages_DoesNotDisplayAlerts()
     {
         // Arrange & Act
-        var cut = Render<FormWrapper>(parameters => parameters
+        IRenderedComponent<FormWrapper> cut = Render<FormWrapper>(parameters => parameters
             .Add(p => p.ErrorMessage, "")
             .Add(p => p.WarningMessage, "")
             .Add(p => p.SuccessMessage, ""));
 
         // Assert
-        var alerts = cut.FindComponents<AlertMessage>();
+        IReadOnlyList<IRenderedComponent<AlertMessage>> alerts = cut.FindComponents<AlertMessage>();
         alerts.ShouldBeEmpty();
     }
 }

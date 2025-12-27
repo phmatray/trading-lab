@@ -11,11 +11,11 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenVariantAWins_ShouldReturnVariantA()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 1);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 1);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);
@@ -29,11 +29,11 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenVariantBWins_ShouldReturnVariantB()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 2);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 2);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);
@@ -47,11 +47,11 @@ public class StrategyComparisonTests
     public void WinningVariant_WhenTie_ShouldReturnNull()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 0);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 0);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);
@@ -65,11 +65,11 @@ public class StrategyComparisonTests
     public void WinningResult_WhenVariantAWins_ShouldReturnResultA()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 1);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 1);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);
@@ -82,11 +82,11 @@ public class StrategyComparisonTests
     public void WinningResult_WhenVariantBWins_ShouldReturnResultB()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 2);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 2);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);
@@ -99,11 +99,11 @@ public class StrategyComparisonTests
     public void WinningResult_WhenTie_ShouldReturnNull()
     {
         // Arrange
-        var variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
-        var variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
-        var resultA = CreateBacktestResult("Strategy A");
-        var resultB = CreateBacktestResult("Strategy B");
-        var ranking = CreateRanking(winnerIndex: 0);
+        StrategyVariant variantA = CreateVariant("Variant A", StrategyType.MovingAverageCrossover);
+        StrategyVariant variantB = CreateVariant("Variant B", StrategyType.MovingAverageCrossover);
+        BacktestResult resultA = CreateBacktestResult("Strategy A");
+        BacktestResult resultB = CreateBacktestResult("Strategy B");
+        ComparisonRanking ranking = CreateRanking(winnerIndex: 0);
 
         var comparison = new StrategyComparison(
             variantA, resultA, variantB, resultB, ranking, "TEST", DateTime.Now);

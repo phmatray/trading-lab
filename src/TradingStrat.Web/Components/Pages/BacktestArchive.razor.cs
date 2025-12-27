@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Web.Components.Base;
 
 namespace TradingStrat.Web.Components.Pages;
@@ -50,7 +51,7 @@ public partial class BacktestArchive : BaseComponent
                 Limit: 100
             );
 
-            var result = await GetBacktestArchiveUseCase.ExecuteAsync(query);
+            Result<BacktestArchiveResult> result = await GetBacktestArchiveUseCase.ExecuteAsync(query);
 
             if (result.IsFailure)
             {

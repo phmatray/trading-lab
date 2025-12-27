@@ -1,4 +1,5 @@
 using Shouldly;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Events;
 using TradingStrat.Domain.Exceptions;
@@ -35,9 +36,9 @@ public class PortfolioAggregateTests
         portfolio.AddPosition(position);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
-        var positionEvent = events[0].ShouldBeOfType<PositionAddedEvent>();
+        PositionAddedEvent positionEvent = events[0].ShouldBeOfType<PositionAddedEvent>();
         positionEvent.Ticker.ShouldBe("AAPL");
         positionEvent.Quantity.ShouldBe(10);
         positionEvent.EntryPrice.ShouldBe(150m);
@@ -51,7 +52,7 @@ public class PortfolioAggregateTests
         portfolio.AddPosition(new Position { Ticker = "AAPL", Quantity = 10, EntryPrice = 150m, EntryDate = DateTime.Today });
 
         // Act & Assert
-        var exception = Should.Throw<DuplicatePositionException>(() =>
+        DuplicatePositionException exception = Should.Throw<DuplicatePositionException>(() =>
             portfolio.AddPosition(new Position { Ticker = "AAPL", Quantity = 5, EntryPrice = 155m, EntryDate = DateTime.Today })
         );
         exception.Ticker.ShouldBe("AAPL");
@@ -98,9 +99,9 @@ public class PortfolioAggregateTests
         portfolio.RemovePosition("AAPL");
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
-        var removedEvent = events[0].ShouldBeOfType<PositionRemovedEvent>();
+        PositionRemovedEvent removedEvent = events[0].ShouldBeOfType<PositionRemovedEvent>();
         removedEvent.Ticker.ShouldBe("AAPL");
         removedEvent.Quantity.ShouldBe(10);
     }
@@ -112,7 +113,7 @@ public class PortfolioAggregateTests
         var portfolio = new Portfolio { Id = 1, Name = "Test", Cash = 10000m };
 
         // Act & Assert
-        var exception = Should.Throw<PositionNotFoundException>(() =>
+        PositionNotFoundException exception = Should.Throw<PositionNotFoundException>(() =>
             portfolio.RemovePosition("MSFT")
         );
         exception.Ticker.ShouldBe("MSFT");
@@ -140,15 +141,15 @@ public class PortfolioAggregateTests
     {
         // Arrange
         var portfolio = new Portfolio { Id = 1, Name = "Test", Cash = 10000m };
-        var transactionDate = DateTime.Today;
+        DateTime transactionDate = DateTime.Today;
 
         // Act
         portfolio.RecordCashTransaction(TransactionType.Deposit, 5000m, transactionDate);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
-        var cashEvent = events[0].ShouldBeOfType<CashTransactionRecordedEvent>();
+        CashTransactionRecordedEvent cashEvent = events[0].ShouldBeOfType<CashTransactionRecordedEvent>();
         cashEvent.Type.ShouldBe(TransactionType.Deposit);
         cashEvent.Amount.ShouldBe(5000m);
         cashEvent.TransactionDate.ShouldBe(transactionDate);
@@ -174,7 +175,7 @@ public class PortfolioAggregateTests
         var portfolio = new Portfolio { Id = 1, Name = "Test", Cash = 10000m };
 
         // Act & Assert
-        var exception = Should.Throw<InsufficientCashException>(() =>
+        InsufficientCashException exception = Should.Throw<InsufficientCashException>(() =>
             portfolio.RecordCashTransaction(TransactionType.Withdrawal, 15000m, DateTime.Today)
         );
         exception.AvailableCash.ShouldBe(10000m);
@@ -193,7 +194,7 @@ public class PortfolioAggregateTests
         portfolio.AddPosition(new Position { Ticker = "AAPL", Quantity = 10, EntryPrice = 150m, EntryDate = DateTime.Today });
 
         // Act
-        var positions = portfolio.Positions;
+        IReadOnlyList<Position> positions = portfolio.Positions;
 
         // Assert
         positions.ShouldBeAssignableTo<IReadOnlyList<Position>>();

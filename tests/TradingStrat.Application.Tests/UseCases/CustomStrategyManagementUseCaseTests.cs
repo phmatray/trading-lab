@@ -2,8 +2,10 @@ using Shouldly;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
+using ValidationResult = TradingStrat.Application.Commands.ValidationResult;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -45,7 +47,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> result = await _useCase.CreateStrategyAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -94,7 +96,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> result = await _useCase.CreateStrategyAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -117,7 +119,7 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        var created = await _useCase.CreateStrategyAsync(createCommand);
+        Result<CustomStrategyResult> created = await _useCase.CreateStrategyAsync(createCommand);
 
         // Modify the definition
         StrategyDefinition modifiedDefinition = new(
@@ -148,7 +150,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.UpdateStrategyAsync(updateCommand);
+        Result<CustomStrategyResult> result = await _useCase.UpdateStrategyAsync(updateCommand);
 
         // Assert
         result.Value.Id.ShouldBe(created.Value.Id);
@@ -172,7 +174,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.UpdateStrategyAsync(command);
+        Result<CustomStrategyResult> result = await _useCase.UpdateStrategyAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -192,7 +194,7 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        var created = await _useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> created = await _useCase.CreateStrategyAsync(command);
         _repository.Count.ShouldBe(1);
 
         // Act
@@ -214,10 +216,10 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        var created = await _useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> created = await _useCase.CreateStrategyAsync(command);
 
         // Act
-        var result = await _useCase.GetStrategyByIdAsync(created.Value.Id);
+        Result<CustomStrategyResult> result = await _useCase.GetStrategyByIdAsync(created.Value.Id);
 
         // Assert
         result.ShouldNotBeNull();
@@ -229,7 +231,7 @@ public class CustomStrategyManagementUseCaseTests
     public async Task GetStrategyByIdAsync_WithNonExistentId_ThrowsException()
     {
         // Act
-        var result = await _useCase.GetStrategyByIdAsync(999);
+        Result<CustomStrategyResult> result = await _useCase.GetStrategyByIdAsync(999);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -249,7 +251,7 @@ public class CustomStrategyManagementUseCaseTests
             "Strategy 3", "Desc 3", "User", "Momentum", CreateValidRSIDefinition()));
 
         // Act
-        var results = await _useCase.GetAllStrategiesAsync();
+        Result<List<CustomStrategyResult>> results = await _useCase.GetAllStrategiesAsync();
 
         // Assert
         results.Value.Count.ShouldBe(3);
@@ -267,7 +269,7 @@ public class CustomStrategyManagementUseCaseTests
             "Strategy 3", "Desc", "User", "Momentum", CreateValidRSIDefinition()));
 
         // Act
-        var results = await _useCase.GetAllStrategiesAsync("Momentum");
+        Result<List<CustomStrategyResult>> results = await _useCase.GetAllStrategiesAsync("Momentum");
 
         // Assert
         results.Value.Count.ShouldBe(2);
@@ -286,10 +288,10 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        var originalResult = await _useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> originalResult = await _useCase.CreateStrategyAsync(command);
 
         // Act
-        var cloneResult2 = await _useCase.CloneStrategyAsync(originalResult.Value.Id, "Cloned Strategy");
+        Result<CustomStrategyResult> cloneResult2 = await _useCase.CloneStrategyAsync(originalResult.Value.Id, "Cloned Strategy");
 
         // Assert
         cloneResult2.Value.Id.ShouldNotBe(originalResult.Value.Id);
@@ -311,7 +313,7 @@ public class CustomStrategyManagementUseCaseTests
         StrategyDefinition definition = CreateValidRSIDefinition();
 
         // Act
-        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        Result<ValidationResult> result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
         result.Value.IsValid.ShouldBeTrue();
@@ -342,7 +344,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        Result<ValidationResult> result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
         result.Value.IsValid.ShouldBeFalse();
@@ -373,7 +375,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        Result<ValidationResult> result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
         result.Value.IsValid.ShouldBeFalse();
@@ -416,7 +418,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        Result<ValidationResult> result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
         result.Value.IsValid.ShouldBeFalse();
@@ -459,7 +461,7 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        Result<ValidationResult> result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
         result.Value.IsValid.ShouldBeFalse();

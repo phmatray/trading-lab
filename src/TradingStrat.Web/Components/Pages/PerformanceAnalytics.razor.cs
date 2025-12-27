@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
@@ -108,7 +109,7 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
                 _endDate
             );
 
-            var result = await GetPerformanceUseCase.ExecuteAsync(query, progress);
+            Result<PortfolioPerformanceHistory> result = await GetPerformanceUseCase.ExecuteAsync(query, progress);
 
             if (result.IsSuccess)
             {

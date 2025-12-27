@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,12 +16,12 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WhenLoading_DisplaysLoadingSpinner()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsLoading, true));
 
         // Assert
         cut.Markup.ShouldContain("Loading data...");
-        var spinner = cut.Find("div.animate-spin");
+        IElement spinner = cut.Find("div.animate-spin");
         spinner.ShouldNotBeNull();
     }
 
@@ -28,11 +29,11 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WhenLoading_DoesNotDisplayTable()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsLoading, true));
 
         // Assert
-        var tables = cut.FindAll("table");
+        IReadOnlyList<IElement> tables = cut.FindAll("table");
         tables.ShouldBeEmpty();
     }
 
@@ -43,13 +44,13 @@ public class DataTableTests : BunitTestContext
         string emptyMessage = "No records found";
 
         // Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsEmpty, true)
             .Add(p => p.EmptyMessage, emptyMessage));
 
         // Assert
         cut.Markup.ShouldContain(emptyMessage);
-        var emptyIcon = cut.Find("svg");
+        IElement emptyIcon = cut.Find("svg");
         emptyIcon.ShouldNotBeNull();
     }
 
@@ -57,7 +58,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WhenEmpty_UsesDefaultEmptyMessage()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsEmpty, true));
 
         // Assert
@@ -68,7 +69,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WhenEmptyWithActions_DisplaysActions()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsEmpty, true)
             .Add(p => p.EmptyActions, builder =>
             {
@@ -79,7 +80,7 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var actionButton = cut.Find("button.test-action");
+        IElement actionButton = cut.Find("button.test-action");
         actionButton.ShouldNotBeNull();
         actionButton.TextContent.ShouldBe("Add Data");
     }
@@ -88,7 +89,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WithData_DisplaysTable()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsLoading, false)
             .Add(p => p.IsEmpty, false)
             .Add(p => p.TableBody, builder =>
@@ -99,7 +100,7 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var table = cut.Find("table");
+        IElement table = cut.Find("table");
         table.ShouldNotBeNull();
         table.ClassList.ShouldContain("min-w-full");
     }
@@ -108,7 +109,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WithTableHeader_RendersHeader()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.TableHeader, builder =>
             {
                 builder.OpenElement(0, "tr");
@@ -119,7 +120,7 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var thead = cut.Find("thead");
+        IElement thead = cut.Find("thead");
         thead.ShouldNotBeNull();
         thead.ClassList.ShouldContain("bg-gray-50");
         thead.TextContent.ShouldContain("Column 1");
@@ -129,7 +130,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WithTableBody_RendersBody()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.TableBody, builder =>
             {
                 builder.OpenElement(0, "tr");
@@ -140,7 +141,7 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var tbody = cut.Find("tbody");
+        IElement tbody = cut.Find("tbody");
         tbody.ShouldNotBeNull();
         tbody.ClassList.ShouldContain("bg-white");
         tbody.TextContent.ShouldContain("Cell Data");
@@ -150,7 +151,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WithTableFooter_RendersFooter()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.TableFooter, builder =>
             {
                 builder.OpenElement(0, "tr");
@@ -161,7 +162,7 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var tfoot = cut.Find("tfoot");
+        IElement tfoot = cut.Find("tfoot");
         tfoot.ShouldNotBeNull();
         tfoot.ClassList.ShouldContain("bg-gray-50");
         tfoot.TextContent.ShouldContain("Footer Content");
@@ -171,7 +172,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_WithCompleteTable_RendersAllParts()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.TableHeader, builder =>
             {
                 builder.OpenElement(0, "tr");
@@ -198,18 +199,18 @@ public class DataTableTests : BunitTestContext
             }));
 
         // Assert
-        var table = cut.Find("table");
+        IElement table = cut.Find("table");
         table.ShouldNotBeNull();
 
-        var thead = cut.Find("thead");
+        IElement thead = cut.Find("thead");
         thead.ShouldNotBeNull();
         thead.TextContent.ShouldContain("Header");
 
-        var tbody = cut.Find("tbody");
+        IElement tbody = cut.Find("tbody");
         tbody.ShouldNotBeNull();
         tbody.TextContent.ShouldContain("Body");
 
-        var tfoot = cut.Find("tfoot");
+        IElement tfoot = cut.Find("tfoot");
         tfoot.ShouldNotBeNull();
         tfoot.TextContent.ShouldContain("Footer");
     }
@@ -218,10 +219,10 @@ public class DataTableTests : BunitTestContext
     public void DataTable_HasCorrectTestId()
     {
         // Arrange & Act
-        var cut = Render<DataTable>();
+        IRenderedComponent<DataTable> cut = Render<DataTable>();
 
         // Assert
-        var container = cut.Find("[data-testid='data-table']");
+        IElement container = cut.Find("[data-testid='data-table']");
         container.ShouldNotBeNull();
         container.ClassList.ShouldContain("card");
     }
@@ -230,7 +231,7 @@ public class DataTableTests : BunitTestContext
     public void DataTable_LoadingTakesPriorityOverEmpty()
     {
         // Arrange & Act
-        var cut = Render<DataTable>(parameters => parameters
+        IRenderedComponent<DataTable> cut = Render<DataTable>(parameters => parameters
             .Add(p => p.IsLoading, true)
             .Add(p => p.IsEmpty, true));
 

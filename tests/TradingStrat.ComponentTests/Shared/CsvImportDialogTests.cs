@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -17,7 +18,7 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HiddenWhenClosed()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, false)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
@@ -30,7 +31,7 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_ShowsWhenOpen()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
@@ -44,13 +45,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasModalAriaAttributes()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var modal = cut.Find("[role='dialog']");
+        IElement modal = cut.Find("[role='dialog']");
         modal.ShouldNotBeNull();
         modal.GetAttribute("aria-modal").ShouldBe("true");
         modal.GetAttribute("aria-labelledby").ShouldBe("modal-title");
@@ -60,7 +61,7 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_DisplaysInstructions()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
@@ -75,13 +76,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasFileInputWithCorrectAccept()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var fileInput = cut.FindComponent<InputFile>();
+        IRenderedComponent<InputFile> fileInput = cut.FindComponent<InputFile>();
         fileInput.ShouldNotBeNull();
         fileInput.Instance.AdditionalAttributes?["accept"].ShouldBe(".csv,.txt");
     }
@@ -90,13 +91,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_ImportButtonDisabledWhenNoTickers()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var importButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Import");
+        IRenderedComponent<Button> importButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Import");
         importButtonComponent.Instance.Disabled.ShouldBeTrue();
     }
 
@@ -105,13 +106,13 @@ public class CsvImportDialogTests : BunitTestContext
     {
         // Arrange
         bool closeCalled = false;
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => closeCalled = true)));
 
         // Act
-        var cancelButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Cancel");
+        IRenderedComponent<Button> cancelButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Cancel");
         cancelButtonComponent.Find("button").Click();
 
         // Assert
@@ -122,13 +123,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_CloseButtonHasCorrectAriaLabel()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var closeButton = cut.Find("button[aria-label='Close']");
+        IElement closeButton = cut.Find("button[aria-label='Close']");
         closeButton.ShouldNotBeNull();
     }
 
@@ -136,13 +137,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasBackdrop()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var backdrop = cut.Find(".bg-gray-500.bg-opacity-75");
+        IElement backdrop = cut.Find(".bg-gray-500.bg-opacity-75");
         backdrop.ShouldNotBeNull();
     }
 
@@ -150,13 +151,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasCorrectModalStyling()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var modalContainer = cut.Find(".fixed.inset-0.z-50");
+        IElement modalContainer = cut.Find(".fixed.inset-0.z-50");
         modalContainer.ShouldNotBeNull();
     }
 
@@ -164,13 +165,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasHeaderBorderAndPadding()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var header = cut.Find(".border-b");
+        IElement header = cut.Find(".border-b");
         header.ShouldNotBeNull();
         header.ClassList.ShouldContain("px-6");
         header.ClassList.ShouldContain("py-4");
@@ -180,13 +181,13 @@ public class CsvImportDialogTests : BunitTestContext
     public void CsvImportDialog_HasFooterWithButtons()
     {
         // Arrange & Act
-        var cut = Render<CsvImportDialog>(parameters => parameters
+        IRenderedComponent<CsvImportDialog> cut = Render<CsvImportDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnTickersImported, EventCallback.Factory.Create<List<string>>(this, _ => { }))
             .Add(p => p.OnClose, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var footer = cut.Find(".border-t");
+        IElement footer = cut.Find(".border-t");
         footer.ShouldNotBeNull();
         cut.Markup.ShouldContain("Cancel");
         cut.Markup.ShouldContain("Import");

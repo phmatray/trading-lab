@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -16,7 +17,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WhenClosed_RendersNothing()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, false));
 
         // Assert
@@ -27,7 +28,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WhenOpen_RendersDialog()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Title, "Confirm Delete")
             .Add(p => p.Message, "Are you sure?"));
@@ -45,7 +46,7 @@ public class ConfirmDialogTests : BunitTestContext
         string message = "This action cannot be undone. Are you sure you want to delete this portfolio?";
 
         // Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Message, message));
 
@@ -60,13 +61,13 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WithDifferentTypes_DisplaysIcon(ConfirmType type)
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Type, type));
 
         // Assert - Find the icon (h-12 w-12), not the close button (w-6 h-6)
-        var svgs = cut.FindAll("svg");
-        var iconSvg = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
+        IReadOnlyList<IElement> svgs = cut.FindAll("svg");
+        IElement? iconSvg = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
         iconSvg.ShouldNotBeNull();
         iconSvg.ClassList.ShouldContain("w-12");
     }
@@ -75,17 +76,17 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_DangerType_AppliesRedStyling()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Type, ConfirmType.Danger));
 
         // Assert - Find the icon (h-12 w-12), not the close button
-        var svgs = cut.FindAll("svg");
-        var icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
+        IReadOnlyList<IElement> svgs = cut.FindAll("svg");
+        IElement? icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
         icon.ShouldNotBeNull();
         icon.ClassList.ShouldContain("text-red-600");
 
-        var confirmButton = cut.FindAll("button").Last();
+        IElement confirmButton = cut.FindAll("button").Last();
         string? buttonClass = confirmButton.GetAttribute("class");
         buttonClass.ShouldNotBeNull();
         buttonClass.ShouldContain("bg-red-600");
@@ -95,17 +96,17 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WarningType_AppliesYellowStyling()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Type, ConfirmType.Warning));
 
         // Assert - Find the icon (h-12 w-12), not the close button
-        var svgs = cut.FindAll("svg");
-        var icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
+        IReadOnlyList<IElement> svgs = cut.FindAll("svg");
+        IElement? icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
         icon.ShouldNotBeNull();
         icon.ClassList.ShouldContain("text-yellow-600");
 
-        var confirmButton = cut.FindAll("button").Last();
+        IElement confirmButton = cut.FindAll("button").Last();
         string? buttonClass = confirmButton.GetAttribute("class");
         buttonClass.ShouldNotBeNull();
         buttonClass.ShouldContain("bg-yellow-600");
@@ -115,17 +116,17 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_InfoType_AppliesBlueStyling()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Type, ConfirmType.Info));
 
         // Assert - Find the icon (h-12 w-12), not the close button
-        var svgs = cut.FindAll("svg");
-        var icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
+        IReadOnlyList<IElement> svgs = cut.FindAll("svg");
+        IElement? icon = svgs.FirstOrDefault(svg => svg.ClassList.Contains("h-12"));
         icon.ShouldNotBeNull();
         icon.ClassList.ShouldContain("text-blue-600");
 
-        var confirmButton = cut.FindAll("button").Last();
+        IElement confirmButton = cut.FindAll("button").Last();
         string? buttonClass = confirmButton.GetAttribute("class");
         buttonClass.ShouldNotBeNull();
         buttonClass.ShouldContain("bg-blue-600");
@@ -138,12 +139,12 @@ public class ConfirmDialogTests : BunitTestContext
         bool confirmCalled = false;
 
         // Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnConfirm, () => confirmCalled = true));
 
-        var buttons = cut.FindAll("button");
-        var confirmButton = buttons.Last();
+        IReadOnlyList<IElement> buttons = cut.FindAll("button");
+        IElement confirmButton = buttons.Last();
         confirmButton.Click();
 
         // Assert
@@ -157,12 +158,12 @@ public class ConfirmDialogTests : BunitTestContext
         bool cancelCalled = false;
 
         // Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.OnCancel, () => cancelCalled = true));
 
-        var buttons = cut.FindAll("button");
-        var cancelButton = buttons.First();
+        IReadOnlyList<IElement> buttons = cut.FindAll("button");
+        IElement cancelButton = buttons.First();
         cancelButton.Click();
 
         // Assert
@@ -173,7 +174,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WithCustomButtonText_DisplaysCustomText()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.ConfirmText, "Delete")
             .Add(p => p.CancelText, "Keep"));
@@ -187,7 +188,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WhenProcessing_DisplaysProcessingText()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.IsProcessing, true)
             .Add(p => p.ProcessingText, "Deleting..."));
@@ -200,14 +201,14 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WhenProcessing_DisablesButtons()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.IsProcessing, true));
 
         // Assert - Check only the confirm/cancel buttons in the footer, not the close button
-        var footer = cut.Find(".dialog-footer");
-        var buttons = footer.QuerySelectorAll("button");
-        foreach (var button in buttons)
+        IElement footer = cut.Find(".dialog-footer");
+        IHtmlCollection<IElement> buttons = footer.QuerySelectorAll("button");
+        foreach (IElement button in buttons)
         {
             button.HasAttribute("disabled").ShouldBeTrue();
             button.ClassList.ShouldContain("disabled:opacity-50");
@@ -222,13 +223,13 @@ public class ConfirmDialogTests : BunitTestContext
         bool cancelCalled = false;
 
         // Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.IsProcessing, true)
             .Add(p => p.OnConfirm, () => confirmCalled = true)
             .Add(p => p.OnCancel, () => cancelCalled = true));
 
-        var buttons = cut.FindAll("button");
+        IReadOnlyList<IElement> buttons = cut.FindAll("button");
         buttons.First().Click(); // Cancel button
         buttons.Last().Click();  // Confirm button
 
@@ -241,7 +242,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_WithCustomWidth_AppliesWidth()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true)
             .Add(p => p.Width, "w-[500px]"));
 
@@ -254,7 +255,7 @@ public class ConfirmDialogTests : BunitTestContext
     public void ConfirmDialog_DefaultValues_AreApplied()
     {
         // Arrange & Act
-        var cut = Render<ConfirmDialog>(parameters => parameters
+        IRenderedComponent<ConfirmDialog> cut = Render<ConfirmDialog>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert

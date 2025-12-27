@@ -73,7 +73,7 @@ public sealed record BacktestRunSummary(
         {
             try
             {
-                var result = System.Text.Json.JsonSerializer.Deserialize<BacktestResult>(backtestRun.ResultsJson);
+                BacktestResult? result = System.Text.Json.JsonSerializer.Deserialize<BacktestResult>(backtestRun.ResultsJson);
                 if (result != null)
                 {
                     totalReturn = result.Metrics.TotalReturnPercentage;

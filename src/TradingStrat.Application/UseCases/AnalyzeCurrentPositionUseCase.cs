@@ -42,7 +42,7 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         try
         {
             // Default to D1 (daily) if no timeframe specified
-            var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
 
             progress?.Report("Loading historical data from database...");
 

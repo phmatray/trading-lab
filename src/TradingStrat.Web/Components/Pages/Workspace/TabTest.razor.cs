@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Models;
@@ -104,7 +105,7 @@ public partial class TabTest : ComponentBase
                 ProgressService.UpdateProgress(message, percentage);
             });
 
-            var backtestResult = await BacktestUseCase.ExecuteAsync(command, progress);
+            Result<BacktestResult> backtestResult = await BacktestUseCase.ExecuteAsync(command, progress);
 
             if (backtestResult.IsSuccess)
             {

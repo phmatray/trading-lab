@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,7 +16,7 @@ public class ProgressIndicatorTests : BunitTestContext
     public void ProgressIndicator_WhenNotVisible_RendersNothing()
     {
         // Arrange & Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, false));
 
         // Assert
@@ -26,12 +27,12 @@ public class ProgressIndicatorTests : BunitTestContext
     public void ProgressIndicator_WhenVisible_RendersContainer()
     {
         // Arrange & Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, true)
             .Add(p => p.CurrentMessage, "Loading data..."));
 
         // Assert
-        var container = cut.Find("[data-testid='progress-indicator']");
+        IElement container = cut.Find("[data-testid='progress-indicator']");
         container.ShouldNotBeNull();
     }
 
@@ -42,12 +43,12 @@ public class ProgressIndicatorTests : BunitTestContext
         string message = "Fetching historical data...";
 
         // Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, true)
             .Add(p => p.CurrentMessage, message));
 
         // Assert
-        var messageElement = cut.Find(".text-sm.font-medium");
+        IElement messageElement = cut.Find(".text-sm.font-medium");
         messageElement.TextContent.ShouldBe(message);
     }
 
@@ -55,17 +56,17 @@ public class ProgressIndicatorTests : BunitTestContext
     public void ProgressIndicator_WithProgress_DisplaysProgressBar()
     {
         // Arrange & Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, true)
             .Add(p => p.CurrentMessage, "Processing...")
             .Add(p => p.Progress, 75));
 
         // Assert
-        var progressBar = cut.Find(".bg-trading-blue");
+        IElement progressBar = cut.Find(".bg-trading-blue");
         progressBar.ShouldNotBeNull();
         progressBar.GetAttribute("style")!.ShouldContain("width: 75%");
 
-        var progressText = cut.Find(".text-xs");
+        IElement progressText = cut.Find(".text-xs");
         progressText.TextContent.ShouldBe("75%");
     }
 
@@ -73,13 +74,13 @@ public class ProgressIndicatorTests : BunitTestContext
     public void ProgressIndicator_WithoutProgress_DoesNotDisplayProgressBar()
     {
         // Arrange & Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, true)
             .Add(p => p.CurrentMessage, "Processing...")
             .Add(p => p.Progress, null));
 
         // Assert
-        var progressBars = cut.FindAll(".bg-trading-blue");
+        IReadOnlyList<IElement> progressBars = cut.FindAll(".bg-trading-blue");
         progressBars.ShouldBeEmpty();
     }
 
@@ -90,16 +91,16 @@ public class ProgressIndicatorTests : BunitTestContext
     public void ProgressIndicator_WithDifferentProgressValues_DisplaysCorrectly(int progress)
     {
         // Arrange & Act
-        var cut = Render<ProgressIndicator>(parameters => parameters
+        IRenderedComponent<ProgressIndicator> cut = Render<ProgressIndicator>(parameters => parameters
             .Add(p => p.IsVisible, true)
             .Add(p => p.CurrentMessage, "Processing...")
             .Add(p => p.Progress, progress));
 
         // Assert
-        var progressBar = cut.Find(".bg-trading-blue");
+        IElement progressBar = cut.Find(".bg-trading-blue");
         progressBar.GetAttribute("style")!.ShouldContain($"width: {progress}%");
 
-        var progressText = cut.Find(".text-xs");
+        IElement progressText = cut.Find(".text-xs");
         progressText.TextContent.ShouldBe($"{progress}%");
     }
 }

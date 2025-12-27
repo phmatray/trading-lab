@@ -73,7 +73,7 @@ public record AllocationWeights
             return false;
         }
 
-        foreach (var kvp in TargetPercentages)
+        foreach (KeyValuePair<string, decimal> kvp in TargetPercentages)
         {
             if (!other.TargetPercentages.TryGetValue(kvp.Key, out decimal otherValue))
             {

@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,15 +29,15 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_InitialRender_ShowsAnalyzeButton()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
         cut.Markup.ShouldContain("Get AI Data Analysis");
-        var button = cut.Find("[data-testid='analyze-data-button']");
+        IElement button = cut.Find("[data-testid='analyze-data-button']");
         button.ShouldNotBeNull();
         button.TextContent.ShouldContain("Get AI Data Analysis");
     }
@@ -45,14 +46,14 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_WithRequiredParameter_RendersCorrectly()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
-        var panel = cut.Find("[data-testid='ai-analysis-panel']");
+        IElement panel = cut.Find("[data-testid='ai-analysis-panel']");
         panel.ShouldNotBeNull();
         panel.ClassList.ShouldContain("card");
     }
@@ -61,10 +62,10 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_InitialState_DoesNotShowAnalysisResults()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
@@ -77,10 +78,10 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_InitialState_DoesNotShowProgressIndicator()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
@@ -91,14 +92,14 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_AnalyzeButton_HasCorrectStyling()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
-        var button = cut.Find("[data-testid='analyze-data-button']");
+        IElement button = cut.Find("[data-testid='analyze-data-button']");
         button.ClassList.ShouldContain("btn-primary");
     }
 
@@ -106,14 +107,14 @@ public class AiDataAnalysisPanelTests : BunitTestContext
     public void AiDataAnalysisPanel_Panel_HasTestId()
     {
         // Arrange
-        var dataSummary = CreateSampleDataSummary();
+        DataSummaryResult dataSummary = CreateSampleDataSummary();
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert
-        var panel = cut.Find("[data-testid='ai-analysis-panel']");
+        IElement panel = cut.Find("[data-testid='ai-analysis-panel']");
         panel.ShouldNotBeNull();
     }
 
@@ -133,7 +134,7 @@ public class AiDataAnalysisPanelTests : BunitTestContext
             LatestClose: 350m);
 
         // Act
-        var cut = Render<AiDataAnalysisPanel>(parameters => parameters
+        IRenderedComponent<AiDataAnalysisPanel> cut = Render<AiDataAnalysisPanel>(parameters => parameters
             .Add(p => p.DataSummary, dataSummary));
 
         // Assert

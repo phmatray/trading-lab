@@ -9,7 +9,7 @@ namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case for managing portfolio positions (add, update, delete).
-/// Uses BaseUseCase pattern to eliminate try-catch boilerplate.
+/// Uses helper method pattern to eliminate try-catch boilerplate.
 /// </summary>
 public class ManagePositionsUseCase : IManagePositionsUseCase
 {
@@ -21,86 +21,64 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     }
 
     /// <inheritdoc />
-    public async Task<Result<Position>> AddPositionAsync(AddPositionCommand command)
+    public Task<Result<Position>> AddPositionAsync(AddPositionCommand command)
+        => ExecuteWithErrorHandling(() => AddPositionCoreAsync(command), ErrorCodes.Position.AddFailed);
+
+    /// <inheritdoc />
+    public Task<Result<Position>> UpdatePositionAsync(UpdatePositionCommand command)
+        => ExecuteWithErrorHandling(() => UpdatePositionCoreAsync(command), ErrorCodes.Position.UpdateFailed);
+
+    /// <inheritdoc />
+    public Task<Result<bool>> DeletePositionAsync(int positionId)
+        => ExecuteWithErrorHandling(() => DeletePositionCoreAsync(positionId), ErrorCodes.Position.DeleteFailed);
+
+    private static async Task<Result<T>> ExecuteWithErrorHandling<T>(
+        Func<Task<T>> executeCore,
+        string errorCode)
     {
         try
         {
-            var position = await AddPositionCoreAsync(command);
-            return Result<Position>.Success(position);
+            T result = await executeCore();
+            return Result<T>.Success(result);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("Portfolio") && ex.Message.Contains("not found"))
         {
-            return Result<Position>.Failure(
+            return Result<T>.Failure(
                 Error.NotFound(ex.Message, ErrorCodes.Portfolio.NotFound));
         }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Position") && ex.Message.Contains("not found"))
         {
-            return Result<Position>.Failure(
+            return Result<T>.Failure(
                 Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {
-            return Result<Position>.Failure(
+            return Result<T>.Failure(
                 Error.Conflict(ex.Message, ErrorCodes.Position.AlreadyExists));
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            return Result<Position>.Failure(
-                Error.BusinessRule($"Failed to add position: {ex.Message}", ErrorCodes.Position.AddFailed));
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<Result<Position>> UpdatePositionAsync(UpdatePositionCommand command)
-    {
-        try
-        {
-            var position = await UpdatePositionCoreAsync(command);
-            return Result<Position>.Success(position);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
-        {
-            return Result<Position>.Failure(
-                Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
+            return Result<T>.Failure(
+                Error.Validation(ex.Message, $"{errorCode}_VALIDATION"));
         }
         catch (Exception ex)
         {
-            return Result<Position>.Failure(
-                Error.BusinessRule($"Failed to update position: {ex.Message}", ErrorCodes.Position.UpdateFailed));
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<Result<bool>> DeletePositionAsync(int positionId)
-    {
-        try
-        {
-            await DeletePositionCoreAsync(positionId);
-            return Result<bool>.Success(true);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
-        {
-            return Result<bool>.Failure(
-                Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Failure(
-                Error.BusinessRule($"Failed to delete position: {ex.Message}", ErrorCodes.Position.DeleteFailed));
+            return Result<T>.Failure(
+                Error.BusinessRule($"Failed: {ex.Message}", $"{errorCode}_FAILED"));
         }
     }
 
     private async Task<Position> AddPositionCoreAsync(AddPositionCommand command)
     {
         // Verify portfolio exists
-        var portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
         if (portfolio == null)
         {
             throw new InvalidOperationException($"Portfolio {command.PortfolioId} not found");
         }
 
         // Check for duplicate position
-        var existingPositions = await _portfolioPort.GetPositionsByPortfolioAsync(command.PortfolioId);
+        List<Position> existingPositions = await _portfolioPort.GetPositionsByPortfolioAsync(command.PortfolioId);
         if (existingPositions.Any(p => p.Ticker == command.Ticker))
         {
             throw new InvalidOperationException($"Position for {command.Ticker} already exists in this portfolio");
@@ -138,15 +116,16 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
         return existingPosition;
     }
 
-    private async Task DeletePositionCoreAsync(int positionId)
+    private async Task<bool> DeletePositionCoreAsync(int positionId)
     {
         // Verify position exists
-        var position = await _portfolioPort.GetPositionByIdAsync(positionId);
+        Position? position = await _portfolioPort.GetPositionByIdAsync(positionId);
         if (position == null)
         {
             throw new InvalidOperationException($"Position {positionId} not found");
         }
 
         await _portfolioPort.DeletePositionAsync(positionId);
+        return true;
     }
 }

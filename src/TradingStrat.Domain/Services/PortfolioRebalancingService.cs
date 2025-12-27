@@ -36,7 +36,7 @@ public class PortfolioRebalancingService
         decimal requiredCash = 0m;
 
         // Calculate signals for each target ticker
-        foreach (var (ticker, targetPercent) in targetWeights.TargetPercentages)
+        foreach ((string ticker, decimal targetPercent) in targetWeights.TargetPercentages)
         {
             if (!currentPrices.TryGetValue(ticker, out decimal currentPrice))
             {
@@ -47,13 +47,13 @@ public class PortfolioRebalancingService
             decimal targetValue = totalValue * (targetPercent / 100m);
             int targetQuantity = (int)(targetValue / currentPrice);
 
-            var currentPosition = currentSnapshot.Positions
+            PositionSnapshot? currentPosition = currentSnapshot.Positions
                 .FirstOrDefault(p => p.Ticker == ticker);
             int currentQuantity = currentPosition?.Quantity ?? 0;
             decimal currentAllocation = currentPosition?.AllocationPercentage ?? 0m;
 
             int quantityDelta = targetQuantity - currentQuantity;
-            var action = quantityDelta > 0 ? RebalancingAction.Buy
+            RebalancingAction action = quantityDelta > 0 ? RebalancingAction.Buy
                        : quantityDelta < 0 ? RebalancingAction.Sell
                        : RebalancingAction.Hold;
 
@@ -86,7 +86,7 @@ public class PortfolioRebalancingService
         }
 
         // Handle positions that need to be sold but are not in target allocation
-        foreach (var position in currentSnapshot.Positions)
+        foreach (PositionSnapshot position in currentSnapshot.Positions)
         {
             if (!targetWeights.TargetPercentages.ContainsKey(position.Ticker))
             {

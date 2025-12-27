@@ -190,7 +190,7 @@ public class BacktestPage : BasePage
     /// </summary>
     public async Task<bool> HasIchimokuParameterAsync(string parameterId)
     {
-        var input = Page.Locator($"#{parameterId}");
+        ILocator input = Page.Locator($"#{parameterId}");
         return await input.IsVisibleAsync();
     }
 

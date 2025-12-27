@@ -1,7 +1,9 @@
 using FakeItEasy;
 using Shouldly;
+using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -57,7 +59,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("GOOGL", null, 8, 8, DateTime.Today.AddDays(-8), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -111,7 +113,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("MSFT", null, 12, 12, DateTime.Today.AddDays(-12), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -155,7 +157,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("MSFT", null, 10, 10, DateTime.Today.AddDays(-10), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -193,7 +195,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("AAPL", null, 10, 10, startDate, endDate, 95m, 105m, 102m));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -229,7 +231,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("AAPL", null, 5, 5, latestExistingDate.AddDays(1), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
@@ -285,7 +287,7 @@ public class BulkFetchHistoricalDataUseCaseTests
         Progress<BulkFetchProgress> progress = new(p => progressReports.Add(p));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command, progress);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command, progress);
 
         // Assert
         result.Value.SuccessfulTickers.ShouldBe(2);
@@ -326,7 +328,7 @@ public class BulkFetchHistoricalDataUseCaseTests
             });
 
         // Act
-        var result = await _useCase.ExecuteAsync(command, cancellationToken: cts.Token);
+        Result<BulkFetchResult> result = await _useCase.ExecuteAsync(command, cancellationToken: cts.Token);
 
         // Assert
         result.Value.SuccessfulTickers.ShouldBeLessThan(3); // Should not process all tickers

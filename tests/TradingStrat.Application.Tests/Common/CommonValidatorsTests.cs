@@ -37,7 +37,7 @@ public class CommonValidatorsTests
         DateTime endDate = DateTime.Today.AddDays(2);
 
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateDateRange(startDate, endDate));
         ex.Message.ShouldContain("Start date cannot be in the future");
     }
@@ -50,7 +50,7 @@ public class CommonValidatorsTests
         DateTime endDate = DateTime.Today.AddDays(1);
 
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateDateRange(startDate, endDate));
         ex.Message.ShouldContain("End date cannot be in the future");
     }
@@ -63,7 +63,7 @@ public class CommonValidatorsTests
         DateTime endDate = DateTime.Today.AddMonths(-2);
 
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateDateRange(startDate, endDate));
         ex.Message.ShouldContain("Start date must be before or equal to end date");
     }
@@ -146,7 +146,7 @@ public class CommonValidatorsTests
     public void ValidateCommission_WithNegativePercentage_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCommission(-0.001m, 1.0m));
         ex.Message.ShouldContain("Commission percentage cannot be negative");
     }
@@ -155,7 +155,7 @@ public class CommonValidatorsTests
     public void ValidateCommission_WithPercentageGreaterThanOne_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCommission(1.0m, 1.0m));
         ex.Message.ShouldContain("Commission percentage must be less than 100%");
     }
@@ -164,7 +164,7 @@ public class CommonValidatorsTests
     public void ValidateCommission_WithNegativeMinimumCommission_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCommission(0.001m, -1.0m));
         ex.Message.ShouldContain("Minimum commission cannot be negative");
     }
@@ -185,7 +185,7 @@ public class CommonValidatorsTests
     public void ValidateCapital_WithZero_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCapital(0m));
         ex.Message.ShouldContain("Capital must be positive");
     }
@@ -194,7 +194,7 @@ public class CommonValidatorsTests
     public void ValidateCapital_WithNegativeValue_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCapital(-1000m));
         ex.Message.ShouldContain("Capital must be positive");
     }
@@ -203,7 +203,7 @@ public class CommonValidatorsTests
     public void ValidateCapital_WithCustomParamName_UsesCustomNameInError()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateCapital(0m, "InitialCash"));
         ex.Message.ShouldContain("InitialCash must be positive");
     }
@@ -240,7 +240,7 @@ public class CommonValidatorsTests
     public void ValidatePercentage_WithNegativeValue_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidatePercentage(-1m));
         ex.Message.ShouldContain("Percentage cannot be negative");
     }
@@ -249,7 +249,7 @@ public class CommonValidatorsTests
     public void ValidatePercentage_WithValueGreaterThanHundred_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidatePercentage(101m));
         ex.Message.ShouldContain("Percentage cannot exceed 100");
     }
@@ -286,7 +286,7 @@ public class CommonValidatorsTests
     public void ValidateRatio_WithNegativeValue_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateRatio(-0.1m));
         ex.Message.ShouldContain("Ratio must be between 0 and 1");
     }
@@ -295,7 +295,7 @@ public class CommonValidatorsTests
     public void ValidateRatio_WithValueGreaterThanOne_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateRatio(1.1m));
         ex.Message.ShouldContain("Ratio must be between 0 and 1");
     }
@@ -316,7 +316,7 @@ public class CommonValidatorsTests
     public void ValidatePositive_WithZero_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidatePositive(0m));
         ex.Message.ShouldContain("Value must be positive");
     }
@@ -325,7 +325,7 @@ public class CommonValidatorsTests
     public void ValidatePositive_WithNegativeValue_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidatePositive(-10m));
         ex.Message.ShouldContain("Value must be positive");
     }
@@ -354,7 +354,7 @@ public class CommonValidatorsTests
     public void ValidateNonNegative_WithNegativeValue_ThrowsArgumentException()
     {
         // Act & Assert
-        var ex = Should.Throw<ArgumentException>(() =>
+        ArgumentException ex = Should.Throw<ArgumentException>(() =>
             CommonValidators.ValidateNonNegative(-10m));
         ex.Message.ShouldContain("Value cannot be negative");
     }

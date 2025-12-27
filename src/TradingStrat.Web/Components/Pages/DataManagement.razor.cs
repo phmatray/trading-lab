@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -127,7 +128,7 @@ public partial class DataManagement : ComponentBase, IDisposable
                 _formModel.EndDate
             );
 
-            var fetchResult = await DataFetchingUseCase.ExecuteAsync(command, progress);
+            Result<DataSummaryResult> fetchResult = await DataFetchingUseCase.ExecuteAsync(command, progress);
 
             if (fetchResult.IsFailure)
             {
@@ -189,7 +190,7 @@ public partial class DataManagement : ComponentBase, IDisposable
                 SkipExisting: _bulkFormModel.SkipExisting
             );
 
-            var bulkFetchResult = await BulkDataFetchingUseCase.ExecuteAsync(command, progress);
+            Result<BulkFetchResult> bulkFetchResult = await BulkDataFetchingUseCase.ExecuteAsync(command, progress);
 
             if (bulkFetchResult.IsFailure)
             {

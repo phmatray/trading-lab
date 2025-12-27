@@ -41,7 +41,7 @@ public class DataStatusCacheServiceTests : IDisposable
             .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act
-        var result = await _cacheService.GetOrFetchDataStatusAsync(query);
+        Result<AllDataStatusResult> result = await _cacheService.GetOrFetchDataStatusAsync(query);
 
         // Assert
         result.Value.ShouldBe(expectedResult);
@@ -60,8 +60,8 @@ public class DataStatusCacheServiceTests : IDisposable
             .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act - Call twice
-        var result1 = await _cacheService.GetOrFetchDataStatusAsync(query);
-        var result2 = await _cacheService.GetOrFetchDataStatusAsync(query);
+        Result<AllDataStatusResult> result1 = await _cacheService.GetOrFetchDataStatusAsync(query);
+        Result<AllDataStatusResult> result2 = await _cacheService.GetOrFetchDataStatusAsync(query);
 
         // Assert
         result1.Value.ShouldBe(expectedResult);
@@ -89,8 +89,8 @@ public class DataStatusCacheServiceTests : IDisposable
             .Returns(Result<AllDataStatusResult>.Success(result2));
 
         // Act
-        var cached1 = await _cacheService.GetOrFetchDataStatusAsync(query1);
-        var cached2 = await _cacheService.GetOrFetchDataStatusAsync(query2);
+        Result<AllDataStatusResult> cached1 = await _cacheService.GetOrFetchDataStatusAsync(query1);
+        Result<AllDataStatusResult> cached2 = await _cacheService.GetOrFetchDataStatusAsync(query2);
 
         // Assert
         cached1.Value.CurrentPage.ShouldBe(1);
@@ -113,7 +113,7 @@ public class DataStatusCacheServiceTests : IDisposable
             .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act
-        var result = await _cacheService.GetOrFetchDataStatusAsync(null);
+        Result<AllDataStatusResult> result = await _cacheService.GetOrFetchDataStatusAsync(null);
 
         // Assert
         result.Value.ShouldBe(expectedResult);

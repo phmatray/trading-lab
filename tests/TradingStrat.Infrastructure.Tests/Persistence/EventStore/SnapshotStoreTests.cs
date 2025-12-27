@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Infrastructure.Persistence.EfCore;
 
@@ -17,7 +18,7 @@ public class SnapshotStoreTests : IDisposable
     public SnapshotStoreTests()
     {
         // Use in-memory database for testing
-        var options = new DbContextOptionsBuilder<TradingContext>()
+        DbContextOptions<TradingContext> options = new DbContextOptionsBuilder<TradingContext>()
             .UseInMemoryDatabase($"SnapshotStoreTests_{Guid.NewGuid()}")
             .Options;
 
@@ -65,7 +66,7 @@ public class SnapshotStoreTests : IDisposable
         await _snapshotStore.SaveSnapshotAsync(portfolio);
 
         // Assert
-        var snapshot = await _context.Snapshots.FirstOrDefaultAsync(s => s.AggregateId == "1");
+        SnapshotRecord? snapshot = await _context.Snapshots.FirstOrDefaultAsync(s => s.AggregateId == "1");
         snapshot.ShouldNotBeNull();
         snapshot.Version.ShouldBe(5);
         snapshot.AggregateType.ShouldContain("Portfolio");
@@ -98,7 +99,7 @@ public class SnapshotStoreTests : IDisposable
         await _snapshotStore.SaveSnapshotAsync(portfolio);
 
         // Assert
-        var snapshots = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
+        List<SnapshotRecord> snapshots = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
         snapshots.Count.ShouldBe(1); // Should replace, not add
         snapshots[0].Version.ShouldBe(10);
         snapshots[0].SnapshotData.ShouldContain("15000");
@@ -146,7 +147,7 @@ public class SnapshotStoreTests : IDisposable
         await _snapshotStore.SaveSnapshotAsync(originalPortfolio);
 
         // Act
-        var snapshot = await _snapshotStore.GetSnapshotAsync<Portfolio>("1");
+        AggregateSnapshot<Portfolio>? snapshot = await _snapshotStore.GetSnapshotAsync<Portfolio>("1");
 
         // Assert
         snapshot.ShouldNotBeNull();
@@ -162,7 +163,7 @@ public class SnapshotStoreTests : IDisposable
     public async Task GetSnapshotAsync_ForNonExistentAggregate_ReturnsNull()
     {
         // Act
-        var snapshot = await _snapshotStore.GetSnapshotAsync<Portfolio>("non-existent");
+        AggregateSnapshot<Portfolio>? snapshot = await _snapshotStore.GetSnapshotAsync<Portfolio>("non-existent");
 
         // Assert
         snapshot.ShouldBeNull();
@@ -188,14 +189,14 @@ public class SnapshotStoreTests : IDisposable
         await _snapshotStore.SaveSnapshotAsync(portfolio);
 
         // Verify snapshot exists
-        var snapshotsBefore = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
+        List<SnapshotRecord> snapshotsBefore = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
         snapshotsBefore.ShouldNotBeEmpty();
 
         // Act
         await _snapshotStore.DeleteSnapshotsAsync("1");
 
         // Assert
-        var snapshotsAfter = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
+        List<SnapshotRecord> snapshotsAfter = await _context.Snapshots.Where(s => s.AggregateId == "1").ToListAsync();
         snapshotsAfter.ShouldBeEmpty();
     }
 

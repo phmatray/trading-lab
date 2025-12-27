@@ -28,7 +28,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
 
     public async Task<List<BacktestRun>> GetBacktestRunsAsync(string? ticker = null, string? strategyType = null, int limit = 100)
     {
-        var query = _context.BacktestRuns.AsQueryable();
+        IQueryable<BacktestRun> query = _context.BacktestRuns.AsQueryable();
 
         if (!string.IsNullOrEmpty(ticker))
         {
@@ -66,7 +66,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
 
     public async Task<bool> DeleteBacktestRunAsync(int id)
     {
-        var backtestRun = await _context.BacktestRuns.FindAsync(id);
+        BacktestRun? backtestRun = await _context.BacktestRuns.FindAsync(id);
         if (backtestRun == null)
         {
             return false;
@@ -80,7 +80,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
     public async Task<List<BacktestRun>> GetTopBacktestRunsAsync(int limit = 5)
     {
         // Get all successful backtests
-        var backtests = await _context.BacktestRuns
+        List<BacktestRun> backtests = await _context.BacktestRuns
             .Where(b => b.Status == "Success")
             .ToListAsync();
 
@@ -90,7 +90,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
             {
                 try
                 {
-                    var result = JsonSerializer.Deserialize<BacktestResult>(b.ResultsJson);
+                    BacktestResult? result = JsonSerializer.Deserialize<BacktestResult>(b.ResultsJson);
                     return new { Backtest = b, Result = result };
                 }
                 catch

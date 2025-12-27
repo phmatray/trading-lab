@@ -73,13 +73,13 @@ public class StrategyFormModel
 
         for (int i = 0; i < EntryRules.Count; i++)
         {
-            var rule = EntryRules[i];
+            RuleFormModel rule = EntryRules[i];
             Log($"[StrategyFormModel] Entry rule {i}: Indicator={rule.IndicatorName}, Operator={rule.Operator}, ValueType={rule.ValueType}, ConstantValue={rule.ConstantValue}, Params={rule.IndicatorParameters.Count}");
         }
 
         for (int i = 0; i < ExitRules.Count; i++)
         {
-            var rule = ExitRules[i];
+            RuleFormModel rule = ExitRules[i];
             Log($"[StrategyFormModel] Exit rule {i}: Indicator={rule.IndicatorName}, Operator={rule.Operator}, ValueType={rule.ValueType}, ConstantValue={rule.ConstantValue}, Params={rule.IndicatorParameters.Count}");
         }
 

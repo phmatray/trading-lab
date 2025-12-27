@@ -2,6 +2,8 @@ using Shouldly;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -20,7 +22,7 @@ public class ManagePositionsUseCaseTests
     public async Task AddPositionAsync_WithValidData_ShouldAddPosition()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var command = new AddPositionCommand(
             PortfolioId: portfolio.Id,
             Ticker: "AAPL",
@@ -30,7 +32,7 @@ public class ManagePositionsUseCaseTests
             Notes: "Strong buy signal");
 
         // Act
-        var result = await _useCase.AddPositionAsync(command);
+        Result<Position> result = await _useCase.AddPositionAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -43,7 +45,7 @@ public class ManagePositionsUseCaseTests
         result.Value.EntryDate.ShouldBe(new DateTime(2024, 1, 15));
         result.Value.Notes.ShouldBe("Strong buy signal");
 
-        var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
+        List<Position> positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.Count.ShouldBe(1);
         positions[0].Ticker.ShouldBe("AAPL");
     }
@@ -52,7 +54,7 @@ public class ManagePositionsUseCaseTests
     public async Task AddPositionAsync_WithLowercaseTicker_ShouldConvertToUppercase()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var command = new AddPositionCommand(
             PortfolioId: portfolio.Id,
             Ticker: "msft",
@@ -62,7 +64,7 @@ public class ManagePositionsUseCaseTests
             Notes: null);
 
         // Act
-        var result = await _useCase.AddPositionAsync(command);
+        Result<Position> result = await _useCase.AddPositionAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -73,7 +75,7 @@ public class ManagePositionsUseCaseTests
     public async Task AddPositionAsync_WithNullNotes_ShouldAddPosition()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var command = new AddPositionCommand(
             PortfolioId: portfolio.Id,
             Ticker: "GOOGL",
@@ -83,7 +85,7 @@ public class ManagePositionsUseCaseTests
             Notes: null);
 
         // Act
-        var result = await _useCase.AddPositionAsync(command);
+        Result<Position> result = await _useCase.AddPositionAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -95,22 +97,22 @@ public class ManagePositionsUseCaseTests
     public async Task AddPositionAsync_MultiplePositionsSamePortfolio_ShouldAddAll()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Diversified Portfolio", null, 50000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Diversified Portfolio", null, 50000m);
         var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
         var command2 = new AddPositionCommand(portfolio.Id, "MSFT", 50, 300m, DateTime.Today, null);
         var command3 = new AddPositionCommand(portfolio.Id, "GOOGL", 25, 2500m, DateTime.Today, null);
 
         // Act
-        var result1 = await _useCase.AddPositionAsync(command1);
-        var result2 = await _useCase.AddPositionAsync(command2);
-        var result3 = await _useCase.AddPositionAsync(command3);
+        Result<Position> result1 = await _useCase.AddPositionAsync(command1);
+        Result<Position> result2 = await _useCase.AddPositionAsync(command2);
+        Result<Position> result3 = await _useCase.AddPositionAsync(command3);
 
         // Assert
         result1.IsSuccess.ShouldBeTrue();
         result2.IsSuccess.ShouldBeTrue();
         result3.IsSuccess.ShouldBeTrue();
 
-        var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
+        List<Position> positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.Count.ShouldBe(3);
         positions.Select(p => p.Ticker).ShouldBe(new[] { "AAPL", "GOOGL", "MSFT" }, ignoreOrder: true);
     }
@@ -119,14 +121,14 @@ public class ManagePositionsUseCaseTests
     public async Task AddPositionAsync_DuplicateTicker_ShouldReturnFailure()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
         var command2 = new AddPositionCommand(portfolio.Id, "AAPL", 50, 155m, DateTime.Today, null);
 
         await _useCase.AddPositionAsync(command1);
 
         // Act
-        var result = await _useCase.AddPositionAsync(command2);
+        Result<Position> result = await _useCase.AddPositionAsync(command2);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -148,7 +150,7 @@ public class ManagePositionsUseCaseTests
             Notes: null);
 
         // Act
-        var result = await _useCase.AddPositionAsync(command);
+        Result<Position> result = await _useCase.AddPositionAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -245,9 +247,9 @@ public class ManagePositionsUseCaseTests
     public async Task UpdatePositionAsync_WithValidData_ShouldUpdatePosition()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, "Initial");
-        var addResult = await _useCase.AddPositionAsync(addCommand);
+        Result<Position> addResult = await _useCase.AddPositionAsync(addCommand);
 
         var updateCommand = new UpdatePositionCommand(
             PositionId: addResult.Value.Id,
@@ -256,7 +258,7 @@ public class ManagePositionsUseCaseTests
             Notes: "Averaged up");
 
         // Act
-        var result = await _useCase.UpdatePositionAsync(updateCommand);
+        Result<Position> result = await _useCase.UpdatePositionAsync(updateCommand);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -300,18 +302,18 @@ public class ManagePositionsUseCaseTests
     public async Task DeletePositionAsync_WithValidId_ShouldDeletePosition()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var addResult = await _useCase.AddPositionAsync(addCommand);
+        Result<Position> addResult = await _useCase.AddPositionAsync(addCommand);
 
         // Act
-        var result = await _useCase.DeletePositionAsync(addResult.Value.Id);
+        Result<bool> result = await _useCase.DeletePositionAsync(addResult.Value.Id);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBeTrue();
 
-        var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
+        List<Position> positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.ShouldBeEmpty();
     }
 
@@ -319,7 +321,7 @@ public class ManagePositionsUseCaseTests
     public async Task DeletePositionAsync_WithNonExistentId_ShouldReturnFailure()
     {
         // Act
-        var result = await _useCase.DeletePositionAsync(9999);
+        Result<bool> result = await _useCase.DeletePositionAsync(9999);
 
         // Assert
         result.IsFailure.ShouldBeTrue();

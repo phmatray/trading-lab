@@ -241,7 +241,7 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule: RSI > 70
-        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
+        ILocator exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
 

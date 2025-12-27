@@ -37,7 +37,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithEmptyPortfolio_ShouldReturnCashOnlySnapshot()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Cash Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Cash Portfolio", null, 10000m);
 
         // Act
         Result<PortfolioSnapshot> result = await _useCase.ExecuteAsync(portfolio.Id);
@@ -60,7 +60,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithSinglePosition_ShouldReturnSnapshot()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
         await _portfolioPort.AddPositionAsync(new Position
         {
             PortfolioId = portfolio.Id,
@@ -96,7 +96,7 @@ public class GetPortfolioSnapshotUseCaseTests
         snapshot.Cash.ShouldBe(5000m);
         snapshot.Positions.Count.ShouldBe(1);
 
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.Ticker.ShouldBe("AAPL");
         position.Quantity.ShouldBe(100);
         position.EntryPrice.ShouldBe(150m);
@@ -122,7 +122,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithMultiplePositions_ShouldReturnCompleteSnapshot()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Diversified Portfolio", null, 2000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Diversified Portfolio", null, 2000m);
 
         await _portfolioPort.AddPositionAsync(new Position
         {
@@ -171,15 +171,15 @@ public class GetPortfolioSnapshotUseCaseTests
         snapshot.Positions.Count.ShouldBe(3);
 
         // AAPL: 100 * 150 = 15000 cost, 100 * 155 = 15500 market
-        var aaplPosition = snapshot.Positions.First(p => p.Ticker == "AAPL");
+        PositionSnapshot aaplPosition = snapshot.Positions.First(p => p.Ticker == "AAPL");
         aaplPosition.UnrealizedGainLoss.ShouldBe(500m);
 
         // MSFT: 50 * 300 = 15000 cost, 50 * 310 = 15500 market
-        var msftPosition = snapshot.Positions.First(p => p.Ticker == "MSFT");
+        PositionSnapshot msftPosition = snapshot.Positions.First(p => p.Ticker == "MSFT");
         msftPosition.UnrealizedGainLoss.ShouldBe(500m);
 
         // GOOGL: 25 * 2500 = 62500 cost, 25 * 2450 = 61250 market (loss)
-        var googlPosition = snapshot.Positions.First(p => p.Ticker == "GOOGL");
+        PositionSnapshot googlPosition = snapshot.Positions.First(p => p.Ticker == "GOOGL");
         googlPosition.UnrealizedGainLoss.ShouldBe(-1250m);
 
         // Total: 2000 cash + 92250 positions = 94250 market value
@@ -193,7 +193,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithProfitablePositions_ShouldCalculateCorrectGains()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Winning Portfolio", null, 1000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Winning Portfolio", null, 1000m);
 
         await _portfolioPort.AddPositionAsync(new Position
         {
@@ -217,7 +217,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         PortfolioSnapshot snapshot = result.Value;
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.UnrealizedGainLoss.ShouldBe(2000m); // (400 - 200) * 10
         position.UnrealizedGainLossPercentage.ShouldBe(100m); // 100% gain
 
@@ -228,7 +228,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithLosingPositions_ShouldCalculateCorrectLosses()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Losing Portfolio", null, 1000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Losing Portfolio", null, 1000m);
 
         await _portfolioPort.AddPositionAsync(new Position
         {
@@ -252,7 +252,7 @@ public class GetPortfolioSnapshotUseCaseTests
         // Assert
         result.IsSuccess.ShouldBeTrue();
         PortfolioSnapshot snapshot = result.Value;
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.UnrealizedGainLoss.ShouldBe(-2500m); // (25 - 50) * 100
         position.UnrealizedGainLossPercentage.ShouldBe(-50m); // 50% loss
 
@@ -277,7 +277,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WhenMarketDataUnavailable_ShouldReturnFailure()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
         await _portfolioPort.AddPositionAsync(new Position
         {
             PortfolioId = portfolio.Id,
@@ -308,7 +308,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WhenClosePriceIsNull_ShouldReturnFailure()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
         await _portfolioPort.AddPositionAsync(new Position
         {
             PortfolioId = portfolio.Id,
@@ -347,7 +347,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_WithProgressReporting_ShouldReportProgress()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
         await _portfolioPort.AddPositionAsync(new Position
         {
             PortfolioId = portfolio.Id,
@@ -382,7 +382,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_ShouldFetchRecentPriceData()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 5000m);
         await _portfolioPort.AddPositionAsync(new Position
         {
             PortfolioId = portfolio.Id,
@@ -414,7 +414,7 @@ public class GetPortfolioSnapshotUseCaseTests
     public async Task ExecuteAsync_ShouldCalculateAllocationPercentages()
     {
         // Arrange
-        var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
+        Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
 
         await _portfolioPort.AddPositionAsync(new Position
         {
@@ -450,11 +450,11 @@ public class GetPortfolioSnapshotUseCaseTests
         // Total value: 10000 cash + 15000 AAPL + 30000 MSFT = 55000
         snapshot.TotalValue.ShouldBe(55000m);
 
-        var aaplPosition = snapshot.Positions.First(p => p.Ticker == "AAPL");
+        PositionSnapshot aaplPosition = snapshot.Positions.First(p => p.Ticker == "AAPL");
         // AAPL allocation: 15000 / 55000 = 27.27%
         aaplPosition.AllocationPercentage.ShouldBe(27.272727272727272727272727273m, 0.01m);
 
-        var msftPosition = snapshot.Positions.First(p => p.Ticker == "MSFT");
+        PositionSnapshot msftPosition = snapshot.Positions.First(p => p.Ticker == "MSFT");
         // MSFT allocation: 30000 / 55000 = 54.55%
         msftPosition.AllocationPercentage.ShouldBe(54.545454545454545454545454545m, 0.01m);
 

@@ -6,6 +6,7 @@ using TradingStrat.Application.Services;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -34,7 +35,7 @@ public class RunBacktestUseCase : IBacktestUseCase
         try
         {
             // Default to D1 (daily) if no timeframe specified
-            var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
 
             // Check if data exists
             List<HistoricalPrice> allData = await _historicalDataPort.GetHistoricalDataAsync(

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -47,7 +48,7 @@ public partial class TabDefine : ComponentBase
 
         try
         {
-            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            Result<List<CustomStrategyResult>> result = await CustomStrategyUseCase.GetAllStrategiesAsync();
 
             if (result.IsFailure)
             {
@@ -75,7 +76,7 @@ public partial class TabDefine : ComponentBase
     {
         try
         {
-            var result = await CustomStrategyUseCase.GetStrategyByIdAsync(strategyId);
+            Result<CustomStrategyResult> result = await CustomStrategyUseCase.GetStrategyByIdAsync(strategyId);
 
             if (result.IsFailure)
             {

@@ -34,7 +34,7 @@
                                     value="@rule.IndicatorName"
                                     @onchange="e => OnIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
                                 <option value="">Select indicator...</option>
-                                @foreach (var category in IndicatorService.GetIndicatorsByCategory())
+                                @foreach (KeyValuePair<string, List<IndicatorMetadata>> category in IndicatorService.GetIndicatorsByCategory())
                                 {
                                     <optgroup label="@category.Key">
                                         @foreach (var ind in category.Value)
@@ -118,7 +118,7 @@
                                         value="@(rule.SecondIndicatorName ?? string.Empty)"
                                         @onchange="e => OnSecondIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
                                     <option value="">Select...</option>
-                                    @foreach (var category in IndicatorService.GetIndicatorsByCategory())
+                                    @foreach (KeyValuePair<string, List<IndicatorMetadata>> category in IndicatorService.GetIndicatorsByCategory())
                                     {
                                         <optgroup label="@category.Key">
                                             @foreach (var ind in category.Value)

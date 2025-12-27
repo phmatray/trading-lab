@@ -47,7 +47,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.ShouldNotBeNull();
@@ -85,7 +85,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.TotalValue.ShouldBe(6500m);
@@ -124,7 +124,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.NumberOfPositions.ShouldBe(3);
@@ -160,7 +160,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         // HHI = 4 * (0.25^2) = 4 * 0.0625 = 0.25
@@ -190,7 +190,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         // HHI = 0.9^2 + 0.09^2 + 0.01^2 = 0.81 + 0.0081 + 0.0001 = 0.8182
@@ -207,10 +207,10 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithoutHistoricalData_ShouldReturnZeroVolatility()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.PortfolioVolatility.ShouldBe(0m);
@@ -223,14 +223,14 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithInsufficientHistoricalData_ShouldReturnZeroVolatility()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>
         {
             new PortfolioPerformancePoint(DateTime.Today.AddDays(-1), 10000m, 10000m, 0m, 0m)
         };
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         metrics.PortfolioVolatility.ShouldBe(0m);
@@ -245,7 +245,7 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithHistoricalData_ShouldCalculateVolatility()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>
         {
             new PortfolioPerformancePoint(DateTime.Today.AddDays(-4), 10000m, 10000m, 0m, 0m),
@@ -256,7 +256,7 @@ public class PortfolioPerformanceServiceTests
         };
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         metrics.PortfolioVolatility.ShouldBeGreaterThan(0m);
@@ -267,7 +267,7 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithHistoricalData_ShouldCaptureMostRecentDailyReturn()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>
         {
             new PortfolioPerformancePoint(DateTime.Today.AddDays(-3), 10000m, 10000m, 0m, 0m),
@@ -276,7 +276,7 @@ public class PortfolioPerformanceServiceTests
         };
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         metrics.DailyReturn.ShouldBe(200m); // Most recent daily return
@@ -286,7 +286,7 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithZeroVolatility_ShouldReturnZeroSharpe()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>
         {
             new PortfolioPerformancePoint(DateTime.Today.AddDays(-2), 10000m, 10000m, 0m, 0m),
@@ -295,7 +295,7 @@ public class PortfolioPerformanceServiceTests
         };
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         metrics.PortfolioVolatility.ShouldBe(0m);
@@ -310,7 +310,7 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithPositiveDailyReturn_ShouldCalculatePercentage()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>
         {
             new PortfolioPerformancePoint(DateTime.Today.AddDays(-2), 10000m, 10000m, 0m, 0m),
@@ -319,7 +319,7 @@ public class PortfolioPerformanceServiceTests
         };
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         metrics.DailyReturn.ShouldBe(200m);
@@ -352,7 +352,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         // AverageCorrelation and PositionBetas are null (require historical position-level data)
@@ -382,7 +382,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.CashPercentage.ShouldBe(0m);
@@ -412,7 +412,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.TotalReturn.ShouldBe(1000m);
@@ -439,7 +439,7 @@ public class PortfolioPerformanceServiceTests
         );
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot);
 
         // Assert
         metrics.TotalReturn.ShouldBe(-1000m);
@@ -454,7 +454,7 @@ public class PortfolioPerformanceServiceTests
     public void CalculateMetrics_WithVolatileReturns_ShouldAnnualizeCorrectly()
     {
         // Arrange
-        var snapshot = CreateSimpleSnapshot();
+        PortfolioSnapshot snapshot = CreateSimpleSnapshot();
         var historicalPoints = new List<PortfolioPerformancePoint>();
 
         // Create 30 days of volatile returns
@@ -473,7 +473,7 @@ public class PortfolioPerformanceServiceTests
         }
 
         // Act
-        var metrics = _service.CalculateMetrics(snapshot, historicalPoints);
+        PortfolioMetrics metrics = _service.CalculateMetrics(snapshot, historicalPoints);
 
         // Assert
         // Volatility is annualized by multiplying by sqrt(252)

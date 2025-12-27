@@ -12,13 +12,13 @@ public class DomainEventTests
     public void DomainEvent_WhenCreated_CapturesUtcTimestamp()
     {
         // Arrange
-        var beforeCreate = DateTime.UtcNow;
+        DateTime beforeCreate = DateTime.UtcNow;
 
         // Act
         var @event = new PortfolioCreatedEvent(1, "Test Portfolio", 10000m);
 
         // Assert
-        var afterCreate = DateTime.UtcNow;
+        DateTime afterCreate = DateTime.UtcNow;
         @event.OccurredAt.ShouldBeInRange(beforeCreate, afterCreate);
         @event.OccurredAt.Kind.ShouldBe(DateTimeKind.Utc);
     }
@@ -71,7 +71,7 @@ public class DomainEventTests
     public void PositionAddedEvent_CapturesAllProperties()
     {
         // Arrange & Act
-        var entryDate = DateTime.Today;
+        DateTime entryDate = DateTime.Today;
         var @event = new PositionAddedEvent(1, "AAPL", 100, 150.50m, entryDate);
 
         // Assert
@@ -106,7 +106,7 @@ public class DomainEventTests
     public void CashTransactionRecordedEvent_CapturesAllProperties()
     {
         // Arrange & Act
-        var transactionDate = DateTime.Today;
+        DateTime transactionDate = DateTime.Today;
         var @event = new CashTransactionRecordedEvent(1, TransactionType.Deposit, 5000m, transactionDate);
 
         // Assert

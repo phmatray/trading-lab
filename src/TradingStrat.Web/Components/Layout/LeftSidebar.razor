@@ -8,11 +8,11 @@
         <!-- Navigation Items -->
         <nav class="flex-1 py-4 space-y-1 overflow-y-auto">
             @{
-                var groups = _navItems.GroupBy(i => i.Group);
+                IEnumerable<IGrouping<string, NavItem>> groups = _navItems.GroupBy(i => i.Group);
                 bool isFirstGroup = true;
             }
 
-            @foreach (var group in groups)
+            @foreach (IGrouping<string, NavItem> group in groups)
             {
                 @* Group divider (collapsed) or header (expanded) *@
                 @if (!isFirstGroup)

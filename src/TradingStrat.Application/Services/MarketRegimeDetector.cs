@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
 
@@ -29,10 +30,10 @@ public class MarketRegimeDetector
     /// <returns>Market regime: "BULLISH", "BEARISH", or "NEUTRAL".</returns>
     public async Task<string> DetectRegimeAsync(string ticker, int daysBack = 60)
     {
-        var endDate = DateTime.Today;
-        var startDate = endDate.AddDays(-daysBack);
+        DateTime endDate = DateTime.Today;
+        DateTime startDate = endDate.AddDays(-daysBack);
 
-        var prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate);
+        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate);
 
         if (prices.Count < 50)
         {

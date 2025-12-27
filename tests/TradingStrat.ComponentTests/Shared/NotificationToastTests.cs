@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -24,7 +25,7 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
@@ -44,11 +45,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var container = cut.Find("[data-testid='notification-toast']");
+        IElement container = cut.Find("[data-testid='notification-toast']");
         container.ClassList.ShouldContain("bg-green-50");
         container.ClassList.ShouldContain("border-green-200");
     }
@@ -65,11 +66,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var container = cut.Find("[data-testid='notification-toast']");
+        IElement container = cut.Find("[data-testid='notification-toast']");
         container.ClassList.ShouldContain("bg-yellow-50");
         container.ClassList.ShouldContain("border-yellow-200");
     }
@@ -86,11 +87,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var container = cut.Find("[data-testid='notification-toast']");
+        IElement container = cut.Find("[data-testid='notification-toast']");
         container.ClassList.ShouldContain("bg-red-50");
         container.ClassList.ShouldContain("border-red-200");
     }
@@ -107,11 +108,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var container = cut.Find("[data-testid='notification-toast']");
+        IElement container = cut.Find("[data-testid='notification-toast']");
         container.ClassList.ShouldContain("bg-blue-50");
         container.ClassList.ShouldContain("border-blue-200");
     }
@@ -132,11 +133,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
         svg.ClassList.ShouldContain("w-6");
         svg.ClassList.ShouldContain("h-6");
@@ -159,11 +160,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var actionButton = cut.Find("button[class*='underline']");
+        IElement actionButton = cut.Find("button[class*='underline']");
         actionButton.ShouldNotBeNull();
         actionButton.TextContent.ShouldBe("View Details");
     }
@@ -180,11 +181,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var actionButtons = cut.FindAll("button[class*='underline']");
+        IReadOnlyList<IElement> actionButtons = cut.FindAll("button[class*='underline']");
         actionButtons.ShouldBeEmpty();
     }
 
@@ -202,11 +203,11 @@ public class NotificationToastTests : BunitTestContext
         bool dismissCalled = false;
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification)
             .Add(p => p.OnDismiss, () => dismissCalled = true));
 
-        var dismissButton = cut.Find("[data-testid='dismiss-button']");
+        IElement dismissButton = cut.Find("[data-testid='dismiss-button']");
         dismissButton.Click();
 
         // Assert
@@ -228,11 +229,11 @@ public class NotificationToastTests : BunitTestContext
         bool dismissCalled = false;
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification)
             .Add(p => p.OnDismiss, () => dismissCalled = true));
 
-        var actionButton = cut.Find("button[class*='underline']");
+        IElement actionButton = cut.Find("button[class*='underline']");
         actionButton.Click();
 
         // Assert
@@ -251,11 +252,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var container = cut.Find("[role='alert']");
+        IElement container = cut.Find("[role='alert']");
         container.ShouldNotBeNull();
         container.GetAttribute("aria-live").ShouldBe("assertive");
         container.GetAttribute("aria-atomic").ShouldBe("true");
@@ -273,11 +274,11 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification));
 
         // Assert
-        var dismissButton = cut.Find("[data-testid='dismiss-button']");
+        IElement dismissButton = cut.Find("[data-testid='dismiss-button']");
         dismissButton.GetAttribute("aria-label").ShouldBe("Dismiss");
     }
 
@@ -293,7 +294,7 @@ public class NotificationToastTests : BunitTestContext
         };
 
         // Act - AutoDismissMs = 0 disables auto-dismiss
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, notification)
             .Add(p => p.AutoDismissMs, 0));
 
@@ -305,12 +306,12 @@ public class NotificationToastTests : BunitTestContext
     public void NotificationToast_WithNullNotification_RendersEmpty()
     {
         // Arrange & Act
-        var cut = Render<NotificationToast>(parameters => parameters
+        IRenderedComponent<NotificationToast> cut = Render<NotificationToast>(parameters => parameters
             .Add(p => p.Notification, null));
 
         // Assert
         // Component should render container but without content
-        var container = cut.Find("[data-testid='notification-toast']");
+        IElement container = cut.Find("[data-testid='notification-toast']");
         container.ShouldNotBeNull();
     }
 }

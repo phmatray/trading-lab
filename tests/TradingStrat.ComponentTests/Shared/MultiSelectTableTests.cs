@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Shouldly;
@@ -18,7 +19,7 @@ public class MultiSelectTableTests : BunitTestContext
     public void MultiSelectTable_RendersEmptyStateWithDefaultMessage()
     {
         // Arrange & Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, Array.Empty<TestItem>())
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.HeaderContent, builder => builder.AddMarkupContent(0, "<th>Name</th>"))
@@ -34,7 +35,7 @@ public class MultiSelectTableTests : BunitTestContext
     public void MultiSelectTable_RendersEmptyStateWithCustomMessage()
     {
         // Arrange & Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, Array.Empty<TestItem>())
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.EmptyMessage, "No data available")
@@ -58,7 +59,7 @@ public class MultiSelectTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.HeaderContent, builder => builder.AddMarkupContent(0, "<th>Name</th>"))
@@ -66,7 +67,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var rows = cut.FindAll("tbody tr");
+        IReadOnlyList<IElement> rows = cut.FindAll("tbody tr");
         rows.Count.ShouldBe(3);
         cut.Markup.ShouldContain("Item 1");
         cut.Markup.ShouldContain("Item 2");
@@ -80,7 +81,7 @@ public class MultiSelectTableTests : BunitTestContext
         List<TestItem> items = new() { new TestItem("1", "Item 1") };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.AllowSelectAll, true)
@@ -89,7 +90,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var headerCheckbox = cut.Find("thead input[type='checkbox']");
+        IElement headerCheckbox = cut.Find("thead input[type='checkbox']");
         headerCheckbox.ShouldNotBeNull();
         headerCheckbox.GetAttribute("aria-label").ShouldBe("Select all items");
     }
@@ -101,7 +102,7 @@ public class MultiSelectTableTests : BunitTestContext
         List<TestItem> items = new() { new TestItem("1", "Item 1") };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.AllowSelectAll, false)
@@ -110,7 +111,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var headerCheckboxes = cut.FindAll("thead input[type='checkbox']");
+        IReadOnlyList<IElement> headerCheckboxes = cut.FindAll("thead input[type='checkbox']");
         headerCheckboxes.ShouldBeEmpty();
     }
 
@@ -126,7 +127,7 @@ public class MultiSelectTableTests : BunitTestContext
         };
         HashSet<string>? capturedSelection = null;
 
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.HeaderContent, builder => builder.AddMarkupContent(0, "<th>Name</th>"))
@@ -134,7 +135,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, sel => capturedSelection = sel)));
 
         // Act
-        var selectAllCheckbox = cut.Find("thead input[type='checkbox']");
+        IElement selectAllCheckbox = cut.Find("thead input[type='checkbox']");
         selectAllCheckbox.Change(true);
 
         // Assert
@@ -157,7 +158,7 @@ public class MultiSelectTableTests : BunitTestContext
         HashSet<string> selectedKeys = new() { "1", "2" };
         HashSet<string>? capturedSelection = null;
 
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.SelectedKeys, selectedKeys)
@@ -166,7 +167,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, sel => capturedSelection = sel)));
 
         // Act
-        var selectAllCheckbox = cut.Find("thead input[type='checkbox']");
+        IElement selectAllCheckbox = cut.Find("thead input[type='checkbox']");
         selectAllCheckbox.Change(false);
 
         // Assert
@@ -181,7 +182,7 @@ public class MultiSelectTableTests : BunitTestContext
         List<TestItem> items = new() { new TestItem("1", "Item 1"), new TestItem("2", "Item 2") };
         HashSet<string>? capturedSelection = null;
 
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.HeaderContent, builder => builder.AddMarkupContent(0, "<th>Name</th>"))
@@ -189,7 +190,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, sel => capturedSelection = sel)));
 
         // Act
-        var rowCheckboxes = cut.FindAll("tbody input[type='checkbox']");
+        IReadOnlyList<IElement> rowCheckboxes = cut.FindAll("tbody input[type='checkbox']");
         rowCheckboxes[0].Change(true);
 
         // Assert
@@ -206,7 +207,7 @@ public class MultiSelectTableTests : BunitTestContext
         HashSet<string> selectedKeys = new() { "1" };
         HashSet<string>? capturedSelection = null;
 
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.SelectedKeys, selectedKeys)
@@ -215,7 +216,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, sel => capturedSelection = sel)));
 
         // Act
-        var rowCheckbox = cut.Find("tbody input[type='checkbox']");
+        IElement rowCheckbox = cut.Find("tbody input[type='checkbox']");
         rowCheckbox.Change(false);
 
         // Assert
@@ -231,7 +232,7 @@ public class MultiSelectTableTests : BunitTestContext
         HashSet<string> selectedKeys = new() { "1" };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.SelectedKeys, selectedKeys)
@@ -240,7 +241,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var row = cut.Find("tbody tr");
+        IElement row = cut.Find("tbody tr");
         row.ClassList.ShouldContain("bg-blue-50");
     }
 
@@ -251,7 +252,7 @@ public class MultiSelectTableTests : BunitTestContext
         List<TestItem> items = new() { new TestItem("AAPL", "Apple") };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.HeaderContent, builder => builder.AddMarkupContent(0, "<th>Name</th>"))
@@ -259,7 +260,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var rowCheckbox = cut.Find("tbody input[type='checkbox']");
+        IElement rowCheckbox = cut.Find("tbody input[type='checkbox']");
         rowCheckbox.GetAttribute("aria-label").ShouldBe("Select AAPL");
     }
 
@@ -271,7 +272,7 @@ public class MultiSelectTableTests : BunitTestContext
         HashSet<string> selectedKeys = new() { "1", "2" };
 
         // Act
-        var cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
+        IRenderedComponent<MultiSelectTable<TestItem>> cut = Render<MultiSelectTable<TestItem>>(parameters => parameters
             .Add(p => p.Items, items)
             .Add(p => p.GetItemKey, item => item.Id)
             .Add(p => p.SelectedKeys, selectedKeys)
@@ -280,7 +281,7 @@ public class MultiSelectTableTests : BunitTestContext
             .Add(p => p.OnSelectionChanged, EventCallback.Factory.Create<HashSet<string>>(this, _ => { })));
 
         // Assert
-        var selectAllCheckbox = cut.Find("thead input[type='checkbox']");
+        IElement selectAllCheckbox = cut.Find("thead input[type='checkbox']");
         selectAllCheckbox.HasAttribute("checked").ShouldBeTrue();
     }
 }

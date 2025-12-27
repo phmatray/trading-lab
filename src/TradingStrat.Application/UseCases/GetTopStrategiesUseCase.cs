@@ -25,16 +25,16 @@ public class GetTopStrategiesUseCase : BaseUseCase<int, List<TopStrategyResult>>
 
     private async Task<List<TopStrategyResult>> ExecuteCoreAsync(int limit)
     {
-        var topBacktests = await _backtestArchivePort.GetTopBacktestRunsAsync(limit);
+        List<BacktestRun> topBacktests = await _backtestArchivePort.GetTopBacktestRunsAsync(limit);
 
         var results = new List<TopStrategyResult>();
 
-        foreach (var backtest in topBacktests)
+        foreach (BacktestRun backtest in topBacktests)
         {
             try
             {
                 // Deserialize BacktestResult from JSON
-                var backtestResult = JsonSerializer.Deserialize<BacktestResult>(backtest.ResultsJson);
+                BacktestResult? backtestResult = JsonSerializer.Deserialize<BacktestResult>(backtest.ResultsJson);
 
                 if (backtestResult != null)
                 {

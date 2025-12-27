@@ -99,11 +99,11 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
         try
         {
             // Load market regime
-            var regime = await AiInsights.GetCurrentRegimeAsync();
+            MarketRegime regime = await AiInsights.GetCurrentRegimeAsync();
             _currentRegime = regime.Regime;
 
             // Load recommendation
-            var recommendation = await AiInsights.GetCurrentRecommendationAsync();
+            PortfolioRecommendation recommendation = await AiInsights.GetCurrentRecommendationAsync();
             _currentRecommendation = recommendation.Action;
             _confidence = recommendation.Confidence;
             _reasons = recommendation.Reasons;

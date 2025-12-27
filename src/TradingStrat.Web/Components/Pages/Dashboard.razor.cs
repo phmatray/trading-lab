@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Web.Components.Base;
 
@@ -31,15 +32,15 @@ public partial class Dashboard : BaseComponent, IDisposable
         try
         {
             // Load all dashboard data in parallel
-            var statsTask = GetDashboardStatsUseCase.ExecuteAsync();
-            var activityTask = GetRecentActivityUseCase.ExecuteAsync(limit: 10);
-            var strategiesTask = GetTopStrategiesUseCase.ExecuteAsync(limit: 5);
+            Task<Result<DashboardStatsResult>> statsTask = GetDashboardStatsUseCase.ExecuteAsync();
+            Task<Result<List<ActivityEvent>>> activityTask = GetRecentActivityUseCase.ExecuteAsync(limit: 10);
+            Task<Result<List<TopStrategyResult>>> strategiesTask = GetTopStrategiesUseCase.ExecuteAsync(limit: 5);
 
             await Task.WhenAll(statsTask, activityTask, strategiesTask);
 
-            var statsResult = await statsTask;
-            var activityResult = await activityTask;
-            var strategiesResult = await strategiesTask;
+            Result<DashboardStatsResult> statsResult = await statsTask;
+            Result<List<ActivityEvent>> activityResult = await activityTask;
+            Result<List<TopStrategyResult>> strategiesResult = await strategiesTask;
 
             if (statsResult.IsFailure)
             {

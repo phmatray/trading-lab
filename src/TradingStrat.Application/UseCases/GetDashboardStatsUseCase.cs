@@ -2,6 +2,7 @@ using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
@@ -43,13 +44,13 @@ public class GetDashboardStatsUseCase : BaseUseCase<Unit, DashboardStatsResult>,
     private async Task<DashboardStatsResult> ExecuteCoreAsync(Unit _)
     {
         // Run all queries in parallel for better performance
-        var customStrategiesTask = _customStrategyPort.GetAllAsync();
-        var backtestCountTask = _backtestArchivePort.GetBacktestRunCountAsync();
-        var portfoliosTask = _portfolioPort.GetAllPortfoliosAsync();
-        var lastBacktestDateTask = _backtestArchivePort.GetLastBacktestDateAsync();
-        var allTickersTask = _historicalDataPort.GetAllTickersAsync();
-        var tickerSummariesTask = _historicalDataPort.GetAllTickerSummariesAsync(Domain.ValueObjects.TimeFrame.D1);
-        var lastDataUpdateTask = _historicalDataPort.GetDatabaseLastModifiedAsync();
+        Task<List<CustomStrategy>> customStrategiesTask = _customStrategyPort.GetAllAsync();
+        Task<int> backtestCountTask = _backtestArchivePort.GetBacktestRunCountAsync();
+        Task<List<Portfolio>> portfoliosTask = _portfolioPort.GetAllPortfoliosAsync();
+        Task<DateTime?> lastBacktestDateTask = _backtestArchivePort.GetLastBacktestDateAsync();
+        Task<List<string>> allTickersTask = _historicalDataPort.GetAllTickersAsync();
+        Task<List<TickerSummary>> tickerSummariesTask = _historicalDataPort.GetAllTickerSummariesAsync(Domain.ValueObjects.TimeFrame.D1);
+        Task<DateTime?> lastDataUpdateTask = _historicalDataPort.GetDatabaseLastModifiedAsync();
 
         await Task.WhenAll(
             customStrategiesTask,

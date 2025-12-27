@@ -93,7 +93,7 @@ public class HomePage : BasePage
     /// </summary>
     public async Task<string?> GetStrategiesCountAsync()
     {
-        var statElement = StrategiesStat.Locator("p.text-3xl");
+        ILocator statElement = StrategiesStat.Locator("p.text-3xl");
         return await statElement.TextContentAsync();
     }
 

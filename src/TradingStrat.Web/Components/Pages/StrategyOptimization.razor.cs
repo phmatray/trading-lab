@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -46,7 +47,7 @@ public partial class StrategyOptimization : IDisposable
 
         try
         {
-            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            Result<List<CustomStrategyResult>> result = await CustomStrategyUseCase.GetAllStrategiesAsync();
 
             if (result.IsFailure)
             {
@@ -78,7 +79,7 @@ public partial class StrategyOptimization : IDisposable
 
         try
         {
-            var result = await CustomStrategyUseCase.GetStrategyByIdAsync(model.CustomStrategyId);
+            Result<CustomStrategyResult> result = await CustomStrategyUseCase.GetStrategyByIdAsync(model.CustomStrategyId);
 
             if (result.IsFailure)
             {
@@ -199,7 +200,7 @@ public partial class StrategyOptimization : IDisposable
 
             // Execute optimization
             OptimizeParametersCommand command = model.ToCommand();
-            var result = await OptimizeUseCase.ExecuteAsync(command, progress);
+            Result<OptimizationResult> result = await OptimizeUseCase.ExecuteAsync(command, progress);
 
             if (result.IsFailure)
             {
@@ -256,7 +257,7 @@ public partial class StrategyOptimization : IDisposable
                 Definition: updatedDefinition
             );
 
-            var updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
+            Result<CustomStrategyResult> updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
 
             if (updateResult.IsFailure)
             {
@@ -377,7 +378,7 @@ public partial class StrategyOptimization : IDisposable
                 Definition: optimizedDefinition
             );
 
-            var createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
+            Result<CustomStrategyResult> createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
 
             if (createResult.IsFailure)
             {

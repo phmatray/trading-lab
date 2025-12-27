@@ -250,7 +250,7 @@ public class StrategyAnalysisPanelPage : BasePage
     /// </summary>
     public async Task<int> GetPanelCountAsync()
     {
-        var panels = Page.Locator("[data-testid='analyze-button']");
+        ILocator panels = Page.Locator("[data-testid='analyze-button']");
         return await panels.CountAsync();
     }
 }

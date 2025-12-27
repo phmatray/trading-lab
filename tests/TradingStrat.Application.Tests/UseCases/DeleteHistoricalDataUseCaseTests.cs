@@ -1,7 +1,9 @@
 using FakeItEasy;
 using Shouldly;
+using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -28,7 +30,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        var result = await _useCase.DeleteTickerAsync(ticker);
+        Result<DeleteDataResult> result = await _useCase.DeleteTickerAsync(ticker);
 
         // Assert
         result.ShouldNotBeNull();
@@ -53,7 +55,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        var result = await _useCase.DeleteTickerAsync(ticker, timeFrame);
+        Result<DeleteDataResult> result = await _useCase.DeleteTickerAsync(ticker, timeFrame);
 
         // Assert
         result.ShouldNotBeNull();
@@ -76,7 +78,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(0);
 
         // Act
-        var result = await _useCase.DeleteTickerAsync(ticker);
+        Result<DeleteDataResult> result = await _useCase.DeleteTickerAsync(ticker);
 
         // Assert
         result.ShouldNotBeNull();
@@ -92,7 +94,7 @@ public class DeleteHistoricalDataUseCaseTests
         string ticker = "";
 
         // Act
-        var result = await _useCase.DeleteTickerAsync(ticker);
+        Result<DeleteDataResult> result = await _useCase.DeleteTickerAsync(ticker);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -107,7 +109,7 @@ public class DeleteHistoricalDataUseCaseTests
         string? ticker = null;
 
         // Act
-        var result = await _useCase.DeleteTickerAsync(ticker!);
+        Result<DeleteDataResult> result = await _useCase.DeleteTickerAsync(ticker!);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -129,7 +131,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();
@@ -154,7 +156,7 @@ public class DeleteHistoricalDataUseCaseTests
         DateTime endDate = new(2024, 1, 1);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -172,7 +174,7 @@ public class DeleteHistoricalDataUseCaseTests
         DateTime endDate = new(2024, 6, 30);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -193,7 +195,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, singleDate, singleDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, singleDate, singleDate);
 
         // Assert
         result.ShouldNotBeNull();
@@ -217,7 +219,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(0);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();
@@ -239,7 +241,7 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        Result<DeleteDataResult> result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();

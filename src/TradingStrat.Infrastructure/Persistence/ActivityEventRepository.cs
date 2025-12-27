@@ -27,7 +27,7 @@ public class ActivityEventRepository : IActivityEventPort
 
     public async Task<List<ActivityEvent>> GetRecentActivityAsync(int limit = 10, string? eventType = null)
     {
-        var query = _context.ActivityEvents.AsQueryable();
+        IQueryable<ActivityEvent> query = _context.ActivityEvents.AsQueryable();
 
         if (!string.IsNullOrEmpty(eventType))
         {

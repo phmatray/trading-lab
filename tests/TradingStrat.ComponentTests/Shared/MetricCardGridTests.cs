@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -23,7 +24,7 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -37,11 +38,11 @@ public class MetricCardGridTests : BunitTestContext
     public void MetricCardGrid_WithEmptyList_RendersEmptyGrid()
     {
         // Arrange & Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, new List<MetricCardData>()));
 
         // Assert
-        var container = cut.Find("[data-testid='metric-card-grid']");
+        IElement container = cut.Find("[data-testid='metric-card-grid']");
         container.ShouldNotBeNull();
         container.ClassList.ShouldContain("grid");
     }
@@ -56,7 +57,7 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -73,11 +74,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var subtitles = cut.FindAll("p.text-xs");
+        IReadOnlyList<IElement> subtitles = cut.FindAll("p.text-xs");
         subtitles.ShouldBeEmpty();
     }
 
@@ -91,11 +92,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var valueElement = cut.Find("p.metric-positive");
+        IElement valueElement = cut.Find("p.metric-positive");
         valueElement.ShouldNotBeNull();
         valueElement.TextContent.ShouldBe("+5%");
     }
@@ -110,11 +111,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var valueElement = cut.Find("p.metric-negative");
+        IElement valueElement = cut.Find("p.metric-negative");
         valueElement.ShouldNotBeNull();
         valueElement.TextContent.ShouldBe("-3%");
     }
@@ -129,11 +130,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var valueElement = cut.Find("p.text-2xl");
+        IElement valueElement = cut.Find("p.text-2xl");
         valueElement.ShouldNotBeNull();
         valueElement.ClassList.ShouldContain("text-gray-900");
     }
@@ -154,11 +155,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
         svg.ClassList.ShouldContain("w-8");
         svg.ClassList.ShouldContain("h-8");
@@ -174,11 +175,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var svgs = cut.FindAll("svg");
+        IReadOnlyList<IElement> svgs = cut.FindAll("svg");
         svgs.ShouldBeEmpty();
     }
 
@@ -197,12 +198,12 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics)
             .Add(p => p.Columns, columns));
 
         // Assert
-        var grid = cut.Find("[data-testid='metric-card-grid']");
+        IElement grid = cut.Find("[data-testid='metric-card-grid']");
         grid.ClassList.ShouldContain(expectedClass);
     }
 
@@ -216,11 +217,11 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var grid = cut.Find("[data-testid='metric-card-grid']");
+        IElement grid = cut.Find("[data-testid='metric-card-grid']");
         grid.ClassList.ShouldContain("grid-cols-1");
     }
 
@@ -237,7 +238,7 @@ public class MetricCardGridTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<MetricCardGrid>(parameters => parameters
+        IRenderedComponent<MetricCardGrid> cut = Render<MetricCardGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -247,7 +248,7 @@ public class MetricCardGridTests : BunitTestContext
         cut.Markup.ShouldContain("Metric 4");
         cut.Markup.ShouldContain("With icon");
 
-        var cards = cut.FindAll("div.card");
+        IReadOnlyList<IElement> cards = cut.FindAll("div.card");
         cards.Count.ShouldBe(4);
     }
 }

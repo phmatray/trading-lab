@@ -34,7 +34,7 @@ public partial class ActivityFeedList : ComponentBase
 
     private string GetRelativeTime(DateTime timestamp)
     {
-        var timespan = DateTime.Now - timestamp;
+        TimeSpan timespan = DateTime.Now - timestamp;
 
         if (timespan.TotalMinutes < 1)
         {

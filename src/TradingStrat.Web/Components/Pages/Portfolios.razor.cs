@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
@@ -81,7 +82,7 @@ public partial class Portfolios : ComponentBase, IDisposable
                 _createFormModel.InitialCash
             );
 
-            var result = await CreatePortfolioUseCase.ExecuteAsync(command);
+            Result<CreatePortfolioResult> result = await CreatePortfolioUseCase.ExecuteAsync(command);
 
             if (result.IsSuccess)
             {

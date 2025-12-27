@@ -111,7 +111,7 @@ public partial class Comparison
             EndDate: model.EndDate
         );
 
-        var optimizationResult = await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
+        Result<ParameterOptimizationResult> optimizationResult = await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
 
         if (optimizationResult.IsFailure)
         {
@@ -138,7 +138,7 @@ public partial class Comparison
     private async Task OnStrategyTypeAChanged(string value)
     {
         // Parse strategy type string to enum
-        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        if (StrategyRegistry.TryParseStrategyType(value, out StrategyType strategyType))
         {
             await OnPropertyChangedAsync(m => m.StrategyTypeA = strategyType);
         }
@@ -150,7 +150,7 @@ public partial class Comparison
     private async Task OnStrategyTypeBChanged(string value)
     {
         // Parse strategy type string to enum
-        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        if (StrategyRegistry.TryParseStrategyType(value, out StrategyType strategyType))
         {
             await OnPropertyChangedAsync(m => m.StrategyTypeB = strategyType);
         }

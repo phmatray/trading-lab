@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,11 +16,11 @@ public class TradingViewWidgetTests : BunitTestContext
     public void TradingViewWidget_WithDefaultParameters_RendersSuccessfully()
     {
         // Arrange & Act
-        var cut = Render<TradingViewWidget>();
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>();
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var container = cut.Find("div.tradingview-widget-container");
+        IElement container = cut.Find("div.tradingview-widget-container");
         container.ShouldNotBeNull();
     }
 
@@ -30,11 +31,11 @@ public class TradingViewWidgetTests : BunitTestContext
         string ticker = "AAPL";
 
         // Act
-        var cut = Render<TradingViewWidget>(parameters => parameters
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>(parameters => parameters
             .Add(p => p.Ticker, ticker));
 
         // Assert
-        var container = cut.Find("div[role='region']");
+        IElement container = cut.Find("div[role='region']");
         container.GetAttribute("aria-label").ShouldBe($"Trading chart for {ticker}");
     }
 
@@ -42,10 +43,10 @@ public class TradingViewWidgetTests : BunitTestContext
     public void TradingViewWidget_HasResponsiveHeightClasses()
     {
         // Arrange & Act
-        var cut = Render<TradingViewWidget>();
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>();
 
         // Assert
-        var container = cut.Find("div.tradingview-widget-container");
+        IElement container = cut.Find("div.tradingview-widget-container");
         container.ClassList.ShouldContain("h-96");
         container.ClassList.ShouldContain("md:h-[600px]");
     }
@@ -54,10 +55,10 @@ public class TradingViewWidgetTests : BunitTestContext
     public void TradingViewWidget_CreatesUniqueWidgetId()
     {
         // Arrange & Act
-        var cut = Render<TradingViewWidget>();
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>();
 
         // Assert
-        var chartDiv = cut.Find("div[id^='tradingview_chart_']");
+        IElement chartDiv = cut.Find("div[id^='tradingview_chart_']");
         chartDiv.ShouldNotBeNull();
         chartDiv.Id.ShouldStartWith("tradingview_chart_");
     }
@@ -69,11 +70,11 @@ public class TradingViewWidgetTests : BunitTestContext
     public void TradingViewWidget_WithDifferentTickers_RendersCorrectly(string ticker)
     {
         // Arrange & Act
-        var cut = Render<TradingViewWidget>(parameters => parameters
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>(parameters => parameters
             .Add(p => p.Ticker, ticker));
 
         // Assert
-        var container = cut.Find("div[role='region']");
+        IElement container = cut.Find("div[role='region']");
         container.GetAttribute("aria-label")!.ShouldContain(ticker);
     }
 
@@ -83,13 +84,13 @@ public class TradingViewWidgetTests : BunitTestContext
     public void TradingViewWidget_WithDifferentThemes_RendersSuccessfully(string theme)
     {
         // Arrange & Act
-        var cut = Render<TradingViewWidget>(parameters => parameters
+        IRenderedComponent<TradingViewWidget> cut = Render<TradingViewWidget>(parameters => parameters
             .Add(p => p.Ticker, "AAPL")
             .Add(p => p.Theme, theme));
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var container = cut.Find("div.tradingview-widget-container");
+        IElement container = cut.Find("div.tradingview-widget-container");
         container.ShouldNotBeNull();
     }
 }

@@ -61,7 +61,7 @@ public class ComparisonPage : BasePage
     /// </summary>
     public async Task SelectVariantAStrategyAsync(string strategyValue)
     {
-        var strategySelect = await StrategySelects.Nth(0).ElementHandleAsync();
+        IElementHandle? strategySelect = await StrategySelects.Nth(0).ElementHandleAsync();
         if (strategySelect != null)
         {
             await strategySelect.SelectOptionAsync(strategyValue);
@@ -74,7 +74,7 @@ public class ComparisonPage : BasePage
     /// </summary>
     public async Task SelectVariantBStrategyAsync(string strategyValue)
     {
-        var strategySelect = await StrategySelects.Nth(1).ElementHandleAsync();
+        IElementHandle? strategySelect = await StrategySelects.Nth(1).ElementHandleAsync();
         if (strategySelect != null)
         {
             await strategySelect.SelectOptionAsync(strategyValue);

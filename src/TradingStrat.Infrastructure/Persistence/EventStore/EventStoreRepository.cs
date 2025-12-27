@@ -85,7 +85,7 @@ public class EventStoreRepository : IEventStore
             throw new ArgumentException("Stream ID cannot be null or whitespace", nameof(streamId));
         }
 
-        var eventRecords = await _context.Events
+        List<EventRecord> eventRecords = await _context.Events
             .Where(e => e.StreamId == streamId && e.Version > fromVersion)
             .OrderBy(e => e.Version)
             .ToListAsync();

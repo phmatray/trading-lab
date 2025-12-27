@@ -72,7 +72,7 @@ public class StrategyComparisonPage : BasePage
 
     public async Task SelectStrategyAsync(int selectorIndex, string strategyName)
     {
-        var selector = StrategySelectors.Nth(selectorIndex);
+        ILocator selector = StrategySelectors.Nth(selectorIndex);
         await selector.SelectOptionAsync(new[] { strategyName });
         await Page.WaitForBlazorAsync();
     }

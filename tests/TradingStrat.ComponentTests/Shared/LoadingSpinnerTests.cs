@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,7 +16,7 @@ public class LoadingSpinnerTests : BunitTestContext
     public void LoadingSpinner_Renders_Successfully()
     {
         // Arrange & Act
-        var cut = Render<LoadingSpinner>();
+        IRenderedComponent<LoadingSpinner> cut = Render<LoadingSpinner>();
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
@@ -25,10 +26,10 @@ public class LoadingSpinnerTests : BunitTestContext
     public void LoadingSpinner_HasAccessibilityAttributes()
     {
         // Arrange & Act
-        var cut = Render<LoadingSpinner>();
+        IRenderedComponent<LoadingSpinner> cut = Render<LoadingSpinner>();
 
         // Assert
-        var container = cut.Find("div[role='status']");
+        IElement container = cut.Find("div[role='status']");
         container.ShouldNotBeNull();
         container.GetAttribute("aria-live").ShouldBe("polite");
     }
@@ -37,10 +38,10 @@ public class LoadingSpinnerTests : BunitTestContext
     public void LoadingSpinner_ContainsSpinnerSvg()
     {
         // Arrange & Act
-        var cut = Render<LoadingSpinner>();
+        IRenderedComponent<LoadingSpinner> cut = Render<LoadingSpinner>();
 
         // Assert
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
         svg.ClassList.ShouldContain("animate-spin");
     }
@@ -49,10 +50,10 @@ public class LoadingSpinnerTests : BunitTestContext
     public void LoadingSpinner_HasScreenReaderText()
     {
         // Arrange & Act
-        var cut = Render<LoadingSpinner>();
+        IRenderedComponent<LoadingSpinner> cut = Render<LoadingSpinner>();
 
         // Assert
-        var srOnly = cut.Find(".sr-only");
+        IElement srOnly = cut.Find(".sr-only");
         srOnly.ShouldNotBeNull();
         srOnly.TextContent.ShouldBe("Loading...");
     }
@@ -61,15 +62,15 @@ public class LoadingSpinnerTests : BunitTestContext
     public void LoadingSpinner_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<LoadingSpinner>();
+        IRenderedComponent<LoadingSpinner> cut = Render<LoadingSpinner>();
 
         // Assert
-        var container = cut.Find("div");
+        IElement container = cut.Find("div");
         container.ClassList.ShouldContain("flex");
         container.ClassList.ShouldContain("items-center");
         container.ClassList.ShouldContain("justify-center");
 
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ClassList.ShouldContain("h-8");
         svg.ClassList.ShouldContain("w-8");
         svg.ClassList.ShouldContain("text-trading-blue");

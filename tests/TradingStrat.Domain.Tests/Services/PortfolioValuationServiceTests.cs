@@ -162,7 +162,7 @@ public class PortfolioValuationServiceTests
         snapshot.Cash.ShouldBe(5000m);
         snapshot.Positions.Count.ShouldBe(1);
 
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.Ticker.ShouldBe("AAPL");
         position.Quantity.ShouldBe(10);
         position.EntryPrice.ShouldBe(100m);
@@ -327,7 +327,7 @@ public class PortfolioValuationServiceTests
         PortfolioSnapshot snapshot = result.Value;
 
         // Assert
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.UnrealizedGainLoss.ShouldBe(-500m); // (10 * 150) - (10 * 200) = 1500 - 2000 = -500
         position.UnrealizedGainLossPercentage.ShouldBe(-25m); // (-500 / 2000) * 100
     }
@@ -361,7 +361,7 @@ public class PortfolioValuationServiceTests
         PortfolioSnapshot snapshot = result.Value;
 
         // Assert
-        var position = snapshot.Positions[0];
+        PositionSnapshot position = snapshot.Positions[0];
         position.CostBasis.ShouldBe(0.10m); // 10 * 0.01
         position.UnrealizedGainLoss.ShouldBe(999.90m); // 1000 - 0.10
         position.UnrealizedGainLossPercentage.ShouldBe(999900m); // (999.90 / 0.10) * 100

@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -16,7 +17,7 @@ public class TradeTableTests : BunitTestContext
     public void TradeTable_WithNullTrades_RendersEmptyMessage()
     {
         // Arrange & Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, null));
 
         // Assert
@@ -27,7 +28,7 @@ public class TradeTableTests : BunitTestContext
     public void TradeTable_WithEmptyTrades_RendersEmptyMessage()
     {
         // Arrange & Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, new List<Trade>()));
 
         // Assert
@@ -45,11 +46,11 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
-        var table = cut.Find("table");
+        IElement table = cut.Find("table");
         table.ShouldNotBeNull();
         cut.Markup.ShouldContain("Buy signal");
         cut.Markup.ShouldContain("Sell signal");
@@ -66,7 +67,7 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
@@ -83,11 +84,11 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
-        var badge = cut.Find("span.bg-green-100");
+        IElement badge = cut.Find("span.bg-green-100");
         badge.ShouldNotBeNull();
         badge.TextContent.ShouldBe("Buy");
     }
@@ -102,11 +103,11 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
-        var badge = cut.Find("span.bg-red-100");
+        IElement badge = cut.Find("span.bg-red-100");
         badge.ShouldNotBeNull();
         badge.TextContent.ShouldBe("Sell");
     }
@@ -122,11 +123,11 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
-        var profitCell = cut.FindAll("td.metric-positive");
+        IReadOnlyList<IElement> profitCell = cut.FindAll("td.metric-positive");
         profitCell.ShouldNotBeEmpty();
     }
 
@@ -141,11 +142,11 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert
-        var lossCell = cut.FindAll("td.metric-negative");
+        IReadOnlyList<IElement> lossCell = cut.FindAll("td.metric-negative");
         lossCell.ShouldNotBeEmpty();
     }
 
@@ -160,12 +161,12 @@ public class TradeTableTests : BunitTestContext
         }
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades)
             .Add(p => p.MaxDisplayTrades, 20));
 
         // Assert
-        var toggleButton = cut.Find("button");
+        IElement toggleButton = cut.Find("button");
         toggleButton.ShouldNotBeNull();
         toggleButton.TextContent.ShouldContain("Show All");
     }
@@ -181,18 +182,18 @@ public class TradeTableTests : BunitTestContext
         }
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades)
             .Add(p => p.MaxDisplayTrades, 20));
 
-        var toggleButton = cut.Find("button");
+        IElement toggleButton = cut.Find("button");
         toggleButton.Click();
 
         // Assert
-        var rows = cut.FindAll("tbody tr");
+        IReadOnlyList<IElement> rows = cut.FindAll("tbody tr");
         rows.Count.ShouldBe(25);
 
-        var showLessButton = cut.Find("button");
+        IElement showLessButton = cut.Find("button");
         showLessButton.ShouldNotBeNull();
         showLessButton.TextContent.ShouldContain("Show Less");
     }
@@ -208,12 +209,12 @@ public class TradeTableTests : BunitTestContext
         }
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades)
             .Add(p => p.MaxDisplayTrades, 10));
 
         // Assert
-        var rows = cut.FindAll("tbody tr");
+        IReadOnlyList<IElement> rows = cut.FindAll("tbody tr");
         rows.Count.ShouldBe(10);
     }
 
@@ -227,7 +228,7 @@ public class TradeTableTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<TradeTable>(parameters => parameters
+        IRenderedComponent<TradeTable> cut = Render<TradeTable>(parameters => parameters
             .Add(p => p.Trades, trades));
 
         // Assert

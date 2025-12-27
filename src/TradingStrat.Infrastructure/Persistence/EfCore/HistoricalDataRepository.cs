@@ -154,11 +154,11 @@ public class HistoricalDataRepository : IHistoricalDataPort
         int completedTickers = 0;
         int totalRecordsSaved = 0;
 
-        foreach (var kvp in tickerDataMap)
+        foreach (KeyValuePair<string, (string? isin, IEnumerable<HistoricalPrice> data)> kvp in tickerDataMap)
         {
             string ticker = kvp.Key;
             string? isin = kvp.Value.isin;
-            var data = kvp.Value.data;
+            IEnumerable<HistoricalPrice> data = kvp.Value.data;
 
             progress?.Report(new BulkSaveProgress(
                 totalTickers,

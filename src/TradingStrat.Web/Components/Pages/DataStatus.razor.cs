@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Components.Base;
 using TradingStrat.Web.Components.Shared;
@@ -43,7 +44,7 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            var result = await CacheService.GetOrFetchDataStatusAsync(_query);
+            Result<AllDataStatusResult> result = await CacheService.GetOrFetchDataStatusAsync(_query);
 
             if (result.IsFailure)
             {
@@ -179,7 +180,7 @@ public partial class DataStatus : BaseComponent
                 SkipExisting: false
             );
 
-            var bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
+            Result<BulkFetchResult> bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
 
             if (bulkResult.IsFailure)
             {
@@ -221,7 +222,7 @@ public partial class DataStatus : BaseComponent
                 return;
             }
 
-            var deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
+            Result<DeleteDataResult> deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
 
             if (deleteResult.IsFailure)
             {
@@ -264,7 +265,7 @@ public partial class DataStatus : BaseComponent
                 SkipExisting: false
             );
 
-            var bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
+            Result<BulkFetchResult> bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
 
             if (bulkResult.IsFailure)
             {
@@ -316,7 +317,7 @@ public partial class DataStatus : BaseComponent
             int totalDeleted = 0;
             foreach (string ticker in _selectedTickers)
             {
-                var deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
+                Result<DeleteDataResult> deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
 
                 if (deleteResult.IsFailure)
                 {
@@ -356,7 +357,7 @@ public partial class DataStatus : BaseComponent
             foreach (string ticker in _selectedTickers)
             {
                 string outputPath = Path.Combine(Path.GetTempPath(), $"{ticker}_{_query.TimeFrame.Unit}.csv");
-                var exportResult = await ExportHistoricalDataUseCase.ExportHistoricalDataAsync(
+                Result<ExportResult> exportResult = await ExportHistoricalDataUseCase.ExportHistoricalDataAsync(
                     ticker,
                     _query.TimeFrame,
                     ExportFormat.CSV,
@@ -393,7 +394,7 @@ public partial class DataStatus : BaseComponent
             }
 
             string outputPath = Path.Combine(Path.GetTempPath(), $"coverage_report_{_query.TimeFrame.Unit}.csv");
-            var exportResult = await ExportHistoricalDataUseCase.ExportCoverageReportAsync(_query.TimeFrame, outputPath);
+            Result<ExportResult> exportResult = await ExportHistoricalDataUseCase.ExportCoverageReportAsync(_query.TimeFrame, outputPath);
 
             if (exportResult.IsFailure)
             {

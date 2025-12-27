@@ -44,7 +44,7 @@ public partial class StrategyForm : ComponentBase
 
     private async Task NotifyParametersChanged()
     {
-        var parameters = GetCurrentParameters();
+        Dictionary<string, object> parameters = GetCurrentParameters();
         await ParametersChanged.InvokeAsync(parameters);
     }
 

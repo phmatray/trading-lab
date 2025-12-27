@@ -1,5 +1,6 @@
 using System.Text;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
@@ -40,10 +41,10 @@ public class PortfolioContextBuilder
     /// <returns>Formatted context string with market data and indicators.</returns>
     public async Task<string> BuildContextForTicker(string ticker, int daysBack = 30)
     {
-        var endDate = DateTime.Today;
-        var startDate = endDate.AddDays(-daysBack);
+        DateTime endDate = DateTime.Today;
+        DateTime startDate = endDate.AddDays(-daysBack);
 
-        var prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, Domain.ValueObjects.TimeFrame.D1, startDate, endDate);
+        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, Domain.ValueObjects.TimeFrame.D1, startDate, endDate);
 
         if (prices.Count == 0)
         {
@@ -144,7 +145,7 @@ public class PortfolioContextBuilder
     /// <returns>Formatted context string with portfolio data and market analysis.</returns>
     public async Task<string> BuildContextForPortfolio(int portfolioId, int daysBack = 30)
     {
-        var portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
         if (portfolio == null)
         {
             return $"Portfolio with ID {portfolioId} not found.";
@@ -169,13 +170,13 @@ public class PortfolioContextBuilder
 
         // Fetch current prices for all positions
         var currentPrices = new Dictionary<string, decimal>();
-        foreach (var position in portfolio.Positions)
+        foreach (Position position in portfolio.Positions)
         {
             try
             {
-                var endDate = DateTime.Today;
-                var startDate = endDate.AddDays(-daysBack);
-                var prices = await _historicalDataPort.GetHistoricalDataAsync(
+                DateTime endDate = DateTime.Today;
+                DateTime startDate = endDate.AddDays(-daysBack);
+                List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(
                     position.Ticker,
                     TimeFrame.D1,
                     startDate,
@@ -193,10 +194,10 @@ public class PortfolioContextBuilder
         }
 
         // Calculate portfolio snapshot
-        var snapshotResult = _valuationService.CalculateSnapshot(portfolio, currentPrices);
+        Result<PortfolioSnapshot> snapshotResult = _valuationService.CalculateSnapshot(portfolio, currentPrices);
         if (snapshotResult.IsSuccess)
         {
-            var snapshot = snapshotResult.Value;
+            PortfolioSnapshot snapshot = snapshotResult.Value;
             decimal cashAllocation = snapshot.TotalValue > 0 ? (snapshot.Cash / snapshot.TotalValue * 100) : 0;
 
             context.AppendLine("PORTFOLIO SUMMARY:");
@@ -207,7 +208,7 @@ public class PortfolioContextBuilder
             context.AppendLine();
 
             context.AppendLine("POSITIONS:");
-            foreach (var posSnapshot in snapshot.Positions)
+            foreach (PositionSnapshot posSnapshot in snapshot.Positions)
             {
                 context.AppendLine($"\n{posSnapshot.Ticker}:");
                 context.AppendLine($"  Quantity: {posSnapshot.Quantity}");
@@ -233,7 +234,7 @@ public class PortfolioContextBuilder
             context.AppendLine("TOP HOLDINGS TECHNICAL ANALYSIS:");
             context.AppendLine();
 
-            foreach (var position in topHoldings)
+            foreach (Position position in topHoldings)
             {
                 try
                 {

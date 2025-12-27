@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -51,7 +52,7 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_WithNullMetrics_DisplaysNoMetricsMessage()
     {
         // Arrange & Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, null));
 
         // Assert
@@ -62,14 +63,14 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_WithMetrics_DisplaysAllMetricCards()
     {
         // Arrange
-        var metrics = CreateTestMetrics();
+        PerformanceMetrics metrics = CreateTestMetrics();
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
-        var metricCards = cut.FindAll("div.card");
+        IReadOnlyList<IElement> metricCards = cut.FindAll("div.card");
         metricCards.Count.ShouldBe(8);
     }
 
@@ -77,10 +78,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysTotalReturnLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(totalReturnPercentage: 0.25m);
+        PerformanceMetrics metrics = CreateTestMetrics(totalReturnPercentage: 0.25m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -91,10 +92,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysSharpeRatioLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(sharpeRatio: 2.34m);
+        PerformanceMetrics metrics = CreateTestMetrics(sharpeRatio: 2.34m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -105,10 +106,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysWinRateLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(winRate: 0.75m);
+        PerformanceMetrics metrics = CreateTestMetrics(winRate: 0.75m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -119,10 +120,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysTotalTradesLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(totalTrades: 123);
+        PerformanceMetrics metrics = CreateTestMetrics(totalTrades: 123);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -134,10 +135,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysProfitFactorLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(profitFactor: 3.25m);
+        PerformanceMetrics metrics = CreateTestMetrics(profitFactor: 3.25m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -148,10 +149,10 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_DisplaysMaxDrawdownLabel()
     {
         // Arrange
-        var metrics = CreateTestMetrics(maxDrawdownPercentage: -0.12m);
+        PerformanceMetrics metrics = CreateTestMetrics(maxDrawdownPercentage: -0.12m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert
@@ -162,14 +163,14 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_WithPositiveReturn_ShowsPositiveStyling()
     {
         // Arrange
-        var metrics = CreateTestMetrics(totalReturnPercentage: 0.20m);
+        PerformanceMetrics metrics = CreateTestMetrics(totalReturnPercentage: 0.20m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert - Total Return metric should have positive styling
-        var positiveMetrics = cut.FindAll(".metric-positive");
+        IReadOnlyList<IElement> positiveMetrics = cut.FindAll(".metric-positive");
         positiveMetrics.ShouldNotBeEmpty();
     }
 
@@ -177,14 +178,14 @@ public class MetricsGridTests : BunitTestContext
     public void MetricsGrid_WithNegativeReturn_ShowsNegativeStyling()
     {
         // Arrange
-        var metrics = CreateTestMetrics(totalReturnPercentage: -0.10m, sharpeRatio: -0.5m, winRate: 0.45m, profitFactor: 0.8m, maxDrawdownPercentage: -0.15m);
+        PerformanceMetrics metrics = CreateTestMetrics(totalReturnPercentage: -0.10m, sharpeRatio: -0.5m, winRate: 0.45m, profitFactor: 0.8m, maxDrawdownPercentage: -0.15m);
 
         // Act
-        var cut = Render<MetricsGrid>(parameters => parameters
+        IRenderedComponent<MetricsGrid> cut = Render<MetricsGrid>(parameters => parameters
             .Add(p => p.Metrics, metrics));
 
         // Assert - Total Return metric should have negative styling
-        var negativeMetrics = cut.FindAll(".metric-negative");
+        IReadOnlyList<IElement> negativeMetrics = cut.FindAll(".metric-negative");
         negativeMetrics.ShouldNotBeEmpty();
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
 using static TradingStrat.Web.Services.DebugLogger;
@@ -103,7 +104,7 @@ public partial class StrategyLibrary
         try
         {
             Log("[StrategyLibrary] Loading custom strategies...");
-            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            Result<List<CustomStrategyResult>> result = await CustomStrategyUseCase.GetAllStrategiesAsync();
 
             if (result.IsFailure)
             {
@@ -192,7 +193,7 @@ public partial class StrategyLibrary
             }
 
             string newName = $"{original.Name} (Copy)";
-            var cloneResult = await CustomStrategyUseCase.CloneStrategyAsync(strategyId, newName);
+            Result<CustomStrategyResult> cloneResult = await CustomStrategyUseCase.CloneStrategyAsync(strategyId, newName);
 
             if (cloneResult.IsFailure)
             {
@@ -229,7 +230,7 @@ public partial class StrategyLibrary
 
         try
         {
-            var deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
+            Result<bool> deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
 
             if (deleteResult.IsFailure)
             {

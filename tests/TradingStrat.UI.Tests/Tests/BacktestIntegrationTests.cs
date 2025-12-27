@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.UI.Tests.Tests;
@@ -112,8 +113,8 @@ public class BacktestIntegrationTests : BaseTest
     private async Task<int> CreateTestStrategyViaApplicationAsync(string name)
     {
         // Get the use case from DI container
-        var scope = AppFixture.Services.CreateScope();
-        var useCase = scope.ServiceProvider.GetRequiredService<ICustomStrategyManagementUseCase>();
+        IServiceScope scope = AppFixture.Services.CreateScope();
+        ICustomStrategyManagementUseCase useCase = scope.ServiceProvider.GetRequiredService<ICustomStrategyManagementUseCase>();
 
         // Create a minimal strategy definition
         var definition = new StrategyDefinition(
@@ -155,7 +156,7 @@ public class BacktestIntegrationTests : BaseTest
             Definition: definition
         );
 
-        var result = await useCase.CreateStrategyAsync(command);
+        Result<CustomStrategyResult> result = await useCase.CreateStrategyAsync(command);
         return result.Value.Id;
     }
 }

@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -18,11 +19,11 @@ public class PageHeaderTests : BunitTestContext
         string title = "Dashboard";
 
         // Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, title));
 
         // Assert
-        var titleElement = cut.Find("h1");
+        IElement titleElement = cut.Find("h1");
         titleElement.TextContent.ShouldBe(title);
         titleElement.ClassList.ShouldContain("text-3xl");
         titleElement.ClassList.ShouldContain("font-bold");
@@ -35,12 +36,12 @@ public class PageHeaderTests : BunitTestContext
         string description = "Manage your portfolios and strategies";
 
         // Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Dashboard")
             .Add(p => p.Description, description));
 
         // Assert
-        var descElement = cut.Find("p");
+        IElement descElement = cut.Find("p");
         descElement.TextContent.ShouldBe(description);
         descElement.ClassList.ShouldContain("text-gray-600");
     }
@@ -49,11 +50,11 @@ public class PageHeaderTests : BunitTestContext
     public void PageHeader_WithoutDescription_DoesNotRenderDescriptionElement()
     {
         // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Dashboard"));
 
         // Assert
-        var paragraphs = cut.FindAll("p");
+        IReadOnlyList<IElement> paragraphs = cut.FindAll("p");
         paragraphs.ShouldBeEmpty();
     }
 
@@ -61,7 +62,7 @@ public class PageHeaderTests : BunitTestContext
     public void PageHeader_WithActions_RendersActionButtons()
     {
         // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Portfolios")
             .Add(p => p.Actions, builder =>
             {
@@ -72,7 +73,7 @@ public class PageHeaderTests : BunitTestContext
             }));
 
         // Assert
-        var button = cut.Find("button.test-action-btn");
+        IElement button = cut.Find("button.test-action-btn");
         button.ShouldNotBeNull();
         button.TextContent.ShouldBe("Create New");
     }
@@ -81,15 +82,15 @@ public class PageHeaderTests : BunitTestContext
     public void PageHeader_WithoutActions_DoesNotRenderActionsContainer()
     {
         // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Dashboard"));
 
         // Assert - should only have the header div, not the actions div
-        var headerDiv = cut.Find("[data-testid='page-header']");
+        IElement headerDiv = cut.Find("[data-testid='page-header']");
         headerDiv.ShouldNotBeNull();
 
         // Should not have action buttons container
-        var actionButtons = cut.FindAll("button");
+        IReadOnlyList<IElement> actionButtons = cut.FindAll("button");
         actionButtons.ShouldBeEmpty();
     }
 
@@ -97,11 +98,11 @@ public class PageHeaderTests : BunitTestContext
     public void PageHeader_HasCorrectTestId()
     {
         // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Test"));
 
         // Assert
-        var container = cut.Find("[data-testid='page-header']");
+        IElement container = cut.Find("[data-testid='page-header']");
         container.ShouldNotBeNull();
         container.ClassList.ShouldContain("flex");
         container.ClassList.ShouldContain("items-center");
@@ -112,7 +113,7 @@ public class PageHeaderTests : BunitTestContext
     public void PageHeader_WithAllFeatures_RendersCorrectly()
     {
         // Arrange & Act
-        var cut = Render<PageHeader>(parameters => parameters
+        IRenderedComponent<PageHeader> cut = Render<PageHeader>(parameters => parameters
             .Add(p => p.Title, "Portfolio Details")
             .Add(p => p.Description, "View and manage your portfolio")
             .Add(p => p.Actions, builder =>
@@ -128,7 +129,7 @@ public class PageHeaderTests : BunitTestContext
         cut.Markup.ShouldContain("Edit");
 
         // Should have the main container
-        var header = cut.Find("[data-testid='page-header']");
+        IElement header = cut.Find("[data-testid='page-header']");
         header.ShouldNotBeNull();
     }
 }

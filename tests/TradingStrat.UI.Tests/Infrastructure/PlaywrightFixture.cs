@@ -21,7 +21,7 @@ public class PlaywrightFixture : IAsyncLifetime
     {
         _playwright = await Playwright.CreateAsync();
 
-        var browserType = TestConfiguration.Browser.ToLowerInvariant() switch
+        IBrowserType browserType = TestConfiguration.Browser.ToLowerInvariant() switch
         {
             "firefox" => _playwright.Firefox,
             "webkit" => _playwright.Webkit,

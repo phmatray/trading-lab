@@ -255,7 +255,7 @@ public class ParameterOptimizerTests
         // Assert
         // Best score should never decrease across generations (due to elitism)
         decimal maxScoreSoFar = decimal.MinValue;
-        foreach (var iteration in result.AllIterations.OrderBy(i => i.IterationNumber))
+        foreach (OptimizationIteration iteration in result.AllIterations.OrderBy(i => i.IterationNumber))
         {
             if (iteration.Score > maxScoreSoFar)
             {

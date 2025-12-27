@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Services;
@@ -31,7 +32,7 @@ public class MarketPriceService
         {
             progress?.Report($"Fetching price for {ticker}...");
 
-            var result = await GetLatestPriceAsync(ticker, marketDataPort);
+            Result<decimal> result = await GetLatestPriceAsync(ticker, marketDataPort);
 
             if (result.IsSuccess)
             {
@@ -61,7 +62,7 @@ public class MarketPriceService
         try
         {
             // Fetch recent data (last 7 days to ensure we get the latest price)
-            var historicalData = await marketDataPort.FetchHistoricalDataAsync(
+            IReadOnlyList<HistoricalPrice> historicalData = await marketDataPort.FetchHistoricalDataAsync(
                 ticker,
                 TimeFrame.D1,
                 DateTime.Today.AddDays(-PriceLookbackDays),
@@ -76,7 +77,7 @@ public class MarketPriceService
             }
 
             // Get most recent closing price
-            var latestPrice = historicalData
+            HistoricalPrice latestPrice = historicalData
                 .OrderByDescending(p => p.DateTime)
                 .First();
 

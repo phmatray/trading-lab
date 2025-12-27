@@ -4,6 +4,7 @@ using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -24,7 +25,7 @@ public class GetBacktestArchiveUseCaseTests
     {
         // Arrange
         var query = new GetBacktestArchiveQuery();
-        var backtestRuns = CreateBacktestRuns(5);
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(5);
 
         A.CallTo(() => _backtestArchivePort.GetBacktestRunsAsync(null, null, 100))
             .Returns(backtestRuns);
@@ -35,11 +36,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(5);
         result.TotalCount.ShouldBe(5);
         result.MostRecentDate.ShouldBe(backtestRuns[0].ExecutedAt);
@@ -51,7 +52,7 @@ public class GetBacktestArchiveUseCaseTests
     {
         // Arrange
         var query = new GetBacktestArchiveQuery(Ticker: "AAPL");
-        var backtestRuns = CreateBacktestRuns(3, ticker: "AAPL");
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(3, ticker: "AAPL");
 
         A.CallTo(() => _backtestArchivePort.GetBacktestRunsAsync("AAPL", null, 100))
             .Returns(backtestRuns);
@@ -61,11 +62,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(3);
         result.BacktestRuns.ShouldAllBe(s => s.Ticker == "AAPL");
     }
@@ -75,7 +76,7 @@ public class GetBacktestArchiveUseCaseTests
     {
         // Arrange
         var query = new GetBacktestArchiveQuery(StrategyType: "rsi");
-        var backtestRuns = CreateBacktestRuns(2, strategyType: "rsi");
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(2, strategyType: "rsi");
 
         A.CallTo(() => _backtestArchivePort.GetBacktestRunsAsync(null, "rsi", 100))
             .Returns(backtestRuns);
@@ -85,11 +86,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(2);
         result.BacktestRuns.ShouldAllBe(s => s.StrategyType == "rsi");
     }
@@ -118,11 +119,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(2);
         result.BacktestRuns.ShouldAllBe(s => s.ExecutedAt >= startDate && s.ExecutedAt <= endDate);
     }
@@ -147,11 +148,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(3);
         result.BacktestRuns[0].TotalReturnPercentage.ShouldBe(10.0m);
         result.BacktestRuns[1].TotalReturnPercentage.ShouldBe(20.0m);
@@ -178,11 +179,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[1] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns[0].TotalReturnPercentage.ShouldBe(30.0m);
         result.BacktestRuns[1].TotalReturnPercentage.ShouldBe(20.0m);
         result.BacktestRuns[2].TotalReturnPercentage.ShouldBe(10.0m);
@@ -208,11 +209,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[1] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns[0].SharpeRatio.ShouldBe(2.5m);
         result.BacktestRuns[1].SharpeRatio.ShouldBe(1.8m);
         result.BacktestRuns[2].SharpeRatio.ShouldBe(1.0m);
@@ -238,11 +239,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[1] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns[0].WinRate.ShouldBe(75.0m);
         result.BacktestRuns[1].WinRate.ShouldBe(60.0m);
         result.BacktestRuns[2].WinRate.ShouldBe(50.0m);
@@ -263,11 +264,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun>());
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.ShouldBeEmpty();
         result.TotalCount.ShouldBe(0);
         result.MostRecentDate.ShouldBeNull();
@@ -280,7 +281,7 @@ public class GetBacktestArchiveUseCaseTests
         // Arrange
         int customLimit = 25;
         var query = new GetBacktestArchiveQuery(Limit: customLimit);
-        var backtestRuns = CreateBacktestRuns(25);
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(25);
 
         A.CallTo(() => _backtestArchivePort.GetBacktestRunsAsync(null, null, customLimit))
             .Returns(backtestRuns);
@@ -290,11 +291,11 @@ public class GetBacktestArchiveUseCaseTests
             .Returns(new List<BacktestRun> { backtestRuns[0] });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(query);
+        Result<BacktestArchiveResult> resultWrapper = await _useCase.ExecuteAsync(query);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        BacktestArchiveResult result = resultWrapper.Value;
         result.BacktestRuns.Count.ShouldBe(25);
         result.TotalCount.ShouldBe(100);
         A.CallTo(() => _backtestArchivePort.GetBacktestRunsAsync(null, null, customLimit))

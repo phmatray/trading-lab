@@ -35,7 +35,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
 
             progress?.Report("Initializing data fetch...");
 
-            var tickerResult = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
+            Result<string> tickerResult = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
             if (tickerResult.IsFailure)
             {
                 return Result<DataSummaryResult>.Failure(tickerResult.Errors);

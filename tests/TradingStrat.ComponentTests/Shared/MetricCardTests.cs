@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,7 +16,7 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithoutParameters_RendersSuccessfully()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>();
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>();
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
@@ -30,13 +31,13 @@ public class MetricCardTests : BunitTestContext
         string value = "+15.50%";
 
         // Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, label)
             .Add(p => p.Value, value));
 
         // Assert
-        var labelElement = cut.Find(".text-sm");
-        var valueElement = cut.Find(".text-2xl");
+        IElement labelElement = cut.Find(".text-sm");
+        IElement valueElement = cut.Find(".text-2xl");
 
         labelElement.TextContent.ShouldBe(label);
         valueElement.TextContent.ShouldBe(value);
@@ -46,13 +47,13 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithPositiveValue_AppliesPositiveColorClass()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, "Gain")
             .Add(p => p.Value, "+10%")
             .Add(p => p.IsPositive, true));
 
         // Assert
-        var valueElement = cut.Find(".text-2xl");
+        IElement valueElement = cut.Find(".text-2xl");
         valueElement.ClassList.ShouldContain("metric-positive");
         valueElement.ClassList.ShouldNotContain("metric-negative");
     }
@@ -61,13 +62,13 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithNegativeValue_AppliesNegativeColorClass()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, "Loss")
             .Add(p => p.Value, "-5.25%")
             .Add(p => p.IsPositive, false));
 
         // Assert
-        var valueElement = cut.Find(".text-2xl");
+        IElement valueElement = cut.Find(".text-2xl");
         valueElement.ClassList.ShouldContain("metric-negative");
         valueElement.ClassList.ShouldNotContain("metric-positive");
     }
@@ -76,13 +77,13 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithNullIsPositive_AppliesNeutralColorClass()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, "Neutral")
             .Add(p => p.Value, "0.00%")
             .Add(p => p.IsPositive, null));
 
         // Assert
-        var valueElement = cut.Find(".text-2xl");
+        IElement valueElement = cut.Find(".text-2xl");
         valueElement.ClassList.ShouldContain("text-gray-900");
         valueElement.ClassList.ShouldNotContain("metric-positive");
         valueElement.ClassList.ShouldNotContain("metric-negative");
@@ -96,7 +97,7 @@ public class MetricCardTests : BunitTestContext
         string expectedClass)
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, "Test")
             .Add(p => p.Value, "Test")
             .Add(p => p.IsPositive, isPositive));
@@ -109,13 +110,13 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithEmptyLabel_RendersWithoutError()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, string.Empty)
             .Add(p => p.Value, "100"));
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var labelElement = cut.Find(".text-sm");
+        IElement labelElement = cut.Find(".text-sm");
         labelElement.TextContent.ShouldBe(string.Empty);
     }
 
@@ -123,13 +124,13 @@ public class MetricCardTests : BunitTestContext
     public void MetricCard_WithEmptyValue_RendersWithoutError()
     {
         // Arrange & Act
-        var cut = Render<MetricCard>(parameters => parameters
+        IRenderedComponent<MetricCard> cut = Render<MetricCard>(parameters => parameters
             .Add(p => p.Label, "Label")
             .Add(p => p.Value, string.Empty));
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var valueElement = cut.Find(".text-2xl");
+        IElement valueElement = cut.Find(".text-2xl");
         valueElement.TextContent.ShouldBe(string.Empty);
     }
 }

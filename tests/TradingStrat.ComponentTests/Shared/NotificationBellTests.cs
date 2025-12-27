@@ -1,7 +1,9 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
 using TradingStrat.Web.Components.Shared;
+using TradingStrat.Web.Models;
 using Xunit;
 
 namespace TradingStrat.ComponentTests.Shared;
@@ -15,11 +17,11 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_Renders_Successfully()
     {
         // Arrange & Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var bell = cut.Find("[data-testid='notification-bell']");
+        IElement bell = cut.Find("[data-testid='notification-bell']");
         bell.ShouldNotBeNull();
     }
 
@@ -27,10 +29,10 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_HasBellIcon()
     {
         // Arrange & Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
 
         // Assert
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
         svg.ClassList.ShouldContain("w-6");
         svg.ClassList.ShouldContain("h-6");
@@ -40,10 +42,10 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_HasAccessibilityAttributes()
     {
         // Arrange & Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
 
         // Assert
-        var button = cut.Find("[data-testid='notification-bell']");
+        IElement button = cut.Find("[data-testid='notification-bell']");
         button.GetAttribute("aria-label").ShouldBe("Notifications");
         button.GetAttribute("type").ShouldBe("button");
         button.GetAttribute("aria-describedby").ShouldNotBeNullOrEmpty();
@@ -67,14 +69,14 @@ public class NotificationBellTests : BunitTestContext
             "Message 2");
 
         // Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
 
         // Wait for OnAfterRenderAsync to complete
         await Task.Delay(100);
         cut.Render();
 
         // Assert
-        var badge = cut.Find("[data-testid='notification-badge']");
+        IElement badge = cut.Find("[data-testid='notification-badge']");
         badge.ShouldNotBeNull();
         badge.TextContent.ShouldBe("2");
     }
@@ -83,7 +85,7 @@ public class NotificationBellTests : BunitTestContext
     public async Task NotificationBell_WithNoUnreadNotifications_DoesNotDisplayBadge()
     {
         // Arrange - Add a notification and mark it as read
-        var notification = await FakeNotificationService.AddNotificationAsync(
+        Notification notification = await FakeNotificationService.AddNotificationAsync(
             Web.Models.NotificationType.System,
             Web.Models.NotificationSeverity.Info,
             "Read",
@@ -91,12 +93,12 @@ public class NotificationBellTests : BunitTestContext
         await FakeNotificationService.MarkAsReadAsync(notification.Id);
 
         // Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
         await Task.Delay(100);
         cut.Render();
 
         // Assert
-        var badges = cut.FindAll("[data-testid='notification-badge']");
+        IReadOnlyList<IElement> badges = cut.FindAll("[data-testid='notification-badge']");
         badges.ShouldBeEmpty();
     }
 
@@ -114,12 +116,12 @@ public class NotificationBellTests : BunitTestContext
         }
 
         // Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
         await Task.Delay(100);
         cut.Render();
 
         // Assert
-        var badge = cut.Find("[data-testid='notification-badge']");
+        IElement badge = cut.Find("[data-testid='notification-badge']");
         badge.TextContent.ShouldBe("99+");
     }
 
@@ -127,8 +129,8 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_Click_TogglesPanel()
     {
         // Arrange
-        var cut = Render<NotificationBell>();
-        var button = cut.Find("[data-testid='notification-bell']");
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
+        IElement button = cut.Find("[data-testid='notification-bell']");
 
         // Get initial aria-expanded state
         string? initialExpanded = button.GetAttribute("aria-expanded");
@@ -158,12 +160,12 @@ public class NotificationBellTests : BunitTestContext
             "Test");
 
         // Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
         await Task.Delay(100);
         cut.Render();
 
         // Assert
-        var badge = cut.Find("[data-testid='notification-badge']");
+        IElement badge = cut.Find("[data-testid='notification-badge']");
         badge.GetAttribute("aria-live").ShouldBe("polite");
     }
 
@@ -178,12 +180,12 @@ public class NotificationBellTests : BunitTestContext
             "Test");
 
         // Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
         await Task.Delay(100);
         cut.Render();
 
         // Assert
-        var badge = cut.Find("[data-testid='notification-badge']");
+        IElement badge = cut.Find("[data-testid='notification-badge']");
         badge.ClassList.ShouldContain("absolute");
         badge.ClassList.ShouldContain("bg-red-600");
         badge.ClassList.ShouldContain("text-white");
@@ -194,12 +196,12 @@ public class NotificationBellTests : BunitTestContext
     public async Task NotificationBell_UpdatesCountWhenNotificationServiceChanges()
     {
         // Arrange
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
         await Task.Delay(100);
         cut.Render();
 
         // Initially no badge
-        var initialBadges = cut.FindAll("[data-testid='notification-badge']");
+        IReadOnlyList<IElement> initialBadges = cut.FindAll("[data-testid='notification-badge']");
         initialBadges.ShouldBeEmpty();
 
         // Act - Add a notification
@@ -214,7 +216,7 @@ public class NotificationBellTests : BunitTestContext
         cut.Render();
 
         // Assert - Badge should now appear
-        var badge = cut.Find("[data-testid='notification-badge']");
+        IElement badge = cut.Find("[data-testid='notification-badge']");
         badge.ShouldNotBeNull();
         badge.TextContent.ShouldBe("1");
     }
@@ -223,14 +225,14 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_RendersNotificationCenter()
     {
         // Arrange
-        var cut = Render<NotificationBell>();
-        var button = cut.Find("[data-testid='notification-bell']");
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
+        IElement button = cut.Find("[data-testid='notification-bell']");
 
         // Act - Click to open the notification center
         button.Click();
 
         // Assert - NotificationCenter panel is now visible
-        var dialog = cut.Find("[role='dialog']");
+        IElement dialog = cut.Find("[role='dialog']");
         dialog.ShouldNotBeNull();
         dialog.GetAttribute("aria-labelledby").ShouldBe("notification-center-title");
     }
@@ -239,10 +241,10 @@ public class NotificationBellTests : BunitTestContext
     public void NotificationBell_ButtonHasHoverStyles()
     {
         // Arrange & Act
-        var cut = Render<NotificationBell>();
+        IRenderedComponent<NotificationBell> cut = Render<NotificationBell>();
 
         // Assert
-        var button = cut.Find("[data-testid='notification-bell']");
+        IElement button = cut.Find("[data-testid='notification-bell']");
         button.ClassList.ShouldContain("hover:bg-gray-100");
         button.ClassList.ShouldContain("focus:outline-none");
         button.ClassList.ShouldContain("focus:ring-2");

@@ -64,7 +64,7 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
             );
 
             // Execute backtest
-            var backtestResult = await _backtestUseCase.ExecuteAsync(backtestCommand, progress: null);
+            Result<BacktestResult> backtestResult = await _backtestUseCase.ExecuteAsync(backtestCommand, progress: null);
 
             if (backtestResult.IsFailure)
             {

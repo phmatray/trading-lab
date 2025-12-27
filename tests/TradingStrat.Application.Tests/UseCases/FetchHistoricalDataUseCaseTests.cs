@@ -1,9 +1,11 @@
 using FakeItEasy;
 using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -39,7 +41,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today.AddDays(-1));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.ShouldNotBeNull();
@@ -64,7 +66,7 @@ public class FetchHistoricalDataUseCaseTests
             .Returns(new List<string> { "CON3.L", "3COI.DE" });
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.ShouldNotBeNull();
@@ -90,7 +92,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: new DateTime(2024, 1, 31));
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);
@@ -117,7 +119,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.Value.ShouldNotBeNull();
@@ -157,7 +159,7 @@ public class FetchHistoricalDataUseCaseTests
             .Returns(null);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();

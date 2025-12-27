@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -15,11 +16,11 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_WithDefaultParameters_RendersSuccessfully()
     {
         // Arrange & Act
-        var cut = Render<EmptyState>();
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>();
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var container = cut.Find("[data-testid='empty-state']");
+        IElement container = cut.Find("[data-testid='empty-state']");
         container.ShouldNotBeNull();
     }
 
@@ -30,11 +31,11 @@ public class EmptyStateTests : BunitTestContext
         string title = "No portfolios found";
 
         // Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Title, title));
 
         // Assert
-        var titleElement = cut.Find("h3");
+        IElement titleElement = cut.Find("h3");
         titleElement.TextContent.ShouldBe(title);
     }
 
@@ -45,12 +46,12 @@ public class EmptyStateTests : BunitTestContext
         string description = "Create your first portfolio to get started";
 
         // Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Title, "No data")
             .Add(p => p.Description, description));
 
         // Assert
-        var descElement = cut.Find("p");
+        IElement descElement = cut.Find("p");
         descElement.TextContent.ShouldBe(description);
     }
 
@@ -58,11 +59,11 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_WithoutDescription_DoesNotRenderDescriptionElement()
     {
         // Arrange & Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Title, "No data"));
 
         // Assert
-        var paragraphs = cut.FindAll("p");
+        IReadOnlyList<IElement> paragraphs = cut.FindAll("p");
         paragraphs.ShouldBeEmpty();
     }
 
@@ -73,11 +74,11 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_WithDifferentSizes_AppliesCorrectClasses(string size, string heightClass, string widthClass)
     {
         // Arrange & Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Size, size));
 
         // Assert
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ClassList.ShouldContain(heightClass);
         svg.ClassList.ShouldContain(widthClass);
     }
@@ -93,15 +94,15 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_WithDifferentIcons_RendersSuccessfully(string icon)
     {
         // Arrange & Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Icon, icon));
 
         // Assert
         cut.Markup.ShouldNotBeEmpty();
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
 
-        var path = cut.Find("svg path");
+        IElement path = cut.Find("svg path");
         path.ShouldNotBeNull();
         path.GetAttribute("d").ShouldNotBeNullOrEmpty();
     }
@@ -110,7 +111,7 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_WithActions_RendersActionContent()
     {
         // Arrange & Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Title, "No data")
             .Add(p => p.Actions, builder =>
             {
@@ -121,7 +122,7 @@ public class EmptyStateTests : BunitTestContext
             }));
 
         // Assert
-        var button = cut.Find("button.test-button");
+        IElement button = cut.Find("button.test-button");
         button.ShouldNotBeNull();
         button.TextContent.ShouldBe("Create New");
     }
@@ -130,19 +131,19 @@ public class EmptyStateTests : BunitTestContext
     public void EmptyState_HasCorrectStructure()
     {
         // Arrange & Act
-        var cut = Render<EmptyState>(parameters => parameters
+        IRenderedComponent<EmptyState> cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.Title, "Test Title")
             .Add(p => p.Icon, "chart"));
 
         // Assert
-        var container = cut.Find("div.card");
+        IElement container = cut.Find("div.card");
         container.ShouldNotBeNull();
 
-        var svg = cut.Find("svg");
+        IElement svg = cut.Find("svg");
         svg.ShouldNotBeNull();
         svg.ClassList.ShouldContain("text-gray-400");
 
-        var title = cut.Find("h3");
+        IElement title = cut.Find("h3");
         title.ShouldNotBeNull();
         title.ClassList.ShouldContain("text-sm");
         title.ClassList.ShouldContain("font-medium");

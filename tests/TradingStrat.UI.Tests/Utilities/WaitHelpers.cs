@@ -49,7 +49,7 @@ public static class WaitHelpers
     public static async Task WaitForProgressIndicatorAsync(this IPage page)
     {
         // Look for common progress indicator patterns
-        var progressIndicator = page.Locator("[data-testid='progress-indicator']")
+        ILocator progressIndicator = page.Locator("[data-testid='progress-indicator']")
             .Or(page.Locator("text=Processing"))
             .Or(page.Locator("text=Loading"))
             .Or(page.Locator(".animate-spin"))
@@ -90,8 +90,8 @@ public static class WaitHelpers
     public static async Task WaitForChartAsync(this IPage page)
     {
         // Wait for ApexCharts canvas
-        var apexChart = page.Locator(".apexcharts-canvas");
-        var tradingViewChart = page.Locator(".tradingview-widget-container iframe");
+        ILocator apexChart = page.Locator(".apexcharts-canvas");
+        ILocator tradingViewChart = page.Locator(".tradingview-widget-container iframe");
 
         try
         {
@@ -116,7 +116,7 @@ public static class WaitHelpers
     /// </summary>
     public static async Task WaitForAlertAsync(this IPage page, string? expectedText = null)
     {
-        var alert = page.Locator("[role='alert']")
+        ILocator alert = page.Locator("[role='alert']")
             .Or(page.Locator(".alert"))
             .Or(page.Locator("[data-testid='alert-message']"));
 
@@ -137,7 +137,7 @@ public static class WaitHelpers
     /// </summary>
     public static async Task WaitForValidationMessageAsync(this IPage page, string? expectedMessage = null)
     {
-        var validationMessage = page.Locator(".validation-message")
+        ILocator validationMessage = page.Locator(".validation-message")
             .Or(page.Locator("[role='alert']"))
             .Or(page.Locator(".text-red-600"));
 

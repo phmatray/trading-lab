@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -16,10 +17,10 @@ public class NotificationToastContainerTests : BunitTestContext
     public void NotificationToastContainer_InitialRender_ShowsNoToasts()
     {
         // Arrange & Act
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Assert
-        var toasts = cut.FindComponents<NotificationToast>();
+        IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
         toasts.ShouldBeEmpty();
     }
 
@@ -27,7 +28,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_WithSingleNotification_DisplaysToast()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act
         await FakeNotificationService.AddNotificationAsync(
@@ -39,7 +40,7 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(1);
         });
 
@@ -51,7 +52,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_WithMultipleNotifications_DisplaysAllToasts()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act
         await FakeNotificationService.AddNotificationAsync(
@@ -75,7 +76,7 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(3);
         });
 
@@ -89,7 +90,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_LimitsToMaxVisibleToasts()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act - Add 5 notifications (max is 3)
         await FakeNotificationService.AddNotificationAsync(
@@ -125,7 +126,7 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(3);
         });
 
@@ -143,7 +144,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_DisplaysNewestToastsFirst()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act
         await FakeNotificationService.AddNotificationAsync(
@@ -161,7 +162,7 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(2);
         });
 
@@ -177,7 +178,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_RemoveToast_RemovesToastFromDisplay()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         await FakeNotificationService.AddNotificationAsync(
             NotificationType.System,
@@ -192,13 +193,13 @@ public class NotificationToastContainerTests : BunitTestContext
         });
 
         // Act - Find and click dismiss button on the toast
-        var toast = cut.FindComponent<NotificationToast>();
+        IRenderedComponent<NotificationToast> toast = cut.FindComponent<NotificationToast>();
         toast.Find("button").Click(); // Dismiss button
 
         // Assert - Wait for toast to be removed
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.ShouldBeEmpty();
         });
 
@@ -209,7 +210,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_AutoDismiss_PassedToNotificationToast()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act
         await FakeNotificationService.AddNotificationAsync(
@@ -221,15 +222,15 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(1);
         });
 
         // Assert - Verify NotificationToast component is rendered
-        var toast = cut.FindComponent<NotificationToast>();
+        IRenderedComponent<NotificationToast> toast = cut.FindComponent<NotificationToast>();
         toast.ShouldNotBeNull();
 
-        var instance = toast.Instance;
+        NotificationToast instance = toast.Instance;
         instance.ShouldNotBeNull();
     }
 
@@ -237,10 +238,10 @@ public class NotificationToastContainerTests : BunitTestContext
     public void NotificationToastContainer_HasCorrectAriaAttributes()
     {
         // Arrange & Act
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Assert
-        var container = cut.Find("div.fixed");
+        IElement container = cut.Find("div.fixed");
         container.GetAttribute("aria-live").ShouldBe("polite");
         container.GetAttribute("aria-atomic").ShouldBe("false");
     }
@@ -249,10 +250,10 @@ public class NotificationToastContainerTests : BunitTestContext
     public void NotificationToastContainer_HasCorrectPositioning()
     {
         // Arrange & Act
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Assert
-        var container = cut.Find("div");
+        IElement container = cut.Find("div");
         container.ClassList.ShouldContain("fixed");
         container.ClassList.ShouldContain("top-4");
         container.ClassList.ShouldContain("right-4");
@@ -263,7 +264,7 @@ public class NotificationToastContainerTests : BunitTestContext
     public async Task NotificationToastContainer_WithDifferentSeverities_DisplaysCorrectly()
     {
         // Arrange
-        var cut = Render<NotificationToastContainer>();
+        IRenderedComponent<NotificationToastContainer> cut = Render<NotificationToastContainer>();
 
         // Act
         await FakeNotificationService.AddNotificationAsync(
@@ -287,7 +288,7 @@ public class NotificationToastContainerTests : BunitTestContext
         // Wait for component to update
         cut.WaitForAssertion(() =>
         {
-            var toasts = cut.FindComponents<NotificationToast>();
+            IReadOnlyList<IRenderedComponent<NotificationToast>> toasts = cut.FindComponents<NotificationToast>();
             toasts.Count.ShouldBe(3);
         });
 

@@ -44,7 +44,7 @@ public class AiInsightsService
         // Check cache expiry
         if (!forceRefresh && await IsCacheValidAsync())
         {
-            var cachedRegime = await _localStorage.GetItemAsync<MarketRegime?>(REGIME_CACHE_KEY);
+            MarketRegime? cachedRegime = await _localStorage.GetItemAsync<MarketRegime?>(REGIME_CACHE_KEY);
             if (cachedRegime != null)
             {
                 return cachedRegime;
@@ -89,7 +89,7 @@ public class AiInsightsService
         // Check cache expiry
         if (!forceRefresh && await IsCacheValidAsync())
         {
-            var cachedRec = await _localStorage.GetItemAsync<PortfolioRecommendation?>(RECOMMENDATION_CACHE_KEY);
+            PortfolioRecommendation? cachedRec = await _localStorage.GetItemAsync<PortfolioRecommendation?>(RECOMMENDATION_CACHE_KEY);
             if (cachedRec != null)
             {
                 return cachedRec;

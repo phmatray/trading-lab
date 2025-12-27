@@ -1,4 +1,5 @@
 using Shouldly;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Events;
 using TradingStrat.Domain.Exceptions;
@@ -40,10 +41,10 @@ public class PortfolioEventSourcingTests
         portfolio.AddPosition(position);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
 
-        var positionEvent = events[0].ShouldBeOfType<PositionAddedEvent>();
+        PositionAddedEvent positionEvent = events[0].ShouldBeOfType<PositionAddedEvent>();
         positionEvent.PortfolioId.ShouldBe(1);
         positionEvent.Ticker.ShouldBe("AAPL");
         positionEvent.Quantity.ShouldBe(10);
@@ -80,10 +81,10 @@ public class PortfolioEventSourcingTests
         portfolio.RemovePosition("AAPL");
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
 
-        var removedEvent = events[0].ShouldBeOfType<PositionRemovedEvent>();
+        PositionRemovedEvent removedEvent = events[0].ShouldBeOfType<PositionRemovedEvent>();
         removedEvent.Ticker.ShouldBe("AAPL");
     }
 
@@ -117,10 +118,10 @@ public class PortfolioEventSourcingTests
         portfolio.UpdatePositionQuantity("AAPL", 15);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
 
-        var quantityEvent = events[0].ShouldBeOfType<PositionQuantityChangedEvent>();
+        PositionQuantityChangedEvent quantityEvent = events[0].ShouldBeOfType<PositionQuantityChangedEvent>();
         quantityEvent.Ticker.ShouldBe("AAPL");
         quantityEvent.OldQuantity.ShouldBe(10);
         quantityEvent.NewQuantity.ShouldBe(15);
@@ -146,10 +147,10 @@ public class PortfolioEventSourcingTests
             DateTime.UtcNow);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(1);
 
-        var cashEvent = events[0].ShouldBeOfType<CashTransactionRecordedEvent>();
+        CashTransactionRecordedEvent cashEvent = events[0].ShouldBeOfType<CashTransactionRecordedEvent>();
         cashEvent.Type.ShouldBe(TransactionType.Deposit);
         cashEvent.Amount.ShouldBe(5000m);
 
@@ -195,7 +196,7 @@ public class PortfolioEventSourcingTests
         portfolio.RecordCashTransaction(TransactionType.Deposit, 5000m, DateTime.UtcNow);
 
         // Assert
-        var events = portfolio.GetDomainEvents();
+        IReadOnlyList<DomainEvent> events = portfolio.GetDomainEvents();
         events.Count.ShouldBe(3);
 
         events[0].ShouldBeOfType<PositionAddedEvent>();
@@ -455,7 +456,7 @@ public class PortfolioEventSourcingTests
         };
 
         // Act & Assert
-        var exception = Should.Throw<DuplicatePositionException>(() =>
+        DuplicatePositionException exception = Should.Throw<DuplicatePositionException>(() =>
             portfolio.AddPosition(duplicatePosition));
 
         exception.Ticker.ShouldBe("AAPL");
@@ -478,7 +479,7 @@ public class PortfolioEventSourcingTests
         };
 
         // Act & Assert
-        var exception = Should.Throw<PositionNotFoundException>(() =>
+        PositionNotFoundException exception = Should.Throw<PositionNotFoundException>(() =>
             portfolio.RemovePosition("AAPL"));
 
         exception.Ticker.ShouldBe("AAPL");
@@ -498,7 +499,7 @@ public class PortfolioEventSourcingTests
         };
 
         // Act & Assert
-        var exception = Should.Throw<InsufficientCashException>(() =>
+        InsufficientCashException exception = Should.Throw<InsufficientCashException>(() =>
             portfolio.RecordCashTransaction(TransactionType.Withdrawal, 2000m, DateTime.UtcNow));
 
         exception.AvailableCash.ShouldBe(1000m);

@@ -58,7 +58,7 @@ public class PortfolioPerformanceService
             sharpeRatio = CalculateSharpeRatio(returns);
 
             // Get most recent daily return
-            var lastPoint = historicalPoints.OrderByDescending(p => p.Date).FirstOrDefault();
+            PortfolioPerformancePoint? lastPoint = historicalPoints.OrderByDescending(p => p.Date).FirstOrDefault();
             if (lastPoint != null)
             {
                 dailyReturn = lastPoint.DailyReturn;

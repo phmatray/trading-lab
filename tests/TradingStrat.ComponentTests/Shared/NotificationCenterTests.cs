@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.ComponentTests.Infrastructure;
@@ -22,7 +23,7 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_WhenClosed_RendersNothing()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, false));
 
         // Assert
@@ -33,12 +34,12 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_WhenOpen_RendersPanel()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
         cut.Markup.ShouldContain("Notifications");
-        var panel = cut.Find("[role='dialog']");
+        IElement panel = cut.Find("[role='dialog']");
         panel.ShouldNotBeNull();
         panel.GetAttribute("aria-modal").ShouldBe("true");
     }
@@ -47,7 +48,7 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_WithNoNotifications_ShowsEmptyState()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -65,7 +66,7 @@ public class NotificationCenterTests : BunitTestContext
             "Test message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -84,11 +85,11 @@ public class NotificationCenterTests : BunitTestContext
             "This is unread");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert - Look for data-is-read attribute
-        var notification = cut.Find("[data-notification-item]");
+        IElement notification = cut.Find("[data-notification-item]");
         notification.GetAttribute("data-is-read").ShouldBe("false");
     }
 
@@ -96,25 +97,25 @@ public class NotificationCenterTests : BunitTestContext
     public async Task NotificationCenter_GroupsNotificationsByTime()
     {
         // Arrange
-        var today = DateTime.UtcNow;
-        var yesterday = DateTime.UtcNow.AddDays(-1);
-        var older = DateTime.UtcNow.AddDays(-5);
+        DateTime today = DateTime.UtcNow;
+        DateTime yesterday = DateTime.UtcNow.AddDays(-1);
+        DateTime older = DateTime.UtcNow.AddDays(-5);
 
         // Add notifications with specific timestamps
-        var notification1 = await FakeNotificationService.AddNotificationAsync(
+        Notification notification1 = await FakeNotificationService.AddNotificationAsync(
             NotificationType.Signal, NotificationSeverity.Info, "Today's Notification", "Today");
         notification1.Timestamp = today;
 
-        var notification2 = await FakeNotificationService.AddNotificationAsync(
+        Notification notification2 = await FakeNotificationService.AddNotificationAsync(
             NotificationType.Signal, NotificationSeverity.Info, "Yesterday's Notification", "Yesterday");
         notification2.Timestamp = yesterday;
 
-        var notification3 = await FakeNotificationService.AddNotificationAsync(
+        Notification notification3 = await FakeNotificationService.AddNotificationAsync(
             NotificationType.Signal, NotificationSeverity.Info, "Old Notification", "Older");
         notification3.Timestamp = older;
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert - Just verify the notification content is displayed
@@ -134,7 +135,7 @@ public class NotificationCenterTests : BunitTestContext
             "Success message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert - Verify the notification displays
@@ -153,7 +154,7 @@ public class NotificationCenterTests : BunitTestContext
             "Warning message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -172,7 +173,7 @@ public class NotificationCenterTests : BunitTestContext
             "Error message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -191,7 +192,7 @@ public class NotificationCenterTests : BunitTestContext
             "Info message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -210,7 +211,7 @@ public class NotificationCenterTests : BunitTestContext
             "Unread message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -221,7 +222,7 @@ public class NotificationCenterTests : BunitTestContext
     public async Task NotificationCenter_WithAllReadNotifications_HidesMarkAllReadButton()
     {
         // Arrange
-        var notification = await FakeNotificationService.AddNotificationAsync(
+        Notification notification = await FakeNotificationService.AddNotificationAsync(
             NotificationType.Signal,
             NotificationSeverity.Info,
             "Read",
@@ -231,7 +232,7 @@ public class NotificationCenterTests : BunitTestContext
         await FakeNotificationService.MarkAsReadAsync(notification.Id);
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -249,7 +250,7 @@ public class NotificationCenterTests : BunitTestContext
             "Test message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
@@ -260,11 +261,11 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_Header_DisplaysTitle()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
-        var title = cut.Find("#notification-center-title");
+        IElement title = cut.Find("#notification-center-title");
         title.ShouldNotBeNull();
         title.TextContent.ShouldContain("Notifications");
     }
@@ -280,7 +281,7 @@ public class NotificationCenterTests : BunitTestContext
             "Test message");
 
         // Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert - Footer should contain clear all button
@@ -291,11 +292,11 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_Panel_HasCorrectAccessibilityAttributes()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
-        var panel = cut.Find("[role='dialog']");
+        IElement panel = cut.Find("[role='dialog']");
         panel.GetAttribute("role").ShouldBe("dialog");
         panel.GetAttribute("aria-modal").ShouldBe("true");
         panel.GetAttribute("aria-labelledby").ShouldBe("notification-center-title");
@@ -305,11 +306,11 @@ public class NotificationCenterTests : BunitTestContext
     public void NotificationCenter_CloseButton_HasAccessibilityLabel()
     {
         // Arrange & Act
-        var cut = Render<NotificationCenter>(parameters => parameters
+        IRenderedComponent<NotificationCenter> cut = Render<NotificationCenter>(parameters => parameters
             .Add(p => p.IsOpen, true));
 
         // Assert
-        var closeButton = cut.Find("button[aria-label='Close notifications']");
+        IElement closeButton = cut.Find("button[aria-label='Close notifications']");
         closeButton.ShouldNotBeNull();
     }
 }

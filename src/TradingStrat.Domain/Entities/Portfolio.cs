@@ -99,8 +99,8 @@ public class Portfolio : AggregateRoot
     public void RemovePosition(string ticker)
     {
         // Validate business rules before raising event
-        var position = _positions.FirstOrDefault(p => p.Ticker == ticker)
-            ?? throw new PositionNotFoundException(ticker);
+        Position position = _positions.FirstOrDefault(p => p.Ticker == ticker)
+                            ?? throw new PositionNotFoundException(ticker);
 
         // Raise event - Apply method will update state
         RaiseDomainEvent(new PositionRemovedEvent(
@@ -119,8 +119,8 @@ public class Portfolio : AggregateRoot
     public void UpdatePositionQuantity(string ticker, int newQuantity)
     {
         // Validate business rules before raising event
-        var position = _positions.FirstOrDefault(p => p.Ticker == ticker)
-            ?? throw new PositionNotFoundException(ticker);
+        Position position = _positions.FirstOrDefault(p => p.Ticker == ticker)
+                            ?? throw new PositionNotFoundException(ticker);
 
         int oldQuantity = position.Quantity;
 
@@ -230,7 +230,7 @@ public class Portfolio : AggregateRoot
     /// </summary>
     private void ApplyPositionRemoved(PositionRemovedEvent e)
     {
-        var position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
+        Position? position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
         if (position != null)
         {
             _positions.Remove(position);
@@ -244,7 +244,7 @@ public class Portfolio : AggregateRoot
     /// </summary>
     private void ApplyPositionQuantityChanged(PositionQuantityChangedEvent e)
     {
-        var position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
+        Position? position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
         if (position != null)
         {
             position.Quantity = e.NewQuantity;

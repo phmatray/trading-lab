@@ -15,7 +15,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public Task SaveHistoricalDataAsync(string ticker, string? isin, TimeFrame timeFrame, IEnumerable<HistoricalPrice> data)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key))
         {
             _data[key] = new List<HistoricalPrice>();
@@ -44,7 +44,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public Task<DateTime?> GetLatestDataDateAsync(string ticker, TimeFrame timeFrame)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key) || !_data[key].Any())
         {
             return Task.FromResult<DateTime?>(null);
@@ -55,7 +55,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker, TimeFrame timeFrame)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key))
         {
             return Task.FromResult(new List<HistoricalPrice>());
@@ -66,7 +66,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public Task<List<HistoricalPrice>> GetHistoricalDataAsync(string ticker, TimeFrame timeFrame, DateTime start, DateTime end)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key))
         {
             return Task.FromResult(new List<HistoricalPrice>());
@@ -82,7 +82,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public Task<DataSummaryResult> GetDataSummaryAsync(string ticker, TimeFrame timeFrame)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key) || !_data[key].Any())
         {
             return Task.FromResult(new DataSummaryResult(ticker, null, 0, 0, null, null, null, null, null));
@@ -155,11 +155,11 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         int completedTickers = 0;
         int totalRecordsSaved = 0;
 
-        foreach (var kvp in tickerDataMap)
+        foreach (KeyValuePair<string, (string? isin, IEnumerable<HistoricalPrice> data)> kvp in tickerDataMap)
         {
             string ticker = kvp.Key;
             string? isin = kvp.Value.isin;
-            var data = kvp.Value.data;
+            IEnumerable<HistoricalPrice> data = kvp.Value.data;
 
             progress?.Report(new BulkSaveProgress(
                 totalTickers,
@@ -191,7 +191,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
                 .Where(k => k.ticker == ticker)
                 .ToList();
 
-            foreach (var key in keysToRemove)
+            foreach ((string ticker, TimeFrameUnit timeFrame) key in keysToRemove)
             {
                 deletedCount += _data[key].Count;
                 _data.Remove(key);
@@ -200,7 +200,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         else
         {
             // Delete specific timeframe
-            var key = (ticker, timeFrame.Unit);
+            (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
             if (_data.ContainsKey(key))
             {
                 deletedCount = _data[key].Count;
@@ -217,7 +217,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
         DateTime startDate,
         DateTime endDate)
     {
-        var key = (ticker, timeFrame.Unit);
+        (string ticker, TimeFrameUnit Unit) key = (ticker, timeFrame.Unit);
         if (!_data.ContainsKey(key))
         {
             return Task.FromResult(0);
@@ -239,7 +239,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
             .Where(kvp => kvp.Key.timeFrame == timeFrame.Unit)
             .Select(kvp =>
             {
-                var data = kvp.Value;
+                List<HistoricalPrice> data = kvp.Value;
                 return new TickerSummary(
                     kvp.Key.ticker,
                     data.FirstOrDefault()?.ISIN,
@@ -272,7 +272,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
 
     public void SeedData(string ticker, TimeFrameUnit timeFrame, List<HistoricalPrice> prices)
     {
-        var key = (ticker, timeFrame);
+        (string ticker, TimeFrameUnit timeFrame) key = (ticker, timeFrame);
         _data[key] = prices.OrderBy(p => p.DateTime).ToList();
     }
 }

@@ -2,6 +2,8 @@ using Shouldly;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -26,7 +28,7 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 10000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -36,7 +38,7 @@ public class CreatePortfolioUseCaseTests
         result.Value.InitialCash.ShouldBe(10000m);
         result.Value.CreatedAt.ShouldNotBe(default);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
+        Portfolio? savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Name.ShouldBe("Growth Portfolio");
         savedPortfolio.Description.ShouldBe("Long-term growth investments");
@@ -53,14 +55,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 0m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value.InitialCash.ShouldBe(0m);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
+        Portfolio? savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Cash.ShouldBe(0m);
     }
@@ -75,14 +77,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 1_000_000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value.InitialCash.ShouldBe(1_000_000m);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
+        Portfolio? savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Cash.ShouldBe(1_000_000m);
     }
@@ -97,13 +99,13 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 5000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
+        Portfolio? savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Description.ShouldBeNull();
     }
@@ -117,9 +119,9 @@ public class CreatePortfolioUseCaseTests
         var command3 = new CreatePortfolioCommand("Portfolio 3", null, 3000m);
 
         // Act
-        var result1 = await _useCase.ExecuteAsync(command1);
-        var result2 = await _useCase.ExecuteAsync(command2);
-        var result3 = await _useCase.ExecuteAsync(command3);
+        Result<CreatePortfolioResult> result1 = await _useCase.ExecuteAsync(command1);
+        Result<CreatePortfolioResult> result2 = await _useCase.ExecuteAsync(command2);
+        Result<CreatePortfolioResult> result3 = await _useCase.ExecuteAsync(command3);
 
         // Assert
         result1.IsSuccess.ShouldBeTrue();
@@ -129,7 +131,7 @@ public class CreatePortfolioUseCaseTests
         result2.Value.PortfolioId.ShouldNotBe(result3.Value.PortfolioId);
         result1.Value.PortfolioId.ShouldNotBe(result3.Value.PortfolioId);
 
-        var allPortfolios = await _portfolioPort.GetAllPortfoliosAsync();
+        List<Portfolio> allPortfolios = await _portfolioPort.GetAllPortfoliosAsync();
         allPortfolios.Count.ShouldBe(3);
     }
 
@@ -184,14 +186,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 1000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
         result.Value.Name.ShouldBe(longName);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
+        Portfolio? savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Name.ShouldBe(longName);
     }
@@ -200,12 +202,12 @@ public class CreatePortfolioUseCaseTests
     public async Task ExecuteAsync_ShouldSetCreatedAtTimestamp()
     {
         // Arrange
-        var beforeCreate = DateTime.UtcNow;
+        DateTime beforeCreate = DateTime.UtcNow;
         var command = new CreatePortfolioCommand("Test", null, 1000m);
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
-        var afterCreate = DateTime.UtcNow;
+        Result<CreatePortfolioResult> result = await _useCase.ExecuteAsync(command);
+        DateTime afterCreate = DateTime.UtcNow;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

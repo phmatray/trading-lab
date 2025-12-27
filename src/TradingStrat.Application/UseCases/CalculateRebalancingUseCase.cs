@@ -75,7 +75,7 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
             if (newTickers.Any())
             {
                 // Fetch prices for new tickers using the centralized service
-                var priceResult = await _priceService.GetCurrentPricesAsync(
+                Result<Dictionary<string, decimal>> priceResult = await _priceService.GetCurrentPricesAsync(
                     newTickers,
                     _marketDataPort,
                     progress);
@@ -95,7 +95,7 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
             progress?.Report("Calculating rebalancing plan...");
 
             // Calculate rebalancing plan using domain service
-            var plan = _rebalancingService.CalculateRebalancing(
+            RebalancingPlan plan = _rebalancingService.CalculateRebalancing(
                 snapshot,
                 command.TargetWeights,
                 currentPrices,

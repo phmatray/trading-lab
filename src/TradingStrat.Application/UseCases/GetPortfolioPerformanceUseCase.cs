@@ -1,6 +1,7 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
@@ -42,7 +43,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             progress?.Report("Loading portfolio...");
 
             // Load portfolio with positions
-            var portfolio = await _portfolioPort.GetPortfolioByIdAsync(query.PortfolioId);
+            Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(query.PortfolioId);
             if (portfolio == null)
             {
                 return Result<PortfolioPerformanceHistory>.Failure(
@@ -50,8 +51,8 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             }
 
             // Set date range (default to last year)
-            var startDate = query.StartDate ?? DateTime.Today.AddYears(-1);
-            var endDate = query.EndDate ?? DateTime.Today;
+            DateTime startDate = query.StartDate ?? DateTime.Today.AddYears(-1);
+            DateTime endDate = query.EndDate ?? DateTime.Today;
 
             if (startDate > endDate)
             {
@@ -72,7 +73,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
                 }
 
                 PortfolioSnapshot currentSnapshot = snapshotResult.Value;
-                var emptyMetrics = _performanceService.CalculateMetrics(currentSnapshot);
+                PortfolioMetrics emptyMetrics = _performanceService.CalculateMetrics(currentSnapshot);
 
                 return Result<PortfolioPerformanceHistory>.Success(new PortfolioPerformanceHistory(
                     portfolio.Id,
@@ -93,7 +94,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             {
                 progress?.Report($"Loading data for {ticker}...");
 
-                var data = await _historicalDataPort.GetHistoricalDataAsync(
+                List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(
                     ticker,
                     Domain.ValueObjects.TimeFrame.D1,
                     startDate,
@@ -121,7 +122,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             var performancePoints = new List<PortfolioPerformancePoint>();
             decimal previousValue = 0m;
 
-            foreach (var date in allDates)
+            foreach (DateTime date in allDates)
             {
                 // Build price dictionary for this date
                 var pricesForDate = new Dictionary<string, decimal>();
@@ -131,7 +132,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
                 {
                     if (allHistoricalData.TryGetValue(ticker, out List<Domain.Entities.HistoricalPrice>? tickerData))
                     {
-                        var priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
+                        HistoricalPrice? priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
 
                         if (priceData?.Close.HasValue == true)
                         {
@@ -155,7 +156,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
                 {
                     try
                     {
-                        var result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
+                        Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
 
                         if (result.IsFailure)
                         {
@@ -163,7 +164,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
                             continue;
                         }
 
-                        var snapshot = result.Value;
+                        PortfolioSnapshot snapshot = result.Value;
                         decimal dailyReturn = previousValue > 0
                             ? (snapshot.TotalValue - previousValue) / previousValue
                             : 0m;
@@ -198,7 +199,7 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
             PortfolioSnapshot currentSnapshotForMetrics = metricsSnapshotResult.Value;
 
             // Calculate metrics with historical data
-            var metrics = _performanceService.CalculateMetrics(
+            PortfolioMetrics metrics = _performanceService.CalculateMetrics(
                 currentSnapshotForMetrics,
                 performancePoints);
 

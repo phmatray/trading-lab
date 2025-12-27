@@ -25,7 +25,7 @@ public class AiAssistantWidgetTests : BunitTestContext
     public void AiAssistantWidget_InitialRender_ShowsMinimizedButton()
     {
         // Arrange & Act
-        var cut = Render<AiAssistantWidget>();
+        IRenderedComponent<AiAssistantWidget> cut = Render<AiAssistantWidget>();
 
         // Assert
         cut.Markup.ShouldContain("AI Assistant");
@@ -35,7 +35,7 @@ public class AiAssistantWidgetTests : BunitTestContext
     public void AiAssistantWidget_MinimizedButton_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<AiAssistantWidget>();
+        IRenderedComponent<AiAssistantWidget> cut = Render<AiAssistantWidget>();
 
         // Assert
         cut.Markup.ShouldContain("bg-trading-blue");
@@ -47,7 +47,7 @@ public class AiAssistantWidgetTests : BunitTestContext
     public void AiAssistantWidget_WithCurrentTicker_Renders()
     {
         // Arrange & Act
-        var cut = Render<AiAssistantWidget>(parameters => parameters
+        IRenderedComponent<AiAssistantWidget> cut = Render<AiAssistantWidget>(parameters => parameters
             .Add(p => p.CurrentTicker, "AAPL"));
 
         // Assert
@@ -58,7 +58,7 @@ public class AiAssistantWidgetTests : BunitTestContext
     public void AiAssistantWidget_WithoutCurrentTicker_Renders()
     {
         // Arrange & Act
-        var cut = Render<AiAssistantWidget>();
+        IRenderedComponent<AiAssistantWidget> cut = Render<AiAssistantWidget>();
 
         // Assert
         cut.Markup.ShouldContain("AI Assistant");
@@ -68,7 +68,7 @@ public class AiAssistantWidgetTests : BunitTestContext
     public void AiAssistantWidget_MinimizedState_ShowsIcon()
     {
         // Arrange & Act
-        var cut = Render<AiAssistantWidget>();
+        IRenderedComponent<AiAssistantWidget> cut = Render<AiAssistantWidget>();
 
         // Assert
         // Check for SVG icon

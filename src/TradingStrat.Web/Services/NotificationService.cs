@@ -45,7 +45,7 @@ public class NotificationService : IDisposable
             Icon = GetIconForType(type, severity)
         };
 
-        var history = await GetHistoryAsync(cancellationToken);
+        NotificationHistory history = await GetHistoryAsync(cancellationToken);
         history.Notifications.Insert(0, notification);
 
         await CleanupIfNeededAsync(history, cancellationToken);
@@ -64,8 +64,8 @@ public class NotificationService : IDisposable
         bool unreadOnly = false,
         CancellationToken cancellationToken = default)
     {
-        var history = await GetHistoryAsync(cancellationToken);
-        var notifications = history.Notifications;
+        NotificationHistory history = await GetHistoryAsync(cancellationToken);
+        List<Notification> notifications = history.Notifications;
 
         return unreadOnly
             ? notifications.Where(n => !n.IsRead).ToList()
@@ -76,8 +76,8 @@ public class NotificationService : IDisposable
         string notificationId,
         CancellationToken cancellationToken = default)
     {
-        var history = await GetHistoryAsync(cancellationToken);
-        var notification = history.Notifications.FirstOrDefault(n => n.Id == notificationId);
+        NotificationHistory history = await GetHistoryAsync(cancellationToken);
+        Notification? notification = history.Notifications.FirstOrDefault(n => n.Id == notificationId);
 
         if (notification != null)
         {
@@ -93,9 +93,9 @@ public class NotificationService : IDisposable
 
     public virtual async Task MarkAllAsReadAsync(CancellationToken cancellationToken = default)
     {
-        var history = await GetHistoryAsync(cancellationToken);
+        NotificationHistory history = await GetHistoryAsync(cancellationToken);
 
-        foreach (var notification in history.Notifications)
+        foreach (Notification notification in history.Notifications)
         {
             notification.IsRead = true;
         }
@@ -117,7 +117,7 @@ public class NotificationService : IDisposable
 
     public virtual async Task<int> GetUnreadCountAsync(CancellationToken cancellationToken = default)
     {
-        var history = await GetHistoryAsync(cancellationToken);
+        NotificationHistory history = await GetHistoryAsync(cancellationToken);
         return history.Notifications.Count(n => !n.IsRead);
     }
 
@@ -127,7 +127,7 @@ public class NotificationService : IDisposable
         decimal price,
         float confidence)
     {
-        var severity = signal == SignalType.Buy
+        NotificationSeverity severity = signal == SignalType.Buy
             ? NotificationSeverity.Success
             : NotificationSeverity.Warning;
 
@@ -154,7 +154,7 @@ public class NotificationService : IDisposable
         int tradeCount,
         decimal totalReturn)
     {
-        var severity = totalReturn >= 0
+        NotificationSeverity severity = totalReturn >= 0
             ? NotificationSeverity.Success
             : NotificationSeverity.Warning;
 
@@ -185,7 +185,7 @@ public class NotificationService : IDisposable
         string recommendation,
         int confidenceScore)
     {
-        var severity = confidenceScore >= 70
+        NotificationSeverity severity = confidenceScore >= 70
             ? NotificationSeverity.Info
             : NotificationSeverity.Warning;
 
@@ -208,7 +208,7 @@ public class NotificationService : IDisposable
         string ticker,
         int daysOld)
     {
-        var severity = daysOld > 7
+        NotificationSeverity severity = daysOld > 7
             ? NotificationSeverity.Warning
             : NotificationSeverity.Info;
 
@@ -262,7 +262,7 @@ public class NotificationService : IDisposable
             return Task.CompletedTask;
         }
 
-        var cutoffDate = now.AddDays(-CLEANUP_DAYS);
+        DateTime cutoffDate = now.AddDays(-CLEANUP_DAYS);
         history.Notifications = history.Notifications
             .Where(n => n.Timestamp > cutoffDate)
             .Take(MAX_HISTORY_ITEMS)

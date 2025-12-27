@@ -170,7 +170,7 @@ public class DataManagementPageTests : BaseTest
         bool progressAppeared = false;
         try
         {
-            var progressIndicator = Page!.Locator("[data-testid='progress-indicator']").Or(Page!.Locator("text=Fetching Data"));
+            ILocator progressIndicator = Page!.Locator("[data-testid='progress-indicator']").Or(Page!.Locator("text=Fetching Data"));
             await progressIndicator.WaitForAsync(new LocatorWaitForOptions
             {
                 State = WaitForSelectorState.Visible,
@@ -247,7 +247,7 @@ public class DataManagementPageTests : BaseTest
         await dataPage.WaitForDataFetchCompleteAsync(timeoutMs: 30000);
 
         // Assert - Progress indicator MUST be hidden
-        var progressIndicator = Page!.Locator("[data-testid='progress-indicator']")
+        ILocator progressIndicator = Page!.Locator("[data-testid='progress-indicator']")
             .Or(Page!.Locator("text=Fetching Data"));
 
         bool isHidden = await progressIndicator.IsHiddenAsync();

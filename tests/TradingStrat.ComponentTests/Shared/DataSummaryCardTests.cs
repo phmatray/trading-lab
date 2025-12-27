@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Shouldly;
 using TradingStrat.Application.Ports.Outbound;
@@ -16,7 +17,7 @@ public class DataSummaryCardTests : BunitTestContext
     public void DataSummaryCard_WithNullSummary_RendersNothing()
     {
         // Arrange & Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, null));
 
         // Assert
@@ -30,11 +31,11 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("AAPL", "US0378331005", 100, 10, null, null, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
-        var header = cut.Find("h2");
+        IElement header = cut.Find("h2");
         header.TextContent.ShouldBe("Data Summary");
     }
 
@@ -45,7 +46,7 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("MSFT", null, 250, 25, null, null, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
@@ -61,7 +62,7 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("GOOGL", "US02079K3059", 100, 0, null, null, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
@@ -76,12 +77,12 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("TSLA", null, 100, 0, null, null, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
-        var dtElements = cut.FindAll("dt");
-        var isinLabel = dtElements.FirstOrDefault(dt => dt.TextContent == "ISIN");
+        IReadOnlyList<IElement> dtElements = cut.FindAll("dt");
+        IElement? isinLabel = dtElements.FirstOrDefault(dt => dt.TextContent == "ISIN");
         isinLabel.ShouldBeNull();
     }
 
@@ -94,7 +95,7 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("AAPL", null, 100, 0, oldestDate, latestDate, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
@@ -121,7 +122,7 @@ public class DataSummaryCardTests : BunitTestContext
         );
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
@@ -153,12 +154,12 @@ public class DataSummaryCardTests : BunitTestContext
         );
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert
         // Verify all major sections are present
-        var definitionTerms = cut.FindAll("dt");
+        IReadOnlyList<IElement> definitionTerms = cut.FindAll("dt");
         definitionTerms.Count.ShouldBeGreaterThan(5);
 
         // Verify ticker section
@@ -190,7 +191,7 @@ public class DataSummaryCardTests : BunitTestContext
         var summary = new DataSummaryResult("AAPL", null, 1000, 100, null, null, null, null, null);
 
         // Act
-        var cut = Render<DataSummaryCard>(parameters => parameters
+        IRenderedComponent<DataSummaryCard> cut = Render<DataSummaryCard>(parameters => parameters
             .Add(p => p.Summary, summary));
 
         // Assert

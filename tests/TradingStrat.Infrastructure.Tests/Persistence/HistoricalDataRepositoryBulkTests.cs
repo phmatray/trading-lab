@@ -25,7 +25,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         _connection.Open();
 
         // Configure DbContext with in-memory database
-        var options = new DbContextOptionsBuilder<TradingContext>()
+        DbContextOptions<TradingContext> options = new DbContextOptionsBuilder<TradingContext>()
             .UseSqlite(_connection)
             .Options;
 
@@ -137,13 +137,13 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         await _repository.BulkSaveHistoricalDataAsync(tickerDataMap, timeFrame);
 
         // Assert
-        var aaplData = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
+        List<HistoricalPrice> aaplData = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
         aaplData.Count.ShouldBe(2);
 
-        var msftData = await _repository.GetHistoricalDataAsync("MSFT", timeFrame);
+        List<HistoricalPrice> msftData = await _repository.GetHistoricalDataAsync("MSFT", timeFrame);
         msftData.Count.ShouldBe(2);
 
-        var googlData = await _repository.GetHistoricalDataAsync("GOOGL", timeFrame);
+        List<HistoricalPrice> googlData = await _repository.GetHistoricalDataAsync("GOOGL", timeFrame);
         googlData.Count.ShouldBe(1);
     }
 
@@ -177,7 +177,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
     {
         // Arrange
         var timeFrame = new TimeFrame { Unit = TimeFrameUnit.D1 };
-        var date = DateTime.Today.AddDays(-1);
+        DateTime date = DateTime.Today.AddDays(-1);
 
         // First save
         var firstBatch = new Dictionary<string, (string? isin, IEnumerable<HistoricalPrice> data)>
@@ -203,7 +203,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         await _repository.BulkSaveHistoricalDataAsync(secondBatch, timeFrame);
 
         // Assert
-        var data = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
+        List<HistoricalPrice> data = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
         data.Count.ShouldBe(2); // Should only have 2 records, not 3
         data[0].Close.ShouldBe(150m); // Original duplicate preserved
         data[1].Close.ShouldBe(160m); // New record added
@@ -239,11 +239,11 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         deletedCount.ShouldBe(2);
 
         // D1 data should be deleted
-        var d1Data = await _repository.GetHistoricalDataAsync("AAPL", d1TimeFrame);
+        List<HistoricalPrice> d1Data = await _repository.GetHistoricalDataAsync("AAPL", d1TimeFrame);
         d1Data.ShouldBeEmpty();
 
         // H1 data should still exist
-        var h1Data = await _repository.GetHistoricalDataAsync("AAPL", h1TimeFrame);
+        List<HistoricalPrice> h1Data = await _repository.GetHistoricalDataAsync("AAPL", h1TimeFrame);
         h1Data.Count.ShouldBe(2);
     }
 
@@ -270,10 +270,10 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         // Assert
         deletedCount.ShouldBe(2);
 
-        var d1Data = await _repository.GetHistoricalDataAsync("AAPL", d1TimeFrame);
+        List<HistoricalPrice> d1Data = await _repository.GetHistoricalDataAsync("AAPL", d1TimeFrame);
         d1Data.ShouldBeEmpty();
 
-        var h1Data = await _repository.GetHistoricalDataAsync("AAPL", h1TimeFrame);
+        List<HistoricalPrice> h1Data = await _repository.GetHistoricalDataAsync("AAPL", h1TimeFrame);
         h1Data.ShouldBeEmpty();
     }
 
@@ -299,7 +299,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
     {
         // Arrange
         var timeFrame = new TimeFrame { Unit = TimeFrameUnit.D1 };
-        var baseDate = DateTime.Today;
+        DateTime baseDate = DateTime.Today;
 
         await _repository.SaveHistoricalDataAsync("AAPL", null, timeFrame, new[]
         {
@@ -310,8 +310,8 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
             new HistoricalPrice { Ticker = "AAPL", DateTime = baseDate.AddDays(-1), Close = 160m }
         });
 
-        var startDate = baseDate.AddDays(-4);
-        var endDate = baseDate.AddDays(-2);
+        DateTime startDate = baseDate.AddDays(-4);
+        DateTime endDate = baseDate.AddDays(-2);
 
         // Act
         int deletedCount = await _repository.DeleteDateRangeAsync("AAPL", timeFrame, startDate, endDate);
@@ -319,7 +319,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         // Assert
         deletedCount.ShouldBe(3); // Records from -4, -3, -2 days
 
-        var remainingData = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
+        List<HistoricalPrice> remainingData = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
         remainingData.Count.ShouldBe(2); // Records from -5 and -1 days
         remainingData[0].DateTime.ShouldBe(baseDate.AddDays(-5));
         remainingData[1].DateTime.ShouldBe(baseDate.AddDays(-1));
@@ -337,8 +337,8 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         });
 
         // Date range with no data
-        var startDate = DateTime.Today.AddDays(-10);
-        var endDate = DateTime.Today.AddDays(-9);
+        DateTime startDate = DateTime.Today.AddDays(-10);
+        DateTime endDate = DateTime.Today.AddDays(-9);
 
         // Act
         int deletedCount = await _repository.DeleteDateRangeAsync("AAPL", timeFrame, startDate, endDate);
@@ -346,7 +346,7 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         // Assert
         deletedCount.ShouldBe(0);
 
-        var data = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
+        List<HistoricalPrice> data = await _repository.GetHistoricalDataAsync("AAPL", timeFrame);
         data.Count.ShouldBe(1); // Original data preserved
     }
 
@@ -355,8 +355,8 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
     {
         // Arrange
         var timeFrame = new TimeFrame { Unit = TimeFrameUnit.D1 };
-        var startDate = DateTime.Today.AddDays(-5);
-        var endDate = DateTime.Today;
+        DateTime startDate = DateTime.Today.AddDays(-5);
+        DateTime endDate = DateTime.Today;
 
         // Act
         int deletedCount = await _repository.DeleteDateRangeAsync("NONEXISTENT", timeFrame, startDate, endDate);
@@ -399,17 +399,17 @@ public class HistoricalDataRepositoryBulkTests : IDisposable
         summaries.Count.ShouldBe(3);
         summaries.ShouldAllBe(s => s.RecordCount > 0);
 
-        var aaplSummary = summaries.First(s => s.Ticker == "AAPL");
+        TickerSummary aaplSummary = summaries.First(s => s.Ticker == "AAPL");
         aaplSummary.RecordCount.ShouldBe(2);
         aaplSummary.ISIN.ShouldBe("US0378331005");
         aaplSummary.OldestDate.ShouldBe(DateTime.Today.AddDays(-10));
         aaplSummary.LatestDate.ShouldBe(DateTime.Today);
 
-        var msftSummary = summaries.First(s => s.Ticker == "MSFT");
+        TickerSummary msftSummary = summaries.First(s => s.Ticker == "MSFT");
         msftSummary.RecordCount.ShouldBe(2);
         msftSummary.ISIN.ShouldBe("US5949181045");
 
-        var googlSummary = summaries.First(s => s.Ticker == "GOOGL");
+        TickerSummary googlSummary = summaries.First(s => s.Ticker == "GOOGL");
         googlSummary.RecordCount.ShouldBe(1);
         googlSummary.ISIN.ShouldBeNull();
     }

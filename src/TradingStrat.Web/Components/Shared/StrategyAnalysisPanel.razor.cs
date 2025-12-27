@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Strategies;
 using TradingStrat.Web.Models;
 using TradingStrat.Web.Services;
 
@@ -35,14 +37,14 @@ public partial class StrategyAnalysisPanel : ComponentBase
         try
         {
             // Parse string strategy type to enum
-            var strategyTypeEnum = StrategyRegistry.ParseStrategyType(StrategyType);
+            StrategyType strategyTypeEnum = StrategyRegistry.ParseStrategyType(StrategyType);
 
             var command = new AnalyzeStrategyCommand(
                 Ticker,
                 strategyTypeEnum,
                 StrategyParameters
             );
-            var result = await AnalyzeStrategyUseCase.ExecuteAsync(command);
+            Result<StrategyRecommendation> result = await AnalyzeStrategyUseCase.ExecuteAsync(command);
 
             if (result.IsFailure)
             {

@@ -46,7 +46,7 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
                 EndDate: DateTime.Today
             );
 
-            var backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
+            Result<BacktestResult> backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
 
             if (backtestResultWrapper.IsFailure)
             {

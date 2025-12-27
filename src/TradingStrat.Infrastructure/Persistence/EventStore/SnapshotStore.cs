@@ -119,7 +119,7 @@ public class SnapshotStore : ISnapshotStore
             throw new ArgumentException("Aggregate ID cannot be null or whitespace", nameof(aggregateId));
         }
 
-        var snapshots = await _context.Snapshots
+        List<SnapshotRecord> snapshots = await _context.Snapshots
             .Where(s => s.AggregateId == aggregateId)
             .ToListAsync();
 

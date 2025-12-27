@@ -3,7 +3,7 @@
 <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary mb-4"
      aria-label="Breadcrumb"
      role="navigation">
-    @foreach (var (crumb, index) in Breadcrumbs.Select((c, i) => (c, i)))
+    @foreach ((Breadcrumb crumb, int index) in Breadcrumbs.Select((c, i) => (c, i)))
     {
         @if (index > 0)
         {

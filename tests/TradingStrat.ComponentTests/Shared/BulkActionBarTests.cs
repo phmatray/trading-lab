@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Shouldly;
@@ -16,7 +17,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_HiddenWhenNoSelection()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 0)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -31,7 +32,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_ShowsWhenItemsSelected()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 3)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -47,7 +48,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_DisplaysSingularText()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -64,7 +65,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_DisplaysPluralText()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 5)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -81,7 +82,7 @@ public class BulkActionBarTests : BunitTestContext
     {
         // Arrange
         bool refreshCalled = false;
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => refreshCalled = true))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -89,7 +90,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var refreshButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Refresh Selected");
+        IRenderedComponent<Button> refreshButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Refresh Selected");
         refreshButtonComponent.Find("button").Click();
 
         // Assert
@@ -101,7 +102,7 @@ public class BulkActionBarTests : BunitTestContext
     {
         // Arrange
         bool deleteCalled = false;
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => deleteCalled = true))
@@ -109,7 +110,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var deleteButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Delete Selected");
+        IRenderedComponent<Button> deleteButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Delete Selected");
         deleteButtonComponent.Find("button").Click();
 
         // Assert
@@ -121,7 +122,7 @@ public class BulkActionBarTests : BunitTestContext
     {
         // Arrange
         bool exportCalled = false;
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -129,7 +130,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Act
-        var exportButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Export Selected");
+        IRenderedComponent<Button> exportButtonComponent = cut.FindComponents<Button>().First(b => b.Instance.Text == "Export Selected");
         exportButtonComponent.Find("button").Click();
 
         // Assert
@@ -141,7 +142,7 @@ public class BulkActionBarTests : BunitTestContext
     {
         // Arrange
         bool clearCalled = false;
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -150,7 +151,7 @@ public class BulkActionBarTests : BunitTestContext
 
         // Act
         // Clear button is a plain button element, not a Button component
-        var clearButton = cut.FindAll("button").Last(); // Clear button is the last button
+        IElement clearButton = cut.FindAll("button").Last(); // Clear button is the last button
         clearButton.Click();
 
         // Assert
@@ -161,7 +162,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_RefreshButtonHiddenWhenDisabled()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.ShowRefreshAction, false)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
@@ -177,7 +178,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_DeleteButtonHiddenWhenDisabled()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.ShowDeleteAction, false)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
@@ -193,7 +194,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_ExportButtonHiddenWhenDisabled()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.ShowExportAction, false)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
@@ -209,7 +210,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_ClearButtonHasCorrectAriaLabel()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -217,7 +218,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var clearButton = cut.Find("button[aria-label='Clear selection']");
+        IElement clearButton = cut.Find("button[aria-label='Clear selection']");
         clearButton.ShouldNotBeNull();
     }
 
@@ -225,7 +226,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_HasStickyPositioning()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -233,7 +234,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var container = cut.Find(".sticky");
+        IElement container = cut.Find(".sticky");
         container.ShouldNotBeNull();
         container.ClassList.ShouldContain("bottom-0");
     }
@@ -242,7 +243,7 @@ public class BulkActionBarTests : BunitTestContext
     public void BulkActionBar_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<BulkActionBar>(parameters => parameters
+        IRenderedComponent<BulkActionBar> cut = Render<BulkActionBar>(parameters => parameters
             .Add(p => p.SelectedCount, 1)
             .Add(p => p.OnRefreshSelected, EventCallback.Factory.Create(this, () => { }))
             .Add(p => p.OnDeleteSelected, EventCallback.Factory.Create(this, () => { }))
@@ -250,7 +251,7 @@ public class BulkActionBarTests : BunitTestContext
             .Add(p => p.OnClearSelection, EventCallback.Factory.Create(this, () => { })));
 
         // Assert
-        var container = cut.Find(".sticky");
+        IElement container = cut.Find(".sticky");
         container.ClassList.ShouldContain("bg-blue-600");
         container.ClassList.ShouldContain("shadow-lg");
         container.ClassList.ShouldContain("z-10");

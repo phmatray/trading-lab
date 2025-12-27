@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Shouldly;
@@ -16,11 +17,11 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_RendersWithPlaceholder()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Placeholder, "Search by ticker..."));
 
         // Assert
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.GetAttribute("placeholder").ShouldBe("Search by ticker...");
     }
 
@@ -28,12 +29,12 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_RendersWithInitialValue()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Value, "AAPL")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.GetAttribute("value").ShouldBe("AAPL");
     }
 
@@ -41,7 +42,7 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_HasSearchIcon()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
@@ -52,12 +53,12 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_ShowsClearButtonWhenHasValue()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Value, "AAPL")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var clearButton = cut.Find("button");
+        IElement clearButton = cut.Find("button");
         clearButton.ShouldNotBeNull();
         clearButton.ClassList.ShouldContain("absolute");
     }
@@ -66,12 +67,12 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_HidesClearButtonWhenEmpty()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Value, "")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var buttons = cut.FindAll("button");
+        IReadOnlyList<IElement> buttons = cut.FindAll("button");
         buttons.ShouldBeEmpty();
     }
 
@@ -80,12 +81,12 @@ public class SearchInputTests : BunitTestContext
     {
         // Arrange
         string? capturedValue = null;
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Value, "AAPL")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, value => capturedValue = value)));
 
         // Act
-        var clearButton = cut.Find("button");
+        IElement clearButton = cut.Find("button");
         clearButton.Click();
 
         // Assert
@@ -97,12 +98,12 @@ public class SearchInputTests : BunitTestContext
     {
         // Arrange
         string? capturedValue = null;
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, value => capturedValue = value))
             .Add(p => p.DebounceMs, 100));
 
         // Act - Type into the input
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.Change("MSFT");
 
         // Assert - Value should not be captured immediately (debounced)
@@ -113,12 +114,12 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_HasCorrectAriaLabel()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Placeholder, "Search tickers")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.GetAttribute("aria-label").ShouldBe("Search tickers");
     }
 
@@ -126,13 +127,13 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_CustomAriaLabelOverridesPlaceholder()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.Placeholder, "Search...")
             .Add(p => p.AriaLabel, "Custom search label")
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.GetAttribute("aria-label").ShouldBe("Custom search label");
     }
 
@@ -140,14 +141,14 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
         // Assert
-        var container = cut.Find(".relative");
+        IElement container = cut.Find(".relative");
         container.ShouldNotBeNull();
 
-        var input = cut.Find("input[type='text']");
+        IElement input = cut.Find("input[type='text']");
         input.ClassList.ShouldContain("w-full");
         input.ClassList.ShouldContain("pl-10"); // Space for search icon
         input.ClassList.ShouldContain("pr-10"); // Space for clear button
@@ -157,7 +158,7 @@ public class SearchInputTests : BunitTestContext
     public void SearchInput_CustomDebounceDelay()
     {
         // Arrange & Act
-        var cut = Render<SearchInput>(parameters => parameters
+        IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { }))
             .Add(p => p.DebounceMs, 500));
 

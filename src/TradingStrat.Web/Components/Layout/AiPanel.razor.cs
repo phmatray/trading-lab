@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using TradingStrat.Web.Models.State;
 using TradingStrat.Web.Services.State;
 
 namespace TradingStrat.Web.Components.Layout;
@@ -40,7 +41,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
             try
             {
                 // Load chat history from localStorage
-                var history = await ChatState.GetHistoryAsync();
+                ChatHistory history = await ChatState.GetHistoryAsync();
                 _messages = history.Messages.Select(m => new ChatDisplayMessage
                 {
                     Content = m.Content,
@@ -126,7 +127,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
     {
         _messages.Clear();
         await ChatState.ClearHistoryAsync();
-        var newHistory = await ChatState.GetHistoryAsync();
+        ChatHistory newHistory = await ChatState.GetHistoryAsync();
         _sessionId = newHistory.SessionId;
     }
 

@@ -196,7 +196,7 @@
 
                         <!-- Detailed Results -->
                         <div class="max-h-96 overflow-y-auto space-y-2">
-                            @foreach (var tickerResult in _bulkResult.SuccessfulResults.OrderBy(r => r.Key))
+                            @foreach (KeyValuePair<string, DataSummaryResult> tickerResult in _bulkResult.SuccessfulResults.OrderBy(r => r.Key))
                             {
                                 <div class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/10 rounded border border-green-200 dark:border-green-800">
                                     <div class="flex items-center gap-2">
@@ -209,7 +209,7 @@
                                 </div>
                             }
 
-                            @foreach (var tickerError in _bulkResult.FailedResults.OrderBy(e => e.Key))
+                            @foreach (KeyValuePair<string, string> tickerError in _bulkResult.FailedResults.OrderBy(e => e.Key))
                             {
                                 <div class="p-2 bg-red-50 dark:bg-red-900/10 rounded border border-red-200 dark:border-red-800">
                                     <div class="flex items-center gap-2 mb-1">

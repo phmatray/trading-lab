@@ -38,7 +38,7 @@ public class AggregateRepositoryTests
             .Returns(Task.FromResult(new List<DomainEvent>()));
 
         // Act
-        var portfolio = await _repository.LoadAsync("1");
+        Portfolio? portfolio = await _repository.LoadAsync("1");
 
         // Assert
         portfolio.ShouldBeNull();
@@ -62,7 +62,7 @@ public class AggregateRepositoryTests
             .Returns(Task.FromResult(events));
 
         // Act
-        var portfolio = await _repository.LoadAsync("1");
+        Portfolio? portfolio = await _repository.LoadAsync("1");
 
         // Assert
         portfolio.ShouldNotBeNull();
@@ -122,7 +122,7 @@ public class AggregateRepositoryTests
             .Returns(Task.FromResult(eventsAfterSnapshot));
 
         // Act
-        var portfolio = await _repository.LoadAsync("1");
+        Portfolio? portfolio = await _repository.LoadAsync("1");
 
         // Assert
         portfolio.ShouldNotBeNull();
@@ -152,7 +152,7 @@ public class AggregateRepositoryTests
             .Returns(Task.FromResult(events));
 
         // Act
-        var portfolio = await _repository.LoadAsync("1");
+        Portfolio? portfolio = await _repository.LoadAsync("1");
 
         // Assert - Uncommitted events should be cleared after reconstruction
         portfolio.ShouldNotBeNull();

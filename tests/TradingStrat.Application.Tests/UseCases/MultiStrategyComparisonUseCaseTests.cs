@@ -49,11 +49,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        MultiStrategyComparisonResult result = resultWrapper.Value;
         result.ShouldNotBeNull();
         result.Ticker.ShouldBe("AAPL");
         result.Strategies.Count.ShouldBe(3);
@@ -83,11 +83,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        MultiStrategyComparisonResult result = resultWrapper.Value;
         result.BestByReturn.ShouldNotBeNull();
         result.BestByReturn.StrategyName.ShouldBe("MACD Strategy");
         result.BestByReturn.Metrics.TotalReturnPercentage.ShouldBe(35.0m);
@@ -114,11 +114,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        MultiStrategyComparisonResult result = resultWrapper.Value;
         result.BestBySharpe.ShouldNotBeNull();
         result.BestBySharpe.StrategyName.ShouldBe("RSI Strategy");
         result.BestBySharpe.Metrics.SharpeRatio.ShouldBe(2.5m);
@@ -145,11 +145,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        MultiStrategyComparisonResult result = resultWrapper.Value;
         result.BestByDrawdown.ShouldNotBeNull();
         result.BestByDrawdown.StrategyName.ShouldBe("MACD Strategy");
         result.BestByDrawdown.Metrics.MaxDrawdown.ShouldBe(400m);
@@ -170,7 +170,7 @@ public class MultiStrategyComparisonUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -190,7 +190,7 @@ public class MultiStrategyComparisonUseCaseTests
         );
 
         // Act
-        var result = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -219,18 +219,18 @@ public class MultiStrategyComparisonUseCaseTests
             new() { ProfitLoss = 150m }    // Win
         };
 
-        var backtestResult = CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m);
+        BacktestResult backtestResult = CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m);
         backtestResult = backtestResult with { Trades = trades };
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .Returns(Result<BacktestResult>.Success(backtestResult));
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        MultiStrategyComparisonResult result = resultWrapper.Value;
         result.Strategies.Count.ShouldBe(1);
         result.Strategies[0].TotalTrades.ShouldBe(5);
         result.Strategies[0].WinningTrades.ShouldBe(3);
@@ -261,7 +261,7 @@ public class MultiStrategyComparisonUseCaseTests
         var progress = new Progress<string>(msg => progressReports.Add(msg));
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command, progress);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command, progress);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -295,7 +295,7 @@ public class MultiStrategyComparisonUseCaseTests
             .Returns(Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -331,7 +331,7 @@ public class MultiStrategyComparisonUseCaseTests
             .Returns(Result<BacktestResult>.Success(CreateBacktestResult("Custom Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(command);
+        Result<MultiStrategyComparisonResult> resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();

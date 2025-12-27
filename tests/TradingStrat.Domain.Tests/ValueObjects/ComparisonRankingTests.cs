@@ -10,8 +10,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_WhenVariantAHasHigherSharpe_ShouldRankAHigher()
     {
         // Arrange
-        var metricsA = CreateMetrics(sharpeRatio: 2.5m, annualizedReturn: 15m);
-        var metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m);
+        PerformanceMetrics metricsA = CreateMetrics(sharpeRatio: 2.5m, annualizedReturn: 15m);
+        PerformanceMetrics metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -25,8 +25,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_WhenVariantBHasHigherSharpe_ShouldRankBHigher()
     {
         // Arrange
-        var metricsA = CreateMetrics(sharpeRatio: 1.0m, annualizedReturn: 15m);
-        var metricsB = CreateMetrics(sharpeRatio: 2.0m, annualizedReturn: 15m);
+        PerformanceMetrics metricsA = CreateMetrics(sharpeRatio: 1.0m, annualizedReturn: 15m);
+        PerformanceMetrics metricsB = CreateMetrics(sharpeRatio: 2.0m, annualizedReturn: 15m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -42,8 +42,8 @@ public class ComparisonRankingTests
         // Arrange - Create metrics where scores are exactly equal (perfect tie)
         // A wins Sharpe (0.40) + Win Rate (0.10) = 0.50
         // B wins Annualized Return (0.30) + Max Drawdown (0.20) = 0.50
-        var metricsA = CreateMetrics(sharpeRatio: 2.0m, annualizedReturn: 10m, maxDrawdownPercentage: -20m, winRate: 60m);
-        var metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m, maxDrawdownPercentage: -15m, winRate: 55m);
+        PerformanceMetrics metricsA = CreateMetrics(sharpeRatio: 2.0m, annualizedReturn: 10m, maxDrawdownPercentage: -20m, winRate: 60m);
+        PerformanceMetrics metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m, maxDrawdownPercentage: -15m, winRate: 55m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -58,8 +58,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_ShouldWeightSharpeRatio40Percent()
     {
         // Arrange
-        var metricsA = CreateMetrics(sharpeRatio: 2.0m);
-        var metricsB = CreateMetrics(sharpeRatio: 1.0m);
+        PerformanceMetrics metricsA = CreateMetrics(sharpeRatio: 2.0m);
+        PerformanceMetrics metricsB = CreateMetrics(sharpeRatio: 1.0m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -73,8 +73,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_ShouldWeightAnnualizedReturn30Percent()
     {
         // Arrange
-        var metricsA = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m);
-        var metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 10m);
+        PerformanceMetrics metricsA = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 15m);
+        PerformanceMetrics metricsB = CreateMetrics(sharpeRatio: 1.5m, annualizedReturn: 10m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -88,8 +88,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_ShouldWeightMaxDrawdown20Percent()
     {
         // Arrange
-        var metricsA = CreateMetrics(maxDrawdownPercentage: -10m);
-        var metricsB = CreateMetrics(maxDrawdownPercentage: -20m);
+        PerformanceMetrics metricsA = CreateMetrics(maxDrawdownPercentage: -10m);
+        PerformanceMetrics metricsB = CreateMetrics(maxDrawdownPercentage: -20m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -103,8 +103,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_ShouldWeightWinRate10Percent()
     {
         // Arrange
-        var metricsA = CreateMetrics(winRate: 60m);
-        var metricsB = CreateMetrics(winRate: 50m);
+        PerformanceMetrics metricsA = CreateMetrics(winRate: 60m);
+        PerformanceMetrics metricsB = CreateMetrics(winRate: 50m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -118,8 +118,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_LowerDrawdownShouldScore_WhenOtherMetricsEqual()
     {
         // Arrange
-        var metricsA = CreateMetrics(maxDrawdownPercentage: -10m);
-        var metricsB = CreateMetrics(maxDrawdownPercentage: -20m);
+        PerformanceMetrics metricsA = CreateMetrics(maxDrawdownPercentage: -10m);
+        PerformanceMetrics metricsB = CreateMetrics(maxDrawdownPercentage: -20m);
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);
@@ -133,8 +133,8 @@ public class ComparisonRankingTests
     public void CalculateRanking_ShouldIncludeAdditionalMetricsWithZeroWeight()
     {
         // Arrange
-        var metricsA = CreateMetrics();
-        var metricsB = CreateMetrics();
+        PerformanceMetrics metricsA = CreateMetrics();
+        PerformanceMetrics metricsB = CreateMetrics();
 
         // Act
         var ranking = ComparisonRanking.CalculateRanking(metricsA, metricsB);

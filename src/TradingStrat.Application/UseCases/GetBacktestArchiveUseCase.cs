@@ -25,7 +25,7 @@ public class GetBacktestArchiveUseCase : BaseUseCase<GetBacktestArchiveQuery, Ba
     private async Task<BacktestArchiveResult> ExecuteCoreAsync(GetBacktestArchiveQuery query)
     {
         // Get filtered backtest runs
-        var backtestRuns = await _backtestArchivePort.GetBacktestRunsAsync(
+        List<BacktestRun> backtestRuns = await _backtestArchivePort.GetBacktestRunsAsync(
             ticker: query.Ticker,
             strategyType: query.StrategyType,
             limit: query.Limit

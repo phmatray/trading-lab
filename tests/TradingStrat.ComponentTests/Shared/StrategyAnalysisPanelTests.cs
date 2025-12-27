@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +32,7 @@ public class StrategyAnalysisPanelTests : BunitTestContext
     public void StrategyAnalysisPanel_InitialRender_ShowsAnalyzeButton()
     {
         // Arrange & Act
-        var cut = Render<StrategyAnalysisPanel>(parameters => parameters
+        IRenderedComponent<StrategyAnalysisPanel> cut = Render<StrategyAnalysisPanel>(parameters => parameters
             .Add(p => p.Ticker, "AAPL")
             .Add(p => p.StrategyType, "rsi"));
 
@@ -39,7 +40,7 @@ public class StrategyAnalysisPanelTests : BunitTestContext
         cut.Markup.ShouldContain("AI Strategy Analysis");
         cut.Markup.ShouldContain("Get AI-powered insights and recommendations");
 
-        var button = cut.Find("[data-testid='analyze-button']");
+        IElement button = cut.Find("[data-testid='analyze-button']");
         button.ShouldNotBeNull();
         button.TextContent.ShouldContain("Get AI Strategy Analysis");
     }
@@ -51,14 +52,14 @@ public class StrategyAnalysisPanelTests : BunitTestContext
         var parameters = new Dictionary<string, object> { ["Period"] = 14 };
 
         // Act
-        var cut = Render<StrategyAnalysisPanel>(builder => builder
+        IRenderedComponent<StrategyAnalysisPanel> cut = Render<StrategyAnalysisPanel>(builder => builder
             .Add(p => p.Ticker, "MSFT")
             .Add(p => p.StrategyType, "macd")
             .Add(p => p.StrategyParameters, parameters));
 
         // Assert
         cut.Markup.ShouldContain("AI Strategy Analysis");
-        var button = cut.Find("[data-testid='analyze-button']");
+        IElement button = cut.Find("[data-testid='analyze-button']");
         button.ShouldNotBeNull();
     }
 
@@ -66,12 +67,12 @@ public class StrategyAnalysisPanelTests : BunitTestContext
     public void StrategyAnalysisPanel_HasCorrectCardStyling()
     {
         // Arrange & Act
-        var cut = Render<StrategyAnalysisPanel>(parameters => parameters
+        IRenderedComponent<StrategyAnalysisPanel> cut = Render<StrategyAnalysisPanel>(parameters => parameters
             .Add(p => p.Ticker, "AAPL")
             .Add(p => p.StrategyType, "rsi"));
 
         // Assert
-        var card = cut.Find(".card");
+        IElement card = cut.Find(".card");
         card.ShouldNotBeNull();
     }
 
@@ -79,12 +80,12 @@ public class StrategyAnalysisPanelTests : BunitTestContext
     public void StrategyAnalysisPanel_AnalyzeButton_HasCorrectStyling()
     {
         // Arrange & Act
-        var cut = Render<StrategyAnalysisPanel>(parameters => parameters
+        IRenderedComponent<StrategyAnalysisPanel> cut = Render<StrategyAnalysisPanel>(parameters => parameters
             .Add(p => p.Ticker, "AAPL")
             .Add(p => p.StrategyType, "rsi"));
 
         // Assert
-        var button = cut.Find("[data-testid='analyze-button']");
+        IElement button = cut.Find("[data-testid='analyze-button']");
         button.ClassList.ShouldContain("bg-trading-blue");
         button.ClassList.ShouldContain("text-white");
         button.ClassList.ShouldContain("rounded-lg");

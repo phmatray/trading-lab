@@ -314,7 +314,7 @@ public class StrategyAnalysisPanelTests : BaseTest
         confidenceScore.ShouldNotBeNullOrEmpty("Confidence score/bar should be visible");
 
         // Verify confidence score element exists (visual representation)
-        var confidenceElement = Page!.Locator("[data-testid='confidence-score']");
+        ILocator confidenceElement = Page!.Locator("[data-testid='confidence-score']");
         bool isVisible = await confidenceElement.IsVisibleAsync();
         isVisible.ShouldBeTrue("Confidence score element should be visible as a progress indicator");
     }

@@ -1,8 +1,10 @@
 using System.Text.Json;
 using FakeItEasy;
 using Shouldly;
+using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -22,11 +24,11 @@ public class GetTopStrategiesUseCaseTests
     public async Task ExecuteAsync_WithDefaultLimit_Returns5TopStrategies()
     {
         // Arrange
-        var backtestRuns = CreateBacktestRuns(5);
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(5);
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -39,11 +41,11 @@ public class GetTopStrategiesUseCaseTests
     {
         // Arrange
         int customLimit = 10;
-        var backtestRuns = CreateBacktestRuns(10);
+        List<BacktestRun> backtestRuns = CreateBacktestRuns(10);
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(customLimit)).Returns(backtestRuns);
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync(customLimit);
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync(customLimit);
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -58,7 +60,7 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(new List<BacktestRun>());
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -82,11 +84,11 @@ public class GetTopStrategiesUseCaseTests
             .Returns(new List<BacktestRun> { backtestRun });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        List<TopStrategyResult> result = resultWrapper.Value;
         result.Count.ShouldBe(1);
         result[0].StrategyName.ShouldBe("RSI Strategy");
         result[0].Ticker.ShouldBe("AAPL");
@@ -132,11 +134,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Should skip the invalid entry
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        List<TopStrategyResult> result = resultWrapper.Value;
         result.Count.ShouldBe(2);
         result[0].StrategyName.ShouldBe("Valid Strategy");
         result[1].StrategyName.ShouldBe("Another Valid Strategy");
@@ -159,7 +161,7 @@ public class GetTopStrategiesUseCaseTests
             .Returns(new List<BacktestRun> { backtestRun });
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Should skip the null result
         resultWrapper.IsSuccess.ShouldBeTrue();
@@ -201,11 +203,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        var resultWrapper = await _useCase.ExecuteAsync();
+        Result<List<TopStrategyResult>> resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Port should return pre-ordered results
         resultWrapper.IsSuccess.ShouldBeTrue();
-        var result = resultWrapper.Value;
+        List<TopStrategyResult> result = resultWrapper.Value;
         result.Count.ShouldBe(3);
         result[0].StrategyName.ShouldBe("High Performer");
         result[1].StrategyName.ShouldBe("Medium Performer");

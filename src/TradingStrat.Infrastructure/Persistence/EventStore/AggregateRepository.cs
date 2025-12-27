@@ -76,7 +76,7 @@ public class AggregateRepository<T> : IAggregateRepository<T> where T : IEventSo
             throw new ArgumentNullException(nameof(aggregate));
         }
 
-        var uncommittedEvents = aggregate.GetDomainEvents();
+        IReadOnlyList<DomainEvent> uncommittedEvents = aggregate.GetDomainEvents();
         if (!uncommittedEvents.Any())
         {
             // No changes to persist

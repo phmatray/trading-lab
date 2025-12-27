@@ -139,7 +139,7 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule
-        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
+        ILocator exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
         await exitSection.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
@@ -312,7 +312,7 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");
         await Page.WaitForBlazorAsync();
 
-        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
+        ILocator exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
@@ -384,7 +384,7 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.Locator("[data-testid='rule-0-value']").FillAsync("30");
 
         // Add exit rule
-        var exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
+        ILocator exitSection = Page.Locator(".card:has(h2:has-text('Exit Rules'))");
         await exitSection.Locator("button:has-text('Add First Rule')").ClickAsync();
         await Page.WaitForBlazorAsync();
         await exitSection.Locator("[data-testid='rule-0-indicator']").SelectOptionAsync("RSI");

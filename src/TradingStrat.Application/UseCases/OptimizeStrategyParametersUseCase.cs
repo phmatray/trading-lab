@@ -188,7 +188,7 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
     {
         Dictionary<string, object> modified = new(indicatorParams);
 
-        foreach (var (key, value) in indicatorParams)
+        foreach ((string key, object value) in indicatorParams)
         {
             // If this parameter is being optimized, replace its value
             if (optimizationParams.ContainsKey(key))

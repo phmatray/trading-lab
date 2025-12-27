@@ -111,7 +111,7 @@ public partial class Backtest
             CustomStrategyId: model.CustomStrategyId
         );
 
-        var backtestResult = await BacktestUseCase.ExecuteAsync(command, backtestProgress);
+        Result<BacktestResult> backtestResult = await BacktestUseCase.ExecuteAsync(command, backtestProgress);
 
         stopwatch.Stop();
 
@@ -145,7 +145,7 @@ public partial class Backtest
                 Tags: null
             );
 
-            var saveResult = await SaveBacktestRunUseCase.ExecuteAsync(saveCommand);
+            Result<BacktestRun> saveResult = await SaveBacktestRunUseCase.ExecuteAsync(saveCommand);
 
             if (saveResult.IsFailure)
             {
@@ -213,7 +213,7 @@ public partial class Backtest
     private async Task OnStrategyTypeChanged(string value)
     {
         // Parse strategy type string to enum
-        if (StrategyRegistry.TryParseStrategyType(value, out var strategyType))
+        if (StrategyRegistry.TryParseStrategyType(value, out StrategyType strategyType))
         {
             await OnPropertyChangedAsync(m => m.StrategyType = strategyType);
         }

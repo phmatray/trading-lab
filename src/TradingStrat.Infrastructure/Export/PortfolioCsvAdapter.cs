@@ -19,12 +19,12 @@ public class PortfolioCsvAdapter : IPortfolioExportPort
     /// <inheritdoc />
     public async Task ExportPortfolioToCsvAsync(int portfolioId, string filePath)
     {
-        var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolioId);
+        List<Position> positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolioId);
 
         var csv = new StringBuilder();
         csv.AppendLine("Ticker,Quantity,EntryPrice,EntryDate,Notes");
 
-        foreach (var position in positions)
+        foreach (Position position in positions)
         {
             // Escape notes field if it contains commas or quotes
             string escapedNotes = EscapeCsvField(position.Notes ?? string.Empty);
@@ -95,7 +95,7 @@ public class PortfolioCsvAdapter : IPortfolioExportPort
                     throw new InvalidOperationException($"Line {i + 1}: Entry price must be positive");
                 }
 
-                var createdPosition = await _portfolioPort.AddPositionAsync(position);
+                Position createdPosition = await _portfolioPort.AddPositionAsync(position);
                 positions.Add(createdPosition);
             }
             catch (FormatException ex)

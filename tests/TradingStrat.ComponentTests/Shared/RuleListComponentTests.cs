@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -30,13 +31,13 @@ public class RuleListComponentTests : BunitTestContext
         var rules = new List<RuleFormModel>();
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
         cut.Markup.ShouldContain("No rules defined yet");
         cut.Markup.ShouldContain("Add First Rule");
-        var button = cut.Find("button");
+        IElement button = cut.Find("button");
         button.TextContent.ShouldContain("Add First Rule");
     }
 
@@ -47,7 +48,7 @@ public class RuleListComponentTests : BunitTestContext
         var rules = new List<RuleFormModel>();
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.EmptyStateMessage, "Create your first entry rule"));
 
@@ -62,11 +63,11 @@ public class RuleListComponentTests : BunitTestContext
         var rules = new List<RuleFormModel>();
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
-        var addButton = cut.Find("button");
+        IElement addButton = cut.Find("button");
 
         // Act
         addButton.Click();
@@ -97,24 +98,24 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
         // Should display indicator dropdown
-        var indicatorSelect = cut.Find("[data-testid='rule-0-indicator']");
+        IElement indicatorSelect = cut.Find("[data-testid='rule-0-indicator']");
         indicatorSelect.ShouldNotBeNull();
 
         // Should display operator dropdown
-        var operatorSelect = cut.Find("[data-testid='rule-0-operator']");
+        IElement operatorSelect = cut.Find("[data-testid='rule-0-operator']");
         operatorSelect.ShouldNotBeNull();
 
         // Should display value type dropdown
-        var valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
+        IElement valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
         valueTypeSelect.ShouldNotBeNull();
 
         // Should display constant value input
-        var valueInput = cut.Find("[data-testid='rule-0-value']");
+        IElement valueInput = cut.Find("[data-testid='rule-0-value']");
         valueInput.ShouldNotBeNull();
     }
 
@@ -128,12 +129,12 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
         // Should not display AND/OR radio buttons (more specific check for radio inputs)
-        var radios = cut.FindAll("input[type='radio']");
+        IReadOnlyList<IElement> radios = cut.FindAll("input[type='radio']");
         radios.ShouldBeEmpty();
     }
 
@@ -152,7 +153,7 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
@@ -172,12 +173,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act - Find and click the first remove button
-        var removeButtons = cut.FindAll("button.btn-danger");
+        IReadOnlyList<IElement> removeButtons = cut.FindAll("button.btn-danger");
         removeButtons[0].Click();
 
         // Assert
@@ -196,11 +197,11 @@ public class RuleListComponentTests : BunitTestContext
             new RuleFormModel { IndicatorName = "RSI" }
         };
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Act
-        var addButton = cut.Find("button.btn-secondary"); // "Add Another Rule"
+        IElement addButton = cut.Find("button.btn-secondary"); // "Add Another Rule"
         addButton.Click();
 
         // Assert
@@ -218,12 +219,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act
-        var indicatorSelect = cut.Find("[data-testid='rule-0-indicator']");
+        IElement indicatorSelect = cut.Find("[data-testid='rule-0-indicator']");
         indicatorSelect.Change("RSI");
 
         // Assert
@@ -247,12 +248,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act
-        var operatorSelect = cut.Find("[data-testid='rule-0-operator']");
+        IElement operatorSelect = cut.Find("[data-testid='rule-0-operator']");
         operatorSelect.Change(ComparisonOperator.LessThan.ToString());
 
         // Assert
@@ -275,12 +276,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act
-        var valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
+        IElement valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
         valueTypeSelect.Change(RuleValueType.Constant.ToString());
 
         // Assert
@@ -304,11 +305,11 @@ public class RuleListComponentTests : BunitTestContext
             }
         };
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Act
-        var valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
+        IElement valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
         valueTypeSelect.Change(RuleValueType.Price.ToString());
 
         // Assert
@@ -331,11 +332,11 @@ public class RuleListComponentTests : BunitTestContext
             }
         };
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Act
-        var valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
+        IElement valueTypeSelect = cut.Find("[data-testid='rule-0-value-type']");
         valueTypeSelect.Change(RuleValueType.Indicator.ToString());
 
         // Assert
@@ -359,11 +360,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var valueInput = cut.Find("[data-testid='rule-0-value']");
+        IElement valueInput = cut.Find("[data-testid='rule-0-value']");
         valueInput.GetAttribute("type").ShouldBe("number");
         valueInput.GetAttribute("step").ShouldBe("0.01");
     }
@@ -382,11 +383,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var inputs = cut.FindAll("input[disabled]");
+        IReadOnlyList<IElement> inputs = cut.FindAll("input[disabled]");
         inputs.ShouldContain(input => input.GetAttribute("value") == "Current Price");
     }
 
@@ -404,11 +405,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var secondIndicatorSelect = cut.Find("[data-testid='rule-0-second-indicator']");
+        IElement secondIndicatorSelect = cut.Find("[data-testid='rule-0-second-indicator']");
         secondIndicatorSelect.ShouldNotBeNull();
         secondIndicatorSelect.TagName.ShouldBe("SELECT");
     }
@@ -428,12 +429,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act
-        var valueInput = cut.Find("[data-testid='rule-0-value']");
+        IElement valueInput = cut.Find("[data-testid='rule-0-value']");
         valueInput.Change("70");
 
         // Assert
@@ -456,12 +457,12 @@ public class RuleListComponentTests : BunitTestContext
         };
         bool changedCalled = false;
 
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules)
             .Add(p => p.OnRulesChanged, () => changedCalled = true));
 
         // Act
-        var secondIndicatorSelect = cut.Find("[data-testid='rule-0-second-indicator']");
+        IElement secondIndicatorSelect = cut.Find("[data-testid='rule-0-second-indicator']");
         secondIndicatorSelect.Change("EMA");
 
         // Assert
@@ -484,12 +485,12 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
         // Should display parameter input (number input)
-        var paramInputs = cut.FindAll("input[type='number']");
+        IReadOnlyList<IElement> paramInputs = cut.FindAll("input[type='number']");
         paramInputs.Count.ShouldBeGreaterThan(0);
     }
 
@@ -505,11 +506,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var removeButtons = cut.FindAll("button.btn-danger");
+        IReadOnlyList<IElement> removeButtons = cut.FindAll("button.btn-danger");
         removeButtons.Count.ShouldBe(3);
     }
 
@@ -523,11 +524,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var addButton = cut.Find("button.btn-secondary");
+        IElement addButton = cut.Find("button.btn-secondary");
         addButton.TextContent.ShouldContain("Add Another Rule");
     }
 
@@ -541,11 +542,11 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
-        var optgroups = cut.FindAll("optgroup");
+        IReadOnlyList<IElement> optgroups = cut.FindAll("optgroup");
         optgroups.ShouldNotBeEmpty();
         // Should have categories like "Price", "Momentum", etc.
         optgroups.ShouldContain(og => og.GetAttribute("label") == "Momentum");
@@ -561,7 +562,7 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert
@@ -581,7 +582,7 @@ public class RuleListComponentTests : BunitTestContext
         };
 
         // Act
-        var cut = Render<RuleListComponent>(parameters => parameters
+        IRenderedComponent<RuleListComponent> cut = Render<RuleListComponent>(parameters => parameters
             .Add(p => p.Rules, rules));
 
         // Assert

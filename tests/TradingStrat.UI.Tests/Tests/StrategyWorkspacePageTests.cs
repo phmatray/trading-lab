@@ -215,7 +215,7 @@ public class StrategyWorkspacePageTests : BaseTest
 
         // Act
         await page.NavigateAsync();
-        var breadcrumbs = Page!.Locator("nav[aria-label='Breadcrumb']");
+        ILocator breadcrumbs = Page!.Locator("nav[aria-label='Breadcrumb']");
         bool hasBreadcrumbs = await breadcrumbs.IsVisibleAsync();
 
         // Assert
