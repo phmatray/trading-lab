@@ -58,8 +58,14 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ICalculateRebalancingUseCase, CalculateRebalancingUseCase>();
         services.AddScoped<IGetPortfolioPerformanceUseCase, GetPortfolioPerformanceUseCase>();
 
-        // Custom Strategy Use Cases
-        services.AddScoped<ICustomStrategyManagementUseCase, CustomStrategyManagementUseCase>();
+        // Custom Strategy Use Cases (CQRS-lite)
+        services.AddScoped<ICustomStrategyQueryUseCase, CustomStrategyQueryUseCase>();
+        services.AddScoped<ICustomStrategyCommandUseCase, CustomStrategyCommandUseCase>();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        services.AddScoped<ICustomStrategyManagementUseCase, CustomStrategyManagementUseCase>(); // Legacy facade for backward compatibility
+#pragma warning restore CS0618 // Type or member is obsolete
+
         services.AddScoped<IOptimizeStrategyParametersUseCase, OptimizeStrategyParametersUseCase>();
 
         // Dashboard Use Cases

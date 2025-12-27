@@ -113,12 +113,3 @@ public sealed record TickerDataStatus(
     decimal CoveragePercentage,
     List<DateGap> Gaps
 );
-
-/// <summary>
-/// Represents a gap in historical data.
-/// </summary>
-public sealed record DateGap(
-    DateTime StartDate,
-    DateTime EndDate,
-    int DaysMissing
-);

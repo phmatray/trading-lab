@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
@@ -68,7 +69,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         catch (Exception ex)
         {
             return Result<DataSummaryResult>.Failure(
-                Error.BusinessRule($"Failed to fetch historical data: {ex.Message}", "DATA_FETCH_FAILED"));
+                Error.BusinessRule($"Failed to fetch historical data: {ex.Message}", ErrorCodes.Data.FetchFailed));
         }
     }
 
@@ -79,7 +80,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
             if (string.IsNullOrEmpty(ticker))
             {
                 return Result<string>.Failure(
-                    Error.Validation("Either ticker or ISIN must be provided", "TICKER_OR_ISIN_REQUIRED"));
+                    Error.Validation("Either ticker or ISIN must be provided", ErrorCodes.Data.TickerOrIsinRequired));
             }
             return Result<string>.Success(ticker);
         }
@@ -89,7 +90,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         if (possibleTickers == null || !possibleTickers.Any())
         {
             return Result<string>.Failure(
-                Error.NotFound($"Could not resolve ISIN {isin} to Yahoo ticker", "ISIN_NOT_RESOLVED"));
+                Error.NotFound($"Could not resolve ISIN {isin} to Yahoo ticker", ErrorCodes.Data.IsinNotResolved));
         }
 
         progress?.Report($"Found possible tickers: {string.Join(", ", possibleTickers)}");
@@ -101,7 +102,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
             return Result<string>.Failure(
                 Error.BusinessRule(
                     "Could not fetch data with any available ticker. This may be due to Yahoo Finance API rate limiting or the security not being available.",
-                    "NO_WORKING_TICKER"));
+                    ErrorCodes.Data.NoWorkingTicker));
         }
 
         return Result<string>.Success(workingTicker);

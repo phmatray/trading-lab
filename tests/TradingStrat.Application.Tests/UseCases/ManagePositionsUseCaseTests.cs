@@ -1,5 +1,5 @@
 using Shouldly;
-using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Commands;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
 

@@ -55,6 +55,10 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IBacktestArchivePort, BacktestArchiveRepository>();
         services.AddScoped<IActivityEventPort, ActivityEventRepository>();
 
+        // Domain services (singleton - no state)
+        services.AddSingleton<DataCoverageService>();
+        services.AddSingleton<StrategyDefinitionValidator>();
+
         // Data Refresh Background Service
         services.Configure<DataRefreshConfiguration>(
             configuration.GetSection("Trading:DataRefresh"));

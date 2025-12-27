@@ -3,6 +3,8 @@ using Shouldly;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -21,11 +23,14 @@ public class GetDashboardStatsUseCaseTests
         _portfolioPort = A.Fake<IPortfolioPort>();
         _historicalDataPort = A.Fake<IHistoricalDataPort>();
 
+        var dataCoverageService = new DataCoverageService();
+
         _useCase = new GetDashboardStatsUseCase(
             _customStrategyPort,
             _backtestArchivePort,
             _portfolioPort,
-            _historicalDataPort);
+            _historicalDataPort,
+            dataCoverageService);
     }
 
     [Fact]

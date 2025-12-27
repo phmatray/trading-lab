@@ -2,6 +2,7 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.UseCases;
@@ -9,14 +10,19 @@ namespace TradingStrat.Application.UseCases;
 /// <summary>
 /// Use case for retrieving comprehensive data status for all tickers.
 /// Supports filtering, sorting, and pagination.
+/// Uses DataCoverageService for gap detection and coverage calculation.
 /// </summary>
 public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
 {
     private readonly IHistoricalDataPort _historicalDataPort;
+    private readonly DataCoverageService _dataCoverageService;
 
-    public GetAllDataStatusUseCase(IHistoricalDataPort historicalDataPort)
+    public GetAllDataStatusUseCase(
+        IHistoricalDataPort historicalDataPort,
+        DataCoverageService dataCoverageService)
     {
         _historicalDataPort = historicalDataPort;
+        _dataCoverageService = dataCoverageService;
     }
 
     public async Task<Result<AllDataStatusResult>> ExecuteAsync(DataStatusQuery? query = null)
@@ -163,16 +169,13 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
         // Get all historical prices to detect gaps
         List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
 
-        List<DateGap> gaps = DetectGaps(prices);
-
+        // Use domain service for gap detection and coverage calculation
+        List<DateGap> gaps = _dataCoverageService.DetectGaps(prices);
         int daysCovered = prices.Count;
-        int expectedDays = summary.OldestDate != null && summary.LatestDate != null
-            ? (summary.LatestDate.Value - summary.OldestDate.Value).Days + 1
-            : 0;
-
-        decimal coveragePercentage = expectedDays > 0
-            ? ((decimal)daysCovered / expectedDays) * 100m
-            : 0m;
+        decimal coveragePercentage = _dataCoverageService.CalculateCoverage(
+            daysCovered,
+            summary.OldestDate,
+            summary.LatestDate);
 
         return new TickerDataStatus(
             Ticker: ticker,
@@ -184,36 +187,5 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
             CoveragePercentage: coveragePercentage,
             Gaps: gaps
         );
-    }
-
-    private List<DateGap> DetectGaps(List<HistoricalPrice> prices)
-    {
-        if (!prices.Any())
-        {
-            return new List<DateGap>();
-        }
-
-        var gaps = new List<DateGap>();
-        var sortedPrices = prices.OrderBy(p => p.DateTime).ToList();
-
-        for (int i = 1; i < sortedPrices.Count; i++)
-        {
-            DateTime previousDate = sortedPrices[i - 1].DateTime;
-            DateTime currentDate = sortedPrices[i].DateTime;
-
-            int daysBetween = (currentDate - previousDate).Days - 1;
-
-            // If there's a gap of more than 3 days (excluding weekends), record it
-            if (daysBetween > 3)
-            {
-                gaps.Add(new DateGap(
-                    StartDate: previousDate.AddDays(1),
-                    EndDate: currentDate.AddDays(-1),
-                    DaysMissing: daysBetween
-                ));
-            }
-        }
-
-        return gaps;
     }
 }

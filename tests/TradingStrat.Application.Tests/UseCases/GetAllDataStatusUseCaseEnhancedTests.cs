@@ -3,6 +3,7 @@ using Shouldly;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 using DataStatusQuery = TradingStrat.Application.Ports.Inbound.DataStatusQuery;
 using DataStatusFilter = TradingStrat.Application.Ports.Inbound.DataStatusFilter;
@@ -19,7 +20,8 @@ public class GetAllDataStatusUseCaseEnhancedTests
     public GetAllDataStatusUseCaseEnhancedTests()
     {
         _historicalDataPort = A.Fake<IHistoricalDataPort>();
-        _useCase = new GetAllDataStatusUseCase(_historicalDataPort);
+        var dataCoverageService = new DataCoverageService();
+        _useCase = new GetAllDataStatusUseCase(_historicalDataPort, dataCoverageService);
     }
 
     [Fact]

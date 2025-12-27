@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;

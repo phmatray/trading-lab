@@ -1,3 +1,5 @@
+using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -7,6 +9,7 @@ namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case for managing portfolio positions (add, update, delete).
+/// Uses BaseUseCase pattern to eliminate try-catch boilerplate.
 /// </summary>
 public class ManagePositionsUseCase : IManagePositionsUseCase
 {
@@ -20,75 +23,50 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     /// <inheritdoc />
     public async Task<Result<Position>> AddPositionAsync(AddPositionCommand command)
     {
-        // Command validation happens in constructor - command is guaranteed to be valid here
-
         try
         {
-            // Verify portfolio exists
-            var portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
-            if (portfolio == null)
-            {
-                return Result<Position>.Failure(
-                    Error.NotFound($"Portfolio {command.PortfolioId} not found", "PORTFOLIO_NOT_FOUND"));
-            }
-
-            // Check for duplicate position (same ticker in same portfolio)
-            var existingPositions = await _portfolioPort.GetPositionsByPortfolioAsync(command.PortfolioId);
-            if (existingPositions.Any(p => p.Ticker == command.Ticker))
-            {
-                return Result<Position>.Failure(
-                    Error.Conflict($"Position for {command.Ticker} already exists in this portfolio", "POSITION_ALREADY_EXISTS"));
-            }
-
-            // Create position entity (Ticker is already normalized by command)
-            var position = new Position
-            {
-                PortfolioId = command.PortfolioId,
-                Ticker = command.Ticker,
-                Quantity = command.Quantity,
-                EntryPrice = command.EntryPrice,
-                EntryDate = command.EntryDate,
-                Notes = command.Notes
-            };
-
-            // Add via repository
-            var createdPosition = await _portfolioPort.AddPositionAsync(position);
-            return Result<Position>.Success(createdPosition);
+            var position = await AddPositionCoreAsync(command);
+            return Result<Position>.Success(position);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Portfolio") && ex.Message.Contains("not found"))
+        {
+            return Result<Position>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Portfolio.NotFound));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<Position>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            return Result<Position>.Failure(
+                Error.Conflict(ex.Message, ErrorCodes.Position.AlreadyExists));
         }
         catch (Exception ex)
         {
             return Result<Position>.Failure(
-                Error.BusinessRule($"Failed to add position: {ex.Message}", "POSITION_ADD_FAILED"));
+                Error.BusinessRule($"Failed to add position: {ex.Message}", ErrorCodes.Position.AddFailed));
         }
     }
 
     /// <inheritdoc />
     public async Task<Result<Position>> UpdatePositionAsync(UpdatePositionCommand command)
     {
-        // Command validation happens in constructor - command is guaranteed to be valid here
-
         try
         {
-            // Load existing position to preserve immutable fields
-            Position? existingPosition = await _portfolioPort.GetPositionByIdAsync(command.PositionId);
-            if (existingPosition == null)
-            {
-                return Result<Position>.Failure(
-                    Error.NotFound($"Position {command.PositionId} not found", "POSITION_NOT_FOUND"));
-            }
-
-            // Update only mutable fields
-            existingPosition.Quantity = command.Quantity;
-            existingPosition.EntryPrice = command.EntryPrice;
-            existingPosition.Notes = command.Notes;
-
-            await _portfolioPort.UpdatePositionAsync(existingPosition);
-            return Result<Position>.Success(existingPosition);
+            var position = await UpdatePositionCoreAsync(command);
+            return Result<Position>.Success(position);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<Position>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
         }
         catch (Exception ex)
         {
             return Result<Position>.Failure(
-                Error.BusinessRule($"Failed to update position: {ex.Message}", "POSITION_UPDATE_FAILED"));
+                Error.BusinessRule($"Failed to update position: {ex.Message}", ErrorCodes.Position.UpdateFailed));
         }
     }
 
@@ -97,21 +75,78 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     {
         try
         {
-            // Verify position exists before deleting
-            var position = await _portfolioPort.GetPositionByIdAsync(positionId);
-            if (position == null)
-            {
-                return Result<bool>.Failure(
-                    Error.NotFound($"Position {positionId} not found", "POSITION_NOT_FOUND"));
-            }
-
-            await _portfolioPort.DeletePositionAsync(positionId);
+            await DeletePositionCoreAsync(positionId);
             return Result<bool>.Success(true);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<bool>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
         }
         catch (Exception ex)
         {
             return Result<bool>.Failure(
-                Error.BusinessRule($"Failed to delete position: {ex.Message}", "POSITION_DELETE_FAILED"));
+                Error.BusinessRule($"Failed to delete position: {ex.Message}", ErrorCodes.Position.DeleteFailed));
         }
+    }
+
+    private async Task<Position> AddPositionCoreAsync(AddPositionCommand command)
+    {
+        // Verify portfolio exists
+        var portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
+        if (portfolio == null)
+        {
+            throw new InvalidOperationException($"Portfolio {command.PortfolioId} not found");
+        }
+
+        // Check for duplicate position
+        var existingPositions = await _portfolioPort.GetPositionsByPortfolioAsync(command.PortfolioId);
+        if (existingPositions.Any(p => p.Ticker == command.Ticker))
+        {
+            throw new InvalidOperationException($"Position for {command.Ticker} already exists in this portfolio");
+        }
+
+        // Create position entity
+        var position = new Position
+        {
+            PortfolioId = command.PortfolioId,
+            Ticker = command.Ticker,
+            Quantity = command.Quantity,
+            EntryPrice = command.EntryPrice,
+            EntryDate = command.EntryDate,
+            Notes = command.Notes
+        };
+
+        return await _portfolioPort.AddPositionAsync(position);
+    }
+
+    private async Task<Position> UpdatePositionCoreAsync(UpdatePositionCommand command)
+    {
+        // Load existing position
+        Position? existingPosition = await _portfolioPort.GetPositionByIdAsync(command.PositionId);
+        if (existingPosition == null)
+        {
+            throw new InvalidOperationException($"Position {command.PositionId} not found");
+        }
+
+        // Update mutable fields
+        existingPosition.Quantity = command.Quantity;
+        existingPosition.EntryPrice = command.EntryPrice;
+        existingPosition.Notes = command.Notes;
+
+        await _portfolioPort.UpdatePositionAsync(existingPosition);
+        return existingPosition;
+    }
+
+    private async Task DeletePositionCoreAsync(int positionId)
+    {
+        // Verify position exists
+        var position = await _portfolioPort.GetPositionByIdAsync(positionId);
+        if (position == null)
+        {
+            throw new InvalidOperationException($"Position {positionId} not found");
+        }
+
+        await _portfolioPort.DeletePositionAsync(positionId);
     }
 }

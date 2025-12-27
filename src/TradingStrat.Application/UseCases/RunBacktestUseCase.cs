@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
@@ -45,7 +46,7 @@ public class RunBacktestUseCase : IBacktestUseCase
                 return Result<BacktestResult>.Failure(
                     Error.InsufficientData(
                         $"No historical data found for {command.Ticker} ({timeFrame}). Please run the data fetcher first to download historical data.",
-                        "NO_HISTORICAL_DATA"));
+                        ErrorCodes.Data.NoHistoricalData));
             }
 
             // Determine date range
@@ -82,7 +83,7 @@ public class RunBacktestUseCase : IBacktestUseCase
         catch (Exception ex)
         {
             return Result<BacktestResult>.Failure(
-                Error.BusinessRule($"Failed to execute backtest: {ex.Message}", "BACKTEST_EXECUTION_FAILED"));
+                Error.BusinessRule($"Failed to execute backtest: {ex.Message}", ErrorCodes.Backtest.ExecutionFailed));
         }
     }
 }

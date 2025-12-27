@@ -2,6 +2,7 @@ using Shouldly;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -9,12 +10,26 @@ namespace TradingStrat.Application.Tests.UseCases;
 public class CustomStrategyManagementUseCaseTests
 {
     private readonly InMemoryCustomStrategyRepository _repository;
+
+#pragma warning disable CS0618 // Type or member is obsolete
     private readonly CustomStrategyManagementUseCase _useCase;
+#pragma warning restore CS0618 // Type or member is obsolete
 
     public CustomStrategyManagementUseCaseTests()
     {
         _repository = new InMemoryCustomStrategyRepository();
-        _useCase = new CustomStrategyManagementUseCase(_repository);
+
+        // Create the domain validator
+        var validator = new StrategyDefinitionValidator();
+
+        // Create the split use cases
+        var queryUseCase = new CustomStrategyQueryUseCase(_repository);
+        var commandUseCase = new CustomStrategyCommandUseCase(_repository, validator);
+
+        // Create the facade for backward compatibility
+#pragma warning disable CS0618 // Type or member is obsolete
+        _useCase = new CustomStrategyManagementUseCase(queryUseCase, commandUseCase, validator);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]

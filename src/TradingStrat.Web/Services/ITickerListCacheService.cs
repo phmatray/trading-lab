@@ -1,4 +1,3 @@
-using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Web.Services;

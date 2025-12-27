@@ -1,12 +1,15 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
+using TradingStrat.Domain.Services;
+using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case for retrieving dashboard statistics.
 /// Aggregates data from multiple ports to provide overview metrics.
+/// Uses DataCoverageService for calculating data freshness.
 /// </summary>
 public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
 {
@@ -14,6 +17,7 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
     private readonly IBacktestArchivePort _backtestArchivePort;
     private readonly IPortfolioPort _portfolioPort;
     private readonly IHistoricalDataPort _historicalDataPort;
+    private readonly DataCoverageService _dataCoverageService;
 
     private const int BUILT_IN_STRATEGY_COUNT = 4; // RSI, MACD, MA Crossover, ML FastTree
 
@@ -21,12 +25,14 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
         ICustomStrategyPort customStrategyPort,
         IBacktestArchivePort backtestArchivePort,
         IPortfolioPort portfolioPort,
-        IHistoricalDataPort historicalDataPort)
+        IHistoricalDataPort historicalDataPort,
+        DataCoverageService dataCoverageService)
     {
         _customStrategyPort = customStrategyPort;
         _backtestArchivePort = backtestArchivePort;
         _portfolioPort = portfolioPort;
         _historicalDataPort = historicalDataPort;
+        _dataCoverageService = dataCoverageService;
     }
 
     public async Task<Result<DashboardStatsResult>> ExecuteAsync()
@@ -63,8 +69,8 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
             int totalPortfolios = portfolios.Count;
             int totalSecurities = allTickers.Count;
 
-            // Calculate data coverage: % of tickers with data in the last 7 days
-            decimal dataCoveragePercentage = CalculateDataCoverage(tickerSummaries);
+            // Calculate data coverage using domain service
+            decimal dataCoveragePercentage = _dataCoverageService.CalculateDataCoveragePercentage(tickerSummaries);
 
             return Result<DashboardStatsResult>.Success(new DashboardStatsResult(
                 TotalStrategies: totalStrategies,
@@ -81,19 +87,5 @@ public class GetDashboardStatsUseCase : IGetDashboardStatsUseCase
             return Result<DashboardStatsResult>.Failure(
                 Error.BusinessRule($"Failed to retrieve dashboard statistics: {ex.Message}", "DASHBOARD_STATS_FAILED"));
         }
-    }
-
-    private static decimal CalculateDataCoverage(List<TickerSummary> tickerSummaries)
-    {
-        if (tickerSummaries.Count == 0)
-        {
-            return 0m;
-        }
-
-        DateTime sevenDaysAgo = DateTime.Today.AddDays(-7);
-        int tickersWithRecentData = tickerSummaries.Count(t =>
-            t.LatestDate.HasValue && t.LatestDate.Value >= sevenDaysAgo);
-
-        return (decimal)tickersWithRecentData / tickerSummaries.Count * 100m;
     }
 }
