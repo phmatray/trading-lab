@@ -45,8 +45,8 @@ public interface ICalculateRebalancingUseCase
     /// </summary>
     /// <param name="command">The rebalancing command.</param>
     /// <param name="progress">Optional progress reporter.</param>
-    /// <returns>The rebalancing plan.</returns>
-    Task<RebalancingPlan> ExecuteAsync(
+    /// <returns>Result containing the rebalancing plan, or errors if the operation failed.</returns>
+    Task<Result<RebalancingPlan>> ExecuteAsync(
         RebalancingCommand command,
         IProgress<string>? progress = null);
 }

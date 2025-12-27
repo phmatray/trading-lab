@@ -108,10 +108,12 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
                 _endDate
             );
 
-            _performanceHistory = await GetPerformanceUseCase.ExecuteAsync(query, progress);
+            var result = await GetPerformanceUseCase.ExecuteAsync(query, progress);
 
-            if (_performanceHistory != null)
+            if (result.IsSuccess)
             {
+                _performanceHistory = result.Value;
+
                 await NotificationService.AddNotificationAsync(
                     NotificationType.System,
                     NotificationSeverity.Success,
@@ -121,7 +123,7 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
             }
             else
             {
-                _errorMessage = "No performance data available for the selected date range.";
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
             }
         }
         catch (Exception ex)

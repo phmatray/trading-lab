@@ -41,12 +41,13 @@ public interface IManageCashUseCase
     /// Executes a cash transaction (deposit or withdrawal).
     /// </summary>
     /// <param name="command">The cash transaction command.</param>
-    Task ExecuteAsync(CashTransactionCommand command);
+    /// <returns>Result indicating success or failure with errors.</returns>
+    Task<Result<bool>> ExecuteAsync(CashTransactionCommand command);
 
     /// <summary>
     /// Gets the cash transaction history for a portfolio.
     /// </summary>
     /// <param name="portfolioId">The portfolio ID.</param>
-    /// <returns>List of cash transactions.</returns>
-    Task<List<PortfolioCashTransaction>> GetTransactionHistoryAsync(int portfolioId);
+    /// <returns>Result containing the list of cash transactions, or errors if the operation failed.</returns>
+    Task<Result<List<PortfolioCashTransaction>>> GetTransactionHistoryAsync(int portfolioId);
 }

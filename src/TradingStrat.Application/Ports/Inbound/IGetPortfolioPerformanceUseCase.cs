@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -24,8 +25,8 @@ public interface IGetPortfolioPerformanceUseCase
     /// </summary>
     /// <param name="query">The performance query.</param>
     /// <param name="progress">Optional progress reporter.</param>
-    /// <returns>The portfolio performance history.</returns>
-    Task<PortfolioPerformanceHistory> ExecuteAsync(
+    /// <returns>Result containing the portfolio performance history, or errors if the operation failed.</returns>
+    Task<Result<PortfolioPerformanceHistory>> ExecuteAsync(
         PortfolioPerformanceQuery query,
         IProgress<string>? progress = null);
 }

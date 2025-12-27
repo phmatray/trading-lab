@@ -161,14 +161,23 @@ public partial class Rebalancing : ComponentBase, IDisposable
                 _formModel.MinimumCommission
             );
 
-            _plan = await CalculateRebalancingUseCase.ExecuteAsync(command, progress);
+            var result = await CalculateRebalancingUseCase.ExecuteAsync(command, progress);
 
-            await NotificationService.AddNotificationAsync(
-                NotificationType.System,
-                _plan.IsExecutable ? NotificationSeverity.Success : NotificationSeverity.Warning,
-                "Rebalancing Plan Calculated",
-                $"{_plan.Signals.Count} actions | {(_plan.IsExecutable ? "Executable" : "Insufficient cash")}"
-            );
+            if (result.IsSuccess)
+            {
+                _plan = result.Value;
+
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.System,
+                    _plan.IsExecutable ? NotificationSeverity.Success : NotificationSeverity.Warning,
+                    "Rebalancing Plan Calculated",
+                    $"{_plan.Signals.Count} actions | {(_plan.IsExecutable ? "Executable" : "Insufficient cash")}"
+                );
+            }
+            else
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+            }
         }
         catch (Exception ex)
         {

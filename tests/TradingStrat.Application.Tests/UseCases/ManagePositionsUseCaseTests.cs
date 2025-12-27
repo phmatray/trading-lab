@@ -2,7 +2,6 @@ using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
-using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
