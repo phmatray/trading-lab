@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -24,58 +25,84 @@ public class ExportHistoricalDataUseCase : IExportHistoricalDataUseCase
         _dataExporter = dataExporter;
     }
 
-    public async Task<ExportResult> ExportCoverageReportAsync(
+    public async Task<Result<ExportResult>> ExportCoverageReportAsync(
         TimeFrame timeFrame,
         string outputPath)
     {
-        // Get all ticker summaries for the timeframe
-        List<TickerSummary> summaries = await _historicalDataPort.GetAllTickerSummariesAsync(timeFrame);
-
-        // Convert to coverage data with calculated percentages
-        List<TickerCoverageData> coverageData = summaries.Select(s =>
+        try
         {
-            decimal coverage = CalculateCoveragePercentage(s.OldestDate, s.LatestDate);
-            int gapCount = CalculateGapCount(s.OldestDate, s.LatestDate, s.RecordCount, timeFrame);
-            string status = GetStatus(coverage);
+            // Get all ticker summaries for the timeframe
+            List<TickerSummary> summaries = await _historicalDataPort.GetAllTickerSummariesAsync(timeFrame);
 
-            return new TickerCoverageData(
-                s.Ticker,
-                s.ISIN,
-                timeFrame,
-                s.RecordCount,
-                s.OldestDate,
-                s.LatestDate,
-                coverage,
-                gapCount,
-                status
-            );
-        }).ToList();
+            // Convert to coverage data with calculated percentages
+            List<TickerCoverageData> coverageData = summaries.Select(s =>
+            {
+                decimal coverage = CalculateCoveragePercentage(s.OldestDate, s.LatestDate);
+                int gapCount = CalculateGapCount(s.OldestDate, s.LatestDate, s.RecordCount, timeFrame);
+                string status = GetStatus(coverage);
 
-        // Export to CSV using the adapter
-        return await _coverageExporter.ExportToCsvAsync(coverageData, outputPath);
+                return new TickerCoverageData(
+                    s.Ticker,
+                    s.ISIN,
+                    timeFrame,
+                    s.RecordCount,
+                    s.OldestDate,
+                    s.LatestDate,
+                    coverage,
+                    gapCount,
+                    status
+                );
+            }).ToList();
+
+            // Export to CSV using the adapter
+            ExportResult result = await _coverageExporter.ExportToCsvAsync(coverageData, outputPath);
+
+            return Result<ExportResult>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result<ExportResult>.Failure(
+                Error.BusinessRule($"Failed to export coverage report: {ex.Message}", "EXPORT_COVERAGE_FAILED"));
+        }
     }
 
-    public async Task<ExportResult> ExportHistoricalDataAsync(
+    public async Task<Result<ExportResult>> ExportHistoricalDataAsync(
         string ticker,
         TimeFrame timeFrame,
         ExportFormat format,
         string outputPath)
     {
-        // Fetch all historical data for the ticker and timeframe
-        List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
-
-        if (data.Count == 0)
+        try
         {
-            throw new InvalidOperationException($"No data found for {ticker} in timeframe {timeFrame.Unit}");
+            // Fetch all historical data for the ticker and timeframe
+            List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
+
+            if (data.Count == 0)
+            {
+                return Result<ExportResult>.Failure(
+                    Error.NotFound($"No data found for {ticker} in timeframe {timeFrame.Unit}", "NO_DATA_TO_EXPORT"));
+            }
+
+            // Export using appropriate adapter based on format
+            ExportResult result = format switch
+            {
+                ExportFormat.CSV => await _dataExporter.ExportToCsvAsync(data, ticker, outputPath),
+                ExportFormat.JSON => await _dataExporter.ExportToJsonAsync(data, ticker, outputPath),
+                _ => throw new ArgumentException($"Unsupported export format: {format}", nameof(format))
+            };
+
+            return Result<ExportResult>.Success(result);
         }
-
-        // Export using appropriate adapter based on format
-        return format switch
+        catch (ArgumentException ex)
         {
-            ExportFormat.CSV => await _dataExporter.ExportToCsvAsync(data, ticker, outputPath),
-            ExportFormat.JSON => await _dataExporter.ExportToJsonAsync(data, ticker, outputPath),
-            _ => throw new ArgumentException($"Unsupported export format: {format}", nameof(format))
-        };
+            return Result<ExportResult>.Failure(
+                Error.Validation(ex.Message, "UNSUPPORTED_EXPORT_FORMAT"));
+        }
+        catch (Exception ex)
+        {
+            return Result<ExportResult>.Failure(
+                Error.BusinessRule($"Failed to export data for {ticker}: {ex.Message}", "EXPORT_DATA_FAILED"));
+        }
     }
 
     private static decimal CalculateCoveragePercentage(DateTime? oldestDate, DateTime? latestDate)

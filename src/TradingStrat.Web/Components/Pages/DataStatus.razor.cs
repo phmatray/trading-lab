@@ -356,15 +356,21 @@ public partial class DataStatus : BaseComponent
             foreach (string ticker in _selectedTickers)
             {
                 string outputPath = Path.Combine(Path.GetTempPath(), $"{ticker}_{_query.TimeFrame.Unit}.csv");
-                ExportResult result = await ExportHistoricalDataUseCase.ExportHistoricalDataAsync(
+                var exportResult = await ExportHistoricalDataUseCase.ExportHistoricalDataAsync(
                     ticker,
                     _query.TimeFrame,
                     ExportFormat.CSV,
                     outputPath
                 );
 
+                if (exportResult.IsFailure)
+                {
+                    await NotificationService.ShowWarningAsync($"Failed to export {ticker}: {string.Join(", ", exportResult.Errors.Select(e => e.Message))}");
+                    continue;
+                }
+
                 // In a real implementation, this would trigger a download
-                await NotificationService.ShowInfoAsync($"Exported {ticker} to {result.FilePath}");
+                await NotificationService.ShowInfoAsync($"Exported {ticker} to {exportResult.Value.FilePath}");
             }
 
             await NotificationService.ShowSuccessAsync($"Exported {_selectedTickers.Count} tickers");
@@ -387,9 +393,15 @@ public partial class DataStatus : BaseComponent
             }
 
             string outputPath = Path.Combine(Path.GetTempPath(), $"coverage_report_{_query.TimeFrame.Unit}.csv");
-            ExportResult result = await ExportHistoricalDataUseCase.ExportCoverageReportAsync(_query.TimeFrame, outputPath);
+            var exportResult = await ExportHistoricalDataUseCase.ExportCoverageReportAsync(_query.TimeFrame, outputPath);
 
-            await NotificationService.ShowSuccessAsync($"Coverage report exported to {result.FilePath}");
+            if (exportResult.IsFailure)
+            {
+                await NotificationService.ShowErrorAsync($"Failed to export coverage report: {string.Join(", ", exportResult.Errors.Select(e => e.Message))}");
+                return;
+            }
+
+            await NotificationService.ShowSuccessAsync($"Coverage report exported to {exportResult.Value.FilePath}");
         }
         catch (Exception ex)
         {

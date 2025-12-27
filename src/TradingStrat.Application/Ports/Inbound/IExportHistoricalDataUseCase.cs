@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -13,7 +14,7 @@ public interface IExportHistoricalDataUseCase
     /// <param name="timeFrame">Timeframe to generate report for.</param>
     /// <param name="outputPath">Full path where the report file should be saved.</param>
     /// <returns>Result containing file path and metadata.</returns>
-    Task<ExportResult> ExportCoverageReportAsync(
+    Task<Result<ExportResult>> ExportCoverageReportAsync(
         TimeFrame timeFrame,
         string outputPath);
 
@@ -25,7 +26,7 @@ public interface IExportHistoricalDataUseCase
     /// <param name="format">Export format (CSV or JSON).</param>
     /// <param name="outputPath">Full path where the file should be saved.</param>
     /// <returns>Result containing file path and metadata.</returns>
-    Task<ExportResult> ExportHistoricalDataAsync(
+    Task<Result<ExportResult>> ExportHistoricalDataAsync(
         string ticker,
         TimeFrame timeFrame,
         ExportFormat format,
