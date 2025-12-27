@@ -21,14 +21,15 @@ dotnet run
 
 ### Testing
 ```bash
-# Run all tests (122+ total: 46 Domain + 37 Application + 8 Infrastructure + 31+ UI)
+# Run all tests (1,669 total: 658 Domain + 289 Application + 73 Infrastructure + 235 UI + 414 Component)
 dotnet test
 
 # Run specific test project
-dotnet test tests/TradingStrat.Domain.Tests          # 46 tests (strategies, valuation, rebalancing, performance)
-dotnet test tests/TradingStrat.Application.Tests     # 37 tests (use cases with test doubles)
-dotnet test tests/TradingStrat.Infrastructure.Tests  # 8 tests (repository, adapters)
-dotnet test tests/TradingStrat.UI.Tests              # 31+ tests (E2E with Playwright)
+dotnet test tests/TradingStrat.Domain.Tests          # 658 tests (strategies, indicators, valuation, rebalancing, performance)
+dotnet test tests/TradingStrat.Application.Tests     # 289 tests (use cases with test doubles)
+dotnet test tests/TradingStrat.Infrastructure.Tests  # 73 tests (repository, adapters, EF Core)
+dotnet test tests/TradingStrat.UI.Tests              # 235 tests (E2E with Playwright)
+dotnet test tests/TradingStrat.ComponentTests        # 414 tests (Blazor component unit tests with BUnit)
 
 # Run a single test class
 dotnet test --filter "FullyQualifiedName~RSIStrategyTests"
@@ -43,7 +44,7 @@ dotnet test --filter "FullyQualifiedName~RSIStrategyTests.GenerateSignal_WhenRSI
 # Install Playwright browsers (first time only)
 pwsh tests/TradingStrat.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
 
-# Run UI tests (31+ E2E tests covering Home, Portfolios, Dashboard, Rebalancing, Performance)
+# Run UI tests (235 E2E tests covering Home, Portfolios, Dashboard, Rebalancing, Performance)
 dotnet test tests/TradingStrat.UI.Tests
 
 # Run specific test class
@@ -55,6 +56,21 @@ dotnet test --filter "FullyQualifiedName~PerformanceAnalyticsPageTests"
 
 # Debug tests with visible browser
 TEST_HEADLESS=false dotnet test tests/TradingStrat.UI.Tests
+```
+
+### Component Testing with BUnit
+```bash
+# Run component tests (414 tests for 55+ Blazor components)
+dotnet test tests/TradingStrat.ComponentTests
+
+# Run tests for specific component categories
+dotnet test --filter "FullyQualifiedName~Shared"      # Shared components (DataTable, MetricCard, etc.)
+dotnet test --filter "FullyQualifiedName~Pages"       # Page components (Home, Backtest, etc.)
+dotnet test --filter "FullyQualifiedName~Layout"      # Layout components (NavMenu, MainLayout, etc.)
+
+# Run specific component tests
+dotnet test --filter "FullyQualifiedName~MetricCardTests"
+dotnet test --filter "FullyQualifiedName~DataTableTests"
 ```
 
 ### Building
@@ -151,6 +167,7 @@ The Application.Tests project contains **TestDoubles/** with in-memory implement
 - **FakeItEasy** (v8.3.0) - Mocking library for fakes/stubs
 - **Shouldly** (v4.2.1) - Assertion library with fluent syntax
 - **xUnit** (v2.9.3) - Testing framework
+- **BUnit** (v2.4.2) - Blazor component testing library (ComponentTests only)
 
 **Common Patterns:**
 
@@ -216,6 +233,94 @@ foreach (var p in savedData)
 - Filter acceptable console errors (favicon 404, sourcemaps) in error tests
 - Each test gets its own browser context for complete isolation
 - Screenshots automatically saved on test failure for debugging
+
+## Component Testing Architecture (BUnit)
+
+**Test Infrastructure:**
+- **BunitTestContext:** Base class for all component tests, automatically provides fake services and BUnit's TestContext
+- **Fake Services:** In-memory implementations of all state/storage services (localStorage, notifications, progress, portfolio state, chat state, user preferences)
+- **FakeItEasy Mocks:** For application layer dependencies (use cases, ports)
+- **Test Isolation:** Each test gets its own component instance and service scope
+
+**Test Coverage (414 tests for 55+ components):**
+- **Shared Components** (~35 components): MetricCard, DataTable, LoadingSpinner, NotificationToast, Dialog, FormWrapper, ProgressIndicator, etc.
+- **Page Components** (~13 components): Home, Backtest, LiveAnalysis, PortfolioDashboard, Rebalancing, StrategyBuilder, etc.
+- **Layout Components** (~7 components): NavMenu, MainLayout, TopBar, LeftSidebar, AiPanel, ReconnectModal, BottomPanel
+
+**Common Patterns:**
+
+```csharp
+// Basic component rendering test
+public class MetricCardTests : BunitTestContext
+{
+    [Fact]
+    public void MetricCard_WithValidParameters_RendersCorrectly()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<MetricCard>(parameters => parameters
+            .Add(p => p.Title, "Total Return")
+            .Add(p => p.Value, "+15.50%")
+            .Add(p => p.Trend, "up"));
+
+        // Assert
+        cut.Find("h3").TextContent.ShouldBe("Total Return");
+        cut.Find(".metric-value").TextContent.ShouldBe("+15.50%");
+        cut.Markup.ShouldContain("metric-positive");
+    }
+}
+
+// Component with mocked use case
+public class PortfolioDashboardTests : BunitTestContext
+{
+    [Fact]
+    public async Task PortfolioDashboard_LoadsPortfolioOnInitialize()
+    {
+        // Arrange
+        var getSnapshotUseCase = A.Fake<IGetPortfolioSnapshotUseCase>();
+        A.CallTo(() => getSnapshotUseCase.ExecuteAsync(1, null))
+            .Returns(Task.FromResult(new PortfolioSnapshot { Id = 1, TotalValue = 15000m }));
+
+        Services.AddScoped(_ => getSnapshotUseCase);
+
+        // Act
+        var cut = RenderComponent<PortfolioDashboard>(parameters => parameters
+            .Add(p => p.PortfolioId, 1));
+
+        // Assert
+        A.CallTo(() => getSnapshotUseCase.ExecuteAsync(1, null))
+            .MustHaveHappenedOnceExactly();
+    }
+}
+
+// Component using fake services
+public class NotificationToastTests : BunitTestContext
+{
+    [Fact]
+    public async Task NotificationToast_DisplaysNotification()
+    {
+        // Arrange - Add notification via fake service (inherited from BunitTestContext)
+        await FakeNotificationService.AddNotificationAsync(
+            NotificationType.System, NotificationSeverity.Success,
+            "Success", "Operation completed successfully");
+
+        // Act
+        var cut = RenderComponent<NotificationToastContainer>();
+
+        // Assert
+        cut.Markup.ShouldContain("Success");
+        cut.Markup.ShouldContain("Operation completed successfully");
+    }
+}
+```
+
+**Key Practices:**
+- Inherit from `BunitTestContext` for automatic fake service registration
+- Use Arrange-Act-Assert pattern consistently
+- Test user-visible behavior, not implementation details
+- Name tests descriptively: `ComponentName_Scenario_ExpectedBehavior`
+- Use `await cut.InvokeAsync(async () => await Task.Delay(N))` for async operations
+- Test both happy paths and edge cases (null, empty, invalid inputs)
+- Verify accessibility attributes (ARIA labels, roles)
 
 ## Application Navigation Structure
 
@@ -462,7 +567,7 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
 - **~42 lines eliminated** through deduplication
 - **100% backward compatibility** maintained
 - **Zero breaking changes** to interfaces
-- **All 1,150+ tests passing** (Domain: 758, Application: 317, Infrastructure: 75)
+- **All 1,669 tests passing** (Domain: 658, Application: 289, Infrastructure: 73, UI: 235, Component: 414)
 
 ### IIndicatorCalculator - Single Source of Truth
 The domain service `IIndicatorCalculator` provides **26 technical indicators**. This eliminates the previous duplication where indicators were calculated in multiple places.
