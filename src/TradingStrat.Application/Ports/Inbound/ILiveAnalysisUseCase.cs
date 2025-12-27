@@ -18,8 +18,8 @@ public interface ILiveAnalysisUseCase
     /// </summary>
     /// <param name="command">Command containing ticker, prediction thresholds, and data refresh settings.</param>
     /// <param name="progress">Optional progress reporter for UI updates.</param>
-    /// <returns>Analysis result containing prediction, signal recommendation, and market features.</returns>
-    Task<LiveAnalysisResult> ExecuteAsync(
+    /// <returns>Result containing analysis result with prediction, signal recommendation, and market features, or errors if the operation failed.</returns>
+    Task<Result<LiveAnalysisResult>> ExecuteAsync(
         AnalysisCommand command,
         IProgress<string>? progress = null);
 }

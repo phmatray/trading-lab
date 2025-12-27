@@ -7,7 +7,6 @@ using TradingStrat.Domain.ValueObjects;
 
 using BulkFetchDataCommand = TradingStrat.Application.Ports.Inbound.BulkFetchDataCommand;
 using BulkFetchProgress = TradingStrat.Application.Ports.Inbound.BulkFetchProgress;
-using BulkFetchResult = TradingStrat.Application.Ports.Inbound.BulkFetchResult;
 
 namespace TradingStrat.Application.Tests.UseCases;
 
@@ -58,19 +57,19 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("GOOGL", null, 8, 8, DateTime.Today.AddDays(-8), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.TotalTickers.ShouldBe(3);
-        result.SuccessfulTickers.ShouldBe(3);
-        result.FailedTickers.ShouldBe(0);
-        result.SkippedTickers.ShouldBe(0);
-        result.SuccessfulResults.ShouldContainKey("AAPL");
-        result.SuccessfulResults.ShouldContainKey("MSFT");
-        result.SuccessfulResults.ShouldContainKey("GOOGL");
-        result.FailedResults.ShouldBeEmpty();
-        result.SkippedResults.ShouldBeEmpty();
+        result.Value.TotalTickers.ShouldBe(3);
+        result.Value.SuccessfulTickers.ShouldBe(3);
+        result.Value.FailedTickers.ShouldBe(0);
+        result.Value.SkippedTickers.ShouldBe(0);
+        result.Value.SuccessfulResults.ShouldContainKey("AAPL");
+        result.Value.SuccessfulResults.ShouldContainKey("MSFT");
+        result.Value.SuccessfulResults.ShouldContainKey("GOOGL");
+        result.Value.FailedResults.ShouldBeEmpty();
+        result.Value.SkippedResults.ShouldBeEmpty();
 
         // Verify all tickers were saved
         A.CallTo(() => _historicalDataPort.SaveHistoricalDataAsync("AAPL", null, timeFrame, aaplPrices))
@@ -112,18 +111,18 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("MSFT", null, 12, 12, DateTime.Today.AddDays(-12), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.TotalTickers.ShouldBe(3);
-        result.SuccessfulTickers.ShouldBe(2);
-        result.FailedTickers.ShouldBe(1);
-        result.SkippedTickers.ShouldBe(0);
-        result.SuccessfulResults.ShouldContainKey("AAPL");
-        result.SuccessfulResults.ShouldContainKey("MSFT");
-        result.FailedResults.ShouldContainKey("INVALID");
-        result.FailedResults["INVALID"].ShouldContain("Ticker not found");
+        result.Value.TotalTickers.ShouldBe(3);
+        result.Value.SuccessfulTickers.ShouldBe(2);
+        result.Value.FailedTickers.ShouldBe(1);
+        result.Value.SkippedTickers.ShouldBe(0);
+        result.Value.SuccessfulResults.ShouldContainKey("AAPL");
+        result.Value.SuccessfulResults.ShouldContainKey("MSFT");
+        result.Value.FailedResults.ShouldContainKey("INVALID");
+        result.Value.FailedResults["INVALID"].ShouldContain("Ticker not found");
 
         // Verify successful tickers were still saved
         A.CallTo(() => _historicalDataPort.SaveHistoricalDataAsync("AAPL", null, timeFrame, aaplPrices))
@@ -156,16 +155,16 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("MSFT", null, 10, 10, DateTime.Today.AddDays(-10), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.TotalTickers.ShouldBe(2);
-        result.SuccessfulTickers.ShouldBe(1);
-        result.FailedTickers.ShouldBe(0);
-        result.SkippedTickers.ShouldBe(1);
-        result.SkippedResults.ShouldContain("AAPL");
-        result.SuccessfulResults.ShouldContainKey("MSFT");
+        result.Value.TotalTickers.ShouldBe(2);
+        result.Value.SuccessfulTickers.ShouldBe(1);
+        result.Value.FailedTickers.ShouldBe(0);
+        result.Value.SkippedTickers.ShouldBe(1);
+        result.Value.SkippedResults.ShouldContain("AAPL");
+        result.Value.SuccessfulResults.ShouldContainKey("MSFT");
 
         // Verify AAPL was not fetched
         A.CallTo(() => _marketDataPort.FetchHistoricalDataAsync("AAPL", A<TimeFrame>._, A<DateTime>._, A<DateTime>._))
@@ -194,11 +193,11 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("AAPL", null, 10, 10, startDate, endDate, 95m, 105m, 102m));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.SuccessfulTickers.ShouldBe(1);
+        result.Value.SuccessfulTickers.ShouldBe(1);
 
         // Verify the exact date range was used
         A.CallTo(() => _marketDataPort.FetchHistoricalDataAsync("AAPL", timeFrame, startDate, endDate))
@@ -230,11 +229,11 @@ public class BulkFetchHistoricalDataUseCaseTests
             .Returns(new DataSummaryResult("AAPL", null, 5, 5, latestExistingDate.AddDays(1), DateTime.Today, 95m, 105m, 102m));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.SuccessfulTickers.ShouldBe(1);
+        result.Value.SuccessfulTickers.ShouldBe(1);
 
         // Verify incremental fetch started from day after latest
         A.CallTo(() => _marketDataPort.FetchHistoricalDataAsync(
@@ -286,10 +285,10 @@ public class BulkFetchHistoricalDataUseCaseTests
         Progress<BulkFetchProgress> progress = new(p => progressReports.Add(p));
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command, progress);
+        var result = await _useCase.ExecuteAsync(command, progress);
 
         // Assert
-        result.SuccessfulTickers.ShouldBe(2);
+        result.Value.SuccessfulTickers.ShouldBe(2);
         progressReports.ShouldNotBeEmpty();
 
         // Verify progress was reported for both tickers
@@ -327,11 +326,11 @@ public class BulkFetchHistoricalDataUseCaseTests
             });
 
         // Act
-        BulkFetchResult result = await _useCase.ExecuteAsync(command, cancellationToken: cts.Token);
+        var result = await _useCase.ExecuteAsync(command, cancellationToken: cts.Token);
 
         // Assert
-        result.SuccessfulTickers.ShouldBeLessThan(3); // Should not process all tickers
-        result.TotalTickers.ShouldBe(3);
+        result.Value.SuccessfulTickers.ShouldBeLessThan(3); // Should not process all tickers
+        result.Value.TotalTickers.ShouldBe(3);
     }
 
     private List<HistoricalPrice> CreateTestPrices(string ticker, int count)

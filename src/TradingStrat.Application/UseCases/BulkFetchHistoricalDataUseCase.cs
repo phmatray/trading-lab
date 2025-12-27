@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -22,15 +23,18 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
         _marketDataPort = marketDataPort;
     }
 
-    public async Task<BulkFetchResult> ExecuteAsync(
+    public async Task<Result<BulkFetchResult>> ExecuteAsync(
         BulkFetchDataCommand command,
         IProgress<BulkFetchProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (command.Tickers == null || !command.Tickers.Any())
+        try
         {
-            throw new ArgumentException("Tickers list cannot be null or empty.", nameof(command));
-        }
+            if (command.Tickers == null || !command.Tickers.Any())
+            {
+                return Result<BulkFetchResult>.Failure(
+                    Error.Validation("Tickers list cannot be null or empty", "TICKERS_REQUIRED"));
+            }
 
         int totalTickers = command.Tickers.Count;
         int completedTickers = 0;
@@ -76,17 +80,23 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
             completedTickers++;
         }
 
-        // Final progress report
-        ReportProgress(progress, totalTickers, completedTickers, string.Empty, "Completed");
+            // Final progress report
+            ReportProgress(progress, totalTickers, completedTickers, string.Empty, "Completed");
 
-        return new BulkFetchResult(
-            totalTickers,
-            successfulResults.Count,
-            failedResults.Count,
-            skippedResults.Count,
-            successfulResults,
-            failedResults,
-            skippedResults);
+            return Result<BulkFetchResult>.Success(new BulkFetchResult(
+                totalTickers,
+                successfulResults.Count,
+                failedResults.Count,
+                skippedResults.Count,
+                successfulResults,
+                failedResults,
+                skippedResults));
+        }
+        catch (Exception ex)
+        {
+            return Result<BulkFetchResult>.Failure(
+                Error.BusinessRule($"Failed to execute bulk data fetch: {ex.Message}", "BULK_DATA_FETCH_FAILED"));
+        }
     }
 
     private async Task<DataSummaryResult> FetchSingleTickerAsync(

@@ -66,21 +66,21 @@ public class RunParameterOptimizationUseCaseTests
             variantB);
 
         // Act
-        ParameterOptimizationResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.Comparison.ShouldNotBeNull();
-        result.Comparison.VariantA.ShouldBe(variantA);
-        result.Comparison.VariantB.ShouldBe(variantB);
-        result.Comparison.ResultA.ShouldNotBeNull();
-        result.Comparison.ResultB.ShouldNotBeNull();
-        result.Comparison.Ranking.ShouldNotBeNull();
-        result.ExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+        result.Value.Comparison.ShouldNotBeNull();
+        result.Value.Comparison.VariantA.ShouldBe(variantA);
+        result.Value.Comparison.VariantB.ShouldBe(variantB);
+        result.Value.Comparison.ResultA.ShouldNotBeNull();
+        result.Value.Comparison.ResultB.ShouldNotBeNull();
+        result.Value.Comparison.Ranking.ShouldNotBeNull();
+        result.Value.ExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNoData_ShouldThrow()
+    public async Task ExecuteAsync_WithNoData_ShouldReturnFailure()
     {
         // Arrange
         StrategyVariant variantA = new StrategyVariant("A", StrategyType.MovingAverageCrossover, new Dictionary<string, object>(), "Test");
@@ -88,10 +88,13 @@ public class RunParameterOptimizationUseCaseTests
 
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("NODATA", variantA, variantB);
 
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("No historical data found");
+        // Act
+        var result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("No historical data found");
+        result.Errors[0].Code.ShouldBe("NO_HISTORICAL_DATA");
     }
 
     [Fact]
@@ -134,11 +137,11 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        ParameterOptimizationResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Comparison.Ranking.WinnerIndex.ShouldBeInRange(0, 2);
+        result.Value.ShouldNotBeNull();
+        result.Value.Comparison.Ranking.WinnerIndex.ShouldBeInRange(0, 2);
     }
 
     [Fact]
@@ -162,13 +165,13 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        ParameterOptimizationResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Sharpe Ratio");
-        result.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Annualized Return");
-        result.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Max Drawdown %");
-        result.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Win Rate");
+        result.Value.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Sharpe Ratio");
+        result.Value.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Annualized Return");
+        result.Value.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Max Drawdown %");
+        result.Value.Comparison.Ranking.MetricBreakdown.ShouldContainKey("Win Rate");
     }
 
     [Fact]
@@ -183,11 +186,11 @@ public class RunParameterOptimizationUseCaseTests
         ParameterOptimizationCommand command = new ParameterOptimizationCommand("TEST", variantA, variantB);
 
         // Act
-        ParameterOptimizationResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.Comparison.Ticker.ShouldBe("TEST");
-        result.Comparison.ComparisonDate.ShouldBeGreaterThan(DateTime.Now.AddMinutes(-1));
+        result.Value.Comparison.Ticker.ShouldBe("TEST");
+        result.Value.Comparison.ComparisonDate.ShouldBeGreaterThan(DateTime.Now.AddMinutes(-1));
     }
 
     private void SeedTestData()

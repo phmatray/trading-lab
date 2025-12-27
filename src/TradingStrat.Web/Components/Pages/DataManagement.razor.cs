@@ -127,7 +127,15 @@ public partial class DataManagement : ComponentBase, IDisposable
                 _formModel.EndDate
             );
 
-            _result = await DataFetchingUseCase.ExecuteAsync(command, progress);
+            var fetchResult = await DataFetchingUseCase.ExecuteAsync(command, progress);
+
+            if (fetchResult.IsFailure)
+            {
+                _errorMessage = string.Join(", ", fetchResult.Errors.Select(e => e.Message));
+                return;
+            }
+
+            _result = fetchResult.Value;
             _successMessage = $"Successfully fetched {_result.NewRecords} new records for {_result.Ticker}";
 
             // Add to recent tickers
@@ -181,7 +189,15 @@ public partial class DataManagement : ComponentBase, IDisposable
                 SkipExisting: _bulkFormModel.SkipExisting
             );
 
-            _bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command, progress);
+            var bulkFetchResult = await BulkDataFetchingUseCase.ExecuteAsync(command, progress);
+
+            if (bulkFetchResult.IsFailure)
+            {
+                _bulkErrorMessage = string.Join(", ", bulkFetchResult.Errors.Select(e => e.Message));
+                return;
+            }
+
+            _bulkResult = bulkFetchResult.Value;
 
             _bulkSuccessMessage = $"Completed: {_bulkResult.SuccessfulTickers} successful, " +
                                   $"{_bulkResult.FailedTickers} failed, " +

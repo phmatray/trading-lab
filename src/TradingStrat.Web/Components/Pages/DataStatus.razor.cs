@@ -169,7 +169,15 @@ public partial class DataStatus : BaseComponent
                 SkipExisting: false
             );
 
-            BulkFetchResult result = await BulkDataFetchingUseCase.ExecuteAsync(command);
+            var bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
+
+            if (bulkResult.IsFailure)
+            {
+                await NotificationService.ShowErrorAsync($"Failed to refresh {ticker}: {string.Join(", ", bulkResult.Errors.Select(e => e.Message))}");
+                return;
+            }
+
+            BulkFetchResult result = bulkResult.Value;
 
             if (result.SuccessfulTickers > 0)
             {
@@ -238,7 +246,15 @@ public partial class DataStatus : BaseComponent
                 SkipExisting: false
             );
 
-            BulkFetchResult result = await BulkDataFetchingUseCase.ExecuteAsync(command);
+            var bulkResult = await BulkDataFetchingUseCase.ExecuteAsync(command);
+
+            if (bulkResult.IsFailure)
+            {
+                await NotificationService.ShowErrorAsync($"Failed to refresh tickers: {string.Join(", ", bulkResult.Errors.Select(e => e.Message))}");
+                return;
+            }
+
+            BulkFetchResult result = bulkResult.Value;
 
             await NotificationService.ShowSuccessAsync($"Refreshed {result.SuccessfulTickers} tickers successfully");
 

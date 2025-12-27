@@ -111,9 +111,16 @@ public partial class Backtest
             CustomStrategyId: model.CustomStrategyId
         );
 
-        BacktestResult result = await BacktestUseCase.ExecuteAsync(command, backtestProgress);
+        var backtestResult = await BacktestUseCase.ExecuteAsync(command, backtestProgress);
 
         stopwatch.Stop();
+
+        if (backtestResult.IsFailure)
+        {
+            return Result<BacktestResult>.Failure(backtestResult.Errors);
+        }
+
+        BacktestResult result = backtestResult.Value;
 
         // Auto-save backtest run to archive
         try

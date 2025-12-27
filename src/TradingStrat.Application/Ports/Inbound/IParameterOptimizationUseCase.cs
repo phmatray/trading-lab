@@ -14,8 +14,8 @@ public interface IParameterOptimizationUseCase
     /// </summary>
     /// <param name="command">Command containing two strategy variants to compare.</param>
     /// <param name="progress">Optional progress reporter for UI updates.</param>
-    /// <returns>Complete comparison results with ranking and metric breakdown.</returns>
-    Task<ParameterOptimizationResult> ExecuteAsync(
+    /// <returns>Result containing complete comparison results with ranking and metric breakdown, or errors if the operation failed.</returns>
+    Task<Result<ParameterOptimizationResult>> ExecuteAsync(
         ParameterOptimizationCommand command,
         IProgress<OptimizationProgress>? progress = null);
 }

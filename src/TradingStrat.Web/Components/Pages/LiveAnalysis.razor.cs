@@ -50,7 +50,14 @@ public partial class LiveAnalysis
             model.FetchFreshData
         );
 
-        LiveAnalysisResult result = await LiveAnalysisUseCase.ExecuteAsync(command, progress);
+        var analysisResult = await LiveAnalysisUseCase.ExecuteAsync(command, progress);
+
+        if (analysisResult.IsFailure)
+        {
+            return Result<LiveAnalysisResult>.Failure(analysisResult.Errors);
+        }
+
+        LiveAnalysisResult result = analysisResult.Value;
 
         // Trigger signal notification for Buy/Sell with high confidence
         if (result.PredictedSignal != SignalType.Hold)

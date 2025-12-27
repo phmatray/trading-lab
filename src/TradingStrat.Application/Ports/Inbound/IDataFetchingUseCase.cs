@@ -16,8 +16,8 @@ public interface IDataFetchingUseCase
     /// </summary>
     /// <param name="command">Command containing ticker, ISIN, and date range parameters.</param>
     /// <param name="progress">Optional progress reporter for UI updates.</param>
-    /// <returns>Summary of the fetched data including record counts and date ranges.</returns>
-    Task<DataSummaryResult> ExecuteAsync(
+    /// <returns>Result containing summary of the fetched data including record counts and date ranges, or errors if the operation failed.</returns>
+    Task<Result<DataSummaryResult>> ExecuteAsync(
         FetchDataCommand command,
         IProgress<string>? progress = null);
 }

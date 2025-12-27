@@ -67,22 +67,26 @@ public class RunBacktestUseCaseTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.Ticker.ShouldBe("TEST");
-        result.Metrics.ShouldNotBeNull();
-        result.Metrics.InitialCapital.ShouldBe(10000m);
+        result.Value.Ticker.ShouldBe("TEST");
+        result.Value.Metrics.ShouldNotBeNull();
+        result.Value.Metrics.InitialCapital.ShouldBe(10000m);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNoData_ShouldThrow()
+    public async Task ExecuteAsync_WithNoData_ShouldReturnFailure()
     {
         // Arrange
         var command = new BacktestCommand(
             Ticker: "NODATA",
             StrategyType: StrategyType.MovingAverageCrossover);
 
-        // Act & Assert
-        var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("No historical data found");
+        // Act
+        var result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("No historical data found");
+        result.Errors[0].Code.ShouldBe("NO_HISTORICAL_DATA");
     }
 
     [Fact]
@@ -130,7 +134,7 @@ public class RunBacktestUseCaseTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.StrategyName.ShouldNotBeEmpty();
+        result.Value.StrategyName.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -152,8 +156,8 @@ public class RunBacktestUseCaseTests
         var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.StartDate.ShouldBe(startDate);
-        result.EndDate.ShouldBe(endDate);
+        result.Value.StartDate.ShouldBe(startDate);
+        result.Value.EndDate.ShouldBe(endDate);
     }
 
     [Fact]

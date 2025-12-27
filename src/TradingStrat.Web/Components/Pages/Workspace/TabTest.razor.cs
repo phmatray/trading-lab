@@ -49,6 +49,7 @@ public partial class TabTest : ComponentBase
     private readonly TestConfig _config = new();
     private BacktestResult? _result;
     private bool _isRunning;
+    private string? _errorMessage;
 
     #endregion
 
@@ -78,6 +79,7 @@ public partial class TabTest : ComponentBase
 
         _isRunning = true;
         _result = null;
+        _errorMessage = null;
 
         try
         {
@@ -102,13 +104,22 @@ public partial class TabTest : ComponentBase
                 ProgressService.UpdateProgress(message, percentage);
             });
 
-            _result = await BacktestUseCase.ExecuteAsync(command, progress);
+            var backtestResult = await BacktestUseCase.ExecuteAsync(command, progress);
 
-            await Notifications.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Success,
-                "Backtest Complete",
-                "Backtest completed successfully");
+            if (backtestResult.IsSuccess)
+            {
+                _result = backtestResult.Value;
+
+                await Notifications.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Success,
+                    "Backtest Complete",
+                    "Backtest completed successfully");
+            }
+            else
+            {
+                _errorMessage = string.Join(", ", backtestResult.Errors.Select(e => e.Message));
+            }
         }
         catch (Exception ex)
         {

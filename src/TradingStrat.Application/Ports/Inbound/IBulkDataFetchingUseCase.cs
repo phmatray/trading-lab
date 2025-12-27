@@ -16,8 +16,8 @@ public interface IBulkDataFetchingUseCase
     /// <param name="command">Command containing tickers, timeframe, and date range.</param>
     /// <param name="progress">Optional progress reporter for tracking bulk operation.</param>
     /// <param name="cancellationToken">Cancellation token to stop the operation.</param>
-    /// <returns>Result containing successful and failed ticker counts with details.</returns>
-    Task<BulkFetchResult> ExecuteAsync(
+    /// <returns>Result containing successful and failed ticker counts with details, or errors if the operation failed.</returns>
+    Task<Result<BulkFetchResult>> ExecuteAsync(
         BulkFetchDataCommand command,
         IProgress<BulkFetchProgress>? progress = null,
         CancellationToken cancellationToken = default);

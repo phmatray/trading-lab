@@ -44,22 +44,20 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
             EndDate: DateTime.Today
         );
 
-        BacktestResult backtestResult;
-        try
-        {
-            backtestResult = await _backtestUseCase.ExecuteAsync(backtestCommand);
-        }
-        catch (Exception ex)
+        var backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
+
+        if (backtestResultWrapper.IsFailure)
         {
             // If backtest fails, return error recommendation
             // Convert enum to string for database storage
             StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
+            string errorMessage = string.Join(", ", backtestResultWrapper.Errors.Select(e => e.Message));
 
             return new StrategyRecommendation
             {
                 Ticker = command.Ticker,
                 StrategyType = descriptor.Key,
-                Summary = $"Unable to run backtest: {ex.Message}",
+                Summary = $"Unable to run backtest: {errorMessage}",
                 Recommendation = "Cannot provide recommendation without backtest data. Please ensure historical data is available.",
                 ActionItems = new List<ActionItem>
                 {
@@ -74,6 +72,8 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
                 CreatedAt = DateTime.UtcNow
             };
         }
+
+        BacktestResult backtestResult = backtestResultWrapper.Value;
 
         // Build comprehensive market context
         string marketContext = await _contextBuilder.BuildContextForTicker(command.Ticker, 30);

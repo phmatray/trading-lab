@@ -2,6 +2,7 @@ using FakeItEasy;
 using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.UseCases;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 
@@ -42,9 +43,9 @@ public class MultiStrategyComparisonUseCaseTests
         // Setup fake responses
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .ReturnsNextFromSequence(
-                CreateBacktestResult("RSI Strategy", 25.0m, 1.8m, 500m),
-                CreateBacktestResult("MACD Strategy", 30.0m, 2.0m, 600m),
-                CreateBacktestResult("MA Strategy", 20.0m, 1.5m, 400m)
+                Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.8m, 500m)),
+                Result<BacktestResult>.Success(CreateBacktestResult("MACD Strategy", 30.0m, 2.0m, 600m)),
+                Result<BacktestResult>.Success(CreateBacktestResult("MA Strategy", 20.0m, 1.5m, 400m))
             );
 
         // Act
@@ -75,8 +76,8 @@ public class MultiStrategyComparisonUseCaseTests
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .ReturnsNextFromSequence(
-                CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m),
-                CreateBacktestResult("MACD Strategy", 35.0m, 1.8m, 600m)  // Higher return
+                Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m)),
+                Result<BacktestResult>.Success(CreateBacktestResult("MACD Strategy", 35.0m, 1.8m, 600m))  // Higher return
             );
 
         // Act
@@ -104,8 +105,8 @@ public class MultiStrategyComparisonUseCaseTests
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .ReturnsNextFromSequence(
-                CreateBacktestResult("RSI Strategy", 25.0m, 2.5m, 500m),  // Higher Sharpe
-                CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 600m)
+                Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 2.5m, 500m)),  // Higher Sharpe
+                Result<BacktestResult>.Success(CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 600m))
             );
 
         // Act
@@ -133,8 +134,8 @@ public class MultiStrategyComparisonUseCaseTests
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .ReturnsNextFromSequence(
-                CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 800m),
-                CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 400m)  // Lower drawdown (better)
+                Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 800m)),
+                Result<BacktestResult>.Success(CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 400m))  // Lower drawdown (better)
             );
 
         // Act
@@ -210,7 +211,7 @@ public class MultiStrategyComparisonUseCaseTests
         backtestResult = backtestResult with { Trades = trades };
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
-            .Returns(backtestResult);
+            .Returns(Result<BacktestResult>.Success(backtestResult));
 
         // Act
         MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
@@ -238,8 +239,8 @@ public class MultiStrategyComparisonUseCaseTests
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
             .ReturnsNextFromSequence(
-                CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m),
-                CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 600m)
+                Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m)),
+                Result<BacktestResult>.Success(CreateBacktestResult("MACD Strategy", 30.0m, 1.8m, 600m))
             );
 
         var progressReports = new List<string>();
@@ -276,7 +277,7 @@ public class MultiStrategyComparisonUseCaseTests
         );
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
-            .Returns(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m));
+            .Returns(Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
         await _useCase.ExecuteAsync(command);
@@ -311,7 +312,7 @@ public class MultiStrategyComparisonUseCaseTests
         );
 
         A.CallTo(() => _backtestUseCase.ExecuteAsync(A<BacktestCommand>._, A<IProgress<BacktestProgress>?>._))
-            .Returns(CreateBacktestResult("Custom Strategy", 25.0m, 1.5m, 500m));
+            .Returns(Result<BacktestResult>.Success(CreateBacktestResult("Custom Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
         await _useCase.ExecuteAsync(command);

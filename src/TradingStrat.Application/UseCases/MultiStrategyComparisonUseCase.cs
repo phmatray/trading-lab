@@ -59,7 +59,15 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
             );
 
             // Execute backtest
-            BacktestResult result = await _backtestUseCase.ExecuteAsync(backtestCommand, progress: null);
+            var backtestResult = await _backtestUseCase.ExecuteAsync(backtestCommand, progress: null);
+
+            if (backtestResult.IsFailure)
+            {
+                throw new InvalidOperationException(
+                    $"Backtest failed for strategy {strategyConfig.StrategyType}: {string.Join(", ", backtestResult.Errors.Select(e => e.Message))}");
+            }
+
+            BacktestResult result = backtestResult.Value;
 
             // Count winning/losing trades
             int winningTrades = result.Trades.Count(t => t.ProfitLoss > 0);

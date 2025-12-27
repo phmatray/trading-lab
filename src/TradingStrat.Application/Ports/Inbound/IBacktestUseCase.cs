@@ -17,8 +17,8 @@ public interface IBacktestUseCase
     /// </summary>
     /// <param name="command">Command containing strategy type, parameters, and backtest configuration.</param>
     /// <param name="progress">Optional progress reporter for UI updates during backtest execution.</param>
-    /// <returns>Complete backtest results including trades, performance metrics, and equity curve.</returns>
-    Task<BacktestResult> ExecuteAsync(
+    /// <returns>Result containing complete backtest results including trades, performance metrics, and equity curve, or errors if the operation failed.</returns>
+    Task<Result<BacktestResult>> ExecuteAsync(
         BacktestCommand command,
         IProgress<BacktestProgress>? progress = null);
 }

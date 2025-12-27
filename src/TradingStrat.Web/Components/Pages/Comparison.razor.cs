@@ -111,8 +111,14 @@ public partial class Comparison
             EndDate: model.EndDate
         );
 
-        ParameterOptimizationResult result = await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
-        return Result<ParameterOptimizationResult>.Success(result);
+        var optimizationResult = await ParameterOptimizationUseCase.ExecuteAsync(command, optimizationProgress);
+
+        if (optimizationResult.IsFailure)
+        {
+            return Result<ParameterOptimizationResult>.Failure(optimizationResult.Errors);
+        }
+
+        return Result<ParameterOptimizationResult>.Success(optimizationResult.Value);
     }
 
     protected override string GetSuccessMessage(ParameterOptimizationResult? result)

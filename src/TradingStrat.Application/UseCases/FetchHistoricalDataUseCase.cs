@@ -1,6 +1,7 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -22,50 +23,73 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         _tickerResolver = tickerResolver;
     }
 
-    public async Task<DataSummaryResult> ExecuteAsync(
+    public async Task<Result<DataSummaryResult>> ExecuteAsync(
         FetchDataCommand command,
         IProgress<string>? progress = null)
     {
-        // Default to D1 (daily) if no timeframe specified
-        TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+        try
+        {
+            // Default to D1 (daily) if no timeframe specified
+            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
 
-        progress?.Report("Initializing data fetch...");
+            progress?.Report("Initializing data fetch...");
 
-        string ticker = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
+            var tickerResult = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
+            if (tickerResult.IsFailure)
+            {
+                return Result<DataSummaryResult>.Failure(tickerResult.Errors);
+            }
+
+            string ticker = tickerResult.Value;
         (DateTime startDate, DateTime endDate, bool isUpToDate) = await DetermineDateRange(ticker, timeFrame, command, progress);
 
-        if (isUpToDate)
-        {
-            progress?.Report("Database is up to date");
-            return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+            if (isUpToDate)
+            {
+                progress?.Report("Database is up to date");
+                DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+                return Result<DataSummaryResult>.Success(summary);
+            }
+
+            IReadOnlyList<HistoricalPrice> historicalData = await FetchMarketData(ticker, timeFrame, startDate, endDate, progress);
+
+            if (!historicalData.Any())
+            {
+                progress?.Report("No new data available");
+                DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+                return Result<DataSummaryResult>.Success(summary);
+            }
+
+            await SaveData(ticker, command.Isin, timeFrame, historicalData, progress);
+
+            progress?.Report("Data fetch complete");
+            DataSummaryResult finalSummary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+            return Result<DataSummaryResult>.Success(finalSummary);
         }
-
-        IReadOnlyList<HistoricalPrice> historicalData = await FetchMarketData(ticker, timeFrame, startDate, endDate, progress);
-
-        if (!historicalData.Any())
+        catch (Exception ex)
         {
-            progress?.Report("No new data available");
-            return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+            return Result<DataSummaryResult>.Failure(
+                Error.BusinessRule($"Failed to fetch historical data: {ex.Message}", "DATA_FETCH_FAILED"));
         }
-
-        await SaveData(ticker, command.Isin, timeFrame, historicalData, progress);
-
-        progress?.Report("Data fetch complete");
-        return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
     }
 
-    private async Task<string> ResolveTicker(string? ticker, string? isin, TimeFrame timeFrame, IProgress<string>? progress)
+    private async Task<Result<string>> ResolveTicker(string? ticker, string? isin, TimeFrame timeFrame, IProgress<string>? progress)
     {
         if (string.IsNullOrEmpty(isin))
         {
-            return ticker ?? throw new ArgumentException("Either ticker or ISIN must be provided");
+            if (string.IsNullOrEmpty(ticker))
+            {
+                return Result<string>.Failure(
+                    Error.Validation("Either ticker or ISIN must be provided", "TICKER_OR_ISIN_REQUIRED"));
+            }
+            return Result<string>.Success(ticker);
         }
 
         List<string>? possibleTickers = _tickerResolver.GetAllTickersForIsin(isin);
 
         if (possibleTickers == null || !possibleTickers.Any())
         {
-            throw new InvalidOperationException($"Could not resolve ISIN {isin} to Yahoo ticker");
+            return Result<string>.Failure(
+                Error.NotFound($"Could not resolve ISIN {isin} to Yahoo ticker", "ISIN_NOT_RESOLVED"));
         }
 
         progress?.Report($"Found possible tickers: {string.Join(", ", possibleTickers)}");
@@ -74,12 +98,13 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
 
         if (workingTicker == null)
         {
-            throw new InvalidOperationException(
-                "Could not fetch data with any available ticker. " +
-                "This may be due to Yahoo Finance API rate limiting or the security not being available.");
+            return Result<string>.Failure(
+                Error.BusinessRule(
+                    "Could not fetch data with any available ticker. This may be due to Yahoo Finance API rate limiting or the security not being available.",
+                    "NO_WORKING_TICKER"));
         }
 
-        return workingTicker;
+        return Result<string>.Success(workingTicker);
     }
 
     private async Task<string?> FindWorkingTicker(IEnumerable<string> possibleTickers, TimeFrame timeFrame, IProgress<string>? progress)

@@ -1,7 +1,6 @@
 using FakeItEasy;
 using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
-using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
@@ -40,12 +39,12 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today.AddDays(-1));
 
         // Act
-        DataSummaryResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Ticker.ShouldBe("TEST");
-        result.TotalRecords.ShouldBeGreaterThan(0);
+        result.Value.ShouldNotBeNull();
+        result.Value.Ticker.ShouldBe("TEST");
+        result.Value.TotalRecords.ShouldBeGreaterThan(0);
 
         List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);
         savedData.ShouldNotBeEmpty();
@@ -65,11 +64,11 @@ public class FetchHistoricalDataUseCaseTests
             .Returns(new List<string> { "CON3.L", "3COI.DE" });
 
         // Act
-        DataSummaryResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Ticker.ShouldBe("CON3.L");
+        result.Value.ShouldNotBeNull();
+        result.Value.Ticker.ShouldBe("CON3.L");
         A.CallTo(() => _tickerResolverFake.GetAllTickersForIsin("XS2399367254")).MustHaveHappenedOnceExactly();
     }
 
@@ -91,7 +90,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: new DateTime(2024, 1, 31));
 
         // Act
-        DataSummaryResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
         List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);
@@ -118,11 +117,11 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: DateTime.Today);
 
         // Act
-        DataSummaryResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.TotalRecords.ShouldBe(1);  // Only existing record
+        result.Value.ShouldNotBeNull();
+        result.Value.TotalRecords.ShouldBe(1);  // Only existing record
     }
 
     [Fact]

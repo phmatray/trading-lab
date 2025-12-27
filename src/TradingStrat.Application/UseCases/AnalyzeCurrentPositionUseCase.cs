@@ -4,6 +4,7 @@ using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
@@ -32,24 +33,29 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         _config = config.Value;
     }
 
-    public async Task<LiveAnalysisResult> ExecuteAsync(
+    public async Task<Result<LiveAnalysisResult>> ExecuteAsync(
         AnalysisCommand command,
         IProgress<string>? progress = null)
     {
-        // Default to D1 (daily) if no timeframe specified
-        var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+        // Command validation happens in constructor - command is guaranteed to be valid here
 
-        progress?.Report("Loading historical data from database...");
-
-        // Step 1: Load historical data from database
-        List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker, timeFrame);
-
-        if (historicalData.Count < 30)
+        try
         {
-            throw new InvalidOperationException(
-                $"Insufficient historical data. Required: 30+, Available: {historicalData.Count}. " +
-                "Please fetch historical data first.");
-        }
+            // Default to D1 (daily) if no timeframe specified
+            var timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+
+            progress?.Report("Loading historical data from database...");
+
+            // Step 1: Load historical data from database
+            List<HistoricalPrice> historicalData = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker, timeFrame);
+
+            if (historicalData.Count < 30)
+            {
+                return Result<LiveAnalysisResult>.Failure(
+                    Error.InsufficientData(
+                        $"Insufficient historical data. Required: 30+, Available: {historicalData.Count}. Please fetch historical data first.",
+                        "INSUFFICIENT_HISTORICAL_DATA"));
+            }
 
         List<HistoricalPrice> completeData;
         bool isFresh;
@@ -110,27 +116,33 @@ public class AnalyzeCurrentPositionUseCase : ILiveAnalysisUseCase
         PredictionThresholds thresholds = command.Thresholds ?? new PredictionThresholds();
         TradeSignal signal = DetermineSignal(predictedReturn, thresholds, latestBar.Close ?? 0);
 
-        progress?.Report("Analysis complete");
+            progress?.Report("Analysis complete");
 
-        return new LiveAnalysisResult
+            return Result<LiveAnalysisResult>.Success(new LiveAnalysisResult
+            {
+                Ticker = command.Ticker,
+                AnalysisDateTime = DateTime.Now,
+                LatestDataDate = latestBar.DateTime,
+                CurrentPrice = latestBar.Close ?? 0,
+                PreviousClose = previousBar.Close ?? 0,
+                DailyChange = (latestBar.Close ?? 0) - (previousBar.Close ?? 0),
+                DailyChangePercent = ((latestBar.Close ?? 0) - (previousBar.Close ?? 0))
+                                   / (previousBar.Close ?? 1) * 100,
+                PredictedSignal = signal.Type,
+                PredictedReturn = predictedReturn,
+                PredictionReason = signal.Reason,
+                CurrentFeatures = currentFeatures,
+                TrainingDataPoints = completeData.Count,
+                OldestTrainingDate = completeData[0].DateTime,
+                IsDataFresh = isFresh,
+                DataFreshnessWarning = warning
+            });
+        }
+        catch (Exception ex)
         {
-            Ticker = command.Ticker,
-            AnalysisDateTime = DateTime.Now,
-            LatestDataDate = latestBar.DateTime,
-            CurrentPrice = latestBar.Close ?? 0,
-            PreviousClose = previousBar.Close ?? 0,
-            DailyChange = (latestBar.Close ?? 0) - (previousBar.Close ?? 0),
-            DailyChangePercent = ((latestBar.Close ?? 0) - (previousBar.Close ?? 0))
-                               / (previousBar.Close ?? 1) * 100,
-            PredictedSignal = signal.Type,
-            PredictedReturn = predictedReturn,
-            PredictionReason = signal.Reason,
-            CurrentFeatures = currentFeatures,
-            TrainingDataPoints = completeData.Count,
-            OldestTrainingDate = completeData[0].DateTime,
-            IsDataFresh = isFresh,
-            DataFreshnessWarning = warning
-        };
+            return Result<LiveAnalysisResult>.Failure(
+                Error.BusinessRule($"Failed to execute live analysis: {ex.Message}", "LIVE_ANALYSIS_FAILED"));
+        }
     }
 
     private async Task<(List<HistoricalPrice> data, bool isFresh, string? warning)>

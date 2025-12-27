@@ -3,6 +3,7 @@ using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 using TradingStrat.Domain.ValueObjects;
@@ -29,17 +30,26 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         _strategyFactory = strategyFactory;
     }
 
-    public async Task<ParameterOptimizationResult> ExecuteAsync(
+    public async Task<Result<ParameterOptimizationResult>> ExecuteAsync(
         ParameterOptimizationCommand command,
         IProgress<Application.Ports.Inbound.OptimizationProgress>? progress = null)
     {
-        // Default to D1 (daily) if no timeframe specified
-        TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+        try
+        {
+            // Default to D1 (daily) if no timeframe specified
+            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
 
-        Stopwatch stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
-        // Validate data exists
-        await ValidateHistoricalDataExists(command.Ticker, timeFrame);
+            // Validate data exists
+            List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(command.Ticker, timeFrame);
+            if (data.Count == 0)
+            {
+                return Result<ParameterOptimizationResult>.Failure(
+                    Error.InsufficientData(
+                        $"No historical data found for {command.Ticker} ({timeFrame}). Please run the data fetcher first to download historical data.",
+                        "NO_HISTORICAL_DATA"));
+            }
 
         // Determine date range
         DateTime endDate = command.EndDate ?? await GetLatestDateAsync(command.Ticker, timeFrame);
@@ -92,20 +102,15 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             command.Ticker,
             DateTime.Now);
 
-        stopwatch.Stop();
+            stopwatch.Stop();
 
-        return new ParameterOptimizationResult(comparison, stopwatch.Elapsed);
-    }
-
-    private async Task ValidateHistoricalDataExists(string ticker, TimeFrame timeFrame)
-    {
-        List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(ticker, timeFrame);
-
-        if (data.Count == 0)
+            return Result<ParameterOptimizationResult>.Success(
+                new ParameterOptimizationResult(comparison, stopwatch.Elapsed));
+        }
+        catch (Exception ex)
         {
-            throw new InvalidOperationException(
-                $"No historical data found for {ticker} ({timeFrame}). " +
-                "Please run the data fetcher first to download historical data.");
+            return Result<ParameterOptimizationResult>.Failure(
+                Error.BusinessRule($"Failed to execute parameter optimization: {ex.Message}", "PARAMETER_OPTIMIZATION_FAILED"));
         }
     }
 
