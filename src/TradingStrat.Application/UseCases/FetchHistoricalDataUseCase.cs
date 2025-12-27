@@ -8,7 +8,11 @@ using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.UseCases;
 
-public class FetchHistoricalDataUseCase : IDataFetchingUseCase
+/// <summary>
+/// Use case for fetching historical market data from external providers.
+/// Uses BaseProgressUseCase to eliminate try-catch boilerplate.
+/// </summary>
+public class FetchHistoricalDataUseCase : BaseProgressUseCase<FetchDataCommand, DataSummaryResult>, IDataFetchingUseCase
 {
     private readonly IHistoricalDataPort _historicalDataPort;
     private readonly IMarketDataPort _marketDataPort;
@@ -24,53 +28,47 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
         _tickerResolver = tickerResolver;
     }
 
-    public async Task<Result<DataSummaryResult>> ExecuteAsync(
+    public Task<Result<DataSummaryResult>> ExecuteAsync(
         FetchDataCommand command,
         IProgress<string>? progress = null)
+        => base.ExecuteAsync(command, progress, ExecuteCoreAsync, ErrorCodes.Data.FetchFailed);
+
+    private async Task<DataSummaryResult> ExecuteCoreAsync(
+        FetchDataCommand command,
+        IProgress<string>? progress)
     {
-        try
+        // Default to D1 (daily) if no timeframe specified
+        TimeFrame timeFrame = command.TimeFrame ?? TimeFrame.D1;
+
+        progress?.Report("Initializing data fetch...");
+
+        Result<string> tickerResult = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
+        if (tickerResult.IsFailure)
         {
-            // Default to D1 (daily) if no timeframe specified
-            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+            throw new InvalidOperationException(tickerResult.Errors.First().Message);
+        }
 
-            progress?.Report("Initializing data fetch...");
-
-            Result<string> tickerResult = await ResolveTicker(command.Ticker, command.Isin, timeFrame, progress);
-            if (tickerResult.IsFailure)
-            {
-                return Result<DataSummaryResult>.Failure(tickerResult.Errors);
-            }
-
-            string ticker = tickerResult.Value;
+        string ticker = tickerResult.Value;
         (DateTime startDate, DateTime endDate, bool isUpToDate) = await DetermineDateRange(ticker, timeFrame, command, progress);
 
-            if (isUpToDate)
-            {
-                progress?.Report("Database is up to date");
-                DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
-                return Result<DataSummaryResult>.Success(summary);
-            }
-
-            IReadOnlyList<HistoricalPrice> historicalData = await FetchMarketData(ticker, timeFrame, startDate, endDate, progress);
-
-            if (!historicalData.Any())
-            {
-                progress?.Report("No new data available");
-                DataSummaryResult summary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
-                return Result<DataSummaryResult>.Success(summary);
-            }
-
-            await SaveData(ticker, command.Isin, timeFrame, historicalData, progress);
-
-            progress?.Report("Data fetch complete");
-            DataSummaryResult finalSummary = await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
-            return Result<DataSummaryResult>.Success(finalSummary);
-        }
-        catch (Exception ex)
+        if (isUpToDate)
         {
-            return Result<DataSummaryResult>.Failure(
-                Error.BusinessRule($"Failed to fetch historical data: {ex.Message}", ErrorCodes.Data.FetchFailed));
+            progress?.Report("Database is up to date");
+            return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
         }
+
+        IReadOnlyList<HistoricalPrice> historicalData = await FetchMarketData(ticker, timeFrame, startDate, endDate, progress);
+
+        if (!historicalData.Any())
+        {
+            progress?.Report("No new data available");
+            return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
+        }
+
+        await SaveData(ticker, command.Isin, timeFrame, historicalData, progress);
+
+        progress?.Report("Data fetch complete");
+        return await _historicalDataPort.GetDataSummaryAsync(ticker, timeFrame);
     }
 
     private async Task<Result<string>> ResolveTicker(string? ticker, string? isin, TimeFrame timeFrame, IProgress<string>? progress)

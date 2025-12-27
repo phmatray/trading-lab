@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -10,8 +11,9 @@ namespace TradingStrat.Application.UseCases;
 /// <summary>
 /// Use case for getting portfolio performance history and metrics.
 /// Orchestrates historical data loading, daily valuation calculation, and performance metrics.
+/// Uses BaseProgressUseCase to eliminate try-catch boilerplate.
 /// </summary>
-public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
+public class GetPortfolioPerformanceUseCase : BaseProgressUseCase<PortfolioPerformanceQuery, PortfolioPerformanceHistory>, IGetPortfolioPerformanceUseCase
 {
     private readonly IPortfolioPort _portfolioPort;
     private readonly IHistoricalDataPort _historicalDataPort;
@@ -34,115 +36,110 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
     }
 
     /// <inheritdoc />
-    public async Task<Result<PortfolioPerformanceHistory>> ExecuteAsync(
+    public Task<Result<PortfolioPerformanceHistory>> ExecuteAsync(
         PortfolioPerformanceQuery query,
         IProgress<string>? progress = null)
+        => base.ExecuteAsync(query, progress, ExecuteCoreAsync, ErrorCodes.Portfolio.PerformanceFailed);
+
+    private async Task<PortfolioPerformanceHistory> ExecuteCoreAsync(
+        PortfolioPerformanceQuery query,
+        IProgress<string>? progress)
     {
-        try
+        progress?.Report("Loading portfolio...");
+
+        // Load portfolio with positions
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(query.PortfolioId);
+        if (portfolio == null)
         {
-            progress?.Report("Loading portfolio...");
+            throw new InvalidOperationException($"Portfolio {query.PortfolioId} not found");
+        }
 
-            // Load portfolio with positions
-            Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(query.PortfolioId);
-            if (portfolio == null)
+        // Set date range (default to last year)
+        DateTime startDate = query.StartDate ?? DateTime.Today.AddYears(-1);
+        DateTime endDate = query.EndDate ?? DateTime.Today;
+
+        if (startDate > endDate)
+        {
+            throw new ArgumentException("Start date must be before end date");
+        }
+
+        // Handle empty portfolio
+        if (!portfolio.Positions.Any())
+        {
+            progress?.Report("Portfolio has no positions");
+
+            Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+
+            if (snapshotResult.IsFailure)
             {
-                return Result<PortfolioPerformanceHistory>.Failure(
-                    Error.NotFound($"Portfolio {query.PortfolioId} not found", "PORTFOLIO_NOT_FOUND"));
+                throw new InvalidOperationException(snapshotResult.Errors.First().Message);
             }
 
-            // Set date range (default to last year)
-            DateTime startDate = query.StartDate ?? DateTime.Today.AddYears(-1);
-            DateTime endDate = query.EndDate ?? DateTime.Today;
+            PortfolioSnapshot currentSnapshot = snapshotResult.Value;
+            PortfolioMetrics emptyMetrics = _performanceService.CalculateMetrics(currentSnapshot);
 
-            if (startDate > endDate)
+            return new PortfolioPerformanceHistory(
+                portfolio.Id,
+                startDate,
+                endDate,
+                new List<PortfolioPerformancePoint>(),
+                emptyMetrics);
+        }
+
+        progress?.Report("Loading historical price data...");
+
+        // Get unique tickers
+        var tickers = portfolio.Positions.Select(p => p.Ticker).Distinct().ToList();
+        var allHistoricalData = new Dictionary<string, List<HistoricalPrice>>();
+
+        // Load historical data for each ticker
+        foreach (string ticker in tickers)
+        {
+            progress?.Report($"Loading data for {ticker}...");
+
+            List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(
+                ticker,
+                TimeFrame.D1,
+                startDate,
+                endDate);
+
+            if (data.Any())
             {
-                return Result<PortfolioPerformanceHistory>.Failure(
-                    Error.Validation("Start date must be before end date", "INVALID_DATE_RANGE"));
+                allHistoricalData[ticker] = data;
             }
-
-            // Handle empty portfolio
-            if (!portfolio.Positions.Any())
+            else
             {
-                progress?.Report("Portfolio has no positions");
-
-                Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
-
-                if (snapshotResult.IsFailure)
-                {
-                    return Result<PortfolioPerformanceHistory>.Failure(snapshotResult.Errors);
-                }
-
-                PortfolioSnapshot currentSnapshot = snapshotResult.Value;
-                PortfolioMetrics emptyMetrics = _performanceService.CalculateMetrics(currentSnapshot);
-
-                return Result<PortfolioPerformanceHistory>.Success(new PortfolioPerformanceHistory(
-                    portfolio.Id,
-                    startDate,
-                    endDate,
-                    new List<PortfolioPerformancePoint>(),
-                    emptyMetrics));
+                progress?.Report($"Warning: No historical data found for {ticker}");
             }
+        }
 
-            progress?.Report("Loading historical price data...");
+        // Get all unique dates where we have complete data for all positions
+        progress?.Report("Calculating daily portfolio values...");
 
-            // Get unique tickers
-            var tickers = portfolio.Positions.Select(p => p.Ticker).Distinct().ToList();
-            var allHistoricalData = new Dictionary<string, List<Domain.Entities.HistoricalPrice>>();
+        var allDates = allHistoricalData.Values
+            .SelectMany(d => d.Select(p => p.DateTime.Date))
+            .Distinct()
+            .OrderBy(d => d)
+            .ToList();
 
-            // Load historical data for each ticker
+        var performancePoints = new List<PortfolioPerformancePoint>();
+        decimal previousValue = 0m;
+
+        foreach (DateTime date in allDates)
+        {
+            // Build price dictionary for this date
+            var pricesForDate = new Dictionary<string, decimal>();
+            bool hasAllPrices = true;
+
             foreach (string ticker in tickers)
             {
-                progress?.Report($"Loading data for {ticker}...");
-
-                List<HistoricalPrice> data = await _historicalDataPort.GetHistoricalDataAsync(
-                    ticker,
-                    Domain.ValueObjects.TimeFrame.D1,
-                    startDate,
-                    endDate);
-
-                if (data.Any())
+                if (allHistoricalData.TryGetValue(ticker, out List<HistoricalPrice>? tickerData))
                 {
-                    allHistoricalData[ticker] = data;
-                }
-                else
-                {
-                    progress?.Report($"Warning: No historical data found for {ticker}");
-                }
-            }
+                    HistoricalPrice? priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
 
-            // Get all unique dates where we have complete data for all positions
-            progress?.Report("Calculating daily portfolio values...");
-
-            var allDates = allHistoricalData.Values
-                .SelectMany(d => d.Select(p => p.DateTime.Date))
-                .Distinct()
-                .OrderBy(d => d)
-                .ToList();
-
-            var performancePoints = new List<PortfolioPerformancePoint>();
-            decimal previousValue = 0m;
-
-            foreach (DateTime date in allDates)
-            {
-                // Build price dictionary for this date
-                var pricesForDate = new Dictionary<string, decimal>();
-                bool hasAllPrices = true;
-
-                foreach (string ticker in tickers)
-                {
-                    if (allHistoricalData.TryGetValue(ticker, out List<Domain.Entities.HistoricalPrice>? tickerData))
+                    if (priceData?.Close.HasValue == true)
                     {
-                        HistoricalPrice? priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
-
-                        if (priceData?.Close.HasValue == true)
-                        {
-                            pricesForDate[ticker] = priceData.Close.Value;
-                        }
-                        else
-                        {
-                            hasAllPrices = false;
-                            break;
-                        }
+                        pricesForDate[ticker] = priceData.Close.Value;
                     }
                     else
                     {
@@ -150,72 +147,72 @@ public class GetPortfolioPerformanceUseCase : IGetPortfolioPerformanceUseCase
                         break;
                     }
                 }
-
-                // Only calculate if we have prices for all positions
-                if (hasAllPrices)
+                else
                 {
-                    try
-                    {
-                        Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
-
-                        if (result.IsFailure)
-                        {
-                            progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} - failed to calculate snapshot");
-                            continue;
-                        }
-
-                        PortfolioSnapshot snapshot = result.Value;
-                        decimal dailyReturn = previousValue > 0
-                            ? (snapshot.TotalValue - previousValue) / previousValue
-                            : 0m;
-
-                        performancePoints.Add(new PortfolioPerformancePoint(
-                            date,
-                            snapshot.TotalValue,
-                            snapshot.Cash,
-                            snapshot.TotalValue - snapshot.Cash,
-                            dailyReturn));
-
-                        previousValue = snapshot.TotalValue;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log or skip problematic dates
-                        progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} due to error: {ex.Message}");
-                    }
+                    hasAllPrices = false;
+                    break;
                 }
             }
 
-            progress?.Report("Calculating performance metrics...");
-
-            // Get current snapshot for metrics
-            Result<PortfolioSnapshot> metricsSnapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
-
-            if (metricsSnapshotResult.IsFailure)
+            // Only calculate if we have prices for all positions
+            if (hasAllPrices)
             {
-                return Result<PortfolioPerformanceHistory>.Failure(metricsSnapshotResult.Errors);
+                try
+                {
+                    Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
+
+                    if (result.IsFailure)
+                    {
+                        progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} - failed to calculate snapshot");
+                        continue;
+                    }
+
+                    PortfolioSnapshot snapshot = result.Value;
+                    decimal dailyReturn = previousValue > 0
+                        ? (snapshot.TotalValue - previousValue) / previousValue
+                        : 0m;
+
+                    performancePoints.Add(new PortfolioPerformancePoint(
+                        date,
+                        snapshot.TotalValue,
+                        snapshot.Cash,
+                        snapshot.TotalValue - snapshot.Cash,
+                        dailyReturn));
+
+                    previousValue = snapshot.TotalValue;
+                }
+                catch (Exception ex)
+                {
+                    // Log or skip problematic dates
+                    progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} due to error: {ex.Message}");
+                }
             }
-
-            PortfolioSnapshot currentSnapshotForMetrics = metricsSnapshotResult.Value;
-
-            // Calculate metrics with historical data
-            PortfolioMetrics metrics = _performanceService.CalculateMetrics(
-                currentSnapshotForMetrics,
-                performancePoints);
-
-            progress?.Report("Performance analysis complete");
-
-            return Result<PortfolioPerformanceHistory>.Success(new PortfolioPerformanceHistory(
-                portfolio.Id,
-                startDate,
-                endDate,
-                performancePoints,
-                metrics));
         }
-        catch (Exception ex)
+
+        progress?.Report("Calculating performance metrics...");
+
+        // Get current snapshot for metrics
+        Result<PortfolioSnapshot> metricsSnapshotResult = await _snapshotUseCase.ExecuteAsync(query.PortfolioId);
+
+        if (metricsSnapshotResult.IsFailure)
         {
-            return Result<PortfolioPerformanceHistory>.Failure(
-                Error.BusinessRule($"Failed to calculate portfolio performance: {ex.Message}", "PERFORMANCE_CALCULATION_FAILED"));
+            throw new InvalidOperationException(metricsSnapshotResult.Errors.First().Message);
         }
+
+        PortfolioSnapshot currentSnapshotForMetrics = metricsSnapshotResult.Value;
+
+        // Calculate metrics with historical data
+        PortfolioMetrics metrics = _performanceService.CalculateMetrics(
+            currentSnapshotForMetrics,
+            performancePoints);
+
+        progress?.Report("Performance analysis complete");
+
+        return new PortfolioPerformanceHistory(
+            portfolio.Id,
+            startDate,
+            endDate,
+            performancePoints,
+            metrics);
     }
 }
