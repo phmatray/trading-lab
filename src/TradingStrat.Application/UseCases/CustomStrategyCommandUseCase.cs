@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -15,6 +16,7 @@ namespace TradingStrat.Application.UseCases;
 /// Handles write operations (Create, Update, Delete, Clone) with validation.
 /// Part of CQRS-lite separation from query operations.
 /// Uses StrategyDefinitionValidator domain service for business rule validation.
+/// Uses helper method pattern to eliminate try-catch boilerplate.
 /// </summary>
 public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
 {
@@ -29,133 +31,133 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
         _validator = validator;
     }
 
-    public async Task<Result<CustomStrategyResult>> CreateStrategyAsync(CreateCustomStrategyCommand command)
+    public Task<Result<CustomStrategyResult>> CreateStrategyAsync(CreateCustomStrategyCommand command)
+        => ExecuteWithErrorHandling(() => CreateStrategyCoreAsync(command), ErrorCodes.Strategy.CreateFailed);
+
+    public Task<Result<CustomStrategyResult>> UpdateStrategyAsync(UpdateCustomStrategyCommand command)
+        => ExecuteWithErrorHandling(() => UpdateStrategyCoreAsync(command), ErrorCodes.Strategy.UpdateFailed);
+
+    public Task<Result<bool>> DeleteStrategyAsync(int strategyId)
+        => ExecuteWithErrorHandling(() => DeleteStrategyCoreAsync(strategyId), ErrorCodes.Strategy.DeleteFailed);
+
+    public Task<Result<CustomStrategyResult>> CloneStrategyAsync(int strategyId, string newName)
+        => ExecuteWithErrorHandling(() => CloneStrategyCoreAsync(strategyId, newName), ErrorCodes.Strategy.CloneFailed);
+
+    private static async Task<Result<T>> ExecuteWithErrorHandling<T>(
+        Func<Task<Result<T>>> executeCore,
+        string errorCode)
     {
         try
         {
-            // Validate definition using domain service
-            DomainValidationResult validation = _validator.Validate(command.Definition);
-            if (!validation.IsValid)
-            {
-                return Result<CustomStrategyResult>.Failure(
-                    Error.Validation(
-                        $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
-                        "INVALID_STRATEGY_DEFINITION"));
-            }
-
-            // Create entity
-            CustomStrategy strategy = new()
-            {
-                Name = command.Name,
-                Description = command.Description,
-                Author = command.Author,
-                Category = command.Category,
-                CreatedAt = DateTime.UtcNow,
-                LastUpdatedAt = DateTime.UtcNow,
-                DefinitionJson = SerializeDefinition(command.Definition)
-            };
-
-            // Persist
-            CustomStrategy created = await _customStrategyPort.CreateAsync(strategy);
-
-            // Map to result
-            return Result<CustomStrategyResult>.Success(MapToResult(created));
+            return await executeCore();
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<T>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Strategy.NotFound));
         }
         catch (Exception ex)
         {
-            return Result<CustomStrategyResult>.Failure(
-                Error.BusinessRule($"Failed to create strategy: {ex.Message}", "STRATEGY_CREATE_FAILED"));
+            return Result<T>.Failure(
+                Error.BusinessRule($"Failed: {ex.Message}", $"{errorCode}_FAILED"));
         }
     }
 
-    public async Task<Result<CustomStrategyResult>> UpdateStrategyAsync(UpdateCustomStrategyCommand command)
+    private async Task<Result<CustomStrategyResult>> CreateStrategyCoreAsync(CreateCustomStrategyCommand command)
     {
-        try
-        {
-            // Validate definition using domain service
-            DomainValidationResult validation = _validator.Validate(command.Definition);
-            if (!validation.IsValid)
-            {
-                return Result<CustomStrategyResult>.Failure(
-                    Error.Validation(
-                        $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
-                        "INVALID_STRATEGY_DEFINITION"));
-            }
-
-            // Load existing strategy
-            CustomStrategy? existing = await _customStrategyPort.GetByIdAsync(command.Id);
-            if (existing == null)
-            {
-                return Result<CustomStrategyResult>.Failure(
-                    Error.NotFound($"Strategy with ID {command.Id} not found", "STRATEGY_NOT_FOUND"));
-            }
-
-            // Update fields
-            existing.Name = command.Name;
-            existing.Description = command.Description;
-            existing.Category = command.Category;
-            existing.DefinitionJson = SerializeDefinition(command.Definition);
-            existing.LastUpdatedAt = DateTime.UtcNow;
-
-            // Persist
-            CustomStrategy updated = await _customStrategyPort.UpdateAsync(existing);
-
-            // Map to result
-            return Result<CustomStrategyResult>.Success(MapToResult(updated));
-        }
-        catch (Exception ex)
+        // Validate definition using domain service
+        DomainValidationResult validation = _validator.Validate(command.Definition);
+        if (!validation.IsValid)
         {
             return Result<CustomStrategyResult>.Failure(
-                Error.BusinessRule($"Failed to update strategy: {ex.Message}", "STRATEGY_UPDATE_FAILED"));
+                Error.Validation(
+                    $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
+                    ErrorCodes.Strategy.InvalidDefinition));
         }
+
+        // Create entity
+        CustomStrategy strategy = new()
+        {
+            Name = command.Name,
+            Description = command.Description,
+            Author = command.Author,
+            Category = command.Category,
+            CreatedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow,
+            DefinitionJson = SerializeDefinition(command.Definition)
+        };
+
+        // Persist
+        CustomStrategy created = await _customStrategyPort.CreateAsync(strategy);
+
+        // Map to result
+        return Result<CustomStrategyResult>.Success(MapToResult(created));
     }
 
-    public async Task<Result<bool>> DeleteStrategyAsync(int strategyId)
+    private async Task<Result<CustomStrategyResult>> UpdateStrategyCoreAsync(UpdateCustomStrategyCommand command)
     {
-        try
-        {
-            await _customStrategyPort.DeleteAsync(strategyId);
-            return Result<bool>.Success(true);
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Failure(
-                Error.BusinessRule($"Failed to delete strategy: {ex.Message}", "STRATEGY_DELETE_FAILED"));
-        }
-    }
-
-    public async Task<Result<CustomStrategyResult>> CloneStrategyAsync(int strategyId, string newName)
-    {
-        try
-        {
-            // Load original strategy
-            CustomStrategy? original = await _customStrategyPort.GetByIdAsync(strategyId);
-            if (original == null)
-            {
-                return Result<CustomStrategyResult>.Failure(
-                    Error.NotFound($"Strategy with ID {strategyId} not found", "STRATEGY_NOT_FOUND"));
-            }
-
-            // Create clone with new name
-            CustomStrategy clone = new()
-            {
-                Name = newName,
-                Description = $"Cloned from {original.Name}",
-                Author = original.Author,
-                Category = original.Category,
-                CreatedAt = DateTime.UtcNow,
-                LastUpdatedAt = DateTime.UtcNow,
-                DefinitionJson = original.DefinitionJson // Same definition
-            };
-
-            CustomStrategy created = await _customStrategyPort.CreateAsync(clone);
-            return Result<CustomStrategyResult>.Success(MapToResult(created));
-        }
-        catch (Exception ex)
+        // Validate definition using domain service
+        DomainValidationResult validation = _validator.Validate(command.Definition);
+        if (!validation.IsValid)
         {
             return Result<CustomStrategyResult>.Failure(
-                Error.BusinessRule($"Failed to clone strategy: {ex.Message}", "STRATEGY_CLONE_FAILED"));
+                Error.Validation(
+                    $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
+                    ErrorCodes.Strategy.InvalidDefinition));
         }
+
+        // Load existing strategy
+        CustomStrategy? existing = await _customStrategyPort.GetByIdAsync(command.Id);
+        if (existing == null)
+        {
+            return Result<CustomStrategyResult>.Failure(
+                Error.NotFound($"Strategy with ID {command.Id} not found", ErrorCodes.Strategy.NotFound));
+        }
+
+        // Update fields
+        existing.Name = command.Name;
+        existing.Description = command.Description;
+        existing.Category = command.Category;
+        existing.DefinitionJson = SerializeDefinition(command.Definition);
+        existing.LastUpdatedAt = DateTime.UtcNow;
+
+        // Persist
+        CustomStrategy updated = await _customStrategyPort.UpdateAsync(existing);
+
+        // Map to result
+        return Result<CustomStrategyResult>.Success(MapToResult(updated));
+    }
+
+    private async Task<Result<bool>> DeleteStrategyCoreAsync(int strategyId)
+    {
+        await _customStrategyPort.DeleteAsync(strategyId);
+        return Result<bool>.Success(true);
+    }
+
+    private async Task<Result<CustomStrategyResult>> CloneStrategyCoreAsync(int strategyId, string newName)
+    {
+        // Load original strategy
+        CustomStrategy? original = await _customStrategyPort.GetByIdAsync(strategyId);
+        if (original == null)
+        {
+            return Result<CustomStrategyResult>.Failure(
+                Error.NotFound($"Strategy with ID {strategyId} not found", ErrorCodes.Strategy.NotFound));
+        }
+
+        // Create clone with new name
+        CustomStrategy clone = new()
+        {
+            Name = newName,
+            Description = $"Cloned from {original.Name}",
+            Author = original.Author,
+            Category = original.Category,
+            CreatedAt = DateTime.UtcNow,
+            LastUpdatedAt = DateTime.UtcNow,
+            DefinitionJson = original.DefinitionJson // Same definition
+        };
+
+        CustomStrategy created = await _customStrategyPort.CreateAsync(clone);
+        return Result<CustomStrategyResult>.Success(MapToResult(created));
     }
 
     private string SerializeDefinition(StrategyDefinition definition)

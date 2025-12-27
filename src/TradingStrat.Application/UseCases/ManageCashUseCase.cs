@@ -1,4 +1,5 @@
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -8,6 +9,7 @@ namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case for managing portfolio cash (deposits and withdrawals).
+/// Uses helper method pattern to eliminate try-catch boilerplate.
 /// </summary>
 public class ManageCashUseCase : IManageCashUseCase
 {
@@ -19,78 +21,91 @@ public class ManageCashUseCase : IManageCashUseCase
     }
 
     /// <inheritdoc />
-    public async Task<Result<bool>> ExecuteAsync(CashTransactionCommand command)
-    {
-        // Command validation happens in constructor - command is guaranteed to be valid here
+    public Task<Result<bool>> ExecuteAsync(CashTransactionCommand command)
+        => ExecuteWithErrorHandling(() => ExecuteCoreAsync(command), ErrorCodes.Cash.TransactionFailed);
 
+    /// <inheritdoc />
+    public Task<Result<List<PortfolioCashTransaction>>> GetTransactionHistoryAsync(int portfolioId)
+        => ExecuteWithErrorHandling(() => GetTransactionHistoryCoreAsync(portfolioId), ErrorCodes.Cash.HistoryFailed);
+
+    private static async Task<Result<T>> ExecuteWithErrorHandling<T>(
+        Func<Task<Result<T>>> executeCore,
+        string errorCode)
+    {
         try
         {
-            // Verify portfolio exists
-            Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
-            if (portfolio == null)
-            {
-                return Result<bool>.Failure(
-                    Error.NotFound($"Portfolio {command.PortfolioId} not found", "PORTFOLIO_NOT_FOUND"));
-            }
-
-            // Execute transaction based on type
-            switch (command.Type)
-            {
-                case TransactionType.Deposit:
-                    await _portfolioPort.AddCashAsync(
-                        command.PortfolioId,
-                        command.Amount,
-                        command.Notes);
-                    return Result<bool>.Success(true);
-
-                case TransactionType.Withdrawal:
-                    // Check sufficient cash for withdrawal
-                    if (portfolio.Cash < command.Amount)
-                    {
-                        return Result<bool>.Failure(
-                            Error.BusinessRule(
-                                $"Insufficient cash balance. Available: {portfolio.Cash:C2}, Requested: {command.Amount:C2}",
-                                "INSUFFICIENT_CASH"));
-                    }
-
-                    await _portfolioPort.WithdrawCashAsync(
-                        command.PortfolioId,
-                        command.Amount,
-                        command.Notes);
-                    return Result<bool>.Success(true);
-
-                default:
-                    return Result<bool>.Failure(
-                        Error.Validation($"Unknown transaction type: {command.Type}", "INVALID_TRANSACTION_TYPE"));
-            }
+            return await executeCore();
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<T>.Failure(
+                Error.NotFound(ex.Message, ErrorCodes.Portfolio.NotFound));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<T>.Failure(
+                Error.Validation(ex.Message, $"{errorCode}_VALIDATION"));
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure(
-                Error.BusinessRule($"Failed to execute cash transaction: {ex.Message}", "CASH_TRANSACTION_FAILED"));
+            return Result<T>.Failure(
+                Error.BusinessRule($"Failed: {ex.Message}", $"{errorCode}_FAILED"));
         }
     }
 
-    /// <inheritdoc />
-    public async Task<Result<List<PortfolioCashTransaction>>> GetTransactionHistoryAsync(int portfolioId)
+    private async Task<Result<bool>> ExecuteCoreAsync(CashTransactionCommand command)
     {
-        try
+        // Verify portfolio exists
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
+        if (portfolio == null)
         {
-            // Verify portfolio exists
-            Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
-            if (portfolio == null)
-            {
-                return Result<List<PortfolioCashTransaction>>.Failure(
-                    Error.NotFound($"Portfolio {portfolioId} not found", "PORTFOLIO_NOT_FOUND"));
-            }
-
-            List<PortfolioCashTransaction> transactions = await _portfolioPort.GetCashTransactionsAsync(portfolioId);
-            return Result<List<PortfolioCashTransaction>>.Success(transactions);
+            return Result<bool>.Failure(
+                Error.NotFound($"Portfolio {command.PortfolioId} not found", ErrorCodes.Portfolio.NotFound));
         }
-        catch (Exception ex)
+
+        // Execute transaction based on type
+        switch (command.Type)
+        {
+            case TransactionType.Deposit:
+                await _portfolioPort.AddCashAsync(
+                    command.PortfolioId,
+                    command.Amount,
+                    command.Notes);
+                return Result<bool>.Success(true);
+
+            case TransactionType.Withdrawal:
+                // Check sufficient cash for withdrawal
+                if (portfolio.Cash < command.Amount)
+                {
+                    return Result<bool>.Failure(
+                        Error.BusinessRule(
+                            $"Insufficient cash balance. Available: {portfolio.Cash:C2}, Requested: {command.Amount:C2}",
+                            ErrorCodes.Cash.InsufficientFunds));
+                }
+
+                await _portfolioPort.WithdrawCashAsync(
+                    command.PortfolioId,
+                    command.Amount,
+                    command.Notes);
+                return Result<bool>.Success(true);
+
+            default:
+                return Result<bool>.Failure(
+                    Error.Validation($"Unknown transaction type: {command.Type}", "INVALID_TRANSACTION_TYPE"));
+        }
+    }
+
+    private async Task<Result<List<PortfolioCashTransaction>>> GetTransactionHistoryCoreAsync(int portfolioId)
+    {
+        // Verify portfolio exists
+        Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
+        if (portfolio == null)
         {
             return Result<List<PortfolioCashTransaction>>.Failure(
-                Error.BusinessRule($"Failed to retrieve transaction history: {ex.Message}", "TRANSACTION_HISTORY_FAILED"));
+                Error.NotFound($"Portfolio {portfolioId} not found", ErrorCodes.Portfolio.NotFound));
         }
+
+        List<PortfolioCashTransaction> transactions = await _portfolioPort.GetCashTransactionsAsync(portfolioId);
+        return Result<List<PortfolioCashTransaction>>.Success(transactions);
     }
 }

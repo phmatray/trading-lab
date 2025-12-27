@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -12,6 +13,7 @@ namespace TradingStrat.Application.UseCases;
 /// Query use case for retrieving custom trading strategies.
 /// Handles read-only operations with zero side effects.
 /// Part of CQRS-lite separation from command operations.
+/// Uses helper method pattern to eliminate try-catch boilerplate.
 /// </summary>
 public class CustomStrategyQueryUseCase : ICustomStrategyQueryUseCase
 {
@@ -22,39 +24,49 @@ public class CustomStrategyQueryUseCase : ICustomStrategyQueryUseCase
         _customStrategyPort = customStrategyPort;
     }
 
-    public async Task<Result<CustomStrategyResult>> GetStrategyByIdAsync(int strategyId)
+    public Task<Result<CustomStrategyResult>> GetStrategyByIdAsync(int strategyId)
+        => ExecuteWithErrorHandling(() => GetStrategyByIdCoreAsync(strategyId), ErrorCodes.Strategy.RetrievalFailed);
+
+    public Task<Result<List<CustomStrategyResult>>> GetAllStrategiesAsync(string? category = null)
+        => ExecuteWithErrorHandling(() => GetAllStrategiesCoreAsync(category), ErrorCodes.Strategy.RetrievalFailed);
+
+    private static async Task<Result<T>> ExecuteWithErrorHandling<T>(
+        Func<Task<Result<T>>> executeCore,
+        string errorCode)
     {
         try
         {
-            CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(strategyId);
-            if (strategy == null)
-            {
-                return Result<CustomStrategyResult>.Failure(
-                    Error.NotFound($"Strategy with ID {strategyId} not found", "STRATEGY_NOT_FOUND"));
-            }
-
-            return Result<CustomStrategyResult>.Success(MapToResult(strategy));
+            return await executeCore();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<T>.Failure(
+                Error.BusinessRule($"Failed: {ex.Message}", $"{errorCode}_FAILED"));
         }
         catch (Exception ex)
         {
-            return Result<CustomStrategyResult>.Failure(
-                Error.BusinessRule($"Failed to retrieve strategy: {ex.Message}", "STRATEGY_RETRIEVAL_FAILED"));
+            return Result<T>.Failure(
+                Error.BusinessRule($"Failed: {ex.Message}", $"{errorCode}_FAILED"));
         }
     }
 
-    public async Task<Result<List<CustomStrategyResult>>> GetAllStrategiesAsync(string? category = null)
+    private async Task<Result<CustomStrategyResult>> GetStrategyByIdCoreAsync(int strategyId)
     {
-        try
+        CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(strategyId);
+        if (strategy == null)
         {
-            List<CustomStrategy> strategies = await _customStrategyPort.GetAllAsync(category);
-            return Result<List<CustomStrategyResult>>.Success(
-                strategies.Select(MapToResult).ToList());
+            return Result<CustomStrategyResult>.Failure(
+                Error.NotFound($"Strategy with ID {strategyId} not found", ErrorCodes.Strategy.NotFound));
         }
-        catch (Exception ex)
-        {
-            return Result<List<CustomStrategyResult>>.Failure(
-                Error.BusinessRule($"Failed to retrieve strategies: {ex.Message}", "STRATEGIES_RETRIEVAL_FAILED"));
-        }
+
+        return Result<CustomStrategyResult>.Success(MapToResult(strategy));
+    }
+
+    private async Task<Result<List<CustomStrategyResult>>> GetAllStrategiesCoreAsync(string? category)
+    {
+        List<CustomStrategy> strategies = await _customStrategyPort.GetAllAsync(category);
+        return Result<List<CustomStrategyResult>>.Success(
+            strategies.Select(MapToResult).ToList());
     }
 
     private StrategyDefinition DeserializeDefinition(string json)
