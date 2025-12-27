@@ -31,17 +31,18 @@ public class ManagePositionsUseCaseTests
             Notes: "Strong buy signal");
 
         // Act
-        Position result = await _useCase.AddPositionAsync(command);
+        var result = await _useCase.AddPositionAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Id.ShouldBeGreaterThan(0);
-        result.PortfolioId.ShouldBe(portfolio.Id);
-        result.Ticker.ShouldBe("AAPL");
-        result.Quantity.ShouldBe(100);
-        result.EntryPrice.ShouldBe(150.50m);
-        result.EntryDate.ShouldBe(new DateTime(2024, 1, 15));
-        result.Notes.ShouldBe("Strong buy signal");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.PortfolioId.ShouldBe(portfolio.Id);
+        result.Value.Ticker.ShouldBe("AAPL");
+        result.Value.Quantity.ShouldBe(100);
+        result.Value.EntryPrice.ShouldBe(150.50m);
+        result.Value.EntryDate.ShouldBe(new DateTime(2024, 1, 15));
+        result.Value.Notes.ShouldBe("Strong buy signal");
 
         var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.Count.ShouldBe(1);
@@ -62,10 +63,11 @@ public class ManagePositionsUseCaseTests
             Notes: null);
 
         // Act
-        Position result = await _useCase.AddPositionAsync(command);
+        var result = await _useCase.AddPositionAsync(command);
 
         // Assert
-        result.Ticker.ShouldBe("MSFT");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Ticker.ShouldBe("MSFT");
     }
 
     [Fact]
@@ -82,11 +84,12 @@ public class ManagePositionsUseCaseTests
             Notes: null);
 
         // Act
-        Position result = await _useCase.AddPositionAsync(command);
+        var result = await _useCase.AddPositionAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Notes.ShouldBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Notes.ShouldBeNull();
     }
 
     [Fact]
@@ -99,18 +102,22 @@ public class ManagePositionsUseCaseTests
         var command3 = new AddPositionCommand(portfolio.Id, "GOOGL", 25, 2500m, DateTime.Today, null);
 
         // Act
-        await _useCase.AddPositionAsync(command1);
-        await _useCase.AddPositionAsync(command2);
-        await _useCase.AddPositionAsync(command3);
+        var result1 = await _useCase.AddPositionAsync(command1);
+        var result2 = await _useCase.AddPositionAsync(command2);
+        var result3 = await _useCase.AddPositionAsync(command3);
 
         // Assert
+        result1.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
+        result3.IsSuccess.ShouldBeTrue();
+
         var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.Count.ShouldBe(3);
         positions.Select(p => p.Ticker).ShouldBe(new[] { "AAPL", "GOOGL", "MSFT" }, ignoreOrder: true);
     }
 
     [Fact]
-    public async Task AddPositionAsync_DuplicateTicker_ShouldThrow()
+    public async Task AddPositionAsync_DuplicateTicker_ShouldReturnFailure()
     {
         // Arrange
         var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
@@ -119,14 +126,18 @@ public class ManagePositionsUseCaseTests
 
         await _useCase.AddPositionAsync(command1);
 
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.AddPositionAsync(command2));
-        ex.Message.ShouldContain("Position with ticker AAPL already exists");
+        // Act
+        var result = await _useCase.AddPositionAsync(command2);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Code.ShouldBe("POSITION_ALREADY_EXISTS");
+        result.Errors[0].Message.ShouldContain("AAPL");
     }
 
     [Fact]
-    public async Task AddPositionAsync_WithNonExistentPortfolio_ShouldThrow()
+    public async Task AddPositionAsync_WithNonExistentPortfolio_ShouldReturnFailure()
     {
         // Arrange
         var command = new AddPositionCommand(
@@ -137,10 +148,14 @@ public class ManagePositionsUseCaseTests
             EntryDate: DateTime.Today,
             Notes: null);
 
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.AddPositionAsync(command));
-        ex.Message.ShouldContain("Portfolio 9999 not found");
+        // Act
+        var result = await _useCase.AddPositionAsync(command);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Code.ShouldBe("PORTFOLIO_NOT_FOUND");
+        result.Errors[0].Message.ShouldContain("9999");
     }
 
     [Fact]
@@ -233,22 +248,23 @@ public class ManagePositionsUseCaseTests
         // Arrange
         var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, "Initial");
-        var addedPosition = await _useCase.AddPositionAsync(addCommand);
+        var addResult = await _useCase.AddPositionAsync(addCommand);
 
         var updateCommand = new UpdatePositionCommand(
-            PositionId: addedPosition.Id,
+            PositionId: addResult.Value.Id,
             Quantity: 150,
             EntryPrice: 155m,
             Notes: "Averaged up");
 
         // Act
-        Position result = await _useCase.UpdatePositionAsync(updateCommand);
+        var result = await _useCase.UpdatePositionAsync(updateCommand);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Quantity.ShouldBe(150);
-        result.EntryPrice.ShouldBe(155m);
-        result.Notes.ShouldBe("Averaged up");
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Quantity.ShouldBe(150);
+        result.Value.EntryPrice.ShouldBe(155m);
+        result.Value.Notes.ShouldBe("Averaged up");
     }
 
     [Fact]
@@ -287,22 +303,29 @@ public class ManagePositionsUseCaseTests
         // Arrange
         var portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
         var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var addedPosition = await _useCase.AddPositionAsync(addCommand);
+        var addResult = await _useCase.AddPositionAsync(addCommand);
 
         // Act
-        await _useCase.DeletePositionAsync(addedPosition.Id);
+        var result = await _useCase.DeletePositionAsync(addResult.Value.Id);
 
         // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeTrue();
+
         var positions = await _portfolioPort.GetPositionsByPortfolioAsync(portfolio.Id);
         positions.ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task DeletePositionAsync_WithNonExistentId_ShouldNotThrow()
+    public async Task DeletePositionAsync_WithNonExistentId_ShouldReturnFailure()
     {
-        // Arrange & Act
-        await _useCase.DeletePositionAsync(9999);
+        // Act
+        var result = await _useCase.DeletePositionAsync(9999);
 
-        // Assert - no exception should be thrown (idempotent delete)
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].Code.ShouldBe("POSITION_NOT_FOUND");
+        result.Errors[0].Message.ShouldContain("9999");
     }
 }

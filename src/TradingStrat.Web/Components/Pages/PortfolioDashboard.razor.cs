@@ -188,21 +188,29 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
                 _addPositionFormModel.Notes
             );
 
-            var position = await ManagePositionsUseCase.AddPositionAsync(command);
+            var result = await ManagePositionsUseCase.AddPositionAsync(command);
 
-            decimal costBasis = position.Quantity * position.EntryPrice;
-            _successMessage = $"Position added: {position.Quantity} shares of {position.Ticker} at {position.EntryPrice:C2}";
+            if (result.IsSuccess)
+            {
+                var position = result.Value;
+                decimal costBasis = position.Quantity * position.EntryPrice;
+                _successMessage = $"Position added: {position.Quantity} shares of {position.Ticker} at {position.EntryPrice:C2}";
 
-            await NotificationService.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Success,
-                "Position Added",
-                $"{position.Quantity} shares of {position.Ticker} (${costBasis:N2})",
-                ticker: position.Ticker
-            );
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Success,
+                    "Position Added",
+                    $"{position.Quantity} shares of {position.Ticker} (${costBasis:N2})",
+                    ticker: position.Ticker
+                );
 
-            CloseAddPositionDialog();
-            await LoadPortfolioSnapshot();
+                CloseAddPositionDialog();
+                await LoadPortfolioSnapshot();
+            }
+            else
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+            }
         }
         catch (Exception ex)
         {
