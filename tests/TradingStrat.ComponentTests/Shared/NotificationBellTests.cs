@@ -57,14 +57,14 @@ public class NotificationBellTests : BunitTestContext
     {
         // Arrange - Add unread notifications to the service
         await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "Test 1",
             "Message 1");
 
         await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "Test 2",
             "Message 2");
 
@@ -86,8 +86,8 @@ public class NotificationBellTests : BunitTestContext
     {
         // Arrange - Add a notification and mark it as read
         Notification notification = await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "Read",
             "Already read");
         await FakeNotificationService.MarkAsReadAsync(notification.Id);
@@ -109,8 +109,8 @@ public class NotificationBellTests : BunitTestContext
         for (int i = 0; i < 100; i++)
         {
             await FakeNotificationService.AddNotificationAsync(
-                Web.Models.NotificationType.System,
-                Web.Models.NotificationSeverity.Info,
+                NotificationType.System,
+                NotificationSeverity.Info,
                 $"Test {i}",
                 $"Message {i}");
         }
@@ -154,8 +154,8 @@ public class NotificationBellTests : BunitTestContext
     {
         // Arrange - Setup notifications first
         await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "Test",
             "Test");
 
@@ -174,8 +174,8 @@ public class NotificationBellTests : BunitTestContext
     {
         // Arrange
         await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "Test",
             "Test");
 
@@ -206,8 +206,8 @@ public class NotificationBellTests : BunitTestContext
 
         // Act - Add a notification
         await FakeNotificationService.AddNotificationAsync(
-            Web.Models.NotificationType.System,
-            Web.Models.NotificationSeverity.Info,
+            NotificationType.System,
+            NotificationSeverity.Info,
             "New",
             "New message");
 

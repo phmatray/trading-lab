@@ -217,7 +217,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m)
         };
@@ -237,7 +237,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.Today.AddDays(-1)),
@@ -261,7 +261,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.Today.AddDays(-1)),
@@ -283,7 +283,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.Today.AddDays(-1)),
@@ -304,7 +304,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new CashTransactionRecordedEvent(1, TransactionType.Deposit, 5000m, DateTime.UtcNow),
@@ -324,7 +324,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.Today.AddDays(-1)),
@@ -401,7 +401,7 @@ public class PortfolioEventSourcingTests
     {
         // Arrange
         var portfolio = new Portfolio();
-        var events = new List<Domain.Common.DomainEvent>
+        var events = new List<DomainEvent>
         {
             new PortfolioCreatedEvent(1, "Test Portfolio", 10000m),
             new PositionAddedEvent(1, "AAPL", 10, 150m, DateTime.Today.AddDays(-1)),

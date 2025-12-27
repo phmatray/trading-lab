@@ -51,13 +51,13 @@ public static class CommonValidators
     /// Validates and normalizes a ticker symbol.
     /// Ensures not null/whitespace and returns uppercase trimmed value.
     /// </summary>
-    /// <param name="Ticker">The ticker symbol to validate and normalize.</param>
+    /// <param name="ticker">The ticker symbol to validate and normalize.</param>
     /// <returns>The normalized ticker (uppercase, trimmed).</returns>
     /// <exception cref="ArgumentException">Thrown when ticker is null or whitespace.</exception>
-    public static string NormalizeTicker(string Ticker)
+    public static string NormalizeTicker(string ticker)
     {
-        ValidationGuard.Require(Ticker).NotNullOrWhiteSpace();
-        return Ticker.ToUpperInvariant().Trim();
+        ValidationGuard.Require(ticker, "Ticker").NotNullOrWhiteSpace();
+        return ticker.ToUpperInvariant().Trim();
     }
 
     /// <summary>

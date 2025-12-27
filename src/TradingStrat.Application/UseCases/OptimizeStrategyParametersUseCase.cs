@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
@@ -46,7 +47,7 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             if (strategy == null)
             {
                 return Result<OptimizationResult>.Failure(
-                    Error.NotFound($"Custom strategy with ID {command.CustomStrategyId} not found", "STRATEGY_NOT_FOUND"));
+                    Error.NotFound($"Custom strategy with ID {command.CustomStrategyId} not found", ErrorCodes.Strategy.NotFound));
             }
 
             // Deserialize strategy definition
@@ -54,7 +55,7 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             if (baseDefinition == null)
             {
                 return Result<OptimizationResult>.Failure(
-                    Error.BusinessRule("Failed to deserialize strategy definition", "INVALID_STRATEGY_DEFINITION"));
+                    Error.BusinessRule("Failed to deserialize strategy definition", ErrorCodes.Strategy.InvalidDefinition));
             }
 
         // Convert BacktestConfig to BacktestConfiguration
@@ -65,11 +66,11 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             InitialCapital: command.BacktestSettings.InitialCapital,
             CommissionPercentage: command.BacktestSettings.CommissionPercentage,
             MinimumCommission: command.BacktestSettings.MinimumCommission,
-            TimeFrame: Domain.ValueObjects.TimeFrame.D1
+            TimeFrame: TimeFrame.D1
         );
 
         // Create parameter evaluator function that runs backtests
-        async Task<(decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount)> evaluator(
+        async Task<(decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount)> Evaluator(
             Dictionary<string, decimal> parameters)
         {
             // Modify strategy definition with new parameters
@@ -105,13 +106,13 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             OptimizationType.GridSearch => await _parameterOptimizer.OptimizeGridSearchAsync(
                 command.ParameterRanges,
                 command.Objective,
-                evaluator,
+                Evaluator,
                 progress),
 
             OptimizationType.Genetic => await _parameterOptimizer.OptimizeGeneticAsync(
                 command.ParameterRanges,
                 command.Objective,
-                evaluator,
+                Evaluator,
                 command.GeneticSettings?.ToDomainConfig() ?? new GeneticAlgorithmConfig(),
                 progress),
 
@@ -123,12 +124,22 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
         catch (ArgumentOutOfRangeException ex)
         {
             return Result<OptimizationResult>.Failure(
-                Error.Validation($"Invalid optimization type: {ex.Message}", "INVALID_OPTIMIZATION_TYPE"));
+                Error.Validation($"Invalid optimization type: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<OptimizationResult>.Failure(
+                Error.BusinessRule($"Optimization failed: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<OptimizationResult>.Failure(
+                Error.Validation($"Invalid optimization parameters: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
         }
         catch (Exception ex)
         {
             return Result<OptimizationResult>.Failure(
-                Error.BusinessRule($"Optimization failed: {ex.Message}", "OPTIMIZATION_FAILED"));
+                Error.BusinessRule($"Optimization failed: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
         }
     }
 

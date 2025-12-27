@@ -44,7 +44,7 @@ public class PortfolioContextBuilder
         DateTime endDate = DateTime.Today;
         DateTime startDate = endDate.AddDays(-daysBack);
 
-        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, Domain.ValueObjects.TimeFrame.D1, startDate, endDate);
+        List<HistoricalPrice> prices = await _historicalDataPort.GetHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate);
 
         if (prices.Count == 0)
         {

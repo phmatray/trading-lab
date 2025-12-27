@@ -52,9 +52,9 @@ public class CoverageReportCsvAdapter : ICoverageReportExporter
             csv.WriteField(data.ISIN ?? string.Empty);
             csv.WriteField(data.TimeFrame.Unit.ToString());
             csv.WriteField(data.RecordCount);
-            csv.WriteField(data.OldestDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);
-            csv.WriteField(data.LatestDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);
-            csv.WriteField(data.CoveragePercentage.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+            csv.WriteField(data.OldestDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty);
+            csv.WriteField(data.LatestDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty);
+            csv.WriteField(data.CoveragePercentage.ToString("F2", CultureInfo.InvariantCulture));
             csv.WriteField(data.GapCount);
             csv.WriteField(data.Status);
             await csv.NextRecordAsync();

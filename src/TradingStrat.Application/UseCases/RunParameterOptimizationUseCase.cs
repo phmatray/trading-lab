@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
@@ -32,12 +33,12 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
 
     public async Task<Result<ParameterOptimizationResult>> ExecuteAsync(
         ParameterOptimizationCommand command,
-        IProgress<Application.Ports.Inbound.OptimizationProgress>? progress = null)
+        IProgress<Ports.Inbound.OptimizationProgress>? progress = null)
     {
         try
         {
             // Default to D1 (daily) if no timeframe specified
-            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+            TimeFrame timeFrame = command.TimeFrame ?? TimeFrame.D1;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -48,7 +49,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
                 return Result<ParameterOptimizationResult>.Failure(
                     Error.InsufficientData(
                         $"No historical data found for {command.Ticker} ({timeFrame}). Please run the data fetcher first to download historical data.",
-                        "NO_HISTORICAL_DATA"));
+                        ErrorCodes.Data.NoHistoricalData));
             }
 
         // Determine date range
@@ -56,7 +57,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
         // Run backtest for Variant A
-        progress?.Report(new Application.Ports.Inbound.OptimizationProgress(
+        progress?.Report(new Ports.Inbound.OptimizationProgress(
             command.VariantA.Label, 0, 0, 0));
 
         BacktestResult resultA = await RunSingleBacktest(
@@ -72,7 +73,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             progress);
 
         // Run backtest for Variant B
-        progress?.Report(new Application.Ports.Inbound.OptimizationProgress(
+        progress?.Report(new Ports.Inbound.OptimizationProgress(
             command.VariantB.Label, 0, 0, 0));
 
         BacktestResult resultB = await RunSingleBacktest(
@@ -107,10 +108,20 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             return Result<ParameterOptimizationResult>.Success(
                 new ParameterOptimizationResult(comparison, stopwatch.Elapsed));
         }
+        catch (InvalidOperationException ex)
+        {
+            return Result<ParameterOptimizationResult>.Failure(
+                Error.BusinessRule($"Failed to execute parameter optimization: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<ParameterOptimizationResult>.Failure(
+                Error.Validation($"Invalid optimization parameters: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
+        }
         catch (Exception ex)
         {
             return Result<ParameterOptimizationResult>.Failure(
-                Error.BusinessRule($"Failed to execute parameter optimization: {ex.Message}", "PARAMETER_OPTIMIZATION_FAILED"));
+                Error.BusinessRule($"Failed to execute parameter optimization: {ex.Message}", ErrorCodes.Analysis.OptimizationFailed));
         }
     }
 
@@ -130,7 +141,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         decimal commissionPercentage,
         decimal minimumCommission,
         string variantLabel,
-        IProgress<Application.Ports.Inbound.OptimizationProgress>? progress)
+        IProgress<Ports.Inbound.OptimizationProgress>? progress)
     {
         // Create strategy using factory
         IStrategy strategy = _strategyFactory.CreateStrategy(
@@ -150,7 +161,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
         // Wrap progress reporter to include variant label
         Progress<(int current, int total, int trades)>? wrappedProgress = progress != null
             ? new Progress<(int current, int total, int trades)>(p =>
-                progress.Report(new Application.Ports.Inbound.OptimizationProgress(
+                progress.Report(new Ports.Inbound.OptimizationProgress(
                     variantLabel, p.current, p.total, p.trades)))
             : null;
 

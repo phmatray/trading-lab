@@ -39,7 +39,7 @@ public partial class Backtest
     [SupplyParameterFromQuery(Name = "customStrategyId")]
     public int? QueryCustomStrategyId { get; set; }
 
-    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    private readonly List<BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {
         new() { Label = "Dashboard", Href = "/" },
         new() { Label = "Backtest", Href = "/backtest" }

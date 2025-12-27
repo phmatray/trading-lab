@@ -197,7 +197,7 @@ public class PortfoliosPageTests : BaseTest
         string portfolioName = $"No Description {DateTime.Now.Ticks}";
 
         // Act
-        await page.CreatePortfolioAsync(portfolioName, null, 10000m);
+        await page.CreatePortfolioAsync(portfolioName);
         bool hasCard = await page.HasPortfolioCardAsync(portfolioName);
 
         // Assert

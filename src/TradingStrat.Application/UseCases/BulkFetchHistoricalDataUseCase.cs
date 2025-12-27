@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -33,7 +34,7 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
             if (command.Tickers == null || !command.Tickers.Any())
             {
                 return Result<BulkFetchResult>.Failure(
-                    Error.Validation("Tickers list cannot be null or empty", "TICKERS_REQUIRED"));
+                    Error.Validation("Tickers list cannot be null or empty", ErrorCodes.Data.TickerRequired));
             }
 
             int totalTickers = command.Tickers.Count;
@@ -92,10 +93,20 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
                 failedResults,
                 skippedResults));
         }
+        catch (InvalidOperationException ex)
+        {
+            return Result<BulkFetchResult>.Failure(
+                Error.BusinessRule($"Failed to execute bulk data fetch: {ex.Message}", ErrorCodes.Data.FetchFailed));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<BulkFetchResult>.Failure(
+                Error.Validation($"Invalid bulk fetch parameters: {ex.Message}", ErrorCodes.Data.FetchFailed));
+        }
         catch (Exception ex)
         {
             return Result<BulkFetchResult>.Failure(
-                Error.BusinessRule($"Failed to execute bulk data fetch: {ex.Message}", "BULK_DATA_FETCH_FAILED"));
+                Error.BusinessRule($"Failed to execute bulk data fetch: {ex.Message}", ErrorCodes.Data.FetchFailed));
         }
     }
 

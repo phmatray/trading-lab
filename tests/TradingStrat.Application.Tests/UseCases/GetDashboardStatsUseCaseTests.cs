@@ -67,7 +67,7 @@ public class GetDashboardStatsUseCaseTests
         DateTime? lastUpdate)
     {
         A.CallTo(() => _historicalDataPort.GetAllTickersAsync()).Returns(tickers);
-        A.CallTo(() => _historicalDataPort.GetAllTickerSummariesAsync(A<Domain.ValueObjects.TimeFrame>._)).Returns(summaries);
+        A.CallTo(() => _historicalDataPort.GetAllTickerSummariesAsync(A<TimeFrame>._)).Returns(summaries);
         A.CallTo(() => _historicalDataPort.GetDatabaseLastModifiedAsync()).Returns(lastUpdate);
     }
 
@@ -231,7 +231,7 @@ public class GetDashboardStatsUseCaseTests
         A.CallTo(() => _portfolioPort.GetAllPortfoliosAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _backtestArchivePort.GetLastBacktestDateAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _historicalDataPort.GetAllTickersAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _historicalDataPort.GetAllTickerSummariesAsync(A<Domain.ValueObjects.TimeFrame>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _historicalDataPort.GetAllTickerSummariesAsync(A<TimeFrame>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _historicalDataPort.GetDatabaseLastModifiedAsync()).MustHaveHappenedOnceExactly();
     }
 

@@ -103,7 +103,7 @@ public class UseCaseProgressTests
     public void ToString_WithSteps_ShouldIncludeStepInfo()
     {
         // Arrange
-        var progress = new UseCaseProgress("Processing batch", 5, 10, null);
+        var progress = new UseCaseProgress("Processing batch", 5, 10);
 
         // Act
         string result = progress.ToString();

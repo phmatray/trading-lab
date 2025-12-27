@@ -192,7 +192,7 @@ public class PercentageTests
     {
         // Arrange
         Percentage percentage = new Percentage(10m); // 10%
-        Money amount = new Money(1000m, "USD");
+        Money amount = new Money(1000m);
 
         // Act
         Money result = percentage.Of(amount);

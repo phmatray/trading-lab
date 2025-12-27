@@ -10,7 +10,7 @@ public class CommissionTests
     {
         // Arrange
         Percentage rate = Percentage.FromPercentage(0.1m);
-        Money minimum = new Money(1.0m, "USD");
+        Money minimum = new Money(1.0m);
 
         // Act
         Commission commission = new Commission(rate, minimum);
@@ -25,7 +25,7 @@ public class CommissionTests
     {
         // Arrange
         Percentage rate = new Percentage(-0.1m);
-        Money minimum = new Money(1.0m, "USD");
+        Money minimum = new Money(1.0m);
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new Commission(rate, minimum));
@@ -36,7 +36,7 @@ public class CommissionTests
     {
         // Arrange
         Percentage rate = Percentage.FromPercentage(0.1m);
-        Money minimum = new Money(-1.0m, "USD");
+        Money minimum = new Money(-1.0m);
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new Commission(rate, minimum));
@@ -57,7 +57,7 @@ public class CommissionTests
     public void FromPercentage_CreatesCommissionWithPercentageRate()
     {
         // Act
-        Commission commission = Commission.FromPercentage(0.1m, 1.0m, "USD");
+        Commission commission = Commission.FromPercentage(0.1m, 1.0m);
 
         // Assert
         commission.Rate.Value.ShouldBe(0.1m);
@@ -69,7 +69,7 @@ public class CommissionTests
     public void FromDecimal_CreatesCommissionWithDecimalRate()
     {
         // Act (0.001 decimal = 0.1%)
-        Commission commission = Commission.FromDecimal(0.001m, 1.0m, "USD");
+        Commission commission = Commission.FromDecimal(0.001m, 1.0m);
 
         // Assert
         commission.Rate.Value.ShouldBe(0.1m);
@@ -80,8 +80,8 @@ public class CommissionTests
     public void CalculateFor_WhenPercentageExceedsMinimum_ReturnsPercentage()
     {
         // Arrange - 0.1% with $1 minimum
-        Commission commission = Commission.FromPercentage(0.1m, 1.0m, "USD");
-        Money tradeValue = new Money(10000m, "USD"); // 0.1% of 10000 = $10
+        Commission commission = Commission.FromPercentage(0.1m, 1.0m);
+        Money tradeValue = new Money(10000m); // 0.1% of 10000 = $10
 
         // Act
         Money result = commission.CalculateFor(tradeValue);
@@ -94,8 +94,8 @@ public class CommissionTests
     public void CalculateFor_WhenPercentageBelowMinimum_ReturnsMinimum()
     {
         // Arrange - 0.1% with $5 minimum
-        Commission commission = Commission.FromPercentage(0.1m, 5.0m, "USD");
-        Money tradeValue = new Money(1000m, "USD"); // 0.1% of 1000 = $1
+        Commission commission = Commission.FromPercentage(0.1m, 5.0m);
+        Money tradeValue = new Money(1000m); // 0.1% of 1000 = $1
 
         // Act
         Money result = commission.CalculateFor(tradeValue);
@@ -108,8 +108,8 @@ public class CommissionTests
     public void CalculateFor_WithZeroRate_ReturnsMinimum()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0m, 2.0m, "USD");
-        Money tradeValue = new Money(1000m, "USD");
+        Commission commission = Commission.FromPercentage(0m, 2.0m);
+        Money tradeValue = new Money(1000m);
 
         // Act
         Money result = commission.CalculateFor(tradeValue);
@@ -122,8 +122,8 @@ public class CommissionTests
     public void CalculateFor_WithZeroMinimum_ReturnsPercentage()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0.5m, 0m, "USD");
-        Money tradeValue = new Money(1000m, "USD"); // 0.5% of 1000 = $5
+        Commission commission = Commission.FromPercentage(0.5m);
+        Money tradeValue = new Money(1000m); // 0.5% of 1000 = $5
 
         // Act
         Money result = commission.CalculateFor(tradeValue);
@@ -136,7 +136,7 @@ public class CommissionTests
     public void CalculateFor_WithDifferentCurrency_ThrowsInvalidOperationException()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0.1m, 1.0m, "USD");
+        Commission commission = Commission.FromPercentage(0.1m, 1.0m);
         Money tradeValue = new Money(1000m, "EUR");
 
         // Act & Assert
@@ -160,7 +160,7 @@ public class CommissionTests
     public void ToString_WithOnlyRate_ReturnsRateOnly()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0.1m, 0m, "USD");
+        Commission commission = Commission.FromPercentage(0.1m);
 
         // Act
         string result = commission.ToString();
@@ -173,7 +173,7 @@ public class CommissionTests
     public void ToString_WithOnlyMinimum_ReturnsMinimumOnly()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0m, 5.0m, "USD");
+        Commission commission = Commission.FromPercentage(0m, 5.0m);
 
         // Act
         string result = commission.ToString();
@@ -187,7 +187,7 @@ public class CommissionTests
     public void ToString_WithBothRateAndMinimum_ReturnsBoth()
     {
         // Arrange
-        Commission commission = Commission.FromPercentage(0.1m, 1.0m, "USD");
+        Commission commission = Commission.FromPercentage(0.1m, 1.0m);
 
         // Act
         string result = commission.ToString();
@@ -203,15 +203,15 @@ public class CommissionTests
     {
         // Arrange - Interactive Brokers US stocks: 0.005 per share, $1 minimum
         // For simplicity, treating as percentage of trade value
-        Commission commission = Commission.FromPercentage(0.1m, 1.0m, "USD");
+        Commission commission = Commission.FromPercentage(0.1m, 1.0m);
 
         // Small trade: $500 * 0.1% = $0.50 < $1 minimum
-        Money smallTrade = new Money(500m, "USD");
+        Money smallTrade = new Money(500m);
         Money smallCommission = commission.CalculateFor(smallTrade);
         smallCommission.Amount.ShouldBe(1.0m); // Minimum applies
 
         // Large trade: $100,000 * 0.1% = $100 > $1 minimum
-        Money largeTrade = new Money(100000m, "USD");
+        Money largeTrade = new Money(100000m);
         Money largeCommission = commission.CalculateFor(largeTrade);
         largeCommission.Amount.ShouldBe(100m); // Percentage applies
     }

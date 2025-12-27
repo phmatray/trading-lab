@@ -113,7 +113,7 @@ public class DataStatusCacheServiceTests : IDisposable
             .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act
-        Result<AllDataStatusResult> result = await _cacheService.GetOrFetchDataStatusAsync(null);
+        Result<AllDataStatusResult> result = await _cacheService.GetOrFetchDataStatusAsync();
 
         // Assert
         result.Value.ShouldBe(expectedResult);

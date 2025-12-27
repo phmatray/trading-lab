@@ -220,7 +220,7 @@ public class TimeFrameValidationTests
     {
         // Arrange
         TimeFrame timeFrame = TimeFrame.D1;
-        TimeFrame zeroTimeFrame = new() { Unit = (TimeFrameUnit)0 };
+        TimeFrame zeroTimeFrame = new() { Unit = 0 };
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => timeFrame.GetPeriodMultiplier(zeroTimeFrame));

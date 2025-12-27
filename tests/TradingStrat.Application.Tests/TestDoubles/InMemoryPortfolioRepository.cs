@@ -254,7 +254,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
     private static void LoadPositionsIntoPortfolio(Portfolio portfolio, List<Position> positions)
     {
         FieldInfo? positionsField = typeof(Portfolio).GetField("_positions",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            BindingFlags.NonPublic | BindingFlags.Instance);
 
         if (positionsField != null)
         {

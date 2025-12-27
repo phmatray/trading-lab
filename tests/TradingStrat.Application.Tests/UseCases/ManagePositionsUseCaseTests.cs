@@ -98,9 +98,9 @@ public class ManagePositionsUseCaseTests
     {
         // Arrange
         Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Diversified Portfolio", null, 50000m);
-        var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var command2 = new AddPositionCommand(portfolio.Id, "MSFT", 50, 300m, DateTime.Today, null);
-        var command3 = new AddPositionCommand(portfolio.Id, "GOOGL", 25, 2500m, DateTime.Today, null);
+        var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today);
+        var command2 = new AddPositionCommand(portfolio.Id, "MSFT", 50, 300m, DateTime.Today);
+        var command3 = new AddPositionCommand(portfolio.Id, "GOOGL", 25, 2500m, DateTime.Today);
 
         // Act
         Result<Position> result1 = await _useCase.AddPositionAsync(command1);
@@ -122,8 +122,8 @@ public class ManagePositionsUseCaseTests
     {
         // Arrange
         Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
-        var command2 = new AddPositionCommand(portfolio.Id, "AAPL", 50, 155m, DateTime.Today, null);
+        var command1 = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today);
+        var command2 = new AddPositionCommand(portfolio.Id, "AAPL", 50, 155m, DateTime.Today);
 
         await _useCase.AddPositionAsync(command1);
 
@@ -303,7 +303,7 @@ public class ManagePositionsUseCaseTests
     {
         // Arrange
         Portfolio portfolio = await _portfolioPort.CreatePortfolioAsync("Test Portfolio", null, 10000m);
-        var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today, null);
+        var addCommand = new AddPositionCommand(portfolio.Id, "AAPL", 100, 150m, DateTime.Today);
         Result<Position> addResult = await _useCase.AddPositionAsync(addCommand);
 
         // Act

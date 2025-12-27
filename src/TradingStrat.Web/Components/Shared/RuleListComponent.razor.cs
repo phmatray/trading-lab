@@ -54,7 +54,7 @@ public partial class RuleListComponent : ComponentBase
         Rules[index].IndicatorName = indicatorName;
         Rules[index].IndicatorParameters = IndicatorService.GetDefaultParameters(indicatorName);
         Log($"[RuleListComponent]   Parameters count: {Rules[index].IndicatorParameters.Count}");
-        foreach (System.Collections.Generic.KeyValuePair<string, object> param in Rules[index].IndicatorParameters)
+        foreach (KeyValuePair<string, object> param in Rules[index].IndicatorParameters)
         {
             Log($"[RuleListComponent]     {param.Key} = {param.Value}");
         }

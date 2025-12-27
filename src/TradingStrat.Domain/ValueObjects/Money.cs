@@ -21,7 +21,7 @@ public readonly record struct Money
     }
 
     public static Money Zero => new(0m);
-    public static Money FromDollars(decimal amount) => new(amount, "USD");
+    public static Money FromDollars(decimal amount) => new(amount);
 
     // Arithmetic operators
     public static Money operator +(Money a, Money b)

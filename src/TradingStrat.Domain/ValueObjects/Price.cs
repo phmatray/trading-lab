@@ -26,7 +26,7 @@ public readonly record struct Price
     }
 
     public static Price Zero => new(0m);
-    public static Price FromDollars(decimal value) => new(value, "USD");
+    public static Price FromDollars(decimal value) => new(value);
 
     // Convert price to money by multiplying by quantity
     public Money MultiplyBy(int quantity)

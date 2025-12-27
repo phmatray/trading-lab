@@ -49,7 +49,7 @@ public class GetDashboardStatsUseCase : BaseUseCase<Unit, DashboardStatsResult>,
         Task<List<Portfolio>> portfoliosTask = _portfolioPort.GetAllPortfoliosAsync();
         Task<DateTime?> lastBacktestDateTask = _backtestArchivePort.GetLastBacktestDateAsync();
         Task<List<string>> allTickersTask = _historicalDataPort.GetAllTickersAsync();
-        Task<List<TickerSummary>> tickerSummariesTask = _historicalDataPort.GetAllTickerSummariesAsync(Domain.ValueObjects.TimeFrame.D1);
+        Task<List<TickerSummary>> tickerSummariesTask = _historicalDataPort.GetAllTickerSummariesAsync(TimeFrame.D1);
         Task<DateTime?> lastDataUpdateTask = _historicalDataPort.GetDatabaseLastModifiedAsync();
 
         await Task.WhenAll(
@@ -61,9 +61,9 @@ public class GetDashboardStatsUseCase : BaseUseCase<Unit, DashboardStatsResult>,
             tickerSummariesTask,
             lastDataUpdateTask);
 
-        List<Domain.Entities.CustomStrategy> customStrategies = await customStrategiesTask;
+        List<CustomStrategy> customStrategies = await customStrategiesTask;
         int backtestCount = await backtestCountTask;
-        List<Domain.Entities.Portfolio> portfolios = await portfoliosTask;
+        List<Portfolio> portfolios = await portfoliosTask;
         DateTime? lastBacktestDate = await lastBacktestDateTask;
         List<string> allTickers = await allTickersTask;
         List<TickerSummary> tickerSummaries = await tickerSummariesTask;

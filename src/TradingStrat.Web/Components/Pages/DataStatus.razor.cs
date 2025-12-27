@@ -22,7 +22,7 @@ public partial class DataStatus : BaseComponent
     private string? _errorMessage;
     private readonly HashSet<string> _selectedTickers = new();
 
-    private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
+    private readonly List<BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {
         new() { Label = "Dashboard", Href = "/" },
         new() { Label = "Data Status", Href = "/data/status" }

@@ -244,8 +244,8 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
                     kvp.Key.ticker,
                     data.FirstOrDefault()?.ISIN,
                     data.Count,
-                    data.Any() ? data.Min(p => p.DateTime) : (DateTime?)null,
-                    data.Any() ? data.Max(p => p.DateTime) : (DateTime?)null);
+                    data.Any() ? data.Min(p => p.DateTime) : null,
+                    data.Any() ? data.Max(p => p.DateTime) : null);
             })
             .OrderBy(t => t.Ticker)
             .ToList();

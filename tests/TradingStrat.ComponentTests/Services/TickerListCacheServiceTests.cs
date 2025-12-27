@@ -194,7 +194,7 @@ public class TickerListCacheServiceTests : IDisposable
         await _cacheService.GetTickersAsync(d1);
         await _cacheService.GetTickersAsync(h1);
 
-        _cacheService.InvalidateCache(null); // Invalidate all
+        _cacheService.InvalidateCache(); // Invalidate all
 
         await _cacheService.GetTickersAsync(d1);
         await _cacheService.GetTickersAsync(h1);

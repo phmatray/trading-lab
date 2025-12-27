@@ -35,7 +35,7 @@ public class RunBacktestUseCase : IBacktestUseCase
         try
         {
             // Default to D1 (daily) if no timeframe specified
-            TimeFrame timeFrame = command.TimeFrame ?? Domain.ValueObjects.TimeFrame.D1;
+            TimeFrame timeFrame = command.TimeFrame ?? TimeFrame.D1;
 
             // Check if data exists
             List<HistoricalPrice> allData = await _historicalDataPort.GetHistoricalDataAsync(
@@ -80,6 +80,16 @@ public class RunBacktestUseCase : IBacktestUseCase
             BacktestResult result = await _backtestEngine.RunBacktestAsync(strategy, config, internalProgress);
 
             return Result<BacktestResult>.Success(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<BacktestResult>.Failure(
+                Error.BusinessRule($"Failed to execute backtest: {ex.Message}", ErrorCodes.Backtest.ExecutionFailed));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<BacktestResult>.Failure(
+                Error.Validation($"Invalid backtest parameters: {ex.Message}", ErrorCodes.Backtest.ExecutionFailed));
         }
         catch (Exception ex)
         {

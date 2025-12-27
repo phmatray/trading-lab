@@ -26,7 +26,7 @@ public interface ICsvTickerParser
 /// </summary>
 public class CsvTickerParser : ICsvTickerParser
 {
-    private static readonly char[] Separators = { ',', ';', '\n', '\r', '\t' };
+    private static readonly char[] _separators = { ',', ';', '\n', '\r', '\t' };
     private const int MaxTickerLength = 10;
     private const int MinTickerLength = 1;
 
@@ -42,7 +42,7 @@ public class CsvTickerParser : ICsvTickerParser
         }
 
         // Split by separators
-        string[] parts = csvContent.Split(Separators, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = csvContent.Split(_separators, StringSplitOptions.RemoveEmptyEntries);
 
         var validTickers = new List<string>();
         var invalidTickers = new HashSet<string>();

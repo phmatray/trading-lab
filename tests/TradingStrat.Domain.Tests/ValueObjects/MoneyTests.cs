@@ -9,7 +9,7 @@ public class MoneyTests
     public void Constructor_WithValidAmount_CreatesInstance()
     {
         // Act
-        Money money = new Money(100.50m, "USD");
+        Money money = new Money(100.50m);
 
         // Assert
         money.Amount.ShouldBe(100.50m);
@@ -75,8 +75,8 @@ public class MoneyTests
     public void Addition_WithSameCurrency_ReturnsSum()
     {
         // Arrange
-        Money a = new Money(100m, "USD");
-        Money b = new Money(50m, "USD");
+        Money a = new Money(100m);
+        Money b = new Money(50m);
 
         // Act
         Money result = a + b;
@@ -90,7 +90,7 @@ public class MoneyTests
     public void Addition_WithDifferentCurrency_ThrowsInvalidOperationException()
     {
         // Arrange
-        Money usd = new Money(100m, "USD");
+        Money usd = new Money(100m);
         Money eur = new Money(50m, "EUR");
 
         // Act & Assert
@@ -101,8 +101,8 @@ public class MoneyTests
     public void Subtraction_WithSameCurrency_ReturnsDifference()
     {
         // Arrange
-        Money a = new Money(100m, "USD");
-        Money b = new Money(30m, "USD");
+        Money a = new Money(100m);
+        Money b = new Money(30m);
 
         // Act
         Money result = a - b;
@@ -116,7 +116,7 @@ public class MoneyTests
     public void Subtraction_WithDifferentCurrency_ThrowsInvalidOperationException()
     {
         // Arrange
-        Money usd = new Money(100m, "USD");
+        Money usd = new Money(100m);
         Money eur = new Money(50m, "EUR");
 
         // Act & Assert
@@ -127,7 +127,7 @@ public class MoneyTests
     public void UnaryMinus_ReturnsNegatedAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = -money;
@@ -141,7 +141,7 @@ public class MoneyTests
     public void Multiplication_ByDecimal_ReturnsScaledAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = money * 2.5m;
@@ -155,7 +155,7 @@ public class MoneyTests
     public void Multiplication_DecimalByMoney_ReturnsScaledAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = 2.5m * money;
@@ -169,7 +169,7 @@ public class MoneyTests
     public void Division_ByDecimal_ReturnsScaledAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = money / 4m;
@@ -183,7 +183,7 @@ public class MoneyTests
     public void Division_ByZero_ThrowsDivideByZeroException()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act & Assert
         Should.Throw<DivideByZeroException>(() => money / 0m);
@@ -193,8 +193,8 @@ public class MoneyTests
     public void GreaterThan_WithSameCurrency_ComparesAmounts()
     {
         // Arrange
-        Money a = new Money(100m, "USD");
-        Money b = new Money(50m, "USD");
+        Money a = new Money(100m);
+        Money b = new Money(50m);
 
         // Act & Assert
         (a > b).ShouldBeTrue();
@@ -205,7 +205,7 @@ public class MoneyTests
     public void GreaterThan_WithDifferentCurrency_ThrowsInvalidOperationException()
     {
         // Arrange
-        Money usd = new Money(100m, "USD");
+        Money usd = new Money(100m);
         Money eur = new Money(50m, "EUR");
 
         // Act & Assert
@@ -216,8 +216,8 @@ public class MoneyTests
     public void LessThan_WithSameCurrency_ComparesAmounts()
     {
         // Arrange
-        Money a = new Money(50m, "USD");
-        Money b = new Money(100m, "USD");
+        Money a = new Money(50m);
+        Money b = new Money(100m);
 
         // Act & Assert
         (a < b).ShouldBeTrue();
@@ -228,7 +228,7 @@ public class MoneyTests
     public void MultiplyBy_ReturnsScaledAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = money.MultiplyBy(3m);
@@ -241,7 +241,7 @@ public class MoneyTests
     public void DivideBy_ReturnsScaledAmount()
     {
         // Arrange
-        Money money = new Money(100m, "USD");
+        Money money = new Money(100m);
 
         // Act
         Money result = money.DivideBy(2m);
@@ -254,7 +254,7 @@ public class MoneyTests
     public void Abs_WithNegativeAmount_ReturnsAbsoluteValue()
     {
         // Arrange
-        Money money = new Money(-100m, "USD");
+        Money money = new Money(-100m);
 
         // Act
         Money result = money.Abs();
@@ -268,8 +268,8 @@ public class MoneyTests
     public void AsPercentageOf_CalculatesCorrectPercentage()
     {
         // Arrange
-        Money part = new Money(25m, "USD");
-        Money total = new Money(100m, "USD");
+        Money part = new Money(25m);
+        Money total = new Money(100m);
 
         // Act
         Percentage result = part.AsPercentageOf(total);
@@ -282,7 +282,7 @@ public class MoneyTests
     public void AsPercentageOf_WithZeroTotal_ReturnsZero()
     {
         // Arrange
-        Money part = new Money(25m, "USD");
+        Money part = new Money(25m);
         Money total = Money.Zero;
 
         // Act
@@ -296,8 +296,8 @@ public class MoneyTests
     public void Max_ReturnsBiggerAmount()
     {
         // Arrange
-        Money a = new Money(100m, "USD");
-        Money b = new Money(150m, "USD");
+        Money a = new Money(100m);
+        Money b = new Money(150m);
 
         // Act
         Money result = Money.Max(a, b);
@@ -310,8 +310,8 @@ public class MoneyTests
     public void Min_ReturnsSmallerAmount()
     {
         // Arrange
-        Money a = new Money(100m, "USD");
-        Money b = new Money(50m, "USD");
+        Money a = new Money(100m);
+        Money b = new Money(50m);
 
         // Act
         Money result = Money.Min(a, b);
@@ -324,7 +324,7 @@ public class MoneyTests
     public void ToString_FormatsWithCurrency()
     {
         // Arrange
-        Money money = new Money(1234.56m, "USD");
+        Money money = new Money(1234.56m);
 
         // Act
         string result = money.ToString();
@@ -337,7 +337,7 @@ public class MoneyTests
     public void ToString_WithFormat_UsesCustomFormat()
     {
         // Arrange
-        Money money = new Money(1234.567m, "USD");
+        Money money = new Money(1234.567m);
 
         // Act
         string result = money.ToString("F3");
