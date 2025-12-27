@@ -26,16 +26,17 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 10000m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.PortfolioId.ShouldBeGreaterThan(0);
-        result.Name.ShouldBe("Growth Portfolio");
-        result.InitialCash.ShouldBe(10000m);
-        result.CreatedAt.ShouldNotBe(default);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.PortfolioId.ShouldBeGreaterThan(0);
+        result.Value.Name.ShouldBe("Growth Portfolio");
+        result.Value.InitialCash.ShouldBe(10000m);
+        result.Value.CreatedAt.ShouldNotBe(default);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Name.ShouldBe("Growth Portfolio");
         savedPortfolio.Description.ShouldBe("Long-term growth investments");
@@ -52,13 +53,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 0m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.InitialCash.ShouldBe(0m);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.InitialCash.ShouldBe(0m);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Cash.ShouldBe(0m);
     }
@@ -73,13 +75,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 1_000_000m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.InitialCash.ShouldBe(1_000_000m);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.InitialCash.ShouldBe(1_000_000m);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Cash.ShouldBe(1_000_000m);
     }
@@ -94,12 +97,13 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 5000m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Description.ShouldBeNull();
     }
@@ -113,14 +117,17 @@ public class CreatePortfolioUseCaseTests
         var command3 = new CreatePortfolioCommand("Portfolio 3", null, 3000m);
 
         // Act
-        CreatePortfolioResult result1 = await _useCase.ExecuteAsync(command1);
-        CreatePortfolioResult result2 = await _useCase.ExecuteAsync(command2);
-        CreatePortfolioResult result3 = await _useCase.ExecuteAsync(command3);
+        var result1 = await _useCase.ExecuteAsync(command1);
+        var result2 = await _useCase.ExecuteAsync(command2);
+        var result3 = await _useCase.ExecuteAsync(command3);
 
         // Assert
-        result1.PortfolioId.ShouldNotBe(result2.PortfolioId);
-        result2.PortfolioId.ShouldNotBe(result3.PortfolioId);
-        result1.PortfolioId.ShouldNotBe(result3.PortfolioId);
+        result1.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
+        result3.IsSuccess.ShouldBeTrue();
+        result1.Value.PortfolioId.ShouldNotBe(result2.Value.PortfolioId);
+        result2.Value.PortfolioId.ShouldNotBe(result3.Value.PortfolioId);
+        result1.Value.PortfolioId.ShouldNotBe(result3.Value.PortfolioId);
 
         var allPortfolios = await _portfolioPort.GetAllPortfoliosAsync();
         allPortfolios.Count.ShouldBe(3);
@@ -177,13 +184,14 @@ public class CreatePortfolioUseCaseTests
             InitialCash: 1000m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
 
         // Assert
-        result.ShouldNotBeNull();
-        result.Name.ShouldBe(longName);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.Name.ShouldBe(longName);
 
-        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.PortfolioId);
+        var savedPortfolio = await _portfolioPort.GetPortfolioByIdAsync(result.Value.PortfolioId);
         savedPortfolio.ShouldNotBeNull();
         savedPortfolio.Name.ShouldBe(longName);
     }
@@ -196,11 +204,12 @@ public class CreatePortfolioUseCaseTests
         var command = new CreatePortfolioCommand("Test", null, 1000m);
 
         // Act
-        CreatePortfolioResult result = await _useCase.ExecuteAsync(command);
+        var result = await _useCase.ExecuteAsync(command);
         var afterCreate = DateTime.UtcNow;
 
         // Assert
-        result.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeCreate);
-        result.CreatedAt.ShouldBeLessThanOrEqualTo(afterCreate);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.CreatedAt.ShouldBeGreaterThanOrEqualTo(beforeCreate);
+        result.Value.CreatedAt.ShouldBeLessThanOrEqualTo(afterCreate);
     }
 }

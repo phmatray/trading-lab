@@ -82,21 +82,28 @@ public partial class Portfolios : ComponentBase, IDisposable
 
             var result = await CreatePortfolioUseCase.ExecuteAsync(command);
 
-            _successMessage = $"Portfolio '{result.Name}' created successfully!";
+            if (result.IsSuccess)
+            {
+                _successMessage = $"Portfolio '{result.Value.Name}' created successfully!";
 
-            await NotificationService.AddNotificationAsync(
-                NotificationType.System,
-                NotificationSeverity.Success,
-                "Portfolio Created",
-                $"'{result.Name}' with ${result.InitialCash:N2} initial cash",
-                metadata: new Dictionary<string, object>
-                {
-                    ["portfolioId"] = result.PortfolioId
-                }
-            );
+                await NotificationService.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Success,
+                    "Portfolio Created",
+                    $"'{result.Value.Name}' with ${result.Value.InitialCash:N2} initial cash",
+                    metadata: new Dictionary<string, object>
+                    {
+                        ["portfolioId"] = result.Value.PortfolioId
+                    }
+                );
 
-            CloseCreateDialog();
-            await LoadPortfolios();
+                CloseCreateDialog();
+                await LoadPortfolios();
+            }
+            else
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+            }
         }
         catch (Exception ex)
         {

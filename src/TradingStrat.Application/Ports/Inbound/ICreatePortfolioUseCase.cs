@@ -51,6 +51,6 @@ public interface ICreatePortfolioUseCase
     /// Creates a new portfolio.
     /// </summary>
     /// <param name="command">The create portfolio command.</param>
-    /// <returns>The created portfolio result.</returns>
-    Task<CreatePortfolioResult> ExecuteAsync(CreatePortfolioCommand command);
+    /// <returns>Result containing the created portfolio information, or errors if creation failed.</returns>
+    Task<Result<CreatePortfolioResult>> ExecuteAsync(CreatePortfolioCommand command);
 }

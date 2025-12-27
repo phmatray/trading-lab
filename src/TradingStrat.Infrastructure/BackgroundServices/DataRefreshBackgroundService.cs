@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,17 +14,17 @@ namespace TradingStrat.Infrastructure.BackgroundServices;
 /// </summary>
 public class DataRefreshBackgroundService : BackgroundService
 {
-    private readonly IDataRefreshService _dataRefreshService;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<DataRefreshBackgroundService> _logger;
     private readonly DataRefreshConfiguration _config;
     private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(15); // Check every 15 minutes
 
     public DataRefreshBackgroundService(
-        IDataRefreshService dataRefreshService,
+        IServiceScopeFactory serviceScopeFactory,
         IOptions<DataRefreshConfiguration> config,
         ILogger<DataRefreshBackgroundService> logger)
     {
-        _dataRefreshService = dataRefreshService;
+        _serviceScopeFactory = serviceScopeFactory;
         _config = config.Value;
         _logger = logger;
     }
@@ -104,26 +105,32 @@ public class DataRefreshBackgroundService : BackgroundService
                     }
                 });
 
-                RefreshResult result = await _dataRefreshService.RefreshAllStaleDataAsync(
-                    timeFrame,
-                    _config.StaleThresholdHours,
-                    progress,
-                    cancellationToken);
-
-                _logger.LogInformation(
-                    "Data refresh completed for {TimeFrame}. Processed: {Processed}, Successful: {Successful}, Failed: {Failed}, Skipped: {Skipped}",
-                    result.TimeFrame.Unit,
-                    result.TotalTickersProcessed,
-                    result.SuccessfulRefreshes,
-                    result.FailedRefreshes,
-                    result.SkippedTickers);
-
-                if (result.Failures.Any())
+                // Create a scope to resolve scoped service
+                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                 {
-                    _logger.LogWarning(
-                        "Failed to refresh {FailureCount} tickers: {FailedTickers}",
-                        result.Failures.Count,
-                        string.Join(", ", result.Failures.Keys));
+                    IDataRefreshService dataRefreshService = scope.ServiceProvider.GetRequiredService<IDataRefreshService>();
+
+                    RefreshResult result = await dataRefreshService.RefreshAllStaleDataAsync(
+                        timeFrame,
+                        _config.StaleThresholdHours,
+                        progress,
+                        cancellationToken);
+
+                    _logger.LogInformation(
+                        "Data refresh completed for {TimeFrame}. Processed: {Processed}, Successful: {Successful}, Failed: {Failed}, Skipped: {Skipped}",
+                        result.TimeFrame.Unit,
+                        result.TotalTickersProcessed,
+                        result.SuccessfulRefreshes,
+                        result.FailedRefreshes,
+                        result.SkippedTickers);
+
+                    if (result.Failures.Any())
+                    {
+                        _logger.LogWarning(
+                            "Failed to refresh {FailureCount} tickers: {FailedTickers}",
+                            result.Failures.Count,
+                            string.Join(", ", result.Failures.Keys));
+                    }
                 }
             }
             catch (Exception ex)
