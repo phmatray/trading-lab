@@ -43,7 +43,17 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            _dataStatus = await CacheService.GetOrFetchDataStatusAsync(_query);
+            var result = await CacheService.GetOrFetchDataStatusAsync(_query);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+                await HandleErrorAsync(new Exception(_errorMessage), "Failed to load data status");
+            }
+            else
+            {
+                _dataStatus = result.Value;
+            }
         }
         catch (Exception ex)
         {

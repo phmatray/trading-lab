@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -12,8 +13,8 @@ public interface IGetAllDataStatusUseCase
     /// Executes the use case to retrieve data status for all tickers.
     /// </summary>
     /// <param name="query">Optional query parameters for filtering, sorting, and pagination.</param>
-    /// <returns>Comprehensive data status with coverage information.</returns>
-    Task<AllDataStatusResult> ExecuteAsync(DataStatusQuery? query = null);
+    /// <returns>Result containing comprehensive data status with coverage information, or errors if the operation failed.</returns>
+    Task<Result<AllDataStatusResult>> ExecuteAsync(DataStatusQuery? query = null);
 }
 
 /// <summary>

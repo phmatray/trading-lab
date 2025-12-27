@@ -2,6 +2,7 @@ using FakeItEasy;
 using Microsoft.Extensions.Caching.Memory;
 using Shouldly;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Web.Services;
 using Xunit;
 
@@ -37,13 +38,13 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult expectedResult = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
-            .Returns(expectedResult);
+            .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act
-        AllDataStatusResult result = await _cacheService.GetOrFetchDataStatusAsync(query);
+        var result = await _cacheService.GetOrFetchDataStatusAsync(query);
 
         // Assert
-        result.ShouldBe(expectedResult);
+        result.Value.ShouldBe(expectedResult);
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
             .MustHaveHappenedOnceExactly();
     }
@@ -56,16 +57,16 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult expectedResult = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
-            .Returns(expectedResult);
+            .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act - Call twice
-        AllDataStatusResult result1 = await _cacheService.GetOrFetchDataStatusAsync(query);
-        AllDataStatusResult result2 = await _cacheService.GetOrFetchDataStatusAsync(query);
+        var result1 = await _cacheService.GetOrFetchDataStatusAsync(query);
+        var result2 = await _cacheService.GetOrFetchDataStatusAsync(query);
 
         // Assert
-        result1.ShouldBe(expectedResult);
-        result2.ShouldBe(expectedResult);
-        result1.ShouldBeSameAs(result2); // Same instance from cache
+        result1.Value.ShouldBe(expectedResult);
+        result2.Value.ShouldBe(expectedResult);
+        result1.Value.ShouldBeSameAs(result2.Value); // Same instance from cache
 
         // Use case should only be called once
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
@@ -83,17 +84,17 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult result2 = CreateTestResult(page: 2);
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query1))
-            .Returns(result1);
+            .Returns(Result<AllDataStatusResult>.Success(result1));
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query2))
-            .Returns(result2);
+            .Returns(Result<AllDataStatusResult>.Success(result2));
 
         // Act
-        AllDataStatusResult cached1 = await _cacheService.GetOrFetchDataStatusAsync(query1);
-        AllDataStatusResult cached2 = await _cacheService.GetOrFetchDataStatusAsync(query2);
+        var cached1 = await _cacheService.GetOrFetchDataStatusAsync(query1);
+        var cached2 = await _cacheService.GetOrFetchDataStatusAsync(query2);
 
         // Assert
-        cached1.CurrentPage.ShouldBe(1);
-        cached2.CurrentPage.ShouldBe(2);
+        cached1.Value.CurrentPage.ShouldBe(1);
+        cached2.Value.CurrentPage.ShouldBe(2);
 
         // Both queries should have been executed once
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query1))
@@ -109,13 +110,13 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult expectedResult = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(A<DataStatusQuery>._))
-            .Returns(expectedResult);
+            .Returns(Result<AllDataStatusResult>.Success(expectedResult));
 
         // Act
-        AllDataStatusResult result = await _cacheService.GetOrFetchDataStatusAsync(null);
+        var result = await _cacheService.GetOrFetchDataStatusAsync(null);
 
         // Assert
-        result.ShouldBe(expectedResult);
+        result.Value.ShouldBe(expectedResult);
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(A<DataStatusQuery>._))
             .MustHaveHappenedOnceExactly();
     }
@@ -128,7 +129,7 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult result = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
-            .Returns(result);
+            .Returns(Result<AllDataStatusResult>.Success(result));
 
         await _cacheService.GetOrFetchDataStatusAsync(query);
 
@@ -149,7 +150,7 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult result = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
-            .Returns(result);
+            .Returns(Result<AllDataStatusResult>.Success(result));
 
         // Act - 1 miss, 2 hits
         await _cacheService.GetOrFetchDataStatusAsync(query); // Cache miss
@@ -173,7 +174,7 @@ public class DataStatusCacheServiceTests : IDisposable
         DataStatusQuery query3 = new(PageNumber: 3);
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(A<DataStatusQuery>._))
-            .Returns(CreateTestResult());
+            .Returns(Result<AllDataStatusResult>.Success(CreateTestResult()));
 
         // Act - 3 different queries = 3 misses
         await _cacheService.GetOrFetchDataStatusAsync(query1);
@@ -212,7 +213,7 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult result = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(A<DataStatusQuery>._))
-            .Returns(result);
+            .Returns(Result<AllDataStatusResult>.Success(result));
 
         // Act
         await _cacheService.GetOrFetchDataStatusAsync(query1);
@@ -234,9 +235,9 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult resultWithoutSearch = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(queryWithSearch))
-            .Returns(resultWithSearch);
+            .Returns(Result<AllDataStatusResult>.Success(resultWithSearch));
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(queryWithoutSearch))
-            .Returns(resultWithoutSearch);
+            .Returns(Result<AllDataStatusResult>.Success(resultWithoutSearch));
 
         // Act
         await _cacheService.GetOrFetchDataStatusAsync(queryWithSearch);
@@ -257,7 +258,7 @@ public class DataStatusCacheServiceTests : IDisposable
         AllDataStatusResult result = CreateTestResult();
 
         A.CallTo(() => _dataStatusUseCase.ExecuteAsync(query))
-            .Returns(result);
+            .Returns(Result<AllDataStatusResult>.Success(result));
 
         await _cacheService.GetOrFetchDataStatusAsync(query);
         await _cacheService.GetOrFetchDataStatusAsync(query);

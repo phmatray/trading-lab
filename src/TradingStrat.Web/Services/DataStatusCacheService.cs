@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 
 namespace TradingStrat.Web.Services;
 
@@ -30,7 +31,7 @@ public class DataStatusCacheService : IDataStatusCacheService
         _dataStatusUseCase = dataStatusUseCase;
     }
 
-    public async Task<AllDataStatusResult> GetOrFetchDataStatusAsync(DataStatusQuery? query = null)
+    public async Task<Result<AllDataStatusResult>> GetOrFetchDataStatusAsync(DataStatusQuery? query = null)
     {
         query ??= new DataStatusQuery();
 
@@ -41,13 +42,20 @@ public class DataStatusCacheService : IDataStatusCacheService
         if (_cache.TryGetValue(cacheKey, out AllDataStatusResult? cachedResult) && cachedResult != null)
         {
             IncrementCacheHits();
-            return cachedResult;
+            return Result<AllDataStatusResult>.Success(cachedResult);
         }
 
         IncrementCacheMisses();
 
         // Cache miss - fetch from use case
-        AllDataStatusResult result = await _dataStatusUseCase.ExecuteAsync(query);
+        Result<AllDataStatusResult> useCaseResult = await _dataStatusUseCase.ExecuteAsync(query);
+
+        if (useCaseResult.IsFailure)
+        {
+            return useCaseResult;
+        }
+
+        AllDataStatusResult result = useCaseResult.Value;
 
         // Store in cache with 5-minute expiration
         MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
@@ -56,7 +64,7 @@ public class DataStatusCacheService : IDataStatusCacheService
 
         _cache.Set(cacheKey, result, cacheOptions);
 
-        return result;
+        return Result<AllDataStatusResult>.Success(result);
     }
 
     public void InvalidateCache()

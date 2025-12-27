@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 
 namespace TradingStrat.Web.Services;
 
@@ -13,7 +14,7 @@ public interface IDataStatusCacheService
     /// </summary>
     /// <param name="query">Query parameters for filtering, sorting, and pagination.</param>
     /// <returns>Cached or freshly-queried data status result.</returns>
-    Task<AllDataStatusResult> GetOrFetchDataStatusAsync(DataStatusQuery? query = null);
+    Task<Result<AllDataStatusResult>> GetOrFetchDataStatusAsync(DataStatusQuery? query = null);
 
     /// <summary>
     /// Invalidates the entire data status cache.
