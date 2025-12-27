@@ -1,4 +1,5 @@
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
@@ -73,7 +74,7 @@ public class CustomStrategyManagementUseCase : ICustomStrategyManagementUseCase
         catch (Exception ex)
         {
             return Task.FromResult(Result<AppValidationResult>.Failure(
-                Error.BusinessRule($"Failed to validate strategy definition: {ex.Message}", "VALIDATION_FAILED")));
+                Error.BusinessRule($"Failed to validate strategy definition: {ex.Message}", ErrorCodes.Strategy.ValidationFailed)));
         }
     }
 }
