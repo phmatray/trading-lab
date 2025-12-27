@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -14,7 +15,7 @@ public interface IDeleteHistoricalDataUseCase
     /// <param name="ticker">Stock ticker symbol.</param>
     /// <param name="timeFrame">Optional timeframe to delete. If null, deletes all timeframes.</param>
     /// <returns>Result containing the number of records deleted.</returns>
-    Task<DeleteDataResult> DeleteTickerAsync(string ticker, TimeFrame? timeFrame = null);
+    Task<Result<DeleteDataResult>> DeleteTickerAsync(string ticker, TimeFrame? timeFrame = null);
 
     /// <summary>
     /// Deletes historical data for a ticker within a specific date range and timeframe.
@@ -24,7 +25,7 @@ public interface IDeleteHistoricalDataUseCase
     /// <param name="startDate">Start date (inclusive).</param>
     /// <param name="endDate">End date (inclusive).</param>
     /// <returns>Result containing the number of records deleted.</returns>
-    Task<DeleteDataResult> DeleteDateRangeAsync(
+    Task<Result<DeleteDataResult>> DeleteDateRangeAsync(
         string ticker,
         TimeFrame timeFrame,
         DateTime startDate,

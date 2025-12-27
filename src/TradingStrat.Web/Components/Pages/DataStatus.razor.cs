@@ -221,7 +221,15 @@ public partial class DataStatus : BaseComponent
                 return;
             }
 
-            DeleteDataResult result = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
+            var deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
+
+            if (deleteResult.IsFailure)
+            {
+                await NotificationService.ShowErrorAsync($"Failed to delete {ticker}: {string.Join(", ", deleteResult.Errors.Select(e => e.Message))}");
+                return;
+            }
+
+            DeleteDataResult result = deleteResult.Value;
 
             await NotificationService.ShowSuccessAsync($"Deleted {result.RecordsDeleted} records for {ticker}");
             CacheService.InvalidateCache();
@@ -308,8 +316,15 @@ public partial class DataStatus : BaseComponent
             int totalDeleted = 0;
             foreach (string ticker in _selectedTickers)
             {
-                DeleteDataResult result = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
-                totalDeleted += result.RecordsDeleted;
+                var deleteResult = await DeleteHistoricalDataUseCase.DeleteTickerAsync(ticker, _query.TimeFrame);
+
+                if (deleteResult.IsFailure)
+                {
+                    await NotificationService.ShowErrorAsync($"Failed to delete {ticker}: {string.Join(", ", deleteResult.Errors.Select(e => e.Message))}");
+                    continue;
+                }
+
+                totalDeleted += deleteResult.Value.RecordsDeleted;
             }
 
             await NotificationService.ShowSuccessAsync($"Deleted {totalDeleted} records for {_selectedTickers.Count} tickers");

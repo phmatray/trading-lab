@@ -1,6 +1,5 @@
 using FakeItEasy;
 using Shouldly;
-using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.ValueObjects;
@@ -29,14 +28,14 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteTickerAsync(ticker);
+        var result = await _useCase.DeleteTickerAsync(ticker);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(deletedRecords);
-        result.Message.ShouldContain("AAPL");
-        result.Message.ShouldContain("250 record(s)");
-        result.Message.ShouldContain("all timeframes");
+        result.Value.RecordsDeleted.ShouldBe(deletedRecords);
+        result.Value.Message.ShouldContain("AAPL");
+        result.Value.Message.ShouldContain("250 record(s)");
+        result.Value.Message.ShouldContain("all timeframes");
 
         A.CallTo(() => _historicalDataPort.DeleteTickerDataAsync(ticker, null))
             .MustHaveHappenedOnceExactly();
@@ -54,14 +53,14 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteTickerAsync(ticker, timeFrame);
+        var result = await _useCase.DeleteTickerAsync(ticker, timeFrame);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(deletedRecords);
-        result.Message.ShouldContain("MSFT");
-        result.Message.ShouldContain("100 record(s)");
-        result.Message.ShouldContain("D1");
+        result.Value.RecordsDeleted.ShouldBe(deletedRecords);
+        result.Value.Message.ShouldContain("MSFT");
+        result.Value.Message.ShouldContain("100 record(s)");
+        result.Value.Message.ShouldContain("D1");
 
         A.CallTo(() => _historicalDataPort.DeleteTickerDataAsync(ticker, timeFrame))
             .MustHaveHappenedOnceExactly();
@@ -77,40 +76,43 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(0);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteTickerAsync(ticker);
+        var result = await _useCase.DeleteTickerAsync(ticker);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(0);
-        result.Message.ShouldContain("NONEXISTENT");
-        result.Message.ShouldContain("0 record(s)");
+        result.Value.RecordsDeleted.ShouldBe(0);
+        result.Value.Message.ShouldContain("NONEXISTENT");
+        result.Value.Message.ShouldContain("0 record(s)");
     }
 
     [Fact]
-    public async Task DeleteTickerAsync_WithEmptyTicker_ThrowsArgumentException()
+    public async Task DeleteTickerAsync_WithEmptyTicker_ReturnsFailure()
     {
         // Arrange
         string ticker = "";
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.DeleteTickerAsync(ticker));
+        // Act
+        var result = await _useCase.DeleteTickerAsync(ticker);
 
-        ex.Message.ShouldContain("Ticker cannot be null or empty");
-        ex.ParamName.ShouldBe("ticker");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("Ticker cannot be null or empty");
+        result.Errors[0].Code.ShouldBe("TICKER_REQUIRED");
     }
 
     [Fact]
-    public async Task DeleteTickerAsync_WithNullTicker_ThrowsArgumentException()
+    public async Task DeleteTickerAsync_WithNullTicker_ReturnsFailure()
     {
         // Arrange
         string? ticker = null;
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.DeleteTickerAsync(ticker!));
+        // Act
+        var result = await _useCase.DeleteTickerAsync(ticker!);
 
-        ex.Message.ShouldContain("Ticker cannot be null or empty");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("Ticker cannot be null or empty");
+        result.Errors[0].Code.ShouldBe("TICKER_REQUIRED");
     }
 
     [Fact]
@@ -127,23 +129,23 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(deletedRecords);
-        result.Message.ShouldContain("GOOGL");
-        result.Message.ShouldContain("125 record(s)");
-        result.Message.ShouldContain("D1");
-        result.Message.ShouldContain("2024-01-01");
-        result.Message.ShouldContain("2024-06-30");
+        result.Value.RecordsDeleted.ShouldBe(deletedRecords);
+        result.Value.Message.ShouldContain("GOOGL");
+        result.Value.Message.ShouldContain("125 record(s)");
+        result.Value.Message.ShouldContain("D1");
+        result.Value.Message.ShouldContain("2024-01-01");
+        result.Value.Message.ShouldContain("2024-06-30");
 
         A.CallTo(() => _historicalDataPort.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate))
             .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
-    public async Task DeleteDateRangeAsync_WithStartDateAfterEndDate_ThrowsArgumentException()
+    public async Task DeleteDateRangeAsync_WithStartDateAfterEndDate_ReturnsFailure()
     {
         // Arrange
         string ticker = "AAPL";
@@ -151,15 +153,17 @@ public class DeleteHistoricalDataUseCaseTests
         DateTime startDate = new(2024, 12, 31);
         DateTime endDate = new(2024, 1, 1);
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate));
+        // Act
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
-        ex.Message.ShouldContain("Start date must be less than or equal to end date");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("Start date must be less than or equal to end date");
+        result.Errors[0].Code.ShouldBe("INVALID_DATE_RANGE");
     }
 
     [Fact]
-    public async Task DeleteDateRangeAsync_WithEmptyTicker_ThrowsArgumentException()
+    public async Task DeleteDateRangeAsync_WithEmptyTicker_ReturnsFailure()
     {
         // Arrange
         string ticker = "";
@@ -167,12 +171,13 @@ public class DeleteHistoricalDataUseCaseTests
         DateTime startDate = new(2024, 1, 1);
         DateTime endDate = new(2024, 6, 30);
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate));
+        // Act
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
-        ex.Message.ShouldContain("Ticker cannot be null or empty");
-        ex.ParamName.ShouldBe("ticker");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors[0].Message.ShouldContain("Ticker cannot be null or empty");
+        result.Errors[0].Code.ShouldBe("TICKER_REQUIRED");
     }
 
     [Fact]
@@ -188,12 +193,12 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, singleDate, singleDate);
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, singleDate, singleDate);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(deletedRecords);
-        result.Message.ShouldContain("2024-07-15");
+        result.Value.RecordsDeleted.ShouldBe(deletedRecords);
+        result.Value.Message.ShouldContain("2024-07-15");
 
         A.CallTo(() => _historicalDataPort.DeleteDateRangeAsync(ticker, timeFrame, singleDate, singleDate))
             .MustHaveHappenedOnceExactly();
@@ -212,12 +217,12 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(0);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(0);
-        result.Message.ShouldContain("0 record(s)");
+        result.Value.RecordsDeleted.ShouldBe(0);
+        result.Value.Message.ShouldContain("0 record(s)");
     }
 
     [Fact]
@@ -234,12 +239,12 @@ public class DeleteHistoricalDataUseCaseTests
             .Returns(deletedRecords);
 
         // Act
-        DeleteDataResult result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
+        var result = await _useCase.DeleteDateRangeAsync(ticker, timeFrame, startDate, endDate);
 
         // Assert
         result.ShouldNotBeNull();
-        result.RecordsDeleted.ShouldBe(deletedRecords);
-        result.Message.ShouldContain("M5");
-        result.Message.ShouldContain("5760 record(s)");
+        result.Value.RecordsDeleted.ShouldBe(deletedRecords);
+        result.Value.Message.ShouldContain("M5");
+        result.Value.Message.ShouldContain("5760 record(s)");
     }
 }
