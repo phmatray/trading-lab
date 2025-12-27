@@ -50,6 +50,7 @@ public static class ErrorCodes
     {
         public const string FetchFailed = "DATA_FETCH_FAILED";
         public const string NoHistoricalData = "NO_HISTORICAL_DATA";
+        public const string TickerRequired = "TICKER_REQUIRED";
         public const string TickerOrIsinRequired = "TICKER_OR_ISIN_REQUIRED";
         public const string IsinNotResolved = "ISIN_NOT_RESOLVED";
         public const string NoWorkingTicker = "NO_WORKING_TICKER";
@@ -57,6 +58,7 @@ public static class ErrorCodes
         public const string DeleteFailed = "DATA_DELETE_FAILED";
         public const string ExportFailed = "DATA_EXPORT_FAILED";
         public const string ImportFailed = "DATA_IMPORT_FAILED";
+        public const string InvalidDateRange = "INVALID_DATE_RANGE";
     }
 
     /// <summary>

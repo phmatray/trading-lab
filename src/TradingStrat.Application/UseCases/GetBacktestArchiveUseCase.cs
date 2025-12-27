@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -7,8 +8,9 @@ namespace TradingStrat.Application.UseCases;
 
 /// <summary>
 /// Use case implementation for retrieving backtest runs from the archive.
+/// Uses BaseUseCase to eliminate try-catch boilerplate.
 /// </summary>
-public class GetBacktestArchiveUseCase : IGetBacktestArchiveUseCase
+public class GetBacktestArchiveUseCase : BaseUseCase<GetBacktestArchiveQuery, BacktestArchiveResult>, IGetBacktestArchiveUseCase
 {
     private readonly IBacktestArchivePort _backtestArchivePort;
 
@@ -17,10 +19,11 @@ public class GetBacktestArchiveUseCase : IGetBacktestArchiveUseCase
         _backtestArchivePort = backtestArchivePort;
     }
 
-    public async Task<Result<BacktestArchiveResult>> ExecuteAsync(GetBacktestArchiveQuery query)
+    public Task<Result<BacktestArchiveResult>> ExecuteAsync(GetBacktestArchiveQuery query)
+        => base.ExecuteAsync(query, ExecuteCoreAsync, ErrorCodes.Backtest.ArchiveQueryFailed);
+
+    private async Task<BacktestArchiveResult> ExecuteCoreAsync(GetBacktestArchiveQuery query)
     {
-        try
-        {
         // Get filtered backtest runs
         var backtestRuns = await _backtestArchivePort.GetBacktestRunsAsync(
             ticker: query.Ticker,
@@ -84,17 +87,11 @@ public class GetBacktestArchiveUseCase : IGetBacktestArchiveUseCase
             ? BacktestRunSummary.FromBacktestRun(topBacktests.First())
             : null;
 
-            return Result<BacktestArchiveResult>.Success(new BacktestArchiveResult(
-                BacktestRuns: summaries,
-                TotalCount: totalCount,
-                MostRecentDate: mostRecentDate,
-                TopPerformer: topPerformer
-            ));
-        }
-        catch (Exception ex)
-        {
-            return Result<BacktestArchiveResult>.Failure(
-                Error.BusinessRule($"Failed to retrieve backtest archive: {ex.Message}", "BACKTEST_ARCHIVE_FAILED"));
-        }
+        return new BacktestArchiveResult(
+            BacktestRuns: summaries,
+            TotalCount: totalCount,
+            MostRecentDate: mostRecentDate,
+            TopPerformer: topPerformer
+        );
     }
 }

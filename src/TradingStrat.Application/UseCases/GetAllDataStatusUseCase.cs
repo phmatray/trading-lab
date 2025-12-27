@@ -1,3 +1,4 @@
+using TradingStrat.Application.Common;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Common;
@@ -11,8 +12,9 @@ namespace TradingStrat.Application.UseCases;
 /// Use case for retrieving comprehensive data status for all tickers.
 /// Supports filtering, sorting, and pagination.
 /// Uses DataCoverageService for gap detection and coverage calculation.
+/// Uses BaseUseCase to eliminate try-catch boilerplate.
 /// </summary>
-public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
+public class GetAllDataStatusUseCase : BaseUseCase<DataStatusQuery?, AllDataStatusResult>, IGetAllDataStatusUseCase
 {
     private readonly IHistoricalDataPort _historicalDataPort;
     private readonly DataCoverageService _dataCoverageService;
@@ -25,10 +27,11 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
         _dataCoverageService = dataCoverageService;
     }
 
-    public async Task<Result<AllDataStatusResult>> ExecuteAsync(DataStatusQuery? query = null)
+    public Task<Result<AllDataStatusResult>> ExecuteAsync(DataStatusQuery? query = null)
+        => base.ExecuteAsync(query, ExecuteCoreAsync, ErrorCodes.Data.StatusQueryFailed);
+
+    private async Task<AllDataStatusResult> ExecuteCoreAsync(DataStatusQuery? query)
     {
-        try
-        {
         // Use default query if not provided
         query ??= new DataStatusQuery();
 
@@ -38,18 +41,18 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
         // Get all ticker summaries for the specified timeframe (efficient single query)
         List<TickerSummary> summaries = await _historicalDataPort.GetAllTickerSummariesAsync(timeFrame);
 
-            if (!summaries.Any())
-            {
-                return Result<AllDataStatusResult>.Success(new AllDataStatusResult(
-                    TotalTickers: 0,
-                    TotalRecords: 0,
-                    AverageCoveragePercentage: 0m,
-                    TickerStatuses: new List<TickerDataStatus>(),
-                    TotalPages: 0,
-                    CurrentPage: 1,
-                    PageSize: query.PageSize
-                ));
-            }
+        if (!summaries.Any())
+        {
+            return new AllDataStatusResult(
+                TotalTickers: 0,
+                TotalRecords: 0,
+                AverageCoveragePercentage: 0m,
+                TickerStatuses: new List<TickerDataStatus>(),
+                TotalPages: 0,
+                CurrentPage: 1,
+                PageSize: query.PageSize
+            );
+        }
 
         // Convert summaries to full status objects (with gap detection)
         var statusTasks = summaries.Select(async summary =>
@@ -80,7 +83,7 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
             .Take(query.PageSize)
             .ToList();
 
-        return Result<AllDataStatusResult>.Success(new AllDataStatusResult(
+        return new AllDataStatusResult(
             TotalTickers: totalTickers,
             TotalRecords: totalRecords,
             AverageCoveragePercentage: avgCoverage,
@@ -88,14 +91,8 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
             TotalPages: totalPages,
             CurrentPage: query.PageNumber,
             PageSize: query.PageSize
-        ));
+        );
     }
-    catch (Exception ex)
-    {
-        return Result<AllDataStatusResult>.Failure(
-            Error.BusinessRule($"Failed to retrieve data status: {ex.Message}", "DATA_STATUS_QUERY_FAILED"));
-    }
-}
 
     private IEnumerable<TickerDataStatus> ApplyFilters(
         IEnumerable<TickerDataStatus> statuses,
