@@ -21,19 +21,17 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
         MultiStrategyComparisonCommand command,
         IProgress<string>? progress = null)
     {
-        try
+        if (command.Strategies.Count == 0)
         {
-            if (command.Strategies.Count == 0)
-            {
-                return Result<MultiStrategyComparisonResult>.Failure(
-                    Error.Validation("At least one strategy must be provided for comparison", "NO_STRATEGIES"));
-            }
+            return Result<MultiStrategyComparisonResult>.Failure(
+                Error.Validation("At least one strategy must be provided for comparison", "NO_STRATEGIES"));
+        }
 
-            if (command.Strategies.Count > 10)
-            {
-                return Result<MultiStrategyComparisonResult>.Failure(
-                    Error.Validation("Maximum 10 strategies can be compared at once", "TOO_MANY_STRATEGIES"));
-            }
+        if (command.Strategies.Count > 10)
+        {
+            return Result<MultiStrategyComparisonResult>.Failure(
+                Error.Validation("Maximum 10 strategies can be compared at once", "TOO_MANY_STRATEGIES"));
+        }
 
         List<StrategyComparisonItem> comparisonItems = new();
         int currentStrategy = 0;
@@ -46,7 +44,16 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
             progress?.Report($"Running backtest {currentStrategy}/{totalStrategies}: {strategyConfig.StrategyType}...");
 
             // Determine strategy type enum
-            StrategyType strategyType = ParseStrategyType(strategyConfig.StrategyType);
+            StrategyType strategyType;
+            try
+            {
+                strategyType = ParseStrategyType(strategyConfig.StrategyType);
+            }
+            catch (ArgumentException ex)
+            {
+                return Result<MultiStrategyComparisonResult>.Failure(
+                    Error.Validation($"Invalid strategy type: {ex.Message}", "INVALID_STRATEGY_TYPE"));
+            }
 
             // Create backtest command
             BacktestCommand backtestCommand = new(
@@ -105,28 +112,17 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
             .OrderBy(s => s.Metrics.MaxDrawdown)  // Lower drawdown is better
             .FirstOrDefault();
 
-            progress?.Report($"Comparison complete: {totalStrategies} strategies analyzed");
+        progress?.Report($"Comparison complete: {totalStrategies} strategies analyzed");
 
-            return Result<MultiStrategyComparisonResult>.Success(new MultiStrategyComparisonResult(
-                Ticker: command.Ticker,
-                StartDate: command.StartDate,
-                EndDate: command.EndDate,
-                Strategies: comparisonItems,
-                BestByReturn: bestByReturn,
-                BestBySharpe: bestBySharpe,
-                BestByDrawdown: bestByDrawdown
-            ));
-        }
-        catch (ArgumentException ex)
-        {
-            return Result<MultiStrategyComparisonResult>.Failure(
-                Error.Validation($"Invalid strategy type: {ex.Message}", "INVALID_STRATEGY_TYPE"));
-        }
-        catch (Exception ex)
-        {
-            return Result<MultiStrategyComparisonResult>.Failure(
-                Error.BusinessRule($"Strategy comparison failed: {ex.Message}", "COMPARISON_FAILED"));
-        }
+        return Result<MultiStrategyComparisonResult>.Success(new MultiStrategyComparisonResult(
+            Ticker: command.Ticker,
+            StartDate: command.StartDate,
+            EndDate: command.EndDate,
+            Strategies: comparisonItems,
+            BestByReturn: bestByReturn,
+            BestBySharpe: bestBySharpe,
+            BestByDrawdown: bestByDrawdown
+        ));
     }
 
     private static StrategyType ParseStrategyType(string strategyType)

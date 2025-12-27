@@ -35,31 +35,29 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
         AnalyzeStrategyCommand command,
         CancellationToken cancellationToken = default)
     {
-        try
+        // Run quick backtest to get recent performance data (last 3 months)
+        var backtestCommand = new BacktestCommand(
+            Ticker: command.Ticker,
+            StrategyType: command.StrategyType,
+            StrategyParameters: command.StrategyParameters,
+            StartDate: DateTime.Today.AddMonths(-3),
+            EndDate: DateTime.Today
+        );
+
+        Result<BacktestResult> backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
+
+        if (backtestResultWrapper.IsFailure)
         {
-            // Run quick backtest to get recent performance data (last 3 months)
-            var backtestCommand = new BacktestCommand(
-                Ticker: command.Ticker,
-                StrategyType: command.StrategyType,
-                StrategyParameters: command.StrategyParameters,
-                StartDate: DateTime.Today.AddMonths(-3),
-                EndDate: DateTime.Today
-            );
-
-            Result<BacktestResult> backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
-
-            if (backtestResultWrapper.IsFailure)
-            {
-                // If backtest fails, return error
-                string errorMessage = string.Join(", ", backtestResultWrapper.Errors.Select(e => e.Message));
-                return Result<StrategyRecommendation>.Failure(
-                    Error.BusinessRule($"Unable to run backtest: {errorMessage}", "BACKTEST_FAILED"));
-            }
+            // If backtest fails, return error
+            string errorMessage = string.Join(", ", backtestResultWrapper.Errors.Select(e => e.Message));
+            return Result<StrategyRecommendation>.Failure(
+                Error.BusinessRule($"Unable to run backtest: {errorMessage}", "BACKTEST_FAILED"));
+        }
 
         BacktestResult backtestResult = backtestResultWrapper.Value;
 
         // Build comprehensive market context
-        string marketContext = await _contextBuilder.BuildContextForTicker(command.Ticker, 30);
+        string marketContext = await _contextBuilder.BuildContextForTicker(command.Ticker);
 
         // Calculate average profit/loss
         decimal avgProfitLoss = 0;
@@ -89,55 +87,53 @@ RECENT BACKTEST RESULTS (Last 3 Months):
 Provide your analysis in the specified JSON format with actionable recommendations.
 ";
 
-            // Get AI analysis (non-streaming for structured output)
-            string response = await _assistantPort.GetChatResponseAsync(
-                PromptTemplates.StrategyAnalysisSystemPrompt,
-                new List<ChatMessage>(), // No conversation history for analysis
-                analysisPrompt,
-                cancellationToken);
+        // Get AI analysis (non-streaming for structured output)
+        string response = await _assistantPort.GetChatResponseAsync(
+            PromptTemplates.StrategyAnalysisSystemPrompt,
+            new List<ChatMessage>(), // No conversation history for analysis
+            analysisPrompt,
+            cancellationToken);
 
-            // Parse JSON response
-            StrategyRecommendation? recommendation;
+        // Parse JSON response
+        StrategyRecommendation? recommendation;
 
-            // Extract JSON from response (in case LLM adds extra text)
-            int jsonStart = response.IndexOf('{');
-            int jsonEnd = response.LastIndexOf('}') + 1;
-            if (jsonStart >= 0 && jsonEnd > jsonStart)
+        // Extract JSON from response (in case LLM adds extra text)
+        int jsonStart = response.IndexOf('{');
+        int jsonEnd = response.LastIndexOf('}') + 1;
+        if (jsonStart >= 0 && jsonEnd > jsonStart)
+        {
+            string jsonContent = response.Substring(jsonStart, jsonEnd - jsonStart);
+
+            try
             {
-                string jsonContent = response.Substring(jsonStart, jsonEnd - jsonStart);
                 recommendation = JsonSerializer.Deserialize<StrategyRecommendation>(jsonContent, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
             }
-            else
+            catch (JsonException ex)
             {
                 return Result<StrategyRecommendation>.Failure(
-                    Error.BusinessRule("No JSON object found in AI response", "AI_RESPONSE_PARSE_ERROR"));
+                    Error.BusinessRule($"Failed to parse AI response: {ex.Message}", "AI_RESPONSE_PARSE_ERROR"));
             }
-
-            if (recommendation == null)
-            {
-                return Result<StrategyRecommendation>.Failure(
-                    Error.BusinessRule("Failed to deserialize AI recommendation", "AI_RESPONSE_PARSE_ERROR"));
-            }
-
-            // Set metadata
-            recommendation.Ticker = command.Ticker;
-            recommendation.StrategyType = _strategyRegistry.GetDescriptor(command.StrategyType).Key;
-            recommendation.CreatedAt = DateTime.UtcNow;
-
-            return Result<StrategyRecommendation>.Success(recommendation);
         }
-        catch (JsonException ex)
+        else
         {
             return Result<StrategyRecommendation>.Failure(
-                Error.BusinessRule($"Failed to parse AI response: {ex.Message}", "AI_RESPONSE_PARSE_ERROR"));
+                Error.BusinessRule("No JSON object found in AI response", "AI_RESPONSE_PARSE_ERROR"));
         }
-        catch (Exception ex)
+
+        if (recommendation == null)
         {
             return Result<StrategyRecommendation>.Failure(
-                Error.BusinessRule($"Strategy analysis failed: {ex.Message}", "ANALYSIS_FAILED"));
+                Error.BusinessRule("Failed to deserialize AI recommendation", "AI_RESPONSE_PARSE_ERROR"));
         }
+
+        // Set metadata
+        recommendation.Ticker = command.Ticker;
+        recommendation.StrategyType = _strategyRegistry.GetDescriptor(command.StrategyType).Key;
+        recommendation.CreatedAt = DateTime.UtcNow;
+
+        return Result<StrategyRecommendation>.Success(recommendation);
     }
 }

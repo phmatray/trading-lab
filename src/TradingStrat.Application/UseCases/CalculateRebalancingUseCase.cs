@@ -38,78 +38,70 @@ public class CalculateRebalancingUseCase : ICalculateRebalancingUseCase
     {
         // Command validation happens in constructor - command is guaranteed to be valid here
 
-        try
-        {
-            // Validate target weights sum to 100%
-            if (!command.TargetWeights.IsValid())
-            {
-                return Result<RebalancingPlan>.Failure(
-                    Error.Validation("Target allocations must sum to 100%", "INVALID_TARGET_WEIGHTS"));
-            }
-
-            progress?.Report("Getting current portfolio snapshot...");
-
-            // Get current portfolio snapshot (with current prices for existing positions)
-            Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(
-                command.PortfolioId,
-                progress);
-
-            if (snapshotResult.IsFailure)
-            {
-                return Result<RebalancingPlan>.Failure(snapshotResult.Errors);
-            }
-
-            PortfolioSnapshot snapshot = snapshotResult.Value;
-
-            progress?.Report("Fetching prices for target positions...");
-
-            // Build complete price dictionary (existing positions + new target tickers)
-            Dictionary<string, decimal> currentPrices = snapshot.Positions.ToDictionary(
-                p => p.Ticker,
-                p => p.CurrentPrice);
-
-            // Fetch prices for any target tickers not already in the portfolio
-            var targetTickers = command.TargetWeights.TargetPercentages.Keys.ToList();
-            var newTickers = targetTickers.Except(currentPrices.Keys).ToList();
-
-            if (newTickers.Any())
-            {
-                // Fetch prices for new tickers using the centralized service
-                Result<Dictionary<string, decimal>> priceResult = await _priceService.GetCurrentPricesAsync(
-                    newTickers,
-                    _marketDataPort,
-                    progress);
-
-                if (priceResult.IsFailure)
-                {
-                    return Result<RebalancingPlan>.Failure(priceResult.Errors);
-                }
-
-                // Merge new prices into the current prices dictionary
-                foreach ((string ticker, decimal price) in priceResult.Value)
-                {
-                    currentPrices[ticker] = price;
-                }
-            }
-
-            progress?.Report("Calculating rebalancing plan...");
-
-            // Calculate rebalancing plan using domain service
-            RebalancingPlan plan = _rebalancingService.CalculateRebalancing(
-                snapshot,
-                command.TargetWeights,
-                currentPrices,
-                command.CommissionPercentage,
-                command.MinimumCommission);
-
-            progress?.Report("Rebalancing calculation complete");
-
-            return Result<RebalancingPlan>.Success(plan);
-        }
-        catch (Exception ex)
+        // Validate target weights sum to 100%
+        if (!command.TargetWeights.IsValid())
         {
             return Result<RebalancingPlan>.Failure(
-                Error.BusinessRule($"Failed to calculate rebalancing plan: {ex.Message}", "REBALANCING_CALCULATION_FAILED"));
+                Error.Validation("Target allocations must sum to 100%", "INVALID_TARGET_WEIGHTS"));
         }
+
+        progress?.Report("Getting current portfolio snapshot...");
+
+        // Get current portfolio snapshot (with current prices for existing positions)
+        Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(
+            command.PortfolioId,
+            progress);
+
+        if (snapshotResult.IsFailure)
+        {
+            return Result<RebalancingPlan>.Failure(snapshotResult.Errors);
+        }
+
+        PortfolioSnapshot snapshot = snapshotResult.Value;
+
+        progress?.Report("Fetching prices for target positions...");
+
+        // Build complete price dictionary (existing positions + new target tickers)
+        Dictionary<string, decimal> currentPrices = snapshot.Positions.ToDictionary(
+            p => p.Ticker,
+            p => p.CurrentPrice);
+
+        // Fetch prices for any target tickers not already in the portfolio
+        var targetTickers = command.TargetWeights.TargetPercentages.Keys.ToList();
+        var newTickers = targetTickers.Except(currentPrices.Keys).ToList();
+
+        if (newTickers.Any())
+        {
+            // Fetch prices for new tickers using the centralized service
+            Result<Dictionary<string, decimal>> priceResult = await _priceService.GetCurrentPricesAsync(
+                newTickers,
+                _marketDataPort,
+                progress);
+
+            if (priceResult.IsFailure)
+            {
+                return Result<RebalancingPlan>.Failure(priceResult.Errors);
+            }
+
+            // Merge new prices into the current prices dictionary
+            foreach ((string ticker, decimal price) in priceResult.Value)
+            {
+                currentPrices[ticker] = price;
+            }
+        }
+
+        progress?.Report("Calculating rebalancing plan...");
+
+        // Calculate rebalancing plan using domain service
+        RebalancingPlan plan = _rebalancingService.CalculateRebalancing(
+            snapshot,
+            command.TargetWeights,
+            currentPrices,
+            command.CommissionPercentage,
+            command.MinimumCommission);
+
+        progress?.Report("Rebalancing calculation complete");
+
+        return Result<RebalancingPlan>.Success(plan);
     }
 }
