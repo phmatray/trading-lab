@@ -145,7 +145,14 @@ public partial class Backtest
                 Tags: null
             );
 
-            await SaveBacktestRunUseCase.ExecuteAsync(saveCommand);
+            var saveResult = await SaveBacktestRunUseCase.ExecuteAsync(saveCommand);
+
+            if (saveResult.IsFailure)
+            {
+                // Log but don't fail the backtest if archiving fails
+                string errorMessage = string.Join(", ", saveResult.Errors.Select(e => e.Message));
+                Console.WriteLine($"[WARNING] Failed to save backtest run to archive: {errorMessage}");
+            }
         }
         catch (Exception ex)
         {

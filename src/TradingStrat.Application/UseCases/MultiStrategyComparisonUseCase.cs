@@ -1,4 +1,5 @@
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Strategies;
 
@@ -16,19 +17,23 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
         _backtestUseCase = backtestUseCase;
     }
 
-    public async Task<MultiStrategyComparisonResult> ExecuteAsync(
+    public async Task<Result<MultiStrategyComparisonResult>> ExecuteAsync(
         MultiStrategyComparisonCommand command,
         IProgress<string>? progress = null)
     {
-        if (command.Strategies.Count == 0)
+        try
         {
-            throw new ArgumentException("At least one strategy must be provided for comparison", nameof(command));
-        }
+            if (command.Strategies.Count == 0)
+            {
+                return Result<MultiStrategyComparisonResult>.Failure(
+                    Error.Validation("At least one strategy must be provided for comparison", "NO_STRATEGIES"));
+            }
 
-        if (command.Strategies.Count > 10)
-        {
-            throw new ArgumentException("Maximum 10 strategies can be compared at once", nameof(command));
-        }
+            if (command.Strategies.Count > 10)
+            {
+                return Result<MultiStrategyComparisonResult>.Failure(
+                    Error.Validation("Maximum 10 strategies can be compared at once", "TOO_MANY_STRATEGIES"));
+            }
 
         List<StrategyComparisonItem> comparisonItems = new();
         int currentStrategy = 0;
@@ -63,8 +68,9 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
 
             if (backtestResult.IsFailure)
             {
-                throw new InvalidOperationException(
-                    $"Backtest failed for strategy {strategyConfig.StrategyType}: {string.Join(", ", backtestResult.Errors.Select(e => e.Message))}");
+                string errorMessage = string.Join(", ", backtestResult.Errors.Select(e => e.Message));
+                return Result<MultiStrategyComparisonResult>.Failure(
+                    Error.BusinessRule($"Backtest failed for strategy {strategyConfig.StrategyType}: {errorMessage}", "BACKTEST_FAILED"));
             }
 
             BacktestResult result = backtestResult.Value;
@@ -99,17 +105,28 @@ public class MultiStrategyComparisonUseCase : IMultiStrategyComparisonUseCase
             .OrderBy(s => s.Metrics.MaxDrawdown)  // Lower drawdown is better
             .FirstOrDefault();
 
-        progress?.Report($"Comparison complete: {totalStrategies} strategies analyzed");
+            progress?.Report($"Comparison complete: {totalStrategies} strategies analyzed");
 
-        return new MultiStrategyComparisonResult(
-            Ticker: command.Ticker,
-            StartDate: command.StartDate,
-            EndDate: command.EndDate,
-            Strategies: comparisonItems,
-            BestByReturn: bestByReturn,
-            BestBySharpe: bestBySharpe,
-            BestByDrawdown: bestByDrawdown
-        );
+            return Result<MultiStrategyComparisonResult>.Success(new MultiStrategyComparisonResult(
+                Ticker: command.Ticker,
+                StartDate: command.StartDate,
+                EndDate: command.EndDate,
+                Strategies: comparisonItems,
+                BestByReturn: bestByReturn,
+                BestBySharpe: bestBySharpe,
+                BestByDrawdown: bestByDrawdown
+            ));
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<MultiStrategyComparisonResult>.Failure(
+                Error.Validation($"Invalid strategy type: {ex.Message}", "INVALID_STRATEGY_TYPE"));
+        }
+        catch (Exception ex)
+        {
+            return Result<MultiStrategyComparisonResult>.Failure(
+                Error.BusinessRule($"Strategy comparison failed: {ex.Message}", "COMPARISON_FAILED"));
+        }
     }
 
     private static StrategyType ParseStrategyType(string strategyType)

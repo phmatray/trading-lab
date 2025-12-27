@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.UseCases;
@@ -16,8 +17,17 @@ public class GetRecentActivityUseCase : IGetRecentActivityUseCase
         _activityEventPort = activityEventPort;
     }
 
-    public async Task<List<ActivityEvent>> ExecuteAsync(int limit = 10)
+    public async Task<Result<List<ActivityEvent>>> ExecuteAsync(int limit = 10)
     {
-        return await _activityEventPort.GetRecentActivityAsync(limit);
+        try
+        {
+            List<ActivityEvent> events = await _activityEventPort.GetRecentActivityAsync(limit);
+            return Result<List<ActivityEvent>>.Success(events);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<ActivityEvent>>.Failure(
+                Error.BusinessRule($"Failed to retrieve recent activity: {ex.Message}", "RECENT_ACTIVITY_FAILED"));
+        }
     }
 }

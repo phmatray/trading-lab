@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Application.Ports.Inbound;
 
 /// <summary>
@@ -9,8 +11,8 @@ public interface IGetTopStrategiesUseCase
     /// Executes the use case to retrieve top performing strategies.
     /// </summary>
     /// <param name="limit">Maximum number of strategies to return (default 5).</param>
-    /// <returns>List of top strategies ordered by performance metric (Sharpe ratio).</returns>
-    Task<List<TopStrategyResult>> ExecuteAsync(int limit = 5);
+    /// <returns>Result containing list of top strategies ordered by performance metric (Sharpe ratio), or errors if retrieval fails.</returns>
+    Task<Result<List<TopStrategyResult>>> ExecuteAsync(int limit = 5);
 }
 
 /// <summary>

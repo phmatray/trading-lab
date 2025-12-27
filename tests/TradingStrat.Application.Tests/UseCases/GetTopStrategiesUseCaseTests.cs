@@ -1,7 +1,6 @@
 using System.Text.Json;
 using FakeItEasy;
 using Shouldly;
-using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
@@ -27,10 +26,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.Count.ShouldBe(5);
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.Count.ShouldBe(5);
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).MustHaveHappenedOnceExactly();
     }
 
@@ -43,10 +43,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(customLimit)).Returns(backtestRuns);
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync(customLimit);
+        var resultWrapper = await _useCase.ExecuteAsync(customLimit);
 
         // Assert
-        result.Count.ShouldBe(10);
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.Count.ShouldBe(10);
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(customLimit)).MustHaveHappenedOnceExactly();
     }
 
@@ -57,10 +58,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(new List<BacktestRun>());
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.ShouldBeEmpty();
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -80,9 +82,11 @@ public class GetTopStrategiesUseCaseTests
             .Returns(new List<BacktestRun> { backtestRun });
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Count.ShouldBe(1);
         result[0].StrategyName.ShouldBe("RSI Strategy");
         result[0].Ticker.ShouldBe("AAPL");
@@ -128,9 +132,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Should skip the invalid entry
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Count.ShouldBe(2);
         result[0].StrategyName.ShouldBe("Valid Strategy");
         result[1].StrategyName.ShouldBe("Another Valid Strategy");
@@ -153,10 +159,11 @@ public class GetTopStrategiesUseCaseTests
             .Returns(new List<BacktestRun> { backtestRun });
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Should skip the null result
-        result.ShouldBeEmpty();
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -194,9 +201,11 @@ public class GetTopStrategiesUseCaseTests
         A.CallTo(() => _backtestArchivePort.GetTopBacktestRunsAsync(5)).Returns(backtestRuns);
 
         // Act
-        List<TopStrategyResult> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert - Port should return pre-ordered results
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Count.ShouldBe(3);
         result[0].StrategyName.ShouldBe("High Performer");
         result[1].StrategyName.ShouldBe("Medium Performer");

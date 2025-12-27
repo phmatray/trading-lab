@@ -46,7 +46,16 @@ public partial class StrategyOptimization : IDisposable
 
         try
         {
-            customStrategies = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+
+            if (result.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
+                customStrategies = new List<CustomStrategyResult>();
+                return;
+            }
+
+            customStrategies = result.Value;
         }
         catch (Exception ex)
         {
@@ -69,7 +78,16 @@ public partial class StrategyOptimization : IDisposable
 
         try
         {
-            selectedStrategy = await CustomStrategyUseCase.GetStrategyByIdAsync(model.CustomStrategyId);
+            var result = await CustomStrategyUseCase.GetStrategyByIdAsync(model.CustomStrategyId);
+
+            if (result.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
+                selectedStrategy = null;
+                return;
+            }
+
+            selectedStrategy = result.Value;
 
             if (selectedStrategy == null)
             {
@@ -181,7 +199,15 @@ public partial class StrategyOptimization : IDisposable
 
             // Execute optimization
             OptimizeParametersCommand command = model.ToCommand();
-            optimizationResult = await OptimizeUseCase.ExecuteAsync(command, progress);
+            var result = await OptimizeUseCase.ExecuteAsync(command, progress);
+
+            if (result.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
+                return;
+            }
+
+            optimizationResult = result.Value;
 
             await ShowSuccessAsync($"Optimization complete! Best score: {optimizationResult.BestScore:F2}");
 
@@ -230,7 +256,13 @@ public partial class StrategyOptimization : IDisposable
                 Definition: updatedDefinition
             );
 
-            await CustomStrategyUseCase.UpdateStrategyAsync(command);
+            var updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
+
+            if (updateResult.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", updateResult.Errors.Select(e => e.Message)));
+                return;
+            }
 
             await ShowSuccessAsync("Strategy updated with best parameters!");
 
@@ -345,7 +377,15 @@ public partial class StrategyOptimization : IDisposable
                 Definition: optimizedDefinition
             );
 
-            CustomStrategyResult newStrategy = await CustomStrategyUseCase.CreateStrategyAsync(command);
+            var createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
+
+            if (createResult.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", createResult.Errors.Select(e => e.Message)));
+                return;
+            }
+
+            CustomStrategyResult newStrategy = createResult.Value;
 
             await ShowSuccessAsync($"New strategy '{newStrategy.Name}' created successfully!");
 

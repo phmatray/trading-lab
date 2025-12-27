@@ -138,7 +138,15 @@ public partial class StrategyComparison : BaseComponent
                 InvokeAsync(StateHasChanged);
             });
 
-            _comparisonResult = await ComparisonUseCase.ExecuteAsync(command, progress);
+            var result = await ComparisonUseCase.ExecuteAsync(command, progress);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+                return;
+            }
+
+            _comparisonResult = result.Value;
         }
         catch (Exception ex)
         {

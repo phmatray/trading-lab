@@ -1,6 +1,5 @@
 using FakeItEasy;
 using Shouldly;
-using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Entities;
@@ -40,9 +39,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.ShouldNotBeNull();
         result.TotalStrategies.ShouldBe(4); // 4 built-in strategies
         result.TotalBacktests.ShouldBe(0);
@@ -81,10 +82,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.TotalStrategies.ShouldBe(7); // 4 built-in + 3 custom
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.TotalStrategies.ShouldBe(7); // 4 built-in + 3 custom
     }
 
     [Fact]
@@ -98,10 +100,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.TotalBacktests.ShouldBe(42);
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.TotalBacktests.ShouldBe(42);
     }
 
     [Fact]
@@ -122,10 +125,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.TotalPortfolios.ShouldBe(3);
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.TotalPortfolios.ShouldBe(3);
     }
 
     [Fact]
@@ -141,9 +145,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.LastBacktestDate.ShouldNotBeNull();
         result.LastBacktestDate.ShouldBe(lastBacktestDate);
     }
@@ -181,9 +187,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(tickers, summaries, lastDataUpdate);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.ShouldNotBeNull();
         result.TotalStrategies.ShouldBe(6); // 4 built-in + 2 custom
         result.TotalBacktests.ShouldBe(25);
@@ -205,9 +213,12 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(new List<string>(), new List<TickerSummary>(), null);
 
         // Act
-        await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
-        // Assert - Verify all ports were called exactly once
+        // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+
+        // Verify all ports were called exactly once
         A.CallTo(() => _customStrategyPort.GetAllAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _backtestArchivePort.GetBacktestRunCountAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portfolioPort.GetAllPortfoliosAsync()).MustHaveHappenedOnceExactly();
@@ -239,9 +250,11 @@ public class GetDashboardStatsUseCaseTests
         SetupHistoricalDataPort(tickers, summaries, lastUpdate);
 
         // Act
-        DashboardStatsResult result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.TotalSecurities.ShouldBe(5);
         result.DataCoveragePercentage.ShouldBe(60m); // 3 out of 5 have recent data (within 7 days)
         result.LastDataUpdate.ShouldBe(lastUpdate);

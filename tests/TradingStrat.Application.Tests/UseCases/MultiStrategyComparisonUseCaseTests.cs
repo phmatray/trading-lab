@@ -49,9 +49,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.ShouldNotBeNull();
         result.Ticker.ShouldBe("AAPL");
         result.Strategies.Count.ShouldBe(3);
@@ -81,9 +83,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.BestByReturn.ShouldNotBeNull();
         result.BestByReturn.StrategyName.ShouldBe("MACD Strategy");
         result.BestByReturn.Metrics.TotalReturnPercentage.ShouldBe(35.0m);
@@ -110,9 +114,11 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.BestBySharpe.ShouldNotBeNull();
         result.BestBySharpe.StrategyName.ShouldBe("RSI Strategy");
         result.BestBySharpe.Metrics.SharpeRatio.ShouldBe(2.5m);
@@ -139,16 +145,18 @@ public class MultiStrategyComparisonUseCaseTests
             );
 
         // Act
-        MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.BestByDrawdown.ShouldNotBeNull();
         result.BestByDrawdown.StrategyName.ShouldBe("MACD Strategy");
         result.BestByDrawdown.Metrics.MaxDrawdown.ShouldBe(400m);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNoStrategies_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNoStrategies_ReturnsFailure()
     {
         // Arrange
         var command = new MultiStrategyComparisonCommand(
@@ -161,14 +169,16 @@ public class MultiStrategyComparisonUseCaseTests
             1.0m
         );
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("At least one strategy must be provided");
+        // Act
+        var result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("At least one strategy must be provided"));
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithMoreThan10Strategies_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithMoreThan10Strategies_ReturnsFailure()
     {
         // Arrange
         var strategies = Enumerable.Range(1, 11)
@@ -179,10 +189,12 @@ public class MultiStrategyComparisonUseCaseTests
             "AAPL", strategies, DateTime.Today.AddYears(-1), DateTime.Today, 10000m, 0.001m, 1.0m
         );
 
-        // Act & Assert
-        ArgumentException ex = await Should.ThrowAsync<ArgumentException>(
-            async () => await _useCase.ExecuteAsync(command));
-        ex.Message.ShouldContain("Maximum 10 strategies");
+        // Act
+        var result = await _useCase.ExecuteAsync(command);
+
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Message.Contains("Maximum 10 strategies"));
     }
 
     [Fact]
@@ -214,9 +226,11 @@ public class MultiStrategyComparisonUseCaseTests
             .Returns(Result<BacktestResult>.Success(backtestResult));
 
         // Act
-        MultiStrategyComparisonResult result = await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Strategies.Count.ShouldBe(1);
         result.Strategies[0].TotalTrades.ShouldBe(5);
         result.Strategies[0].WinningTrades.ShouldBe(3);
@@ -247,9 +261,10 @@ public class MultiStrategyComparisonUseCaseTests
         var progress = new Progress<string>(msg => progressReports.Add(msg));
 
         // Act
-        await _useCase.ExecuteAsync(command, progress);
+        var resultWrapper = await _useCase.ExecuteAsync(command, progress);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
         progressReports.ShouldNotBeEmpty();
         progressReports.ShouldContain(msg => msg.Contains("Running backtest 1/2"));
         progressReports.ShouldContain(msg => msg.Contains("Running backtest 2/2"));
@@ -280,9 +295,10 @@ public class MultiStrategyComparisonUseCaseTests
             .Returns(Result<BacktestResult>.Success(CreateBacktestResult("RSI Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
-        await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
         A.CallTo(() => _backtestUseCase.ExecuteAsync(
             A<BacktestCommand>.That.Matches(cmd =>
                 cmd.Ticker == "AAPL" &&
@@ -315,9 +331,10 @@ public class MultiStrategyComparisonUseCaseTests
             .Returns(Result<BacktestResult>.Success(CreateBacktestResult("Custom Strategy", 25.0m, 1.5m, 500m)));
 
         // Act
-        await _useCase.ExecuteAsync(command);
+        var resultWrapper = await _useCase.ExecuteAsync(command);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
         A.CallTo(() => _backtestUseCase.ExecuteAsync(
             A<BacktestCommand>.That.Matches(cmd => cmd.CustomStrategyId == 42),
             A<IProgress<BacktestProgress>?>._

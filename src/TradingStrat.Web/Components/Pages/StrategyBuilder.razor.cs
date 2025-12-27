@@ -61,14 +61,16 @@ public partial class StrategyBuilder
 
         try
         {
-            CustomStrategyResult? result = await CustomStrategyUseCase.GetStrategyByIdAsync(Id!.Value);
+            var getResult = await CustomStrategyUseCase.GetStrategyByIdAsync(Id!.Value);
 
-            if (result == null)
+            if (getResult.IsFailure)
             {
-                await ShowErrorAsync("Strategy not found");
+                await ShowErrorAsync(string.Join(", ", getResult.Errors.Select(e => e.Message)));
                 NavigateToLibrary();
                 return;
             }
+
+            CustomStrategyResult result = getResult.Value;
 
             // Populate form model from result
             _formModel.Name = result.Name;
@@ -200,7 +202,13 @@ public partial class StrategyBuilder
                 );
 
                 Log($"[StrategyBuilder] Updating strategy {Id.Value}...");
-                await CustomStrategyUseCase.UpdateStrategyAsync(command);
+                var updateResult = await CustomStrategyUseCase.UpdateStrategyAsync(command);
+
+                if (updateResult.IsFailure)
+                {
+                    await ShowErrorAsync(string.Join(", ", updateResult.Errors.Select(e => e.Message)));
+                    return;
+                }
             }
             else
             {
@@ -213,7 +221,14 @@ public partial class StrategyBuilder
                 );
 
                 Log($"[StrategyBuilder] Creating new strategy '{_formModel.Name}'...");
-                await CustomStrategyUseCase.CreateStrategyAsync(command);
+                var createResult = await CustomStrategyUseCase.CreateStrategyAsync(command);
+
+                if (createResult.IsFailure)
+                {
+                    await ShowErrorAsync(string.Join(", ", createResult.Errors.Select(e => e.Message)));
+                    return;
+                }
+
                 Log($"[StrategyBuilder] Strategy created successfully!");
             }
 
@@ -271,7 +286,14 @@ public partial class StrategyBuilder
 
         try
         {
-            await CustomStrategyUseCase.DeleteStrategyAsync(Id!.Value);
+            var deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(Id!.Value);
+
+            if (deleteResult.IsFailure)
+            {
+                await ShowErrorAsync(string.Join(", ", deleteResult.Errors.Select(e => e.Message)));
+                return;
+            }
+
             await ShowSuccessAsync("Strategy deleted successfully!");
             NavigateToLibrary();
         }

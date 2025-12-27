@@ -47,7 +47,19 @@ public partial class TabDefine : ComponentBase
 
         try
         {
-            _strategies = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+
+            if (result.IsFailure)
+            {
+                await Notifications.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Error,
+                    "Load Failed",
+                    string.Join(", ", result.Errors.Select(e => e.Message)));
+                return;
+            }
+
+            _strategies = result.Value;
         }
         catch (Exception ex)
         {
@@ -63,7 +75,19 @@ public partial class TabDefine : ComponentBase
     {
         try
         {
-            CustomStrategyResult strategyResult = await CustomStrategyUseCase.GetStrategyByIdAsync(strategyId);
+            var result = await CustomStrategyUseCase.GetStrategyByIdAsync(strategyId);
+
+            if (result.IsFailure)
+            {
+                await Notifications.AddNotificationAsync(
+                    NotificationType.System,
+                    NotificationSeverity.Error,
+                    "Load Failed",
+                    string.Join(", ", result.Errors.Select(e => e.Message)));
+                return;
+            }
+
+            CustomStrategyResult strategyResult = result.Value;
 
             // Convert result to entity for workspace state
             CustomStrategy strategy = new()

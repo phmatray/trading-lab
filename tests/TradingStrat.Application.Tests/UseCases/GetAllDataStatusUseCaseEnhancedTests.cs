@@ -126,27 +126,27 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TimeFrame timeFrame = new() { Unit = TimeFrameUnit.D1 };
 
         // Create summaries with different coverage levels
-        // Complete: 250 records in 365 days = ~97.8% coverage
+        // Complete: 350 records in 365 days = 95.9% coverage (>=95%)
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 250,
+            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
-        // Partial: 220 records in 365 days = ~86% coverage
+        // Partial: 320 records in 365 days = 87.7% coverage (80-95%)
         TickerSummary partialTicker = new(
             "PARTIAL",
             null,
-            RecordCount: 220,
+            RecordCount: 320, // 320/365 = 87.7% coverage (80-95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
-        // Gaps: 100 records in 365 days = ~39% coverage
+        // Gaps: 100 records in 365 days = 27.4% coverage (<80%)
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100,
+            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -177,21 +177,21 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 250,
+            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary partialTicker = new(
             "PARTIAL",
             null,
-            RecordCount: 220,
+            RecordCount: 320, // 320/365 = 87.7% coverage (80-95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100,
+            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -223,14 +223,14 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 250,
+            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100,
+            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -261,14 +261,14 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary highCoverage = new(
             "HIGH",
             null,
-            RecordCount: 250,
+            RecordCount: 330, // 330/365 = 90.4% coverage (>=90%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary lowCoverage = new(
             "LOW",
             null,
-            RecordCount: 100,
+            RecordCount: 100, // 100/365 = 27.4% coverage
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -417,10 +417,10 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TimeFrame timeFrame = new() { Unit = TimeFrameUnit.D1 };
         List<TickerSummary> summaries = new()
         {
-            new("AAPL", null, 250, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)),  // Complete
-            new("MSFT", null, 220, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)),  // Partial
-            new("GOOGL", null, 240, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)), // Complete
-            new("AMZN", null, 100, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31))   // Gaps
+            new("AAPL", null, 350, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)),  // Complete: 350/365 = 95.9%
+            new("MSFT", null, 320, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)),  // Partial: 320/365 = 87.7%
+            new("GOOGL", null, 347, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31)), // Complete: 347/365 = 95.1%
+            new("AMZN", null, 100, new DateTime(2023, 1, 1), new DateTime(2023, 12, 31))   // Gaps: 100/365 = 27.4%
         };
 
         DataStatusQuery query = new(

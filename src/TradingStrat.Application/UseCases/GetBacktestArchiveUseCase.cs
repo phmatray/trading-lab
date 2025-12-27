@@ -1,5 +1,6 @@
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.UseCases;
@@ -16,8 +17,10 @@ public class GetBacktestArchiveUseCase : IGetBacktestArchiveUseCase
         _backtestArchivePort = backtestArchivePort;
     }
 
-    public async Task<BacktestArchiveResult> ExecuteAsync(GetBacktestArchiveQuery query)
+    public async Task<Result<BacktestArchiveResult>> ExecuteAsync(GetBacktestArchiveQuery query)
     {
+        try
+        {
         // Get filtered backtest runs
         var backtestRuns = await _backtestArchivePort.GetBacktestRunsAsync(
             ticker: query.Ticker,
@@ -81,11 +84,17 @@ public class GetBacktestArchiveUseCase : IGetBacktestArchiveUseCase
             ? BacktestRunSummary.FromBacktestRun(topBacktests.First())
             : null;
 
-        return new BacktestArchiveResult(
-            BacktestRuns: summaries,
-            TotalCount: totalCount,
-            MostRecentDate: mostRecentDate,
-            TopPerformer: topPerformer
-        );
+            return Result<BacktestArchiveResult>.Success(new BacktestArchiveResult(
+                BacktestRuns: summaries,
+                TotalCount: totalCount,
+                MostRecentDate: mostRecentDate,
+                TopPerformer: topPerformer
+            ));
+        }
+        catch (Exception ex)
+        {
+            return Result<BacktestArchiveResult>.Failure(
+                Error.BusinessRule($"Failed to retrieve backtest archive: {ex.Message}", "BACKTEST_ARCHIVE_FAILED"));
+        }
     }
 }

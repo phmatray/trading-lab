@@ -50,7 +50,15 @@ public partial class BacktestArchive : BaseComponent
                 Limit: 100
             );
 
-            _archiveResult = await GetBacktestArchiveUseCase.ExecuteAsync(query);
+            var result = await GetBacktestArchiveUseCase.ExecuteAsync(query);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = string.Join(", ", result.Errors.Select(e => e.Message));
+                return;
+            }
+
+            _archiveResult = result.Value;
         }
         catch (Exception ex)
         {

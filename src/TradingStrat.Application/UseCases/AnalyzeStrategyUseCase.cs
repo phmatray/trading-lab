@@ -3,8 +3,8 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
 using TradingStrat.Application.Strategies;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
-using TradingStrat.Domain.Strategies;
 
 namespace TradingStrat.Application.UseCases;
 
@@ -31,47 +31,30 @@ public class AnalyzeStrategyUseCase : IAnalyzeStrategyUseCase
         _strategyRegistry = strategyRegistry;
     }
 
-    public async Task<StrategyRecommendation> ExecuteAsync(
+    public async Task<Result<StrategyRecommendation>> ExecuteAsync(
         AnalyzeStrategyCommand command,
         CancellationToken cancellationToken = default)
     {
-        // Run quick backtest to get recent performance data (last 3 months)
-        var backtestCommand = new BacktestCommand(
-            Ticker: command.Ticker,
-            StrategyType: command.StrategyType,
-            StrategyParameters: command.StrategyParameters,
-            StartDate: DateTime.Today.AddMonths(-3),
-            EndDate: DateTime.Today
-        );
-
-        var backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
-
-        if (backtestResultWrapper.IsFailure)
+        try
         {
-            // If backtest fails, return error recommendation
-            // Convert enum to string for database storage
-            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
-            string errorMessage = string.Join(", ", backtestResultWrapper.Errors.Select(e => e.Message));
+            // Run quick backtest to get recent performance data (last 3 months)
+            var backtestCommand = new BacktestCommand(
+                Ticker: command.Ticker,
+                StrategyType: command.StrategyType,
+                StrategyParameters: command.StrategyParameters,
+                StartDate: DateTime.Today.AddMonths(-3),
+                EndDate: DateTime.Today
+            );
 
-            return new StrategyRecommendation
+            var backtestResultWrapper = await _backtestUseCase.ExecuteAsync(backtestCommand);
+
+            if (backtestResultWrapper.IsFailure)
             {
-                Ticker = command.Ticker,
-                StrategyType = descriptor.Key,
-                Summary = $"Unable to run backtest: {errorMessage}",
-                Recommendation = "Cannot provide recommendation without backtest data. Please ensure historical data is available.",
-                ActionItems = new List<ActionItem>
-                {
-                    new ActionItem
-                    {
-                        Description = "Fetch historical data for this ticker using the Data Management page",
-                        Priority = "High",
-                        ConfidenceLevel = 1.0m
-                    }
-                },
-                Confidence = 0,
-                CreatedAt = DateTime.UtcNow
-            };
-        }
+                // If backtest fails, return error
+                string errorMessage = string.Join(", ", backtestResultWrapper.Errors.Select(e => e.Message));
+                return Result<StrategyRecommendation>.Failure(
+                    Error.BusinessRule($"Unable to run backtest: {errorMessage}", "BACKTEST_FAILED"));
+            }
 
         BacktestResult backtestResult = backtestResultWrapper.Value;
 
@@ -106,46 +89,16 @@ RECENT BACKTEST RESULTS (Last 3 Months):
 Provide your analysis in the specified JSON format with actionable recommendations.
 ";
 
-        // Get AI analysis (non-streaming for structured output)
-        string response;
-        try
-        {
-            response = await _assistantPort.GetChatResponseAsync(
+            // Get AI analysis (non-streaming for structured output)
+            string response = await _assistantPort.GetChatResponseAsync(
                 PromptTemplates.StrategyAnalysisSystemPrompt,
                 new List<ChatMessage>(), // No conversation history for analysis
                 analysisPrompt,
                 cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // If AI call fails, return basic recommendation
-            // Convert enum to string for database storage
-            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
 
-            return new StrategyRecommendation
-            {
-                Ticker = command.Ticker,
-                StrategyType = descriptor.Key,
-                Summary = $"Backtest completed with {backtestResult.Metrics.TotalReturn:P2} return over 3 months.",
-                Recommendation = $"AI analysis unavailable ({ex.Message}). Based on metrics: Sharpe {backtestResult.Metrics.SharpeRatio:F2}, Win Rate {backtestResult.Metrics.WinRate:P1}.",
-                ActionItems = new List<ActionItem>
-                {
-                    new ActionItem
-                    {
-                        Description = "Review backtest results manually to assess strategy performance",
-                        Priority = "Medium",
-                        ConfidenceLevel = 0.5m
-                    }
-                },
-                Confidence = 50,
-                CreatedAt = DateTime.UtcNow
-            };
-        }
+            // Parse JSON response
+            StrategyRecommendation? recommendation;
 
-        // Parse JSON response
-        StrategyRecommendation? recommendation;
-        try
-        {
             // Extract JSON from response (in case LLM adds extra text)
             int jsonStart = response.IndexOf('{');
             int jsonEnd = response.LastIndexOf('}') + 1;
@@ -159,45 +112,32 @@ Provide your analysis in the specified JSON format with actionable recommendatio
             }
             else
             {
-                throw new JsonException("No JSON object found in response");
+                return Result<StrategyRecommendation>.Failure(
+                    Error.BusinessRule("No JSON object found in AI response", "AI_RESPONSE_PARSE_ERROR"));
             }
+
+            if (recommendation == null)
+            {
+                return Result<StrategyRecommendation>.Failure(
+                    Error.BusinessRule("Failed to deserialize AI recommendation", "AI_RESPONSE_PARSE_ERROR"));
+            }
+
+            // Set metadata
+            recommendation.Ticker = command.Ticker;
+            recommendation.StrategyType = _strategyRegistry.GetDescriptor(command.StrategyType).Key;
+            recommendation.CreatedAt = DateTime.UtcNow;
+
+            return Result<StrategyRecommendation>.Success(recommendation);
         }
         catch (JsonException ex)
         {
-            // If JSON parsing fails, create fallback recommendation
-            // Convert enum to string for database storage
-            StrategyDescriptor descriptor = _strategyRegistry.GetDescriptor(command.StrategyType);
-
-            return new StrategyRecommendation
-            {
-                Ticker = command.Ticker,
-                StrategyType = descriptor.Key,
-                Summary = $"Strategy shows {backtestResult.Metrics.TotalReturn:P2} return with {backtestResult.Metrics.WinRate:P1} win rate.",
-                Recommendation = $"AI response formatting issue ({ex.Message}). Review backtest metrics directly.",
-                ActionItems = new List<ActionItem>
-                {
-                    new ActionItem
-                    {
-                        Description = "Check backtest results on the Backtest page for detailed analysis",
-                        Priority = "High",
-                        ConfidenceLevel = 1.0m
-                    }
-                },
-                Confidence = 50,
-                CreatedAt = DateTime.UtcNow
-            };
+            return Result<StrategyRecommendation>.Failure(
+                Error.BusinessRule($"Failed to parse AI response: {ex.Message}", "AI_RESPONSE_PARSE_ERROR"));
         }
-
-        if (recommendation == null)
+        catch (Exception ex)
         {
-            throw new InvalidOperationException("Failed to deserialize AI recommendation");
+            return Result<StrategyRecommendation>.Failure(
+                Error.BusinessRule($"Strategy analysis failed: {ex.Message}", "ANALYSIS_FAILED"));
         }
-
-        // Set metadata
-        recommendation.Ticker = command.Ticker;
-        recommendation.StrategyType = _strategyRegistry.GetDescriptor(command.StrategyType).Key;
-        recommendation.CreatedAt = DateTime.UtcNow;
-
-        return recommendation;
     }
 }

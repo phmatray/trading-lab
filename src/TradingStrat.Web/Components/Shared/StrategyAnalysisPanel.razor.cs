@@ -42,7 +42,15 @@ public partial class StrategyAnalysisPanel : ComponentBase
                 strategyTypeEnum,
                 StrategyParameters
             );
-            _recommendation = await AnalyzeStrategyUseCase.ExecuteAsync(command);
+            var result = await AnalyzeStrategyUseCase.ExecuteAsync(command);
+
+            if (result.IsFailure)
+            {
+                _error = string.Join(", ", result.Errors.Select(e => e.Message));
+                return;
+            }
+
+            _recommendation = result.Value;
 
             // Trigger recommendation notification
             await NotificationService.AddNotificationAsync(

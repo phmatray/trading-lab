@@ -24,13 +24,20 @@ public class ChatHub : Hub
     /// <param name="sessionId">Optional session ID for conversation history.</param>
     public async Task SendMessage(string userMessage, string? ticker = null, string? sessionId = null)
     {
-        SendChatMessageCommand command = new SendChatMessageCommand(userMessage, ticker, sessionId);
-
-        await foreach (string token in _sendChatMessageUseCase.ExecuteStreamingAsync(command))
+        try
         {
-            await Clients.Caller.SendAsync("ReceiveMessageToken", token);
-        }
+            SendChatMessageCommand command = new SendChatMessageCommand(userMessage, ticker, sessionId);
 
-        await Clients.Caller.SendAsync("MessageComplete");
+            await foreach (string token in _sendChatMessageUseCase.ExecuteStreamingAsync(command))
+            {
+                await Clients.Caller.SendAsync("ReceiveMessageToken", token);
+            }
+
+            await Clients.Caller.SendAsync("MessageComplete");
+        }
+        catch (Exception ex)
+        {
+            await Clients.Caller.SendAsync("ReceiveError", ex.Message);
+        }
     }
 }

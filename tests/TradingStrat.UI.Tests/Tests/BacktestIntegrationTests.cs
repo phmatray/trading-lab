@@ -156,6 +156,6 @@ public class BacktestIntegrationTests : BaseTest
         );
 
         var result = await useCase.CreateStrategyAsync(command);
-        return result.Id;
+        return result.Value.Id;
     }
 }

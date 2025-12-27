@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Application.Ports.Inbound;
 
 /// <summary>
@@ -8,8 +10,8 @@ public interface IGetDashboardStatsUseCase
     /// <summary>
     /// Executes the use case to retrieve dashboard statistics.
     /// </summary>
-    /// <returns>Dashboard statistics including strategy count, backtest count, portfolio count, and data coverage.</returns>
-    Task<DashboardStatsResult> ExecuteAsync();
+    /// <returns>Result containing dashboard statistics including strategy count, backtest count, portfolio count, and data coverage, or errors if retrieval fails.</returns>
+    Task<Result<DashboardStatsResult>> ExecuteAsync();
 }
 
 /// <summary>

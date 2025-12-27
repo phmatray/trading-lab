@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -11,6 +12,6 @@ public interface IGetRecentActivityUseCase
     /// Executes the use case to retrieve recent activity events.
     /// </summary>
     /// <param name="limit">Maximum number of events to return (default 10).</param>
-    /// <returns>List of recent activity events ordered by timestamp descending.</returns>
-    Task<List<ActivityEvent>> ExecuteAsync(int limit = 10);
+    /// <returns>Result containing list of recent activity events ordered by timestamp descending, or errors if retrieval fails.</returns>
+    Task<Result<List<ActivityEvent>>> ExecuteAsync(int limit = 10);
 }

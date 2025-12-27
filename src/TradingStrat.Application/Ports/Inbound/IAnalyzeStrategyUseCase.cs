@@ -16,8 +16,8 @@ public interface IAnalyzeStrategyUseCase
     /// </summary>
     /// <param name="command">Command containing ticker, strategy type, and parameters.</param>
     /// <param name="cancellationToken">Cancellation token for request cancellation.</param>
-    /// <returns>Structured recommendation with summary, confidence scores, and action items.</returns>
-    Task<StrategyRecommendation> ExecuteAsync(
+    /// <returns>Result containing structured recommendation with summary, confidence scores, and action items, or errors if analysis fails.</returns>
+    Task<Result<StrategyRecommendation>> ExecuteAsync(
         AnalyzeStrategyCommand command,
         CancellationToken cancellationToken = default);
 }

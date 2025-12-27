@@ -31,10 +31,11 @@ public class GetRecentActivityUseCaseTests
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(10)).Returns(expectedEvents);
 
         // Act
-        List<ActivityEvent> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.ShouldBe(expectedEvents);
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.ShouldBe(expectedEvents);
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(10)).MustHaveHappenedOnceExactly();
     }
 
@@ -56,9 +57,11 @@ public class GetRecentActivityUseCaseTests
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(customLimit)).Returns(expectedEvents);
 
         // Act
-        List<ActivityEvent> result = await _useCase.ExecuteAsync(customLimit);
+        var resultWrapper = await _useCase.ExecuteAsync(customLimit);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Count.ShouldBe(25);
         result.ShouldBe(expectedEvents);
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(customLimit)).MustHaveHappenedOnceExactly();
@@ -71,10 +74,11 @@ public class GetRecentActivityUseCaseTests
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(10)).Returns(new List<ActivityEvent>());
 
         // Act
-        List<ActivityEvent> result = await _useCase.ExecuteAsync();
+        var resultWrapper = await _useCase.ExecuteAsync();
 
         // Assert
-        result.ShouldBeEmpty();
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        resultWrapper.Value.ShouldBeEmpty();
     }
 
     [Fact]
@@ -89,9 +93,11 @@ public class GetRecentActivityUseCaseTests
         A.CallTo(() => _activityEventPort.GetRecentActivityAsync(1)).Returns(singleEvent);
 
         // Act
-        List<ActivityEvent> result = await _useCase.ExecuteAsync(1);
+        var resultWrapper = await _useCase.ExecuteAsync(1);
 
         // Assert
+        resultWrapper.IsSuccess.ShouldBeTrue();
+        var result = resultWrapper.Value;
         result.Count.ShouldBe(1);
         result[0].EventType.ShouldBe("BacktestCompleted");
     }

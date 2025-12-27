@@ -30,19 +30,19 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        CustomStrategyResult result = await _useCase.CreateStrategyAsync(command);
+        var result = await _useCase.CreateStrategyAsync(command);
 
         // Assert
         result.ShouldNotBeNull();
-        result.Id.ShouldBeGreaterThan(0);
-        result.Name.ShouldBe("Test RSI Strategy");
-        result.Author.ShouldBe("Test User");
-        result.Category.ShouldBe("Momentum");
-        result.Definition.ShouldNotBeNull();
-        result.Definition.EntryRules.Count.ShouldBe(1);
-        result.Definition.ExitRules.Count.ShouldBe(1);
-        result.TimesUsed.ShouldBe(0);
-        result.LastBacktestReturn.ShouldBeNull();
+        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Name.ShouldBe("Test RSI Strategy");
+        result.Value.Author.ShouldBe("Test User");
+        result.Value.Category.ShouldBe("Momentum");
+        result.Value.Definition.ShouldNotBeNull();
+        result.Value.Definition.EntryRules.Count.ShouldBe(1);
+        result.Value.Definition.ExitRules.Count.ShouldBe(1);
+        result.Value.TimesUsed.ShouldBe(0);
+        result.Value.LastBacktestReturn.ShouldBeNull();
 
         _repository.Count.ShouldBe(1);
     }
@@ -78,12 +78,14 @@ public class CustomStrategyManagementUseCaseTests
             invalidDefinition
         );
 
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.CreateStrategyAsync(command));
+        // Act
+        var result = await _useCase.CreateStrategyAsync(command);
 
-        ex.Message.ShouldContain("Invalid strategy definition");
-        ex.Message.ShouldContain("at least one entry rule");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Code == "INVALID_STRATEGY_DEFINITION");
+        result.Errors.First().Message.ShouldContain("Invalid strategy definition");
+        result.Errors.First().Message.ShouldContain("at least one entry rule");
 
         _repository.Count.ShouldBe(0);
     }
@@ -100,7 +102,7 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        CustomStrategyResult created = await _useCase.CreateStrategyAsync(createCommand);
+        var created = await _useCase.CreateStrategyAsync(createCommand);
 
         // Modify the definition
         StrategyDefinition modifiedDefinition = new(
@@ -117,13 +119,13 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: created.Definition.ExitRules,
-            SizingMode: created.Definition.SizingMode,
-            SizingParameters: created.Definition.SizingParameters
+            ExitRules: created.Value.Definition.ExitRules,
+            SizingMode: created.Value.Definition.SizingMode,
+            SizingParameters: created.Value.Definition.SizingParameters
         );
 
         UpdateCustomStrategyCommand updateCommand = new(
-            created.Id,
+            created.Value.Id,
             "Updated Name",
             "Updated Description",
             "Updated Category",
@@ -131,15 +133,15 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        CustomStrategyResult result = await _useCase.UpdateStrategyAsync(updateCommand);
+        var result = await _useCase.UpdateStrategyAsync(updateCommand);
 
         // Assert
-        result.Id.ShouldBe(created.Id);
-        result.Name.ShouldBe("Updated Name");
-        result.Description.ShouldBe("Updated Description");
-        result.Category.ShouldBe("Updated Category");
-        result.Definition.EntryRules[0].ConstantValue.ShouldBe(25);
-        result.LastUpdatedAt.ShouldBeGreaterThan(created.LastUpdatedAt);
+        result.Value.Id.ShouldBe(created.Value.Id);
+        result.Value.Name.ShouldBe("Updated Name");
+        result.Value.Description.ShouldBe("Updated Description");
+        result.Value.Category.ShouldBe("Updated Category");
+        result.Value.Definition.EntryRules[0].ConstantValue.ShouldBe(25);
+        result.Value.LastUpdatedAt.ShouldBeGreaterThan(created.Value.LastUpdatedAt);
     }
 
     [Fact]
@@ -154,11 +156,13 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.UpdateStrategyAsync(command));
+        // Act
+        var result = await _useCase.UpdateStrategyAsync(command);
 
-        ex.Message.ShouldContain("not found");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Code == "STRATEGY_NOT_FOUND");
+        result.Errors.First().Message.ShouldContain("not found");
     }
 
     [Fact]
@@ -173,11 +177,11 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        CustomStrategyResult created = await _useCase.CreateStrategyAsync(command);
+        var created = await _useCase.CreateStrategyAsync(command);
         _repository.Count.ShouldBe(1);
 
         // Act
-        await _useCase.DeleteStrategyAsync(created.Id);
+        await _useCase.DeleteStrategyAsync(created.Value.Id);
 
         // Assert
         _repository.Count.ShouldBe(0);
@@ -195,25 +199,27 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        CustomStrategyResult created = await _useCase.CreateStrategyAsync(command);
+        var created = await _useCase.CreateStrategyAsync(command);
 
         // Act
-        CustomStrategyResult result = await _useCase.GetStrategyByIdAsync(created.Id);
+        var result = await _useCase.GetStrategyByIdAsync(created.Value.Id);
 
         // Assert
         result.ShouldNotBeNull();
-        result.Id.ShouldBe(created.Id);
-        result.Name.ShouldBe("Test Strategy");
+        result.Value.Id.ShouldBe(created.Value.Id);
+        result.Value.Name.ShouldBe("Test Strategy");
     }
 
     [Fact]
     public async Task GetStrategyByIdAsync_WithNonExistentId_ThrowsException()
     {
-        // Act & Assert
-        InvalidOperationException ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await _useCase.GetStrategyByIdAsync(999));
+        // Act
+        var result = await _useCase.GetStrategyByIdAsync(999);
 
-        ex.Message.ShouldContain("not found");
+        // Assert
+        result.IsFailure.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e.Code == "STRATEGY_NOT_FOUND");
+        result.Errors.First().Message.ShouldContain("not found");
     }
 
     [Fact]
@@ -228,10 +234,10 @@ public class CustomStrategyManagementUseCaseTests
             "Strategy 3", "Desc 3", "User", "Momentum", CreateValidRSIDefinition()));
 
         // Act
-        List<CustomStrategyResult> results = await _useCase.GetAllStrategiesAsync();
+        var results = await _useCase.GetAllStrategiesAsync();
 
         // Assert
-        results.Count.ShouldBe(3);
+        results.Value.Count.ShouldBe(3);
     }
 
     [Fact]
@@ -246,11 +252,11 @@ public class CustomStrategyManagementUseCaseTests
             "Strategy 3", "Desc", "User", "Momentum", CreateValidRSIDefinition()));
 
         // Act
-        List<CustomStrategyResult> results = await _useCase.GetAllStrategiesAsync("Momentum");
+        var results = await _useCase.GetAllStrategiesAsync("Momentum");
 
         // Assert
-        results.Count.ShouldBe(2);
-        results.ShouldAllBe(r => r.Category == "Momentum");
+        results.Value.Count.ShouldBe(2);
+        results.Value.ShouldAllBe(r => r.Category == "Momentum");
     }
 
     [Fact]
@@ -265,20 +271,20 @@ public class CustomStrategyManagementUseCaseTests
             CreateValidRSIDefinition()
         );
 
-        CustomStrategyResult original = await _useCase.CreateStrategyAsync(command);
+        var originalResult = await _useCase.CreateStrategyAsync(command);
 
         // Act
-        CustomStrategyResult clone = await _useCase.CloneStrategyAsync(original.Id, "Cloned Strategy");
+        var cloneResult2 = await _useCase.CloneStrategyAsync(originalResult.Value.Id, "Cloned Strategy");
 
         // Assert
-        clone.Id.ShouldNotBe(original.Id);
-        clone.Name.ShouldBe("Cloned Strategy");
-        clone.Description.ShouldContain("Cloned from");
-        clone.Author.ShouldBe(original.Author);
-        clone.Category.ShouldBe(original.Category);
-        clone.Definition.EntryRules.Count.ShouldBe(original.Definition.EntryRules.Count);
-        clone.Definition.ExitRules.Count.ShouldBe(original.Definition.ExitRules.Count);
-        clone.TimesUsed.ShouldBe(0); // Clone starts fresh
+        cloneResult2.Value.Id.ShouldNotBe(originalResult.Value.Id);
+        cloneResult2.Value.Name.ShouldBe("Cloned Strategy");
+        cloneResult2.Value.Description.ShouldContain("Cloned from");
+        cloneResult2.Value.Author.ShouldBe(originalResult.Value.Author);
+        cloneResult2.Value.Category.ShouldBe(originalResult.Value.Category);
+        cloneResult2.Value.Definition.EntryRules.Count.ShouldBe(originalResult.Value.Definition.EntryRules.Count);
+        cloneResult2.Value.Definition.ExitRules.Count.ShouldBe(originalResult.Value.Definition.ExitRules.Count);
+        cloneResult2.Value.TimesUsed.ShouldBe(0); // Clone starts fresh
 
         _repository.Count.ShouldBe(2);
     }
@@ -290,11 +296,11 @@ public class CustomStrategyManagementUseCaseTests
         StrategyDefinition definition = CreateValidRSIDefinition();
 
         // Act
-        ValidationResult result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
-        result.IsValid.ShouldBeTrue();
-        result.Errors.ShouldBeEmpty();
+        result.Value.IsValid.ShouldBeTrue();
+        result.Value.Errors.ShouldBeEmpty();
     }
 
     [Fact]
@@ -321,11 +327,11 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        ValidationResult result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("at least one entry rule"));
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.Errors.ShouldContain(e => e.Contains("at least one entry rule"));
     }
 
     [Fact]
@@ -352,11 +358,11 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        ValidationResult result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("at least one exit rule"));
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.Errors.ShouldContain(e => e.Contains("at least one exit rule"));
     }
 
     [Fact]
@@ -395,11 +401,11 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        ValidationResult result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("ConstantValue"));
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.Errors.ShouldContain(e => e.Contains("ConstantValue"));
     }
 
     [Fact]
@@ -438,11 +444,11 @@ public class CustomStrategyManagementUseCaseTests
         );
 
         // Act
-        ValidationResult result = await _useCase.ValidateStrategyDefinitionAsync(definition);
+        var result = await _useCase.ValidateStrategyDefinitionAsync(definition);
 
         // Assert
-        result.IsValid.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("Percentage"));
+        result.Value.IsValid.ShouldBeFalse();
+        result.Value.Errors.ShouldContain(e => e.Contains("Percentage"));
     }
 
     #region Helper Methods

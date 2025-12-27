@@ -103,7 +103,17 @@ public partial class StrategyLibrary
         try
         {
             Log("[StrategyLibrary] Loading custom strategies...");
-            List<CustomStrategyResult> strategies = await CustomStrategyUseCase.GetAllStrategiesAsync();
+            var result = await CustomStrategyUseCase.GetAllStrategiesAsync();
+
+            if (result.IsFailure)
+            {
+                Log($"[StrategyLibrary] ERROR loading strategies: {string.Join(", ", result.Errors.Select(e => e.Message))}");
+                customStrategies = new List<CustomStrategyResult>();
+                _ = ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
+                return;
+            }
+
+            List<CustomStrategyResult> strategies = result.Value;
             Log($"[StrategyLibrary] Loaded {strategies.Count} strategies");
 
             customStrategies = strategies.OrderByDescending(s => s.LastUpdatedAt).ToList();
@@ -182,7 +192,13 @@ public partial class StrategyLibrary
             }
 
             string newName = $"{original.Name} (Copy)";
-            CustomStrategyResult cloned = await CustomStrategyUseCase.CloneStrategyAsync(strategyId, newName);
+            var cloneResult = await CustomStrategyUseCase.CloneStrategyAsync(strategyId, newName);
+
+            if (cloneResult.IsFailure)
+            {
+                _ = ShowErrorAsync(string.Join(", ", cloneResult.Errors.Select(e => e.Message)));
+                return;
+            }
 
             await LoadCustomStrategies();
             _ = ShowSuccessAsync($"Strategy cloned successfully as '{newName}'");
@@ -213,7 +229,14 @@ public partial class StrategyLibrary
 
         try
         {
-            await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
+            var deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
+
+            if (deleteResult.IsFailure)
+            {
+                _ = ShowErrorAsync(string.Join(", ", deleteResult.Errors.Select(e => e.Message)));
+                return;
+            }
+
             await LoadCustomStrategies();
             _ = ShowSuccessAsync($"Strategy '{strategy.Name}' deleted successfully");
         }

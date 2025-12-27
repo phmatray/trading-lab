@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -12,8 +13,8 @@ public interface IMultiStrategyComparisonUseCase
     /// </summary>
     /// <param name="command">The command containing strategies to compare.</param>
     /// <param name="progress">Optional progress reporting.</param>
-    /// <returns>Comparison result with metrics and equity curves for all strategies.</returns>
-    Task<MultiStrategyComparisonResult> ExecuteAsync(
+    /// <returns>Result containing comparison data with metrics and equity curves for all strategies, or errors if comparison fails.</returns>
+    Task<Result<MultiStrategyComparisonResult>> ExecuteAsync(
         MultiStrategyComparisonCommand command,
         IProgress<string>? progress = null);
 }

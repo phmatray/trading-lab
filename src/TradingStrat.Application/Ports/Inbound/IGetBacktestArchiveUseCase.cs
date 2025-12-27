@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Application.Ports.Inbound;
@@ -11,8 +12,8 @@ public interface IGetBacktestArchiveUseCase
     /// Executes the use case to retrieve backtest runs.
     /// </summary>
     /// <param name="query">The query with filtering criteria.</param>
-    /// <returns>Archive result with backtest runs and metadata.</returns>
-    Task<BacktestArchiveResult> ExecuteAsync(GetBacktestArchiveQuery query);
+    /// <returns>Result containing archive result with backtest runs and metadata, or errors if retrieval fails.</returns>
+    Task<Result<BacktestArchiveResult>> ExecuteAsync(GetBacktestArchiveQuery query);
 }
 
 /// <summary>

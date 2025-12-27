@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 
@@ -12,8 +13,8 @@ public interface ISaveBacktestRunUseCase
     /// Executes the use case to save a backtest run.
     /// </summary>
     /// <param name="command">The command containing backtest execution details.</param>
-    /// <returns>The saved backtest run with assigned ID.</returns>
-    Task<BacktestRun> ExecuteAsync(SaveBacktestRunCommand command);
+    /// <returns>Result containing the saved backtest run with assigned ID, or errors if save fails.</returns>
+    Task<Result<BacktestRun>> ExecuteAsync(SaveBacktestRunCommand command);
 }
 
 /// <summary>

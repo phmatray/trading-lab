@@ -3,6 +3,7 @@ using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.Services.Indicators;
@@ -34,20 +35,27 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
         _indicatorCalculator = indicatorCalculator;
     }
 
-    public async Task<OptimizationResult> ExecuteAsync(
+    public async Task<Result<OptimizationResult>> ExecuteAsync(
         OptimizeParametersCommand command,
         IProgress<Domain.ValueObjects.OptimizationProgress>? progress = null)
     {
-        // Load custom strategy from repository
-        CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(command.CustomStrategyId);
-        if (strategy == null)
+        try
         {
-            throw new InvalidOperationException($"Custom strategy with ID {command.CustomStrategyId} not found");
-        }
+            // Load custom strategy from repository
+            CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(command.CustomStrategyId);
+            if (strategy == null)
+            {
+                return Result<OptimizationResult>.Failure(
+                    Error.NotFound($"Custom strategy with ID {command.CustomStrategyId} not found", "STRATEGY_NOT_FOUND"));
+            }
 
-        // Deserialize strategy definition
-        StrategyDefinition baseDefinition = JsonSerializer.Deserialize<StrategyDefinition>(strategy.DefinitionJson)
-            ?? throw new InvalidOperationException("Failed to deserialize strategy definition");
+            // Deserialize strategy definition
+            StrategyDefinition? baseDefinition = JsonSerializer.Deserialize<StrategyDefinition>(strategy.DefinitionJson);
+            if (baseDefinition == null)
+            {
+                return Result<OptimizationResult>.Failure(
+                    Error.BusinessRule("Failed to deserialize strategy definition", "INVALID_STRATEGY_DEFINITION"));
+            }
 
         // Convert BacktestConfig to BacktestConfiguration
         BacktestConfiguration backtestConfig = new(
@@ -110,7 +118,18 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
             _ => throw new ArgumentOutOfRangeException(nameof(command.Type), command.Type, "Unknown optimization type")
         };
 
-        return optimizationResult;
+            return Result<OptimizationResult>.Success(optimizationResult);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return Result<OptimizationResult>.Failure(
+                Error.Validation($"Invalid optimization type: {ex.Message}", "INVALID_OPTIMIZATION_TYPE"));
+        }
+        catch (Exception ex)
+        {
+            return Result<OptimizationResult>.Failure(
+                Error.BusinessRule($"Optimization failed: {ex.Message}", "OPTIMIZATION_FAILED"));
+        }
     }
 
     /// <summary>
