@@ -1,7 +1,9 @@
 // ReSharper disable InconsistentNaming
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
-public class MarketFeatures
+public sealed class MarketFeatures : ValueObject
 {
     // Price-based (5)
     public float DailyReturn { get; set; }
@@ -43,9 +45,45 @@ public class MarketFeatures
 
     // Target (training only)
     public float NextDayReturn { get; set; }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return DailyReturn;
+        yield return LogReturn;
+        yield return HighLowRange;
+        yield return OpenCloseRange;
+        yield return PricePosition;
+        yield return SMA_5;
+        yield return SMA_10;
+        yield return SMA_20;
+        yield return EMA_12;
+        yield return EMA_26;
+        yield return PriceToSMA20;
+        yield return RSI_14;
+        yield return Momentum_5;
+        yield return ROC_10;
+        yield return StochRSI;
+        yield return MACD;
+        yield return MACDSignal;
+        yield return MACDHistogram;
+        yield return StdDev_10;
+        yield return StdDev_20;
+        yield return ATR_14;
+        yield return BollingerPosition;
+        yield return VolumeChange;
+        yield return VolumeMA_10;
+        yield return VolumeRatio;
+        yield return PriceVolumeCorrelation;
+        yield return NextDayReturn;
+    }
 }
 
-public class PricePrediction
+public sealed class PricePrediction : ValueObject
 {
     public float Score { get; set; } // Predicted next-day return
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Score;
+    }
 }

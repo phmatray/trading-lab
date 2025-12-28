@@ -1,10 +1,12 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
 /// Represents commission structure with a percentage rate and minimum amount.
 /// Encapsulates commission calculation logic.
 /// </summary>
-public readonly record struct Commission
+public sealed class Commission : ValueObject
 {
     public Percentage Rate { get; init; }
     public Money Minimum { get; init; }
@@ -61,6 +63,12 @@ public readonly record struct Commission
 
         Money percentageCommission = Rate.Of(tradeValue);
         return Money.Max(percentageCommission, Minimum);
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Rate;
+        yield return Minimum;
     }
 
     public override string ToString()

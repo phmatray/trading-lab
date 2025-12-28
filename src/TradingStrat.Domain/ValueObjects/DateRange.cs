@@ -1,10 +1,12 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
 /// Represents a date range with start and end dates.
 /// Encapsulates validation logic and common date range operations.
 /// </summary>
-public readonly record struct DateRange
+public sealed class DateRange : ValueObject
 {
     public DateTime Start { get; init; }
     public DateTime End { get; init; }
@@ -114,6 +116,12 @@ public readonly record struct DateRange
 
             current = monthEnd.AddDays(1);
         }
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Start;
+        yield return End;
     }
 
     public override string ToString() => $"{Start:yyyy-MM-dd} to {End:yyyy-MM-dd}";

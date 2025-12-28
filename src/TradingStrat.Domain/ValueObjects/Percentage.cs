@@ -1,10 +1,12 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
 /// Represents a percentage value (stored as 0-100).
 /// Eliminates confusion between decimal representation (0.01) and percentage representation (1%).
 /// </summary>
-public readonly record struct Percentage
+public sealed class Percentage : ValueObject
 {
     public decimal Value { get; init; }
 
@@ -69,6 +71,11 @@ public readonly record struct Percentage
 
     // Absolute value
     public Percentage Abs() => new(Math.Abs(Value));
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+    }
 
     public override string ToString() => $"{Value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)}%";
     public string ToString(string format) => $"{Value.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}%";

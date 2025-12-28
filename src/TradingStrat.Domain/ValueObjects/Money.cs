@@ -1,10 +1,12 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
 /// Represents a monetary amount with currency.
 /// Eliminates primitive obsession by wrapping decimal values that represent money.
 /// </summary>
-public readonly record struct Money
+public sealed class Money : ValueObject
 {
     public decimal Amount { get; init; }
     public string Currency { get; init; }
@@ -122,6 +124,12 @@ public readonly record struct Money
             throw new InvalidOperationException(
                 $"Cannot perform operation on different currencies: {a.Currency} and {b.Currency}");
         }
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Amount;
+        yield return Currency;
     }
 
     public override string ToString() => $"{Amount.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)} {Currency}";

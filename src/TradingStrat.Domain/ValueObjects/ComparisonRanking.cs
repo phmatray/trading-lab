@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Domain.ValueObjects;
@@ -6,12 +7,25 @@ namespace TradingStrat.Domain.ValueObjects;
 /// Value object containing ranking logic and scores for strategy comparison.
 /// Uses weighted scoring across multiple performance metrics.
 /// </summary>
-public record ComparisonRanking(
-    decimal VariantAScore,
-    decimal VariantBScore,
-    Dictionary<string, MetricComparison> MetricBreakdown,
-    int WinnerIndex)
+public sealed class ComparisonRanking : ValueObject
 {
+    public decimal VariantAScore { get; init; }
+    public decimal VariantBScore { get; init; }
+    public Dictionary<string, MetricComparison> MetricBreakdown { get; init; }
+    public int WinnerIndex { get; init; }
+
+    public ComparisonRanking(
+        decimal VariantAScore,
+        decimal VariantBScore,
+        Dictionary<string, MetricComparison> MetricBreakdown,
+        int WinnerIndex)
+    {
+        this.VariantAScore = VariantAScore;
+        this.VariantBScore = VariantBScore;
+        this.MetricBreakdown = MetricBreakdown;
+        this.WinnerIndex = WinnerIndex;
+    }
+
     /// <summary>
     /// Calculates ranking between two performance metrics using weighted scoring.
     /// Weights: Sharpe Ratio (40%), Annualized Return (30%), Max Drawdown (20%), Win Rate (10%)
@@ -20,7 +34,7 @@ public record ComparisonRanking(
         PerformanceMetrics metricsA,
         PerformanceMetrics metricsB)
     {
-        var breakdown = new Dictionary<string, MetricComparison>();
+        Dictionary<string, MetricComparison> breakdown = new Dictionary<string, MetricComparison>();
 
         // Key metrics for ranking (selected based on user requirements)
         breakdown["Sharpe Ratio"] = CompareMetric(
@@ -120,20 +134,56 @@ public record ComparisonRanking(
             pointsB,
             higherIsBetter);
     }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return VariantAScore;
+        yield return VariantBScore;
+        foreach (string key in MetricBreakdown.Keys.OrderBy(k => k))
+        {
+            yield return key;
+            yield return MetricBreakdown[key];
+        }
+        yield return WinnerIndex;
+    }
 }
 
 /// <summary>
 /// Represents the comparison of a single metric between two variants.
 /// </summary>
-public record MetricComparison(
-    decimal VariantAValue,
-    decimal VariantBValue,
-    decimal VariantAPoints,
-    decimal VariantBPoints,
-    bool HigherIsBetter)
+public sealed class MetricComparison : ValueObject
 {
+    public decimal VariantAValue { get; init; }
+    public decimal VariantBValue { get; init; }
+    public decimal VariantAPoints { get; init; }
+    public decimal VariantBPoints { get; init; }
+    public bool HigherIsBetter { get; init; }
+
+    public MetricComparison(
+        decimal VariantAValue,
+        decimal VariantBValue,
+        decimal VariantAPoints,
+        decimal VariantBPoints,
+        bool HigherIsBetter)
+    {
+        this.VariantAValue = VariantAValue;
+        this.VariantBValue = VariantBValue;
+        this.VariantAPoints = VariantAPoints;
+        this.VariantBPoints = VariantBPoints;
+        this.HigherIsBetter = HigherIsBetter;
+    }
+
     public decimal Difference => VariantAValue - VariantBValue;
     public decimal PercentageDifference => VariantBValue != 0
         ? ((VariantAValue - VariantBValue) / Math.Abs(VariantBValue)) * 100m
         : 0m;
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return VariantAValue;
+        yield return VariantBValue;
+        yield return VariantAPoints;
+        yield return VariantBPoints;
+        yield return HigherIsBetter;
+    }
 }

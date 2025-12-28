@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
@@ -5,28 +7,125 @@ namespace TradingStrat.Domain.ValueObjects;
 /// Contains entry rules, exit rules, and position sizing configuration.
 /// Serialized to JSON for persistence in the database.
 /// </summary>
-public sealed record StrategyDefinition(
-    List<StrategyRule> EntryRules,
-    List<StrategyRule> ExitRules,
-    PositionSizingMode SizingMode,
-    Dictionary<string, decimal> SizingParameters
-);
+public sealed class StrategyDefinition : ValueObject
+{
+    /// <summary>Entry rules for the strategy.</summary>
+    public List<StrategyRule> EntryRules { get; init; }
+
+    /// <summary>Exit rules for the strategy.</summary>
+    public List<StrategyRule> ExitRules { get; init; }
+
+    /// <summary>Position sizing mode.</summary>
+    public PositionSizingMode SizingMode { get; init; }
+
+    /// <summary>Position sizing parameters.</summary>
+    public Dictionary<string, decimal> SizingParameters { get; init; }
+
+    public StrategyDefinition(
+        List<StrategyRule> EntryRules,
+        List<StrategyRule> ExitRules,
+        PositionSizingMode SizingMode,
+        Dictionary<string, decimal> SizingParameters)
+    {
+        this.EntryRules = EntryRules;
+        this.ExitRules = ExitRules;
+        this.SizingMode = SizingMode;
+        this.SizingParameters = SizingParameters;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        foreach (StrategyRule rule in EntryRules)
+        {
+            yield return rule;
+        }
+        foreach (StrategyRule rule in ExitRules)
+        {
+            yield return rule;
+        }
+        yield return SizingMode;
+        foreach (string key in SizingParameters.Keys.OrderBy(k => k))
+        {
+            yield return key;
+            yield return SizingParameters[key];
+        }
+    }
+}
 
 /// <summary>
 /// Represents a single condition-based rule in a custom strategy.
 /// Rules compare indicators to constants, price, or other indicators.
 /// Multiple rules can be combined with AND/OR logic.
 /// </summary>
-public sealed record StrategyRule(
-    string IndicatorName,
-    Dictionary<string, object> IndicatorParameters,
-    ComparisonOperator Operator,
-    RuleValueType ValueType,
-    decimal? ConstantValue,
-    string? SecondIndicatorName,
-    Dictionary<string, object>? SecondIndicatorParameters,
-    LogicalOperator LogicalOperator
-);
+public sealed class StrategyRule : ValueObject
+{
+    /// <summary>Indicator name.</summary>
+    public string IndicatorName { get; init; }
+
+    /// <summary>Indicator parameters.</summary>
+    public Dictionary<string, object> IndicatorParameters { get; init; }
+
+    /// <summary>Comparison operator.</summary>
+    public ComparisonOperator Operator { get; init; }
+
+    /// <summary>Rule value type.</summary>
+    public RuleValueType ValueType { get; init; }
+
+    /// <summary>Constant value (if ValueType is Constant).</summary>
+    public decimal? ConstantValue { get; init; }
+
+    /// <summary>Second indicator name (if ValueType is Indicator).</summary>
+    public string? SecondIndicatorName { get; init; }
+
+    /// <summary>Second indicator parameters (if ValueType is Indicator).</summary>
+    public Dictionary<string, object>? SecondIndicatorParameters { get; init; }
+
+    /// <summary>Logical operator to combine with next rule.</summary>
+    public LogicalOperator LogicalOperator { get; init; }
+
+    public StrategyRule(
+        string IndicatorName,
+        Dictionary<string, object> IndicatorParameters,
+        ComparisonOperator Operator,
+        RuleValueType ValueType,
+        decimal? ConstantValue,
+        string? SecondIndicatorName,
+        Dictionary<string, object>? SecondIndicatorParameters,
+        LogicalOperator LogicalOperator)
+    {
+        this.IndicatorName = IndicatorName;
+        this.IndicatorParameters = IndicatorParameters;
+        this.Operator = Operator;
+        this.ValueType = ValueType;
+        this.ConstantValue = ConstantValue;
+        this.SecondIndicatorName = SecondIndicatorName;
+        this.SecondIndicatorParameters = SecondIndicatorParameters;
+        this.LogicalOperator = LogicalOperator;
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return IndicatorName;
+        foreach (string key in IndicatorParameters.Keys.OrderBy(k => k))
+        {
+            yield return key;
+            yield return IndicatorParameters[key];
+        }
+        yield return Operator;
+        yield return ValueType;
+        yield return ConstantValue ?? 0m;
+        yield return SecondIndicatorName ?? string.Empty;
+        if (SecondIndicatorParameters is not null)
+        {
+            foreach (string key in SecondIndicatorParameters.Keys.OrderBy(k => k))
+            {
+                yield return key;
+                yield return SecondIndicatorParameters[key];
+            }
+        }
+        yield return LogicalOperator;
+    }
+}
 
 /// <summary>
 /// Defines how to compare an indicator value with a threshold.

@@ -1,10 +1,12 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
 /// Represents a price per unit (e.g., price per share).
 /// Distinct from Money to prevent mixing price-per-unit with total monetary amounts.
 /// </summary>
-public readonly record struct Price
+public sealed class Price : ValueObject
 {
     public decimal Value { get; init; }
     public string Currency { get; init; }
@@ -112,6 +114,12 @@ public readonly record struct Price
             throw new InvalidOperationException(
                 $"Cannot compare prices in different currencies: {a.Currency} and {b.Currency}");
         }
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Value;
+        yield return Currency;
     }
 
     public override string ToString() => $"{Value.ToString("N2", System.Globalization.CultureInfo.InvariantCulture)} {Currency}";

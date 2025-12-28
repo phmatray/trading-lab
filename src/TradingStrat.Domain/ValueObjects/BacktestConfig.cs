@@ -5,7 +5,7 @@ namespace TradingStrat.Domain.ValueObjects;
 /// <summary>
 /// Domain value object for backtest configuration (zero external dependencies).
 /// </summary>
-public sealed record BacktestConfig
+public sealed class BacktestConfig : ValueObject
 {
     public string Ticker { get; init; }
     public DateTime StartDate { get; init; }
@@ -50,4 +50,14 @@ public sealed record BacktestConfig
         this.CommissionPercentage = CommissionPercentage;
         this.MinimumCommission = MinimumCommission;
     }
-};
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Ticker;
+        yield return StartDate;
+        yield return EndDate;
+        yield return InitialCapital;
+        yield return CommissionPercentage;
+        yield return MinimumCommission;
+    }
+}

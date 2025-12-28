@@ -203,25 +203,40 @@ public class TerminologyConsistencyTests
 
         // Act
         List<string> violations = valueObjectTypes
-            .Where(t => !t.IsValueType && !IsRecord(t))
+            .Where(t => !t.IsValueType && !IsRecord(t) && !InheritsFromValueObject(t))
             .Where(t => !classExceptions.Contains(t.Name))
             .Select(t => t.Name)
             .ToList();
 
         // Assert
         violations.ShouldBeEmpty(
-            $"Value objects should be records or structs for immutability. Found classes: {string.Join(", ", violations)}");
+            $"Value objects should be records, structs, or inherit from TradingStrat.Domain.Common.ValueObject for immutability. Found classes: {string.Join(", ", violations)}");
     }
 
     private static bool IsRecord(Type type)
     {
         // Records have a compiler-generated <Clone>$ method
-        return type.GetMethod("<Clone>$", BindingFlags.Public | BindingFlags.Instance) != null;
+        return type.GetMethod("<Clone>$", BindingFlags.Public | BindingFlags.Instance) is not null;
+    }
+
+    private static bool InheritsFromValueObject(Type type)
+    {
+        // Check if the type inherits from Ardalis.SharedKernel.ValueObject
+        Type? baseType = type.BaseType;
+        while (baseType is not null)
+        {
+            if (baseType.Name == "ValueObject")
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
+        }
+        return false;
     }
 
     private static bool IsCompilerGenerated(Type type)
     {
-        // Compiler-generated types start with < or contain <>
+        // Compiler-generated types start with < or contains <>
         return type.Name.StartsWith("<") || type.Name.Contains("<>");
     }
 }

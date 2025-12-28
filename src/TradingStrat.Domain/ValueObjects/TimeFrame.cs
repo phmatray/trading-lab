@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
@@ -39,7 +41,7 @@ public enum TimeFrameUnit
 /// Value object representing a chart timeframe with conversion utilities.
 /// Immutable record containing domain logic for timeframe operations.
 /// </summary>
-public sealed record TimeFrame
+public sealed class TimeFrame : ValueObject
 {
     /// <summary>
     /// The timeframe unit represented by this instance.
@@ -118,7 +120,7 @@ public sealed record TimeFrame
     /// <exception cref="ArgumentException">Thrown when the value is not a valid timeframe.</exception>
     public static TimeFrame FromString(string value)
     {
-        if (value == null)
+        if (value is null)
         {
             throw new ArgumentNullException(nameof(value));
         }
@@ -143,4 +145,9 @@ public sealed record TimeFrame
     /// </summary>
     /// <returns>The timeframe code as a string.</returns>
     public override string ToString() => Unit.ToString();
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Unit;
+    }
 }

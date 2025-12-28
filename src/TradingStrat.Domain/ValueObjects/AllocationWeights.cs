@@ -5,7 +5,7 @@ namespace TradingStrat.Domain.ValueObjects;
 /// <summary>
 /// Target allocation weights for portfolio rebalancing.
 /// </summary>
-public record AllocationWeights
+public class AllocationWeights : ValueObject
 {
     /// <summary>
     /// Dictionary of ticker symbol to target allocation percentage (all non-negative).
@@ -48,62 +48,15 @@ public record AllocationWeights
         return Math.Abs(total - 100m) < 0.01m; // Allow small rounding errors
     }
 
-    /// <summary>
-    /// Custom equality implementation that compares dictionary contents (value equality).
-    /// </summary>
-    public virtual bool Equals(AllocationWeights? other)
+    protected override IEnumerable<object> GetEqualityComponents()
     {
-        if (other is null)
-        {
-            return false;
-        }
+        yield return CashPercentage;
 
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
-
-        if (CashPercentage != other.CashPercentage)
-        {
-            return false;
-        }
-
-        if (TargetPercentages.Count != other.TargetPercentages.Count)
-        {
-            return false;
-        }
-
-        foreach (KeyValuePair<string, decimal> kvp in TargetPercentages)
-        {
-            if (!other.TargetPercentages.TryGetValue(kvp.Key, out decimal otherValue))
-            {
-                return false;
-            }
-
-            if (kvp.Value != otherValue)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Custom hash code implementation that includes dictionary contents.
-    /// </summary>
-    public override int GetHashCode()
-    {
-        HashCode hash = new HashCode();
-        hash.Add(CashPercentage);
-
-        // Sort keys for consistent hash code
+        // Sort keys for consistent equality comparison
         foreach (string key in TargetPercentages.Keys.OrderBy(k => k))
         {
-            hash.Add(key);
-            hash.Add(TargetPercentages[key]);
+            yield return key;
+            yield return TargetPercentages[key];
         }
-
-        return hash.ToHashCode();
     }
 }

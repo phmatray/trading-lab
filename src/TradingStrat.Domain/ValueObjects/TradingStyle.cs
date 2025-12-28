@@ -1,3 +1,5 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
 /// <summary>
@@ -32,7 +34,7 @@ public enum TradingStyleType
 /// Immutable record containing style-specific defaults for backtesting and live trading.
 /// Each trading style has appropriate timeframe ranges, position sizing, and commission structures.
 /// </summary>
-public sealed record TradingStyle
+public sealed class TradingStyle : ValueObject
 {
     /// <summary>
     /// The type of trading style.
@@ -240,4 +242,17 @@ public sealed record TradingStyle
     /// </summary>
     /// <returns>The trading style type as a string.</returns>
     public override string ToString() => Type.ToString();
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return Type;
+        yield return DefaultTimeFrame;
+        yield return MinTimeFrame;
+        yield return MaxTimeFrame;
+        yield return DefaultPositionSizePercent;
+        yield return MaxPositionSizePercent;
+        yield return DefaultCommissionPercentage;
+        yield return DefaultMinimumCommission;
+        yield return PeriodMultiplier;
+    }
 }

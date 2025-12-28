@@ -1,16 +1,18 @@
+using TradingStrat.Domain.Common;
+
 namespace TradingStrat.Domain.ValueObjects;
 
-public class PredictionThresholds
+public sealed class PredictionThresholds : ValueObject
 {
     public decimal BuyThreshold { get; init; } = 0.01m;    // +1%
     public decimal SellThreshold { get; init; } = -0.01m;  // -1%
 
     public PredictionThresholds() { }
 
-    public PredictionThresholds(decimal buyThreshold, decimal sellThreshold)
+    public PredictionThresholds(decimal BuyThreshold, decimal SellThreshold)
     {
-        BuyThreshold = buyThreshold;
-        SellThreshold = sellThreshold;
+        this.BuyThreshold = BuyThreshold;
+        this.SellThreshold = SellThreshold;
     }
 
     public SignalType ConvertPredictionToSignal(float predictedReturn)
@@ -27,5 +29,11 @@ public class PredictionThresholds
         {
             return SignalType.Hold;
         }
+    }
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return BuyThreshold;
+        yield return SellThreshold;
     }
 }

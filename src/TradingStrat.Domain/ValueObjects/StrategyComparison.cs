@@ -1,3 +1,4 @@
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 
 namespace TradingStrat.Domain.ValueObjects;
@@ -6,15 +7,34 @@ namespace TradingStrat.Domain.ValueObjects;
 /// Immutable value object representing the comparison between two strategy variants.
 /// Contains both backtest results and ranking information.
 /// </summary>
-public record StrategyComparison(
-    StrategyVariant VariantA,
-    BacktestResult ResultA,
-    StrategyVariant VariantB,
-    BacktestResult ResultB,
-    ComparisonRanking Ranking,
-    string Ticker,
-    DateTime ComparisonDate)
+public sealed class StrategyComparison : ValueObject
 {
+    public StrategyVariant VariantA { get; init; }
+    public BacktestResult ResultA { get; init; }
+    public StrategyVariant VariantB { get; init; }
+    public BacktestResult ResultB { get; init; }
+    public ComparisonRanking Ranking { get; init; }
+    public string Ticker { get; init; }
+    public DateTime ComparisonDate { get; init; }
+
+    public StrategyComparison(
+        StrategyVariant VariantA,
+        BacktestResult ResultA,
+        StrategyVariant VariantB,
+        BacktestResult ResultB,
+        ComparisonRanking Ranking,
+        string Ticker,
+        DateTime ComparisonDate)
+    {
+        this.VariantA = VariantA;
+        this.ResultA = ResultA;
+        this.VariantB = VariantB;
+        this.ResultB = ResultB;
+        this.Ranking = Ranking;
+        this.Ticker = Ticker;
+        this.ComparisonDate = ComparisonDate;
+    }
+
     /// <summary>
     /// Gets the winner based on ranking (1 = Variant A, 2 = Variant B, 0 = tie).
     /// </summary>
@@ -39,4 +59,15 @@ public record StrategyComparison(
         2 => ResultB,
         _ => null
     };
+
+    protected override IEnumerable<object> GetEqualityComponents()
+    {
+        yield return VariantA;
+        yield return ResultA;
+        yield return VariantB;
+        yield return ResultB;
+        yield return Ranking;
+        yield return Ticker;
+        yield return ComparisonDate;
+    }
 }
