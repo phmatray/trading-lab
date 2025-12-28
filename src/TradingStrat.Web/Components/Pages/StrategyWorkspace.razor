@@ -3,6 +3,8 @@
 @using TradingStrat.Domain.Entities
 @using TradingStrat.Web.Services.State
 @using TradingStrat.Web.Components.Pages.Workspace
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 
 <PageTitle>Strategy Workspace - TradingStrat</PageTitle>
 
@@ -20,7 +22,7 @@
         <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div class="flex items-center gap-3">
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 dark:border-blue-400"></div>
-                <p class="text-sm text-blue-800 dark:text-blue-400">@_progressMessage</p>
+                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-blue-800 dark:text-blue-400">@_progressMessage</TradingStrat.Web.Components.UI.Typography.Text>
             </div>
         </div>
     }
@@ -110,10 +112,12 @@
                     <span>No strategy selected. Create or load a strategy to begin.</span>
                 }
             </div>
-            <button @onclick="ClearWorkspace"
-                    class="px-4 py-2 text-sm text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-elevated rounded-lg transition-colors">
+            <TradingStrat.Web.Components.UI.Buttons.Button
+                OnClick="ClearWorkspace"
+                Plain="true"
+                Class="text-sm">
                 Clear Workspace
-            </button>
+            </TradingStrat.Web.Components.UI.Buttons.Button>
         </div>
     </div>
 </div>

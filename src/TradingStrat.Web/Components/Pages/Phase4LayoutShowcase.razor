@@ -1,0 +1,162 @@
+@page "/phase4-layout-showcase"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Layouts
+@using TradingStrat.Web.Components.UI.Navigation.Navbar
+@using TradingStrat.Web.Components.UI.Navigation.Sidebar
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
+
+<PageTitle>Phase 4 Layout Showcase - TradingStrat</PageTitle>
+
+<div class="space-y-8 p-6">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Phase 4 Layout Showcase</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Demonstration of responsive layout components</p>
+    </div>
+
+    <!-- Layout Switcher -->
+    <div class="flex gap-4 mb-8" data-testid="layout-switcher">
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="@(_currentLayout == "sidebar" ? ButtonColor.Blue : ButtonColor.Zinc)"
+                OnClick="@(() => _currentLayout = "sidebar")"
+                data-testid="switch-to-sidebar">
+            Sidebar Layout
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="@(_currentLayout == "stacked" ? ButtonColor.Blue : ButtonColor.Zinc)"
+                OnClick="@(() => _currentLayout = "stacked")"
+                data-testid="switch-to-stacked">
+            Stacked Layout
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="@(_currentLayout == "auth" ? ButtonColor.Blue : ButtonColor.Zinc)"
+                OnClick="@(() => _currentLayout = "auth")"
+                data-testid="switch-to-auth">
+            Auth Layout
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+    </div>
+
+    <!-- Sidebar Layout Demo -->
+    @if (_currentLayout == "sidebar")
+    {
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg min-h-[600px]" data-testid="sidebar-layout-demo">
+            <SidebarLayout>
+                <Navbar>
+                    <Navbar data-testid="sidebar-layout-navbar">
+                        <NavbarSection>
+                            <NavbarItem data-testid="navbar-home">
+                                <NavbarLabel>Home</NavbarLabel>
+                            </NavbarItem>
+                            <NavbarItem data-testid="navbar-about">
+                                <NavbarLabel>About</NavbarLabel>
+                            </NavbarItem>
+                        </NavbarSection>
+                    </Navbar>
+                </Navbar>
+                <Sidebar>
+                    <Sidebar data-testid="sidebar-layout-sidebar">
+                        <SidebarHeader>
+                            <SidebarSection>
+                                <h3 class="text-lg font-semibold px-2">My App</h3>
+                            </SidebarSection>
+                        </SidebarHeader>
+                        <SidebarBody>
+                            <SidebarSection>
+                                <SidebarHeading>Navigation</SidebarHeading>
+                                <SidebarItem data-testid="sidebar-dashboard">
+                                    <SidebarLabel>Dashboard</SidebarLabel>
+                                </SidebarItem>
+                                <SidebarItem data-testid="sidebar-settings">
+                                    <SidebarLabel>Settings</SidebarLabel>
+                                </SidebarItem>
+                            </SidebarSection>
+                        </SidebarBody>
+                    </Sidebar>
+                </Sidebar>
+                <ChildContent>
+                    <div class="space-y-4" data-testid="sidebar-layout-content">
+                        <Heading Level="2">Sidebar Layout Content</Heading>
+                        <Text>This layout has a fixed sidebar on desktop and a mobile dialog.</Text>
+                        <Text>The navbar appears on mobile at the top with a hamburger menu.</Text>
+                    </div>
+                </ChildContent>
+            </SidebarLayout>
+        </div>
+    }
+
+    <!-- Stacked Layout Demo -->
+    @if (_currentLayout == "stacked")
+    {
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg min-h-[600px]" data-testid="stacked-layout-demo">
+            <StackedLayout>
+                <Navbar>
+                    <Navbar data-testid="stacked-layout-navbar">
+                        <NavbarSection>
+                            <NavbarItem data-testid="navbar-products">
+                                <NavbarLabel>Products</NavbarLabel>
+                            </NavbarItem>
+                            <NavbarItem data-testid="navbar-pricing">
+                                <NavbarLabel>Pricing</NavbarLabel>
+                            </NavbarItem>
+                        </NavbarSection>
+                    </Navbar>
+                </Navbar>
+                <Sidebar>
+                    <Sidebar data-testid="stacked-layout-sidebar">
+                        <SidebarBody>
+                            <SidebarSection>
+                                <SidebarItem data-testid="sidebar-menu1">
+                                    <SidebarLabel>Menu Item 1</SidebarLabel>
+                                </SidebarItem>
+                                <SidebarItem data-testid="sidebar-menu2">
+                                    <SidebarLabel>Menu Item 2</SidebarLabel>
+                                </SidebarItem>
+                            </SidebarSection>
+                        </SidebarBody>
+                    </Sidebar>
+                </Sidebar>
+                <ChildContent>
+                    <div class="space-y-4" data-testid="stacked-layout-content">
+                        <Heading Level="2">Stacked Layout Content</Heading>
+                        <Text>This layout has the navbar on top for all screen sizes.</Text>
+                        <Text>On mobile, a hamburger menu opens the sidebar in a dialog.</Text>
+                    </div>
+                </ChildContent>
+            </StackedLayout>
+        </div>
+    }
+
+    <!-- Auth Layout Demo -->
+    @if (_currentLayout == "auth")
+    {
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg min-h-[600px]" data-testid="auth-layout-demo">
+            <AuthLayout>
+                <div class="w-full max-w-sm space-y-6" data-testid="auth-layout-content">
+                    <div class="space-y-2 text-center">
+                        <Heading Level="2">Sign In</Heading>
+                        <Text>Enter your credentials to access your account</Text>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <input type="email" class="w-full px-3 py-2 border rounded-lg" placeholder="you@example.com" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Password</label>
+                            <input type="password" class="w-full px-3 py-2 border rounded-lg" placeholder="••••••••" />
+                        </div>
+                        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" Class="w-full">
+                            Sign In
+                        </TradingStrat.Web.Components.UI.Buttons.Button>
+                    </div>
+                </div>
+            </AuthLayout>
+        </div>
+    }
+
+    <!-- Current Layout Indicator -->
+    <div class="text-sm text-gray-500 dark:text-gray-400" data-testid="current-layout-indicator">
+        Current layout: <span class="font-semibold" data-testid="current-layout-name">@_currentLayout</span>
+    </div>
+</div>
+
+@code {
+    private string _currentLayout = "sidebar";
+}

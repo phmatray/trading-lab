@@ -1,6 +1,8 @@
 @page "/portfolio/{portfolioId:int}"
 @rendermode InteractiveServer
 
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 <PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
 
 <div class="space-y-6">
@@ -11,7 +13,7 @@
                 Description="@(_portfolio?.Description)"
                 OnBack="NavigateBack">
         <Actions>
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@RefreshPrices"
                     Disabled="@ProgressService.IsProcessing"
                     Text="Refresh Prices">
@@ -20,8 +22,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
-            <Button Variant="@ButtonVariant.Primary"
+            </TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     OnClick="@OpenAddPositionDialog"
                     Text="Add Position">
                 <LeadingIcon>
@@ -29,7 +31,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </Actions>
     </PageHeader>
 
@@ -48,9 +50,9 @@
                         Title="Portfolio not found"
                         Description="The portfolio you're looking for doesn't exist.">
                 <Actions>
-                    <Button Variant="@ButtonVariant.Primary"
+                    <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                             OnClick="@NavigateBack"
-                            Text="Back to Portfolios"></Button>
+                            Text="Back to Portfolios"></TradingStrat.Web.Components.Shared.Button>
                 </Actions>
             </EmptyState>
         }
@@ -60,7 +62,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Value -->
             <div class="card">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Value</h3>
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Value</Heading>
                 <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.TotalValue.ToString("C2")</p>
                 <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
                     Cash + Positions
@@ -69,7 +71,7 @@
 
             <!-- Cash Balance -->
             <div class="card">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash Balance</h3>
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash Balance</Heading>
                 <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.Cash.ToString("C2")</p>
                 <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
                     @((_snapshot.Cash / _snapshot.TotalValue * 100).ToString("F1"))% allocation
@@ -78,7 +80,7 @@
 
             <!-- Unrealized Gain/Loss -->
             <div class="card">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Unrealized Gain/Loss</h3>
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Unrealized Gain/Loss</Heading>
                 <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
                     @_snapshot.UnrealizedGainLoss.ToString("C2")
                 </p>
@@ -89,7 +91,7 @@
 
             <!-- Return Percentage -->
             <div class="card">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Return %</h3>
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Return %</Heading>
                 <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
                     @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
                 </p>
@@ -101,7 +103,7 @@
 
         <!-- Positions Table -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Positions</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Positions</Heading>
 
             @if (!_snapshot.Positions.Any())
             {
@@ -109,9 +111,9 @@
                             Title="No positions"
                             Description="Add your first position to start tracking your investments.">
                     <Actions>
-                        <Button Variant="@ButtonVariant.Primary"
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                                 OnClick="@OpenAddPositionDialog"
-                                Text="Add Position"></Button>
+                                Text="Add Position"></TradingStrat.Web.Components.Shared.Button>
                     </Actions>
                 </EmptyState>
             }
@@ -244,17 +246,17 @@
     </ChildContent>
     <Footer>
         <div class="flex space-x-3">
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@CloseAddPositionDialog"
                     AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
-                    Text="Cancel"></Button>
-            <Button Type="@ButtonType.Submit"
+                    Text="Cancel"></TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                     Variant="@ButtonVariant.Primary"
                     OnClick="@HandleAddPosition"
                     IsLoading="@_isAddingPosition"
                     AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
                     Text="Add Position"
-                    LoadingText="Adding..."></Button>
+                    LoadingText="Adding..."></TradingStrat.Web.Components.Shared.Button>
         </div>
     </Footer>
 </Dialog>

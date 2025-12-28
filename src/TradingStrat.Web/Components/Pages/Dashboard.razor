@@ -1,5 +1,7 @@
 @page "/dashboard"
 @using TradingStrat.Web.Components.Base
+@using TradingStrat.Web.Components.UI.Buttons
+@using TradingStrat.Web.Components.UI.Typography
 @inherits BaseComponent
 @rendermode InteractiveServer
 
@@ -10,7 +12,7 @@
     <PageHeader Title="Dashboard"
                 Description="Strategy research command center">
         <Actions>
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@LoadDashboardDataAsync"
                     IsLoading="@_isLoading"
                     Text="Refresh"
@@ -20,7 +22,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </Actions>
     </PageHeader>
 
@@ -29,14 +31,14 @@
         <div class="flex items-center justify-center py-12">
             <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
-                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading dashboard...</p>
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading dashboard...</TradingStrat.Web.Components.UI.Typography.Text>
             </div>
         </div>
     }
     else if (_errorMessage is not null)
     {
         <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-            <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
+            <TradingStrat.Web.Components.UI.Typography.Text Class="text-red-800 dark:text-red-400">@_errorMessage</TradingStrat.Web.Components.UI.Typography.Text>
         </div>
     }
     else
@@ -72,24 +74,28 @@
 
         <!-- Quick Actions -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</h2>
+            <Heading Level="2" Class="text-lg font-semibold mb-4">Quick Actions</Heading>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Button Variant="@ButtonVariant.Primary"
-                        Size="@ButtonSize.Small"
-                        OnClick="@(() => NavigateToPage("/backtest"))"
-                        Text="New Backtest"></Button>
-                <Button Variant="@ButtonVariant.Secondary"
-                        Size="@ButtonSize.Small"
-                        OnClick="@(() => NavigateToPage("/strategies/builder"))"
-                        Text="Create Strategy"></Button>
-                <Button Variant="@ButtonVariant.Secondary"
-                        Size="@ButtonSize.Small"
-                        OnClick="@(() => NavigateToPage("/data"))"
-                        Text="Import Data"></Button>
-                <Button Variant="@ButtonVariant.Secondary"
-                        Size="@ButtonSize.Small"
-                        OnClick="@(() => NavigateToPage("/strategies/compare"))"
-                        Text="Compare Strategies"></Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Blue"
+                    OnClick="@(() => NavigateToPage("/backtest"))">
+                    New Backtest
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/strategies/builder"))">
+                    Create Strategy
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/data"))">
+                    Import Data
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/strategies/compare"))">
+                    Compare Strategies
+                </TradingStrat.Web.Components.UI.Buttons.Button>
             </div>
         </div>
 
@@ -98,13 +104,14 @@
             <!-- Top Strategies -->
             <div class="card">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Top Strategies
-                    </h2>
-                    <Button Variant="@ButtonVariant.Ghost"
-                            Size="@ButtonSize.Small"
-                            OnClick="@(() => NavigateToPage("/strategies/compare"))"
-                            Text="View All →"></Button>
+                    </Heading>
+                    <TradingStrat.Web.Components.UI.Buttons.Button
+                        Plain="true"
+                        OnClick="@(() => NavigateToPage("/strategies/compare"))">
+                        View All →
+                    </TradingStrat.Web.Components.UI.Buttons.Button>
                 </div>
                 <TopStrategyTable Strategies="@_topStrategies" />
             </div>
@@ -112,9 +119,9 @@
             <!-- Recent Activity -->
             <div class="card">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Recent Activity
-                    </h2>
+                    </Heading>
                 </div>
                 <ActivityFeedList Activities="@_recentActivity" />
             </div>

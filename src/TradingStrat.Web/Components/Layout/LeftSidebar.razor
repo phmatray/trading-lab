@@ -1,4 +1,5 @@
-@* LeftSidebar Component - Vertical icon-based navigation *@
+@using TradingStrat.Web.Components.UI.Navigation.Sidebar
+@* LeftSidebar Component - Vertical icon-based navigation with Catalyst components *@
 
 <aside class="@GetSidebarClasses()"
        data-testid="left-sidebar"
@@ -6,7 +7,7 @@
        aria-label="Main navigation">
     <div class="h-full flex flex-col bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border">
         <!-- Navigation Items -->
-        <nav class="flex-1 py-4 space-y-1 overflow-y-auto">
+        <Sidebar Class="flex-1 py-4 px-2 overflow-y-auto">
             @{
                 IEnumerable<IGrouping<string, NavItem>> groups = _navItems.GroupBy(i => i.Group);
                 bool isFirstGroup = true;
@@ -17,32 +18,26 @@
                 @* Group divider (collapsed) or header (expanded) *@
                 @if (!isFirstGroup)
                 {
-                    @if (IsCollapsed)
+                    <SidebarDivider Class="my-2" />
+                }
+
+                <SidebarSection>
+                    @if (!IsCollapsed)
                     {
-                        <div class="mx-2 border-t border-gray-200 dark:border-dark-border my-2"></div>
-                    }
-                }
-
-                @if (!IsCollapsed)
-                {
-                    <div class="px-4 pt-4 pb-2">
-                        <h3 class="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
+                        <SidebarHeading Class="px-2">
                             @group.Key
-                        </h3>
-                    </div>
-                }
+                        </SidebarHeading>
+                    }
 
-                @* Menu items *@
-                @foreach (var item in group)
-                {
-                    <NavLink href="@item.Href"
-                             class="@GetNavLinkClass()"
-                             Match="@item.Match"
-                             title="@GetTooltipText(item)"
-                             aria-label="@GetTooltipText(item)">
-                        <div class="flex items-center @(IsCollapsed ? "justify-center" : "px-4") py-3">
+                    @* Menu items *@
+                    @foreach (var item in group)
+                    {
+                        <SidebarItem Href="@item.Href"
+                                   Current="@IsCurrentRoute(item.Href, item.Match)"
+                                   title="@GetTooltipText(item)"
+                                   aria-label="@GetTooltipText(item)">
                             <!-- Icon -->
-                            <svg class="w-5 h-5 @(IsCollapsed ? "" : "mr-3")" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg data-slot="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 @GetIconPath(item.Icon)
                             </svg>
 
@@ -51,16 +46,16 @@
                             {
                                 <span>@item.Label</span>
                             }
-                        </div>
-                    </NavLink>
-                }
+                        </SidebarItem>
+                    }
+                </SidebarSection>
 
                 isFirstGroup = false;
             }
-        </nav>
+        </Sidebar>
 
         <!-- Toggle Button -->
-        <div class="border-t border-gray-200 dark:border-dark-border p-4">
+        <SidebarFooter>
             <button @onclick="ToggleCollapse"
                     class="w-full flex items-center @(IsCollapsed ? "justify-center" : "justify-between") p-2 text-gray-500 hover:text-gray-700 dark:text-dark-text-secondary dark:hover:text-dark-text-primary rounded transition-colors"
                     aria-label="@(IsCollapsed ? "Expand sidebar" : "Collapse sidebar")"
@@ -73,7 +68,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
                 </svg>
             </button>
-        </div>
+        </SidebarFooter>
     </div>
 </aside>
-

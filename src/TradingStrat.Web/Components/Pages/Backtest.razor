@@ -1,6 +1,8 @@
 @page "/backtest"
 @rendermode InteractiveServer
 @inherits BaseDataPage<BacktestFormModel, BacktestResult>
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 
 <PageTitle>Backtest - TradingStrat</PageTitle>
 
@@ -23,7 +25,7 @@
         <!-- Configuration Form -->
         <div class="lg:col-span-1 space-y-6">
             <div class="card">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</h2>
+                <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
 
                 <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-4">
                     <DataAnnotationsValidator />
@@ -45,12 +47,12 @@
                     <DateRangeInput @bind-StartDate="FormModel.StartDate"
                                     @bind-EndDate="FormModel.EndDate" />
 
-                    <Button Type="@ButtonType.Submit"
+                    <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             FullWidth="@true"
                             IsLoading="@ProgressService.IsProcessing"
                             Text="Run Backtest"
-                            LoadingText="Running Backtest..."></Button>
+                            LoadingText="Running Backtest..."></TradingStrat.Web.Components.Shared.Button>
                 </EditForm>
             </div>
 
@@ -65,13 +67,13 @@
             @if (Result is not null)
             {
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                         @Result.StrategyName
-                    </h2>
-                    <p class="text-gray-600 dark:text-dark-text-secondary mb-4">@Result.StrategyDescription</p>
+                    </Heading>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-600 dark:text-dark-text-secondary mb-4">@Result.StrategyDescription</TradingStrat.Web.Components.UI.Typography.Text>
                     <div class="text-sm text-gray-500 dark:text-dark-text-secondary">
-                        <p>Period: @Result.StartDate.ToString("yyyy-MM-dd") to @Result.EndDate.ToString("yyyy-MM-dd")</p>
-                        <p>Initial Capital: @Result.InitialCapital.ToString("C2")</p>
+                        <TradingStrat.Web.Components.UI.Typography.Text>Period: @Result.StartDate.ToString("yyyy-MM-dd") to @Result.EndDate.ToString("yyyy-MM-dd")</TradingStrat.Web.Components.UI.Typography.Text>
+                        <TradingStrat.Web.Components.UI.Typography.Text>Initial Capital: @Result.InitialCapital.ToString("C2")</TradingStrat.Web.Components.UI.Typography.Text>
                     </div>
                 </div>
 
@@ -87,9 +89,9 @@
                 <TradeTable Trades="@Result.Trades" />
 
                 <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</h3>
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</Heading>
                     <div class="flex flex-wrap gap-3">
-                        <Button Variant="@ButtonVariant.Secondary"
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@CreatePortfolioFromStrategy"
                                 Text="Create Portfolio">
                             <LeadingIcon>
@@ -97,8 +99,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@CompareWithOthers"
                                 Text="Compare Strategies">
                             <LeadingIcon>
@@ -106,8 +108,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@OptimizeParameters"
                                 Text="Optimize Parameters">
                             <LeadingIcon>
@@ -115,8 +117,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@ViewInArchive"
                                 Text="View in Archive">
                             <LeadingIcon>
@@ -124,7 +126,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
+                        </TradingStrat.Web.Components.Shared.Button>
                     </div>
                 </div>
             }
@@ -135,8 +137,8 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No backtest results</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your strategy and run a backtest to see results here.</p>
+                        <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No backtest results</Heading>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your strategy and run a backtest to see results here.</TradingStrat.Web.Components.UI.Typography.Text>
                     </div>
                 </div>
             }

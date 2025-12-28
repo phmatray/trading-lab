@@ -1,0 +1,20 @@
+@using Microsoft.AspNetCore.Components
+
+<span class="@GetClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</span>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "truncate"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

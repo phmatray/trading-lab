@@ -104,8 +104,8 @@ public class StrategyComparisonPageTests : BaseTest
         // Arrange
         await NavigateToAsync("/");
 
-        // Act
-        await Page!.Locator("nav a[href='/strategies/compare']").ClickAsync();
+        // Act - Use Catalyst sidebar navigation
+        await Page!.Locator("aside[data-testid='left-sidebar'] nav a[href='/strategies/compare']").ClickAsync();
         await Page!.WaitForBlazorAsync();
 
         // Assert

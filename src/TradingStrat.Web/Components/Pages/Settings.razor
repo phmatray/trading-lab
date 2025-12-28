@@ -1,5 +1,7 @@
 @page "/settings"
 @rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 
 <PageTitle>Settings - TradingStrat</PageTitle>
 
@@ -17,7 +19,7 @@
 
         <!-- Appearance -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Appearance</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Appearance</Heading>
 
             <div class="space-y-4">
                 <div>
@@ -28,35 +30,35 @@
                         <option value="dark">Dark</option>
                         <option value="system">System</option>
                     </InputSelect>
-                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Choose your preferred color theme</p>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Choose your preferred color theme</TradingStrat.Web.Components.UI.Typography.Text>
                 </div>
             </div>
         </div>
 
         <!-- Default Ticker -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Default Ticker</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Default Ticker</Heading>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="defaultTicker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol</label>
                     <InputText id="defaultTicker" @bind-Value="_preferences.DefaultTicker"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
-                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Default ticker symbol for all forms</p>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Default ticker symbol for all forms</TradingStrat.Web.Components.UI.Typography.Text>
                 </div>
 
                 <div>
                     <label for="defaultIsin" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">ISIN (Optional)</label>
                     <InputText id="defaultIsin" @bind-Value="_preferences.DefaultIsin"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
-                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number</p>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number</TradingStrat.Web.Components.UI.Typography.Text>
                 </div>
             </div>
         </div>
 
         <!-- Backtest Defaults -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Backtest Defaults</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Backtest Defaults</Heading>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -93,7 +95,7 @@
 
         <!-- Chart Preferences -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Chart Preferences</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Chart Preferences</Heading>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -127,19 +129,19 @@
         <!-- Actions -->
         <div class="card">
             <div class="flex flex-wrap gap-4">
-                <Button Type="@ButtonType.Submit"
+                <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                         Variant="@ButtonVariant.Primary"
                         IsLoading="@_isSaving"
                         Text="Save Settings"
-                        LoadingText="Saving..."></Button>
+                        LoadingText="Saving..."></TradingStrat.Web.Components.Shared.Button>
 
-                <Button Variant="@ButtonVariant.Secondary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                         OnClick="@HandleResetToDefaults"
-                        Text="Reset to Defaults"></Button>
+                        Text="Reset to Defaults"></TradingStrat.Web.Components.Shared.Button>
 
-                <Button Variant="@ButtonVariant.Danger"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Danger"
                         OnClick="@HandleClearAllData"
-                        Text="Clear All Data"></Button>
+                        Text="Clear All Data"></TradingStrat.Web.Components.Shared.Button>
             </div>
         </div>
         </EditForm>

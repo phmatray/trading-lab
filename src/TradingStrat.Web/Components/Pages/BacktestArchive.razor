@@ -1,6 +1,8 @@
 @page "/backtests"
 @using TradingStrat.Web.Components.Base
 @inherits BaseComponent
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 @rendermode InteractiveServer
 
 <PageTitle>Backtest Archive - TradingStrat</PageTitle>
@@ -13,7 +15,7 @@
     <PageHeader Title="Backtest Archive"
                 Description="History of all backtest runs with filtering and sorting">
         <Actions>
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@LoadArchiveAsync"
                     IsLoading="@_isLoading"
                     Text="Refresh"
@@ -23,8 +25,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
-            <Button Variant="@ButtonVariant.Primary"
+            </TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     OnClick="@NavigateToBacktest"
                     Text="New Backtest">
                 <LeadingIcon>
@@ -32,7 +34,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </Actions>
     </PageHeader>
 
@@ -85,7 +87,7 @@
 
         <!-- Filters -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Filters</h2>
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Filters</Heading>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
@@ -128,12 +130,12 @@
                 </div>
             </div>
             <div class="mt-4 flex gap-3">
-                <Button Variant="@ButtonVariant.Primary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                         OnClick="@ApplyFiltersAsync"
-                        Text="Apply Filters"></Button>
-                <Button Variant="@ButtonVariant.Secondary"
+                        Text="Apply Filters"></TradingStrat.Web.Components.Shared.Button>
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                         OnClick="@ClearFiltersAsync"
-                        Text="Clear Filters"></Button>
+                        Text="Clear Filters"></TradingStrat.Web.Components.Shared.Button>
             </div>
         </div>
 
@@ -141,9 +143,9 @@
         {
             <!-- Backtest Results Table -->
             <div class="card">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                     Backtest Results (@_archiveResult.BacktestRuns.Count)
-                </h2>
+                </Heading>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
                         <thead class="bg-gray-50 dark:bg-dark-bg-tertiary">
@@ -258,7 +260,7 @@
                 <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-dark-text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Backtests Found</h3>
+                <Heading Level="3" Class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Backtests Found</Heading>
                 <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
                     @if (!string.IsNullOrEmpty(_filterTicker) || !string.IsNullOrEmpty(_filterStrategy) || _filterStartDate is not null || _filterEndDate is not null)
                     {
@@ -269,9 +271,9 @@
                         <span>You haven't run any backtests yet. Start by running your first backtest.</span>
                     }
                 </p>
-                <Button Variant="@ButtonVariant.Primary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                         OnClick="@NavigateToBacktest"
-                        Text="Run First Backtest"></Button>
+                        Text="Run First Backtest"></TradingStrat.Web.Components.Shared.Button>
             </div>
         }
     }

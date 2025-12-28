@@ -199,8 +199,8 @@ public class StrategyWorkspacePageTests : BaseTest
         // Arrange
         await NavigateToAsync("/");
 
-        // Act
-        await Page!.Locator("nav a[href='/workspace']").ClickAsync();
+        // Act - Use Catalyst sidebar navigation
+        await Page!.Locator("aside[data-testid='left-sidebar'] nav a[href='/workspace']").ClickAsync();
         await Page!.WaitForBlazorAsync();
 
         // Assert

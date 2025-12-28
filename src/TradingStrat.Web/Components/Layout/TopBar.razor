@@ -1,3 +1,6 @@
+@using System.Globalization
+@using TradingStrat.Web.Components.UI.Navigation.Navbar
+@using TradingStrat.Web.Components.UI.Typography
 @* TopBar Component - Fixed top bar with portfolio info and quick actions *@
 
 <div class="h-16 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border fixed top-0 left-0 right-0 z-40"
@@ -7,55 +10,53 @@
         <!-- Left: App Title + Portfolio Info -->
         <div class="flex items-center gap-6">
             <!-- App Title -->
-            <h1 class="text-xl font-bold text-trading-blue dark:text-dark-accent-blue whitespace-nowrap">
+            <Heading Level="1" Class="text-xl font-bold text-trading-blue dark:text-dark-accent-blue whitespace-nowrap">
                 TradingStrat AI
-            </h1>
+            </Heading>
 
             <!-- Portfolio Info -->
             @if (!string.IsNullOrEmpty(SelectedPortfolioName) && PortfolioValue.HasValue)
             {
                 <div class="hidden md:flex items-center gap-2 text-sm">
-                    <span class="text-gray-500 dark:text-dark-text-secondary">Portfolio:</span>
-                    <span class="font-medium text-gray-900 dark:text-dark-text-primary">@SelectedPortfolioName</span>
-                    <span class="text-gray-900 dark:text-dark-text-primary">(@PortfolioValue.Value.ToString("C0"))</span>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">Portfolio:</TradingStrat.Web.Components.UI.Typography.Text>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="font-medium text-gray-900 dark:text-dark-text-primary">@SelectedPortfolioName</TradingStrat.Web.Components.UI.Typography.Text>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-primary">(@PortfolioValue.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US")))</TradingStrat.Web.Components.UI.Typography.Text>
 
                     @if (YtdPerformance.HasValue)
                     {
-                        <span class="@GetPerformanceClass()">
-                            @(YtdPerformance.Value >= 0 ? "+" : "")@YtdPerformance.Value.ToString("P2") YTD
-                        </span>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="@GetPerformanceClass()">
+                            @(YtdPerformance.Value >= 0 ? "+" : "")@YtdPerformance.Value.ToString("F2", CultureInfo.InvariantCulture)% YTD
+                        </TradingStrat.Web.Components.UI.Typography.Text>
                     }
                 </div>
             }
         </div>
 
         <!-- Right: Actions -->
-        <div class="flex items-center gap-3">
-            <!-- AI Mode Selector (optional) -->
-            @if (ShowAiModeSelector)
-            {
-                <select class="hidden lg:block px-3 py-1 text-sm rounded border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue"
-                        aria-label="AI Mode">
-                    <option>Conservative</option>
-                    <option selected>Balanced</option>
-                    <option>Aggressive</option>
-                </select>
-            }
+        <Navbar Class="flex items-center gap-3">
+            <NavbarSection>
+                <!-- AI Mode Selector (optional) -->
+                @if (ShowAiModeSelector)
+                {
+                    <select class="hidden lg:block px-3 py-1 text-sm rounded border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue"
+                            aria-label="AI Mode">
+                        <option>Conservative</option>
+                        <option selected>Balanced</option>
+                        <option>Aggressive</option>
+                    </select>
+                }
 
-            <!-- Notification Bell -->
-            <NotificationBell />
+                <!-- Notification Bell -->
+                <NotificationBell />
 
-            <!-- Settings Button -->
-            <button @onclick="NavigateToSettings"
-                    class="p-2 text-gray-500 hover:text-gray-700 dark:text-dark-text-secondary dark:hover:text-dark-text-primary transition-colors"
-                    aria-label="Settings"
-                    type="button">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-            </button>
-        </div>
+                <!-- Settings Button -->
+                <NavbarItem OnClick="@NavigateToSettings" aria-label="Settings">
+                    <svg data-slot="icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </NavbarItem>
+            </NavbarSection>
+        </Navbar>
     </div>
 </div>
-

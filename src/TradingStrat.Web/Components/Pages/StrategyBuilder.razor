@@ -1,6 +1,8 @@
 @page "/strategies/builder"
 @page "/strategies/builder/{Id:int}"
 @rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 
 <PageTitle>@(IsEditMode ? "Edit Strategy" : "Strategy Builder") | TradingStrat</PageTitle>
 
@@ -24,7 +26,7 @@
 
             <!-- Strategy Metadata Card -->
             <div class="card">
-                <h2 class="text-xl font-semibold mb-4">Strategy Information</h2>
+                <Heading Level="2" Class="text-xl font-semibold mb-4">Strategy Information</Heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -67,7 +69,7 @@
 
             <!-- Position Sizing Card -->
             <div class="card">
-                <h2 class="text-xl font-semibold mb-4">Position Sizing</h2>
+                <Heading Level="2" Class="text-xl font-semibold mb-4">Position Sizing</Heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -87,7 +89,7 @@
                                          class="input-field w-full"
                                          step="0.1" />
                             <ValidationMessage For="@(() => _formModel.FixedPercentage)" class="text-red-600 text-sm mt-1" />
-                            <p class="text-xs text-gray-500 mt-1">Use 1-100% of available capital per trade</p>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 mt-1">Use 1-100% of available capital per trade</TradingStrat.Web.Components.UI.Typography.Text>
                         </div>
                     }
                     else if (_formModel.SizingMode == PositionSizingMode.FixedQuantity)
@@ -97,7 +99,7 @@
                             <InputNumber @bind-Value="_formModel.FixedQuantity"
                                          class="input-field w-full" />
                             <ValidationMessage For="@(() => _formModel.FixedQuantity)" class="text-red-600 text-sm mt-1" />
-                            <p class="text-xs text-gray-500 mt-1">Buy fixed number of shares per trade</p>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 mt-1">Buy fixed number of shares per trade</TradingStrat.Web.Components.UI.Typography.Text>
                         </div>
                     }
                     else if (_formModel.SizingMode == PositionSizingMode.RiskBased)
@@ -108,7 +110,7 @@
                                          class="input-field w-full"
                                          step="0.001" />
                             <ValidationMessage For="@(() => _formModel.RiskPercentage)" class="text-red-600 text-sm mt-1" />
-                            <p class="text-xs text-gray-500 mt-1">Risk 0.1-10% of capital per trade</p>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 mt-1">Risk 0.1-10% of capital per trade</TradingStrat.Web.Components.UI.Typography.Text>
                         </div>
                     }
                 </div>
@@ -118,10 +120,10 @@
             <div class="card">
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h2 class="text-xl font-semibold">Entry Rules</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <Heading Level="2" Class="text-xl font-semibold">Entry Rules</Heading>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Define when to open a position (buy signal)
-                        </p>
+                        </TradingStrat.Web.Components.UI.Typography.Text>
                     </div>
                     <span class="badge badge-primary">@_formModel.EntryRules.Count rule(s)</span>
                 </div>
@@ -135,10 +137,10 @@
             <div class="card">
                 <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h2 class="text-xl font-semibold">Exit Rules</h2>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        <Heading Level="2" Class="text-xl font-semibold">Exit Rules</Heading>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Define when to close a position (sell signal)
-                        </p>
+                        </TradingStrat.Web.Components.UI.Typography.Text>
                     </div>
                     <span class="badge badge-primary">@_formModel.ExitRules.Count rule(s)</span>
                 </div>
@@ -150,23 +152,23 @@
 
             <!-- Action Buttons -->
             <div class="flex justify-between items-center">
-                <Button Variant="@ButtonVariant.Secondary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                         OnClick="@NavigateToLibrary"
-                        Text="Cancel"></Button>
+                        Text="Cancel"></TradingStrat.Web.Components.Shared.Button>
 
                 <div class="flex gap-3">
                     @if (IsEditMode)
                     {
-                        <Button Variant="@ButtonVariant.Danger"
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Danger"
                                 OnClick="@HandleDelete"
                                 AriaLabel="Delete this strategy"
-                                Text="Delete Strategy"></Button>
+                                Text="Delete Strategy"></TradingStrat.Web.Components.Shared.Button>
                     }
-                    <Button Type="@ButtonType.Submit"
+                    <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             IsLoading="@_isSaving"
                             Text="@(IsEditMode ? "Update Strategy" : "Create Strategy")"
-                            LoadingText="Saving..."></Button>
+                            LoadingText="Saving..."></TradingStrat.Web.Components.Shared.Button>
                 </div>
             </div>
 
@@ -174,7 +176,7 @@
             @if (_validationErrors.Any())
             {
                 <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                    <h3 class="font-semibold text-red-800 dark:text-red-200 mb-2">Please fix the following errors:</h3>
+                    <Heading Level="3" Class="font-semibold text-red-800 dark:text-red-200 mb-2">Please fix the following errors:</Heading>
                     <ul class="list-disc list-inside text-red-700 dark:text-red-300 text-sm space-y-1">
                         @foreach (var error in _validationErrors)
                         {

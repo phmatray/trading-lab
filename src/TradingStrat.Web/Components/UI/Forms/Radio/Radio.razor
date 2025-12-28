@@ -1,0 +1,142 @@
+@using TradingStrat.Web.Utilities
+@using TradingStrat.Web.Components.UI
+
+@* Catalyst UI Kit - Radio Component *@
+
+<label class="group inline-flex focus:outline-hidden cursor-pointer">
+    <span class="radio-base @GetColorClass()" data-slot="control">
+        <input type="radio"
+               checked="@Checked"
+               disabled="@Disabled"
+               name="@Name"
+               value="@Value"
+               @onchange="HandleChange"
+               @attributes="AdditionalAttributes"
+               class="sr-only" />
+
+        @* Radio indicator dot *@
+        <span class="@GetIndicatorClass()"></span>
+    </span>
+    @ChildContent
+</label>
+
+@code {
+    /// <summary>
+    /// Whether the radio is checked.
+    /// </summary>
+    [Parameter]
+    public bool Checked { get; set; }
+
+    /// <summary>
+    /// Checked changed callback for two-way binding.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CheckedChanged { get; set; }
+
+    /// <summary>
+    /// Radio group name (required for grouping).
+    /// </summary>
+    [Parameter]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Radio value.
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>
+    /// If true, disables the radio.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Radio color variant.
+    /// </summary>
+    [Parameter]
+    public RadioColor Color { get; set; } = RadioColor.DarkZinc;
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Radio label content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetColorClass()
+    {
+        string colorClass = Color switch
+        {
+            RadioColor.DarkZinc => CatalystStyles.RadioDarkZinc,
+            RadioColor.DarkWhite => CatalystStyles.RadioDarkWhite,
+            RadioColor.White => CatalystStyles.RadioWhite,
+            RadioColor.Dark => CatalystStyles.RadioDark,
+            RadioColor.Zinc => CatalystStyles.RadioZinc,
+            RadioColor.Blue => CatalystStyles.RadioBlue,
+            RadioColor.Red => CatalystStyles.RadioRed,
+            RadioColor.Green => CatalystStyles.RadioGreen,
+            RadioColor.Orange => CatalystStyles.RadioOrange,
+            RadioColor.Amber => CatalystStyles.RadioAmber,
+            RadioColor.Yellow => CatalystStyles.RadioYellow,
+            RadioColor.Lime => CatalystStyles.RadioLime,
+            RadioColor.Emerald => CatalystStyles.RadioEmerald,
+            RadioColor.Teal => CatalystStyles.RadioTeal,
+            RadioColor.Cyan => CatalystStyles.RadioCyan,
+            RadioColor.Sky => CatalystStyles.RadioSky,
+            RadioColor.Indigo => CatalystStyles.RadioIndigo,
+            RadioColor.Violet => CatalystStyles.RadioViolet,
+            RadioColor.Purple => CatalystStyles.RadioPurple,
+            RadioColor.Fuchsia => CatalystStyles.RadioFuchsia,
+            RadioColor.Pink => CatalystStyles.RadioPink,
+            RadioColor.Rose => CatalystStyles.RadioRose,
+            _ => CatalystStyles.RadioDarkZinc
+        };
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            return $"{colorClass} {Class}";
+        }
+
+        return colorClass;
+    }
+
+    private string GetIndicatorClass()
+    {
+        List<string> classes =
+        [
+            "size-full",
+            "rounded-full",
+            "border-[4.5px]",
+            "border-transparent",
+            "bg-[--radio-indicator]"
+        ];
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        bool newValue = e.Value as bool? ?? false;
+        if (CheckedChanged.HasDelegate)
+        {
+            await CheckedChanged.InvokeAsync(newValue);
+        }
+    }
+}

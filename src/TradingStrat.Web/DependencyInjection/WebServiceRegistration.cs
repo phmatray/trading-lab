@@ -36,6 +36,9 @@ public static class WebServiceRegistration
         // Notification service
         services.AddScoped<NotificationService>();
 
+        // Dialog service (Catalyst UI)
+        services.AddScoped<DialogService>();
+
         // Data freshness service
         services.AddScoped<IDataFreshnessService, DataFreshnessService>();
 

@@ -1,0 +1,37 @@
+@* Catalyst UI Kit - AlertDescription Component *@
+
+<div class="@GetClasses()">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Description content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            "mt-2",
+            "text-pretty",
+            "text-zinc-500",
+            "dark:text-zinc-400"
+        ];
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+}

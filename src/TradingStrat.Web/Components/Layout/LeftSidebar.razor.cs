@@ -5,6 +5,9 @@ namespace TradingStrat.Web.Components.Layout;
 
 public partial class LeftSidebar : ComponentBase
 {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
     /// <summary>
     /// Whether the sidebar is collapsed
     /// </summary>
@@ -64,11 +67,6 @@ public partial class LeftSidebar : ComponentBase
         return $"{baseClasses} {widthClasses}";
     }
 
-    private string GetNavLinkClass()
-    {
-        return "block text-gray-700 dark:text-dark-text-secondary hover:text-trading-blue dark:hover:text-dark-accent-blue hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors";
-    }
-
     private async Task ToggleCollapse()
     {
         IsCollapsed = !IsCollapsed;
@@ -86,6 +84,18 @@ public partial class LeftSidebar : ComponentBase
         }
         // When expanded: show just description (label is visible)
         return item.Description ?? item.Label;
+    }
+
+    private bool IsCurrentRoute(string href, NavLinkMatch match)
+    {
+        string currentUri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        if (match == NavLinkMatch.All)
+        {
+            return currentUri == href.TrimStart('/');
+        }
+
+        return currentUri.StartsWith(href.TrimStart('/'));
     }
 
     private RenderFragment GetIconPath(string iconName) => builder =>

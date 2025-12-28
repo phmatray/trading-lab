@@ -1,6 +1,8 @@
 @page "/comparison"
 @rendermode InteractiveServer
 @using TradingStrat.Web.Models
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 @using TradingStrat.Web.Utilities
 @inherits BaseDataPage<ComparisonFormModel, ParameterOptimizationResult>
 
@@ -17,7 +19,7 @@
     <FormWrapper ErrorMessage="@ErrorMessage">
         <!-- Configuration -->
     <div class="card">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Test Configuration</h2>
+        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Test Configuration</Heading>
 
         <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-6">
             <DataAnnotationsValidator />
@@ -39,12 +41,12 @@
                 </FormInputGroup>
 
                 <div class="flex items-end">
-                    <Button Type="@ButtonType.Submit"
+                    <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             FullWidth="@true"
                             IsLoading="@ProgressService.IsProcessing"
                             Text="Run Comparison"
-                            LoadingText="Comparing..."></Button>
+                            LoadingText="Comparing..."></TradingStrat.Web.Components.Shared.Button>
                 </div>
             </div>
 
@@ -52,7 +54,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Variant A -->
                 <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
-                    <h3 class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</h3>
+                    <Heading Level="3" Class="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-400">Variant A</Heading>
                     <StrategyForm @ref="_strategyFormA"
                                   SelectedStrategy="@GetStrategyKey(FormModel.StrategyTypeA)"
                                   SelectedStrategyChanged="@OnStrategyTypeAChanged"
@@ -61,7 +63,7 @@
 
                 <!-- Variant B -->
                 <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-elevated">
-                    <h3 class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</h3>
+                    <Heading Level="3" Class="text-lg font-semibold mb-4 text-green-700 dark:text-green-400">Variant B</Heading>
                     <StrategyForm @ref="_strategyFormB"
                                   SelectedStrategy="@GetStrategyKey(FormModel.StrategyTypeB)"
                                   SelectedStrategyChanged="@OnStrategyTypeBChanged"
@@ -81,9 +83,9 @@
         {
             <div class="card bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-800">
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
+                    <Heading Level="2" Class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">
                         🏆 Winner: @(comparison.Winner == 1 ? "Variant A" : "Variant B")
-                    </h2>
+                    </Heading>
                     <p class="text-gray-600 dark:text-dark-text-secondary">
                         @(comparison.Winner == 1 ? comparison.VariantA.Description : comparison.VariantB.Description)
                     </p>
@@ -96,7 +98,7 @@
 
         <!-- Side-by-Side Metrics -->
         <div class="card">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Comparison</h2>
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Comparison</Heading>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full">
@@ -143,7 +145,7 @@
             <!-- Variant A Results -->
             <div class="space-y-4">
                 <div class="card border-2 border-blue-200 dark:border-blue-800">
-                    <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A: @comparison.VariantA.Description</h3>
+                    <Heading Level="3" Class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A: @comparison.VariantA.Description</Heading>
                     <MetricsGrid Metrics="@comparison.ResultA.Metrics" />
                 </div>
                 <StrategyAnalysisPanel
@@ -158,7 +160,7 @@
             <!-- Variant B Results -->
             <div class="space-y-4">
                 <div class="card border-2 border-green-200 dark:border-green-800">
-                    <h3 class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B: @comparison.VariantB.Description</h3>
+                    <Heading Level="3" Class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B: @comparison.VariantB.Description</Heading>
                     <MetricsGrid Metrics="@comparison.ResultB.Metrics" />
                 </div>
                 <StrategyAnalysisPanel
@@ -174,11 +176,11 @@
         <!-- Trade Tables -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-white dark:bg-dark-card">
-                <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A Trades</h3>
+                <Heading Level="3" Class="text-lg font-semibold text-blue-700 dark:text-blue-400 mb-4">Variant A Trades</Heading>
                 <TradeTable Trades="@comparison.ResultA.Trades" MaxDisplayTrades="10" />
             </div>
             <div class="border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-white dark:bg-dark-card">
-                <h3 class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B Trades</h3>
+                <Heading Level="3" Class="text-lg font-semibold text-green-700 dark:text-green-400 mb-4">Variant B Trades</Heading>
                 <TradeTable Trades="@comparison.ResultB.Trades" MaxDisplayTrades="10" />
             </div>
         </div>

@@ -1,0 +1,198 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+@* Catalyst UI Kit - Dialog Component *@
+
+@if (IsOpen)
+{
+    <div class="dialog-container" @onclick="HandleBackdropClick">
+        @* Backdrop *@
+        <div class="@GetBackdropClasses()" data-state="@(IsOpen ? "open" : "closed")"></div>
+
+        @* Dialog wrapper with scroll container *@
+        <div class="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0" @onclick:stopPropagation>
+            <div class="grid min-h-full grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr] sm:p-4">
+                @* Dialog panel *@
+                <div class="@GetPanelClasses()"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="dialog-title"
+                     data-state="@(IsOpen ? "open" : "closed")"
+                     @onclick:stopPropagation
+                     @ref="_panelRef">
+                    @ChildContent
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private ElementReference _panelRef;
+    private DotNetObjectReference<Dialog>? _dotNetRef;
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    /// <summary>
+    /// Whether the dialog is open.
+    /// </summary>
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    /// <summary>
+    /// Callback when dialog open state changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    /// <summary>
+    /// Dialog size variant.
+    /// </summary>
+    [Parameter]
+    public DialogSize Size { get; set; } = DialogSize.Large;
+
+    /// <summary>
+    /// Additional CSS classes to apply to the panel.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Dialog content (title, description, body, actions).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("catalyst.initializeDialog", _dotNetRef);
+        }
+
+        if (IsOpen && _panelRef.Id != null)
+        {
+            // Focus the dialog panel when opened
+            await JSRuntime.InvokeVoidAsync("catalyst.focusDialog", _panelRef);
+        }
+    }
+
+    private string GetBackdropClasses()
+    {
+        List<string> classes =
+        [
+            "fixed",
+            "inset-0",
+            "flex",
+            "w-screen",
+            "justify-center",
+            "overflow-y-auto",
+            "bg-zinc-950/25",
+            "dark:bg-zinc-950/50",
+            "px-2",
+            "py-2",
+            "sm:px-6",
+            "sm:py-8",
+            "lg:px-8",
+            "lg:py-16",
+            "transition",
+            "duration-100",
+            "focus:outline-0",
+            "data-[state=closed]:opacity-0",
+            "data-[state=open]:opacity-100"
+        ];
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetPanelClasses()
+    {
+        List<string> classes =
+        [
+            "row-start-2",
+            "w-full",
+            "min-w-0",
+            "rounded-t-3xl",
+            "sm:mb-auto",
+            "sm:rounded-2xl",
+            "bg-white",
+            "dark:bg-zinc-900",
+            "p-8",
+            "shadow-lg",
+            "ring-1",
+            "ring-zinc-950/10",
+            "dark:ring-white/10",
+            // Transitions
+            "transition",
+            "duration-100",
+            "will-change-transform",
+            "data-[state=closed]:translate-y-12",
+            "data-[state=closed]:opacity-0",
+            "sm:data-[state=closed]:translate-y-0",
+            "sm:data-[state=closed]:scale-95",
+            "data-[state=open]:translate-y-0",
+            "data-[state=open]:opacity-100",
+            "sm:data-[state=open]:scale-100"
+        ];
+
+        // Add size class
+        string sizeClass = Size switch
+        {
+            DialogSize.XS => "sm:max-w-xs",
+            DialogSize.Small => "sm:max-w-sm",
+            DialogSize.Medium => "sm:max-w-md",
+            DialogSize.Large => "sm:max-w-lg",
+            DialogSize.XL => "sm:max-w-xl",
+            DialogSize.XL2 => "sm:max-w-2xl",
+            DialogSize.XL3 => "sm:max-w-3xl",
+            DialogSize.XL4 => "sm:max-w-4xl",
+            DialogSize.XL5 => "sm:max-w-5xl",
+            _ => "sm:max-w-lg"
+        };
+        classes.Add(sizeClass);
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        await CloseAsync();
+    }
+
+    /// <summary>
+    /// Close the dialog (called from JavaScript when Escape is pressed).
+    /// </summary>
+    [JSInvokable]
+    public async Task CloseDialog()
+    {
+        await CloseAsync();
+    }
+
+    /// <summary>
+    /// Close the dialog.
+    /// </summary>
+    public async Task CloseAsync()
+    {
+        if (!IsOpen) return;
+
+        if (IsOpenChanged.HasDelegate)
+        {
+            await IsOpenChanged.InvokeAsync(false);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            await JSRuntime.InvokeVoidAsync("catalyst.disposeDialog");
+            _dotNetRef.Dispose();
+        }
+    }
+}

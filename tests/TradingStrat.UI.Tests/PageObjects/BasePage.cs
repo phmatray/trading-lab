@@ -97,12 +97,13 @@ public abstract class BasePage
     }
 
     /// <summary>
-    /// Navigation menu locator (common across all pages).
+    /// Navigation menu locator (left sidebar with Catalyst Sidebar component).
+    /// Targets the sidebar navigation specifically, not the top navbar.
     /// </summary>
-    protected ILocator NavMenu => Page.Locator("nav");
+    protected ILocator NavMenu => Page.Locator("aside[data-testid='left-sidebar'] nav");
 
     /// <summary>
-    /// Navigates using the navigation menu.
+    /// Navigates using the navigation menu in the left sidebar.
     /// </summary>
     protected async Task NavigateViaMenuAsync(string linkText)
     {

@@ -1,6 +1,8 @@
 @page "/data/status"
 @using TradingStrat.Application.Ports.Inbound
 @using TradingStrat.Web.Components.Base
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 @inherits BaseComponent
 @rendermode InteractiveServer
 
@@ -16,19 +18,19 @@
                     Description="Overview of historical data coverage and quality" />
 
         <div class="flex items-center gap-3">
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@ExportCoverageReport"
                     Text="Export Report"
                     IconName="arrow-down-tray" />
 
-            <Button Variant="@ButtonVariant.Secondary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@LoadDataStatusAsync"
                     IsLoading="@_isLoading"
                     Text="Refresh"
                     LoadingText="Refreshing..."
                     IconName="arrow-path" />
 
-            <Button Variant="@ButtonVariant.Primary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     OnClick="@NavigateToDataManagement"
                     Text="Fetch Data"
                     IconName="plus" />
@@ -101,9 +103,9 @@
             <!-- Enhanced Data Table -->
             <div class="card">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Ticker Coverage Details
-                    </h2>
+                    </Heading>
                     <div class="text-sm text-gray-600 dark:text-gray-400">
                         Showing @_dataStatus.TickerStatuses.Count of @_dataStatus.TotalTickers tickers
                     </div>
@@ -238,13 +240,13 @@
             <!-- Empty State -->
             <div class="card text-center py-12">
                 <Icon Name="inbox" Size="IconSize.Large" Class="mx-auto mb-4 text-gray-400" />
-                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Data Available</h3>
+                <Heading Level="3" Class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Data Available</Heading>
                 <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
                     @(string.IsNullOrEmpty(_query.SearchTicker) ? "You haven't fetched any historical data yet." : "No tickers match your search criteria.")
                 </p>
-                <Button Variant="@ButtonVariant.Primary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                         OnClick="@NavigateToDataManagement"
-                        Text="Get Started"></Button>
+                        Text="Get Started"></TradingStrat.Web.Components.Shared.Button>
             </div>
         }
     }

@@ -1,0 +1,283 @@
+@using Microsoft.AspNetCore.Components
+@typeparam TItem
+
+<div class="relative" @ref="_containerRef" @attributes="AdditionalAttributes">
+    <button type="button"
+            @ref="_buttonRef"
+            @onclick="ToggleDropdown"
+            @onkeydown="HandleKeyDown"
+            disabled="@Disabled"
+            aria-label="@AriaLabel"
+            class="@GetButtonWrapperClasses()">
+        <span class="@GetSelectedDisplayClasses()">
+            @if (Value != null)
+            {
+                @DisplayValue(Value)
+            }
+            else if (Placeholder != null)
+            {
+                <span class="block truncate text-zinc-500">@Placeholder</span>
+            }
+        </span>
+        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+            <svg class="@GetChevronClasses()"
+                 viewBox="0 0 16 16"
+                 aria-hidden="true"
+                 fill="none">
+                <path d="M5.75 10.75L8 13L10.25 10.75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.25 5.25L8 3L5.75 5.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </span>
+    </button>
+
+    @if (_isOpen)
+    {
+        <div class="@GetOptionsClasses()">
+            @foreach (var (option, index) in Options.Select((o, i) => (o, i)))
+            {
+                <div @key="option"
+                     class="@GetOptionClasses(option, index)"
+                     @onclick="() => SelectOption(option)"
+                     @onmouseenter="() => _focusedIndex = index">
+                    <svg class="relative size-5 self-center stroke-current sm:size-4 @(EqualityComparer<TItem>.Default.Equals(option, Value) ? "inline" : "hidden")"
+                         viewBox="0 0 16 16"
+                         fill="none"
+                         aria-hidden="true">
+                        <path d="M4 8.5l3 3L12 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="col-start-2">
+                        @OptionTemplate(option)
+                    </span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _containerRef;
+    private ElementReference _buttonRef;
+    private bool _isOpen = false;
+    private int _focusedIndex = -1;
+
+    [Parameter] public TItem? Value { get; set; }
+    [Parameter] public EventCallback<TItem?> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<TItem> Options { get; set; } = Array.Empty<TItem>();
+    [Parameter] public Func<TItem, string> DisplayValue { get; set; } = item => item?.ToString() ?? string.Empty;
+    [Parameter] public RenderFragment<TItem> OptionTemplate { get; set; } = item => builder => builder.AddContent(0, item?.ToString());
+    [Parameter] public RenderFragment? Placeholder { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private void ToggleDropdown()
+    {
+        if (!Disabled)
+        {
+            _isOpen = !_isOpen;
+            if (_isOpen && Value != null)
+            {
+                _focusedIndex = Options.ToList().FindIndex(o => EqualityComparer<TItem>.Default.Equals(o, Value));
+            }
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!_isOpen)
+        {
+            if (e.Key == "ArrowDown" || e.Key == "ArrowUp" || e.Key == "Enter" || e.Key == " ")
+            {
+                _isOpen = true;
+                await InvokeAsync(StateHasChanged);
+            }
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                _focusedIndex = Math.Min(_focusedIndex + 1, Options.Count - 1);
+                await InvokeAsync(StateHasChanged);
+                break;
+
+            case "ArrowUp":
+                _focusedIndex = Math.Max(_focusedIndex - 1, 0);
+                await InvokeAsync(StateHasChanged);
+                break;
+
+            case "Enter":
+            case " ":
+                if (_focusedIndex >= 0 && _focusedIndex < Options.Count)
+                {
+                    await SelectOption(Options[_focusedIndex]);
+                }
+                break;
+
+            case "Escape":
+                await CloseDropdown();
+                break;
+        }
+    }
+
+    private async Task SelectOption(TItem option)
+    {
+        Value = option;
+        _isOpen = false;
+        _focusedIndex = -1;
+
+        await ValueChanged.InvokeAsync(option);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CloseDropdown()
+    {
+        _isOpen = false;
+        _focusedIndex = -1;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetButtonWrapperClasses()
+    {
+        var classes = new List<string>
+        {
+            "group",
+            "relative",
+            "block",
+            "w-full",
+            "before:absolute",
+            "before:inset-px",
+            "before:rounded-[calc(var(--radius-lg)-1px)]",
+            "before:bg-white",
+            "before:shadow-sm",
+            "dark:before:hidden",
+            "focus:outline-hidden",
+            "after:pointer-events-none",
+            "after:absolute",
+            "after:inset-0",
+            "after:rounded-lg",
+            "after:ring-transparent",
+            "after:ring-inset",
+            "focus:after:ring-2",
+            "focus:after:ring-blue-500"
+        };
+
+        if (Disabled)
+        {
+            classes.Add("opacity-50");
+            classes.Add("before:bg-zinc-950/5");
+            classes.Add("before:shadow-none");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetSelectedDisplayClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "relative",
+            "block",
+            "w-full",
+            "appearance-none",
+            "rounded-lg",
+            "py-[calc(theme(spacing.2\\.5)-1px)]",
+            "sm:py-[calc(theme(spacing.1\\.5)-1px)]",
+            "min-h-11",
+            "sm:min-h-9",
+            "pr-[calc(theme(spacing.7)-1px)]",
+            "pl-[calc(theme(spacing.3\\.5)-1px)]",
+            "sm:pl-[calc(theme(spacing.3)-1px)]",
+            "text-left",
+            "text-base/6",
+            "text-zinc-950",
+            "sm:text-sm/6",
+            "dark:text-white",
+            "border",
+            "border-zinc-950/10",
+            "group-hover:border-zinc-950/20",
+            "dark:border-white/10",
+            "dark:group-hover:border-white/20",
+            "bg-transparent",
+            "dark:bg-white/5",
+            "group-disabled:border-zinc-950/20",
+            "group-disabled:opacity-100",
+            "dark:group-disabled:border-white/15",
+            "dark:group-disabled:bg-white/2.5"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    private string GetChevronClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "size-5",
+            "stroke-zinc-500",
+            "group-disabled:stroke-zinc-600",
+            "sm:size-4",
+            "dark:stroke-zinc-400"
+        });
+    }
+
+    private string GetOptionsClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "absolute",
+            "z-10",
+            "mt-2",
+            "w-max",
+            "min-w-[calc(100%+1.75rem)]",
+            "scroll-py-1",
+            "rounded-xl",
+            "p-1",
+            "isolate",
+            "overflow-y-auto",
+            "max-h-60",
+            "bg-white/75",
+            "backdrop-blur-xl",
+            "dark:bg-zinc-800/75",
+            "shadow-lg",
+            "ring-1",
+            "ring-zinc-950/10",
+            "dark:ring-white/10",
+            "dark:ring-inset"
+        });
+    }
+
+    private string GetOptionClasses(TItem option, int index)
+    {
+        var classes = new List<string>
+        {
+            "group/option",
+            "grid",
+            "cursor-default",
+            "grid-cols-[theme(spacing.5)_1fr]",
+            "items-baseline",
+            "gap-x-2",
+            "rounded-lg",
+            "py-2.5",
+            "pr-3.5",
+            "pl-2",
+            "sm:grid-cols-[theme(spacing.4)_1fr]",
+            "sm:py-1.5",
+            "sm:pr-3",
+            "sm:pl-1.5",
+            "text-base/6",
+            "text-zinc-950",
+            "sm:text-sm/6",
+            "dark:text-white",
+            "outline-hidden"
+        };
+
+        if (index == _focusedIndex || EqualityComparer<TItem>.Default.Equals(option, Value))
+        {
+            classes.Add("bg-blue-500");
+            classes.Add("text-white");
+        }
+
+        return string.Join(" ", classes);
+    }
+}

@@ -1,5 +1,7 @@
 @page "/portfolios"
 @rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 
 <PageTitle>Portfolios - TradingStrat</PageTitle>
 
@@ -8,7 +10,7 @@
     <PageHeader Title="Portfolios"
                 Description="Manage your investment portfolios and track performance.">
         <Actions>
-            <Button Variant="@ButtonVariant.Primary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     OnClick="@OpenCreateDialog"
                     Text="Create Portfolio">
                 <LeadingIcon>
@@ -16,7 +18,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </Actions>
     </PageHeader>
 
@@ -36,9 +38,9 @@
                     Title="No portfolios"
                     Description="Get started by creating a new portfolio.">
             <Actions>
-                <Button Variant="@ButtonVariant.Primary"
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                         OnClick="@OpenCreateDialog"
-                        Text="Create Portfolio"></Button>
+                        Text="Create Portfolio"></TradingStrat.Web.Components.Shared.Button>
             </Actions>
         </EmptyState>
     }
@@ -55,14 +57,14 @@
                      aria-label="View portfolio: @portfolio.Name">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
+                            <Heading Level="3" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
                                 @portfolio.Name
-                            </h3>
+                            </Heading>
                             @if (!string.IsNullOrEmpty(portfolio.Description))
                             {
-                                <p class="text-sm text-gray-600 dark:text-dark-text-secondary">
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-dark-text-secondary">
                                     @portfolio.Description
-                                </p>
+                                </TradingStrat.Web.Components.UI.Typography.Text>
                             }
                         </div>
                         <button @onclick="(e) => ConfirmDelete(portfolio.Id, portfolio.Name, e)"

@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Components
+
+<span class="@GetClasses()" @attributes="AdditionalAttributes">
+    <TradingStrat.Web.Components.UI.Buttons.Button Href="@(string.IsNullOrEmpty(Href) ? null : Href)"
+            Disabled="@(string.IsNullOrEmpty(Href))"
+            Plain="true"
+            aria-label="Previous page">
+        <svg class="stroke-current" data-slot="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2.75 8H13.25M2.75 8L5.25 5.5M2.75 8L5.25 10.5"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+        </svg>
+        @ChildContent
+    </TradingStrat.Web.Components.UI.Buttons.Button>
+</span>
+
+@code {
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "grow",
+            "basis-0"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    protected override void OnInitialized()
+    {
+        ChildContent ??= builder => builder.AddContent(0, "Previous");
+    }
+}

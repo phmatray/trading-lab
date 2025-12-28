@@ -1,6 +1,8 @@
 @page "/strategies/compare"
 @using TradingStrat.Web.Components.Base
 @inherits BaseComponent
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 @rendermode InteractiveServer
 
 <PageTitle>Strategy Comparison - TradingStrat</PageTitle>
@@ -15,7 +17,7 @@
 
     <!-- Configuration Form -->
     <div class="card">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</h2>
+        <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <!-- Ticker -->
@@ -98,10 +100,10 @@
     <!-- Strategy Selection -->
     <div class="card">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                 Selected Strategies (@_selectedStrategies.Count/@MaxStrategies)
-            </h2>
-            <Button Variant="@ButtonVariant.Secondary"
+            </Heading>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                     OnClick="@AddStrategy"
                     Disabled="@(_selectedStrategies.Count >= MaxStrategies || _isLoading)"
                     Text="Add Strategy">
@@ -110,7 +112,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </div>
 
         @if (!_selectedStrategies.Any())
@@ -163,7 +165,7 @@
 
         <!-- Run Comparison Button -->
         <div class="mt-6">
-            <Button Variant="@ButtonVariant.Primary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     FullWidth="@true"
                     OnClick="@RunComparisonAsync"
                     IsLoading="@_isLoading"
@@ -175,7 +177,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </Icon>
                 </LeadingIcon>
-            </Button>
+            </TradingStrat.Web.Components.Shared.Button>
         </div>
 
         @if (_errorMessage is not null)
@@ -233,13 +235,13 @@
 
         <!-- Performance Matrix -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Matrix</h2>
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Matrix</Heading>
             <StrategyComparisonMatrix ComparisonResult="@_comparisonResult" />
         </div>
 
         <!-- Equity Curve Chart -->
         <div class="card">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Equity Curves</h2>
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Equity Curves</Heading>
             <EquityOverlayChart ComparisonResult="@_comparisonResult" />
         </div>
     }

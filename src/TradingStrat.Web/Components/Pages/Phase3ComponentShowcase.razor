@@ -1,0 +1,275 @@
+@page "/phase3-component-showcase"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
+@using TradingStrat.Web.Components.UI.Navigation.Pagination
+@using TradingStrat.Web.Components.UI.Forms.Combobox
+@using TradingStrat.Web.Components.UI.Forms.Listbox
+@using TradingStrat.Web.Components.UI.Navigation.Navbar
+@using TradingStrat.Web.Components.UI.Navigation.Sidebar
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
+
+<PageTitle>Phase 3 Component Showcase - TradingStrat</PageTitle>
+
+<div class="space-y-8 p-6">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Phase 3 Component Showcase</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Interactive demonstration of Phase 3 UI components</p>
+    </div>
+
+<!-- Table Section -->
+<section class="mb-12" data-testid="table-section">
+    <h2 class="text-2xl font-semibold mb-4">Table Components</h2>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Basic Table</h3>
+        <Table data-testid="basic-table">
+            <TableHead>
+                <TableRow>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Email</TableHeader>
+                    <TableHeader>Role</TableHeader>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                <TableRow>
+                    <TableCell>John Doe</TableCell>
+                    <TableCell>john@example.com</TableCell>
+                    <TableCell>Admin</TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Jane Smith</TableCell>
+                    <TableCell>jane@example.com</TableCell>
+                    <TableCell>User</TableCell>
+                </TableRow>
+            </TableBody>
+        </Table>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Striped Table</h3>
+        <Table Striped="true" data-testid="striped-table">
+            <TableHead>
+                <TableRow>
+                    <TableHeader>Product</TableHeader>
+                    <TableHeader>Price</TableHeader>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                <TableRow>
+                    <TableCell>Item 1</TableCell>
+                    <TableCell>$10</TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Item 2</TableCell>
+                    <TableCell>$20</TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Item 3</TableCell>
+                    <TableCell>$30</TableCell>
+                </TableRow>
+            </TableBody>
+        </Table>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Clickable Rows</h3>
+        <Table data-testid="clickable-table">
+            <TableBody>
+                <TableRow Href="/details/1" Title="View Item 1" data-testid="clickable-row-1">
+                    <TableCell>Clickable Item 1</TableCell>
+                    <TableCell>Click me!</TableCell>
+                </TableRow>
+                <TableRow Href="/details/2" Title="View Item 2" data-testid="clickable-row-2">
+                    <TableCell>Clickable Item 2</TableCell>
+                    <TableCell>Click me too!</TableCell>
+                </TableRow>
+            </TableBody>
+        </Table>
+    </div>
+</section>
+
+<!-- Pagination Section -->
+<section class="mb-12" data-testid="pagination-section">
+    <h2 class="text-2xl font-semibold mb-4">Pagination Components</h2>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Full Pagination</h3>
+        <Pagination data-testid="full-pagination">
+            <PaginationPrevious Href="/page/1" data-testid="prev-button" />
+            <PaginationList>
+                <PaginationPage Href="/page/1" data-testid="page-1">1</PaginationPage>
+                <PaginationPage Href="/page/2" Current="true" data-testid="page-2">2</PaginationPage>
+                <PaginationPage Href="/page/3" data-testid="page-3">3</PaginationPage>
+                <PaginationGap data-testid="page-gap" />
+                <PaginationPage Href="/page/10" data-testid="page-10">10</PaginationPage>
+            </PaginationList>
+            <PaginationNext Href="/page/3" data-testid="next-button" />
+        </Pagination>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Disabled Navigation</h3>
+        <Pagination data-testid="disabled-pagination">
+            <PaginationPrevious data-testid="disabled-prev" />
+            <PaginationList>
+                <PaginationPage Href="/page/1" Current="true">1</PaginationPage>
+            </PaginationList>
+            <PaginationNext Href="/page/2" />
+        </Pagination>
+    </div>
+</section>
+
+<!-- Combobox Section -->
+<section class="mb-12" data-testid="combobox-section">
+    <h2 class="text-2xl font-semibold mb-4">Combobox Component</h2>
+
+    <div class="mb-6 max-w-sm">
+        <h3 class="text-lg font-medium mb-2">Fruit Selector</h3>
+        <Combobox TItem="string"
+                  @bind-Value="_selectedFruit"
+                  Options="_fruits"
+                  Placeholder="Search fruits..."
+                  AriaLabel="Select fruit"
+                  data-testid="fruit-combobox">
+            <OptionTemplate Context="fruit">
+                @fruit
+            </OptionTemplate>
+        </Combobox>
+        @if (_selectedFruit != null)
+        {
+            <p class="mt-2 text-sm" data-testid="selected-fruit">Selected: @_selectedFruit</p>
+        }
+    </div>
+</section>
+
+<!-- Listbox Section -->
+<section class="mb-12" data-testid="listbox-section">
+    <h2 class="text-2xl font-semibold mb-4">Listbox Component</h2>
+
+    <div class="mb-6 max-w-sm">
+        <h3 class="text-lg font-medium mb-2">Size Selector</h3>
+        <Listbox TItem="string"
+                 @bind-Value="_selectedSize"
+                 Options="_sizes"
+                 AriaLabel="Select size"
+                 data-testid="size-listbox">
+            <Placeholder>Choose a size</Placeholder>
+            <OptionTemplate Context="size">
+                @size
+            </OptionTemplate>
+        </Listbox>
+        @if (_selectedSize != null)
+        {
+            <p class="mt-2 text-sm" data-testid="selected-size">Selected: @_selectedSize</p>
+        }
+    </div>
+</section>
+
+<!-- Navbar Section -->
+<section class="mb-12" data-testid="navbar-section">
+    <h2 class="text-2xl font-semibold mb-4">Navbar Component</h2>
+
+    <div class="mb-6 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+        <Navbar data-testid="sample-navbar">
+            <NavbarSection>
+                <NavbarItem Current="@(_currentNavPage == "home")"
+                           OnClick="@(() => _currentNavPage = "home")"
+                           data-testid="nav-home">
+                    <NavbarLabel>Home</NavbarLabel>
+                </NavbarItem>
+                <NavbarItem Current="@(_currentNavPage == "about")"
+                           OnClick="@(() => _currentNavPage = "about")"
+                           data-testid="nav-about">
+                    <NavbarLabel>About</NavbarLabel>
+                </NavbarItem>
+                <NavbarItem Current="@(_currentNavPage == "contact")"
+                           OnClick="@(() => _currentNavPage = "contact")"
+                           data-testid="nav-contact">
+                    <NavbarLabel>Contact</NavbarLabel>
+                </NavbarItem>
+            </NavbarSection>
+            <NavbarSpacer />
+            <NavbarSection>
+                <NavbarDivider />
+                <NavbarItem Href="/settings" data-testid="nav-settings">
+                    <NavbarLabel>Settings</NavbarLabel>
+                </NavbarItem>
+            </NavbarSection>
+        </Navbar>
+        @if (!string.IsNullOrEmpty(_currentNavPage))
+        {
+            <p class="mt-4 text-sm" data-testid="current-nav-page">Current page: @_currentNavPage</p>
+        }
+    </div>
+</section>
+
+<!-- Sidebar Section -->
+<section class="mb-12" data-testid="sidebar-section">
+    <h2 class="text-2xl font-semibold mb-4">Sidebar Component</h2>
+
+    <div class="border border-zinc-200 dark:border-zinc-800 rounded-lg" style="height: 400px;">
+        <Sidebar data-testid="sample-sidebar">
+            <SidebarHeader>
+                <SidebarSection>
+                    <h3 class="text-lg font-semibold px-2">My App</h3>
+                </SidebarSection>
+            </SidebarHeader>
+
+            <SidebarBody>
+                <SidebarSection>
+                    <SidebarHeading>Navigation</SidebarHeading>
+                    <SidebarItem Current="@(_currentSidebarPage == "dashboard")"
+                                OnClick="@(() => _currentSidebarPage = "dashboard")"
+                                data-testid="sidebar-dashboard">
+                        <SidebarLabel>Dashboard</SidebarLabel>
+                    </SidebarItem>
+                    <SidebarItem Current="@(_currentSidebarPage == "projects")"
+                                OnClick="@(() => _currentSidebarPage = "projects")"
+                                data-testid="sidebar-projects">
+                        <SidebarLabel>Projects</SidebarLabel>
+                    </SidebarItem>
+                    <SidebarItem Current="@(_currentSidebarPage == "tasks")"
+                                OnClick="@(() => _currentSidebarPage = "tasks")"
+                                data-testid="sidebar-tasks">
+                        <SidebarLabel>Tasks</SidebarLabel>
+                    </SidebarItem>
+                </SidebarSection>
+
+                <SidebarDivider />
+
+                <SidebarSection>
+                    <SidebarHeading>Settings</SidebarHeading>
+                    <SidebarItem Href="/preferences" data-testid="sidebar-preferences">
+                        <SidebarLabel>Preferences</SidebarLabel>
+                    </SidebarItem>
+                </SidebarSection>
+
+                <SidebarSpacer />
+            </SidebarBody>
+
+            <SidebarFooter>
+                <SidebarSection>
+                    <SidebarItem Href="/profile" data-testid="sidebar-profile">
+                        <SidebarLabel>Profile</SidebarLabel>
+                    </SidebarItem>
+                </SidebarSection>
+            </SidebarFooter>
+        </Sidebar>
+        @if (!string.IsNullOrEmpty(_currentSidebarPage))
+        {
+            <p class="p-4 text-sm" data-testid="current-sidebar-page">Current page: @_currentSidebarPage</p>
+        }
+    </div>
+</section>
+</div>
+
+@code {
+    private string? _selectedFruit;
+    private string? _selectedSize;
+    private string _currentNavPage = "home";
+    private string _currentSidebarPage = "dashboard";
+
+    private readonly List<string> _fruits = ["Apple", "Banana", "Cherry", "Date", "Elderberry"];
+    private readonly List<string> _sizes = ["Small", "Medium", "Large", "Extra Large"];
+}

@@ -128,8 +128,8 @@ public class BacktestArchivePageTests : BaseTest
         // Arrange
         await NavigateToAsync("/");
 
-        // Act
-        await Page!.Locator("nav a[href='/backtests']").ClickAsync();
+        // Act - Use Catalyst sidebar navigation
+        await Page!.Locator("aside[data-testid='left-sidebar'] nav a[href='/backtests']").ClickAsync();
         await Page!.WaitForBlazorAsync();
 
         // Assert

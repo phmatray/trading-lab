@@ -1,0 +1,99 @@
+@* Catalyst UI Kit - DropdownMenu Component *@
+
+<div @attributes="AdditionalAttributes"
+     id="@_menuId"
+     role="menu"
+     class="@GetClasses()"
+     style="@GetStyles()">
+    @ChildContent
+</div>
+
+@code {
+    private readonly string _menuId = $"dropdown-menu-{Guid.NewGuid():N}";
+
+    [CascadingParameter] private Dropdown? Dropdown { get; set; }
+
+    /// <summary>
+    /// Anchor position for the menu.
+    /// Options: "bottom", "top", "bottom start", "bottom end", "top start", "top end"
+    /// </summary>
+    [Parameter]
+    public string Anchor { get; set; } = "bottom";
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Menu content (dropdown items).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Dropdown != null)
+        {
+            Dropdown.MenuId = _menuId;
+            Dropdown.Anchor = Anchor;
+        }
+    }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            // Base styles
+            "isolate",
+            "w-max",
+            "rounded-xl",
+            "p-1",
+            // Outline for accessibility
+            "outline",
+            "outline-transparent",
+            "focus:outline-hidden",
+            // Handle scrolling
+            "overflow-y-auto",
+            "max-h-96",
+            // Popover background
+            "bg-white/75",
+            "backdrop-blur-xl",
+            "dark:bg-zinc-800/75",
+            // Shadows
+            "shadow-lg",
+            "ring-1",
+            "ring-zinc-950/10",
+            "dark:ring-white/10",
+            "dark:ring-inset",
+            // Grid layout for complex items
+            "supports-[grid-template-columns:subgrid]:grid",
+            "supports-[grid-template-columns:subgrid]:grid-cols-[auto_1fr_1.5rem_0.5rem_auto]",
+            // Transitions
+            "transition",
+            "duration-100",
+            "ease-in"
+        ];
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetStyles()
+    {
+        // Initially hidden, will be shown by JavaScript
+        string display = Dropdown?.IsOpen == true ? "block" : "none";
+        return $"display: {display};";
+    }
+}

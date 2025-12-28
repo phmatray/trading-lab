@@ -1,0 +1,154 @@
+@using TradingStrat.Web.Utilities
+@using TradingStrat.Web.Components.UI
+
+@* Catalyst UI Kit - Switch Component *@
+
+<span class="switch-base @GetColorClass()"
+      data-slot="control"
+      data-changing="@(_isChanging ? "true" : null)">
+    <input type="checkbox"
+           checked="@Checked"
+           disabled="@Disabled"
+           @onchange="HandleChange"
+           @attributes="AdditionalAttributes"
+           class="sr-only" />
+
+    @* Switch knob (sliding indicator) *@
+    <span aria-hidden="true" class="@GetKnobClass()"></span>
+</span>
+
+@code {
+    private bool _isChanging;
+
+    /// <summary>
+    /// Whether the switch is checked.
+    /// </summary>
+    [Parameter]
+    public bool Checked { get; set; }
+
+    /// <summary>
+    /// Checked changed callback for two-way binding.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CheckedChanged { get; set; }
+
+    /// <summary>
+    /// If true, disables the switch.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Switch color variant.
+    /// </summary>
+    [Parameter]
+    public SwitchColor Color { get; set; } = SwitchColor.DarkZinc;
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetColorClass()
+    {
+        string colorClass = Color switch
+        {
+            SwitchColor.DarkZinc => CatalystStyles.SwitchDarkZinc,
+            SwitchColor.DarkWhite => CatalystStyles.SwitchDarkWhite,
+            SwitchColor.White => CatalystStyles.SwitchWhite,
+            SwitchColor.Dark => CatalystStyles.SwitchDark,
+            SwitchColor.Zinc => CatalystStyles.SwitchZinc,
+            SwitchColor.Blue => CatalystStyles.SwitchBlue,
+            SwitchColor.Red => CatalystStyles.SwitchRed,
+            SwitchColor.Green => CatalystStyles.SwitchGreen,
+            SwitchColor.Orange => CatalystStyles.SwitchOrange,
+            SwitchColor.Amber => CatalystStyles.SwitchAmber,
+            SwitchColor.Yellow => CatalystStyles.SwitchYellow,
+            SwitchColor.Lime => CatalystStyles.SwitchLime,
+            SwitchColor.Emerald => CatalystStyles.SwitchEmerald,
+            SwitchColor.Teal => CatalystStyles.SwitchTeal,
+            SwitchColor.Cyan => CatalystStyles.SwitchCyan,
+            SwitchColor.Sky => CatalystStyles.SwitchSky,
+            SwitchColor.Indigo => CatalystStyles.SwitchIndigo,
+            SwitchColor.Violet => CatalystStyles.SwitchViolet,
+            SwitchColor.Purple => CatalystStyles.SwitchPurple,
+            SwitchColor.Fuchsia => CatalystStyles.SwitchFuchsia,
+            SwitchColor.Pink => CatalystStyles.SwitchPink,
+            SwitchColor.Rose => CatalystStyles.SwitchRose,
+            _ => CatalystStyles.SwitchDarkZinc
+        };
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            return $"{colorClass} {Class}";
+        }
+
+        return colorClass;
+    }
+
+    private string GetKnobClass()
+    {
+        List<string> classes =
+        [
+            // Basic layout
+            "pointer-events-none",
+            "relative",
+            "inline-block",
+            "size-4.5",
+            "sm:size-3.5",
+            "rounded-full",
+            // Transition
+            "translate-x-0",
+            "transition",
+            "duration-200",
+            "ease-in-out",
+            // Invisible border for forced-colors mode
+            "border",
+            "border-transparent",
+            // Unchecked state
+            "bg-white",
+            "shadow-sm",
+            "ring-1",
+            "ring-black/5"
+        ];
+
+        // Add translation classes based on checked state
+        if (Checked)
+        {
+            classes.Add("!translate-x-4");
+            classes.Add("sm:!translate-x-3");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        // Trigger animation by setting _isChanging flag
+        _isChanging = true;
+        StateHasChanged();
+
+        bool newValue = e.Value as bool? ?? false;
+        if (CheckedChanged.HasDelegate)
+        {
+            await CheckedChanged.InvokeAsync(newValue);
+        }
+
+        // Reset animation flag after transition completes (200ms)
+        await Task.Delay(200);
+        _isChanging = false;
+        StateHasChanged();
+    }
+}

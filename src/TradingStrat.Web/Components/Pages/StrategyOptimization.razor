@@ -1,6 +1,8 @@
 @page "/strategies/optimize"
 @rendermode InteractiveServer
 
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 <PageTitle>Optimize Strategy | TradingStrat</PageTitle>
 
 <div class="space-y-6">
@@ -19,15 +21,15 @@
     {
         <div class="card text-center py-12">
             <div class="text-6xl mb-4">📊</div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <Heading Level="3" Class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 No Custom Strategies Found
-            </h3>
+            </Heading>
             <p class="text-gray-600 dark:text-gray-400 mb-6">
                 Create a custom strategy first to use the optimization feature.
             </p>
-            <Button Variant="@ButtonVariant.Primary"
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                     OnClick="@NavigateToBuilder"
-                    Text="Create Strategy"></Button>
+                    Text="Create Strategy"></TradingStrat.Web.Components.Shared.Button>
         </div>
     }
     else
@@ -40,9 +42,9 @@
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Strategy Selection -->
                     <div class="card">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             1. Select Strategy
-                        </h2>
+                        </Heading>
 
                         <div class="form-group">
                             <label for="strategy" class="form-label">Custom Strategy</label>
@@ -73,9 +75,9 @@
                     @if (_model.ParameterRanges.Any())
                     {
                         <div class="card">
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                 2. Configure Parameter Ranges
-                            </h2>
+                            </Heading>
 
                             <div class="space-y-4">
                                 @foreach (var param in _model.ParameterRanges)
@@ -134,9 +136,9 @@
 
                     <!-- Backtest Settings -->
                     <div class="card">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             3. Backtest Configuration
-                        </h2>
+                        </Heading>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="form-group">
@@ -168,9 +170,9 @@
                 <div class="space-y-6">
                     <!-- Algorithm Settings -->
                     <div class="card">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             Optimization Settings
-                        </h2>
+                        </Heading>
 
                         <div class="form-group">
                             <label class="form-label">Algorithm</label>
@@ -194,7 +196,7 @@
                         @if (_model.OptimizationType == OptimizationType.Genetic)
                         {
                             <div class="mt-4 space-y-3">
-                                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Genetic Settings</h3>
+                                <Heading Level="3" Class="text-sm font-medium text-gray-900 dark:text-white">Genetic Settings</Heading>
 
                                 <div class="form-group">
                                     <label class="form-label text-sm">Population Size</label>
@@ -227,17 +229,17 @@
                     </div>
 
                     <!-- Start Button -->
-                    <Button Type="@ButtonType.Submit"
+                    <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             FullWidth="@true"
                             IsLoading="@_isOptimizing"
                             Text="Start Optimization"
-                            LoadingText="Optimizing..."></Button>
+                            LoadingText="Optimizing..."></TradingStrat.Web.Components.Shared.Button>
 
                     @if (_isOptimizing && _optimizationProgress is not null)
                     {
                         <div class="card">
-                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</h3>
+                            <Heading Level="3" Class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</Heading>
                             <div class="progress-bar mb-2">
                                 <div class="progress-bar-fill" style="width: @_optimizationProgress.PercentComplete%"></div>
                             </div>
@@ -254,9 +256,9 @@
         @if (_optimizationResult is not null)
         {
             <div class="card mt-6">
-                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                <Heading Level="2" Class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
                     Optimization Results
-                </h2>
+                </Heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="metric-card">
@@ -277,7 +279,7 @@
                     </div>
                 </div>
 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</h3>
+                <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</Heading>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                     @foreach (KeyValuePair<string, decimal> param in _optimizationResult.BestParameters)
                     {
@@ -288,7 +290,7 @@
                     }
                 </div>
 
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top 5 Results</h3>
+                <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top 5 Results</Heading>
                 <div class="overflow-x-auto">
                     <table class="data-table">
                         <thead>
@@ -324,9 +326,9 @@
                 </div>
 
                 <div class="card mt-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</h3>
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</Heading>
                     <div class="flex flex-wrap gap-3">
-                        <Button Variant="@ButtonVariant.Primary"
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
                                 OnClick="@ApplyBestParameters"
                                 Text="Apply Best Parameters">
                             <LeadingIcon>
@@ -334,8 +336,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@NavigateToBacktest"
                                 Text="Run Backtest with Best">
                             <LeadingIcon>
@@ -343,8 +345,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@CreatePortfolioFromStrategy"
                                 Text="Create Portfolio">
                             <LeadingIcon>
@@ -352,8 +354,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@CompareVariations"
                                 Text="Compare Variations">
                             <LeadingIcon>
@@ -361,8 +363,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
-                        <Button Variant="@ButtonVariant.Secondary"
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
                                 OnClick="@SaveAsNewStrategy"
                                 Text="Save as New Strategy">
                             <LeadingIcon>
@@ -370,7 +372,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </Icon>
                             </LeadingIcon>
-                        </Button>
+                        </TradingStrat.Web.Components.Shared.Button>
                     </div>
                 </div>
             </div>

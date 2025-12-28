@@ -1,0 +1,50 @@
+@using Microsoft.AspNetCore.Components
+
+<TradingStrat.Web.Components.UI.Buttons.Button Href="@Href"
+        Plain="true"
+        Class="@GetClasses()"
+        AdditionalAttributes="@GetMergedAttributes()">
+    <span class="-mx-0.5">@ChildContent</span>
+</TradingStrat.Web.Components.UI.Buttons.Button>
+
+@code {
+    [Parameter] public string Href { get; set; } = string.Empty;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool Current { get; set; } = false;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        var classes = new List<string>();
+
+        if (!string.IsNullOrEmpty(Class))
+            classes.Add(Class);
+
+        // Base styles
+        classes.Add("min-w-9");
+        classes.Add("before:absolute");
+        classes.Add("before:-inset-px");
+        classes.Add("before:rounded-lg");
+
+        // Current page background
+        if (Current)
+        {
+            classes.Add("before:bg-zinc-950/5");
+            classes.Add("dark:before:bg-white/10");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private Dictionary<string, object> GetMergedAttributes()
+    {
+        var merged = new Dictionary<string, object>(AdditionalAttributes ?? new Dictionary<string, object>());
+        merged["aria-label"] = $"Page {ChildContent}";
+        if (Current)
+        {
+            merged["aria-current"] = "page";
+        }
+        return merged;
+    }
+}

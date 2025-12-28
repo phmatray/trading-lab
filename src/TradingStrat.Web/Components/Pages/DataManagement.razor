@@ -1,6 +1,8 @@
 @page "/data"
 @rendermode InteractiveServer
 
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
 <PageTitle>Data Management - TradingStrat</PageTitle>
 
 <div class="space-y-6">
@@ -49,7 +51,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Form -->
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Fetch Historical Data</h2>
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Fetch Historical Data</Heading>
 
                     <EditForm Model="@_formModel" OnValidSubmit="@HandleFetchData" class="space-y-4">
                         <DataAnnotationsValidator />
@@ -72,12 +74,12 @@
                         <DateRangeInput @bind-StartDate="_formModel.StartDate"
                                         @bind-EndDate="_formModel.EndDate" />
 
-                        <Button Type="@ButtonType.Submit"
+                        <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                                 Variant="@ButtonVariant.Primary"
                                 FullWidth="@true"
                                 IsLoading="@ProgressService.IsProcessing"
                                 Text="Fetch Data"
-                                LoadingText="Fetching Data..."></Button>
+                                LoadingText="Fetching Data..."></TradingStrat.Web.Components.Shared.Button>
                     </EditForm>
                 </div>
 
@@ -105,8 +107,8 @@
                 <!-- Bulk Fetch Form -->
                 <div class="card space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary">Bulk Fetch Tickers</h2>
-                        <Button
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary">Bulk Fetch Tickers</Heading>
+                        <TradingStrat.Web.Components.Shared.Button
                             Text="Import CSV"
                             OnClick="@(() => _showCsvDialog = true)"
                             Variant="ButtonVariant.Secondary"
@@ -161,20 +163,20 @@
                             </label>
                         </div>
 
-                        <Button Type="@ButtonType.Submit"
+                        <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                                 Variant="@ButtonVariant.Primary"
                                 FullWidth="@true"
                                 IsLoading="@_isBulkFetching"
                                 Text="@($"Fetch {ParsedTickerCount} Tickers")"
-                                LoadingText="Fetching..."></Button>
+                                LoadingText="Fetching..."></TradingStrat.Web.Components.Shared.Button>
                     </EditForm>
                 </div>
 
                 <!-- Bulk Progress & Results -->
                 <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                         Progress & Results
-                    </h3>
+                    </Heading>
 
                     @if (_bulkResult is not null)
                     {
