@@ -4,8 +4,8 @@ using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
-using DomainValidationResult = TradingStrat.Domain.Services.ValidationResult;
 using AppValidationResult = TradingStrat.Application.Commands.ValidationResult;
+using DomainValidationResult = TradingStrat.Domain.Services.ValidationResult;
 
 namespace TradingStrat.Application.UseCases;
 

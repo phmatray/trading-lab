@@ -7,8 +7,8 @@ using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.Services;
 using TradingStrat.Domain.ValueObjects;
-using DataStatusQuery = TradingStrat.Application.Ports.Inbound.DataStatusQuery;
 using DataStatusFilter = TradingStrat.Application.Ports.Inbound.DataStatusFilter;
+using DataStatusQuery = TradingStrat.Application.Ports.Inbound.DataStatusQuery;
 using SortColumn = TradingStrat.Application.Ports.Inbound.SortColumn;
 using SortDirection = TradingStrat.Application.Ports.Inbound.SortDirection;
 

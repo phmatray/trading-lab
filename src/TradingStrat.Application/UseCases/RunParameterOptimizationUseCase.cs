@@ -52,56 +52,56 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
                         ErrorCodes.Data.NoHistoricalData));
             }
 
-        // Determine date range
-        DateTime endDate = command.EndDate ?? await GetLatestDateAsync(command.Ticker, timeFrame);
-        DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
+            // Determine date range
+            DateTime endDate = command.EndDate ?? await GetLatestDateAsync(command.Ticker, timeFrame);
+            DateTime startDate = command.StartDate ?? endDate.AddYears(-2);
 
-        // Run backtest for Variant A
-        progress?.Report(new Ports.Inbound.OptimizationProgress(
-            command.VariantA.Label, 0, 0, 0));
+            // Run backtest for Variant A
+            progress?.Report(new Ports.Inbound.OptimizationProgress(
+                command.VariantA.Label, 0, 0, 0));
 
-        BacktestResult resultA = await RunSingleBacktest(
-            command.VariantA,
-            command.Ticker,
-            timeFrame,
-            startDate,
-            endDate,
-            command.InitialCapital,
-            command.CommissionPercentage,
-            command.MinimumCommission,
-            variantLabel: command.VariantA.Label,
-            progress);
+            BacktestResult resultA = await RunSingleBacktest(
+                command.VariantA,
+                command.Ticker,
+                timeFrame,
+                startDate,
+                endDate,
+                command.InitialCapital,
+                command.CommissionPercentage,
+                command.MinimumCommission,
+                variantLabel: command.VariantA.Label,
+                progress);
 
-        // Run backtest for Variant B
-        progress?.Report(new Ports.Inbound.OptimizationProgress(
-            command.VariantB.Label, 0, 0, 0));
+            // Run backtest for Variant B
+            progress?.Report(new Ports.Inbound.OptimizationProgress(
+                command.VariantB.Label, 0, 0, 0));
 
-        BacktestResult resultB = await RunSingleBacktest(
-            command.VariantB,
-            command.Ticker,
-            timeFrame,
-            startDate,
-            endDate,
-            command.InitialCapital,
-            command.CommissionPercentage,
-            command.MinimumCommission,
-            variantLabel: command.VariantB.Label,
-            progress);
+            BacktestResult resultB = await RunSingleBacktest(
+                command.VariantB,
+                command.Ticker,
+                timeFrame,
+                startDate,
+                endDate,
+                command.InitialCapital,
+                command.CommissionPercentage,
+                command.MinimumCommission,
+                variantLabel: command.VariantB.Label,
+                progress);
 
-        // Calculate ranking
-        ComparisonRanking ranking = ComparisonRanking.CalculateRanking(
-            resultA.Metrics,
-            resultB.Metrics);
+            // Calculate ranking
+            ComparisonRanking ranking = ComparisonRanking.CalculateRanking(
+                resultA.Metrics,
+                resultB.Metrics);
 
-        // Create comparison
-        StrategyComparison comparison = new StrategyComparison(
-            command.VariantA,
-            resultA,
-            command.VariantB,
-            resultB,
-            ranking,
-            command.Ticker,
-            DateTime.Now);
+            // Create comparison
+            StrategyComparison comparison = new StrategyComparison(
+                command.VariantA,
+                resultA,
+                command.VariantB,
+                resultB,
+                ranking,
+                command.Ticker,
+                DateTime.Now);
 
             stopwatch.Stop();
 

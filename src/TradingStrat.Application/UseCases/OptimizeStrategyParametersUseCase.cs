@@ -58,66 +58,66 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
                     Error.BusinessRule("Failed to deserialize strategy definition", ErrorCodes.Strategy.InvalidDefinition));
             }
 
-        // Convert BacktestConfig to BacktestConfiguration
-        BacktestConfiguration backtestConfig = new(
-            Ticker: command.BacktestSettings.Ticker,
-            StartDate: command.BacktestSettings.StartDate,
-            EndDate: command.BacktestSettings.EndDate,
-            InitialCapital: command.BacktestSettings.InitialCapital,
-            CommissionPercentage: command.BacktestSettings.CommissionPercentage,
-            MinimumCommission: command.BacktestSettings.MinimumCommission,
-            TimeFrame: TimeFrame.D1
-        );
-
-        // Create parameter evaluator function that runs backtests
-        async Task<(decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount)> Evaluator(
-            Dictionary<string, decimal> parameters)
-        {
-            // Modify strategy definition with new parameters
-            StrategyDefinition modifiedDefinition = ApplyParametersToDefinition(baseDefinition, parameters);
-
-            // Create strategy instance with modified definition
-            CustomRuleBasedStrategy customStrategy = new(
-                _indicatorCalculator,
-                modifiedDefinition,
-                strategy.Name,
-                strategy.Description
+            // Convert BacktestConfig to BacktestConfiguration
+            BacktestConfiguration backtestConfig = new(
+                Ticker: command.BacktestSettings.Ticker,
+                StartDate: command.BacktestSettings.StartDate,
+                EndDate: command.BacktestSettings.EndDate,
+                InitialCapital: command.BacktestSettings.InitialCapital,
+                CommissionPercentage: command.BacktestSettings.CommissionPercentage,
+                MinimumCommission: command.BacktestSettings.MinimumCommission,
+                TimeFrame: TimeFrame.D1
             );
 
-            // Run backtest
-            BacktestResult result = await _backtestEngine.RunBacktestAsync(
-                customStrategy,
-                backtestConfig,
-                progress: null // Don't report individual backtest progress to avoid noise
-            );
+            // Create parameter evaluator function that runs backtests
+            async Task<(decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount)> Evaluator(
+                Dictionary<string, decimal> parameters)
+            {
+                // Modify strategy definition with new parameters
+                StrategyDefinition modifiedDefinition = ApplyParametersToDefinition(baseDefinition, parameters);
 
-            // Extract metrics for optimization
-            decimal totalReturn = result.Metrics.TotalReturn;
-            decimal sharpeRatio = result.Metrics.SharpeRatio;
-            decimal maxDrawdown = result.Metrics.MaxDrawdown;
-            int tradeCount = result.Trades.Count;
+                // Create strategy instance with modified definition
+                CustomRuleBasedStrategy customStrategy = new(
+                    _indicatorCalculator,
+                    modifiedDefinition,
+                    strategy.Name,
+                    strategy.Description
+                );
 
-            return (totalReturn, sharpeRatio, maxDrawdown, tradeCount);
-        }
+                // Run backtest
+                BacktestResult result = await _backtestEngine.RunBacktestAsync(
+                    customStrategy,
+                    backtestConfig,
+                    progress: null // Don't report individual backtest progress to avoid noise
+                );
 
-        // Run optimization based on type
-        OptimizationResult optimizationResult = command.Type switch
-        {
-            OptimizationType.GridSearch => await _parameterOptimizer.OptimizeGridSearchAsync(
-                command.ParameterRanges,
-                command.Objective,
-                Evaluator,
-                progress),
+                // Extract metrics for optimization
+                decimal totalReturn = result.Metrics.TotalReturn;
+                decimal sharpeRatio = result.Metrics.SharpeRatio;
+                decimal maxDrawdown = result.Metrics.MaxDrawdown;
+                int tradeCount = result.Trades.Count;
 
-            OptimizationType.Genetic => await _parameterOptimizer.OptimizeGeneticAsync(
-                command.ParameterRanges,
-                command.Objective,
-                Evaluator,
-                command.GeneticSettings?.ToDomainConfig() ?? new GeneticAlgorithmConfig(),
-                progress),
+                return (totalReturn, sharpeRatio, maxDrawdown, tradeCount);
+            }
 
-            _ => throw new ArgumentOutOfRangeException(nameof(command.Type), command.Type, "Unknown optimization type")
-        };
+            // Run optimization based on type
+            OptimizationResult optimizationResult = command.Type switch
+            {
+                OptimizationType.GridSearch => await _parameterOptimizer.OptimizeGridSearchAsync(
+                    command.ParameterRanges,
+                    command.Objective,
+                    Evaluator,
+                    progress),
+
+                OptimizationType.Genetic => await _parameterOptimizer.OptimizeGeneticAsync(
+                    command.ParameterRanges,
+                    command.Objective,
+                    Evaluator,
+                    command.GeneticSettings?.ToDomainConfig() ?? new GeneticAlgorithmConfig(),
+                    progress),
+
+                _ => throw new ArgumentOutOfRangeException(nameof(command.Type), command.Type, "Unknown optimization type")
+            };
 
             return Result<OptimizationResult>.Success(optimizationResult);
         }

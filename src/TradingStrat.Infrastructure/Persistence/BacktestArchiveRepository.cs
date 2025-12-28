@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Domain.Entities;
 using TradingStrat.Infrastructure.Persistence.EfCore;
