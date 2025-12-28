@@ -60,7 +60,7 @@ public partial class NotificationCenter : ComponentBase, IDisposable
             await NotificationService.MarkAsReadAsync(notification.Id);
         }
 
-        if (notification.Action != null)
+        if (notification.Action is not null)
         {
             Navigation.NavigateTo(notification.Action.TargetPage);
             await Close();

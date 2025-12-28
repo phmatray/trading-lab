@@ -36,7 +36,7 @@ public class MLPredictionService : IMLPredictionService
     /// <inheritdoc />
     public void Train(MarketFeatures[] features, int currentIndex)
     {
-        if (features == null || features.Length == 0)
+        if (features is null || features.Length == 0)
         {
             throw new ArgumentException("Features array cannot be null or empty", nameof(features));
         }
@@ -73,12 +73,12 @@ public class MLPredictionService : IMLPredictionService
     /// <inheritdoc />
     public decimal Predict(MarketFeatures features)
     {
-        if (features == null)
+        if (features is null)
         {
             throw new ArgumentNullException(nameof(features));
         }
 
-        if (_currentModel == null)
+        if (_currentModel is null)
         {
             throw new InvalidOperationException("Model has not been trained yet. Call Train() before Predict().");
         }

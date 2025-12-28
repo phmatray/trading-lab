@@ -31,7 +31,7 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
     {
         try
         {
-            if (command.Tickers == null || !command.Tickers.Any())
+            if (command.Tickers is null || !command.Tickers.Any())
             {
                 return Result<BulkFetchResult>.Failure(
                     Error.Validation("Tickers list cannot be null or empty", ErrorCodes.Data.TickerRequired));
@@ -177,7 +177,7 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
         string currentTicker,
         string currentStatus)
     {
-        if (progress == null)
+        if (progress is null)
         {
             return;
         }

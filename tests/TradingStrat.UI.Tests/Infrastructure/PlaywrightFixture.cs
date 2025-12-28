@@ -41,7 +41,7 @@ public class PlaywrightFixture : IAsyncLifetime
     /// </summary>
     public async Task DisposeAsync()
     {
-        if (_browser != null)
+        if (_browser is not null)
         {
             await _browser.CloseAsync();
         }

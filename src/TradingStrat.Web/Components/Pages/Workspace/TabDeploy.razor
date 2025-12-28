@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 
 <div class="space-y-6">
-    @if (Strategy == null || TestResult == null)
+    @if (Strategy is null || TestResult is null)
     {
         <div class="card text-center py-12">
             <p class="text-gray-600 dark:text-dark-text-secondary">

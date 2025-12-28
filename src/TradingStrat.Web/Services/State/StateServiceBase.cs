@@ -37,7 +37,7 @@ public abstract class StateServiceBase<T> : IStateService<T> where T : class, ne
     public virtual async Task<T> GetStateAsync(CancellationToken cancellationToken = default)
     {
         // Return cached state if available
-        if (_cachedState != null)
+        if (_cachedState is not null)
         {
             return _cachedState;
         }

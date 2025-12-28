@@ -101,7 +101,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
 
         List<string>? possibleTickers = _tickerResolver.GetAllTickersForIsin(isin);
 
-        if (possibleTickers == null || !possibleTickers.Any())
+        if (possibleTickers is null || !possibleTickers.Any())
         {
             return Result<string>.Failure(
                 Error.NotFound($"Could not resolve ISIN {isin} to Yahoo ticker", ErrorCodes.Data.IsinNotResolved));
@@ -111,7 +111,7 @@ public class FetchHistoricalDataUseCase : IDataFetchingUseCase
 
         string? workingTicker = await FindWorkingTicker(possibleTickers, timeFrame, progress);
 
-        if (workingTicker == null)
+        if (workingTicker is null)
         {
             return Result<string>.Failure(
                 Error.BusinessRule(

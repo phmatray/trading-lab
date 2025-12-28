@@ -44,7 +44,7 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
         {
             // Load custom strategy from repository
             CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(command.CustomStrategyId);
-            if (strategy == null)
+            if (strategy is null)
             {
                 return Result<OptimizationResult>.Failure(
                     Error.NotFound($"Custom strategy with ID {command.CustomStrategyId} not found", ErrorCodes.Strategy.NotFound));
@@ -52,7 +52,7 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
 
             // Deserialize strategy definition
             StrategyDefinition? baseDefinition = JsonSerializer.Deserialize<StrategyDefinition>(strategy.DefinitionJson);
-            if (baseDefinition == null)
+            if (baseDefinition is null)
             {
                 return Result<OptimizationResult>.Failure(
                     Error.BusinessRule("Failed to deserialize strategy definition", ErrorCodes.Strategy.InvalidDefinition));
@@ -178,16 +178,20 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
         Dictionary<string, object> modifiedParams = ModifyParameters(rule.IndicatorParameters, parameters);
 
         // Modify second indicator parameters if present
-        Dictionary<string, object>? modifiedSecondParams = rule.SecondIndicatorParameters != null
+        Dictionary<string, object>? modifiedSecondParams = rule.SecondIndicatorParameters is not null
             ? ModifyParameters(rule.SecondIndicatorParameters, parameters)
             : null;
 
         // Return modified rule
-        return rule with
-        {
-            IndicatorParameters = modifiedParams,
-            SecondIndicatorParameters = modifiedSecondParams
-        };
+        return new StrategyRule(
+            rule.IndicatorName,
+            modifiedParams,
+            rule.Operator,
+            rule.ValueType,
+            rule.ConstantValue,
+            rule.SecondIndicatorName,
+            modifiedSecondParams,
+            rule.LogicalOperator);
     }
 
     /// <summary>

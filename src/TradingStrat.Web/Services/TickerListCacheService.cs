@@ -26,7 +26,7 @@ public class TickerListCacheService : ITickerListCacheService
     {
         string cacheKey = GetTickersCacheKey(timeFrame);
 
-        if (_cache.TryGetValue(cacheKey, out List<string>? cachedTickers) && cachedTickers != null)
+        if (_cache.TryGetValue(cacheKey, out List<string>? cachedTickers) && cachedTickers is not null)
         {
             return cachedTickers;
         }
@@ -49,7 +49,7 @@ public class TickerListCacheService : ITickerListCacheService
     {
         string cacheKey = GetSummariesCacheKey(timeFrame);
 
-        if (_cache.TryGetValue(cacheKey, out List<TickerSummary>? cachedSummaries) && cachedSummaries != null)
+        if (_cache.TryGetValue(cacheKey, out List<TickerSummary>? cachedSummaries) && cachedSummaries is not null)
         {
             return cachedSummaries;
         }
@@ -69,7 +69,7 @@ public class TickerListCacheService : ITickerListCacheService
 
     public void InvalidateCache(TimeFrame? timeFrame = null)
     {
-        if (timeFrame == null)
+        if (timeFrame is null)
         {
             // Invalidate all timeframes
             foreach (TimeFrameUnit unit in Enum.GetValues<TimeFrameUnit>())

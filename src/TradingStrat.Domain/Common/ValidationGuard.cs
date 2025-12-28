@@ -62,7 +62,7 @@ public class ValidationContext<T>
     /// <exception cref="ArgumentNullException">Thrown when value is null.</exception>
     public ValidationContext<T> NotNull()
     {
-        if (_value == null)
+        if (_value is null)
         {
             throw new ArgumentNullException(_parameterName);
         }
@@ -186,7 +186,7 @@ public class ValidationContext<T>
     /// <exception cref="ArgumentException">Thrown when string is null, empty, or whitespace.</exception>
     public ValidationContext<T> NotNullOrWhiteSpace()
     {
-        if (_value == null || (_value is string str && string.IsNullOrWhiteSpace(str)))
+        if (_value is null || (_value is string str && string.IsNullOrWhiteSpace(str)))
         {
             throw new ArgumentException($"{_parameterName} cannot be null, empty, or whitespace", _parameterName);
         }

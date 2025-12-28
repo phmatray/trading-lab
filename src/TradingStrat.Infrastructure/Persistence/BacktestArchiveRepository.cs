@@ -67,7 +67,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
     public async Task<bool> DeleteBacktestRunAsync(int id)
     {
         BacktestRun? backtestRun = await _context.BacktestRuns.FindAsync(id);
-        if (backtestRun == null)
+        if (backtestRun is null)
         {
             return false;
         }
@@ -98,7 +98,7 @@ public class BacktestArchiveRepository : IBacktestArchivePort
                     return new { Backtest = b, Result = (BacktestResult?)null };
                 }
             })
-            .Where(x => x.Result != null)
+            .Where(x => x.Result is not null)
             .OrderByDescending(x => x.Result!.Metrics.SharpeRatio)
             .ThenByDescending(x => x.Result!.Metrics.TotalReturnPercentage)
             .Take(limit)

@@ -29,7 +29,7 @@
     {
         <LoadingState Message="Loading portfolios..." />
     }
-    else if (_portfolios == null || !_portfolios.Any())
+    else if (_portfolios is null || !_portfolios.Any())
     {
         <!-- Empty State -->
         <EmptyState Icon="portfolio"

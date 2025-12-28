@@ -112,7 +112,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
     public async Task AddCashAsync(int portfolioId, decimal amount, string? notes)
     {
         Portfolio? portfolio = await GetPortfolioByIdAsync(portfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             throw new InvalidOperationException($"Portfolio {portfolioId} not found");
         }
@@ -136,7 +136,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
     public async Task WithdrawCashAsync(int portfolioId, decimal amount, string? notes)
     {
         Portfolio? portfolio = await GetPortfolioByIdAsync(portfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             throw new InvalidOperationException($"Portfolio {portfolioId} not found");
         }
@@ -256,7 +256,7 @@ public class InMemoryPortfolioRepository : IPortfolioPort
         FieldInfo? positionsField = typeof(Portfolio).GetField("_positions",
             BindingFlags.NonPublic | BindingFlags.Instance);
 
-        if (positionsField != null)
+        if (positionsField is not null)
         {
             var positionsList = (List<Position>)positionsField.GetValue(portfolio)!;
             positionsList.Clear();

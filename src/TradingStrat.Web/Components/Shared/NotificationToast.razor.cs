@@ -13,7 +13,7 @@ public partial class NotificationToast : ComponentBase, IDisposable
 
     protected override void OnParametersSet()
     {
-        if (Notification != null && AutoDismissMs > 0)
+        if (Notification is not null && AutoDismissMs > 0)
         {
             _autoDismissTimer?.Dispose();
             _autoDismissTimer = new Timer(_ => InvokeAsync(HandleDismiss), null, AutoDismissMs, Timeout.Infinite);
@@ -28,7 +28,7 @@ public partial class NotificationToast : ComponentBase, IDisposable
 
     private async Task HandleActionClick()
     {
-        if (Notification?.Action != null)
+        if (Notification?.Action is not null)
         {
             _autoDismissTimer?.Dispose();
             await OnDismiss.InvokeAsync();

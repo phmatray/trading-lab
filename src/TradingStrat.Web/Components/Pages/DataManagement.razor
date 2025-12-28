@@ -85,12 +85,12 @@
                 <DataSummaryCard Summary="@_result" />
             </div>
 
-            @if (_result != null)
+            @if (_result is not null)
             {
                 <TradingViewWidget Ticker="@_result.Ticker" />
             }
 
-            @if (_result != null)
+            @if (_result is not null)
             {
                 <AiDataAnalysisPanel DataSummary="_result" />
             }
@@ -176,7 +176,7 @@
                         Progress & Results
                     </h3>
 
-                    @if (_bulkResult != null)
+                    @if (_bulkResult is not null)
                     {
                         <!-- Summary Cards -->
                         <div class="grid grid-cols-3 gap-3 mb-4">

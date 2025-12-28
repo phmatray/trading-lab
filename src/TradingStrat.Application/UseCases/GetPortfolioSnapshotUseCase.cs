@@ -41,7 +41,7 @@ public class GetPortfolioSnapshotUseCase : IGetPortfolioSnapshotUseCase
 
         // Load portfolio with positions
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             return Result<PortfolioSnapshot>.Failure(
                 Error.NotFound($"Portfolio {portfolioId} not found", "PORTFOLIO_NOT_FOUND"));

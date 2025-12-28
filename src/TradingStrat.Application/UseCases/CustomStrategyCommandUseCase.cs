@@ -108,7 +108,7 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
 
         // Load existing strategy
         CustomStrategy? existing = await _customStrategyPort.GetByIdAsync(command.Id);
-        if (existing == null)
+        if (existing is null)
         {
             return Result<CustomStrategyResult>.Failure(
                 Error.NotFound($"Strategy with ID {command.Id} not found", ErrorCodes.Strategy.NotFound));
@@ -138,7 +138,7 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
     {
         // Load original strategy
         CustomStrategy? original = await _customStrategyPort.GetByIdAsync(strategyId);
-        if (original == null)
+        if (original is null)
         {
             return Result<CustomStrategyResult>.Failure(
                 Error.NotFound($"Strategy with ID {strategyId} not found", ErrorCodes.Strategy.NotFound));

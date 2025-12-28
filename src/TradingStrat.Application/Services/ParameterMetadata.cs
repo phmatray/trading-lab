@@ -14,12 +14,12 @@ public sealed record ParameterMetadata
     public required string Type { get; init; } // "int", "decimal", "enum"
 
     public T GetDefault<T>() => (T)DefaultValue;
-    public T? GetMin<T>() where T : struct => MinValue != null ? (T)MinValue : null;
-    public T? GetMax<T>() where T : struct => MaxValue != null ? (T)MaxValue : null;
+    public T? GetMin<T>() where T : struct => MinValue is not null ? (T)MinValue : null;
+    public T? GetMax<T>() where T : struct => MaxValue is not null ? (T)MaxValue : null;
 
     public (T Min, T Max) GetRange<T>() where T : struct
     {
-        if (MinValue == null || MaxValue == null)
+        if (MinValue is null || MaxValue is null)
         {
             throw new InvalidOperationException($"Parameter {Name} does not have min/max range defined");
         }

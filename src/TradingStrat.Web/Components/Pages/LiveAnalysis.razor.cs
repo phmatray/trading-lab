@@ -101,7 +101,7 @@ public partial class LiveAnalysis
 
     protected override string GetSuccessMessage(LiveAnalysisResult? result)
     {
-        if (result == null)
+        if (result is null)
         {
             return "Analysis completed.";
         }

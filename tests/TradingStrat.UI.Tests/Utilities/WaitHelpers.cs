@@ -120,7 +120,7 @@ public static class WaitHelpers
             .Or(page.Locator(".alert"))
             .Or(page.Locator("[data-testid='alert-message']"));
 
-        if (expectedText != null)
+        if (expectedText is not null)
         {
             alert = page.Locator($"text={expectedText}");
         }
@@ -141,7 +141,7 @@ public static class WaitHelpers
             .Or(page.Locator("[role='alert']"))
             .Or(page.Locator(".text-red-600"));
 
-        if (expectedMessage != null)
+        if (expectedMessage is not null)
         {
             validationMessage = page.Locator($"text={expectedMessage}");
         }

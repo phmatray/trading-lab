@@ -48,7 +48,14 @@ public class ParameterOptimizer : IParameterOptimizer
 
             // Calculate score based on objective
             decimal score = CalculateScore(iteration, objective);
-            iteration = iteration with { Score = score };
+            iteration = new OptimizationIteration(
+                iteration.IterationNumber,
+                iteration.Parameters,
+                score,
+                iteration.TotalReturn,
+                iteration.SharpeRatio,
+                iteration.MaxDrawdown,
+                iteration.TradeCount);
 
             allIterations.Add(iteration);
 
@@ -149,7 +156,14 @@ public class ParameterOptimizer : IParameterOptimizer
                 );
 
                 decimal score = CalculateScore(iteration, objective);
-                iteration = iteration with { Score = score };
+                iteration = new OptimizationIteration(
+                    iteration.IterationNumber,
+                    iteration.Parameters,
+                    score,
+                    iteration.TotalReturn,
+                    iteration.SharpeRatio,
+                    iteration.MaxDrawdown,
+                    iteration.TradeCount);
 
                 allIterations.Add(iteration);
                 evaluatedPopulation.Add((parameters, score));

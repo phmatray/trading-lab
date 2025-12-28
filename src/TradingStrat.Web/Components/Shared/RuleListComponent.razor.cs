@@ -64,7 +64,7 @@ public partial class RuleListComponent : ComponentBase
     private async Task OnParameterChanged(int index, string paramName, object? value)
     {
         Log($"[RuleListComponent] OnParameterChanged: index={index}, param={paramName}, value={value}");
-        if (value != null && int.TryParse(value.ToString(), out int intValue))
+        if (value is not null && int.TryParse(value.ToString(), out int intValue))
         {
             Rules[index].IndicatorParameters[paramName] = intValue;
             await NotifyChanged();
@@ -113,7 +113,7 @@ public partial class RuleListComponent : ComponentBase
     private async Task OnConstantValueChanged(int index, object? value)
     {
         Log($"[RuleListComponent] OnConstantValueChanged: index={index}, value={value}, type={value?.GetType().Name}");
-        if (value != null && decimal.TryParse(value.ToString(), out decimal decValue))
+        if (value is not null && decimal.TryParse(value.ToString(), out decimal decValue))
         {
             Rules[index].ConstantValue = decValue;
             Log($"[RuleListComponent]   Parsed to decimal: {decValue}");

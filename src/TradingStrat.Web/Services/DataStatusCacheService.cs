@@ -39,7 +39,7 @@ public class DataStatusCacheService : IDataStatusCacheService
 
         string cacheKey = GenerateCacheKey(query);
 
-        if (_cache.TryGetValue(cacheKey, out AllDataStatusResult? cachedResult) && cachedResult != null)
+        if (_cache.TryGetValue(cacheKey, out AllDataStatusResult? cachedResult) && cachedResult is not null)
         {
             IncrementCacheHits();
             return Result<AllDataStatusResult>.Success(cachedResult);

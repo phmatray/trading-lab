@@ -47,7 +47,7 @@ public partial class Comparison
 
             // Try to restore saved form state
             ComparisonFormModel? savedForm = await FormState.GetFormStateAsync<ComparisonFormModel>(FORM_KEY);
-            if (savedForm != null)
+            if (savedForm is not null)
             {
                 FormModel = savedForm;
             }
@@ -67,11 +67,11 @@ public partial class Comparison
         IProgress<string> progress)
     {
         // Get current strategy parameters from both forms
-        if (_strategyFormA != null)
+        if (_strategyFormA is not null)
         {
             model.StrategyParametersA = _strategyFormA.GetCurrentParameters();
         }
-        if (_strategyFormB != null)
+        if (_strategyFormB is not null)
         {
             model.StrategyParametersB = _strategyFormB.GetCurrentParameters();
         }
@@ -123,7 +123,7 @@ public partial class Comparison
 
     protected override string GetSuccessMessage(ParameterOptimizationResult? result)
     {
-        if (result == null || result.Comparison == null)
+        if (result is null || result.Comparison is null)
         {
             return "Comparison completed.";
         }

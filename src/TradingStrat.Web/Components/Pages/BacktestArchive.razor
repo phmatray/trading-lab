@@ -45,13 +45,13 @@
             </div>
         </div>
     }
-    else if (_errorMessage != null)
+    else if (_errorMessage is not null)
     {
         <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
         </div>
     }
-    else if (_archiveResult != null)
+    else if (_archiveResult is not null)
     {
         <!-- Summary Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -67,7 +67,7 @@
             </div>
             <div class="card">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Top Performer</p>
-                @if (_archiveResult.TopPerformer != null)
+                @if (_archiveResult.TopPerformer is not null)
                 {
                     <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         @_archiveResult.TopPerformer.StrategyName
@@ -260,7 +260,7 @@
                 </svg>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Backtests Found</h3>
                 <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
-                    @if (!string.IsNullOrEmpty(_filterTicker) || !string.IsNullOrEmpty(_filterStrategy) || _filterStartDate != null || _filterEndDate != null)
+                    @if (!string.IsNullOrEmpty(_filterTicker) || !string.IsNullOrEmpty(_filterStrategy) || _filterStartDate is not null || _filterEndDate is not null)
                     {
                         <span>No backtests match your filters. Try adjusting or clearing them.</span>
                     }

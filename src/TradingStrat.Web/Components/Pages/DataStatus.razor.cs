@@ -129,7 +129,7 @@ public partial class DataStatus : BaseComponent
     {
         bool isChecked = (bool)(e.Value ?? false);
 
-        if (isChecked && _dataStatus != null)
+        if (isChecked && _dataStatus is not null)
         {
             foreach (TickerDataStatus status in _dataStatus.TickerStatuses)
             {
@@ -166,7 +166,7 @@ public partial class DataStatus : BaseComponent
     {
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;
@@ -216,7 +216,7 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;
@@ -251,7 +251,7 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;
@@ -308,7 +308,7 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;
@@ -348,7 +348,7 @@ public partial class DataStatus : BaseComponent
 
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;
@@ -387,7 +387,7 @@ public partial class DataStatus : BaseComponent
     {
         try
         {
-            if (_query.TimeFrame == null)
+            if (_query.TimeFrame is null)
             {
                 await NotificationService.ShowErrorAsync("Please select a timeframe");
                 return;

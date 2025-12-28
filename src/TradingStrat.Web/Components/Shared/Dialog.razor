@@ -14,7 +14,7 @@
             <!-- Header -->
             <div class="flex justify-between items-center mb-4">
                 <h3 id="dialog-title" class="text-lg font-medium text-gray-900 dark:text-dark-text-primary">@Title</h3>
-                @if (HeaderActions != null)
+                @if (HeaderActions is not null)
                 {
                     @HeaderActions
                 }
@@ -37,7 +37,7 @@
             </div>
 
             <!-- Footer -->
-            @if (Footer != null)
+            @if (Footer is not null)
             {
                 <div class="dialog-footer mt-4">
                     @Footer

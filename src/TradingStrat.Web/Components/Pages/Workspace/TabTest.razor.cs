@@ -58,7 +58,7 @@ public partial class TabTest : ComponentBase
 
     protected override void OnParametersSet()
     {
-        if (Strategy != null && string.IsNullOrEmpty(_config.Ticker))
+        if (Strategy is not null && string.IsNullOrEmpty(_config.Ticker))
         {
             // Initialize with defaults
             _config.Ticker = "AAPL";
@@ -73,7 +73,7 @@ public partial class TabTest : ComponentBase
 
     private async Task RunBacktest()
     {
-        if (Strategy == null)
+        if (Strategy is null)
         {
             return;
         }

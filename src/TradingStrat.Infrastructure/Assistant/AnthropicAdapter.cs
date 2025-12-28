@@ -105,7 +105,7 @@ public class AnthropicAdapter : IAssistantPort
             }
 
             string? textToken = ExtractTextFromStreamEvent(data);
-            if (textToken != null)
+            if (textToken is not null)
             {
                 yield return textToken;
             }
@@ -189,7 +189,7 @@ public class AnthropicAdapter : IAssistantPort
                     PropertyNameCaseInsensitive = true
                 }, cancellationToken);
 
-            if (anthropicResponse?.Content != null && anthropicResponse.Content.Count > 0)
+            if (anthropicResponse?.Content is not null && anthropicResponse.Content.Count > 0)
             {
                 return anthropicResponse.Content[0].Text ?? string.Empty;
             }

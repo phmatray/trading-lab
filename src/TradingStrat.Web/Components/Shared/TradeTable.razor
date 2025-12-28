@@ -1,4 +1,4 @@
-@if (Trades != null && Trades.Count > 0)
+@if (Trades is not null && Trades.Count > 0)
 {
     <div class="card overflow-x-auto">
         <h3 class="text-lg font-semibold mb-4 dark:text-dark-text-primary">Trade History (@Trades.Count trades)</h3>

@@ -125,7 +125,7 @@ public class ExportHistoricalDataUseCase : IExportHistoricalDataUseCase
 
     private static decimal CalculateCoveragePercentage(DateTime? oldestDate, DateTime? latestDate)
     {
-        if (oldestDate == null || latestDate == null)
+        if (oldestDate is null || latestDate is null)
         {
             return 0m;
         }
@@ -142,7 +142,7 @@ public class ExportHistoricalDataUseCase : IExportHistoricalDataUseCase
 
     private static int CalculateGapCount(DateTime? oldestDate, DateTime? latestDate, int recordCount, TimeFrame timeFrame)
     {
-        if (oldestDate == null || latestDate == null)
+        if (oldestDate is null || latestDate is null)
         {
             return 0;
         }

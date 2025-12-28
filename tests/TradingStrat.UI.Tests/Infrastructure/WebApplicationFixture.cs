@@ -52,7 +52,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         IServer? server = _kestrelHost.Services.GetRequiredService<IServer>();
         IServerAddressesFeature? addresses = server.Features.Get<IServerAddressesFeature>();
 
-        if (addresses != null && addresses.Addresses.Any())
+        if (addresses is not null && addresses.Addresses.Any())
         {
             _baseAddress = addresses.Addresses.First();
             ClientOptions.BaseAddress = new Uri(_baseAddress);
@@ -88,7 +88,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
             // Remove the existing TradingContext registration
             ServiceDescriptor? descriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<TradingContext>));
-            if (descriptor != null)
+            if (descriptor is not null)
             {
                 services.Remove(descriptor);
             }
@@ -106,7 +106,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
 
     private void EnsureServer()
     {
-        if (_kestrelHost == null)
+        if (_kestrelHost is null)
         {
             // Trigger server creation by accessing Server property
             // This will call CreateHost() which sets up the Kestrel host
@@ -135,7 +135,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         EnsureServer();
 
         // Now seed test data using the Kestrel host's services
-        if (_kestrelHost != null)
+        if (_kestrelHost is not null)
         {
             using IServiceScope scope = _kestrelHost.Services.CreateScope();
             TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
@@ -316,7 +316,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
     public new async Task DisposeAsync()
     {
         // Stop and dispose the Kestrel host
-        if (_kestrelHost != null)
+        if (_kestrelHost is not null)
         {
             await _kestrelHost.StopAsync();
             _kestrelHost.Dispose();

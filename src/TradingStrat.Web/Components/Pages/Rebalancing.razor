@@ -20,7 +20,7 @@
         {
             <LoadingState Message="Loading portfolio..." />
         }
-        else if (_portfolio == null)
+        else if (_portfolio is null)
         {
             <EmptyState Icon="alert"
                         Title="Portfolio not found"
@@ -40,7 +40,7 @@
                 <div class="card">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Target Allocation</h2>
 
-                    @if (_snapshot != null)
+                    @if (_snapshot is not null)
                     {
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <p class="text-sm text-blue-800 dark:text-blue-300 font-medium">Current Allocation</p>
@@ -129,7 +129,7 @@
 
             <!-- Results -->
             <div class="lg:col-span-2 space-y-6">
-                @if (_plan != null)
+                @if (_plan is not null)
                 {
                     <!-- Summary Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

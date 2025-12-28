@@ -74,7 +74,7 @@ public partial class DateRangeInput : ComponentBase
 
     private List<DateRangePreset> GetPresets()
     {
-        if (CustomPresets != null && CustomPresets.Any())
+        if (CustomPresets is not null && CustomPresets.Any())
         {
             return CustomPresets;
         }

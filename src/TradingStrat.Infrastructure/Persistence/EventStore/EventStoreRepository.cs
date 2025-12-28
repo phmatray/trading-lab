@@ -36,7 +36,7 @@ public class EventStoreRepository : IEventStore
             throw new ArgumentException("Stream ID cannot be null or whitespace", nameof(streamId));
         }
 
-        if (events == null)
+        if (events is null)
         {
             throw new ArgumentNullException(nameof(events));
         }
@@ -96,7 +96,7 @@ public class EventStoreRepository : IEventStore
         {
             // Deserialize event using the stored type information
             Type? eventType = Type.GetType(record.EventType);
-            if (eventType == null)
+            if (eventType is null)
             {
                 throw new InvalidOperationException(
                     $"Cannot find event type '{record.EventType}' for stream '{streamId}' version {record.Version}");

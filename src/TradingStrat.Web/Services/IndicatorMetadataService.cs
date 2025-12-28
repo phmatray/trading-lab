@@ -49,7 +49,7 @@ public class IndicatorMetadataService
     public Dictionary<string, object> GetDefaultParameters(string indicatorName)
     {
         IndicatorMetadata? indicator = GetIndicator(indicatorName);
-        if (indicator == null)
+        if (indicator is null)
         {
             return new Dictionary<string, object>();
         }

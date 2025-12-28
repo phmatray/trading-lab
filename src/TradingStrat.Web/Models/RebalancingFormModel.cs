@@ -58,7 +58,7 @@ public class RebalancingFormModel
     /// <returns>True if allocations are valid, false otherwise.</returns>
     public bool ValidateAllocations()
     {
-        if (TargetAllocations == null || TargetAllocations.Count == 0)
+        if (TargetAllocations is null || TargetAllocations.Count == 0)
         {
             return CashPercentage == 100m;
         }

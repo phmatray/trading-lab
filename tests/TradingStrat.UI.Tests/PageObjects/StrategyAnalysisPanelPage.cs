@@ -133,7 +133,7 @@ public class StrategyAnalysisPanelPage : BasePage
         {
             // Check if details is already open
             string? isOpen = await ActionItemsDetails.GetAttributeAsync("open");
-            if (isOpen == null)
+            if (isOpen is null)
             {
                 // Click to expand if closed
                 await ActionItemsDetails.ClickAsync();
@@ -157,7 +157,7 @@ public class StrategyAnalysisPanelPage : BasePage
         {
             // Check if details is already open
             string? isOpen = await ActionItemsDetails.GetAttributeAsync("open");
-            if (isOpen == null)
+            if (isOpen is null)
             {
                 // Click to expand if closed
                 await ActionItemsDetails.ClickAsync();

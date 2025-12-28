@@ -79,7 +79,7 @@ public partial class Backtest
         var stopwatch = Stopwatch.StartNew();
 
         // Get current strategy parameters from the form
-        if (_strategyForm != null)
+        if (_strategyForm is not null)
         {
             model.StrategyParameters = _strategyForm.GetCurrentParameters();
         }
@@ -199,7 +199,7 @@ public partial class Backtest
 
     protected override string GetSuccessMessage(BacktestResult? result)
     {
-        if (result == null)
+        if (result is null)
         {
             return "Backtest completed.";
         }
@@ -237,7 +237,7 @@ public partial class Backtest
     // Quick Actions navigation methods
     private void CreatePortfolioFromStrategy()
     {
-        if (Result == null)
+        if (Result is null)
         {
             return;
         }
@@ -248,7 +248,7 @@ public partial class Backtest
 
     private void CompareWithOthers()
     {
-        if (Result == null)
+        if (Result is null)
         {
             return;
         }
@@ -259,7 +259,7 @@ public partial class Backtest
 
     private void OptimizeParameters()
     {
-        if (Result == null)
+        if (Result is null)
         {
             return;
         }
@@ -271,7 +271,7 @@ public partial class Backtest
 
     private void ViewInArchive()
     {
-        if (Result == null)
+        if (Result is null)
         {
             return;
         }

@@ -43,7 +43,7 @@ public abstract class BaseComponent : ComponentBase
         Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
 
         // Log inner exception if present
-        if (ex.InnerException != null)
+        if (ex.InnerException is not null)
         {
             Console.WriteLine($"[ERROR] Inner exception: {ex.InnerException.Message}");
         }

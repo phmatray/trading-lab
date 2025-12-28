@@ -32,7 +32,7 @@ public class SnapshotStore : ISnapshotStore
     /// <inheritdoc />
     public async Task SaveSnapshotAsync<T>(T aggregate) where T : IEventSourcedAggregate
     {
-        if (aggregate == null)
+        if (aggregate is null)
         {
             throw new ArgumentNullException(nameof(aggregate));
         }
@@ -48,7 +48,7 @@ public class SnapshotStore : ISnapshotStore
         SnapshotRecord? existingSnapshot = await _context.Snapshots
             .FirstOrDefaultAsync(s => s.AggregateId == aggregateId);
 
-        if (existingSnapshot != null)
+        if (existingSnapshot is not null)
         {
             // Update existing snapshot
             _context.Snapshots.Remove(existingSnapshot);
@@ -79,14 +79,14 @@ public class SnapshotStore : ISnapshotStore
         SnapshotRecord? snapshotRecord = await _context.Snapshots
             .FirstOrDefaultAsync(s => s.AggregateId == aggregateId);
 
-        if (snapshotRecord == null)
+        if (snapshotRecord is null)
         {
             return null;
         }
 
         // Deserialize the aggregate
         Type? aggregateType = Type.GetType(snapshotRecord.AggregateType);
-        if (aggregateType == null)
+        if (aggregateType is null)
         {
             throw new InvalidOperationException(
                 $"Cannot find aggregate type '{snapshotRecord.AggregateType}' for snapshot '{aggregateId}'");

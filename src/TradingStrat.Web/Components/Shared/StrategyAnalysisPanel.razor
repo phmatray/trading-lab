@@ -1,5 +1,5 @@
 <div class="card mt-6">
-    @if (_recommendation == null && !_isAnalyzing && _error == null)
+    @if (_recommendation is null && !_isAnalyzing && _error is null)
     {
         <div class="text-center">
             <h3 class="text-lg font-semibold mb-3 dark:text-dark-text-primary">AI Strategy Analysis</h3>
@@ -15,7 +15,7 @@
     {
         <ProgressIndicator IsVisible="true" CurrentMessage="Analyzing strategy with AI..." />
     }
-    else if (_error != null)
+    else if (_error is not null)
     {
         <AlertMessage Message="@_error" Type="AlertType.Error" />
         <button @onclick="ResetPanel"
@@ -23,7 +23,7 @@
             Try Again
         </button>
     }
-    else if (_recommendation != null)
+    else if (_recommendation is not null)
     {
         <div class="space-y-4">
             <!-- Header -->

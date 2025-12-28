@@ -79,7 +79,7 @@ public partial class StrategyComparison : BaseComponent
     private void OnStrategyTypeChanged(Guid id, string value)
     {
         SelectedStrategy? strategy = _selectedStrategies.FirstOrDefault(s => s.Id == id);
-        if (strategy == null)
+        if (strategy is null)
         {
             return;
         }

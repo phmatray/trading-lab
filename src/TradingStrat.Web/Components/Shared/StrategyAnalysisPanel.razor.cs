@@ -85,7 +85,7 @@ public partial class StrategyAnalysisPanel : ComponentBase
 
     private string GetRecommendationCardClass()
     {
-        if (_recommendation == null)
+        if (_recommendation is null)
         {
             return "bg-gray-50 dark:bg-dark-elevated border border-gray-200 dark:border-dark-border";
         }
@@ -100,7 +100,7 @@ public partial class StrategyAnalysisPanel : ComponentBase
 
     private string GetConfidenceBarClass()
     {
-        if (_recommendation == null)
+        if (_recommendation is null)
         {
             return "bg-gray-400 dark:bg-gray-600";
         }

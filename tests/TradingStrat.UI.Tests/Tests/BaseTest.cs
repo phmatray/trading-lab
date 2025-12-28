@@ -54,12 +54,12 @@ public abstract class BaseTest : IAsyncLifetime
         // Note: Screenshot on failure is typically handled by test framework hooks
         // But we can add manual screenshot capture here if needed
 
-        if (Page != null)
+        if (Page is not null)
         {
             await Page.CloseAsync();
         }
 
-        if (Context != null)
+        if (Context is not null)
         {
             await Context.CloseAsync();
         }
@@ -70,7 +70,7 @@ public abstract class BaseTest : IAsyncLifetime
     /// </summary>
     protected async Task NavigateToAsync(string path)
     {
-        if (Page == null)
+        if (Page is null)
         {
             throw new InvalidOperationException("Page is not initialized");
         }
@@ -84,7 +84,7 @@ public abstract class BaseTest : IAsyncLifetime
     /// </summary>
     protected async Task TakeScreenshotAsync(string name)
     {
-        if (Page == null)
+        if (Page is null)
         {
             return;
         }

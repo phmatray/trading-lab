@@ -45,7 +45,7 @@
 
                     <!-- Date Range -->
                     <td class="px-4 py-3 whitespace-nowrap">
-                        @if (ticker.OldestDate != null && ticker.LatestDate != null)
+                        @if (ticker.OldestDate is not null && ticker.LatestDate is not null)
                         {
                             <div class="text-sm text-gray-900 dark:text-dark-text-primary">
                                 @ticker.OldestDate.Value.ToString("MMM dd, yyyy")

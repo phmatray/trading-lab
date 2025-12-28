@@ -20,7 +20,7 @@
         {
             <LoadingState Message="Loading portfolio..." />
         }
-        else if (_portfolio == null)
+        else if (_portfolio is null)
         {
             <EmptyState Icon="alert"
                         Title="Portfolio not found"
@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        @if (_performanceHistory != null)
+        @if (_performanceHistory is not null)
         {
             <!-- Performance Metrics Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -233,7 +233,7 @@
             </div>
 
             <!-- Position Beta Table -->
-            @if (_performanceHistory.CurrentMetrics.PositionBetas != null && _performanceHistory.CurrentMetrics.PositionBetas.Any())
+            @if (_performanceHistory.CurrentMetrics.PositionBetas is not null && _performanceHistory.CurrentMetrics.PositionBetas.Any())
             {
                 <div class="card">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Position Betas</h2>

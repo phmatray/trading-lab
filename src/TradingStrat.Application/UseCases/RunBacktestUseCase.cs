@@ -72,7 +72,7 @@ public class RunBacktestUseCase : IBacktestUseCase
                 TradingStyle: command.TradingStyle);
 
             // Run backtest
-            Progress<(int current, int total, int trades)>? internalProgress = progress != null
+            Progress<(int current, int total, int trades)>? internalProgress = progress is not null
                 ? new Progress<(int current, int total, int trades)>(p =>
                     progress.Report(new BacktestProgress(p.current, p.total, p.trades)))
                 : null;

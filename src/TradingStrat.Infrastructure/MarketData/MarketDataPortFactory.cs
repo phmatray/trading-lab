@@ -66,7 +66,7 @@ public class MarketDataPortFactory
         // Resolve AlphaVantageAdapter from DI container
         IMarketDataPort? adapter = _serviceProvider.GetService<AlphaVantageAdapter>();
 
-        if (adapter == null)
+        if (adapter is null)
         {
             throw new InvalidOperationException(
                 "AlphaVantageAdapter is not registered in DI container. " +
@@ -81,7 +81,7 @@ public class MarketDataPortFactory
         // Resolve YahooFinanceAdapter from DI container
         IMarketDataPort? adapter = _serviceProvider.GetService<YahooFinanceAdapter>();
 
-        if (adapter == null)
+        if (adapter is null)
         {
             throw new InvalidOperationException(
                 "YahooFinanceAdapter is not registered in DI container. " +

@@ -72,7 +72,7 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     {
         // Verify portfolio exists
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             throw new InvalidOperationException($"Portfolio {command.PortfolioId} not found");
         }
@@ -102,7 +102,7 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     {
         // Load existing position
         Position? existingPosition = await _portfolioPort.GetPositionByIdAsync(command.PositionId);
-        if (existingPosition == null)
+        if (existingPosition is null)
         {
             throw new InvalidOperationException($"Position {command.PositionId} not found");
         }
@@ -120,7 +120,7 @@ public class ManagePositionsUseCase : IManagePositionsUseCase
     {
         // Verify position exists
         Position? position = await _portfolioPort.GetPositionByIdAsync(positionId);
-        if (position == null)
+        if (position is null)
         {
             throw new InvalidOperationException($"Position {positionId} not found");
         }

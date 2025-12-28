@@ -178,7 +178,7 @@
             </Button>
         </div>
 
-        @if (_errorMessage != null)
+        @if (_errorMessage is not null)
         {
             <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
@@ -187,7 +187,7 @@
     </div>
 
     <!-- Comparison Results -->
-    @if (_comparisonResult != null)
+    @if (_comparisonResult is not null)
     {
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -196,7 +196,7 @@
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestByReturn?.StrategyName ?? "N/A"
                 </p>
-                @if (_comparisonResult.BestByReturn != null)
+                @if (_comparisonResult.BestByReturn is not null)
                 {
                     <p class="text-sm text-green-600 dark:text-green-400">
                         @_comparisonResult.BestByReturn.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
@@ -209,7 +209,7 @@
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestBySharpe?.StrategyName ?? "N/A"
                 </p>
-                @if (_comparisonResult.BestBySharpe != null)
+                @if (_comparisonResult.BestBySharpe is not null)
                 {
                     <p class="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Sharpe: @_comparisonResult.BestBySharpe.Metrics.SharpeRatio.ToString("F2")
@@ -222,7 +222,7 @@
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestByDrawdown?.StrategyName ?? "N/A"
                 </p>
-                @if (_comparisonResult.BestByDrawdown != null)
+                @if (_comparisonResult.BestByDrawdown is not null)
                 {
                     <p class="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Max DD: @_comparisonResult.BestByDrawdown.Metrics.MaxDrawdown.ToString("F2%")

@@ -33,7 +33,7 @@
             </div>
         </div>
     }
-    else if (_errorMessage != null)
+    else if (_errorMessage is not null)
     {
         <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
@@ -53,7 +53,7 @@
                 Title="Backtests"
                 Value="@(_stats?.TotalBacktests.ToString() ?? "0")"
                 Icon="chart"
-                Subtitle="@(_stats?.LastBacktestDate != null ? $"Last: {_stats.LastBacktestDate:MMM d}" : "")"
+                Subtitle="@(_stats?.LastBacktestDate is not null ? $"Last: {_stats.LastBacktestDate:MMM d}" : "")"
                 OnClick="@(() => NavigateToPage("/backtests"))" />
 
             <DashboardStatsCard

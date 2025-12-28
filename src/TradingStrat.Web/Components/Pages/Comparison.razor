@@ -72,7 +72,7 @@
     </div>
 
     <!-- Results -->
-    @if (Result != null && Result.Comparison != null)
+    @if (Result is not null && Result.Comparison is not null)
     {
         var comparison = Result.Comparison;
 

@@ -18,10 +18,7 @@ public class PortfolioPerformanceService
         PortfolioSnapshot snapshot,
         List<PortfolioPerformancePoint>? historicalPoints = null)
     {
-        if (snapshot == null)
-        {
-            throw new ArgumentNullException(nameof(snapshot));
-        }
+        ArgumentNullException.ThrowIfNull(snapshot);
 
         int numPositions = snapshot.Positions.Count;
         decimal cashPercent = snapshot.TotalValue > 0
@@ -47,7 +44,7 @@ public class PortfolioPerformanceService
         decimal dailyReturn = 0m;
         decimal dailyReturnPercentage = 0m;
 
-        if (historicalPoints != null && historicalPoints.Count > 2)
+        if (historicalPoints is not null && historicalPoints.Count > 2)
         {
             var returns = historicalPoints
                 .OrderBy(p => p.Date)
@@ -59,7 +56,7 @@ public class PortfolioPerformanceService
 
             // Get most recent daily return
             PortfolioPerformancePoint? lastPoint = historicalPoints.OrderByDescending(p => p.Date).FirstOrDefault();
-            if (lastPoint != null)
+            if (lastPoint is not null)
             {
                 dailyReturn = lastPoint.DailyReturn;
                 dailyReturnPercentage = lastPoint.TotalValue > 0

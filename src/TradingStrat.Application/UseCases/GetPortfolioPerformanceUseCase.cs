@@ -49,7 +49,7 @@ public class GetPortfolioPerformanceUseCase : BaseProgressUseCase<PortfolioPerfo
 
         // Load portfolio with positions
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(query.PortfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             throw new InvalidOperationException($"Portfolio {query.PortfolioId} not found");
         }

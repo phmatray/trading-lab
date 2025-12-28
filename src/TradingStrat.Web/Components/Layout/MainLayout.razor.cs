@@ -72,7 +72,7 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
             if (portfolioId.HasValue)
             {
                 Domain.Entities.Portfolio? portfolio = await PortfolioPort.GetPortfolioByIdAsync(portfolioId.Value);
-                if (portfolio != null)
+                if (portfolio is not null)
                 {
                     _selectedPortfolioName = portfolio.Name;
                     // Portfolio value and YTD performance would require additional calculations

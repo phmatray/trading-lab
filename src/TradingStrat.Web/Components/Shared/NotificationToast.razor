@@ -2,7 +2,7 @@
     <div class="flex items-start gap-3">
         <!-- Icon -->
         <div class="flex-shrink-0">
-            @if (Notification != null)
+            @if (Notification is not null)
             {
                 <svg class="@IconClasses" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     @switch (Notification.Severity)
@@ -26,12 +26,12 @@
 
         <!-- Content -->
         <div class="flex-1 min-w-0">
-            @if (Notification != null)
+            @if (Notification is not null)
             {
                 <p class="text-sm font-semibold @TextClasses">@Notification.Title</p>
                 <p class="mt-1 text-sm @TextClasses opacity-90">@Notification.Message</p>
 
-                @if (Notification.Action != null)
+                @if (Notification.Action is not null)
                 {
                     <button @onclick="HandleActionClick"
                             class="mt-2 text-sm font-medium underline @TextClasses hover:opacity-80 transition-opacity">

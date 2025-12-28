@@ -14,7 +14,7 @@
            class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue uppercase"
            aria-label="@Label" />
 
-    @if (ShowValidation && For != null)
+    @if (ShowValidation && For is not null)
     {
         <ValidationMessage For="@For" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
     }

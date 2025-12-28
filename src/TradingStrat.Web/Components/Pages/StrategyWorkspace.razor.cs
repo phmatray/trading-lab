@@ -56,9 +56,9 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
     {
         return tabIndex switch
         {
-            1 => _workspaceState.State.CurrentStrategy == null, // Test requires strategy
-            2 => _workspaceState.State.CurrentStrategy == null, // Optimize requires strategy
-            3 => _workspaceState.State.TestResult == null,      // Deploy requires test results
+            1 => _workspaceState.State.CurrentStrategy is null, // Test requires strategy
+            2 => _workspaceState.State.CurrentStrategy is null, // Optimize requires strategy
+            3 => _workspaceState.State.TestResult is null,      // Deploy requires test results
             _ => false
         };
     }

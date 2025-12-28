@@ -22,12 +22,12 @@ public class PortfolioValuationService
     {
         List<Error> errors = new();
 
-        if (portfolio == null)
+        if (portfolio is null)
         {
             errors.Add(Error.Validation("Portfolio is required", "PORTFOLIO_REQUIRED"));
         }
 
-        if (currentPrices == null)
+        if (currentPrices is null)
         {
             errors.Add(Error.Validation("Current prices are required", "CURRENT_PRICES_REQUIRED"));
         }
@@ -74,12 +74,18 @@ public class PortfolioValuationService
 
         // Calculate allocation percentages now that we know total value
         var updatedSnapshots = positionSnapshots
-            .Select(p => p with
-            {
-                AllocationPercentage = totalMarketValue > 0
+            .Select(p => new PositionSnapshot(
+                p.Ticker,
+                p.Quantity,
+                p.EntryPrice,
+                p.CurrentPrice,
+                p.MarketValue,
+                p.CostBasis,
+                p.UnrealizedGainLoss,
+                p.UnrealizedGainLossPercentage,
+                totalMarketValue > 0
                     ? (p.MarketValue / totalMarketValue) * 100
-                    : 0
-            })
+                    : 0))
             .ToList();
 
         decimal totalGainLoss = totalMarketValue - totalCost;

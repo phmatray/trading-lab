@@ -79,7 +79,7 @@ public class NotificationService : IDisposable
         NotificationHistory history = await GetHistoryAsync(cancellationToken);
         Notification? notification = history.Notifications.FirstOrDefault(n => n.Id == notificationId);
 
-        if (notification != null)
+        if (notification is not null)
         {
             notification.IsRead = true;
             await SaveHistoryAsync(history, cancellationToken);
@@ -235,7 +235,7 @@ public class NotificationService : IDisposable
 
     private async Task<NotificationHistory> GetHistoryAsync(CancellationToken cancellationToken)
     {
-        if (_cachedHistory != null)
+        if (_cachedHistory is not null)
         {
             return _cachedHistory;
         }

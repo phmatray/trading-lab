@@ -55,12 +55,12 @@ public class BacktestPage : BasePage
         await TickerInput.FillAsync(ticker);
         await CapitalInput.FillAsync(capital.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
-        if (startDate != null)
+        if (startDate is not null)
         {
             await StartDateInput.FillAsync(startDate);
         }
 
-        if (endDate != null)
+        if (endDate is not null)
         {
             await EndDateInput.FillAsync(endDate);
         }

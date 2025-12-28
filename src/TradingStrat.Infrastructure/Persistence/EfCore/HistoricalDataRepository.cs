@@ -185,7 +185,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
         IQueryable<HistoricalPrice> query = _context.HistoricalPrices
             .Where(p => p.Ticker == ticker);
 
-        if (timeFrame != null)
+        if (timeFrame is not null)
         {
             query = query.Where(p => p.TimeFrame == timeFrame.Unit);
         }

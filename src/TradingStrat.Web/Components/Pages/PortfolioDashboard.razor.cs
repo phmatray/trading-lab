@@ -62,7 +62,7 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
             // Load basic portfolio info
             _portfolio = await PortfolioPort.GetPortfolioByIdAsync(PortfolioId);
 
-            if (_portfolio == null)
+            if (_portfolio is null)
             {
                 _errorMessage = "Portfolio not found.";
                 return;
@@ -91,7 +91,7 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
             _snapshot = snapshotResult.Value;
 
             // Update breadcrumbs with portfolio name
-            if (_portfolio != null)
+            if (_portfolio is not null)
             {
                 _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
                 {

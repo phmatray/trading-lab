@@ -72,13 +72,13 @@
             </div>
         </div>
     }
-    else if (_errorMessage != null)
+    else if (_errorMessage is not null)
     {
         <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
         </div>
     }
-    else if (_dataStatus != null)
+    else if (_dataStatus is not null)
     {
         <!-- Summary Stats (Filtered) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

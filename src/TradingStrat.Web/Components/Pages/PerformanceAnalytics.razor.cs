@@ -58,7 +58,7 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
         {
             _portfolio = await PortfolioPort.GetPortfolioByIdAsync(PortfolioId);
 
-            if (_portfolio == null)
+            if (_portfolio is null)
             {
                 _errorMessage = "Portfolio not found.";
             }
@@ -89,7 +89,7 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
         _errorMessage = null;
         _performanceHistory = null;
 
-        if (_portfolio == null)
+        if (_portfolio is null)
         {
             return;
         }

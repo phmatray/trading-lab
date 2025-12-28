@@ -146,7 +146,7 @@ public class PortfolioContextBuilder
     public async Task<string> BuildContextForPortfolio(int portfolioId, int daysBack = 30)
     {
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             return $"Portfolio with ID {portfolioId} not found.";
         }

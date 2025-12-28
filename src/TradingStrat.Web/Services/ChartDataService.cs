@@ -17,7 +17,7 @@ public class ChartDataService
     /// </summary>
     public Dictionary<string, string> FormatMetrics(PerformanceMetrics? metrics)
     {
-        if (metrics == null)
+        if (metrics is null)
         {
             return new Dictionary<string, string>();
         }

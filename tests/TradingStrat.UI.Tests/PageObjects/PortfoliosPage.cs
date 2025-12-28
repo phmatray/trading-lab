@@ -81,7 +81,7 @@ public class PortfoliosPage : BasePage
 
         await NameInput.FillAsync(name);
 
-        if (description != null)
+        if (description is not null)
         {
             await DescriptionTextarea.FillAsync(description);
         }

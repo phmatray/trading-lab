@@ -35,7 +35,7 @@ public class AggregateRepository<T> : IAggregateRepository<T> where T : IEventSo
         int fromVersion = 0;
         T aggregate;
 
-        if (snapshot != null)
+        if (snapshot is not null)
         {
             // Start from snapshot
             aggregate = snapshot.Aggregate;
@@ -50,7 +50,7 @@ public class AggregateRepository<T> : IAggregateRepository<T> where T : IEventSo
         // Load events since snapshot (or from beginning if no snapshot)
         List<DomainEvent> events = await _eventStore.GetEventsAsync(aggregateId, fromVersion);
 
-        if (!events.Any() && snapshot == null)
+        if (!events.Any() && snapshot is null)
         {
             // No events and no snapshot = aggregate doesn't exist
             return default;
@@ -71,7 +71,7 @@ public class AggregateRepository<T> : IAggregateRepository<T> where T : IEventSo
     /// <inheritdoc />
     public async Task SaveAsync(T aggregate)
     {
-        if (aggregate == null)
+        if (aggregate is null)
         {
             throw new ArgumentNullException(nameof(aggregate));
         }

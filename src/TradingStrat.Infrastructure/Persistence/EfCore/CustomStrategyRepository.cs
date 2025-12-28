@@ -41,7 +41,7 @@ public class CustomStrategyRepository : ICustomStrategyPort
     public async Task DeleteAsync(int strategyId)
     {
         CustomStrategy? strategy = await _context.CustomStrategies.FindAsync(strategyId);
-        if (strategy != null)
+        if (strategy is not null)
         {
             _context.CustomStrategies.Remove(strategy);
             await _context.SaveChangesAsync();
@@ -70,7 +70,7 @@ public class CustomStrategyRepository : ICustomStrategyPort
     public async Task IncrementUsageCountAsync(int strategyId)
     {
         CustomStrategy? strategy = await _context.CustomStrategies.FindAsync(strategyId);
-        if (strategy != null)
+        if (strategy is not null)
         {
             strategy.TimesUsed++;
             await _context.SaveChangesAsync();
@@ -80,7 +80,7 @@ public class CustomStrategyRepository : ICustomStrategyPort
     public async Task UpdateBacktestStatsAsync(int strategyId, decimal returnPercentage, DateTime backtestDate)
     {
         CustomStrategy? strategy = await _context.CustomStrategies.FindAsync(strategyId);
-        if (strategy != null)
+        if (strategy is not null)
         {
             strategy.LastBacktestReturn = returnPercentage;
             strategy.LastBacktestDate = backtestDate;

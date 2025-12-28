@@ -146,7 +146,7 @@ public class RuleFormModel
             ValueType = rule.ValueType,
             ConstantValue = rule.ConstantValue,
             SecondIndicatorName = rule.SecondIndicatorName,
-            SecondIndicatorParameters = rule.SecondIndicatorParameters != null
+            SecondIndicatorParameters = rule.SecondIndicatorParameters is not null
                 ? new Dictionary<string, object>(rule.SecondIndicatorParameters)
                 : null,
             LogicalOperator = rule.LogicalOperator

@@ -65,7 +65,7 @@
                         }
 
                         <!-- Reasons -->
-                        @if (Reasons != null && Reasons.Any())
+                        @if (Reasons is not null && Reasons.Any())
                         {
                             <ul class="mt-3 space-y-1 text-sm text-gray-700 dark:text-dark-text-primary">
                                 @foreach (var reason in Reasons.Take(3))

@@ -29,11 +29,11 @@ public class SufficientBacktestDataSpecification : ISpecification<BacktestConfig
     /// </summary>
     /// <param name="candidate">The backtest configuration to validate.</param>
     /// <returns>True if the date range provides sufficient data bars.</returns>
-    public bool IsSatisfiedBy(BacktestConfig candidate)
+    public bool IsSatisfiedBy(BacktestConfig? candidate)
     {
         Reason = string.Empty;
 
-        if (candidate == null)
+        if (candidate is null)
         {
             Reason = "Backtest configuration cannot be null";
             return false;

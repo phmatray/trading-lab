@@ -90,7 +90,7 @@ public partial class StrategyOptimization : IDisposable
 
             selectedStrategy = result.Value;
 
-            if (selectedStrategy == null)
+            if (selectedStrategy is null)
             {
                 return;
             }
@@ -235,7 +235,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task ApplyBestParameters()
     {
-        if (optimizationResult == null || selectedStrategy == null)
+        if (optimizationResult is null || selectedStrategy is null)
         {
             return;
         }
@@ -315,7 +315,15 @@ public partial class StrategyOptimization : IDisposable
             }
         }
 
-        return rule with { IndicatorParameters = updatedParams };
+        return new StrategyRule(
+            rule.IndicatorName,
+            updatedParams,
+            rule.Operator,
+            rule.ValueType,
+            rule.ConstantValue,
+            rule.SecondIndicatorName,
+            rule.SecondIndicatorParameters,
+            rule.LogicalOperator);
     }
 
     private void NavigateToBuilder()
@@ -325,7 +333,7 @@ public partial class StrategyOptimization : IDisposable
 
     private void NavigateToBacktest()
     {
-        if (selectedStrategy != null)
+        if (selectedStrategy is not null)
         {
             NavigationManager.NavigateTo($"/backtest?customStrategyId={selectedStrategy.Id}");
         }
@@ -334,7 +342,7 @@ public partial class StrategyOptimization : IDisposable
     // Quick Actions navigation methods
     private void CreatePortfolioFromStrategy()
     {
-        if (optimizationResult == null || selectedStrategy == null)
+        if (optimizationResult is null || selectedStrategy is null)
         {
             return;
         }
@@ -345,7 +353,7 @@ public partial class StrategyOptimization : IDisposable
 
     private void CompareVariations()
     {
-        if (optimizationResult == null || selectedStrategy == null)
+        if (optimizationResult is null || selectedStrategy is null)
         {
             return;
         }
@@ -356,7 +364,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task SaveAsNewStrategy()
     {
-        if (optimizationResult == null || selectedStrategy == null)
+        if (optimizationResult is null || selectedStrategy is null)
         {
             return;
         }

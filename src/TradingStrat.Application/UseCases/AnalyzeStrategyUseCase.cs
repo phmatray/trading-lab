@@ -123,7 +123,7 @@ Provide your analysis in the specified JSON format with actionable recommendatio
                 Error.BusinessRule("No JSON object found in AI response", "AI_RESPONSE_PARSE_ERROR"));
         }
 
-        if (recommendation == null)
+        if (recommendation is null)
         {
             return Result<StrategyRecommendation>.Failure(
                 Error.BusinessRule("Failed to deserialize AI recommendation", "AI_RESPONSE_PARSE_ERROR"));

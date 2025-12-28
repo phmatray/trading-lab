@@ -36,7 +36,7 @@ public class GetTopStrategiesUseCase : BaseUseCase<int, List<TopStrategyResult>>
                 // Deserialize BacktestResult from JSON
                 BacktestResult? backtestResult = JsonSerializer.Deserialize<BacktestResult>(backtest.ResultsJson);
 
-                if (backtestResult != null)
+                if (backtestResult is not null)
                 {
                     results.Add(new TopStrategyResult(
                         StrategyName: backtest.StrategyName,

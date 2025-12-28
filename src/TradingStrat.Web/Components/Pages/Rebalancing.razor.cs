@@ -60,7 +60,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
         {
             _portfolio = await PortfolioPort.GetPortfolioByIdAsync(PortfolioId);
 
-            if (_portfolio == null)
+            if (_portfolio is null)
             {
                 _errorMessage = "Portfolio not found.";
                 return;
@@ -84,7 +84,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
             _snapshot = snapshotResult.Value;
 
             // Update breadcrumbs with portfolio name
-            if (_portfolio != null)
+            if (_portfolio is not null)
             {
                 _breadcrumbs = new List<Shared.BreadcrumbNav.Breadcrumb>
                 {
@@ -96,7 +96,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
             }
 
             // Initialize form with current positions
-            if (_snapshot != null)
+            if (_snapshot is not null)
             {
                 _formModel.PortfolioId = PortfolioId;
                 _formModel.TargetAllocations = _snapshot.Positions

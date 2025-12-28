@@ -260,7 +260,7 @@ public partial class StrategyBuilder
             _validationErrors.Add($"{ruleName}: Indicator is required");
         }
 
-        if (rule.ValueType == RuleValueType.Constant && rule.ConstantValue == null)
+        if (rule.ValueType == RuleValueType.Constant && rule.ConstantValue is null)
         {
             _validationErrors.Add($"{ruleName}: Constant value is required");
         }

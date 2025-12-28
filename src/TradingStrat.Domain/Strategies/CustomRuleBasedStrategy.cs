@@ -116,7 +116,7 @@ public class CustomRuleBasedStrategy : BaseStrategy
             }
 
             // If rule compares two indicators, pre-calculate the second one
-            if (rule.ValueType == RuleValueType.Indicator && rule.SecondIndicatorName != null)
+            if (rule.ValueType == RuleValueType.Indicator && rule.SecondIndicatorName is not null)
             {
                 string secondKey = GetIndicatorCacheKey(
                     rule.SecondIndicatorName,

@@ -74,7 +74,7 @@ public sealed record BacktestRunSummary(
             try
             {
                 BacktestResult? result = System.Text.Json.JsonSerializer.Deserialize<BacktestResult>(backtestRun.ResultsJson);
-                if (result != null)
+                if (result is not null)
                 {
                     totalReturn = result.Metrics.TotalReturnPercentage;
                     sharpeRatio = result.Metrics.SharpeRatio;

@@ -46,7 +46,7 @@ public class FakeMarketDataAdapter : IMarketDataPort
     {
         HistoricalPrice? latest = _fakeData.OrderByDescending(p => p.DateTime).FirstOrDefault();
 
-        if (latest == null)
+        if (latest is null)
         {
             return Task.FromResult<HistoricalPrice?>(null);
         }

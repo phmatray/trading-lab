@@ -73,7 +73,7 @@
 
         <!-- Results -->
         <div class="lg:col-span-2 space-y-6">
-            @if (Result != null)
+            @if (Result is not null)
             {
                 <!-- Current Price & Prediction -->
                 <div class="card">
@@ -217,7 +217,7 @@
         </div>
     </div>
 
-    @if (Result != null)
+    @if (Result is not null)
     {
         <TradingViewWidget Ticker="@Result.Ticker" />
     }

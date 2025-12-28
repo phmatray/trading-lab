@@ -231,7 +231,7 @@ public class Portfolio : AggregateRoot
     private void ApplyPositionRemoved(PositionRemovedEvent e)
     {
         Position? position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
-        if (position != null)
+        if (position is not null)
         {
             _positions.Remove(position);
         }
@@ -245,7 +245,7 @@ public class Portfolio : AggregateRoot
     private void ApplyPositionQuantityChanged(PositionQuantityChangedEvent e)
     {
         Position? position = _positions.FirstOrDefault(p => p.Ticker == e.Ticker);
-        if (position != null)
+        if (position is not null)
         {
             position.Quantity = e.NewQuantity;
         }

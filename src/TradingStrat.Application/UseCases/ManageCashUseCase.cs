@@ -57,7 +57,7 @@ public class ManageCashUseCase : IManageCashUseCase
     {
         // Verify portfolio exists
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(command.PortfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             return Result<bool>.Failure(
                 Error.NotFound($"Portfolio {command.PortfolioId} not found", ErrorCodes.Portfolio.NotFound));
@@ -99,7 +99,7 @@ public class ManageCashUseCase : IManageCashUseCase
     {
         // Verify portfolio exists
         Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
-        if (portfolio == null)
+        if (portfolio is null)
         {
             return Result<List<PortfolioCashTransaction>>.Failure(
                 Error.NotFound($"Portfolio {portfolioId} not found", ErrorCodes.Portfolio.NotFound));

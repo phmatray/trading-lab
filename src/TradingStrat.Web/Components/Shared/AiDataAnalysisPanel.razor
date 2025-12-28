@@ -1,5 +1,5 @@
 <div class="card mt-6" data-testid="ai-analysis-panel">
-    @if (_analysis == null && !_isAnalyzing)
+    @if (_analysis is null && !_isAnalyzing)
     {
         <!-- Analyze Button -->
         <div class="text-center py-8">
@@ -14,7 +14,7 @@
         <!-- Loading State -->
         <ProgressIndicator IsVisible="true" CurrentMessage="Analyzing market data..." />
     }
-    else if (_analysis != null)
+    else if (_analysis is not null)
     {
         <!-- Analysis Results Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

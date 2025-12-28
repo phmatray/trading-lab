@@ -89,7 +89,7 @@ public class DeleteHistoricalDataUseCase : IDeleteHistoricalDataUseCase
     {
         int recordsDeleted = await _historicalDataPort.DeleteTickerDataAsync(ticker, timeFrame);
 
-        string message = timeFrame != null
+        string message = timeFrame is not null
             ? $"Deleted {recordsDeleted} record(s) for {ticker} ({timeFrame.Unit})."
             : $"Deleted {recordsDeleted} record(s) for {ticker} (all timeframes).";
 

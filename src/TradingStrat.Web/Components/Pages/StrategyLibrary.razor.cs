@@ -186,7 +186,7 @@ public partial class StrategyLibrary
         try
         {
             CustomStrategyResult? original = customStrategies.FirstOrDefault(s => s.Id == strategyId);
-            if (original == null)
+            if (original is null)
             {
                 _ = ShowErrorAsync("Strategy not found");
                 return;
@@ -213,7 +213,7 @@ public partial class StrategyLibrary
     private async Task DeleteStrategy(int strategyId)
     {
         CustomStrategyResult? strategy = customStrategies.FirstOrDefault(s => s.Id == strategyId);
-        if (strategy == null)
+        if (strategy is null)
         {
             return;
         }

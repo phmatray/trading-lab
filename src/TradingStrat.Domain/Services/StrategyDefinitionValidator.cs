@@ -62,7 +62,7 @@ public class StrategyDefinitionValidator
         }
 
         // Validate constant comparisons
-        if (rule.ValueType == RuleValueType.Constant && rule.ConstantValue == null)
+        if (rule.ValueType == RuleValueType.Constant && rule.ConstantValue is null)
         {
             errors.Add($"Rule with constant comparison must provide ConstantValue (Indicator: {rule.IndicatorName})");
         }
@@ -75,14 +75,14 @@ public class StrategyDefinitionValidator
                 errors.Add($"Rule comparing two indicators must provide SecondIndicatorName (Indicator: {rule.IndicatorName})");
             }
 
-            if (rule.SecondIndicatorParameters == null || rule.SecondIndicatorParameters.Count == 0)
+            if (rule.SecondIndicatorParameters is null || rule.SecondIndicatorParameters.Count == 0)
             {
                 errors.Add($"Rule comparing two indicators must provide SecondIndicatorParameters (Indicator: {rule.IndicatorName})");
             }
         }
 
         // Validate indicator parameters
-        if (rule.IndicatorParameters == null || rule.IndicatorParameters.Count == 0)
+        if (rule.IndicatorParameters is null || rule.IndicatorParameters.Count == 0)
         {
             errors.Add($"Rule must provide IndicatorParameters (Indicator: {rule.IndicatorName})");
         }

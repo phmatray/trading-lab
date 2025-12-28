@@ -184,7 +184,7 @@ public class InMemoryHistoricalDataRepository : IHistoricalDataPort
     {
         int deletedCount = 0;
 
-        if (timeFrame == null)
+        if (timeFrame is null)
         {
             // Delete all timeframes for this ticker
             var keysToRemove = _data.Keys

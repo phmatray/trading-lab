@@ -168,7 +168,7 @@ public class AlphaVantageAdapter : IMarketDataPort
             // Find the time series property (varies by interval)
             JsonElement? timeSeries = FindTimeSeriesElement(root);
 
-            if (timeSeries == null)
+            if (timeSeries is null)
             {
                 _logger.LogWarning("No time series data found in Alpha Vantage response");
                 return prices;

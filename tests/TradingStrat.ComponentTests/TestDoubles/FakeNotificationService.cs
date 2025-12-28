@@ -59,7 +59,7 @@ public class FakeNotificationService : NotificationService
             eventName,
             BindingFlags.Instance | BindingFlags.NonPublic);
 
-        if (eventField != null)
+        if (eventField is not null)
         {
             Delegate? eventDelegate = eventField.GetValue(this) as Delegate;
             eventDelegate?.DynamicInvoke(args);
@@ -84,7 +84,7 @@ public class FakeNotificationService : NotificationService
         await Task.Delay(0, cancellationToken); // Simulate async
 
         Notification? notification = _notifications.FirstOrDefault(n => n.Id == notificationId);
-        if (notification != null)
+        if (notification is not null)
         {
             notification.IsRead = true;
 

@@ -53,7 +53,7 @@ public class CustomStrategyQueryUseCase : ICustomStrategyQueryUseCase
     private async Task<Result<CustomStrategyResult>> GetStrategyByIdCoreAsync(int strategyId)
     {
         CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(strategyId);
-        if (strategy == null)
+        if (strategy is null)
         {
             return Result<CustomStrategyResult>.Failure(
                 Error.NotFound($"Strategy with ID {strategyId} not found", ErrorCodes.Strategy.NotFound));

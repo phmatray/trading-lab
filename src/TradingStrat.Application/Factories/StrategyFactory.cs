@@ -213,14 +213,14 @@ public class StrategyFactory : IStrategyFactory
     /// <exception cref="InvalidOperationException">Thrown if the strategy is not found or repository not configured.</exception>
     public async Task<IStrategy> CreateCustomStrategyFromIdAsync(int customStrategyId)
     {
-        if (_customStrategyPort == null)
+        if (_customStrategyPort is null)
         {
             throw new InvalidOperationException(
                 "Cannot create custom strategy from ID: ICustomStrategyPort not configured in factory");
         }
 
         CustomStrategy? strategy = await _customStrategyPort.GetByIdAsync(customStrategyId);
-        if (strategy == null)
+        if (strategy is null)
         {
             throw new InvalidOperationException($"Custom strategy with ID {customStrategyId} not found");
         }

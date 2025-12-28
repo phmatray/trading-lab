@@ -50,17 +50,17 @@ public class DataManagementPage : BasePage
     {
         await TickerInput.FillAsync(ticker);
 
-        if (isin != null)
+        if (isin is not null)
         {
             await ISINInput.FillAsync(isin);
         }
 
-        if (startDate != null)
+        if (startDate is not null)
         {
             await StartDateInput.FillAsync(startDate);
         }
 
-        if (endDate != null)
+        if (endDate is not null)
         {
             await EndDateInput.FillAsync(endDate);
         }

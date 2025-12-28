@@ -159,7 +159,7 @@ public class RunParameterOptimizationUseCase : IParameterOptimizationUseCase
             TimeFrame: timeFrame);
 
         // Wrap progress reporter to include variant label
-        Progress<(int current, int total, int trades)>? wrappedProgress = progress != null
+        Progress<(int current, int total, int trades)>? wrappedProgress = progress is not null
             ? new Progress<(int current, int total, int trades)>(p =>
                 progress.Report(new Ports.Inbound.OptimizationProgress(
                     variantLabel, p.current, p.total, p.trades)))

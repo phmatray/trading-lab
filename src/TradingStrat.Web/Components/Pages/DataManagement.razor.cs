@@ -54,14 +54,14 @@ public partial class DataManagement : ComponentBase, IDisposable
 
         // Restore selected timeframe from localStorage
         string? savedTimeFrame = await FormState.GetFormStateAsync<string>(TIMEFRAME_KEY);
-        if (savedTimeFrame != null && Enum.TryParse<TimeFrameUnit>(savedTimeFrame, out TimeFrameUnit unit))
+        if (savedTimeFrame is not null && Enum.TryParse<TimeFrameUnit>(savedTimeFrame, out TimeFrameUnit unit))
         {
             _selectedTimeFrame = new TimeFrame { Unit = unit };
         }
 
         // Restore single ticker form state
         DataFetchFormModel? savedForm = await FormState.GetFormStateAsync<DataFetchFormModel>(FORM_KEY);
-        if (savedForm != null)
+        if (savedForm is not null)
         {
             _formModel = savedForm;
         }
@@ -73,7 +73,7 @@ public partial class DataManagement : ComponentBase, IDisposable
 
         // Restore bulk fetch form state
         BulkFetchFormModel? savedBulkForm = await FormState.GetFormStateAsync<BulkFetchFormModel>(BULK_FORM_KEY);
-        if (savedBulkForm != null)
+        if (savedBulkForm is not null)
         {
             _bulkFormModel = savedBulkForm;
         }

@@ -45,7 +45,7 @@ public class AiInsightsService
         if (!forceRefresh && await IsCacheValidAsync())
         {
             MarketRegime? cachedRegime = await _localStorage.GetItemAsync<MarketRegime?>(REGIME_CACHE_KEY);
-            if (cachedRegime != null)
+            if (cachedRegime is not null)
             {
                 return cachedRegime;
             }
@@ -90,7 +90,7 @@ public class AiInsightsService
         if (!forceRefresh && await IsCacheValidAsync())
         {
             PortfolioRecommendation? cachedRec = await _localStorage.GetItemAsync<PortfolioRecommendation?>(RECOMMENDATION_CACHE_KEY);
-            if (cachedRec != null)
+            if (cachedRec is not null)
             {
                 return cachedRec;
             }
@@ -143,7 +143,7 @@ public class AiInsightsService
         try
         {
             Domain.Entities.Portfolio? portfolio = await _portfolioPort.GetPortfolioByIdAsync(portfolioId);
-            if (portfolio == null)
+            if (portfolio is null)
             {
                 return new List<string>();
             }
