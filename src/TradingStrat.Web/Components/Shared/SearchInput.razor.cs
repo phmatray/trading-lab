@@ -92,7 +92,7 @@ public partial class SearchInput : ComponentBase, IDisposable
 
     private async Task ClearSearch()
     {
-        _currentValue = string.Empty;
+        _currentValue = null;
 
         // Cancel any pending debounce
         _debounceTimer?.Stop();

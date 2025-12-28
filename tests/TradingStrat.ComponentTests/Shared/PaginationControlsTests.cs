@@ -24,8 +24,9 @@ public class PaginationControlsTests : BunitTestContext
             .Add(p => p.OnPageChanged, EventCallback.Factory.Create<int>(this, _ => { }))
             .Add(p => p.OnPageSizeChanged, EventCallback.Factory.Create<int>(this, _ => { })));
 
-        // Assert
-        cut.Markup.ShouldContain("Page 2 of 10");
+        // Assert - Check for page text (may have whitespace/newlines)
+        string cleanedMarkup = System.Text.RegularExpressions.Regex.Replace(cut.Markup, @"\s+", " ");
+        cleanedMarkup.ShouldContain("Page 2 of 10");
     }
 
     [Fact]
@@ -155,8 +156,9 @@ public class PaginationControlsTests : BunitTestContext
             .Add(p => p.OnPageChanged, EventCallback.Factory.Create<int>(this, _ => { }))
             .Add(p => p.OnPageSizeChanged, EventCallback.Factory.Create<int>(this, _ => { })));
 
-        // Assert
-        cut.Markup.ShouldContain("Page 5 of 10");
+        // Assert - Check for page text (may have whitespace/newlines)
+        string cleanedMarkup = System.Text.RegularExpressions.Regex.Replace(cut.Markup, @"\s+", " ");
+        cleanedMarkup.ShouldContain("Page 5 of 10");
     }
 
     [Fact]

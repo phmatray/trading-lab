@@ -89,6 +89,12 @@
             classes.Add("inline-flex items-center");
         }
 
+        // Disabled state styling
+        if (Disabled || IsLoading)
+        {
+            classes.Add("opacity-50 cursor-not-allowed");
+        }
+
         return string.Join(" ", classes.Where(c => !string.IsNullOrEmpty(c)));
     }
 }

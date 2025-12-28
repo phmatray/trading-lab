@@ -1,9 +1,9 @@
 @if (TotalPages > 0)
 {
     <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6" aria-label="Pagination">
-        <div class="hidden sm:block">
+        <div>
             <p class="text-sm text-gray-700 dark:text-gray-300">
-                Showing page
+                Page
                 <span class="font-medium">@CurrentPage</span>
                 of
                 <span class="font-medium">@TotalPages</span>
@@ -37,8 +37,7 @@
                     Disabled="@(CurrentPage <= 1)"
                     Variant="ButtonVariant.Secondary"
                     Size="ButtonSize.Small"
-                    IconName="chevron-left"
-                    IconPosition="IconPosition.Left"
+                    AriaLabel="Previous page"
                 />
 
                 <Button
@@ -47,8 +46,7 @@
                     Disabled="@(CurrentPage >= TotalPages)"
                     Variant="ButtonVariant.Secondary"
                     Size="ButtonSize.Small"
-                    IconName="chevron-right"
-                    IconPosition="IconPosition.Right"
+                    AriaLabel="Next page"
                 />
             </div>
         </div>

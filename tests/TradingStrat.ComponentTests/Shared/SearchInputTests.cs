@@ -45,8 +45,11 @@ public class SearchInputTests : BunitTestContext
         IRenderedComponent<SearchInput> cut = Render<SearchInput>(parameters => parameters
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, _ => { })));
 
-        // Assert
-        cut.Markup.ShouldContain("magnifying-glass");
+        // Assert - Check for search icon SVG element with search path
+        IElement icon = cut.Find("svg path");
+        icon.ShouldNotBeNull();
+        icon.GetAttribute("d").ShouldNotBeNull(); // Has the path data
+        cut.Markup.ShouldContain("m21 21-5.197-5.197"); // Part of magnifying glass icon path
     }
 
     [Fact]
@@ -102,9 +105,9 @@ public class SearchInputTests : BunitTestContext
             .Add(p => p.ValueChanged, EventCallback.Factory.Create<string?>(this, value => capturedValue = value))
             .Add(p => p.DebounceMs, 100));
 
-        // Act - Type into the input
+        // Act - Type into the input (using Input for @oninput event)
         IElement input = cut.Find("input[type='text']");
-        input.Change("MSFT");
+        input.Input("MSFT");
 
         // Assert - Value should not be captured immediately (debounced)
         capturedValue.ShouldBeNull();
