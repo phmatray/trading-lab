@@ -34,7 +34,7 @@ public enum TimeFrameUnit
     W1 = 10080,
 
     /// <summary>1 month timeframe (approximately 30 days in minutes).</summary>
-    MN1 = 43200
+    Mn1 = 43200
 }
 
 /// <summary>
@@ -57,7 +57,7 @@ public sealed class TimeFrame : ValueObject
     public static readonly TimeFrame H4 = new() { Unit = TimeFrameUnit.H4 };
     public static readonly TimeFrame D1 = new() { Unit = TimeFrameUnit.D1 };
     public static readonly TimeFrame W1 = new() { Unit = TimeFrameUnit.W1 };
-    public static readonly TimeFrame MN1 = new() { Unit = TimeFrameUnit.MN1 };
+    public static readonly TimeFrame Mn1 = new() { Unit = TimeFrameUnit.Mn1 };
 
     /// <summary>
     /// Converts the timeframe to minutes.
@@ -135,16 +135,17 @@ public sealed class TimeFrame : ValueObject
             "H4" => H4,
             "D1" => D1,
             "W1" => W1,
-            "MN1" => MN1,
+            "MN1" => Mn1,
             _ => throw new ArgumentException($"Invalid timeframe: {value}. Valid values are: M1, M5, M15, M30, H1, H4, D1, W1, MN1", nameof(value))
         };
     }
 
     /// <summary>
     /// Returns the string representation of this timeframe (e.g., "M1", "H1", "D1").
+    /// Uses trading platform conventions (MN1 for monthly).
     /// </summary>
     /// <returns>The timeframe code as a string.</returns>
-    public override string ToString() => Unit.ToString();
+    public override string ToString() => Unit == TimeFrameUnit.Mn1 ? "MN1" : Unit.ToString();
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
