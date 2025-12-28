@@ -335,7 +335,7 @@ public class ParameterOptimizerTests
         );
 
         var progressReports = new List<OptimizationProgress>();
-        var progress = new Progress<OptimizationProgress>(p => progressReports.Add(p));
+        var progress = new SynchronousProgress<OptimizationProgress>(p => progressReports.Add(p));
 
         // Act
         await _optimizer.OptimizeGeneticAsync(
@@ -609,4 +609,22 @@ public class ParameterOptimizerTests
     }
 
     #endregion
+}
+
+/// <summary>
+/// Synchronous progress reporter for testing to avoid race conditions with async Progress&lt;T&gt;.
+/// </summary>
+internal sealed class SynchronousProgress<T> : IProgress<T>
+{
+    private readonly Action<T> _handler;
+
+    public SynchronousProgress(Action<T> handler)
+    {
+        _handler = handler ?? throw new ArgumentNullException(nameof(handler));
+    }
+
+    public void Report(T value)
+    {
+        _handler(value);
+    }
 }

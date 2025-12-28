@@ -54,8 +54,8 @@ public class SortableColumnHeaderTests : BunitTestContext
             .Add(p => p.CurrentSortDirection, SortDirection.Ascending)
             .Add(p => p.OnSort, EventCallback.Factory.Create<(SortColumn, SortDirection)>(this, _ => { })));
 
-        // Assert
-        cut.Markup.ShouldContain("chevron-up");
+        // Assert - Check for chevron-up icon SVG path
+        cut.Markup.ShouldContain("m4.5 15.75 7.5-7.5");
     }
 
     [Fact]
@@ -69,8 +69,8 @@ public class SortableColumnHeaderTests : BunitTestContext
             .Add(p => p.CurrentSortDirection, SortDirection.Descending)
             .Add(p => p.OnSort, EventCallback.Factory.Create<(SortColumn, SortDirection)>(this, _ => { })));
 
-        // Assert
-        cut.Markup.ShouldContain("chevron-down");
+        // Assert - Check for chevron-down icon SVG path
+        cut.Markup.ShouldContain("m19.5 8.25-7.5 7.5");
     }
 
     [Fact]

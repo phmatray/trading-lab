@@ -28,7 +28,7 @@ public class MultiSelectTableTests : BunitTestContext
 
         // Assert
         cut.Markup.ShouldContain("No items to display");
-        cut.Markup.ShouldContain("inbox"); // Icon name
+        cut.Markup.ShouldContain("M9 3.75H6.912"); // Part of inbox icon SVG path
     }
 
     [Fact]

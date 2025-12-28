@@ -5,7 +5,7 @@
         disabled="@(Disabled || IsLoading)"
         class="@GetButtonClasses()"
         aria-label="@AriaLabel"
-        @attributes="AdditionalAttributes">
+        @attributes="GetFilteredAttributes()">
 
     @if (IsLoading)
     {
@@ -95,6 +95,23 @@
             classes.Add("opacity-50 cursor-not-allowed");
         }
 
+        // Merge additional classes from AdditionalAttributes if present
+        if (AdditionalAttributes?.TryGetValue("class", out var additionalClass) == true)
+        {
+            classes.Add(additionalClass.ToString() ?? "");
+        }
+
         return string.Join(" ", classes.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    private Dictionary<string, object>? GetFilteredAttributes()
+    {
+        if (AdditionalAttributes == null)
+            return null;
+
+        // Filter out "class" key since we handle it in GetButtonClasses()
+        return AdditionalAttributes
+            .Where(kvp => kvp.Key != "class")
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

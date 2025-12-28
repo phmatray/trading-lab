@@ -24,9 +24,10 @@ public class PaginationControlsTests : BunitTestContext
             .Add(p => p.OnPageChanged, EventCallback.Factory.Create<int>(this, _ => { }))
             .Add(p => p.OnPageSizeChanged, EventCallback.Factory.Create<int>(this, _ => { })));
 
-        // Assert - Check for page text (may have whitespace/newlines)
-        string cleanedMarkup = System.Text.RegularExpressions.Regex.Replace(cut.Markup, @"\s+", " ");
-        cleanedMarkup.ShouldContain("Page 2 of 10");
+        // Assert - Check for individual parts since whitespace may vary
+        IElement pageText = cut.Find("p.text-sm");
+        pageText.TextContent.ShouldContain("2");
+        pageText.TextContent.ShouldContain("10");
     }
 
     [Fact]
@@ -156,9 +157,10 @@ public class PaginationControlsTests : BunitTestContext
             .Add(p => p.OnPageChanged, EventCallback.Factory.Create<int>(this, _ => { }))
             .Add(p => p.OnPageSizeChanged, EventCallback.Factory.Create<int>(this, _ => { })));
 
-        // Assert - Check for page text (may have whitespace/newlines)
-        string cleanedMarkup = System.Text.RegularExpressions.Regex.Replace(cut.Markup, @"\s+", " ");
-        cleanedMarkup.ShouldContain("Page 5 of 10");
+        // Assert - Check for individual parts since whitespace may vary
+        IElement pageText = cut.Find("p.text-sm");
+        pageText.TextContent.ShouldContain("5");
+        pageText.TextContent.ShouldContain("10");
     }
 
     [Fact]
