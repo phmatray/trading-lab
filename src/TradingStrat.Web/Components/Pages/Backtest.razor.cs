@@ -130,12 +130,12 @@ public partial class Backtest
                 StrategyType: model.StrategyType.ToString().ToLowerInvariant(),
                 StrategyName: result.StrategyName,
                 Config: new BacktestConfig(
-                    Ticker: model.Ticker,
-                    StartDate: model.StartDate ?? DateTime.Today.AddYears(-2),
-                    EndDate: model.EndDate ?? DateTime.Today,
-                    InitialCapital: model.InitialCapital,
-                    CommissionPercentage: model.CommissionPercentage,
-                    MinimumCommission: model.MinimumCommission
+                    ticker: model.Ticker,
+                    startDate: model.StartDate ?? DateTime.Today.AddYears(-2),
+                    endDate: model.EndDate ?? DateTime.Today,
+                    initialCapital: model.InitialCapital,
+                    commissionPercentage: model.CommissionPercentage,
+                    minimumCommission: model.MinimumCommission
                 ),
                 Result: result,
                 StrategyParameters: model.StrategyParameters,
@@ -183,12 +183,12 @@ public partial class Backtest
             StrategyName = result.StrategyName,
             StrategyParameters = model.StrategyParameters,
             Config = new BacktestConfig(
-                Ticker: model.Ticker,
-                StartDate: model.StartDate ?? DateTime.Today.AddYears(-2),
-                EndDate: model.EndDate ?? DateTime.Today,
-                InitialCapital: model.InitialCapital,
-                CommissionPercentage: model.CommissionPercentage,
-                MinimumCommission: model.MinimumCommission
+                ticker: model.Ticker,
+                startDate: model.StartDate ?? DateTime.Today.AddYears(-2),
+                endDate: model.EndDate ?? DateTime.Today,
+                initialCapital: model.InitialCapital,
+                commissionPercentage: model.CommissionPercentage,
+                minimumCommission: model.MinimumCommission
             ),
             Result = result
         };
