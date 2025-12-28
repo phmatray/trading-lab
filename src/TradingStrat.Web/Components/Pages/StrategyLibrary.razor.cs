@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using TradingStrat.Application.Commands;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Domain.Common;
@@ -20,9 +19,6 @@ public partial class StrategyLibrary
     [Inject]
     private NotificationService NotificationService { get; set; } = null!;
 
-    [Inject]
-    private IJSRuntime JSRuntime { get; set; } = null!;
-
     private enum StrategyTab
     {
         BuiltIn,
@@ -32,6 +28,11 @@ public partial class StrategyLibrary
     private StrategyTab _activeTab = StrategyTab.BuiltIn;
     private bool _isLoading = false;
     private List<CustomStrategyResult> _customStrategies = [];
+
+    // Delete dialog state
+    private bool _showDeleteDialog = false;
+    private int _strategyToDelete = 0;
+    private string _strategyToDeleteName = string.Empty;
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {
@@ -210,27 +211,27 @@ public partial class StrategyLibrary
         }
     }
 
-    private async Task DeleteStrategy(int strategyId)
+    private void ShowDeleteDialog(int strategyId, string strategyName)
     {
-        CustomStrategyResult? strategy = _customStrategies.FirstOrDefault(s => s.Id == strategyId);
-        if (strategy is null)
-        {
-            return;
-        }
+        _strategyToDelete = strategyId;
+        _strategyToDeleteName = strategyName;
+        _showDeleteDialog = true;
+    }
 
-        bool confirmed = await JSRuntime.InvokeAsync<bool>(
-            "confirm",
-            $"Are you sure you want to delete '{strategy.Name}'? This action cannot be undone."
-        );
+    private void CancelDelete()
+    {
+        _showDeleteDialog = false;
+        _strategyToDelete = 0;
+        _strategyToDeleteName = string.Empty;
+    }
 
-        if (!confirmed)
-        {
-            return;
-        }
+    private async Task ConfirmDelete()
+    {
+        _showDeleteDialog = false;
 
         try
         {
-            Result<bool> deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(strategyId);
+            Result<bool> deleteResult = await CustomStrategyUseCase.DeleteStrategyAsync(_strategyToDelete);
 
             if (deleteResult.IsFailure)
             {
@@ -239,11 +240,16 @@ public partial class StrategyLibrary
             }
 
             await LoadCustomStrategies();
-            _ = ShowSuccessAsync($"Strategy '{strategy.Name}' deleted successfully");
+            _ = ShowSuccessAsync($"Strategy '{_strategyToDeleteName}' deleted successfully");
         }
         catch (Exception ex)
         {
             _ = ShowErrorAsync($"Failed to delete strategy: {ex.Message}");
+        }
+        finally
+        {
+            _strategyToDelete = 0;
+            _strategyToDeleteName = string.Empty;
         }
     }
 

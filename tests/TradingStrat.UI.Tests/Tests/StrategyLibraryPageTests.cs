@@ -174,10 +174,11 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Assert - Should show all action buttons
-        await Page.Locator("button[title='Edit strategy']").ShouldBeVisibleAsync();
-        await Page.Locator("button[title='Clone strategy']").ShouldBeVisibleAsync();
-        await Page.Locator("button[title='Delete strategy']").ShouldBeVisibleAsync();
+        await Page.Locator("button:has-text('Edit')").ShouldBeVisibleAsync();
+        await Page.Locator("button:has-text('Clone')").ShouldBeVisibleAsync();
+        await Page.Locator("button:has-text('Optimize')").ShouldBeVisibleAsync();
         await Page.Locator("button:has-text('Test')").ShouldBeVisibleAsync();
+        await Page.Locator("button:has-text('Delete')").ShouldBeVisibleAsync();
     }
 
     [Fact]
@@ -190,7 +191,7 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Act
-        await Page.Locator("button[title='Edit strategy']").First.ClickAsync();
+        await Page.Locator("button:has-text('Edit')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
 
         // Assert - Should navigate to builder with ID
@@ -227,10 +228,10 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Count strategies before cloning
-        int countBefore = await Page.Locator(".card").CountAsync();
+        int countBefore = await Page.Locator("text=Entry Rules:").CountAsync();
 
         // Act
-        await Page.Locator("button[title='Clone strategy']").First.ClickAsync();
+        await Page.Locator("button:has-text('Clone')").First.ClickAsync();
         await Page.WaitForBlazorAsync();
         await Task.Delay(1000); // Wait for clone operation
 
@@ -238,7 +239,7 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.Locator($"text={originalName} (Copy)").ShouldBeVisibleAsync();
 
         // Should have one more strategy
-        int countAfter = await Page.Locator(".card").CountAsync();
+        int countAfter = await Page.Locator("text=Entry Rules:").CountAsync();
         countAfter.ShouldBe(countBefore + 1);
     }
 
@@ -251,18 +252,21 @@ public class StrategyLibraryPageTests : BaseTest
         await Page!.Locator("button:has-text('My Strategies')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
-        // Setup dialog handler to cancel deletion
-        Page.Dialog += async (_, dialog) =>
-        {
-            dialog.Message.ShouldContain("Are you sure");
-            await dialog.DismissAsync();
-        };
+        // Act - Click delete button
+        await Page.Locator("button:has-text('Delete')").First.ClickAsync();
+        await Page.WaitForBlazorAsync();
 
-        // Act
-        await Page.Locator("button[title='Delete strategy']").First.ClickAsync();
-        await Task.Delay(500); // Wait for dialog
+        // Assert - Dialog should appear with confirmation message
+        await Page.Locator("[role='dialog']").WaitForAsync();
+        await Page.Locator("text=Delete Strategy").ShouldBeVisibleAsync();
+        await Page.Locator("text=Delete Test Strategy").ShouldBeVisibleAsync();
+        await Page.Locator("text=This action cannot be undone").ShouldBeVisibleAsync();
 
-        // Assert - Strategy should still be visible (deletion cancelled)
+        // Cancel deletion
+        await Page.Locator("button:has-text('Cancel')").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Strategy should still be visible (deletion cancelled)
         await Page.Locator("text=Delete Test Strategy").ShouldBeVisibleAsync();
     }
 
@@ -276,15 +280,16 @@ public class StrategyLibraryPageTests : BaseTest
         await Page!.Locator("button:has-text('My Strategies')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
-        // Setup dialog handler to confirm deletion
-        Page.Dialog += async (_, dialog) =>
-        {
-            await dialog.AcceptAsync();
-        };
+        // Act - Click delete button
+        await Page.Locator("button:has-text('Delete')").First.ClickAsync();
+        await Page.WaitForBlazorAsync();
 
-        // Act
-        await Page.Locator("button[title='Delete strategy']").First.ClickAsync();
-        await Task.Delay(1000); // Wait for deletion
+        // Wait for dialog to appear
+        await Page.Locator("[role='dialog']").WaitForAsync();
+
+        // Confirm deletion by clicking Delete button in dialog
+        await Page.Locator("[role='dialog'] button:has-text('Delete')").ClickAsync();
+        await Task.Delay(1000); // Wait for deletion to complete
 
         // Assert - Strategy should be removed
         ILocator strategyCard = Page.Locator($"text={strategyName}");

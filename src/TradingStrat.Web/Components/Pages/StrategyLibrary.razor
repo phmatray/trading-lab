@@ -2,6 +2,9 @@
 @rendermode InteractiveServer
 @using TradingStrat.Web.Components.UI.Typography
 @using TradingStrat.Web.Components.UI.Buttons
+@using TradingStrat.Web.Components.UI.DataDisplay
+@using TradingStrat.Web.Components.UI.Overlays.Dialog
+@using TradingStrat.Web.Components.UI
 
 <PageTitle>Strategy Library | TradingStrat</PageTitle>
 
@@ -13,13 +16,9 @@
     <PageHeader Title="Strategy Library"
                 Description="Browse built-in strategies or create your own custom trading strategies">
         <Actions>
-            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
-                    OnClick="@NavigateToBuilder"
-                    Text="Create Strategy">
-                <LeadingIcon>
-                    <span class="mr-2">+</span>
-                </LeadingIcon>
-            </TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@NavigateToBuilder">
+                <span class="mr-2">+</span> Create Strategy
+            </TradingStrat.Web.Components.UI.Buttons.Button>
         </Actions>
     </PageHeader>
 
@@ -30,13 +29,13 @@
                     class="@GetTabClass(StrategyTab.BuiltIn)"
                     @onclick="() => SetActiveTab(StrategyTab.BuiltIn)">
                 Built-in Strategies
-                <span class="ml-2 badge badge-secondary">5</span>
+                <Badge Color="BadgeColor.Gray" Class="ml-2">5</Badge>
             </button>
             <button type="button"
                     class="@GetTabClass(StrategyTab.Custom)"
                     @onclick="() => SetActiveTab(StrategyTab.Custom)">
                 My Strategies
-                <span class="ml-2 badge badge-secondary">@_customStrategies.Count</span>
+                <Badge Color="BadgeColor.Gray" Class="ml-2">@_customStrategies.Count</Badge>
             </button>
         </nav>
     </div>
@@ -54,21 +53,21 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var strategy in _builtInStrategies)
                 {
-                    <div class="card hover:shadow-lg transition-shadow">
-                        <div class="flex justify-between items-start mb-3">
+                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-6 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+                        <div class="flex justify-between items-start mb-4">
                             <div>
                                 <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white">
                                     @strategy.Name
                                 </Heading>
-                                <span class="badge badge-info mt-1">@strategy.Category</span>
+                                <Badge Color="BadgeColor.Blue" Class="mt-1">@strategy.Category</Badge>
                             </div>
                         </div>
 
-                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-4 min-h-[3rem]">
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-6 min-h-[3rem]">
                             @strategy.Description
                         </TradingStrat.Web.Components.UI.Typography.Text>
 
-                        <div class="space-y-2 mb-4 text-sm">
+                        <div class="space-y-2 mb-6 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-400">Key:</span>
                                 <span class="font-mono text-gray-900 dark:text-white">@strategy.Key</span>
@@ -84,10 +83,9 @@
                             }
                         </div>
 
-                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
-                                FullWidth="@true"
-                                OnClick="@(() => NavigateToBacktest(strategy.Key))"
-                                Text="Run Backtest"></TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@(() => NavigateToBacktest(strategy.Key))" Class="w-full">
+                            Run Backtest
+                        </TradingStrat.Web.Components.UI.Buttons.Button>
                     </div>
                 }
             </div>
@@ -106,13 +104,9 @@
                     <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-600 dark:text-gray-400 mb-6">
                         Create your first custom strategy to get started
                     </TradingStrat.Web.Components.UI.Typography.Text>
-                    <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
-                            OnClick="@NavigateToBuilder"
-                            Text="Create Your First Strategy">
-                        <LeadingIcon>
-                            <span class="mr-2">+</span>
-                        </LeadingIcon>
-                    </TradingStrat.Web.Components.Shared.Button>
+                    <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@NavigateToBuilder">
+                        <span class="mr-2">+</span> Create Your First Strategy
+                    </TradingStrat.Web.Components.UI.Buttons.Button>
                 </div>
             }
             else
@@ -120,13 +114,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach (var strategy in _customStrategies)
                     {
-                        <div class="card hover:shadow-lg transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
+                        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-6 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+                            <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white">
                                         @strategy.Name
                                     </Heading>
-                                    <span class="badge badge-primary mt-1">@strategy.Category</span>
+                                    <Badge Color="BadgeColor.Green" Class="mt-1">@strategy.Category</Badge>
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">
                                     @strategy.LastUpdatedAt.ToString("MMM d, yyyy")
@@ -135,12 +129,12 @@
 
                             @if (!string.IsNullOrWhiteSpace(strategy.Description))
                             {
-                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-4 min-h-[3rem]">
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-6 min-h-[3rem]">
                                     @strategy.Description
                                 </TradingStrat.Web.Components.UI.Typography.Text>
                             }
 
-                            <div class="space-y-2 mb-4 text-sm">
+                            <div class="space-y-2 mb-6 text-sm">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600 dark:text-gray-400">Author:</span>
                                     <span class="text-gray-900 dark:text-white">@strategy.Author</span>
@@ -171,40 +165,44 @@
                                 }
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2">
-                                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
-                                        Size="@ButtonSize.Small"
-                                        OnClick="@(() => NavigateToEdit(strategy.Id))"
-                                        AriaLabel="Edit strategy"
-                                        Text="Edit"></TradingStrat.Web.Components.Shared.Button>
-                                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
-                                        Size="@ButtonSize.Small"
-                                        OnClick="@(() => CloneStrategy(strategy.Id))"
-                                        AriaLabel="Clone strategy"
-                                        Text="Clone"></TradingStrat.Web.Components.Shared.Button>
-                                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Info"
-                                        Size="@ButtonSize.Small"
-                                        OnClick="@(() => NavigateToOptimize(strategy.Id))"
-                                        AriaLabel="Optimize parameters"
-                                        Text="Optimize"></TradingStrat.Web.Components.Shared.Button>
-                                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
-                                        Size="@ButtonSize.Small"
-                                        OnClick="@(() => NavigateToBacktestWithCustom(strategy.Id))"
-                                        AriaLabel="Run backtest"
-                                        Text="Test"></TradingStrat.Web.Components.Shared.Button>
+                            <div class="grid grid-cols-2 gap-3">
+                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@(() => NavigateToEdit(strategy.Id))">
+                                    Edit
+                                </TradingStrat.Web.Components.UI.Buttons.Button>
+                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@(() => CloneStrategy(strategy.Id))">
+                                    Clone
+                                </TradingStrat.Web.Components.UI.Buttons.Button>
+                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Indigo" OnClick="@(() => NavigateToOptimize(strategy.Id))">
+                                    Optimize
+                                </TradingStrat.Web.Components.UI.Buttons.Button>
+                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@(() => NavigateToBacktestWithCustom(strategy.Id))">
+                                    Test
+                                </TradingStrat.Web.Components.UI.Buttons.Button>
                             </div>
 
-                            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Danger"
-                                    Size="@ButtonSize.Small"
-                                    FullWidth="@true"
-                                    OnClick="@(() => DeleteStrategy(strategy.Id))"
-                                    AriaLabel="Delete strategy"
-                                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "mt-2" } })"
-                                    Text="Delete"></TradingStrat.Web.Components.Shared.Button>
+                            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Red" OnClick="@(() => ShowDeleteDialog(strategy.Id, strategy.Name))" Class="w-full mt-3">
+                                Delete
+                            </TradingStrat.Web.Components.UI.Buttons.Button>
                         </div>
                     }
                 </div>
             }
         }
     }
+
+    @* Delete Confirmation Dialog *@
+    <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog IsOpen="_showDeleteDialog" IsOpenChanged="@((isOpen) => _showDeleteDialog = isOpen)" Size="DialogSize.Small">
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogTitle>Delete Strategy</TradingStrat.Web.Components.UI.Overlays.Dialog.DialogTitle>
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogDescription>
+            Are you sure you want to delete '<strong>@_strategyToDeleteName</strong>'? This action cannot be undone.
+        </TradingStrat.Web.Components.UI.Overlays.Dialog.DialogDescription>
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogActions>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@CancelDelete">
+                Cancel
+            </TradingStrat.Web.Components.UI.Buttons.Button>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Red" OnClick="@ConfirmDelete">
+                Delete
+            </TradingStrat.Web.Components.UI.Buttons.Button>
+        </TradingStrat.Web.Components.UI.Overlays.Dialog.DialogActions>
+    </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
 </div>
