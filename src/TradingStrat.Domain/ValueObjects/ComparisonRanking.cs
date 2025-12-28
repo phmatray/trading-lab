@@ -15,15 +15,15 @@ public sealed class ComparisonRanking : ValueObject
     public int WinnerIndex { get; init; }
 
     public ComparisonRanking(
-        decimal VariantAScore,
-        decimal VariantBScore,
-        Dictionary<string, MetricComparison> MetricBreakdown,
-        int WinnerIndex)
+        decimal variantAScore,
+        decimal variantBScore,
+        Dictionary<string, MetricComparison> metricBreakdown,
+        int winnerIndex)
     {
-        this.VariantAScore = VariantAScore;
-        this.VariantBScore = VariantBScore;
-        this.MetricBreakdown = MetricBreakdown;
-        this.WinnerIndex = WinnerIndex;
+        VariantAScore = variantAScore;
+        VariantBScore = variantBScore;
+        MetricBreakdown = metricBreakdown;
+        WinnerIndex = winnerIndex;
     }
 
     /// <summary>
@@ -160,17 +160,17 @@ public sealed class MetricComparison : ValueObject
     public bool HigherIsBetter { get; init; }
 
     public MetricComparison(
-        decimal VariantAValue,
-        decimal VariantBValue,
-        decimal VariantAPoints,
-        decimal VariantBPoints,
-        bool HigherIsBetter)
+        decimal variantAValue,
+        decimal variantBValue,
+        decimal variantAPoints,
+        decimal variantBPoints,
+        bool higherIsBetter)
     {
-        this.VariantAValue = VariantAValue;
-        this.VariantBValue = VariantBValue;
-        this.VariantAPoints = VariantAPoints;
-        this.VariantBPoints = VariantBPoints;
-        this.HigherIsBetter = HigherIsBetter;
+        VariantAValue = variantAValue;
+        VariantBValue = variantBValue;
+        VariantAPoints = variantAPoints;
+        VariantBPoints = variantBPoints;
+        HigherIsBetter = higherIsBetter;
     }
 
     public decimal Difference => VariantAValue - VariantBValue;

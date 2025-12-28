@@ -6,9 +6,9 @@ namespace TradingStrat.Web.Services;
 
 public class NotificationService : IDisposable
 {
-    private const string STORAGE_KEY = "tradingstrat_notifications";
-    private const int MAX_HISTORY_ITEMS = 100;
-    private const int CLEANUP_DAYS = 7;
+    private const string StorageKey = "tradingstrat_notifications";
+    private const int MaxHistoryItems = 100;
+    private const int CleanupDays = 7;
 
     private readonly LocalStorageService _localStorage;
     private NotificationHistory? _cachedHistory;
@@ -240,7 +240,7 @@ public class NotificationService : IDisposable
             return _cachedHistory;
         }
 
-        _cachedHistory = await _localStorage.GetItemAsync<NotificationHistory>(STORAGE_KEY, cancellationToken)
+        _cachedHistory = await _localStorage.GetItemAsync<NotificationHistory>(StorageKey, cancellationToken)
             ?? new NotificationHistory();
 
         return _cachedHistory;
@@ -249,7 +249,7 @@ public class NotificationService : IDisposable
     private async Task SaveHistoryAsync(NotificationHistory history, CancellationToken cancellationToken)
     {
         _cachedHistory = history;
-        await _localStorage.SetItemAsync(STORAGE_KEY, history, cancellationToken);
+        await _localStorage.SetItemAsync(StorageKey, history, cancellationToken);
     }
 
     private Task CleanupIfNeededAsync(NotificationHistory history, CancellationToken cancellationToken)
@@ -262,10 +262,10 @@ public class NotificationService : IDisposable
             return Task.CompletedTask;
         }
 
-        DateTime cutoffDate = now.AddDays(-CLEANUP_DAYS);
+        DateTime cutoffDate = now.AddDays(-CleanupDays);
         history.Notifications = history.Notifications
             .Where(n => n.Timestamp > cutoffDate)
-            .Take(MAX_HISTORY_ITEMS)
+            .Take(MaxHistoryItems)
             .ToList();
 
         history.LastCleanup = now;

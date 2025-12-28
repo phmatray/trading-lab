@@ -41,34 +41,34 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when RSI < 30
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
-                    IndicatorName: "RSI",
-                    IndicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
-                    Operator: ComparisonOperator.LessThan,
-                    ValueType: RuleValueType.Constant,
-                    ConstantValue: 30,
-                    SecondIndicatorName: null,
-                    SecondIndicatorParameters: null,
-                    LogicalOperator: LogicalOperator.None
+                    indicatorName: "RSI",
+                    indicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
+                    @operator: ComparisonOperator.LessThan,
+                    valueType: RuleValueType.Constant,
+                    constantValue: 30,
+                    secondIndicatorName: null,
+                    secondIndicatorParameters: null,
+                    logicalOperator: LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
-                    IndicatorName: "RSI",
-                    IndicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
-                    Operator: ComparisonOperator.GreaterThan,
-                    ValueType: RuleValueType.Constant,
-                    ConstantValue: 70,
-                    SecondIndicatorName: null,
-                    SecondIndicatorParameters: null,
-                    LogicalOperator: LogicalOperator.None
+                    indicatorName: "RSI",
+                    indicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
+                    @operator: ComparisonOperator.GreaterThan,
+                    valueType: RuleValueType.Constant,
+                    constantValue: 70,
+                    secondIndicatorName: null,
+                    secondIndicatorParameters: null,
+                    logicalOperator: LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create declining prices to get low RSI (oversold)
@@ -97,7 +97,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when RSI < 30 AND Price > SMA(20)
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -120,7 +120,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -133,8 +133,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices that satisfy both conditions
@@ -162,7 +162,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when RSI < 30 OR SMA(5) < SMA(20)
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -185,7 +185,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -198,8 +198,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices where SMA(5) < SMA(20) (downtrend) even if RSI is not oversold
@@ -227,7 +227,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when RSI crosses above 30
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -240,7 +240,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -253,8 +253,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices with RSI crossing above 30
@@ -281,7 +281,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Same strategy as above
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -294,7 +294,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -307,8 +307,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices where RSI stays above 30 (no crossover)
@@ -335,7 +335,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when SMA(5) > SMA(20) (simplified - not crossover)
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "SMA",
@@ -348,7 +348,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "SMA",
@@ -361,8 +361,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices in uptrend (fast SMA will be above slow SMA)
@@ -390,7 +390,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange - Strategy: Buy when Price > SMA(20)
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "SMA",
@@ -403,7 +403,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "SMA",
@@ -416,8 +416,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Create prices in uptrend (price above MA)
@@ -491,7 +491,7 @@ public class CustomRuleBasedStrategyTests
     {
         // Arrange
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -504,7 +504,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -517,8 +517,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedQuantity,
-            SizingParameters: new Dictionary<string, decimal> { ["Quantity"] = 50 }
+            sizingMode: PositionSizingMode.FixedQuantity,
+            sizingParameters: new Dictionary<string, decimal> { ["Quantity"] = 50 }
         );
 
         List<HistoricalPrice> prices = HistoricalPriceBuilder.Create()
@@ -591,7 +591,7 @@ public class CustomRuleBasedStrategyTests
     private StrategyDefinition CreateSimpleRSIDefinition()
     {
         return new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -604,7 +604,7 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -617,8 +617,8 @@ public class CustomRuleBasedStrategyTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
     }
 
@@ -641,20 +641,20 @@ public class CustomRuleBasedStrategyTests
             .Returns(rsiValues);
 
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30, null, null, LogicalOperator.And),
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 20, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.1m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.1m }
         );
 
         var strategy = new CustomRuleBasedStrategy(
@@ -695,16 +695,16 @@ public class CustomRuleBasedStrategyTests
             .Returns(rsi21);
 
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30, null, null, LogicalOperator.And),
                 new("RSI", new() { ["Period"] = 21 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>(),
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.1m }
+            exitRules: new List<StrategyRule>(),
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.1m }
         );
 
         var strategy = new CustomRuleBasedStrategy(
@@ -824,7 +824,7 @@ public class CustomRuleBasedStrategyTests
             .Returns(sma50);
 
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("SMA", new() { ["Period"] = 20 },
                     ComparisonOperator.GreaterThan,
@@ -834,9 +834,9 @@ public class CustomRuleBasedStrategyTests
                     new() { ["Period"] = 50 },
                     LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>(),
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.1m }
+            exitRules: new List<StrategyRule>(),
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.1m }
         );
 
         var strategy = new CustomRuleBasedStrategy(
@@ -873,7 +873,7 @@ public class CustomRuleBasedStrategyTests
             .Returns(new decimal[100]);
 
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("SMA", new() { ["Period"] = 10 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 100, null, null, LogicalOperator.And),
@@ -882,9 +882,9 @@ public class CustomRuleBasedStrategyTests
                 new("SMA", new() { ["Period"] = 50 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 100, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>(),
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.1m }
+            exitRules: new List<StrategyRule>(),
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.1m }
         );
 
         var strategy = new CustomRuleBasedStrategy(

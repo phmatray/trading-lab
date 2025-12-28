@@ -22,7 +22,7 @@ public class GetDashboardStatsUseCase : BaseUseCase<Unit, DashboardStatsResult>,
     private readonly IHistoricalDataPort _historicalDataPort;
     private readonly DataCoverageService _dataCoverageService;
 
-    private const int BUILT_IN_STRATEGY_COUNT = 4; // RSI, MACD, MA Crossover, ML FastTree
+    private const int BuiltInStrategyCount = 4; // RSI, MACD, MA Crossover, ML FastTree
 
     public GetDashboardStatsUseCase(
         ICustomStrategyPort customStrategyPort,
@@ -69,7 +69,7 @@ public class GetDashboardStatsUseCase : BaseUseCase<Unit, DashboardStatsResult>,
         List<TickerSummary> tickerSummaries = await tickerSummariesTask;
         DateTime? lastDataUpdate = await lastDataUpdateTask;
 
-        int totalStrategies = BUILT_IN_STRATEGY_COUNT + customStrategies.Count;
+        int totalStrategies = BuiltInStrategyCount + customStrategies.Count;
         int totalPortfolios = portfolios.Count;
         int totalSecurities = allTickers.Count;
 

@@ -100,21 +100,21 @@ public class PortfolioPerformanceService
         Dictionary<string, decimal>? positionBetas = null;
 
         return new PortfolioMetrics(
-            TotalValue: snapshot.TotalValue,
-            TotalCost: snapshot.TotalCost,
-            TotalReturn: snapshot.UnrealizedGainLoss,
-            TotalReturnPercentage: snapshot.UnrealizedGainLossPercentage,
-            DailyReturn: dailyReturn,
-            DailyReturnPercentage: dailyReturnPercentage,
-            NumberOfPositions: numPositions,
-            CashPercentage: cashPercent,
-            LargestPositionPercentage: largestPositionPercent,
-            MostValuablePosition: mostValuablePosition,
-            PortfolioVolatility: volatility,
-            PortfolioSharpeRatio: sharpeRatio,
-            DiversificationRatio: diversificationRatio,
-            AverageCorrelation: averageCorrelation,
-            PositionBetas: positionBetas
+            totalValue: snapshot.TotalValue,
+            totalCost: snapshot.TotalCost,
+            totalReturn: snapshot.UnrealizedGainLoss,
+            totalReturnPercentage: snapshot.UnrealizedGainLossPercentage,
+            dailyReturn: dailyReturn,
+            dailyReturnPercentage: dailyReturnPercentage,
+            numberOfPositions: numPositions,
+            cashPercentage: cashPercent,
+            largestPositionPercentage: largestPositionPercent,
+            mostValuablePosition: mostValuablePosition,
+            portfolioVolatility: volatility,
+            portfolioSharpeRatio: sharpeRatio,
+            diversificationRatio: diversificationRatio,
+            averageCorrelation: averageCorrelation,
+            positionBetas: positionBetas
         );
     }
 

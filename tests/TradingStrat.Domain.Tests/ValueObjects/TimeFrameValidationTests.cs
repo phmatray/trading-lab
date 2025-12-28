@@ -23,12 +23,12 @@ public class TimeFrameValidationTests
     public void TimeFrame_StaticInstances_AreEqual()
     {
         // Arrange & Act
-        TimeFrame d1_1 = TimeFrame.D1;
-        TimeFrame d1_2 = TimeFrame.D1;
+        TimeFrame d11 = TimeFrame.D1;
+        TimeFrame d12 = TimeFrame.D1;
 
         // Assert
-        d1_1.ShouldBe(d1_2);
-        ReferenceEquals(d1_1, d1_2).ShouldBeTrue(); // Flyweight pattern
+        d11.ShouldBe(d12);
+        ReferenceEquals(d11, d12).ShouldBeTrue(); // Flyweight pattern
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class TimeFrameValidationTests
     [InlineData(TimeFrameUnit.H1, "H1")]
     [InlineData(TimeFrameUnit.D1, "D1")]
     [InlineData(TimeFrameUnit.W1, "W1")]
-    [InlineData(TimeFrameUnit.MN1, "MN1")]
+    [InlineData(TimeFrameUnit.Mn1, "MN1")]
     public void TimeFrame_ToString_ReturnsCorrectFormat(TimeFrameUnit unit, string expected)
     {
         // Arrange
@@ -76,7 +76,7 @@ public class TimeFrameValidationTests
     [InlineData("H1", TimeFrameUnit.H1)]
     [InlineData("D1", TimeFrameUnit.D1)]
     [InlineData("W1", TimeFrameUnit.W1)]
-    [InlineData("MN1", TimeFrameUnit.MN1)]
+    [InlineData("MN1", TimeFrameUnit.Mn1)]
     [InlineData("m1", TimeFrameUnit.M1)]  // Case insensitive
     [InlineData("d1", TimeFrameUnit.D1)]  // Case insensitive
     public void TimeFrame_FromString_ParsesCorrectly(string input, TimeFrameUnit expected)
@@ -184,7 +184,7 @@ public class TimeFrameValidationTests
     [Theory]
     [InlineData(TimeFrameUnit.D1, false)]
     [InlineData(TimeFrameUnit.W1, true)]
-    [InlineData(TimeFrameUnit.MN1, true)]
+    [InlineData(TimeFrameUnit.Mn1, true)]
     public void TimeFrame_IsHigherThanDaily_ReturnsCorrectValue(TimeFrameUnit unit, bool expected)
     {
         // Arrange

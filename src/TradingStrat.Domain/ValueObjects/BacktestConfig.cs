@@ -15,40 +15,40 @@ public sealed class BacktestConfig : ValueObject
     public decimal MinimumCommission { get; init; }
 
     public BacktestConfig(
-        string Ticker,
-        DateTime StartDate,
-        DateTime EndDate,
-        decimal InitialCapital,
-        decimal CommissionPercentage,
-        decimal MinimumCommission)
+        string ticker,
+        DateTime startDate,
+        DateTime endDate,
+        decimal initialCapital,
+        decimal commissionPercentage,
+        decimal minimumCommission)
     {
         // Validate ticker
-        ValidationGuard.Require(Ticker).NotNullOrWhiteSpace();
+        ValidationGuard.Require(ticker).NotNullOrWhiteSpace();
 
         // Validate date range
-        if (StartDate >= EndDate)
+        if (startDate >= endDate)
         {
-            throw new ArgumentException("Start date must be before end date", nameof(StartDate));
+            throw new ArgumentException("Start date must be before end date", nameof(startDate));
         }
 
-        if (StartDate > DateTime.Today)
+        if (startDate > DateTime.Today)
         {
-            throw new ArgumentException("Start date cannot be in the future", nameof(StartDate));
+            throw new ArgumentException("Start date cannot be in the future", nameof(startDate));
         }
 
         // Validate initial capital
-        ValidationGuard.Require(InitialCapital).GreaterThan(0m);
+        ValidationGuard.Require(initialCapital).GreaterThan(0m);
 
         // Validate commissions
-        ValidationGuard.Require(CommissionPercentage).GreaterThanOrEqual(0m);
-        ValidationGuard.Require(MinimumCommission).GreaterThanOrEqual(0m);
+        ValidationGuard.Require(commissionPercentage).GreaterThanOrEqual(0m);
+        ValidationGuard.Require(minimumCommission).GreaterThanOrEqual(0m);
 
-        this.Ticker = Ticker;
-        this.StartDate = StartDate;
-        this.EndDate = EndDate;
-        this.InitialCapital = InitialCapital;
-        this.CommissionPercentage = CommissionPercentage;
-        this.MinimumCommission = MinimumCommission;
+        Ticker = ticker;
+        StartDate = startDate;
+        EndDate = endDate;
+        InitialCapital = initialCapital;
+        CommissionPercentage = commissionPercentage;
+        MinimumCommission = minimumCommission;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

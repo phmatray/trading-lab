@@ -14,12 +14,12 @@ public class SufficientBacktestDataSpecificationTests
         // Arrange
         var specification = new SufficientBacktestDataSpecification(minimumBars: 100);
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddDays(-150),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddDays(-150),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Act
@@ -36,12 +36,12 @@ public class SufficientBacktestDataSpecificationTests
         // Arrange
         var specification = new SufficientBacktestDataSpecification(minimumBars: 100);
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddDays(-100),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddDays(-100),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Act
@@ -61,12 +61,12 @@ public class SufficientBacktestDataSpecificationTests
         // Arrange
         var specification = new SufficientBacktestDataSpecification(minimumBars: 100);
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddDays(-50),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddDays(-50),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Act
@@ -93,12 +93,12 @@ public class SufficientBacktestDataSpecificationTests
         // Arrange
         var specification = new SufficientBacktestDataSpecification(minimumBars);
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddDays(-actualDays),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddDays(-actualDays),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Act

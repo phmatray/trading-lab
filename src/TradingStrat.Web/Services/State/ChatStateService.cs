@@ -7,8 +7,8 @@ namespace TradingStrat.Web.Services.State;
 /// </summary>
 public class ChatStateService : StateServiceBase<ChatHistory>
 {
-    private const string STORAGE_KEY = "tradingstrat_chat_history";
-    private const int MAX_MESSAGES = 50;
+    private const string StorageKey = "tradingstrat_chat_history";
+    private const int MaxMessages = 50;
 
     /// <summary>
     /// Event raised when chat history changes. Alias for OnStateChanged.
@@ -20,7 +20,7 @@ public class ChatStateService : StateServiceBase<ChatHistory>
     }
 
     public ChatStateService(LocalStorageService localStorage)
-        : base(localStorage, STORAGE_KEY)
+        : base(localStorage, StorageKey)
     {
     }
 
@@ -48,9 +48,9 @@ public class ChatStateService : StateServiceBase<ChatHistory>
         });
 
         // Enforce message limit
-        if (history.Messages.Count > MAX_MESSAGES)
+        if (history.Messages.Count > MaxMessages)
         {
-            history.Messages.RemoveRange(0, history.Messages.Count - MAX_MESSAGES);
+            history.Messages.RemoveRange(0, history.Messages.Count - MaxMessages);
         }
 
         history.LastUpdated = DateTime.UtcNow;

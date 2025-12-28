@@ -53,23 +53,23 @@ public sealed class RebalancingSignal : ValueObject
     public decimal EstimatedCost { get; init; }
 
     public RebalancingSignal(
-        string Ticker,
-        RebalancingAction Action,
-        int CurrentQuantity,
-        int TargetQuantity,
-        int QuantityDelta,
-        decimal CurrentAllocation,
-        decimal TargetAllocation,
-        decimal EstimatedCost)
+        string ticker,
+        RebalancingAction action,
+        int currentQuantity,
+        int targetQuantity,
+        int quantityDelta,
+        decimal currentAllocation,
+        decimal targetAllocation,
+        decimal estimatedCost)
     {
-        this.Ticker = Ticker;
-        this.Action = Action;
-        this.CurrentQuantity = CurrentQuantity;
-        this.TargetQuantity = TargetQuantity;
-        this.QuantityDelta = QuantityDelta;
-        this.CurrentAllocation = CurrentAllocation;
-        this.TargetAllocation = TargetAllocation;
-        this.EstimatedCost = EstimatedCost;
+        Ticker = ticker;
+        Action = action;
+        CurrentQuantity = currentQuantity;
+        TargetQuantity = targetQuantity;
+        QuantityDelta = quantityDelta;
+        CurrentAllocation = currentAllocation;
+        TargetAllocation = targetAllocation;
+        EstimatedCost = estimatedCost;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -109,19 +109,19 @@ public sealed class RebalancingPlan : ValueObject
     public bool IsExecutable { get; init; }
 
     public RebalancingPlan(
-        int PortfolioId,
-        DateTime CalculationDate,
-        List<RebalancingSignal> Signals,
-        decimal RequiredCash,
-        decimal AvailableCash,
-        bool IsExecutable)
+        int portfolioId,
+        DateTime calculationDate,
+        List<RebalancingSignal> signals,
+        decimal requiredCash,
+        decimal availableCash,
+        bool isExecutable)
     {
-        this.PortfolioId = PortfolioId;
-        this.CalculationDate = CalculationDate;
-        this.Signals = Signals;
-        this.RequiredCash = RequiredCash;
-        this.AvailableCash = AvailableCash;
-        this.IsExecutable = IsExecutable;
+        PortfolioId = portfolioId;
+        CalculationDate = calculationDate;
+        Signals = signals;
+        RequiredCash = requiredCash;
+        AvailableCash = availableCash;
+        IsExecutable = isExecutable;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

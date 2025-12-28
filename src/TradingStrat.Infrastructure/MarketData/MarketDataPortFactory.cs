@@ -50,7 +50,7 @@ public class MarketDataPortFactory
             // Daily and higher timeframes → Yahoo Finance
             TimeFrameUnit.D1 or
             TimeFrameUnit.W1 or
-            TimeFrameUnit.MN1 => GetYahooFinanceAdapter(),
+            TimeFrameUnit.Mn1 => GetYahooFinanceAdapter(),
 
             _ => throw new NotSupportedException($"Unsupported timeframe: {timeFrame}")
         };

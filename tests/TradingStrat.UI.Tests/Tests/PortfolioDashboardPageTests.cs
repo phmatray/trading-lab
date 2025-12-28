@@ -98,10 +98,10 @@ public class PortfolioDashboardPageTests : BaseTest
         // Act
         await page.NavigateAsync();
         await page.WaitForLoadingToCompleteAsync();
-        bool hasMSFT = await page.HasPositionAsync("MSFT");
+        bool hasMsft = await page.HasPositionAsync("MSFT");
 
         // Assert
-        hasMSFT.ShouldBeTrue("Tech Growth Portfolio should have MSFT position");
+        hasMsft.ShouldBeTrue("Tech Growth Portfolio should have MSFT position");
     }
 
     [Fact]
@@ -113,10 +113,10 @@ public class PortfolioDashboardPageTests : BaseTest
         // Act
         await page.NavigateAsync();
         await page.WaitForLoadingToCompleteAsync();
-        bool hasAAPL = await page.HasPositionAsync("AAPL");
+        bool hasAapl = await page.HasPositionAsync("AAPL");
 
         // Assert
-        hasAAPL.ShouldBeTrue("Tech Growth Portfolio should have AAPL position");
+        hasAapl.ShouldBeTrue("Tech Growth Portfolio should have AAPL position");
     }
 
     [Fact]

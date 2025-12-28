@@ -16,21 +16,21 @@ public sealed class OptimizationIteration : ValueObject
     public int TradeCount { get; init; }
 
     public OptimizationIteration(
-        int IterationNumber,
-        Dictionary<string, decimal> Parameters,
-        decimal Score,
-        decimal TotalReturn,
-        decimal SharpeRatio,
-        decimal MaxDrawdown,
-        int TradeCount)
+        int iterationNumber,
+        Dictionary<string, decimal> parameters,
+        decimal score,
+        decimal totalReturn,
+        decimal sharpeRatio,
+        decimal maxDrawdown,
+        int tradeCount)
     {
-        this.IterationNumber = IterationNumber;
-        this.Parameters = Parameters;
-        this.Score = Score;
-        this.TotalReturn = TotalReturn;
-        this.SharpeRatio = SharpeRatio;
-        this.MaxDrawdown = MaxDrawdown;
-        this.TradeCount = TradeCount;
+        IterationNumber = iterationNumber;
+        Parameters = parameters;
+        Score = score;
+        TotalReturn = totalReturn;
+        SharpeRatio = sharpeRatio;
+        MaxDrawdown = maxDrawdown;
+        TradeCount = tradeCount;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -62,19 +62,19 @@ public sealed class OptimizationResult : ValueObject
     public OptimizationObjective Objective { get; init; }
 
     public OptimizationResult(
-        Dictionary<string, decimal> BestParameters,
-        decimal BestScore,
-        List<OptimizationIteration> AllIterations,
-        TimeSpan Duration,
-        int TotalIterations,
-        OptimizationObjective Objective)
+        Dictionary<string, decimal> bestParameters,
+        decimal bestScore,
+        List<OptimizationIteration> allIterations,
+        TimeSpan duration,
+        int totalIterations,
+        OptimizationObjective objective)
     {
-        this.BestParameters = BestParameters;
-        this.BestScore = BestScore;
-        this.AllIterations = AllIterations;
-        this.Duration = Duration;
-        this.TotalIterations = TotalIterations;
-        this.Objective = Objective;
+        BestParameters = bestParameters;
+        BestScore = bestScore;
+        AllIterations = allIterations;
+        Duration = duration;
+        TotalIterations = totalIterations;
+        Objective = objective;
     }
 
     /// <summary>
@@ -143,13 +143,13 @@ public sealed class ParameterRange : ValueObject
     public decimal Step { get; init; }
 
     public ParameterRange(
-        decimal Min,
-        decimal Max,
-        decimal Step)
+        decimal min,
+        decimal max,
+        decimal step)
     {
-        this.Min = Min;
-        this.Max = Max;
-        this.Step = Step;
+        Min = min;
+        Max = max;
+        Step = step;
     }
 
     /// <summary>
@@ -196,19 +196,19 @@ public sealed class OptimizationProgress : ValueObject
     public string Message { get; init; }
 
     public OptimizationProgress(
-        int Current,
-        int Total,
-        int IterationsCompleted,
-        decimal? CurrentBestScore,
-        Dictionary<string, decimal>? CurrentBestParameters,
-        string Message)
+        int current,
+        int total,
+        int iterationsCompleted,
+        decimal? currentBestScore,
+        Dictionary<string, decimal>? currentBestParameters,
+        string message)
     {
-        this.Current = Current;
-        this.Total = Total;
-        this.IterationsCompleted = IterationsCompleted;
-        this.CurrentBestScore = CurrentBestScore;
-        this.CurrentBestParameters = CurrentBestParameters;
-        this.Message = Message;
+        Current = current;
+        Total = total;
+        IterationsCompleted = iterationsCompleted;
+        CurrentBestScore = currentBestScore;
+        CurrentBestParameters = currentBestParameters;
+        Message = message;
     }
 
     /// <summary>
@@ -246,17 +246,17 @@ public sealed class GeneticAlgorithmConfig : ValueObject
     public decimal CrossoverRate { get; init; }
 
     public GeneticAlgorithmConfig(
-        int PopulationSize = 50,
-        int Generations = 100,
-        decimal MutationRate = 0.1m,
-        int EliteCount = 5,
-        decimal CrossoverRate = 0.8m)
+        int populationSize = 50,
+        int generations = 100,
+        decimal mutationRate = 0.1m,
+        int eliteCount = 5,
+        decimal crossoverRate = 0.8m)
     {
-        this.PopulationSize = PopulationSize;
-        this.Generations = Generations;
-        this.MutationRate = MutationRate;
-        this.EliteCount = EliteCount;
-        this.CrossoverRate = CrossoverRate;
+        PopulationSize = populationSize;
+        Generations = generations;
+        MutationRate = mutationRate;
+        EliteCount = eliteCount;
+        CrossoverRate = crossoverRate;
     }
 
     /// <summary>

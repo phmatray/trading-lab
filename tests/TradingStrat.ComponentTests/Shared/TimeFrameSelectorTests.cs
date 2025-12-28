@@ -66,7 +66,7 @@ public class TimeFrameSelectorTests : BunitTestContext
     {
         // Arrange & Act
         IRenderedComponent<TimeFrameSelector> cut = Render<TimeFrameSelector>(parameters => parameters
-            .Add(p => p.AvailableTimeFrames, new[] { TimeFrameUnit.D1, TimeFrameUnit.W1, TimeFrameUnit.MN1 })
+            .Add(p => p.AvailableTimeFrames, new[] { TimeFrameUnit.D1, TimeFrameUnit.W1, TimeFrameUnit.Mn1 })
             .Add(p => p.OnTimeFrameChanged, EventCallback.Factory.Create<TimeFrame>(this, _ => { })));
 
         // Assert

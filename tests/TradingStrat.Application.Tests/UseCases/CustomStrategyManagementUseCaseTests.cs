@@ -69,8 +69,8 @@ public class CustomStrategyManagementUseCaseTests
     {
         // Arrange - Definition with no entry rules (invalid)
         StrategyDefinition invalidDefinition = new(
-            EntryRules: new List<StrategyRule>(), // Empty!
-            ExitRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>(), // Empty!
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -83,8 +83,8 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         CreateCustomStrategyCommand command = new(
@@ -123,7 +123,7 @@ public class CustomStrategyManagementUseCaseTests
 
         // Modify the definition
         StrategyDefinition modifiedDefinition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -136,9 +136,9 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: created.Value.Definition.ExitRules,
-            SizingMode: created.Value.Definition.SizingMode,
-            SizingParameters: created.Value.Definition.SizingParameters
+            exitRules: created.Value.Definition.ExitRules,
+            sizingMode: created.Value.Definition.SizingMode,
+            sizingParameters: created.Value.Definition.SizingParameters
         );
 
         UpdateCustomStrategyCommand updateCommand = new(
@@ -325,8 +325,8 @@ public class CustomStrategyManagementUseCaseTests
     {
         // Arrange
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>(), // Empty
-            ExitRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>(), // Empty
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -339,8 +339,8 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -356,7 +356,7 @@ public class CustomStrategyManagementUseCaseTests
     {
         // Arrange
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -369,9 +369,9 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>(), // Empty
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            exitRules: new List<StrategyRule>(), // Empty
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -387,7 +387,7 @@ public class CustomStrategyManagementUseCaseTests
     {
         // Arrange - Rule with constant comparison but no value
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -400,7 +400,7 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -413,8 +413,8 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -430,7 +430,7 @@ public class CustomStrategyManagementUseCaseTests
     {
         // Arrange - Missing required parameter for sizing mode
         StrategyDefinition definition = new(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -443,7 +443,7 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -456,8 +456,8 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal>() // Missing "Percentage"!
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal>() // Missing "Percentage"!
         );
 
         // Act
@@ -473,7 +473,7 @@ public class CustomStrategyManagementUseCaseTests
     private StrategyDefinition CreateValidRSIDefinition()
     {
         return new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -486,7 +486,7 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
                     "RSI",
@@ -499,8 +499,8 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 0.95m }
         );
     }
 

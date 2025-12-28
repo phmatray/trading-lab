@@ -22,15 +22,15 @@ public sealed class StrategyDefinition : ValueObject
     public Dictionary<string, decimal> SizingParameters { get; init; }
 
     public StrategyDefinition(
-        List<StrategyRule> EntryRules,
-        List<StrategyRule> ExitRules,
-        PositionSizingMode SizingMode,
-        Dictionary<string, decimal> SizingParameters)
+        List<StrategyRule> entryRules,
+        List<StrategyRule> exitRules,
+        PositionSizingMode sizingMode,
+        Dictionary<string, decimal> sizingParameters)
     {
-        this.EntryRules = EntryRules;
-        this.ExitRules = ExitRules;
-        this.SizingMode = SizingMode;
-        this.SizingParameters = SizingParameters;
+        EntryRules = entryRules;
+        ExitRules = exitRules;
+        SizingMode = sizingMode;
+        SizingParameters = sizingParameters;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -84,23 +84,23 @@ public sealed class StrategyRule : ValueObject
     public LogicalOperator LogicalOperator { get; init; }
 
     public StrategyRule(
-        string IndicatorName,
-        Dictionary<string, object> IndicatorParameters,
-        ComparisonOperator Operator,
-        RuleValueType ValueType,
-        decimal? ConstantValue,
-        string? SecondIndicatorName,
-        Dictionary<string, object>? SecondIndicatorParameters,
-        LogicalOperator LogicalOperator)
+        string indicatorName,
+        Dictionary<string, object> indicatorParameters,
+        ComparisonOperator @operator,
+        RuleValueType valueType,
+        decimal? constantValue,
+        string? secondIndicatorName,
+        Dictionary<string, object>? secondIndicatorParameters,
+        LogicalOperator logicalOperator)
     {
-        this.IndicatorName = IndicatorName;
-        this.IndicatorParameters = IndicatorParameters;
-        this.Operator = Operator;
-        this.ValueType = ValueType;
-        this.ConstantValue = ConstantValue;
-        this.SecondIndicatorName = SecondIndicatorName;
-        this.SecondIndicatorParameters = SecondIndicatorParameters;
-        this.LogicalOperator = LogicalOperator;
+        IndicatorName = indicatorName;
+        IndicatorParameters = indicatorParameters;
+        Operator = @operator;
+        ValueType = valueType;
+        ConstantValue = constantValue;
+        SecondIndicatorName = secondIndicatorName;
+        SecondIndicatorParameters = secondIndicatorParameters;
+        LogicalOperator = logicalOperator;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

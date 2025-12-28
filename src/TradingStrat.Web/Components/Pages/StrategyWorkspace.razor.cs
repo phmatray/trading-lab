@@ -7,8 +7,8 @@ namespace TradingStrat.Web.Components.Pages;
 
 public partial class StrategyWorkspace : ComponentBase, IDisposable
 {
-    [Inject] private WorkspaceStateService _workspaceState { get; set; } = null!;
-    [Inject] private ProgressService _progressService { get; set; } = null!;
+    [Inject] private WorkspaceStateService WorkspaceState { get; set; } = null!;
+    [Inject] private ProgressService ProgressService { get; set; } = null!;
 
     private int _activeTab;
     private string _progressMessage = string.Empty;
@@ -21,15 +21,15 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
 
     protected override void OnInitialized()
     {
-        _activeTab = _workspaceState.State.ActiveTab;
-        _workspaceState.StateChanged += OnWorkspaceStateChanged;
-        _progressService.OnProgressChanged += OnProgressChanged;
+        _activeTab = WorkspaceState.State.ActiveTab;
+        WorkspaceState.StateChanged += OnWorkspaceStateChanged;
+        ProgressService.OnProgressChanged += OnProgressChanged;
     }
 
     private void SetActiveTab(int tabIndex)
     {
         _activeTab = tabIndex;
-        _workspaceState.SetActiveTab(tabIndex);
+        WorkspaceState.SetActiveTab(tabIndex);
     }
 
     private string GetTabClass(int tabIndex)
@@ -56,16 +56,16 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
     {
         return tabIndex switch
         {
-            1 => _workspaceState.State.CurrentStrategy is null, // Test requires strategy
-            2 => _workspaceState.State.CurrentStrategy is null, // Optimize requires strategy
-            3 => _workspaceState.State.TestResult is null,      // Deploy requires test results
+            1 => WorkspaceState.State.CurrentStrategy is null, // Test requires strategy
+            2 => WorkspaceState.State.CurrentStrategy is null, // Optimize requires strategy
+            3 => WorkspaceState.State.TestResult is null,      // Deploy requires test results
             _ => false
         };
     }
 
     private void HandleStrategyCreated(CustomStrategy strategy)
     {
-        _workspaceState.SetCurrentStrategy(strategy);
+        WorkspaceState.SetCurrentStrategy(strategy);
 
         // Auto-advance to Test tab
         SetActiveTab(1);
@@ -75,19 +75,19 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
 
     private void HandleTestComplete(BacktestResult result)
     {
-        _workspaceState.SetTestResult(result);
+        WorkspaceState.SetTestResult(result);
         StateHasChanged();
     }
 
     private void HandleOptimizationComplete(WorkspaceOptimizationResult result)
     {
-        _workspaceState.SetOptimizationResult(result);
+        WorkspaceState.SetOptimizationResult(result);
         StateHasChanged();
     }
 
     private void ClearWorkspace()
     {
-        _workspaceState.Clear();
+        WorkspaceState.Clear();
         _activeTab = 0;
         StateHasChanged();
     }
@@ -99,13 +99,13 @@ public partial class StrategyWorkspace : ComponentBase, IDisposable
 
     private void OnProgressChanged()
     {
-        _progressMessage = _progressService.CurrentMessage;
+        _progressMessage = ProgressService.CurrentMessage;
         InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        _workspaceState.StateChanged -= OnWorkspaceStateChanged;
-        _progressService.OnProgressChanged -= OnProgressChanged;
+        WorkspaceState.StateChanged -= OnWorkspaceStateChanged;
+        ProgressService.OnProgressChanged -= OnProgressChanged;
     }
 }

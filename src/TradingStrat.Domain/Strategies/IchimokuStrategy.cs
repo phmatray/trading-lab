@@ -193,21 +193,21 @@ public class IchimokuStrategy : BaseStrategy
         TrendState weeklyTrend = _weeklyTrendByDailyBar[currentIndex];
 
         return new IchimokuSignals(
-            Price: price,
-            ConversionLine: conversionLine,
-            BaseLine: baseLine,
-            LeadingSpanA: leadingSpanA,
-            LeadingSpanB: leadingSpanB,
-            LaggingSpan: laggingSpan,
-            PriceAtLaggingSpanPosition: priceAtLaggingSpanPosition,
-            KumoTop: kumoTop,
-            KumoBottom: kumoBottom,
-            PriceAboveKumo: price > kumoTop,
-            PriceBelowKumo: price < kumoBottom,
-            PriceInKumo: price >= kumoBottom && price <= kumoTop,
-            ConversionLineAboveBaseLine: conversionLine > baseLine,
-            LaggingSpanAbovePriceHistory: laggingSpan > priceAtLaggingSpanPosition,
-            WeeklyTrend: weeklyTrend
+            price: price,
+            conversionLine: conversionLine,
+            baseLine: baseLine,
+            leadingSpanA: leadingSpanA,
+            leadingSpanB: leadingSpanB,
+            laggingSpan: laggingSpan,
+            priceAtLaggingSpanPosition: priceAtLaggingSpanPosition,
+            kumoTop: kumoTop,
+            kumoBottom: kumoBottom,
+            priceAboveKumo: price > kumoTop,
+            priceBelowKumo: price < kumoBottom,
+            priceInKumo: price >= kumoBottom && price <= kumoTop,
+            conversionLineAboveBaseLine: conversionLine > baseLine,
+            laggingSpanAbovePriceHistory: laggingSpan > priceAtLaggingSpanPosition,
+            weeklyTrend: weeklyTrend
         );
     }
 

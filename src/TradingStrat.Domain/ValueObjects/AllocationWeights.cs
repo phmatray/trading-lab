@@ -17,25 +17,25 @@ public class AllocationWeights : ValueObject
     /// </summary>
     public decimal CashPercentage { get; init; }
 
-    public AllocationWeights(Dictionary<string, decimal> TargetPercentages, decimal CashPercentage)
+    public AllocationWeights(Dictionary<string, decimal> targetPercentages, decimal cashPercentage)
     {
         // Validate dictionary is not null
-        ValidationGuard.Require(TargetPercentages).NotNull();
+        ValidationGuard.Require(targetPercentages).NotNull();
 
         // Validate cash percentage is non-negative
-        ValidationGuard.Require(CashPercentage).GreaterThanOrEqual(0m);
+        ValidationGuard.Require(cashPercentage).GreaterThanOrEqual(0m);
 
         // Validate all target percentages are non-negative
-        foreach (KeyValuePair<string, decimal> kvp in TargetPercentages)
+        foreach (KeyValuePair<string, decimal> kvp in targetPercentages)
         {
             if (kvp.Value < 0)
             {
-                throw new ArgumentException($"Target percentage for {kvp.Key} cannot be negative: {kvp.Value}%", nameof(TargetPercentages));
+                throw new ArgumentException($"Target percentage for {kvp.Key} cannot be negative: {kvp.Value}%", nameof(targetPercentages));
             }
         }
 
-        this.TargetPercentages = TargetPercentages;
-        this.CashPercentage = CashPercentage;
+        TargetPercentages = targetPercentages;
+        CashPercentage = cashPercentage;
     }
 
     /// <summary>

@@ -35,15 +35,15 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Cash Only",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 10000m,
-            TotalCost: 10000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Cash Only",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 10000m,
+            totalCost: 10000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         // Act
@@ -70,18 +70,18 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Single Asset",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Single Asset",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 23.08m)
             },
-            TotalValue: 6500m,
-            TotalCost: 6000m,
-            UnrealizedGainLoss: 500m,
-            UnrealizedGainLossPercentage: 8.33m
+            totalValue: 6500m,
+            totalCost: 6000m,
+            unrealizedGainLoss: 500m,
+            unrealizedGainLossPercentage: 8.33m
         );
 
         // Act
@@ -107,20 +107,20 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Diversified",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Diversified",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 6.67m),
                 new PositionSnapshot("MSFT", 20, 200m, 250m, 5000m, 4000m, 1000m, 25m, 22.22m),
                 new PositionSnapshot("GOOGL", 5, 1000m, 1200m, 6000m, 5000m, 1000m, 20m, 26.67m)
             },
-            TotalValue: 22500m,
-            TotalCost: 20000m,
-            UnrealizedGainLoss: 2500m,
-            UnrealizedGainLossPercentage: 12.5m
+            totalValue: 22500m,
+            totalCost: 20000m,
+            unrealizedGainLoss: 2500m,
+            unrealizedGainLossPercentage: 12.5m
         );
 
         // Act
@@ -142,21 +142,21 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Balanced",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 0m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Balanced",
+            snapshotDate: DateTime.UtcNow,
+            cash: 0m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 100m, 1000m, 1000m, 0m, 0m, 25m),
                 new PositionSnapshot("MSFT", 10, 100m, 100m, 1000m, 1000m, 0m, 0m, 25m),
                 new PositionSnapshot("GOOGL", 10, 100m, 100m, 1000m, 1000m, 0m, 0m, 25m),
                 new PositionSnapshot("AMZN", 10, 100m, 100m, 1000m, 1000m, 0m, 0m, 25m)
             },
-            TotalValue: 4000m,
-            TotalCost: 4000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            totalValue: 4000m,
+            totalCost: 4000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         // Act
@@ -173,20 +173,20 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Concentrated",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 0m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Concentrated",
+            snapshotDate: DateTime.UtcNow,
+            cash: 0m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 100, 100m, 100m, 10000m, 10000m, 0m, 0m, 90m),
                 new PositionSnapshot("MSFT", 10, 100m, 100m, 1000m, 1000m, 0m, 0m, 9m),
                 new PositionSnapshot("GOOGL", 1, 100m, 100m, 111m, 111m, 0m, 0m, 1m)
             },
-            TotalValue: 11111m,
-            TotalCost: 11111m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            totalValue: 11111m,
+            totalCost: 11111m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         // Act
@@ -336,19 +336,19 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Multi-Asset",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Multi-Asset",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 20m),
                 new PositionSnapshot("MSFT", 5, 200m, 250m, 1250m, 1000m, 250m, 25m, 16.67m)
             },
-            TotalValue: 7750m,
-            TotalCost: 7000m,
-            UnrealizedGainLoss: 750m,
-            UnrealizedGainLossPercentage: 10.71m
+            totalValue: 7750m,
+            totalCost: 7000m,
+            unrealizedGainLoss: 750m,
+            unrealizedGainLossPercentage: 10.71m
         );
 
         // Act
@@ -370,15 +370,15 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Empty Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 0m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 0m,
-            TotalCost: 0m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Empty Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 0m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 0m,
+            totalCost: 0m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         // Act
@@ -397,18 +397,18 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Winning Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Winning Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 200m, 2000m, 1000m, 1000m, 100m, 28.57m)
             },
-            TotalValue: 7000m,
-            TotalCost: 6000m,
-            UnrealizedGainLoss: 1000m,
-            UnrealizedGainLossPercentage: 16.67m
+            totalValue: 7000m,
+            totalCost: 6000m,
+            unrealizedGainLoss: 1000m,
+            unrealizedGainLossPercentage: 16.67m
         );
 
         // Act
@@ -424,18 +424,18 @@ public class PortfolioPerformanceServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Losing Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Losing Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 200m, 100m, 1000m, 2000m, -1000m, -50m, 16.67m)
             },
-            TotalValue: 6000m,
-            TotalCost: 7000m,
-            UnrealizedGainLoss: -1000m,
-            UnrealizedGainLossPercentage: -14.29m
+            totalValue: 6000m,
+            totalCost: 7000m,
+            unrealizedGainLoss: -1000m,
+            unrealizedGainLossPercentage: -14.29m
         );
 
         // Act
@@ -489,15 +489,15 @@ public class PortfolioPerformanceServiceTests
     private static PortfolioSnapshot CreateSimpleSnapshot()
     {
         return new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 10000m,
-            TotalCost: 10000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 10000m,
+            totalCost: 10000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
     }
 

@@ -25,37 +25,37 @@ internal sealed class IchimokuSignals : ValueObject
     public TrendState WeeklyTrend { get; init; }
 
     public IchimokuSignals(
-        decimal Price,
-        decimal ConversionLine,
-        decimal BaseLine,
-        decimal LeadingSpanA,
-        decimal LeadingSpanB,
-        decimal LaggingSpan,
-        decimal PriceAtLaggingSpanPosition,
-        decimal KumoTop,
-        decimal KumoBottom,
-        bool PriceAboveKumo,
-        bool PriceBelowKumo,
-        bool PriceInKumo,
-        bool ConversionLineAboveBaseLine,
-        bool LaggingSpanAbovePriceHistory,
-        TrendState WeeklyTrend)
+        decimal price,
+        decimal conversionLine,
+        decimal baseLine,
+        decimal leadingSpanA,
+        decimal leadingSpanB,
+        decimal laggingSpan,
+        decimal priceAtLaggingSpanPosition,
+        decimal kumoTop,
+        decimal kumoBottom,
+        bool priceAboveKumo,
+        bool priceBelowKumo,
+        bool priceInKumo,
+        bool conversionLineAboveBaseLine,
+        bool laggingSpanAbovePriceHistory,
+        TrendState weeklyTrend)
     {
-        this.Price = Price;
-        this.ConversionLine = ConversionLine;
-        this.BaseLine = BaseLine;
-        this.LeadingSpanA = LeadingSpanA;
-        this.LeadingSpanB = LeadingSpanB;
-        this.LaggingSpan = LaggingSpan;
-        this.PriceAtLaggingSpanPosition = PriceAtLaggingSpanPosition;
-        this.KumoTop = KumoTop;
-        this.KumoBottom = KumoBottom;
-        this.PriceAboveKumo = PriceAboveKumo;
-        this.PriceBelowKumo = PriceBelowKumo;
-        this.PriceInKumo = PriceInKumo;
-        this.ConversionLineAboveBaseLine = ConversionLineAboveBaseLine;
-        this.LaggingSpanAbovePriceHistory = LaggingSpanAbovePriceHistory;
-        this.WeeklyTrend = WeeklyTrend;
+        Price = price;
+        ConversionLine = conversionLine;
+        BaseLine = baseLine;
+        LeadingSpanA = leadingSpanA;
+        LeadingSpanB = leadingSpanB;
+        LaggingSpan = laggingSpan;
+        PriceAtLaggingSpanPosition = priceAtLaggingSpanPosition;
+        KumoTop = kumoTop;
+        KumoBottom = kumoBottom;
+        PriceAboveKumo = priceAboveKumo;
+        PriceBelowKumo = priceBelowKumo;
+        PriceInKumo = priceInKumo;
+        ConversionLineAboveBaseLine = conversionLineAboveBaseLine;
+        LaggingSpanAbovePriceHistory = laggingSpanAbovePriceHistory;
+        WeeklyTrend = weeklyTrend;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

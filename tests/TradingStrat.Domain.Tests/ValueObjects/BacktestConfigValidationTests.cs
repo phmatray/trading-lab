@@ -16,12 +16,12 @@ public class BacktestConfigValidationTests
 
         // Act
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: start,
-            EndDate: end,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: start,
+            endDate: end,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Assert
@@ -38,12 +38,12 @@ public class BacktestConfigValidationTests
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: start,
-            EndDate: end,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: start,
+            endDate: end,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -55,12 +55,12 @@ public class BacktestConfigValidationTests
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: date,
-            EndDate: date,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: date,
+            endDate: date,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -73,12 +73,12 @@ public class BacktestConfigValidationTests
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: start,
-            EndDate: end,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: start,
+            endDate: end,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -94,12 +94,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: capital,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: capital,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Assert
@@ -114,12 +114,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: capital,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: capital,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -135,12 +135,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: commissionPercent,
-            MinimumCommission: 0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: commissionPercent,
+            minimumCommission: 0m
         );
 
         // Assert
@@ -152,12 +152,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: -0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: -0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -169,12 +169,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act
         BacktestConfig config = new(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: minCommission
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: minCommission
         );
 
         // Assert
@@ -186,12 +186,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: "AAPL",
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: -1.0m
+            ticker: "AAPL",
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: -1.0m
         ));
     }
 
@@ -207,12 +207,12 @@ public class BacktestConfigValidationTests
     {
         // Arrange & Act & Assert
         Should.Throw<ArgumentException>(() => new BacktestConfig(
-            Ticker: ticker!,
-            StartDate: DateTime.Today.AddYears(-1),
-            EndDate: DateTime.Today,
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: ticker!,
+            startDate: DateTime.Today.AddYears(-1),
+            endDate: DateTime.Today,
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         ));
     }
 
@@ -225,21 +225,21 @@ public class BacktestConfigValidationTests
     {
         // Arrange
         BacktestConfig config1 = new(
-            Ticker: "AAPL",
-            StartDate: new DateTime(2024, 1, 1),
-            EndDate: new DateTime(2024, 12, 31),
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: new DateTime(2024, 1, 1),
+            endDate: new DateTime(2024, 12, 31),
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         BacktestConfig config2 = new(
-            Ticker: "AAPL",
-            StartDate: new DateTime(2024, 1, 1),
-            EndDate: new DateTime(2024, 12, 31),
-            InitialCapital: 10000m,
-            CommissionPercentage: 0.1m,
-            MinimumCommission: 1.0m
+            ticker: "AAPL",
+            startDate: new DateTime(2024, 1, 1),
+            endDate: new DateTime(2024, 12, 31),
+            initialCapital: 10000m,
+            commissionPercentage: 0.1m,
+            minimumCommission: 1.0m
         );
 
         // Act & Assert - Records support value equality

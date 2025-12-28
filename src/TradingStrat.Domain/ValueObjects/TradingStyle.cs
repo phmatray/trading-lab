@@ -143,7 +143,7 @@ public sealed class TradingStyle : ValueObject
         Type = TradingStyleType.LongTerm,
         DefaultTimeFrame = TimeFrame.D1,
         MinTimeFrame = TimeFrame.D1,
-        MaxTimeFrame = TimeFrame.MN1,
+        MaxTimeFrame = TimeFrame.Mn1,
         DefaultPositionSizePercent = 0.25m,  // 25% - larger positions, lower frequency
         MaxPositionSizePercent = 1.0m,       // 100% - can go all-in for long-term positions
         DefaultCommissionPercentage = 0.001m, // 0.1%

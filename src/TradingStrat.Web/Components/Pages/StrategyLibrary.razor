@@ -34,23 +34,23 @@
                     class="@GetTabClass(StrategyTab.Custom)"
                     @onclick="() => SetActiveTab(StrategyTab.Custom)">
                 My Strategies
-                <span class="ml-2 badge badge-secondary">@customStrategies.Count</span>
+                <span class="ml-2 badge badge-secondary">@_customStrategies.Count</span>
             </button>
         </nav>
     </div>
 
     <!-- Loading State -->
-    @if (isLoading)
+    @if (_isLoading)
     {
         <LoadingState Message="Loading strategies..." />
     }
     else
     {
         <!-- Built-in Strategies Tab -->
-        @if (activeTab == StrategyTab.BuiltIn)
+        @if (_activeTab == StrategyTab.BuiltIn)
         {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach (var strategy in builtInStrategies)
+                @foreach (var strategy in _builtInStrategies)
                 {
                     <div class="card hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-start mb-3">
@@ -92,9 +92,9 @@
         }
 
         <!-- Custom Strategies Tab -->
-        @if (activeTab == StrategyTab.Custom)
+        @if (_activeTab == StrategyTab.Custom)
         {
-            @if (!customStrategies.Any())
+            @if (!_customStrategies.Any())
             {
                 <div class="text-center py-12">
                     <div class="text-6xl mb-4">📊</div>
@@ -116,7 +116,7 @@
             else
             {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach (var strategy in customStrategies)
+                    @foreach (var strategy in _customStrategies)
                     {
                         <div class="card hover:shadow-lg transition-shadow">
                             <div class="flex justify-between items-start mb-3">

@@ -35,25 +35,25 @@ public sealed class PositionSnapshot : ValueObject
     public decimal AllocationPercentage { get; init; }
 
     public PositionSnapshot(
-        string Ticker,
-        int Quantity,
-        decimal EntryPrice,
-        decimal CurrentPrice,
-        decimal MarketValue,
-        decimal CostBasis,
-        decimal UnrealizedGainLoss,
-        decimal UnrealizedGainLossPercentage,
-        decimal AllocationPercentage)
+        string ticker,
+        int quantity,
+        decimal entryPrice,
+        decimal currentPrice,
+        decimal marketValue,
+        decimal costBasis,
+        decimal unrealizedGainLoss,
+        decimal unrealizedGainLossPercentage,
+        decimal allocationPercentage)
     {
-        this.Ticker = Ticker;
-        this.Quantity = Quantity;
-        this.EntryPrice = EntryPrice;
-        this.CurrentPrice = CurrentPrice;
-        this.MarketValue = MarketValue;
-        this.CostBasis = CostBasis;
-        this.UnrealizedGainLoss = UnrealizedGainLoss;
-        this.UnrealizedGainLossPercentage = UnrealizedGainLossPercentage;
-        this.AllocationPercentage = AllocationPercentage;
+        Ticker = ticker;
+        Quantity = quantity;
+        EntryPrice = entryPrice;
+        CurrentPrice = currentPrice;
+        MarketValue = marketValue;
+        CostBasis = costBasis;
+        UnrealizedGainLoss = unrealizedGainLoss;
+        UnrealizedGainLossPercentage = unrealizedGainLossPercentage;
+        AllocationPercentage = allocationPercentage;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -103,25 +103,25 @@ public sealed class PortfolioSnapshot : ValueObject
     public decimal UnrealizedGainLossPercentage { get; init; }
 
     public PortfolioSnapshot(
-        int PortfolioId,
-        string PortfolioName,
-        DateTime SnapshotDate,
-        decimal Cash,
-        List<PositionSnapshot> Positions,
-        decimal TotalValue,
-        decimal TotalCost,
-        decimal UnrealizedGainLoss,
-        decimal UnrealizedGainLossPercentage)
+        int portfolioId,
+        string portfolioName,
+        DateTime snapshotDate,
+        decimal cash,
+        List<PositionSnapshot> positions,
+        decimal totalValue,
+        decimal totalCost,
+        decimal unrealizedGainLoss,
+        decimal unrealizedGainLossPercentage)
     {
-        this.PortfolioId = PortfolioId;
-        this.PortfolioName = PortfolioName;
-        this.SnapshotDate = SnapshotDate;
-        this.Cash = Cash;
-        this.Positions = Positions;
-        this.TotalValue = TotalValue;
-        this.TotalCost = TotalCost;
-        this.UnrealizedGainLoss = UnrealizedGainLoss;
-        this.UnrealizedGainLossPercentage = UnrealizedGainLossPercentage;
+        PortfolioId = portfolioId;
+        PortfolioName = portfolioName;
+        SnapshotDate = snapshotDate;
+        Cash = cash;
+        Positions = positions;
+        TotalValue = totalValue;
+        TotalCost = totalCost;
+        UnrealizedGainLoss = unrealizedGainLoss;
+        UnrealizedGainLossPercentage = unrealizedGainLossPercentage;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

@@ -28,7 +28,7 @@ public partial class DataStatus : BaseComponent
         new() { Label = "Data Status", Href = "/data/status" }
     };
 
-    private bool _isAllSelected =>
+    private bool IsAllSelected =>
         _dataStatus?.TickerStatuses.Any() == true &&
         _dataStatus.TickerStatuses.All(s => _selectedTickers.Contains(s.Ticker));
 

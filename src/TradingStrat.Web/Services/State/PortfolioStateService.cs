@@ -7,7 +7,7 @@ namespace TradingStrat.Web.Services.State;
 /// </summary>
 public class PortfolioStateService : StateServiceBase<PortfolioState>
 {
-    private const string STORAGE_KEY = "tradingstrat_selected_portfolio";
+    private const string StorageKey = "tradingstrat_selected_portfolio";
 
     /// <summary>
     /// Event raised when the selected portfolio changes. Provides EventArgs for compatibility.
@@ -20,7 +20,7 @@ public class PortfolioStateService : StateServiceBase<PortfolioState>
     public int? SelectedPortfolioId { get; private set; }
 
     public PortfolioStateService(LocalStorageService localStorage)
-        : base(localStorage, STORAGE_KEY)
+        : base(localStorage, StorageKey)
     {
         // Subscribe to base class state change to update cached property
         OnStateChanged += () =>

@@ -29,9 +29,9 @@ public partial class StrategyLibrary
         Custom
     }
 
-    private StrategyTab activeTab = StrategyTab.BuiltIn;
-    private bool isLoading = false;
-    private List<CustomStrategyResult> customStrategies = [];
+    private StrategyTab _activeTab = StrategyTab.BuiltIn;
+    private bool _isLoading = false;
+    private List<CustomStrategyResult> _customStrategies = [];
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {
@@ -39,7 +39,7 @@ public partial class StrategyLibrary
         new() { Label = "Strategy Library", Href = "/strategies/library" }
     };
 
-    private readonly List<BuiltInStrategyInfo> builtInStrategies = new()
+    private readonly List<BuiltInStrategyInfo> _builtInStrategies = new()
     {
         new BuiltInStrategyInfo
         {
@@ -99,7 +99,7 @@ public partial class StrategyLibrary
 
     private async Task LoadCustomStrategies()
     {
-        isLoading = true;
+        _isLoading = true;
 
         try
         {
@@ -109,7 +109,7 @@ public partial class StrategyLibrary
             if (result.IsFailure)
             {
                 Log($"[StrategyLibrary] ERROR loading strategies: {string.Join(", ", result.Errors.Select(e => e.Message))}");
-                customStrategies = new List<CustomStrategyResult>();
+                _customStrategies = new List<CustomStrategyResult>();
                 _ = ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
                 return;
             }
@@ -117,7 +117,7 @@ public partial class StrategyLibrary
             List<CustomStrategyResult> strategies = result.Value;
             Log($"[StrategyLibrary] Loaded {strategies.Count} strategies");
 
-            customStrategies = strategies.OrderByDescending(s => s.LastUpdatedAt).ToList();
+            _customStrategies = strategies.OrderByDescending(s => s.LastUpdatedAt).ToList();
             Log("[StrategyLibrary] Strategies sorted and assigned");
         }
         catch (Exception ex)
@@ -126,26 +126,26 @@ public partial class StrategyLibrary
             Log($"[StrategyLibrary] Stack: {ex.StackTrace}");
 
             // Initialize to empty list on error so page can still load
-            customStrategies = new List<CustomStrategyResult>();
+            _customStrategies = new List<CustomStrategyResult>();
 
             // Fire-and-forget notification (don't block page load on JSInterop)
             _ = ShowErrorAsync($"Failed to load custom strategies: {ex.Message}");
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
             Log("[StrategyLibrary] Load custom strategies complete");
         }
     }
 
     private void SetActiveTab(StrategyTab tab)
     {
-        activeTab = tab;
+        _activeTab = tab;
     }
 
     private string GetTabClass(StrategyTab tab)
     {
-        bool isActive = activeTab == tab;
+        bool isActive = _activeTab == tab;
         string baseClass = "py-4 px-1 border-b-2 font-medium text-sm transition-colors";
 
         if (isActive)
@@ -185,7 +185,7 @@ public partial class StrategyLibrary
     {
         try
         {
-            CustomStrategyResult? original = customStrategies.FirstOrDefault(s => s.Id == strategyId);
+            CustomStrategyResult? original = _customStrategies.FirstOrDefault(s => s.Id == strategyId);
             if (original is null)
             {
                 _ = ShowErrorAsync("Strategy not found");
@@ -212,7 +212,7 @@ public partial class StrategyLibrary
 
     private async Task DeleteStrategy(int strategyId)
     {
-        CustomStrategyResult? strategy = customStrategies.FirstOrDefault(s => s.Id == strategyId);
+        CustomStrategyResult? strategy = _customStrategies.FirstOrDefault(s => s.Id == strategyId);
         if (strategy is null)
         {
             return;

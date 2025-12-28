@@ -142,10 +142,10 @@ public class RebalancingPageTests : BaseTest
         // Act
         await page.ConfigureAndCalculateRebalancingAsync(targetAllocations);
         await page.WaitForCalculationToCompleteAsync();
-        bool hasMSFTSignal = await page.HasSignalForTickerAsync("MSFT");
+        bool hasMsftSignal = await page.HasSignalForTickerAsync("MSFT");
 
         // Assert
-        hasMSFTSignal.ShouldBeTrue("Should have signal for MSFT");
+        hasMsftSignal.ShouldBeTrue("Should have signal for MSFT");
     }
 
     [Fact]

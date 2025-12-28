@@ -22,7 +22,7 @@ public partial class TopBar : ComponentBase
     /// Year-to-date performance percentage
     /// </summary>
     [Parameter]
-    public decimal? YTDPerformance { get; set; }
+    public decimal? YtdPerformance { get; set; }
 
     /// <summary>
     /// Whether to show the AI mode selector
@@ -32,12 +32,12 @@ public partial class TopBar : ComponentBase
 
     private string GetPerformanceClass()
     {
-        if (!YTDPerformance.HasValue)
+        if (!YtdPerformance.HasValue)
         {
             return "";
         }
 
-        return YTDPerformance.Value >= 0
+        return YtdPerformance.Value >= 0
             ? "metric-positive text-sm font-semibold"
             : "metric-negative text-sm font-semibold";
     }

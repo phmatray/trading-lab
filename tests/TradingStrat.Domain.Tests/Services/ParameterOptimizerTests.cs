@@ -25,11 +25,11 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 20, Step: 2)
+            ["Period"] = new ParameterRange(min: 10, max: 20, step: 2)
         };
 
         // Evaluator returns better results for Period = 14
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             // Quadratic function with optimum at 14
@@ -41,7 +41,7 @@ public class ParameterOptimizerTests
         OptimizationResult result = await _optimizer.OptimizeGridSearchAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator);
+            Evaluator);
 
         // Assert
         result.ShouldNotBeNull();
@@ -57,12 +57,12 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 14, Step: 2), // 3 values: 10, 12, 14
-            ["Threshold"] = new ParameterRange(Min: 20, Max: 30, Step: 5) // 3 values: 20, 25, 30
+            ["Period"] = new ParameterRange(min: 10, max: 14, step: 2), // 3 values: 10, 12, 14
+            ["Threshold"] = new ParameterRange(min: 20, max: 30, step: 5) // 3 values: 20, 25, 30
         };
 
         // Evaluator returns better results for Period=14, Threshold=25
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             decimal threshold = parameters["Threshold"];
@@ -74,7 +74,7 @@ public class ParameterOptimizerTests
         OptimizationResult result = await _optimizer.OptimizeGridSearchAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator);
+            Evaluator);
 
         // Assert
         result.TotalIterations.ShouldBe(9); // 3 * 3 = 9 combinations
@@ -90,10 +90,10 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 14, Step: 2)
+            ["Period"] = new ParameterRange(min: 10, max: 14, step: 2)
         };
 
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             return Task.FromResult((
                 totalReturn: 50m,
@@ -107,7 +107,7 @@ public class ParameterOptimizerTests
         OptimizationResult result = await _optimizer.OptimizeGridSearchAsync(
             parameterRanges,
             OptimizationObjective.MaximizeSharpeRatio,
-            evaluator);
+            Evaluator);
 
         // Assert
         result.BestScore.ShouldBe(2.5m); // Sharpe ratio is the score
@@ -120,10 +120,10 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 14, Step: 2)
+            ["Period"] = new ParameterRange(min: 10, max: 14, step: 2)
         };
 
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             // Lower period = lower drawdown (better)
@@ -135,7 +135,7 @@ public class ParameterOptimizerTests
         OptimizationResult result = await _optimizer.OptimizeGridSearchAsync(
             parameterRanges,
             OptimizationObjective.MinimizeDrawdown,
-            evaluator);
+            Evaluator);
 
         // Assert
         result.BestParameters["Period"].ShouldBe(10m); // Lowest period = lowest drawdown
@@ -148,10 +148,10 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 30, Step: 2) // 11 values
+            ["Period"] = new ParameterRange(min: 10, max: 30, step: 2) // 11 values
         };
 
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             return Task.FromResult((50m, 1.5m, 10m, 100));
         }
@@ -163,7 +163,7 @@ public class ParameterOptimizerTests
         await _optimizer.OptimizeGridSearchAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator,
+            Evaluator,
             progress);
 
         // Assert
@@ -183,11 +183,11 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 5, Max: 30, Step: 1)
+            ["Period"] = new ParameterRange(min: 5, max: 30, step: 1)
         };
 
         // Evaluator with clear optimum at Period = 14
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             decimal totalReturn = -(period - 14) * (period - 14) + 100;
@@ -195,18 +195,18 @@ public class ParameterOptimizerTests
         }
 
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 20,
-            Generations: 30,
-            MutationRate: 0.2m,
-            EliteCount: 2,
-            CrossoverRate: 0.8m
+            populationSize: 20,
+            generations: 30,
+            mutationRate: 0.2m,
+            eliteCount: 2,
+            crossoverRate: 0.8m
         );
 
         // Act
         OptimizationResult result = await _optimizer.OptimizeGeneticAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator,
+            Evaluator,
             config);
 
         // Assert
@@ -227,10 +227,10 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 5, Max: 30, Step: 1)
+            ["Period"] = new ParameterRange(min: 5, max: 30, step: 1)
         };
 
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             decimal totalReturn = -(period - 15) * (period - 15) + 100;
@@ -238,18 +238,18 @@ public class ParameterOptimizerTests
         }
 
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 10,
-            Generations: 10,
-            MutationRate: 0.1m,
-            EliteCount: 3, // Keep top 3
-            CrossoverRate: 0.8m
+            populationSize: 10,
+            generations: 10,
+            mutationRate: 0.1m,
+            eliteCount: 3, // Keep top 3
+            crossoverRate: 0.8m
         );
 
         // Act
         OptimizationResult result = await _optimizer.OptimizeGeneticAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator,
+            Evaluator,
             config);
 
         // Assert
@@ -272,12 +272,12 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 5, Max: 30, Step: 1),
-            ["Threshold"] = new ParameterRange(Min: 20, Max: 80, Step: 1)
+            ["Period"] = new ParameterRange(min: 5, max: 30, step: 1),
+            ["Threshold"] = new ParameterRange(min: 20, max: 80, step: 1)
         };
 
         // Optimum at Period=14, Threshold=50
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             decimal period = parameters["Period"];
             decimal threshold = parameters["Threshold"];
@@ -286,18 +286,18 @@ public class ParameterOptimizerTests
         }
 
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 30,
-            Generations: 50,
-            MutationRate: 0.15m,
-            EliteCount: 5,
-            CrossoverRate: 0.8m
+            populationSize: 30,
+            generations: 50,
+            mutationRate: 0.15m,
+            eliteCount: 5,
+            crossoverRate: 0.8m
         );
 
         // Act
         OptimizationResult result = await _optimizer.OptimizeGeneticAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator,
+            Evaluator,
             config);
 
         // Assert
@@ -318,20 +318,20 @@ public class ParameterOptimizerTests
         // Arrange
         var parameterRanges = new Dictionary<string, ParameterRange>
         {
-            ["Period"] = new ParameterRange(Min: 10, Max: 20, Step: 1)
+            ["Period"] = new ParameterRange(min: 10, max: 20, step: 1)
         };
 
-        static Task<(decimal, decimal, decimal, int)> evaluator(Dictionary<string, decimal> parameters)
+        static Task<(decimal, decimal, decimal, int)> Evaluator(Dictionary<string, decimal> parameters)
         {
             return Task.FromResult((50m, 1.5m, 10m, 100));
         }
 
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 10,
-            Generations: 5,
-            MutationRate: 0.1m,
-            EliteCount: 2,
-            CrossoverRate: 0.8m
+            populationSize: 10,
+            generations: 5,
+            mutationRate: 0.1m,
+            eliteCount: 2,
+            crossoverRate: 0.8m
         );
 
         var progressReports = new List<OptimizationProgress>();
@@ -341,7 +341,7 @@ public class ParameterOptimizerTests
         await _optimizer.OptimizeGeneticAsync(
             parameterRanges,
             OptimizationObjective.MaximizeTotalReturn,
-            evaluator,
+            Evaluator,
             config,
             progress);
 
@@ -357,8 +357,8 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 5, // Too small
-            Generations: 10
+            populationSize: 5, // Too small
+            generations: 10
         );
 
         // Act & Assert
@@ -370,9 +370,9 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 20,
-            Generations: 10,
-            MutationRate: 1.5m // > 1
+            populationSize: 20,
+            generations: 10,
+            mutationRate: 1.5m // > 1
         );
 
         // Act & Assert
@@ -384,9 +384,9 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var config = new GeneticAlgorithmConfig(
-            PopulationSize: 20,
-            Generations: 10,
-            EliteCount: 25 // Greater than population size
+            populationSize: 20,
+            generations: 10,
+            eliteCount: 25 // Greater than population size
         );
 
         // Act & Assert
@@ -402,13 +402,13 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var iteration = new OptimizationIteration(
-            IterationNumber: 1,
-            Parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
-            Score: 0m,
-            TotalReturn: 25.5m,
-            SharpeRatio: 1.8m,
-            MaxDrawdown: 12.3m,
-            TradeCount: 50
+            iterationNumber: 1,
+            parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
+            score: 0m,
+            totalReturn: 25.5m,
+            sharpeRatio: 1.8m,
+            maxDrawdown: 12.3m,
+            tradeCount: 50
         );
 
         // Act
@@ -423,13 +423,13 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var iteration = new OptimizationIteration(
-            IterationNumber: 1,
-            Parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
-            Score: 0m,
-            TotalReturn: 25.5m,
-            SharpeRatio: 1.8m,
-            MaxDrawdown: 12.3m,
-            TradeCount: 50
+            iterationNumber: 1,
+            parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
+            score: 0m,
+            totalReturn: 25.5m,
+            sharpeRatio: 1.8m,
+            maxDrawdown: 12.3m,
+            tradeCount: 50
         );
 
         // Act
@@ -444,13 +444,13 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var iteration = new OptimizationIteration(
-            IterationNumber: 1,
-            Parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
-            Score: 0m,
-            TotalReturn: 25.5m,
-            SharpeRatio: 1.8m,
-            MaxDrawdown: 12.3m,
-            TradeCount: 50
+            iterationNumber: 1,
+            parameters: new Dictionary<string, decimal> { ["Period"] = 14 },
+            score: 0m,
+            totalReturn: 25.5m,
+            sharpeRatio: 1.8m,
+            maxDrawdown: 12.3m,
+            tradeCount: 50
         );
 
         // Act
@@ -468,7 +468,7 @@ public class ParameterOptimizerTests
     public void ParameterRange_GetValues_ReturnsCorrectSequence()
     {
         // Arrange
-        var range = new ParameterRange(Min: 10, Max: 20, Step: 2.5m);
+        var range = new ParameterRange(min: 10, max: 20, step: 2.5m);
 
         // Act
         List<decimal> values = range.GetValues();
@@ -481,7 +481,7 @@ public class ParameterOptimizerTests
     public void ParameterRange_StepCount_CalculatesCorrectly()
     {
         // Arrange
-        var range = new ParameterRange(Min: 10, Max: 20, Step: 2);
+        var range = new ParameterRange(min: 10, max: 20, step: 2);
 
         // Act
         int stepCount = range.StepCount;
@@ -494,7 +494,7 @@ public class ParameterOptimizerTests
     public void ParameterRange_WithInvalidStep_ThrowsException()
     {
         // Arrange
-        var range = new ParameterRange(Min: 10, Max: 20, Step: 0);
+        var range = new ParameterRange(min: 10, max: 20, step: 0);
 
         // Act & Assert
         Should.Throw<ArgumentException>(() => range.GetValues());
@@ -516,12 +516,12 @@ public class ParameterOptimizerTests
         };
 
         var result = new OptimizationResult(
-            BestParameters: new Dictionary<string, decimal>(),
-            BestScore: 75m,
-            AllIterations: iterations,
-            Duration: TimeSpan.FromSeconds(10),
-            TotalIterations: 3,
-            Objective: OptimizationObjective.MaximizeTotalReturn
+            bestParameters: new Dictionary<string, decimal>(),
+            bestScore: 75m,
+            allIterations: iterations,
+            duration: TimeSpan.FromSeconds(10),
+            totalIterations: 3,
+            objective: OptimizationObjective.MaximizeTotalReturn
         );
 
         // Act
@@ -546,12 +546,12 @@ public class ParameterOptimizerTests
         };
 
         var result = new OptimizationResult(
-            BestParameters: new Dictionary<string, decimal>(),
-            BestScore: 80m,
-            AllIterations: iterations,
-            Duration: TimeSpan.FromSeconds(10),
-            TotalIterations: 5,
-            Objective: OptimizationObjective.MaximizeTotalReturn
+            bestParameters: new Dictionary<string, decimal>(),
+            bestScore: 80m,
+            allIterations: iterations,
+            duration: TimeSpan.FromSeconds(10),
+            totalIterations: 5,
+            objective: OptimizationObjective.MaximizeTotalReturn
         );
 
         // Act
@@ -573,12 +573,12 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var progress = new OptimizationProgress(
-            Current: 25,
-            Total: 100,
-            IterationsCompleted: 25,
-            CurrentBestScore: 75m,
-            CurrentBestParameters: new Dictionary<string, decimal>(),
-            Message: "Progress"
+            current: 25,
+            total: 100,
+            iterationsCompleted: 25,
+            currentBestScore: 75m,
+            currentBestParameters: new Dictionary<string, decimal>(),
+            message: "Progress"
         );
 
         // Act
@@ -593,12 +593,12 @@ public class ParameterOptimizerTests
     {
         // Arrange
         var progress = new OptimizationProgress(
-            Current: 0,
-            Total: 0,
-            IterationsCompleted: 0,
-            CurrentBestScore: null,
-            CurrentBestParameters: null,
-            Message: "Starting"
+            current: 0,
+            total: 0,
+            iterationsCompleted: 0,
+            currentBestScore: null,
+            currentBestParameters: null,
+            message: "Starting"
         );
 
         // Act

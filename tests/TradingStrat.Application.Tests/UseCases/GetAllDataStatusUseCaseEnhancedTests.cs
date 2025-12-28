@@ -134,7 +134,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
+            recordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -142,7 +142,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary partialTicker = new(
             "PARTIAL",
             null,
-            RecordCount: 320, // 320/365 = 87.7% coverage (80-95%)
+            recordCount: 320, // 320/365 = 87.7% coverage (80-95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -150,7 +150,7 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
+            recordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -181,21 +181,21 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
+            recordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary partialTicker = new(
             "PARTIAL",
             null,
-            RecordCount: 320, // 320/365 = 87.7% coverage (80-95%)
+            recordCount: 320, // 320/365 = 87.7% coverage (80-95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
+            recordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -227,14 +227,14 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary completeTicker = new(
             "COMPLETE",
             null,
-            RecordCount: 350, // 350/365 = 95.9% coverage (>=95%)
+            recordCount: 350, // 350/365 = 95.9% coverage (>=95%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary gappyTicker = new(
             "GAPPY",
             null,
-            RecordCount: 100, // 100/365 = 27.4% coverage (<80%)
+            recordCount: 100, // 100/365 = 27.4% coverage (<80%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -265,14 +265,14 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary highCoverage = new(
             "HIGH",
             null,
-            RecordCount: 330, // 330/365 = 90.4% coverage (>=90%)
+            recordCount: 330, // 330/365 = 90.4% coverage (>=90%)
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary lowCoverage = new(
             "LOW",
             null,
-            RecordCount: 100, // 100/365 = 27.4% coverage
+            recordCount: 100, // 100/365 = 27.4% coverage
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
@@ -302,14 +302,14 @@ public class GetAllDataStatusUseCaseEnhancedTests
         TickerSummary highCoverage = new(
             "HIGH",
             null,
-            RecordCount: 250,
+            recordCount: 250,
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 
         TickerSummary lowCoverage = new(
             "LOW",
             null,
-            RecordCount: 100,
+            recordCount: 100,
             new DateTime(2023, 1, 1),
             new DateTime(2023, 12, 31));
 

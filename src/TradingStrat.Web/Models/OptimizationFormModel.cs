@@ -69,12 +69,12 @@ public class OptimizationFormModel
 
         // Create backtest config
         BacktestConfig backtestConfig = new(
-            Ticker: Ticker,
-            StartDate: StartDate ?? DateTime.Today.AddYears(-2),
-            EndDate: EndDate ?? DateTime.Today,
-            InitialCapital: InitialCapital,
-            CommissionPercentage: CommissionPercentage,
-            MinimumCommission: MinimumCommission
+            ticker: Ticker,
+            startDate: StartDate ?? DateTime.Today.AddYears(-2),
+            endDate: EndDate ?? DateTime.Today,
+            initialCapital: InitialCapital,
+            commissionPercentage: CommissionPercentage,
+            minimumCommission: MinimumCommission
         );
 
         // Create genetic settings if needed

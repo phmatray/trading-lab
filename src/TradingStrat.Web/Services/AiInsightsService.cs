@@ -17,10 +17,10 @@ public class AiInsightsService
     private readonly IPortfolioPort _portfolioPort;
 
     // Cache keys
-    private const string REGIME_CACHE_KEY = "ai_insights_regime";
-    private const string RECOMMENDATION_CACHE_KEY = "ai_insights_recommendation";
-    private const string CACHE_TIMESTAMP_KEY = "ai_insights_timestamp";
-    private const int CACHE_EXPIRY_MINUTES = 15; // Refresh every 15 minutes
+    private const string RegimeCacheKey = "ai_insights_regime";
+    private const string RecommendationCacheKey = "ai_insights_recommendation";
+    private const string CacheTimestampKey = "ai_insights_timestamp";
+    private const int CacheExpiryMinutes = 15; // Refresh every 15 minutes
 
     public AiInsightsService(
         MarketRegimeDetector regimeDetector,
@@ -44,7 +44,7 @@ public class AiInsightsService
         // Check cache expiry
         if (!forceRefresh && await IsCacheValidAsync())
         {
-            MarketRegime? cachedRegime = await _localStorage.GetItemAsync<MarketRegime?>(REGIME_CACHE_KEY);
+            MarketRegime? cachedRegime = await _localStorage.GetItemAsync<MarketRegime?>(RegimeCacheKey);
             if (cachedRegime is not null)
             {
                 return cachedRegime;
@@ -70,7 +70,7 @@ public class AiInsightsService
             var regime = new MarketRegime(regimeValue, portfolioId.Value);
 
             // Cache the result
-            await _localStorage.SetItemAsync(REGIME_CACHE_KEY, regime);
+            await _localStorage.SetItemAsync(RegimeCacheKey, regime);
             await UpdateCacheTimestampAsync();
 
             return regime;
@@ -89,7 +89,7 @@ public class AiInsightsService
         // Check cache expiry
         if (!forceRefresh && await IsCacheValidAsync())
         {
-            PortfolioRecommendation? cachedRec = await _localStorage.GetItemAsync<PortfolioRecommendation?>(RECOMMENDATION_CACHE_KEY);
+            PortfolioRecommendation? cachedRec = await _localStorage.GetItemAsync<PortfolioRecommendation?>(RecommendationCacheKey);
             if (cachedRec is not null)
             {
                 return cachedRec;
@@ -117,7 +117,7 @@ public class AiInsightsService
             PortfolioRecommendation aggregated = AggregateRecommendations(recommendations);
 
             // Cache the result
-            await _localStorage.SetItemAsync(RECOMMENDATION_CACHE_KEY, aggregated);
+            await _localStorage.SetItemAsync(RecommendationCacheKey, aggregated);
             await UpdateCacheTimestampAsync();
 
             return aggregated;
@@ -133,9 +133,9 @@ public class AiInsightsService
     /// </summary>
     public async Task ClearCacheAsync()
     {
-        await _localStorage.RemoveItemAsync(REGIME_CACHE_KEY);
-        await _localStorage.RemoveItemAsync(RECOMMENDATION_CACHE_KEY);
-        await _localStorage.RemoveItemAsync(CACHE_TIMESTAMP_KEY);
+        await _localStorage.RemoveItemAsync(RegimeCacheKey);
+        await _localStorage.RemoveItemAsync(RecommendationCacheKey);
+        await _localStorage.RemoveItemAsync(CacheTimestampKey);
     }
 
     private async Task<List<string>> GetPortfolioTickersAsync(int portfolioId)
@@ -194,18 +194,18 @@ public class AiInsightsService
 
     private async Task<bool> IsCacheValidAsync()
     {
-        DateTime? timestamp = await _localStorage.GetItemAsync<DateTime?>(CACHE_TIMESTAMP_KEY);
+        DateTime? timestamp = await _localStorage.GetItemAsync<DateTime?>(CacheTimestampKey);
         if (!timestamp.HasValue)
         {
             return false;
         }
 
-        return DateTime.UtcNow - timestamp.Value < TimeSpan.FromMinutes(CACHE_EXPIRY_MINUTES);
+        return DateTime.UtcNow - timestamp.Value < TimeSpan.FromMinutes(CacheExpiryMinutes);
     }
 
     private async Task UpdateCacheTimestampAsync()
     {
-        await _localStorage.SetItemAsync(CACHE_TIMESTAMP_KEY, DateTime.UtcNow);
+        await _localStorage.SetItemAsync(CacheTimestampKey, DateTime.UtcNow);
     }
 }
 

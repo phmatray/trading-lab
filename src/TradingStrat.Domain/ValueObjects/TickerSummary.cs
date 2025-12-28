@@ -14,13 +14,13 @@ public sealed class TickerSummary : ValueObject
     public DateTime? OldestDate { get; init; }
     public DateTime? LatestDate { get; init; }
 
-    public TickerSummary(string Ticker, string? ISIN, int RecordCount, DateTime? OldestDate, DateTime? LatestDate)
+    public TickerSummary(string ticker, string? isin, int recordCount, DateTime? oldestDate, DateTime? latestDate)
     {
-        this.Ticker = Ticker;
-        this.ISIN = ISIN;
-        this.RecordCount = RecordCount;
-        this.OldestDate = OldestDate;
-        this.LatestDate = LatestDate;
+        Ticker = ticker;
+        ISIN = isin;
+        RecordCount = recordCount;
+        OldestDate = oldestDate;
+        LatestDate = latestDate;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

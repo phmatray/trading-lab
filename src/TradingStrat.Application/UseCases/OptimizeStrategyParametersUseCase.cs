@@ -162,10 +162,10 @@ public class OptimizeStrategyParametersUseCase : IOptimizeStrategyParametersUseC
 
         // Return modified definition
         return new StrategyDefinition(
-            EntryRules: modifiedEntryRules,
-            ExitRules: modifiedExitRules,
-            SizingMode: baseDefinition.SizingMode,
-            SizingParameters: new Dictionary<string, decimal>(baseDefinition.SizingParameters)
+            entryRules: modifiedEntryRules,
+            exitRules: modifiedExitRules,
+            sizingMode: baseDefinition.SizingMode,
+            sizingParameters: new Dictionary<string, decimal>(baseDefinition.SizingParameters)
         );
     }
 

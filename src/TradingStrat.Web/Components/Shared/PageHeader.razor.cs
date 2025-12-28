@@ -21,4 +21,10 @@ public partial class PageHeader : ComponentBase
     /// </summary>
     [Parameter]
     public RenderFragment? Actions { get; set; }
+
+    /// <summary>
+    /// Optional back button callback
+    /// </summary>
+    [Parameter]
+    public EventCallback OnBack { get; set; }
 }

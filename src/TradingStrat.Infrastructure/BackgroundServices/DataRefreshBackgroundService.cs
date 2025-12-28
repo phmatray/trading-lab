@@ -168,7 +168,7 @@ public class DataRefreshBackgroundService : BackgroundService
             "H4" => new TimeFrame { Unit = TimeFrameUnit.H4 },
             "D1" => new TimeFrame { Unit = TimeFrameUnit.D1 },
             "W1" => new TimeFrame { Unit = TimeFrameUnit.W1 },
-            "MN1" => new TimeFrame { Unit = TimeFrameUnit.MN1 },
+            "MN1" => new TimeFrame { Unit = TimeFrameUnit.Mn1 },
             _ => new TimeFrame { Unit = TimeFrameUnit.D1 }
         };
     }

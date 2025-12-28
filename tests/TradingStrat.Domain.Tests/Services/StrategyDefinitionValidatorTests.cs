@@ -24,18 +24,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -55,14 +55,14 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>(),
-            ExitRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>(),
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -78,14 +78,14 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>(),
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            exitRules: new List<StrategyRule>(),
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -105,18 +105,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -132,18 +132,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, null, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -159,18 +159,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("SMA", new() { ["Period"] = 20 }, ComparisonOperator.CrossesAbove,
                     RuleValueType.Indicator, null, "", new() { ["Period"] = 50 }, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -186,18 +186,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("SMA", new() { ["Period"] = 20 }, ComparisonOperator.CrossesAbove,
                     RuleValueType.Indicator, null, "SMA", new(), LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -213,18 +213,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new(), ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0.95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0.95m }
         );
 
         // Act
@@ -244,18 +244,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new()
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new()
         );
 
         // Act
@@ -271,18 +271,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 0m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 0m }
         );
 
         // Act
@@ -298,18 +298,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 1.5m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 1.5m }
         );
 
         // Act
@@ -325,18 +325,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedQuantity,
-            SizingParameters: new()
+            sizingMode: PositionSizingMode.FixedQuantity,
+            sizingParameters: new()
         );
 
         // Act
@@ -352,18 +352,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.FixedQuantity,
-            SizingParameters: new() { ["Quantity"] = 0m }
+            sizingMode: PositionSizingMode.FixedQuantity,
+            sizingParameters: new() { ["Quantity"] = 0m }
         );
 
         // Act
@@ -379,18 +379,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.RiskBased,
-            SizingParameters: new()
+            sizingMode: PositionSizingMode.RiskBased,
+            sizingParameters: new()
         );
 
         // Act
@@ -406,18 +406,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.RiskBased,
-            SizingParameters: new() { ["RiskPercentage"] = 0m }
+            sizingMode: PositionSizingMode.RiskBased,
+            sizingParameters: new() { ["RiskPercentage"] = 0m }
         );
 
         // Act
@@ -433,18 +433,18 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.LessThan,
                     RuleValueType.Constant, 30m, null, null, LogicalOperator.None)
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new("RSI", new() { ["Period"] = 14 }, ComparisonOperator.GreaterThan,
                     RuleValueType.Constant, 70m, null, null, LogicalOperator.None)
             },
-            SizingMode: PositionSizingMode.RiskBased,
-            SizingParameters: new() { ["RiskPercentage"] = 0.2m }
+            sizingMode: PositionSizingMode.RiskBased,
+            sizingParameters: new() { ["RiskPercentage"] = 0.2m }
         );
 
         // Act
@@ -464,10 +464,10 @@ public class StrategyDefinitionValidatorTests
     {
         // Arrange
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>(),
-            ExitRules: new List<StrategyRule>(),
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new() { ["Percentage"] = 2m }
+            entryRules: new List<StrategyRule>(),
+            exitRules: new List<StrategyRule>(),
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new() { ["Percentage"] = 2m }
         );
 
         // Act

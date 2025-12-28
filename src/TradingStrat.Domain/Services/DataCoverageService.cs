@@ -37,9 +37,9 @@ public class DataCoverageService
             if (daysBetween > 3)
             {
                 gaps.Add(new DateGap(
-                    StartDate: previousDate.AddDays(1),
-                    EndDate: currentDate.AddDays(-1),
-                    DaysMissing: daysBetween
+                    startDate: previousDate.AddDays(1),
+                    endDate: currentDate.AddDays(-1),
+                    daysMissing: daysBetween
                 ));
             }
         }

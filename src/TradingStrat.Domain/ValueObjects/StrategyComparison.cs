@@ -18,21 +18,21 @@ public sealed class StrategyComparison : ValueObject
     public DateTime ComparisonDate { get; init; }
 
     public StrategyComparison(
-        StrategyVariant VariantA,
-        BacktestResult ResultA,
-        StrategyVariant VariantB,
-        BacktestResult ResultB,
-        ComparisonRanking Ranking,
-        string Ticker,
-        DateTime ComparisonDate)
+        StrategyVariant variantA,
+        BacktestResult resultA,
+        StrategyVariant variantB,
+        BacktestResult resultB,
+        ComparisonRanking ranking,
+        string ticker,
+        DateTime comparisonDate)
     {
-        this.VariantA = VariantA;
-        this.ResultA = ResultA;
-        this.VariantB = VariantB;
-        this.ResultB = ResultB;
-        this.Ranking = Ranking;
-        this.Ticker = Ticker;
-        this.ComparisonDate = ComparisonDate;
+        VariantA = variantA;
+        ResultA = resultA;
+        VariantB = variantB;
+        ResultB = resultB;
+        Ranking = ranking;
+        Ticker = ticker;
+        ComparisonDate = comparisonDate;
     }
 
     /// <summary>

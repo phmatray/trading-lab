@@ -12,11 +12,11 @@ public sealed class DateGap : ValueObject
     public DateTime EndDate { get; init; }
     public int DaysMissing { get; init; }
 
-    public DateGap(DateTime StartDate, DateTime EndDate, int DaysMissing)
+    public DateGap(DateTime startDate, DateTime endDate, int daysMissing)
     {
-        this.StartDate = StartDate;
-        this.EndDate = EndDate;
-        this.DaysMissing = DaysMissing;
+        StartDate = startDate;
+        EndDate = endDate;
+        DaysMissing = daysMissing;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

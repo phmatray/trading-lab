@@ -8,7 +8,7 @@ public partial class NotificationToastContainer : ComponentBase, IDisposable
 {
     [Inject] private NotificationService NotificationService { get; set; } = null!;
 
-    private const int MAX_VISIBLE_TOASTS = 3;
+    private const int MaxVisibleToasts = 3;
     private readonly List<Notification> _activeToasts = new();
 
     protected override void OnInitialized()
@@ -22,7 +22,7 @@ public partial class NotificationToastContainer : ComponentBase, IDisposable
         {
             _activeToasts.Insert(0, notification);
 
-            if (_activeToasts.Count > MAX_VISIBLE_TOASTS)
+            if (_activeToasts.Count > MaxVisibleToasts)
             {
                 _activeToasts.RemoveAt(_activeToasts.Count - 1);
             }

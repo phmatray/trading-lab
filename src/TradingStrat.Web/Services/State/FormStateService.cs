@@ -9,12 +9,12 @@ namespace TradingStrat.Web.Services.State;
 /// </summary>
 public class FormStateService : StateServiceBase<FormStateContainer>
 {
-    private const string STORAGE_KEY = "tradingstrat_form_states";
-    private const int CLEANUP_DAYS = 7;
+    private const string StorageKey = "tradingstrat_form_states";
+    private const int CleanupDays = 7;
     private readonly Dictionary<string, Timer> _debounceTimers = new();
 
     public FormStateService(LocalStorageService localStorage)
-        : base(localStorage, STORAGE_KEY)
+        : base(localStorage, StorageKey)
     {
     }
 
@@ -92,7 +92,7 @@ public class FormStateService : StateServiceBase<FormStateContainer>
         FormStateContainer container = await base.CreateDefaultStateAsync() ?? new FormStateContainer();
 
         // Cleanup old forms if needed
-        if ((DateTime.UtcNow - container.LastCleanup).TotalDays >= CLEANUP_DAYS)
+        if ((DateTime.UtcNow - container.LastCleanup).TotalDays >= CleanupDays)
         {
             container = new FormStateContainer();
         }

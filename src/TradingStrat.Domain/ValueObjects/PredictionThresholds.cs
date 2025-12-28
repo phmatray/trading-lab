@@ -9,10 +9,10 @@ public sealed class PredictionThresholds : ValueObject
 
     public PredictionThresholds() { }
 
-    public PredictionThresholds(decimal BuyThreshold, decimal SellThreshold)
+    public PredictionThresholds(decimal buyThreshold, decimal sellThreshold)
     {
-        this.BuyThreshold = BuyThreshold;
-        this.SellThreshold = SellThreshold;
+        BuyThreshold = buyThreshold;
+        SellThreshold = sellThreshold;
     }
 
     public SignalType ConvertPredictionToSignal(float predictedReturn)

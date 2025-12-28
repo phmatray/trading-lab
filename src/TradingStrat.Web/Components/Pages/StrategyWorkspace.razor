@@ -40,7 +40,7 @@
 
             <button @onclick="() => SetActiveTab(1)"
                     class="@GetTabClass(1) py-4 border-b-2 font-medium text-sm transition-colors"
-                    disabled="@(_workspaceState.State.CurrentStrategy is null)">
+                    disabled="@(WorkspaceState.State.CurrentStrategy is null)">
                 <span class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -51,7 +51,7 @@
 
             <button @onclick="() => SetActiveTab(2)"
                     class="@GetTabClass(2) py-4 border-b-2 font-medium text-sm transition-colors"
-                    disabled="@(_workspaceState.State.CurrentStrategy is null)">
+                    disabled="@(WorkspaceState.State.CurrentStrategy is null)">
                 <span class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
@@ -62,7 +62,7 @@
 
             <button @onclick="() => SetActiveTab(3)"
                     class="@GetTabClass(3) py-4 border-b-2 font-medium text-sm transition-colors"
-                    disabled="@(_workspaceState.State.TestResult is null)">
+                    disabled="@(WorkspaceState.State.TestResult is null)">
                 <span class="flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -81,18 +81,18 @@
         }
         else if (_activeTab == 1)
         {
-            <TabTest Strategy="_workspaceState.State.CurrentStrategy"
+            <TabTest Strategy="WorkspaceState.State.CurrentStrategy"
                      OnTestComplete="HandleTestComplete" />
         }
         else if (_activeTab == 2)
         {
-            <TabOptimize Strategy="_workspaceState.State.CurrentStrategy"
+            <TabOptimize Strategy="WorkspaceState.State.CurrentStrategy"
                          OnOptimizationComplete="HandleOptimizationComplete" />
         }
         else if (_activeTab == 3)
         {
-            <TabDeploy Strategy="_workspaceState.State.CurrentStrategy"
-                       TestResult="_workspaceState.State.TestResult" />
+            <TabDeploy Strategy="WorkspaceState.State.CurrentStrategy"
+                       TestResult="WorkspaceState.State.TestResult" />
         }
     </div>
 
@@ -100,10 +100,10 @@
     <div class="mt-8 p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg border border-gray-200 dark:border-dark-border">
         <div class="flex items-center justify-between">
             <div class="text-sm text-gray-600 dark:text-dark-text-secondary">
-                @if (_workspaceState.State.CurrentStrategy is not null)
+                @if (WorkspaceState.State.CurrentStrategy is not null)
                 {
                     <span class="font-medium">Current Strategy:</span>
-                    <span class="ml-2">@_workspaceState.State.CurrentStrategy.Name</span>
+                    <span class="ml-2">@WorkspaceState.State.CurrentStrategy.Name</span>
                 }
                 else
                 {

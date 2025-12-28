@@ -7,10 +7,10 @@ namespace TradingStrat.Web.Services.State;
 /// </summary>
 public class AppStateService : StateServiceBase<AppState>
 {
-    private const string STORAGE_KEY = "tradingstrat_app_state";
+    private const string StorageKey = "tradingstrat_app_state";
 
     public AppStateService(LocalStorageService localStorage)
-        : base(localStorage, STORAGE_KEY)
+        : base(localStorage, StorageKey)
     {
     }
 

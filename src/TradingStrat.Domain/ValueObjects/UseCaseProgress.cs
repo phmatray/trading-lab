@@ -21,15 +21,15 @@ public sealed class UseCaseProgress : ValueObject
     public int? PercentComplete { get; init; }
 
     public UseCaseProgress(
-        string Message,
-        int? CurrentStep = null,
-        int? TotalSteps = null,
-        int? PercentComplete = null)
+        string message,
+        int? currentStep = null,
+        int? totalSteps = null,
+        int? percentComplete = null)
     {
-        this.Message = Message;
-        this.CurrentStep = CurrentStep;
-        this.TotalSteps = TotalSteps;
-        this.PercentComplete = PercentComplete;
+        Message = message;
+        CurrentStep = currentStep;
+        TotalSteps = totalSteps;
+        PercentComplete = percentComplete;
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public sealed class UseCaseProgress : ValueObject
     /// <param name="percent">Percentage complete (0-100).</param>
     /// <returns>A progress update with explicit percentage.</returns>
     public static UseCaseProgress WithPercentage(string message, int percent) =>
-        new(message, PercentComplete: percent);
+        new(message, percentComplete: percent);
 
     private static int CalculatePercentage(int current, int total)
     {

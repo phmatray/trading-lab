@@ -10,7 +10,7 @@ namespace TradingStrat.Web.Services.State;
 /// </summary>
 public class UserPreferencesService : StateServiceBase<UserPreferences>
 {
-    private const string STORAGE_KEY = "tradingstrat_preferences";
+    private const string StorageKey = "tradingstrat_preferences";
     private readonly TradingConfiguration _configuration;
 
     /// <summary>
@@ -25,7 +25,7 @@ public class UserPreferencesService : StateServiceBase<UserPreferences>
     public UserPreferencesService(
         LocalStorageService localStorage,
         IOptions<TradingConfiguration> configuration)
-        : base(localStorage, STORAGE_KEY)
+        : base(localStorage, StorageKey)
     {
         _configuration = configuration.Value;
     }

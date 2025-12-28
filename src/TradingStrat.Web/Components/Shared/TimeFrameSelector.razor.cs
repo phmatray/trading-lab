@@ -36,7 +36,7 @@ public partial class TimeFrameSelector : ComponentBase
         TimeFrameUnit.H4,
         TimeFrameUnit.D1,
         TimeFrameUnit.W1,
-        TimeFrameUnit.MN1
+        TimeFrameUnit.Mn1
     ];
 
     /// <summary>
@@ -84,7 +84,7 @@ public partial class TimeFrameSelector : ComponentBase
             TimeFrameUnit.H4 => "4 Hours (H4)",
             TimeFrameUnit.D1 => "Daily (D1)",
             TimeFrameUnit.W1 => "Weekly (W1)",
-            TimeFrameUnit.MN1 => "Monthly (MN1)",
+            TimeFrameUnit.Mn1 => "Monthly (MN1)",
             _ => unit.ToString()
         };
     }

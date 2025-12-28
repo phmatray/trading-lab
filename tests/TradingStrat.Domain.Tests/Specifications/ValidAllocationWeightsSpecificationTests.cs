@@ -25,7 +25,7 @@ public class ValidAllocationWeightsSpecificationTests
                 ["AAPL"] = 60m,
                 ["MSFT"] = 40m
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         );
 
         // Act
@@ -46,7 +46,7 @@ public class ValidAllocationWeightsSpecificationTests
                 ["AAPL"] = 50m,
                 ["MSFT"] = 30m
             },
-            CashPercentage: 20m
+            cashPercentage: 20m
         );
 
         // Act
@@ -63,7 +63,7 @@ public class ValidAllocationWeightsSpecificationTests
         // Arrange
         AllocationWeights weights = new(
             new Dictionary<string, decimal>(),
-            CashPercentage: 100m
+            cashPercentage: 100m
         );
 
         // Act
@@ -87,7 +87,7 @@ public class ValidAllocationWeightsSpecificationTests
                 ["AAPL"] = 50m,
                 ["MSFT"] = 40m
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         );
 
         // Act
@@ -109,7 +109,7 @@ public class ValidAllocationWeightsSpecificationTests
                 ["AAPL"] = 60m,
                 ["MSFT"] = 50m
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         );
 
         // Act
@@ -131,7 +131,7 @@ public class ValidAllocationWeightsSpecificationTests
                 ["AAPL"] = -10m,
                 ["MSFT"] = 110m
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         ));
     }
 
@@ -150,7 +150,7 @@ public class ValidAllocationWeightsSpecificationTests
             {
                 ["AAPL"] = total
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         );
 
         // Act

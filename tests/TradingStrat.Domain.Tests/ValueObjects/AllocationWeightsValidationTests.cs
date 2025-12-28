@@ -17,7 +17,7 @@ public class AllocationWeightsValidationTests
                 ["AAPL"] = 60m,
                 ["MSFT"] = 30m
             },
-            CashPercentage: 10m
+            cashPercentage: 10m
         );
 
         // Act & Assert
@@ -40,7 +40,7 @@ public class AllocationWeightsValidationTests
                 ["AAPL"] = applePercent,
                 ["MSFT"] = microsoftPercent
             },
-            CashPercentage: cashPercent
+            cashPercentage: cashPercent
         );
 
         // Act & Assert
@@ -53,7 +53,7 @@ public class AllocationWeightsValidationTests
         // Arrange
         AllocationWeights weights = new(
             new Dictionary<string, decimal>(),
-            CashPercentage: 0m
+            cashPercentage: 0m
         );
 
         // Act & Assert
@@ -66,7 +66,7 @@ public class AllocationWeightsValidationTests
         // Arrange
         AllocationWeights weights = new(
             new Dictionary<string, decimal>(),
-            CashPercentage: 100m
+            cashPercentage: 100m
         );
 
         // Act & Assert
@@ -87,7 +87,7 @@ public class AllocationWeightsValidationTests
                 ["AAPL"] = -10m,
                 ["MSFT"] = 110m
             },
-            CashPercentage: 0m
+            cashPercentage: 0m
         ));
     }
 
@@ -101,7 +101,7 @@ public class AllocationWeightsValidationTests
                 ["AAPL"] = 50m,
                 ["MSFT"] = 60m
             },
-            CashPercentage: -10m
+            cashPercentage: -10m
         ));
     }
 
@@ -115,12 +115,12 @@ public class AllocationWeightsValidationTests
         // Arrange
         AllocationWeights weights1 = new(
             new Dictionary<string, decimal> { ["AAPL"] = 60m },
-            CashPercentage: 40m
+            cashPercentage: 40m
         );
 
         AllocationWeights weights2 = new(
             new Dictionary<string, decimal> { ["AAPL"] = 60m },
-            CashPercentage: 40m
+            cashPercentage: 40m
         );
 
         // Act & Assert - Records support value equality
@@ -137,7 +137,7 @@ public class AllocationWeightsValidationTests
         // Arrange & Act & Assert
         Should.Throw<ArgumentNullException>(() => new AllocationWeights(
             null!,
-            CashPercentage: 100m
+            cashPercentage: 100m
         ));
     }
 

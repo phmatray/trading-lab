@@ -19,10 +19,10 @@
                     <span class="font-medium text-gray-900 dark:text-dark-text-primary">@SelectedPortfolioName</span>
                     <span class="text-gray-900 dark:text-dark-text-primary">(@PortfolioValue.Value.ToString("C0"))</span>
 
-                    @if (YTDPerformance.HasValue)
+                    @if (YtdPerformance.HasValue)
                     {
                         <span class="@GetPerformanceClass()">
-                            @(YTDPerformance.Value >= 0 ? "+" : "")@YTDPerformance.Value.ToString("P2") YTD
+                            @(YtdPerformance.Value >= 0 ? "+" : "")@YtdPerformance.Value.ToString("P2") YTD
                         </span>
                     }
                 </div>

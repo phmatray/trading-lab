@@ -53,37 +53,37 @@ public sealed class PortfolioMetrics : ValueObject
     public Dictionary<string, decimal>? PositionBetas { get; init; }
 
     public PortfolioMetrics(
-        decimal TotalValue,
-        decimal TotalCost,
-        decimal TotalReturn,
-        decimal TotalReturnPercentage,
-        decimal DailyReturn,
-        decimal DailyReturnPercentage,
-        int NumberOfPositions,
-        decimal CashPercentage,
-        decimal LargestPositionPercentage,
-        string MostValuablePosition,
-        decimal PortfolioVolatility,
-        decimal PortfolioSharpeRatio,
-        decimal DiversificationRatio,
-        decimal? AverageCorrelation,
-        Dictionary<string, decimal>? PositionBetas)
+        decimal totalValue,
+        decimal totalCost,
+        decimal totalReturn,
+        decimal totalReturnPercentage,
+        decimal dailyReturn,
+        decimal dailyReturnPercentage,
+        int numberOfPositions,
+        decimal cashPercentage,
+        decimal largestPositionPercentage,
+        string mostValuablePosition,
+        decimal portfolioVolatility,
+        decimal portfolioSharpeRatio,
+        decimal diversificationRatio,
+        decimal? averageCorrelation,
+        Dictionary<string, decimal>? positionBetas)
     {
-        this.TotalValue = TotalValue;
-        this.TotalCost = TotalCost;
-        this.TotalReturn = TotalReturn;
-        this.TotalReturnPercentage = TotalReturnPercentage;
-        this.DailyReturn = DailyReturn;
-        this.DailyReturnPercentage = DailyReturnPercentage;
-        this.NumberOfPositions = NumberOfPositions;
-        this.CashPercentage = CashPercentage;
-        this.LargestPositionPercentage = LargestPositionPercentage;
-        this.MostValuablePosition = MostValuablePosition;
-        this.PortfolioVolatility = PortfolioVolatility;
-        this.PortfolioSharpeRatio = PortfolioSharpeRatio;
-        this.DiversificationRatio = DiversificationRatio;
-        this.AverageCorrelation = AverageCorrelation;
-        this.PositionBetas = PositionBetas;
+        TotalValue = totalValue;
+        TotalCost = totalCost;
+        TotalReturn = totalReturn;
+        TotalReturnPercentage = totalReturnPercentage;
+        DailyReturn = dailyReturn;
+        DailyReturnPercentage = dailyReturnPercentage;
+        NumberOfPositions = numberOfPositions;
+        CashPercentage = cashPercentage;
+        LargestPositionPercentage = largestPositionPercentage;
+        MostValuablePosition = mostValuablePosition;
+        PortfolioVolatility = portfolioVolatility;
+        PortfolioSharpeRatio = portfolioSharpeRatio;
+        DiversificationRatio = diversificationRatio;
+        AverageCorrelation = averageCorrelation;
+        PositionBetas = positionBetas;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -134,17 +134,17 @@ public sealed class PortfolioPerformancePoint : ValueObject
     public decimal DailyReturn { get; init; }
 
     public PortfolioPerformancePoint(
-        DateTime Date,
-        decimal TotalValue,
-        decimal Cash,
-        decimal EquityValue,
-        decimal DailyReturn)
+        DateTime date,
+        decimal totalValue,
+        decimal cash,
+        decimal equityValue,
+        decimal dailyReturn)
     {
-        this.Date = Date;
-        this.TotalValue = TotalValue;
-        this.Cash = Cash;
-        this.EquityValue = EquityValue;
-        this.DailyReturn = DailyReturn;
+        Date = date;
+        TotalValue = totalValue;
+        Cash = cash;
+        EquityValue = equityValue;
+        DailyReturn = dailyReturn;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
@@ -178,17 +178,17 @@ public sealed class PortfolioPerformanceHistory : ValueObject
     public PortfolioMetrics CurrentMetrics { get; init; }
 
     public PortfolioPerformanceHistory(
-        int PortfolioId,
-        DateTime StartDate,
-        DateTime EndDate,
-        List<PortfolioPerformancePoint> DataPoints,
-        PortfolioMetrics CurrentMetrics)
+        int portfolioId,
+        DateTime startDate,
+        DateTime endDate,
+        List<PortfolioPerformancePoint> dataPoints,
+        PortfolioMetrics currentMetrics)
     {
-        this.PortfolioId = PortfolioId;
-        this.StartDate = StartDate;
-        this.EndDate = EndDate;
-        this.DataPoints = DataPoints;
-        this.CurrentMetrics = CurrentMetrics;
+        PortfolioId = portfolioId;
+        StartDate = startDate;
+        EndDate = endDate;
+        DataPoints = dataPoints;
+        CurrentMetrics = currentMetrics;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

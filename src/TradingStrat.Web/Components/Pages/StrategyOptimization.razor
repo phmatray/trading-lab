@@ -11,11 +11,11 @@
     <PageHeader Title="Strategy Optimization"
                 Description="Find optimal parameters for your custom strategies using grid search or genetic algorithms" />
 
-    @if (isLoadingStrategies)
+    @if (_isLoadingStrategies)
     {
         <LoadingState Message="Loading custom strategies..." />
     }
-    else if (!customStrategies.Any())
+    else if (!_customStrategies.Any())
     {
         <div class="card text-center py-12">
             <div class="text-6xl mb-4">📊</div>
@@ -32,7 +32,7 @@
     }
     else
     {
-        <EditForm Model="model" OnValidSubmit="HandleOptimize" FormName="optimization-form">
+        <EditForm Model="_model" OnValidSubmit="HandleOptimize" FormName="optimization-form">
             <DataAnnotationsValidator />
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -48,29 +48,29 @@
                             <label for="strategy" class="form-label">Custom Strategy</label>
                             <select id="strategy"
                                     class="form-control"
-                                    @bind="model.CustomStrategyId"
+                                    @bind="_model.CustomStrategyId"
                                     @bind:after="LoadStrategyParameters">
                                 <option value="0">-- Select a strategy --</option>
-                                @foreach (var strategy in customStrategies)
+                                @foreach (var strategy in _customStrategies)
                                 {
                                     <option value="@strategy.Id">@strategy.Name</option>
                                 }
                             </select>
-                            <ValidationMessage For="() => model.CustomStrategyId" />
+                            <ValidationMessage For="() => _model.CustomStrategyId" />
                         </div>
 
-                        @if (selectedStrategy is not null)
+                        @if (_selectedStrategy is not null)
                         {
                             <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                 <p class="text-sm text-gray-700 dark:text-gray-300">
-                                    <strong>Description:</strong> @selectedStrategy.Description
+                                    <strong>Description:</strong> @_selectedStrategy.Description
                                 </p>
                             </div>
                         }
                     </div>
 
                     <!-- Parameter Ranges -->
-                    @if (model.ParameterRanges.Any())
+                    @if (_model.ParameterRanges.Any())
                     {
                         <div class="card">
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -78,7 +78,7 @@
                             </h2>
 
                             <div class="space-y-4">
-                                @foreach (var param in model.ParameterRanges)
+                                @foreach (var param in _model.ParameterRanges)
                                 {
                                     <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
                                         <div class="flex items-center justify-between mb-3">
@@ -141,24 +141,24 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label class="form-label">Ticker</label>
-                                <input type="text" @bind="model.Ticker" class="form-control" />
-                                <ValidationMessage For="() => model.Ticker" />
+                                <input type="text" @bind="_model.Ticker" class="form-control" />
+                                <ValidationMessage For="() => _model.Ticker" />
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Initial Capital</label>
-                                <input type="number" @bind="model.InitialCapital" class="form-control" />
-                                <ValidationMessage For="() => model.InitialCapital" />
+                                <input type="number" @bind="_model.InitialCapital" class="form-control" />
+                                <ValidationMessage For="() => _model.InitialCapital" />
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Start Date</label>
-                                <input type="date" @bind="model.StartDate" class="form-control" />
+                                <input type="date" @bind="_model.StartDate" class="form-control" />
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">End Date</label>
-                                <input type="date" @bind="model.EndDate" class="form-control" />
+                                <input type="date" @bind="_model.EndDate" class="form-control" />
                             </div>
                         </div>
                     </div>
@@ -174,7 +174,7 @@
 
                         <div class="form-group">
                             <label class="form-label">Algorithm</label>
-                            <select @bind="model.OptimizationType" class="form-control">
+                            <select @bind="_model.OptimizationType" class="form-control">
                                 <option value="@OptimizationType.GridSearch">Grid Search (Exhaustive)</option>
                                 <option value="@OptimizationType.Genetic">Genetic Algorithm</option>
                             </select>
@@ -182,7 +182,7 @@
 
                         <div class="form-group">
                             <label class="form-label">Objective</label>
-                            <select @bind="model.Objective" class="form-control">
+                            <select @bind="_model.Objective" class="form-control">
                                 <option value="@OptimizationObjective.MaximizeTotalReturn">Maximize Total Return</option>
                                 <option value="@OptimizationObjective.MaximizeSharpeRatio">Maximize Sharpe Ratio</option>
                                 <option value="@OptimizationObjective.MinimizeDrawdown">Minimize Drawdown</option>
@@ -191,33 +191,33 @@
                             </select>
                         </div>
 
-                        @if (model.OptimizationType == OptimizationType.Genetic)
+                        @if (_model.OptimizationType == OptimizationType.Genetic)
                         {
                             <div class="mt-4 space-y-3">
                                 <h3 class="text-sm font-medium text-gray-900 dark:text-white">Genetic Settings</h3>
 
                                 <div class="form-group">
                                     <label class="form-label text-sm">Population Size</label>
-                                    <input type="number" @bind="model.PopulationSize" class="form-control" />
+                                    <input type="number" @bind="_model.PopulationSize" class="form-control" />
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label text-sm">Generations</label>
-                                    <input type="number" @bind="model.Generations" class="form-control" />
+                                    <input type="number" @bind="_model.Generations" class="form-control" />
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label text-sm">Mutation Rate</label>
-                                    <input type="number" step="0.01" @bind="model.MutationRate" class="form-control" />
+                                    <input type="number" step="0.01" @bind="_model.MutationRate" class="form-control" />
                                 </div>
                             </div>
                         }
 
-                        @if (estimatedIterations > 0)
+                        @if (_estimatedIterations > 0)
                         {
                             <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                                 <p class="text-sm text-gray-700 dark:text-gray-300">
-                                    <strong>Estimated iterations:</strong> @estimatedIterations
+                                    <strong>Estimated iterations:</strong> @_estimatedIterations
                                 </p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                     This may take several minutes
@@ -230,19 +230,19 @@
                     <Button Type="@ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             FullWidth="@true"
-                            IsLoading="@isOptimizing"
+                            IsLoading="@_isOptimizing"
                             Text="Start Optimization"
                             LoadingText="Optimizing..."></Button>
 
-                    @if (isOptimizing && optimizationProgress is not null)
+                    @if (_isOptimizing && _optimizationProgress is not null)
                     {
                         <div class="card">
                             <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</h3>
                             <div class="progress-bar mb-2">
-                                <div class="progress-bar-fill" style="width: @optimizationProgress.PercentComplete%"></div>
+                                <div class="progress-bar-fill" style="width: @_optimizationProgress.PercentComplete%"></div>
                             </div>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
-                                @optimizationProgress.Message
+                                @_optimizationProgress.Message
                             </p>
                         </div>
                     }
@@ -251,7 +251,7 @@
         </EditForm>
 
         <!-- Results -->
-        @if (optimizationResult is not null)
+        @if (_optimizationResult is not null)
         {
             <div class="card mt-6">
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
@@ -261,25 +261,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="metric-card">
                         <div class="metric-label">Best Score</div>
-                        <div class="metric-value">@optimizationResult.BestScore.ToString("F2")</div>
+                        <div class="metric-value">@_optimizationResult.BestScore.ToString("F2")</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Total Iterations</div>
-                        <div class="metric-value">@optimizationResult.TotalIterations</div>
+                        <div class="metric-value">@_optimizationResult.TotalIterations</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Duration</div>
-                        <div class="metric-value">@optimizationResult.Duration.TotalSeconds.ToString("F1")s</div>
+                        <div class="metric-value">@_optimizationResult.Duration.TotalSeconds.ToString("F1")s</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Objective</div>
-                        <div class="metric-value text-sm">@optimizationResult.Objective.ToString()</div>
+                        <div class="metric-value text-sm">@_optimizationResult.Objective.ToString()</div>
                     </div>
                 </div>
 
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    @foreach (KeyValuePair<string, decimal> param in optimizationResult.BestParameters)
+                    @foreach (KeyValuePair<string, decimal> param in _optimizationResult.BestParameters)
                     {
                         <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                             <div class="text-xs text-gray-600 dark:text-gray-400">@param.Key</div>
@@ -303,7 +303,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var iteration in optimizationResult.GetTopIterations(5).Select((it, idx) => new { it, rank = idx + 1 }))
+                            @foreach (var iteration in _optimizationResult.GetTopIterations(5).Select((it, idx) => new { it, rank = idx + 1 }))
                             {
                                 <tr>
                                     <td>@iteration.rank</td>

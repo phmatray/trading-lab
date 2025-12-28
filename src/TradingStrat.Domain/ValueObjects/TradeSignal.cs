@@ -34,32 +34,32 @@ public sealed class TradeSignal : ValueObject
     public int Quantity { get; init; }
     public string Reason { get; init; } = string.Empty;
 
-    public TradeSignal(SignalType Type, decimal Price, int Quantity, string Reason)
+    public TradeSignal(SignalType type, decimal price, int quantity, string reason)
     {
         // Validate price - only required for Buy/Sell signals (Hold can have 0)
-        if ((Type == SignalType.Buy || Type == SignalType.Sell) && Price <= 0m)
+        if ((type == SignalType.Buy || type == SignalType.Sell) && price <= 0m)
         {
-            throw new ArgumentException($"{Type} signals must have price greater than 0", nameof(Price));
+            throw new ArgumentException($"{type} signals must have price greater than 0", nameof(price));
         }
 
         // Validate reason
-        ValidationGuard.Require(Reason).NotNullOrWhiteSpace();
+        ValidationGuard.Require(reason).NotNullOrWhiteSpace();
 
         // Validate quantity based on signal type
-        if (Type == SignalType.Hold && Quantity != 0)
+        if (type == SignalType.Hold && quantity != 0)
         {
-            throw new ArgumentException("Hold signals must have quantity of 0", nameof(Quantity));
+            throw new ArgumentException("Hold signals must have quantity of 0", nameof(quantity));
         }
 
-        if ((Type == SignalType.Buy || Type == SignalType.Sell) && Quantity <= 0)
+        if ((type == SignalType.Buy || type == SignalType.Sell) && quantity <= 0)
         {
-            throw new ArgumentException($"{Type} signals must have quantity greater than 0", nameof(Quantity));
+            throw new ArgumentException($"{type} signals must have quantity greater than 0", nameof(quantity));
         }
 
-        this.Type = Type;
-        this.Price = Price;
-        this.Quantity = Quantity;
-        this.Reason = Reason;
+        Type = type;
+        Price = price;
+        Quantity = quantity;
+        Reason = reason;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

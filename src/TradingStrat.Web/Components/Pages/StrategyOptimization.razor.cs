@@ -18,15 +18,15 @@ public partial class StrategyOptimization : IDisposable
     [Inject] private ProgressService ProgressService { get; set; } = default!;
     [Inject] private AppStateService AppState { get; set; } = default!;
 
-    private readonly OptimizationFormModel model = new();
-    private List<CustomStrategyResult> customStrategies = new();
-    private CustomStrategyResult? selectedStrategy;
-    private OptimizationResult? optimizationResult;
-    private Domain.ValueObjects.OptimizationProgress? optimizationProgress;
+    private readonly OptimizationFormModel _model = new();
+    private List<CustomStrategyResult> _customStrategies = new();
+    private CustomStrategyResult? _selectedStrategy;
+    private OptimizationResult? _optimizationResult;
+    private Domain.ValueObjects.OptimizationProgress? _optimizationProgress;
 
-    private bool isLoadingStrategies = true;
-    private bool isOptimizing = false;
-    private int estimatedIterations = 0;
+    private bool _isLoadingStrategies = true;
+    private bool _isOptimizing = false;
+    private int _estimatedIterations = 0;
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {
@@ -43,7 +43,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task LoadCustomStrategiesAsync()
     {
-        isLoadingStrategies = true;
+        _isLoadingStrategies = true;
 
         try
         {
@@ -52,11 +52,11 @@ public partial class StrategyOptimization : IDisposable
             if (result.IsFailure)
             {
                 await ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
-                customStrategies = new List<CustomStrategyResult>();
+                _customStrategies = new List<CustomStrategyResult>();
                 return;
             }
 
-            customStrategies = result.Value;
+            _customStrategies = result.Value;
         }
         catch (Exception ex)
         {
@@ -64,42 +64,42 @@ public partial class StrategyOptimization : IDisposable
         }
         finally
         {
-            isLoadingStrategies = false;
+            _isLoadingStrategies = false;
         }
     }
 
     private async Task LoadStrategyParameters()
     {
-        if (model.CustomStrategyId <= 0)
+        if (_model.CustomStrategyId <= 0)
         {
-            selectedStrategy = null;
-            model.ParameterRanges.Clear();
+            _selectedStrategy = null;
+            _model.ParameterRanges.Clear();
             return;
         }
 
         try
         {
-            Result<CustomStrategyResult> result = await CustomStrategyUseCase.GetStrategyByIdAsync(model.CustomStrategyId);
+            Result<CustomStrategyResult> result = await CustomStrategyUseCase.GetStrategyByIdAsync(_model.CustomStrategyId);
 
             if (result.IsFailure)
             {
                 await ShowErrorAsync(string.Join(", ", result.Errors.Select(e => e.Message)));
-                selectedStrategy = null;
+                _selectedStrategy = null;
                 return;
             }
 
-            selectedStrategy = result.Value;
+            _selectedStrategy = result.Value;
 
-            if (selectedStrategy is null)
+            if (_selectedStrategy is null)
             {
                 return;
             }
 
             // Extract all unique parameters from entry and exit rules
-            model.ParameterRanges.Clear();
+            _model.ParameterRanges.Clear();
             HashSet<string> parameterNames = new();
 
-            foreach (StrategyRule rule in selectedStrategy.Definition.EntryRules.Concat(selectedStrategy.Definition.ExitRules))
+            foreach (StrategyRule rule in _selectedStrategy.Definition.EntryRules.Concat(_selectedStrategy.Definition.ExitRules))
             {
                 foreach (string paramName in rule.IndicatorParameters.Keys)
                 {
@@ -112,7 +112,7 @@ public partial class StrategyOptimization : IDisposable
                         decimal currentDecimal = Convert.ToDecimal(currentValue);
 
                         // Add parameter range with sensible defaults
-                        model.ParameterRanges.Add(new ParameterRangeModel
+                        _model.ParameterRanges.Add(new ParameterRangeModel
                         {
                             ParameterName = paramName,
                             CurrentValue = currentDecimal,
@@ -135,20 +135,20 @@ public partial class StrategyOptimization : IDisposable
 
     private void UpdateEstimatedIterations()
     {
-        if (model.OptimizationType == OptimizationType.GridSearch)
+        if (_model.OptimizationType == OptimizationType.GridSearch)
         {
             // Calculate total combinations
-            estimatedIterations = 1;
-            foreach (ParameterRangeModel param in model.ParameterRanges.Where(p => p.IsEnabled))
+            _estimatedIterations = 1;
+            foreach (ParameterRangeModel param in _model.ParameterRanges.Where(p => p.IsEnabled))
             {
                 int steps = (int)Math.Ceiling((param.Max - param.Min) / param.Step) + 1;
-                estimatedIterations *= steps;
+                _estimatedIterations *= steps;
             }
         }
         else
         {
             // Genetic algorithm iterations
-            estimatedIterations = model.PopulationSize * model.Generations;
+            _estimatedIterations = _model.PopulationSize * _model.Generations;
         }
     }
 
@@ -164,7 +164,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task HandleOptimize()
     {
-        if (!model.ParameterRanges.Any(p => p.IsEnabled))
+        if (!_model.ParameterRanges.Any(p => p.IsEnabled))
         {
             await ShowWarningAsync("Please enable at least one parameter to optimize");
             return;
@@ -172,15 +172,15 @@ public partial class StrategyOptimization : IDisposable
 
         UpdateEstimatedIterations();
 
-        if (estimatedIterations > 10000)
+        if (_estimatedIterations > 10000)
         {
-            await ShowWarningAsync($"Optimization will run {estimatedIterations} iterations. This may take a very long time. Consider reducing parameter ranges or using genetic algorithm.");
+            await ShowWarningAsync($"Optimization will run {_estimatedIterations} iterations. This may take a very long time. Consider reducing parameter ranges or using genetic algorithm.");
             return;
         }
 
-        isOptimizing = true;
-        optimizationResult = null;
-        optimizationProgress = null;
+        _isOptimizing = true;
+        _optimizationResult = null;
+        _optimizationProgress = null;
 
         try
         {
@@ -190,7 +190,7 @@ public partial class StrategyOptimization : IDisposable
             // Create progress reporter
             Progress<Domain.ValueObjects.OptimizationProgress> progress = new(p =>
             {
-                optimizationProgress = p;
+                _optimizationProgress = p;
                 InvokeAsync(() =>
                 {
                     ProgressService.UpdateProgress(p.Message, p.PercentComplete);
@@ -199,7 +199,7 @@ public partial class StrategyOptimization : IDisposable
             });
 
             // Execute optimization
-            OptimizeParametersCommand command = model.ToCommand();
+            OptimizeParametersCommand command = _model.ToCommand();
             Result<OptimizationResult> result = await OptimizeUseCase.ExecuteAsync(command, progress);
 
             if (result.IsFailure)
@@ -208,17 +208,17 @@ public partial class StrategyOptimization : IDisposable
                 return;
             }
 
-            optimizationResult = result.Value;
+            _optimizationResult = result.Value;
 
-            await ShowSuccessAsync($"Optimization complete! Best score: {optimizationResult.BestScore:F2}");
+            await ShowSuccessAsync($"Optimization complete! Best score: {_optimizationResult.BestScore:F2}");
 
             // Save optimization context for quick actions
             var optimizationContext = new Models.State.OptimizationContext
             {
-                CustomStrategyId = model.CustomStrategyId,
-                BestParameters = optimizationResult.BestParameters,
-                BestObjectiveValue = optimizationResult.BestScore,
-                OptimizationAlgorithm = model.OptimizationType.ToString()
+                CustomStrategyId = _model.CustomStrategyId,
+                BestParameters = _optimizationResult.BestParameters,
+                BestObjectiveValue = _optimizationResult.BestScore,
+                OptimizationAlgorithm = _model.OptimizationType.ToString()
             };
             await AppState.SetOptimizationContextAsync(optimizationContext);
         }
@@ -229,13 +229,13 @@ public partial class StrategyOptimization : IDisposable
         finally
         {
             await InvokeAsync(() => ProgressService.Reset());
-            isOptimizing = false;
+            _isOptimizing = false;
         }
     }
 
     private async Task ApplyBestParameters()
     {
-        if (optimizationResult is null || selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null)
         {
             return;
         }
@@ -244,16 +244,16 @@ public partial class StrategyOptimization : IDisposable
         {
             // Create updated strategy definition with best parameters
             StrategyDefinition updatedDefinition = ApplyParametersToDefinition(
-                selectedStrategy.Definition,
-                optimizationResult.BestParameters
+                _selectedStrategy.Definition,
+                _optimizationResult.BestParameters
             );
 
             // Update strategy
             UpdateCustomStrategyCommand command = new(
-                Id: selectedStrategy.Id,
-                Name: selectedStrategy.Name,
-                Description: selectedStrategy.Description,
-                Category: selectedStrategy.Category,
+                Id: _selectedStrategy.Id,
+                Name: _selectedStrategy.Name,
+                Description: _selectedStrategy.Description,
+                Category: _selectedStrategy.Category,
                 Definition: updatedDefinition
             );
 
@@ -291,10 +291,10 @@ public partial class StrategyOptimization : IDisposable
             .ToList();
 
         return new StrategyDefinition(
-            EntryRules: updatedEntryRules,
-            ExitRules: updatedExitRules,
-            SizingMode: baseDefinition.SizingMode,
-            SizingParameters: baseDefinition.SizingParameters
+            entryRules: updatedEntryRules,
+            exitRules: updatedExitRules,
+            sizingMode: baseDefinition.SizingMode,
+            sizingParameters: baseDefinition.SizingParameters
         );
     }
 
@@ -333,16 +333,16 @@ public partial class StrategyOptimization : IDisposable
 
     private void NavigateToBacktest()
     {
-        if (selectedStrategy is not null)
+        if (_selectedStrategy is not null)
         {
-            NavigationManager.NavigateTo($"/backtest?customStrategyId={selectedStrategy.Id}");
+            NavigationManager.NavigateTo($"/backtest?customStrategyId={_selectedStrategy.Id}");
         }
     }
 
     // Quick Actions navigation methods
     private void CreatePortfolioFromStrategy()
     {
-        if (optimizationResult is null || selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null)
         {
             return;
         }
@@ -353,7 +353,7 @@ public partial class StrategyOptimization : IDisposable
 
     private void CompareVariations()
     {
-        if (optimizationResult is null || selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null)
         {
             return;
         }
@@ -364,7 +364,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task SaveAsNewStrategy()
     {
-        if (optimizationResult is null || selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null)
         {
             return;
         }
@@ -373,16 +373,16 @@ public partial class StrategyOptimization : IDisposable
         {
             // Create updated strategy definition with best parameters
             StrategyDefinition optimizedDefinition = ApplyParametersToDefinition(
-                selectedStrategy.Definition,
-                optimizationResult.BestParameters
+                _selectedStrategy.Definition,
+                _optimizationResult.BestParameters
             );
 
             // Create new strategy with optimized parameters
             CreateCustomStrategyCommand command = new(
-                Name: $"{selectedStrategy.Name} (Optimized)",
-                Description: $"{selectedStrategy.Description} - Optimized with {model.Objective} objective. Best score: {optimizationResult.BestScore:F2}",
-                Category: selectedStrategy.Category,
-                Author: selectedStrategy.Author,
+                Name: $"{_selectedStrategy.Name} (Optimized)",
+                Description: $"{_selectedStrategy.Description} - Optimized with {_model.Objective} objective. Best score: {_optimizationResult.BestScore:F2}",
+                Category: _selectedStrategy.Category,
+                Author: _selectedStrategy.Author,
                 Definition: optimizedDefinition
             );
 

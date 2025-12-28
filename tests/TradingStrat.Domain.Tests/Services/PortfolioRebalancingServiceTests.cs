@@ -27,7 +27,7 @@ public class PortfolioRebalancingServiceTests
                 ["AAPL"] = 60m,
                 ["MSFT"] = 30m
             },
-            CashPercentage: 0m); // Total = 90%, not 100%
+            cashPercentage: 0m); // Total = 90%, not 100%
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -60,7 +60,7 @@ public class PortfolioRebalancingServiceTests
                 ["AAPL"] = 50m,
                 ["GOOGL"] = 50m
             },
-            CashPercentage: 0m);
+            cashPercentage: 0m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -81,23 +81,23 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 20m)
             },
-            TotalValue: 11500m,
-            TotalCost: 11000m,
-            UnrealizedGainLoss: 500m,
-            UnrealizedGainLossPercentage: 4.54m
+            totalValue: 11500m,
+            totalCost: 11000m,
+            unrealizedGainLoss: 500m,
+            unrealizedGainLossPercentage: 4.54m
         );
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>(),
-            CashPercentage: 100m); // Liquidate all positions
+            cashPercentage: 100m); // Liquidate all positions
 
         var currentPrices = new Dictionary<string, decimal>(); // Missing AAPL price
 
@@ -118,15 +118,15 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 10000m,
-            TotalCost: 10000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 10000m,
+            totalCost: 10000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         var targetWeights = new AllocationWeights(
@@ -134,7 +134,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 50m
             },
-            CashPercentage: 50m);
+            cashPercentage: 50m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -163,18 +163,18 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange - portfolio has positions with some cash
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Low Cash Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 100m, // Only $100 cash
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Low Cash Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 100m, // Only $100 cash
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("MSFT", 2, 250m, 250m, 500m, 500m, 0m, 0m, 83.33m)
             },
-            TotalValue: 600m,
-            TotalCost: 600m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            totalValue: 600m,
+            totalCost: 600m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         var targetWeights = new AllocationWeights(
@@ -183,7 +183,7 @@ public class PortfolioRebalancingServiceTests
                 ["AAPL"] = 90m,    // Need to buy $540 worth of AAPL
                 ["MSFT"] = 10m     // Need to sell some MSFT
             },
-            CashPercentage: 0m);
+            cashPercentage: 0m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -210,23 +210,23 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 23.08m)
             },
-            TotalValue: 6500m,
-            TotalCost: 6000m,
-            UnrealizedGainLoss: 500m,
-            UnrealizedGainLossPercentage: 8.33m
+            totalValue: 6500m,
+            totalCost: 6000m,
+            unrealizedGainLoss: 500m,
+            unrealizedGainLossPercentage: 8.33m
         );
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>(),
-            CashPercentage: 100m); // Liquidate everything
+            cashPercentage: 100m); // Liquidate everything
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -253,18 +253,18 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 20, 100m, 150m, 3000m, 2000m, 1000m, 50m, 37.5m)
             },
-            TotalValue: 8000m,
-            TotalCost: 7000m,
-            UnrealizedGainLoss: 1000m,
-            UnrealizedGainLossPercentage: 14.29m
+            totalValue: 8000m,
+            totalCost: 7000m,
+            unrealizedGainLoss: 1000m,
+            unrealizedGainLossPercentage: 14.29m
         );
 
         var targetWeights = new AllocationWeights(
@@ -272,7 +272,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 18.75m // Half of current allocation
             },
-            CashPercentage: 81.25m);
+            cashPercentage: 81.25m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -299,18 +299,18 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Balanced Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 5000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Balanced Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 5000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 33, 150m, 150m, 4950m, 4950m, 0m, 0m, 49.75m)
             },
-            TotalValue: 9950m,
-            TotalCost: 9950m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            totalValue: 9950m,
+            totalCost: 9950m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         var targetWeights = new AllocationWeights(
@@ -318,7 +318,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 49.75m // Matches current
             },
-            CashPercentage: 50.25m);
+            cashPercentage: 50.25m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -349,7 +349,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 50m
             },
-            CashPercentage: 50m);
+            cashPercentage: 50m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -377,7 +377,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 1m // Small position
             },
-            CashPercentage: 99m);
+            cashPercentage: 99m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -402,19 +402,19 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Multi-Asset Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>
+            portfolioId: 1,
+            portfolioName: "Multi-Asset Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>
             {
                 new PositionSnapshot("AAPL", 10, 100m, 150m, 1500m, 1000m, 500m, 50m, 12m),
                 new PositionSnapshot("MSFT", 5, 200m, 250m, 1250m, 1000m, 250m, 25m, 10m)
             },
-            TotalValue: 12750m,
-            TotalCost: 12000m,
-            UnrealizedGainLoss: 750m,
-            UnrealizedGainLossPercentage: 6.25m
+            totalValue: 12750m,
+            totalCost: 12000m,
+            unrealizedGainLoss: 750m,
+            unrealizedGainLossPercentage: 6.25m
         );
 
         var targetWeights = new AllocationWeights(
@@ -424,7 +424,7 @@ public class PortfolioRebalancingServiceTests
                 ["MSFT"] = 30m,
                 ["GOOGL"] = 30m
             },
-            CashPercentage: 0m);
+            cashPercentage: 0m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -452,15 +452,15 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 100000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 100000m,
-            TotalCost: 100000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 100000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 100000m,
+            totalCost: 100000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         var targetWeights = new AllocationWeights(
@@ -470,7 +470,7 @@ public class PortfolioRebalancingServiceTests
                 ["GOOGL"] = 60m, // $60,000 position
                 ["MSFT"] = 30m   // $30,000 position
             },
-            CashPercentage: 0m);
+            cashPercentage: 0m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -501,7 +501,7 @@ public class PortfolioRebalancingServiceTests
 
         var targetWeights = new AllocationWeights(
             new Dictionary<string, decimal>(),
-            CashPercentage: 100m);
+            cashPercentage: 100m);
 
         var currentPrices = new Dictionary<string, decimal>();
 
@@ -525,15 +525,15 @@ public class PortfolioRebalancingServiceTests
     {
         // Arrange
         var snapshot = new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Well-Funded Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 50000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 50000m,
-            TotalCost: 50000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Well-Funded Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 50000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 50000m,
+            totalCost: 50000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
 
         var targetWeights = new AllocationWeights(
@@ -541,7 +541,7 @@ public class PortfolioRebalancingServiceTests
             {
                 ["AAPL"] = 50m
             },
-            CashPercentage: 50m);
+            cashPercentage: 50m);
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -563,15 +563,15 @@ public class PortfolioRebalancingServiceTests
     private static PortfolioSnapshot CreateSimpleSnapshot()
     {
         return new PortfolioSnapshot(
-            PortfolioId: 1,
-            PortfolioName: "Test Portfolio",
-            SnapshotDate: DateTime.UtcNow,
-            Cash: 10000m,
-            Positions: new List<PositionSnapshot>(),
-            TotalValue: 10000m,
-            TotalCost: 10000m,
-            UnrealizedGainLoss: 0m,
-            UnrealizedGainLossPercentage: 0m
+            portfolioId: 1,
+            portfolioName: "Test Portfolio",
+            snapshotDate: DateTime.UtcNow,
+            cash: 10000m,
+            positions: new List<PositionSnapshot>(),
+            totalValue: 10000m,
+            totalCost: 10000m,
+            unrealizedGainLoss: 0m,
+            unrealizedGainLossPercentage: 0m
         );
     }
 

@@ -37,13 +37,13 @@ public class ParameterOptimizer : IParameterOptimizer
             (decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount) = await evaluator(parameters);
 
             var iteration = new OptimizationIteration(
-                IterationNumber: iterationNumber,
-                Parameters: new Dictionary<string, decimal>(parameters),
-                Score: 0m, // Will be calculated below
-                TotalReturn: totalReturn,
-                SharpeRatio: sharpeRatio,
-                MaxDrawdown: maxDrawdown,
-                TradeCount: tradeCount
+                iterationNumber: iterationNumber,
+                parameters: new Dictionary<string, decimal>(parameters),
+                score: 0m, // Will be calculated below
+                totalReturn: totalReturn,
+                sharpeRatio: sharpeRatio,
+                maxDrawdown: maxDrawdown,
+                tradeCount: tradeCount
             );
 
             // Calculate score based on objective
@@ -66,23 +66,23 @@ public class ParameterOptimizer : IParameterOptimizer
                 bestParameters = parameters;
 
                 progress?.Report(new OptimizationProgress(
-                    Current: iterationNumber,
-                    Total: totalCombinations,
-                    IterationsCompleted: iterationNumber,
-                    CurrentBestScore: bestScore,
-                    CurrentBestParameters: bestParameters,
-                    Message: $"New best score: {bestScore:F2} (iteration {iterationNumber}/{totalCombinations})"
+                    current: iterationNumber,
+                    total: totalCombinations,
+                    iterationsCompleted: iterationNumber,
+                    currentBestScore: bestScore,
+                    currentBestParameters: bestParameters,
+                    message: $"New best score: {bestScore:F2} (iteration {iterationNumber}/{totalCombinations})"
                 ));
             }
             else if (iterationNumber % 10 == 0)
             {
                 progress?.Report(new OptimizationProgress(
-                    Current: iterationNumber,
-                    Total: totalCombinations,
-                    IterationsCompleted: iterationNumber,
-                    CurrentBestScore: bestScore,
-                    CurrentBestParameters: bestParameters,
-                    Message: $"Completed {iterationNumber}/{totalCombinations} iterations"
+                    current: iterationNumber,
+                    total: totalCombinations,
+                    iterationsCompleted: iterationNumber,
+                    currentBestScore: bestScore,
+                    currentBestParameters: bestParameters,
+                    message: $"Completed {iterationNumber}/{totalCombinations} iterations"
                 ));
             }
         }
@@ -91,24 +91,24 @@ public class ParameterOptimizer : IParameterOptimizer
         if (iterationNumber % 10 != 0 && iterationNumber > 0)
         {
             progress?.Report(new OptimizationProgress(
-                Current: iterationNumber,
-                Total: totalCombinations,
-                IterationsCompleted: iterationNumber,
-                CurrentBestScore: bestScore,
-                CurrentBestParameters: bestParameters,
-                Message: $"Completed {iterationNumber}/{totalCombinations} iterations"
+                current: iterationNumber,
+                total: totalCombinations,
+                iterationsCompleted: iterationNumber,
+                currentBestScore: bestScore,
+                currentBestParameters: bestParameters,
+                message: $"Completed {iterationNumber}/{totalCombinations} iterations"
             ));
         }
 
         stopwatch.Stop();
 
         return new OptimizationResult(
-            BestParameters: bestParameters!,
-            BestScore: bestScore,
-            AllIterations: allIterations,
-            Duration: stopwatch.Elapsed,
-            TotalIterations: totalCombinations,
-            Objective: objective
+            bestParameters: bestParameters!,
+            bestScore: bestScore,
+            allIterations: allIterations,
+            duration: stopwatch.Elapsed,
+            totalIterations: totalCombinations,
+            objective: objective
         );
     }
 
@@ -146,13 +146,13 @@ public class ParameterOptimizer : IParameterOptimizer
                 (decimal totalReturn, decimal sharpeRatio, decimal maxDrawdown, int tradeCount) = await evaluator(parameters);
 
                 var iteration = new OptimizationIteration(
-                    IterationNumber: iterationNumber,
-                    Parameters: new Dictionary<string, decimal>(parameters),
-                    Score: 0m, // Will be calculated below
-                    TotalReturn: totalReturn,
-                    SharpeRatio: sharpeRatio,
-                    MaxDrawdown: maxDrawdown,
-                    TradeCount: tradeCount
+                    iterationNumber: iterationNumber,
+                    parameters: new Dictionary<string, decimal>(parameters),
+                    score: 0m, // Will be calculated below
+                    totalReturn: totalReturn,
+                    sharpeRatio: sharpeRatio,
+                    maxDrawdown: maxDrawdown,
+                    tradeCount: tradeCount
                 );
 
                 decimal score = CalculateScore(iteration, objective);
@@ -179,12 +179,12 @@ public class ParameterOptimizer : IParameterOptimizer
             // Report progress
             int totalIterations = geneticConfig.PopulationSize * geneticConfig.Generations;
             progress?.Report(new OptimizationProgress(
-                Current: iterationNumber,
-                Total: totalIterations,
-                IterationsCompleted: iterationNumber,
-                CurrentBestScore: bestScore,
-                CurrentBestParameters: bestParameters,
-                Message: $"Generation {generation + 1}/{geneticConfig.Generations} - Best score: {bestScore:F2}"
+                current: iterationNumber,
+                total: totalIterations,
+                iterationsCompleted: iterationNumber,
+                currentBestScore: bestScore,
+                currentBestParameters: bestParameters,
+                message: $"Generation {generation + 1}/{geneticConfig.Generations} - Best score: {bestScore:F2}"
             ));
 
             // If not last generation, create next generation
@@ -200,12 +200,12 @@ public class ParameterOptimizer : IParameterOptimizer
         stopwatch.Stop();
 
         return new OptimizationResult(
-            BestParameters: bestParameters!,
-            BestScore: bestScore,
-            AllIterations: allIterations,
-            Duration: stopwatch.Elapsed,
-            TotalIterations: iterationNumber,
-            Objective: objective
+            bestParameters: bestParameters!,
+            bestScore: bestScore,
+            allIterations: allIterations,
+            duration: stopwatch.Elapsed,
+            totalIterations: iterationNumber,
+            objective: objective
         );
     }
 

@@ -22,9 +22,9 @@ public partial class DataManagement : ComponentBase, IDisposable
     [Inject] private AppStateService AppState { get; set; } = null!;
     [Inject] private IOptions<TradingConfiguration> Configuration { get; set; } = null!;
 
-    private const string FORM_KEY = "data-fetch-form";
-    private const string BULK_FORM_KEY = "bulk-fetch-form";
-    private const string TIMEFRAME_KEY = "data-management-timeframe";
+    private const string FormKey = "data-fetch-form";
+    private const string BulkFormKey = "bulk-fetch-form";
+    private const string TimeframeKey = "data-management-timeframe";
 
     private enum TabType { SingleTicker, BulkFetch }
 
@@ -53,14 +53,14 @@ public partial class DataManagement : ComponentBase, IDisposable
         ProgressService.OnProgressChanged += StateHasChanged;
 
         // Restore selected timeframe from localStorage
-        string? savedTimeFrame = await FormState.GetFormStateAsync<string>(TIMEFRAME_KEY);
+        string? savedTimeFrame = await FormState.GetFormStateAsync<string>(TimeframeKey);
         if (savedTimeFrame is not null && Enum.TryParse<TimeFrameUnit>(savedTimeFrame, out TimeFrameUnit unit))
         {
             _selectedTimeFrame = new TimeFrame { Unit = unit };
         }
 
         // Restore single ticker form state
-        DataFetchFormModel? savedForm = await FormState.GetFormStateAsync<DataFetchFormModel>(FORM_KEY);
+        DataFetchFormModel? savedForm = await FormState.GetFormStateAsync<DataFetchFormModel>(FormKey);
         if (savedForm is not null)
         {
             _formModel = savedForm;
@@ -72,7 +72,7 @@ public partial class DataManagement : ComponentBase, IDisposable
         }
 
         // Restore bulk fetch form state
-        BulkFetchFormModel? savedBulkForm = await FormState.GetFormStateAsync<BulkFetchFormModel>(BULK_FORM_KEY);
+        BulkFetchFormModel? savedBulkForm = await FormState.GetFormStateAsync<BulkFetchFormModel>(BulkFormKey);
         if (savedBulkForm is not null)
         {
             _bulkFormModel = savedBulkForm;
@@ -89,7 +89,7 @@ public partial class DataManagement : ComponentBase, IDisposable
     private async Task HandleTimeFrameChanged(TimeFrame timeFrame)
     {
         _selectedTimeFrame = timeFrame;
-        await FormState.SaveFormStateAsync(TIMEFRAME_KEY, timeFrame.Unit.ToString());
+        await FormState.SaveFormStateAsync(TimeframeKey, timeFrame.Unit.ToString());
     }
 
     private string GetTabClasses(TabType tab)
@@ -103,7 +103,7 @@ public partial class DataManagement : ComponentBase, IDisposable
     // Single ticker methods
     private async Task OnFormFieldChanged()
     {
-        await FormState.SaveFormStateAsync(FORM_KEY, _formModel);
+        await FormState.SaveFormStateAsync(FormKey, _formModel);
     }
 
     private async Task HandleFetchData()
@@ -212,7 +212,7 @@ public partial class DataManagement : ComponentBase, IDisposable
             _recentTickers = await AppState.GetRecentTickersAsync();
 
             // Save form state
-            await FormState.SaveFormStateAsync(BULK_FORM_KEY, _bulkFormModel);
+            await FormState.SaveFormStateAsync(BulkFormKey, _bulkFormModel);
         }
         catch (Exception ex)
         {
@@ -264,7 +264,7 @@ public partial class DataManagement : ComponentBase, IDisposable
     private async Task HandleCsvImported(List<string> tickers)
     {
         _bulkFormModel.TickerList = string.Join("\n", tickers);
-        await FormState.SaveFormStateAsync(BULK_FORM_KEY, _bulkFormModel);
+        await FormState.SaveFormStateAsync(BulkFormKey, _bulkFormModel);
     }
 
     public void Dispose()

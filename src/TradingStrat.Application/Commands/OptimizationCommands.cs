@@ -75,11 +75,11 @@ public record GeneticAlgorithmSettings(
     public GeneticAlgorithmConfig ToDomainConfig()
     {
         return new GeneticAlgorithmConfig(
-            PopulationSize: PopulationSize,
-            Generations: Generations,
-            MutationRate: MutationRate,
-            EliteCount: EliteCount,
-            CrossoverRate: CrossoverRate
+            populationSize: PopulationSize,
+            generations: Generations,
+            mutationRate: MutationRate,
+            eliteCount: EliteCount,
+            crossoverRate: CrossoverRate
         );
     }
 }

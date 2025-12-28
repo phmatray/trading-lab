@@ -45,7 +45,7 @@ public class TimeFrameAggregator
         return targetTimeFrame.Unit switch
         {
             TimeFrameUnit.W1 => AggregateToWeekly(sourceBars),
-            TimeFrameUnit.MN1 => AggregateToMonthly(sourceBars),
+            TimeFrameUnit.Mn1 => AggregateToMonthly(sourceBars),
             _ => AggregateToFixedPeriod(sourceBars, targetTimeFrame)
         };
     }
@@ -213,7 +213,7 @@ public class TimeFrameAggregator
         {
             Ticker = bars[0].Ticker,
             ISIN = bars[0].ISIN,
-            TimeFrame = TimeFrameUnit.MN1,
+            TimeFrame = TimeFrameUnit.Mn1,
             DateTime = bars[^1].DateTime, // Last bar of month
             Open = bars[0].Open,
             High = highestHigh,

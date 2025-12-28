@@ -118,34 +118,34 @@ public class BacktestIntegrationTests : BaseTest
 
         // Create a minimal strategy definition
         var definition = new StrategyDefinition(
-            EntryRules: new List<StrategyRule>
+            entryRules: new List<StrategyRule>
             {
                 new StrategyRule(
-                    IndicatorName: "RSI",
-                    IndicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
-                    Operator: ComparisonOperator.LessThan,
-                    ValueType: RuleValueType.Constant,
-                    ConstantValue: 30m,
-                    SecondIndicatorName: null,
-                    SecondIndicatorParameters: null,
-                    LogicalOperator: LogicalOperator.None
+                    indicatorName: "RSI",
+                    indicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
+                    @operator: ComparisonOperator.LessThan,
+                    valueType: RuleValueType.Constant,
+                    constantValue: 30m,
+                    secondIndicatorName: null,
+                    secondIndicatorParameters: null,
+                    logicalOperator: LogicalOperator.None
                 )
             },
-            ExitRules: new List<StrategyRule>
+            exitRules: new List<StrategyRule>
             {
                 new StrategyRule(
-                    IndicatorName: "RSI",
-                    IndicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
-                    Operator: ComparisonOperator.GreaterThan,
-                    ValueType: RuleValueType.Constant,
-                    ConstantValue: 70m,
-                    SecondIndicatorName: null,
-                    SecondIndicatorParameters: null,
-                    LogicalOperator: LogicalOperator.None
+                    indicatorName: "RSI",
+                    indicatorParameters: new Dictionary<string, object> { ["Period"] = 14 },
+                    @operator: ComparisonOperator.GreaterThan,
+                    valueType: RuleValueType.Constant,
+                    constantValue: 70m,
+                    secondIndicatorName: null,
+                    secondIndicatorParameters: null,
+                    logicalOperator: LogicalOperator.None
                 )
             },
-            SizingMode: PositionSizingMode.FixedPercentage,
-            SizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 95m }
+            sizingMode: PositionSizingMode.FixedPercentage,
+            sizingParameters: new Dictionary<string, decimal> { ["Percentage"] = 95m }
         );
 
         var command = new CreateCustomStrategyCommand(

@@ -22,15 +22,15 @@ public sealed class StrategyVariant : ValueObject
     }
 
     public StrategyVariant(
-        string Label,
-        StrategyType StrategyType,
-        Dictionary<string, object> Parameters,
-        string Description)
+        string label,
+        StrategyType strategyType,
+        Dictionary<string, object> parameters,
+        string description)
     {
-        this.Label = Label;
-        this.StrategyType = StrategyType;
-        this.Parameters = Parameters;
-        this.Description = Description;
+        Label = label;
+        StrategyType = strategyType;
+        Parameters = parameters;
+        Description = description;
     }
 
     /// <summary>
