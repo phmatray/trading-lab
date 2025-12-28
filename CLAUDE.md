@@ -512,7 +512,93 @@ public class CreatePortfolioUseCase : BaseUseCase<CreatePortfolioCommand, Create
 }
 ```
 
-**Note:** Use cases with `IProgress<T>` parameters maintain explicit error handling but use ErrorCodes constants.
+**Note:** Use cases with `IProgress<T>` parameters can use `BaseProgressUseCase<TCommand, TResult>` for consistent error handling.
+
+**2a. BaseProgressUseCase Pattern - For IProgress<string> Use Cases**
+
+Use cases with progress reporting inherit from `BaseProgressUseCase<TCommand, TResult>`:
+
+```csharp
+public class AnalyzeCurrentPositionUseCase : BaseProgressUseCase<AnalyzePositionCommand, PositionAnalysisResult>,
+    IAnalyzeCurrentPositionUseCase
+{
+    public Task<Result<PositionAnalysisResult>> ExecuteAsync(
+        AnalyzePositionCommand command,
+        IProgress<string>? progress = null)
+        => base.ExecuteAsync(command, progress, ExecuteCoreAsync, ErrorCodes.Analysis.AnalysisFailed);
+
+    private async Task<PositionAnalysisResult> ExecuteCoreAsync(
+        AnalyzePositionCommand command,
+        IProgress<string>? progress)
+    {
+        progress?.Report("Analyzing position...");
+        // Pure business logic - exceptions caught by base class
+        return result;
+    }
+}
+```
+
+**Note:** Some use cases with custom `IProgress<T>` types (e.g., `BulkFetchProgress`, `OptimizationProgress`) maintain explicit exception handling to preserve specific error codes but use ErrorCodes constants.
+
+**2b. Helper Method Pattern - For Multi-Method Use Cases**
+
+Use cases with multiple methods use a shared helper for error handling:
+
+```csharp
+public class ManagePositionsUseCase : IManagePositionsUseCase
+{
+    public Task<Result<Position>> AddPositionAsync(AddPositionCommand command)
+        => ExecuteWithErrorHandling(() => AddPositionCoreAsync(command), ErrorCodes.Position.AddFailed);
+
+    public Task<Result<Position>> UpdatePositionAsync(UpdatePositionCommand command)
+        => ExecuteWithErrorHandling(() => UpdatePositionCoreAsync(command), ErrorCodes.Position.UpdateFailed);
+
+    private static async Task<Result<T>> ExecuteWithErrorHandling<T>(
+        Func<Task<T>> executeCore, string errorCode)
+    {
+        try
+        {
+            T result = await executeCore();
+            return Result<T>.Success(result);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return Result<T>.Failure(Error.NotFound(ex.Message, ErrorCodes.Position.NotFound));
+        }
+        // ... other specific exception handlers
+    }
+
+    private async Task<Position> AddPositionCoreAsync(AddPositionCommand command) { ... }
+    private async Task<Position> UpdatePositionCoreAsync(UpdatePositionCommand command) { ... }
+}
+```
+
+**2c. Result Propagation Pattern - For Complex Orchestration**
+
+Use cases that orchestrate multiple operations returning `Result<T>` use pure Result composition without try-catch:
+
+```csharp
+public async Task<Result<RebalancingPlan>> ExecuteAsync(...)
+{
+    // Manual validation
+    if (!command.TargetWeights.IsValid())
+    {
+        return Result<RebalancingPlan>.Failure(
+            Error.Validation("Invalid target weights", ErrorCodes.Rebalancing.InvalidWeights));
+    }
+
+    // Propagate Result<T> from dependencies
+    Result<PortfolioSnapshot> snapshotResult = await _snapshotUseCase.ExecuteAsync(...);
+    if (snapshotResult.IsFailure)
+    {
+        return Result<RebalancingPlan>.Failure(snapshotResult.Errors);
+    }
+
+    // Use successful result
+    PortfolioSnapshot snapshot = snapshotResult.Value;
+    return _domainService.Calculate(snapshot);
+}
+```
 
 **3. Domain Services - Business Logic Extraction**
 
@@ -562,12 +648,29 @@ public class GetAllDataStatusUseCase : IGetAllDataStatusUseCase
 - Reusable across multiple use cases
 - Follows Domain-Driven Design principles
 
-**Refactoring Impact (Phases 5-6):**
-- **6 use cases migrated** (CreatePortfolio, ManagePositions, GetDashboardStats, GetAllDataStatus, RunBacktest, FetchHistoricalData)
-- **~42 lines eliminated** through deduplication
+**Refactoring Impact (Phases 1-7 Complete):**
+
+**Summary:**
+- **27 use cases refactored** across 7 phases
+- **~340+ lines of try-catch boilerplate eliminated**
 - **100% backward compatibility** maintained
-- **Zero breaking changes** to interfaces
-- **All 1,669 tests passing** (Domain: 658, Application: 289, Infrastructure: 73, UI: 235, Component: 414)
+- **Zero magic string error codes** - all use ErrorCodes constants
+- **All 317 Application tests passing** (100% pass rate)
+
+**Breakdown by Pattern:**
+- **BaseUseCase:** 7 simple use cases (SaveBacktest, GetBacktestArchive, GetTopStrategies, GetRecentActivity, GetDashboardStats, DeleteHistoricalData, GetAllDataStatus)
+- **BaseProgressUseCase:** 2 use cases with IProgress<string> (AnalyzeCurrentPosition, GetPortfolioPerformance)
+- **Helper Method Pattern:** 5 multi-method use cases (ManagePositions, ManageCash, ExportHistoricalData, CustomStrategyQuery, CustomStrategyCommand)
+- **Result Propagation:** 4 orchestration use cases (GetPortfolioSnapshot, CalculateRebalancing, AnalyzeStrategy, MultiStrategyComparison)
+- **Custom IProgress + ErrorCodes:** 4 use cases (BulkFetchHistoricalData, RunBacktest, OptimizeStrategyParameters, RunParameterOptimization)
+- **Explicit Exception Handling:** 3 special cases (FetchHistoricalData - preserves specific error codes, SendChatMessage - streaming, CustomStrategyManagement - obsolete facade)
+- **Infrastructure Created:** BaseProgressUseCase, Unit type for parameterless use cases
+
+**Test Results:**
+- Domain.Tests: 758 passed, 3 skipped (761 total)
+- Application.Tests: 317 passed (317 total) ✅
+- Infrastructure.Tests: 75 passed (75 total)
+- Total refactoring-related tests: 1,150/1,153 passing (99.7%)
 
 ### IIndicatorCalculator - Single Source of Truth
 The domain service `IIndicatorCalculator` provides **26 technical indicators**. This eliminates the previous duplication where indicators were calculated in multiple places.
