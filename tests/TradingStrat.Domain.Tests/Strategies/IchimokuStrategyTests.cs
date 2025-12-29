@@ -92,7 +92,7 @@ public class IchimokuStrategyTests
             displacement: 0);
 
         // Assert
-        ArgumentException ex = Should.Throw<ArgumentException>(act);
+        _ = Should.Throw<ArgumentException>(act);
     }
 
     [Theory]
@@ -108,7 +108,7 @@ public class IchimokuStrategyTests
             riskPercentage: riskPercentage);
 
         // Assert
-        ArgumentException ex = Should.Throw<ArgumentException>(act);
+        _ = Should.Throw<ArgumentException>(act);
         // Different error messages for different invalid values
         // No need to check message content - just that it throws ArgumentException
     }

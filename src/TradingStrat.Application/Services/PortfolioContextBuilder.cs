@@ -53,9 +53,9 @@ public class PortfolioContextBuilder
 
         // Convert to arrays for indicator calculation
         decimal[] closePrices = prices.Select(p => p.Close ?? 0).ToArray();
-        decimal[] highPrices = prices.Select(p => p.High ?? 0).ToArray();
-        decimal[] lowPrices = prices.Select(p => p.Low ?? 0).ToArray();
-        decimal[] volumes = prices.Select(p => (decimal)(p.Volume ?? 0)).ToArray();
+        _ = prices.Select(p => p.High ?? 0).ToArray();
+        _ = prices.Select(p => p.Low ?? 0).ToArray();
+        _ = prices.Select(p => (decimal)(p.Volume ?? 0)).ToArray();
 
         // Calculate key technical indicators
         decimal[] rsi14 = _indicatorCalculator.CalculateRSI(closePrices, 14);

@@ -69,7 +69,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
+        builder.ConfigureAppConfiguration((_, config) =>
         {
             // Clear default configuration sources and use only test configuration
             config.Sources.Clear();
@@ -82,7 +82,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
                 reloadOnChange: false);
         });
 
-        builder.ConfigureServices((context, services) =>
+        builder.ConfigureServices((_, services) =>
         {
             // Override the database connection to use the test database
             // Remove the existing TradingContext registration

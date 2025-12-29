@@ -376,8 +376,8 @@ public class PortfolioValuationServiceTests
     {
         // Arrange
         decimal cash = 10000m;
-        List<Position> positions = new List<Position>();
-        Dictionary<string, decimal> currentPrices = new Dictionary<string, decimal>();
+        List<Position> positions = [];
+        Dictionary<string, decimal> currentPrices = [];
 
         // Act
         decimal totalValue = _service.CalculateTotalValue(cash, positions, currentPrices);

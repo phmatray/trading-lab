@@ -63,12 +63,12 @@ public class GetAllDataStatusUseCase : BaseUseCase<DataStatusQuery?, AllDataStat
         List<TickerDataStatus> allStatuses = (await Task.WhenAll(statusTasks)).ToList();
 
         // Apply filters
-        IEnumerable<TickerDataStatus> filteredStatuses = ApplyFilters(allStatuses, query);
+        List<TickerDataStatus> filteredStatuses = ApplyFilters(allStatuses, query).ToList();
 
         // Calculate totals before pagination
-        int totalTickers = filteredStatuses.Count();
+        int totalTickers = filteredStatuses.Count;
         int totalRecords = filteredStatuses.Sum(s => s.RecordCount);
-        decimal avgCoverage = filteredStatuses.Any()
+        decimal avgCoverage = filteredStatuses.Count > 0
             ? filteredStatuses.Average(s => s.CoveragePercentage)
             : 0m;
 

@@ -81,7 +81,7 @@ public class EventStoreRepositoryTests : IDisposable
     public async Task AppendEventsAsync_WithEmptyEventList_DoesNothing()
     {
         // Arrange
-        var emptyEvents = new List<DomainEvent>();
+        List<DomainEvent> emptyEvents = [];
 
         // Act
         await _eventStore.AppendEventsAsync(TestStreamId, emptyEvents, expectedVersion: 0);

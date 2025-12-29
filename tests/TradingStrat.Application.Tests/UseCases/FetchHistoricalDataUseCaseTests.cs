@@ -92,7 +92,7 @@ public class FetchHistoricalDataUseCaseTests
             EndDate: new DateTime(2024, 1, 31));
 
         // Act
-        Result<DataSummaryResult> result = await _useCase.ExecuteAsync(command);
+        _ = await _useCase.ExecuteAsync(command);
 
         // Assert
         List<HistoricalPrice> savedData = await _historicalDataPort.GetHistoricalDataAsync("TEST", TimeFrame.D1);

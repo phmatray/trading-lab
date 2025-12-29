@@ -51,120 +51,142 @@ public class AiRecommendationService
         decimal[] rsi14 = _indicatorCalculator.CalculateRSI(closePrices, 14);
         decimal[] sma20 = _indicatorCalculator.CalculateSMA(closePrices, 20);
         decimal[] sma50 = _indicatorCalculator.CalculateSMA(closePrices, 50);
-        (decimal[] macd, decimal[] signal, decimal[] histogram) = _indicatorCalculator.CalculateMACD(closePrices);
+        (_, _, decimal[] histogram) = _indicatorCalculator.CalculateMACD(closePrices);
         decimal[] atr14 = _indicatorCalculator.CalculateATR(prices.ToArray(), 14);
 
         var reasons = new List<string>();
-        int score = 0; // Range: -100 to +100
+        int score = 0;
 
-        // 1. RSI Analysis (30 points)
-        decimal rsiValue = rsi14[latestIdx];
-        if (rsiValue < 30)
+        // Analyze indicators and accumulate score
+        var (rsiScore, rsiReason) = AnalyzeRsiIndicator(rsi14[latestIdx]);
+        score += rsiScore;
+        if (!string.IsNullOrEmpty(rsiReason))
         {
-            score += 30;
-            reasons.Add($"RSI ({rsiValue:F1}) indicates oversold conditions - potential buy opportunity");
-        }
-        else if (rsiValue > 70)
-        {
-            score -= 30;
-            reasons.Add($"RSI ({rsiValue:F1}) indicates overbought conditions - consider taking profits");
-        }
-        else if (rsiValue < 40)
-        {
-            score += 15;
-            reasons.Add($"RSI ({rsiValue:F1}) shows weak momentum but approaching oversold");
-        }
-        else if (rsiValue > 60)
-        {
-            score -= 15;
-            reasons.Add($"RSI ({rsiValue:F1}) shows strong momentum but approaching overbought");
+            reasons.Add(rsiReason);
         }
 
-        // 2. Moving Average Analysis (40 points)
         decimal currentPrice = closePrices[latestIdx];
-        bool priceAboveSma20 = currentPrice > sma20[latestIdx];
-        bool priceAboveSma50 = currentPrice > sma50[latestIdx];
-        bool sma20AboveSma50 = sma20[latestIdx] > sma50[latestIdx];
-
-        if (priceAboveSma20 && priceAboveSma50 && sma20AboveSma50)
+        var (maScore, maReason) = AnalyzeMovingAverages(currentPrice, sma20[latestIdx], sma50[latestIdx]);
+        score += maScore;
+        if (!string.IsNullOrEmpty(maReason))
         {
-            score += 40;
-            reasons.Add("Price above both SMA20 and SMA50 with golden cross - strong uptrend");
-        }
-        else if (!priceAboveSma20 && !priceAboveSma50 && !sma20AboveSma50)
-        {
-            score -= 40;
-            reasons.Add("Price below both SMA20 and SMA50 with death cross - strong downtrend");
-        }
-        else if (priceAboveSma20 && !priceAboveSma50)
-        {
-            score += 20;
-            reasons.Add("Price above SMA20 but below SMA50 - short-term strength, long-term weakness");
-        }
-        else if (!priceAboveSma20 && priceAboveSma50)
-        {
-            score -= 20;
-            reasons.Add("Price below SMA20 but above SMA50 - short-term weakness, long-term support");
+            reasons.Add(maReason);
         }
 
-        // 3. MACD Analysis (20 points)
-        decimal macdValue = histogram[latestIdx];
         if (latestIdx > 0)
         {
-            decimal previousMacd = histogram[latestIdx - 1];
-            if (macdValue > 0 && previousMacd <= 0)
+            var (macdScore, macdReason) = AnalyzeMacdIndicator(histogram[latestIdx], histogram[latestIdx - 1]);
+            score += macdScore;
+            if (!string.IsNullOrEmpty(macdReason))
             {
-                score += 20;
-                reasons.Add("MACD histogram crossed above zero - bullish momentum shift");
-            }
-            else if (macdValue < 0 && previousMacd >= 0)
-            {
-                score -= 20;
-                reasons.Add("MACD histogram crossed below zero - bearish momentum shift");
-            }
-            else if (macdValue > 0)
-            {
-                score += 10;
-                reasons.Add("MACD histogram positive - bullish momentum");
-            }
-            else if (macdValue < 0)
-            {
-                score -= 10;
-                reasons.Add("MACD histogram negative - bearish momentum");
+                reasons.Add(macdReason);
             }
         }
 
-        // 4. Volatility Check (10 points)
-        decimal atrValue = atr14[latestIdx];
-        decimal atrPercentOfPrice = currentPrice > 0 ? (atrValue / currentPrice * 100) : 0;
-        if (atrPercentOfPrice > 5)
+        var (volatilityAdjustedScore, volatilityReason) = AnalyzeVolatility(atr14[latestIdx], currentPrice, score);
+        score = volatilityAdjustedScore;
+        if (!string.IsNullOrEmpty(volatilityReason))
         {
-            reasons.Add($"High volatility detected (ATR: {atrPercentOfPrice:F2}% of price) - increased risk");
-            score = (int)(score * 0.8m); // Reduce confidence in high volatility
+            reasons.Add(volatilityReason);
         }
 
         // Determine action and confidence
-        string action;
-        int confidence;
-
-        if (score >= 50)
-        {
-            action = "BUY";
-            confidence = Math.Min(50 + score / 2, 95); // Cap at 95%
-        }
-        else if (score <= -50)
-        {
-            action = "SELL";
-            confidence = Math.Min(50 + Math.Abs(score) / 2, 95);
-        }
-        else
-        {
-            action = "HOLD";
-            confidence = 50 + (20 - Math.Abs(score) / 5); // Higher confidence for neutral signals close to 0
-            reasons.Add("Mixed signals suggest waiting for clearer trend confirmation");
-        }
+        var (action, confidence) = DetermineActionAndConfidence(score, reasons);
 
         return new RecommendationResult(action, confidence, reasons);
+    }
+
+    /// <summary>
+    /// Analyzes RSI indicator and returns score adjustment and reason.
+    /// </summary>
+    private static (int ScoreAdjustment, string Reason) AnalyzeRsiIndicator(decimal rsiValue)
+    {
+        return rsiValue switch
+        {
+            < 30 => (30, $"RSI ({rsiValue:F1}) indicates oversold conditions - potential buy opportunity"),
+            > 70 => (-30, $"RSI ({rsiValue:F1}) indicates overbought conditions - consider taking profits"),
+            < 40 => (15, $"RSI ({rsiValue:F1}) shows weak momentum but approaching oversold"),
+            > 60 => (-15, $"RSI ({rsiValue:F1}) shows strong momentum but approaching overbought"),
+            _ => (0, string.Empty)
+        };
+    }
+
+    /// <summary>
+    /// Analyzes moving averages and returns score adjustment and reason.
+    /// </summary>
+    private static (int ScoreAdjustment, string Reason) AnalyzeMovingAverages(
+        decimal currentPrice,
+        decimal sma20,
+        decimal sma50)
+    {
+        bool priceAboveSma20 = currentPrice > sma20;
+        bool priceAboveSma50 = currentPrice > sma50;
+        bool sma20AboveSma50 = sma20 > sma50;
+
+        return (priceAboveSma20, priceAboveSma50, sma20AboveSma50) switch
+        {
+            (true, true, true) => (40, "Price above both SMA20 and SMA50 with golden cross - strong uptrend"),
+            (false, false, false) => (-40, "Price below both SMA20 and SMA50 with death cross - strong downtrend"),
+            (true, false, _) => (20, "Price above SMA20 but below SMA50 - short-term strength, long-term weakness"),
+            (false, true, _) => (-20, "Price below SMA20 but above SMA50 - short-term weakness, long-term support"),
+            _ => (0, string.Empty)
+        };
+    }
+
+    /// <summary>
+    /// Analyzes MACD histogram and returns score adjustment and reason.
+    /// </summary>
+    private static (int ScoreAdjustment, string Reason) AnalyzeMacdIndicator(
+        decimal macdValue,
+        decimal previousMacd)
+    {
+        return (macdValue, previousMacd) switch
+        {
+            ( > 0, <= 0) => (20, "MACD histogram crossed above zero - bullish momentum shift"),
+            ( < 0, >= 0) => (-20, "MACD histogram crossed below zero - bearish momentum shift"),
+            ( > 0, _) => (10, "MACD histogram positive - bullish momentum"),
+            ( < 0, _) => (-10, "MACD histogram negative - bearish momentum"),
+            _ => (0, string.Empty)
+        };
+    }
+
+    /// <summary>
+    /// Analyzes volatility and adjusts score if volatility is high.
+    /// </summary>
+    private static (int AdjustedScore, string Reason) AnalyzeVolatility(
+        decimal atrValue,
+        decimal currentPrice,
+        int currentScore)
+    {
+        decimal atrPercentOfPrice = currentPrice > 0 ? (atrValue / currentPrice * 100) : 0;
+
+        if (atrPercentOfPrice > 5)
+        {
+            int adjustedScore = (int)(currentScore * 0.8m);
+            string reason = $"High volatility detected (ATR: {atrPercentOfPrice:F2}% of price) - increased risk";
+            return (adjustedScore, reason);
+        }
+
+        return (currentScore, string.Empty);
+    }
+
+    /// <summary>
+    /// Determines trading action and confidence based on score.
+    /// </summary>
+    private static (string Action, int Confidence) DetermineActionAndConfidence(int score, List<string> reasons)
+    {
+        if (score >= 50)
+        {
+            return ("BUY", Math.Min(50 + score / 2, 95));
+        }
+
+        if (score <= -50)
+        {
+            return ("SELL", Math.Min(50 + Math.Abs(score) / 2, 95));
+        }
+
+        reasons.Add("Mixed signals suggest waiting for clearer trend confirmation");
+        return ("HOLD", 50 + (20 - Math.Abs(score) / 5));
     }
 
     /// <summary>

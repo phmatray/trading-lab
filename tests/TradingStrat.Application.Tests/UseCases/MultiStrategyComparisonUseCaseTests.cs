@@ -182,7 +182,7 @@ public class MultiStrategyComparisonUseCaseTests
     {
         // Arrange
         var strategies = Enumerable.Range(1, 11)
-            .Select(i => new StrategyConfiguration("rsi", new Dictionary<string, object>()))
+            .Select(_ => new StrategyConfiguration("rsi", new Dictionary<string, object>()))
             .ToList();
 
         var command = new MultiStrategyComparisonCommand(

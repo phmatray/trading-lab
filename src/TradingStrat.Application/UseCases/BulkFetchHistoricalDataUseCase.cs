@@ -31,10 +31,10 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
     {
         try
         {
-            if (command.Tickers is null || !command.Tickers.Any())
+            if (!command.Tickers.Any())
             {
                 return Result<BulkFetchResult>.Failure(
-                    Error.Validation("Tickers list cannot be null or empty", ErrorCodes.Data.TickerRequired));
+                    Error.Validation("Tickers list cannot be empty", ErrorCodes.Data.TickerRequired));
             }
 
             int totalTickers = command.Tickers.Count;
@@ -66,7 +66,7 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
 
                     // Fetch data for this ticker
                     ReportProgress(progress, totalTickers, completedTickers, ticker, "Fetching data...");
-                    DataSummaryResult result = await FetchSingleTickerAsync(ticker, command, progress);
+                    DataSummaryResult result = await FetchSingleTickerAsync(ticker, command);
 
                     successfulResults[ticker] = result;
                     ReportProgress(progress, totalTickers, completedTickers, ticker, $"Success ({result.NewRecords} new records)");
@@ -112,8 +112,7 @@ public class BulkFetchHistoricalDataUseCase : IBulkDataFetchingUseCase
 
     private async Task<DataSummaryResult> FetchSingleTickerAsync(
         string ticker,
-        BulkFetchDataCommand command,
-        IProgress<BulkFetchProgress>? progress)
+        BulkFetchDataCommand command)
     {
         // Determine date range
         DateTime startDate = command.StartDate ?? await GetStartDateAsync(ticker, command.TimeFrame);

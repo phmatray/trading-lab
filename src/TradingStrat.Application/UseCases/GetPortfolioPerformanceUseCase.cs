@@ -127,65 +127,24 @@ public class GetPortfolioPerformanceUseCase : BaseProgressUseCase<PortfolioPerfo
 
         foreach (DateTime date in allDates)
         {
-            // Build price dictionary for this date
-            var pricesForDate = new Dictionary<string, decimal>();
-            bool hasAllPrices = true;
+            Dictionary<string, decimal>? pricesForDate = GetPricesForDate(date, allHistoricalData, tickers);
 
-            foreach (string ticker in tickers)
+            if (pricesForDate is null)
             {
-                if (allHistoricalData.TryGetValue(ticker, out List<HistoricalPrice>? tickerData))
-                {
-                    HistoricalPrice? priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
-
-                    if (priceData?.Close.HasValue == true)
-                    {
-                        pricesForDate[ticker] = priceData.Close.Value;
-                    }
-                    else
-                    {
-                        hasAllPrices = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    hasAllPrices = false;
-                    break;
-                }
+                continue; // Skip dates with incomplete price data
             }
 
-            // Only calculate if we have prices for all positions
-            if (hasAllPrices)
+            PortfolioPerformancePoint? point = CalculatePerformancePointForDate(
+                date,
+                portfolio,
+                pricesForDate,
+                previousValue,
+                progress);
+
+            if (point is not null)
             {
-                try
-                {
-                    Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
-
-                    if (result.IsFailure)
-                    {
-                        progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} - failed to calculate snapshot");
-                        continue;
-                    }
-
-                    PortfolioSnapshot snapshot = result.Value;
-                    decimal dailyReturn = previousValue > 0
-                        ? (snapshot.TotalValue - previousValue) / previousValue
-                        : 0m;
-
-                    performancePoints.Add(new PortfolioPerformancePoint(
-                        date,
-                        snapshot.TotalValue,
-                        snapshot.Cash,
-                        snapshot.TotalValue - snapshot.Cash,
-                        dailyReturn));
-
-                    previousValue = snapshot.TotalValue;
-                }
-                catch (Exception ex)
-                {
-                    // Log or skip problematic dates
-                    progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} due to error: {ex.Message}");
-                }
+                performancePoints.Add(point);
+                previousValue = point.TotalValue;
             }
         }
 
@@ -214,5 +173,76 @@ public class GetPortfolioPerformanceUseCase : BaseProgressUseCase<PortfolioPerfo
             endDate,
             performancePoints,
             metrics);
+    }
+
+    /// <summary>
+    /// Gets prices for all tickers on a specific date.
+    /// Returns null if any ticker is missing price data for the date.
+    /// </summary>
+    private static Dictionary<string, decimal>? GetPricesForDate(
+        DateTime date,
+        Dictionary<string, List<HistoricalPrice>> allHistoricalData,
+        List<string> tickers)
+    {
+        var pricesForDate = new Dictionary<string, decimal>();
+
+        foreach (string ticker in tickers)
+        {
+            if (!allHistoricalData.TryGetValue(ticker, out List<HistoricalPrice>? tickerData))
+            {
+                return null; // Missing ticker data
+            }
+
+            HistoricalPrice? priceData = tickerData.FirstOrDefault(p => p.DateTime.Date == date);
+
+            if (priceData?.Close.HasValue != true)
+            {
+                return null; // Missing price for this date
+            }
+
+            pricesForDate[ticker] = priceData.Close!.Value;
+        }
+
+        return pricesForDate;
+    }
+
+    /// <summary>
+    /// Calculates a performance point for a specific date.
+    /// Returns null if calculation fails.
+    /// </summary>
+    private PortfolioPerformancePoint? CalculatePerformancePointForDate(
+        DateTime date,
+        Portfolio portfolio,
+        Dictionary<string, decimal> pricesForDate,
+        decimal previousValue,
+        IProgress<string>? progress)
+    {
+        try
+        {
+            Result<PortfolioSnapshot> result = _valuationService.CalculateSnapshot(portfolio, pricesForDate);
+
+            if (result.IsFailure)
+            {
+                progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} - failed to calculate snapshot");
+                return null;
+            }
+
+            PortfolioSnapshot snapshot = result.Value;
+            decimal dailyReturn = previousValue > 0
+                ? (snapshot.TotalValue - previousValue) / previousValue
+                : 0m;
+
+            return new PortfolioPerformancePoint(
+                date,
+                snapshot.TotalValue,
+                snapshot.Cash,
+                snapshot.TotalValue - snapshot.Cash,
+                dailyReturn);
+        }
+        catch (Exception ex)
+        {
+            progress?.Report($"Warning: Skipped {date:yyyy-MM-dd} due to error: {ex.Message}");
+            return null;
+        }
     }
 }

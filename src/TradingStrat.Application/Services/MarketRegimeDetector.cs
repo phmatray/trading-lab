@@ -47,7 +47,7 @@ public class MarketRegimeDetector
         decimal[] sma20 = _indicatorCalculator.CalculateSMA(closePrices, 20);
         decimal[] sma50 = _indicatorCalculator.CalculateSMA(closePrices, 50);
         decimal[] rsi14 = _indicatorCalculator.CalculateRSI(closePrices, 14);
-        (decimal[] macd, decimal[] signal, decimal[] histogram) = _indicatorCalculator.CalculateMACD(closePrices);
+        (_, _, decimal[] histogram) = _indicatorCalculator.CalculateMACD(closePrices);
 
         // Score based on multiple indicators (range: -100 to +100)
         int score = 0;
@@ -145,7 +145,6 @@ public class MarketRegimeDetector
         // Calculate consensus
         int bullishCount = regimes.Count(r => r == "BULLISH");
         int bearishCount = regimes.Count(r => r == "BEARISH");
-        int neutralCount = regimes.Count(r => r == "NEUTRAL");
 
         int total = regimes.Count;
         decimal bullishPct = (decimal)bullishCount / total;

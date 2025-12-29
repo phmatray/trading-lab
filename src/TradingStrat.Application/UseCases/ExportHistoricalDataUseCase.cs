@@ -75,7 +75,7 @@ public class ExportHistoricalDataUseCase : IExportHistoricalDataUseCase
         List<TickerCoverageData> coverageData = summaries.Select(s =>
         {
             decimal coverage = CalculateCoveragePercentage(s.OldestDate, s.LatestDate);
-            int gapCount = CalculateGapCount(s.OldestDate, s.LatestDate, s.RecordCount, timeFrame);
+            int gapCount = CalculateGapCount(s.OldestDate, s.LatestDate);
             string status = GetStatus(coverage);
 
             return new TickerCoverageData(
@@ -140,14 +140,15 @@ public class ExportHistoricalDataUseCase : IExportHistoricalDataUseCase
         return 100m;
     }
 
-    private static int CalculateGapCount(DateTime? oldestDate, DateTime? latestDate, int recordCount, TimeFrame timeFrame)
+    private static int CalculateGapCount(DateTime? oldestDate, DateTime? latestDate)
     {
         if (oldestDate is null || latestDate is null)
         {
             return 0;
         }
 
-        // Simplified - actual implementation would detect gaps properly
+        // TODO: Implement actual gap detection logic
+        // This should analyze the date range and detect missing market days
         return 0;
     }
 

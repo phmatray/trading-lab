@@ -189,13 +189,13 @@ public class IndicatorCalculatorTests
         // Arrange
         decimal[] prices = [10m, 20m, 30m, 40m, 50m];
         int period = 3;
-        decimal multiplier = 2m / (period + 1); // 2/(3+1) = 0.5
+        _ = 2m / (period + 1); // 2/(3+1) = 0.5
 
         // Act
         decimal[] result = _calculator.CalculateEMA(prices, period);
 
         // Assert
-        result[2].ShouldBe(20m); // First EMA = SMA = (10+20+30)/3 = 20
+        // First EMA = SMA = (10+20+30)/3 = 20
         // Next EMA = ((40 - 20) * 0.5) + 20 = 30
         result[3].ShouldBe(30m);
         // Next EMA = ((50 - 30) * 0.5) + 30 = 40
@@ -478,7 +478,7 @@ public class IndicatorCalculatorTests
         decimal[] prices = Enumerable.Range(1, 50).Select(i => 100m + i).ToArray();
 
         // Act
-        (decimal[] macd, decimal[] signal, decimal[] _) = _calculator.CalculateMACD(prices);
+        (_, decimal[] signal, _) = _calculator.CalculateMACD(prices);
 
         // Assert
         // Signal line should be non-zero after sufficient data
@@ -508,7 +508,7 @@ public class IndicatorCalculatorTests
         decimal[] prices = Enumerable.Range(1, 20).Select(i => (decimal)i).ToArray();
 
         // Act
-        (decimal[] macd, decimal[] signal, decimal[] histogram) = _calculator.CalculateMACD(prices);
+        (decimal[] macd, decimal[] signal, _) = _calculator.CalculateMACD(prices);
 
         // Assert
         // Early values should be zero due to insufficient data
@@ -1303,9 +1303,9 @@ public class IndicatorCalculatorTests
         // Act - calculate all Ichimoku components
         decimal[] tenkan = _calculator.CalculateConversionLine(prices.ToArray());
         decimal[] kijun = _calculator.CalculateBaseLine(prices.ToArray());
-        decimal[] senkouA = _calculator.CalculateLeadingSpanA(tenkan, kijun);
-        decimal[] senkouB = _calculator.CalculateLeadingSpanB(prices.ToArray());
-        decimal[] chikou = _calculator.CalculateLaggingSpan(prices.ToArray());
+        _ = _calculator.CalculateLeadingSpanA(tenkan, kijun);
+        _ = _calculator.CalculateLeadingSpanB(prices.ToArray());
+        _ = _calculator.CalculateLaggingSpan(prices.ToArray());
 
         // Assert - should complete in reasonable time
         TimeSpan elapsed = DateTime.Now - start;
