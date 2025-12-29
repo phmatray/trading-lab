@@ -168,8 +168,8 @@ public class NotificationToastContainerTests : BunitTestContext
 
         // Assert - Newest should appear first in markup
         string markup = cut.Markup;
-        int newestIndex = markup.IndexOf("Newest");
-        int oldestIndex = markup.IndexOf("Oldest");
+        int newestIndex = markup.IndexOf("Newest", StringComparison.Ordinal);
+        int oldestIndex = markup.IndexOf("Oldest", StringComparison.Ordinal);
 
         newestIndex.ShouldBeLessThan(oldestIndex);
     }

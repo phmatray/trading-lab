@@ -23,7 +23,7 @@ public class Phase4LayoutShowcaseTests : BaseTest
         await page.NavigateAsync();
 
         // Assert
-        string? title = await Page!.TitleAsync();
+        string title = await Page!.TitleAsync();
         title.ShouldContain("Phase 4 Layout Showcase");
     }
 

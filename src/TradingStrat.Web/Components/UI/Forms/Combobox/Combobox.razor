@@ -1,5 +1,3 @@
-@using Microsoft.AspNetCore.Components
-@using Microsoft.JSInterop
 @typeparam TItem
 
 <div class="relative" @ref="_containerRef" @attributes="AdditionalAttributes">
@@ -29,7 +27,7 @@
     @if (_isOpen && FilteredOptions.Any())
     {
         <div class="@GetOptionsClasses()">
-            @foreach (var (option, index) in FilteredOptions.Select((o, i) => (o, i)))
+            @foreach ((TItem option, int index) in FilteredOptions.Select((o, i) => (o, i)))
             {
                 <div @key="option"
                      class="@GetOptionClasses(option, index)"

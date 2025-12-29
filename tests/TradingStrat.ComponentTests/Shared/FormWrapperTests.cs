@@ -131,9 +131,9 @@ public class FormWrapperTests : BunitTestContext
 
         // Assert - Error should appear before Warning, Warning before Success
         string markup = cut.Markup;
-        int errorIndex = markup.IndexOf("Error");
-        int warningIndex = markup.IndexOf("Warning");
-        int successIndex = markup.IndexOf("Success");
+        int errorIndex = markup.IndexOf("Error", StringComparison.Ordinal);
+        int warningIndex = markup.IndexOf("Warning", StringComparison.Ordinal);
+        int successIndex = markup.IndexOf("Success", StringComparison.Ordinal);
 
         errorIndex.ShouldBeLessThan(warningIndex);
         warningIndex.ShouldBeLessThan(successIndex);

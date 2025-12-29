@@ -2,7 +2,7 @@
 using System.Reflection;
 using Shouldly;
 using TradingStrat.Domain.Entities;
-using Xunit;
+
 #pragma warning restore IDE0005
 
 namespace TradingStrat.Domain.Tests.Common;

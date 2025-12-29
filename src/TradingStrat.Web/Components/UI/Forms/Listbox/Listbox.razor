@@ -1,4 +1,3 @@
-@using Microsoft.AspNetCore.Components
 @typeparam TItem
 
 <div class="relative" @ref="_containerRef" @attributes="AdditionalAttributes">
@@ -33,7 +32,7 @@
     @if (_isOpen)
     {
         <div class="@GetOptionsClasses()">
-            @foreach (var (option, index) in Options.Select((o, i) => (o, i)))
+            @foreach ((TItem option, int index) in Options.Select((o, i) => (o, i)))
             {
                 <div @key="option"
                      class="@GetOptionClasses(option, index)"

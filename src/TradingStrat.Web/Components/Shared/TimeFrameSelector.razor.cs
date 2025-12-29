@@ -61,7 +61,7 @@ public partial class TimeFrameSelector : ComponentBase
 
     private async Task HandleTimeFrameChanged(ChangeEventArgs e)
     {
-        if (Enum.TryParse<TimeFrameUnit>(e.Value?.ToString(), out TimeFrameUnit selectedUnit))
+        if (Enum.TryParse(e.Value?.ToString(), out TimeFrameUnit selectedUnit))
         {
             TimeFrame newTimeFrame = new() { Unit = selectedUnit };
             await OnTimeFrameChanged.InvokeAsync(newTimeFrame);

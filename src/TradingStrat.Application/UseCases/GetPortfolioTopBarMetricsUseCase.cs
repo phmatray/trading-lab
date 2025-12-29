@@ -97,7 +97,7 @@ public class GetPortfolioTopBarMetricsUseCase : IGetPortfolioTopBarMetricsUseCas
             progress?.Report("Calculating win rate...");
 
             // Calculate win rate
-            var (winRatePercentage, winningPositions, totalPositions) =
+            (decimal winRatePercentage, int winningPositions, int totalPositions) =
                 _valuationService.CalculateWinRate(currentSnapshot);
 
             progress?.Report("Fetching yesterday's prices for return calculation...");

@@ -13,7 +13,7 @@ public class AuthLayoutTests : BunitTestContext
     public void AuthLayout_WithChildContent_RendersCorrectly()
     {
         // Arrange & Act
-        var cut = Render<AuthLayout>(parameters => parameters
+        IRenderedComponent<AuthLayout> cut = Render<AuthLayout>(parameters => parameters
             .Add(p => p.ChildContent, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "div");
@@ -29,7 +29,7 @@ public class AuthLayoutTests : BunitTestContext
     public void AuthLayout_ShouldHaveCenteredLayout()
     {
         // Arrange & Act
-        var cut = Render<AuthLayout>();
+        IRenderedComponent<AuthLayout> cut = Render<AuthLayout>();
 
         // Assert
         cut.Markup.ShouldContain("flex");
@@ -41,7 +41,7 @@ public class AuthLayoutTests : BunitTestContext
     public void AuthLayout_ShouldHaveMinimumViewportHeight()
     {
         // Arrange & Act
-        var cut = Render<AuthLayout>();
+        IRenderedComponent<AuthLayout> cut = Render<AuthLayout>();
 
         // Assert
         cut.Markup.ShouldContain("min-h-dvh");
@@ -51,7 +51,7 @@ public class AuthLayoutTests : BunitTestContext
     public void AuthLayout_ShouldHaveResponsiveStyling()
     {
         // Arrange & Act
-        var cut = Render<AuthLayout>();
+        IRenderedComponent<AuthLayout> cut = Render<AuthLayout>();
 
         // Assert
         cut.Markup.ShouldContain("lg:rounded-lg");
@@ -64,7 +64,7 @@ public class AuthLayoutTests : BunitTestContext
     public void AuthLayout_ShouldRenderMainElement()
     {
         // Arrange & Act
-        var cut = Render<AuthLayout>();
+        IRenderedComponent<AuthLayout> cut = Render<AuthLayout>();
 
         // Assert
         cut.Markup.ShouldContain("<main");

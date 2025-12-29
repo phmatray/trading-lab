@@ -166,7 +166,7 @@ public class InputTests : BunitTestContext
     {
         // Arrange
         string? newValue = null;
-        EventCallback<string?> callback = EventCallback.Factory.Create<string?>(
+        EventCallback<string?> callback = EventCallback.Factory.Create(
             this,
             (string? value) => newValue = value);
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Services;
 using TradingStrat.Web.Services.State;
@@ -79,7 +80,7 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
                     _selectedPortfolioName = portfolio.Name;
 
                     // Load TopBar metrics using the use case
-                    var metricsResult = await GetTopBarMetricsUseCase.ExecuteAsync(portfolioId.Value);
+                    Result<TopBarMetrics> metricsResult = await GetTopBarMetricsUseCase.ExecuteAsync(portfolioId.Value);
                     if (metricsResult.IsSuccess)
                     {
                         TopBarMetrics metrics = metricsResult.Value;

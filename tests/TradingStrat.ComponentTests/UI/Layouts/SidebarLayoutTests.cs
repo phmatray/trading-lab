@@ -20,7 +20,7 @@ public class SidebarLayoutTests : BunitTestContext
     public void SidebarLayout_WithAllSlots_RendersCorrectly()
     {
         // Arrange & Act
-        var cut = Render<SidebarLayout>(parameters => parameters
+        IRenderedComponent<SidebarLayout> cut = Render<SidebarLayout>(parameters => parameters
             .Add(p => p.Navbar, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "nav");
@@ -50,7 +50,7 @@ public class SidebarLayoutTests : BunitTestContext
     public void SidebarLayout_ShouldHaveFixedSidebarOnDesktop()
     {
         // Arrange & Act
-        var cut = Render<SidebarLayout>(parameters => parameters
+        IRenderedComponent<SidebarLayout> cut = Render<SidebarLayout>(parameters => parameters
             .Add(p => p.Sidebar, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "aside");
@@ -66,7 +66,7 @@ public class SidebarLayoutTests : BunitTestContext
     public void SidebarLayout_ShouldHaveNavbarOnMobile()
     {
         // Arrange & Act
-        var cut = Render<SidebarLayout>(parameters => parameters
+        IRenderedComponent<SidebarLayout> cut = Render<SidebarLayout>(parameters => parameters
             .Add(p => p.Navbar, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "nav");
@@ -83,7 +83,7 @@ public class SidebarLayoutTests : BunitTestContext
     public void SidebarLayout_ShouldHaveResponsiveBackgroundColors()
     {
         // Arrange & Act
-        var cut = Render<SidebarLayout>();
+        IRenderedComponent<SidebarLayout> cut = Render<SidebarLayout>();
 
         // Assert
         cut.Markup.ShouldContain("bg-white");

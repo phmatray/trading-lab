@@ -45,7 +45,7 @@ public class AnthropicAdapter : IAssistantPort
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Build message list for IChatClient
-        var messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
+        List<AIChatMessage> messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
 
         // Create chat options
         var options = new ChatOptions
@@ -55,10 +55,10 @@ public class AnthropicAdapter : IAssistantPort
         };
 
         // Stream the response
-        await foreach (var update in _chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
+        await foreach (ChatResponseUpdate update in _chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             // Extract text content from streaming updates
-            foreach (var content in update.Contents.OfType<TextContent>())
+            foreach (TextContent content in update.Contents.OfType<TextContent>())
             {
                 if (!string.IsNullOrEmpty(content.Text))
                 {
@@ -77,7 +77,7 @@ public class AnthropicAdapter : IAssistantPort
         try
         {
             // Build message list for IChatClient
-            var messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
+            List<AIChatMessage> messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
 
             // Create chat options
             var options = new ChatOptions
@@ -118,9 +118,9 @@ public class AnthropicAdapter : IAssistantPort
         }
 
         // Convert conversation history
-        foreach (var msg in conversationHistory)
+        foreach (DomainChatMessage msg in conversationHistory)
         {
-            var role = msg.Role.ToLowerInvariant() switch
+            ChatRole role = msg.Role.ToLowerInvariant() switch
             {
                 "user" => ChatRole.User,
                 "assistant" => ChatRole.Assistant,

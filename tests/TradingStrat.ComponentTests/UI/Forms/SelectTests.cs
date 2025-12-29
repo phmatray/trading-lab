@@ -183,7 +183,7 @@ public class SelectTests : BunitTestContext
     {
         // Arrange
         bool changed = false;
-        EventCallback<ChangeEventArgs> callback = EventCallback.Factory.Create<ChangeEventArgs>(
+        EventCallback<ChangeEventArgs> callback = EventCallback.Factory.Create(
             this,
             (ChangeEventArgs _) => changed = true);
 

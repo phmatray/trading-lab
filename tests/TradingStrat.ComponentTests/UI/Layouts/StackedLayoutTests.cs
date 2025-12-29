@@ -20,7 +20,7 @@ public class StackedLayoutTests : BunitTestContext
     public void StackedLayout_WithAllSlots_RendersCorrectly()
     {
         // Arrange & Act
-        var cut = Render<StackedLayout>(parameters => parameters
+        IRenderedComponent<StackedLayout> cut = Render<StackedLayout>(parameters => parameters
             .Add(p => p.Navbar, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "nav");
@@ -50,7 +50,7 @@ public class StackedLayoutTests : BunitTestContext
     public void StackedLayout_ShouldHaveNavbarInHeader()
     {
         // Arrange & Act
-        var cut = Render<StackedLayout>(parameters => parameters
+        IRenderedComponent<StackedLayout> cut = Render<StackedLayout>(parameters => parameters
             .Add(p => p.Navbar, (RenderFragment)(builder =>
             {
                 builder.OpenElement(0, "nav");
@@ -67,7 +67,7 @@ public class StackedLayoutTests : BunitTestContext
     public void StackedLayout_ShouldHaveMobileMenuButton()
     {
         // Arrange & Act
-        var cut = Render<StackedLayout>();
+        IRenderedComponent<StackedLayout> cut = Render<StackedLayout>();
 
         // Assert
         cut.Markup.ShouldContain("lg:hidden");
@@ -78,7 +78,7 @@ public class StackedLayoutTests : BunitTestContext
     public void StackedLayout_ShouldHaveFlexColumnLayout()
     {
         // Arrange & Act
-        var cut = Render<StackedLayout>();
+        IRenderedComponent<StackedLayout> cut = Render<StackedLayout>();
 
         // Assert
         cut.Markup.ShouldContain("flex-col");
@@ -89,7 +89,7 @@ public class StackedLayoutTests : BunitTestContext
     public void StackedLayout_ShouldHaveResponsiveBackgroundColors()
     {
         // Arrange & Act
-        var cut = Render<StackedLayout>();
+        IRenderedComponent<StackedLayout> cut = Render<StackedLayout>();
 
         // Assert
         cut.Markup.ShouldContain("bg-white");

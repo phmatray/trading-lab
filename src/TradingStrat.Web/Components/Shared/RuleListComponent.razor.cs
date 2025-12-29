@@ -74,7 +74,7 @@ public partial class RuleListComponent : ComponentBase
     private async Task OnOperatorChanged(int index, string operatorValue)
     {
         Log($"[RuleListComponent] OnOperatorChanged: index={index}, operator={operatorValue}");
-        if (Enum.TryParse<ComparisonOperator>(operatorValue, out ComparisonOperator op))
+        if (Enum.TryParse(operatorValue, out ComparisonOperator op))
         {
             Rules[index].Operator = op;
             Log($"[RuleListComponent]   Parsed to: {op}");
@@ -85,7 +85,7 @@ public partial class RuleListComponent : ComponentBase
     private async Task OnValueTypeChanged(int index, string valueType)
     {
         Log($"[RuleListComponent] OnValueTypeChanged: index={index}, valueType={valueType}");
-        if (Enum.TryParse<RuleValueType>(valueType, out RuleValueType vt))
+        if (Enum.TryParse(valueType, out RuleValueType vt))
         {
             Rules[index].ValueType = vt;
 

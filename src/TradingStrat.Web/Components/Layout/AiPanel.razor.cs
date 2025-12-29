@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models.State;
 using TradingStrat.Web.Services.State;
@@ -173,7 +174,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
 
         try
         {
-            var result = await AnalyzeTickerUseCase.ExecuteAsync(_selectedTicker);
+            Result<TickerAnalysis> result = await AnalyzeTickerUseCase.ExecuteAsync(_selectedTicker);
 
             if (result.IsSuccess)
             {

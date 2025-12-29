@@ -109,7 +109,7 @@ public class StrategyBuilderPageTests : BaseTest
         // Assert
         await Page.Locator("text=Period").ShouldBeVisibleAsync();
         ILocator periodInput = Page.Locator("input[type='number']").First;
-        string? value = await periodInput.InputValueAsync();
+        string value = await periodInput.InputValueAsync();
         value.ShouldBe("14"); // Default RSI period
     }
 

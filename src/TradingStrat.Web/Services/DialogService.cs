@@ -83,7 +83,7 @@ public class DialogService
     /// </summary>
     public void Close(Guid id)
     {
-        var dialog = _dialogs.FirstOrDefault(d => d.Id == id);
+        DialogInstance? dialog = _dialogs.FirstOrDefault(d => d.Id == id);
         if (dialog != null)
         {
             _dialogs.Remove(dialog);
@@ -99,7 +99,7 @@ public class DialogService
     /// </summary>
     public void Confirm(Guid id)
     {
-        var dialog = _dialogs.FirstOrDefault(d => d.Id == id);
+        DialogInstance? dialog = _dialogs.FirstOrDefault(d => d.Id == id);
         if (dialog != null)
         {
             _dialogs.Remove(dialog);

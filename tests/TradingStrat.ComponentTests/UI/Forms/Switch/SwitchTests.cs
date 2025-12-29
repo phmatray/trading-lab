@@ -116,7 +116,7 @@ public class SwitchTests : BunitTestContext
     {
         // Arrange
         bool? newValue = null;
-        EventCallback<bool> callback = EventCallback.Factory.Create<bool>(
+        EventCallback<bool> callback = EventCallback.Factory.Create(
             this,
             (bool value) => newValue = value);
 
@@ -136,7 +136,7 @@ public class SwitchTests : BunitTestContext
     {
         // Arrange
         bool? newValue = null;
-        EventCallback<bool> callback = EventCallback.Factory.Create<bool>(
+        EventCallback<bool> callback = EventCallback.Factory.Create(
             this,
             (bool value) => newValue = value);
 

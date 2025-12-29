@@ -66,7 +66,7 @@ public partial class FilterPanel : ComponentBase
     {
         DataStatusFilter? newFilter = null;
         if (!string.IsNullOrEmpty(e.Value?.ToString()) &&
-            Enum.TryParse<DataStatusFilter>(e.Value.ToString(), out DataStatusFilter parsedFilter))
+            Enum.TryParse(e.Value.ToString(), out DataStatusFilter parsedFilter))
         {
             newFilter = parsedFilter;
         }

@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TradingStrat.UI.Tests.PageObjects;
 
 /// <summary>
@@ -86,7 +88,7 @@ public class PortfoliosPage : BasePage
             await DescriptionTextarea.FillAsync(description);
         }
 
-        await InitialCashInput.FillAsync(initialCash.ToString());
+        await InitialCashInput.FillAsync(initialCash.ToString(CultureInfo.InvariantCulture));
         await CreateSubmitButton.ClickAsync();
 
         await Page.WaitForBlazorAsync();

@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace TradingStrat.UI.Tests.PageObjects;
 
 /// <summary>
@@ -82,7 +84,7 @@ public class RebalancingPage : BasePage
 
         // Fill percentage input (second input in the row)
         ILocator percentageInput = lastAllocation.Locator("input").Nth(1);
-        await percentageInput.FillAsync(percentage.ToString());
+        await percentageInput.FillAsync(percentage.ToString(CultureInfo.InvariantCulture));
 
         await Task.Delay(200);
     }
@@ -92,7 +94,7 @@ public class RebalancingPage : BasePage
     /// </summary>
     public async Task SetCommissionPercentageAsync(decimal percentage)
     {
-        await CommissionPercentageInput.FillAsync(percentage.ToString());
+        await CommissionPercentageInput.FillAsync(percentage.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -100,7 +102,7 @@ public class RebalancingPage : BasePage
     /// </summary>
     public async Task SetMinimumCommissionAsync(decimal amount)
     {
-        await MinimumCommissionInput.FillAsync(amount.ToString());
+        await MinimumCommissionInput.FillAsync(amount.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -109,7 +111,7 @@ public class RebalancingPage : BasePage
     public async Task SetCashPercentageAsync(decimal percentage)
     {
         // Range inputs in Playwright require string values
-        await CashPercentageInput.FillAsync(percentage.ToString());
+        await CashPercentageInput.FillAsync(percentage.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>

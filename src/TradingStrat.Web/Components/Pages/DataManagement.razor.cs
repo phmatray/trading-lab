@@ -54,7 +54,7 @@ public partial class DataManagement : ComponentBase, IDisposable
 
         // Restore selected timeframe from localStorage
         string? savedTimeFrame = await FormState.GetFormStateAsync<string>(TimeframeKey);
-        if (savedTimeFrame is not null && Enum.TryParse<TimeFrameUnit>(savedTimeFrame, out TimeFrameUnit unit))
+        if (savedTimeFrame is not null && Enum.TryParse(savedTimeFrame, out TimeFrameUnit unit))
         {
             _selectedTimeFrame = new TimeFrame { Unit = unit };
         }

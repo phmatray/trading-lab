@@ -227,7 +227,7 @@ public sealed class TradingStyle : ValueObject
     /// <exception cref="ArgumentException">Thrown when the value is not a valid trading style.</exception>
     public static TradingStyle FromString(string value)
     {
-        if (Enum.TryParse<TradingStyleType>(value, ignoreCase: true, out TradingStyleType type))
+        if (Enum.TryParse(value, ignoreCase: true, out TradingStyleType type))
         {
             return FromType(type);
         }
