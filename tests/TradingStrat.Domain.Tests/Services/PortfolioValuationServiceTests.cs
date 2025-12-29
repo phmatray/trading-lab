@@ -375,7 +375,7 @@ public class PortfolioValuationServiceTests
     public void CalculateTotalValue_WithCashOnly_ShouldReturnCash()
     {
         // Arrange
-        decimal cash = 10000m;
+        const decimal cash = 10000m;
         List<Position> positions = [];
         Dictionary<string, decimal> currentPrices = [];
 
@@ -390,22 +390,12 @@ public class PortfolioValuationServiceTests
     public void CalculateTotalValue_WithPositions_ShouldIncludeMarketValue()
     {
         // Arrange
-        decimal cash = 5000m;
-        List<Position> positions = new List<Position>
-        {
-            new Position
-            {
-                Ticker = "AAPL",
-                Quantity = 10,
-                EntryPrice = 100m
-            },
-            new Position
-            {
-                Ticker = "MSFT",
-                Quantity = 5,
-                EntryPrice = 200m
-            }
-        };
+        const decimal cash = 5000m;
+        List<Position> positions =
+        [
+            new() { Ticker = "AAPL", Quantity = 10, EntryPrice = 100m },
+            new() { Ticker = "MSFT", Quantity = 5, EntryPrice = 200m }
+        ];
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -425,22 +415,12 @@ public class PortfolioValuationServiceTests
     public void CalculateTotalValue_WithMissingPrice_ShouldSkipPosition()
     {
         // Arrange
-        decimal cash = 5000m;
-        List<Position> positions = new List<Position>
-        {
-            new Position
-            {
-                Ticker = "AAPL",
-                Quantity = 10,
-                EntryPrice = 100m
-            },
-            new Position
-            {
-                Ticker = "UNKNOWN",
-                Quantity = 5,
-                EntryPrice = 200m
-            }
-        };
+        const decimal cash = 5000m;
+        List<Position> positions =
+        [
+            new() { Ticker = "AAPL", Quantity = 10, EntryPrice = 100m },
+            new() { Ticker = "UNKNOWN", Quantity = 5, EntryPrice = 200m }
+        ];
 
         var currentPrices = new Dictionary<string, decimal>
         {
@@ -460,16 +440,11 @@ public class PortfolioValuationServiceTests
     public void CalculateTotalValue_WithZeroCash_ShouldReturnPositionsValue()
     {
         // Arrange
-        decimal cash = 0m;
-        List<Position> positions = new List<Position>
-        {
-            new Position
-            {
-                Ticker = "AAPL",
-                Quantity = 10,
-                EntryPrice = 100m
-            }
-        };
+        const decimal cash = 0m;
+        List<Position> positions =
+        [
+            new() { Ticker = "AAPL", Quantity = 10, EntryPrice = 100m }
+        ];
 
         var currentPrices = new Dictionary<string, decimal>
         {

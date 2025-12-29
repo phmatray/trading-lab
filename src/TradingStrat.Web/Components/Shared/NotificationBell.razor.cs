@@ -7,9 +7,9 @@ public partial class NotificationBell : ComponentBase, IDisposable
 {
     [Inject] private NotificationService NotificationService { get; set; } = null!;
 
-    private bool _isOpen = false;
-    private int _unreadCount = 0;
-    private bool _hasLoadedCount = false;
+    private bool _isOpen;
+    private int _unreadCount;
+    private bool _hasLoadedCount;
 
     protected override void OnInitialized()
     {

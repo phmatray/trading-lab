@@ -30,7 +30,7 @@ public partial class DataManagement : ComponentBase, IDisposable
 
     private TabType _activeTab = TabType.SingleTicker;
     private TimeFrame _selectedTimeFrame = new() { Unit = TimeFrameUnit.D1 };
-    private bool _showCsvDialog = false;
+    private bool _showCsvDialog;
 
     // Single ticker state
     private DataFetchFormModel _formModel = new();
@@ -43,7 +43,7 @@ public partial class DataManagement : ComponentBase, IDisposable
     private BulkFetchResult? _bulkResult;
     private string? _bulkErrorMessage;
     private string? _bulkSuccessMessage;
-    private bool _isBulkFetching = false;
+    private bool _isBulkFetching;
     private List<string> _recentTickers = new();
 
     private int ParsedTickerCount => ParseTickerList(_bulkFormModel.TickerList ?? "").Count;

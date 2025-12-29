@@ -21,11 +21,11 @@ public partial class Portfolios : ComponentBase, IDisposable
 
     private List<Portfolio>? _portfolios;
     private CreatePortfolioFormModel _createFormModel = new();
-    private bool _showCreateDialog = false;
-    private bool _showDeleteDialog = false;
-    private bool _isLoading = false;
-    private bool _isCreating = false;
-    private bool _isDeleting = false;
+    private bool _showCreateDialog;
+    private bool _showDeleteDialog;
+    private bool _isLoading;
+    private bool _isCreating;
+    private bool _isDeleting;
     private int _portfolioIdToDelete;
     private string _portfolioToDelete = string.Empty;
     private string? _errorMessage;

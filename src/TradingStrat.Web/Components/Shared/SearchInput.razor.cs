@@ -57,10 +57,7 @@ public partial class SearchInput : ComponentBase, IDisposable
 
     protected override void OnParametersSet()
     {
-        if (_currentValue != Value)
-        {
-            _currentValue = Value;
-        }
+        _currentValue = Value;
     }
 
     #endregion

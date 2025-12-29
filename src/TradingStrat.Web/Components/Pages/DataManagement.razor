@@ -66,14 +66,14 @@
                                         IsOptional="true"
                                         HelpText="International Securities Identification Number for ticker resolution">
                             <InputText id="isin" @bind-Value="_formModel.ISIN"
-                                       @oninput="@(async (ChangeEventArgs e) => { _formModel.ISIN = e.Value?.ToString(); await OnFormFieldChanged(); })"
+                                       @oninput="@(async e => { _formModel.ISIN = e.Value?.ToString(); await OnFormFieldChanged(); })"
                                        class="@TailwindStyles.InputText" />
                         </FormInputGroup>
 
                         <DateRangeInput @bind-StartDate="_formModel.StartDate"
                                         @bind-EndDate="_formModel.EndDate" />
 
-                        <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
+                        <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
                                 Variant="@ButtonVariant.Primary"
                                 FullWidth="@true"
                                 IsLoading="@ProgressService.IsProcessing"
@@ -162,7 +162,7 @@
                             </label>
                         </div>
 
-                        <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
+                        <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
                                 Variant="@ButtonVariant.Primary"
                                 FullWidth="@true"
                                 IsLoading="@_isBulkFetching"

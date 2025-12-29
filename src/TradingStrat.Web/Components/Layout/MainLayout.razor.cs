@@ -17,23 +17,23 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
     [Inject] private IGetPortfolioTopBarMetricsUseCase GetTopBarMetricsUseCase { get; set; } = null!;
 
     // Layout state
-    private bool _sidebarCollapsed = false;
-    private bool _rightPanelCollapsed = false;
+    private bool _sidebarCollapsed;
+    private bool _rightPanelCollapsed;
 
     // TopBar data
-    private string? _selectedPortfolioName = null;
-    private decimal? _portfolioValue = null;
-    private decimal? _todayReturnDollars = null;
-    private decimal? _todayReturnPercentage = null;
-    private decimal? _winRatePercentage = null;
+    private string? _selectedPortfolioName;
+    private decimal? _portfolioValue;
+    private decimal? _todayReturnDollars;
+    private decimal? _todayReturnPercentage;
+    private decimal? _winRatePercentage;
 
     // AI Panel data
     private readonly string? _currentTicker = null;
     private readonly string? _currentContext = null;
     private string _currentRegime = "NEUTRAL";
-    private string? _currentRecommendation = null;
-    private int? _confidence = null;
-    private List<string>? _reasons = null;
+    private string? _currentRecommendation;
+    private int? _confidence;
+    private List<string>? _reasons;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

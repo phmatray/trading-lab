@@ -47,14 +47,13 @@ public class DataFreshnessService : IDataFreshnessService
                 NotificationType.DataFreshness,
                 severity,
                 "Data Refresh Recommended",
-                $"Data for {ticker} is {daysOld} day{(daysOld == 1 ? "" : "s")} old",
+                $"Data for {ticker} is {daysOld} days old",
                 ticker: ticker,
                 action: new NotificationAction
                 {
                     Label = "Refresh Now",
                     TargetPage = "/data"
-                }
-            );
+                }, cancellationToken: cancellationToken);
         }
     }
 }

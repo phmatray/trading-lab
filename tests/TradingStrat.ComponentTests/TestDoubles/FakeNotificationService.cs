@@ -11,7 +11,7 @@ namespace TradingStrat.ComponentTests.TestDoubles;
 public class FakeNotificationService : NotificationService
 {
     private readonly List<Notification> _notifications = new();
-    private bool _disposed = false;
+    private bool _disposed;
 
     public FakeNotificationService() : base(new FakeLocalStorageService())
     {

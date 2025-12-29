@@ -26,7 +26,7 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
     private PortfolioPerformanceHistory? _performanceHistory;
     private DateTime _startDate = DateTime.Today.AddYears(-1);
     private DateTime _endDate = DateTime.Today;
-    private bool _isLoading = false;
+    private bool _isLoading;
     private string? _errorMessage;
 
     private List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()

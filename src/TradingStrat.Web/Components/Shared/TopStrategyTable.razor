@@ -1,8 +1,9 @@
 @* Top strategies table component *@
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
 
 @if (Strategies is null || !Strategies.Any())
 {
-    <div class="text-center py-8 text-gray-500 dark:text-dark-text-muted">
+    <div class="text-center py-8 text-gray-500 dark:text-dark-text-tertiary">
         <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
         </svg>
@@ -12,50 +13,40 @@
 }
 else
 {
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-            <thead class="bg-gray-50 dark:bg-dark-bg-tertiary">
-                <tr>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                        Strategy
-                    </th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                        Return
-                    </th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                        Sharpe
-                    </th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">
-                        Trades
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-dark-bg-secondary divide-y divide-gray-200 dark:divide-dark-border">
-                @foreach (var strategy in Strategies)
-                {
-                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary">
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
-                                @strategy.StrategyName
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-dark-text-muted">
-                                @strategy.Ticker
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="@(strategy.TotalReturn >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400") text-sm font-medium">
-                                @(strategy.TotalReturn >= 0 ? "+" : "")@strategy.TotalReturn.ToString("F2")%
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary">
-                            @strategy.SharpeRatio.ToString("F2")
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-dark-text-secondary">
-                            @strategy.TotalTrades
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+    <Table Dense Striped>
+        <TableHead>
+            <TableRow>
+                <TableHeader>Strategy</TableHeader>
+                <TableHeader>Return</TableHeader>
+                <TableHeader>Sharpe</TableHeader>
+                <TableHeader>Trades</TableHeader>
+            </TableRow>
+        </TableHead>
+        <TableBody>
+            @foreach (var strategy in Strategies)
+            {
+                <TableRow>
+                    <TableCell>
+                        <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                            @strategy.StrategyName
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-dark-text-tertiary">
+                            @strategy.Ticker
+                        </div>
+                    </TableCell>
+                    <TableCell>
+                        <span class="@(strategy.TotalReturn >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400") text-sm font-medium">
+                            @(strategy.TotalReturn >= 0 ? "+" : "")@strategy.TotalReturn.ToString("F2")%
+                        </span>
+                    </TableCell>
+                    <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary">
+                        @strategy.SharpeRatio.ToString("F2")
+                    </TableCell>
+                    <TableCell Class="text-sm text-gray-500 dark:text-dark-text-secondary">
+                        @strategy.TotalTrades
+                    </TableCell>
+                </TableRow>
+            }
+        </TableBody>
+    </Table>
 }

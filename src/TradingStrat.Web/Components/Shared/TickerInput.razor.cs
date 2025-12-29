@@ -6,7 +6,6 @@ namespace TradingStrat.Web.Components.Shared;
 public partial class TickerInput : ComponentBase
 {
     private readonly string _inputId = $"ticker-{Guid.NewGuid():N}";
-    private string? _currentValue;
 
     /// <summary>
     /// Current value of the ticker input
@@ -62,27 +61,17 @@ public partial class TickerInput : ComponentBase
     [Parameter]
     public EventCallback OnInputChanged { get; set; }
 
-    private string? CurrentValue
-    {
-        get => _currentValue;
-        set
-        {
-            if (_currentValue != value)
-            {
-                _currentValue = value;
-            }
-        }
-    }
+    private string? CurrentValue { get; set; }
 
     protected override void OnParametersSet()
     {
-        _currentValue = Value;
+        CurrentValue = Value;
     }
 
     private async Task HandleInput(ChangeEventArgs e)
     {
         string? newValue = e.Value?.ToString()?.ToUpperInvariant();
-        _currentValue = newValue;
+        CurrentValue = newValue;
         await ValueChanged.InvokeAsync(newValue);
 
         if (OnInputChanged.HasDelegate)

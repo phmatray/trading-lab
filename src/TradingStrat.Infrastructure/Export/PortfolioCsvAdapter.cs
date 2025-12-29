@@ -128,27 +128,23 @@ public class PortfolioCsvAdapter : IPortfolioExportPort
         {
             char c = line[i];
 
-            if (c == '"')
+            switch (c)
             {
                 // Handle escaped quotes ("")
-                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
-                {
+                case '"' when inQuotes && i + 1 < line.Length && line[i + 1] == '"':
                     currentField.Append('"');
                     i++; // Skip next quote
-                }
-                else
-                {
+                    break;
+                case '"':
                     inQuotes = !inQuotes;
-                }
-            }
-            else if (c == ',' && !inQuotes)
-            {
-                fields.Add(currentField.ToString());
-                currentField.Clear();
-            }
-            else
-            {
-                currentField.Append(c);
+                    break;
+                case ',' when !inQuotes:
+                    fields.Add(currentField.ToString());
+                    currentField.Clear();
+                    break;
+                default:
+                    currentField.Append(c);
+                    break;
             }
         }
 

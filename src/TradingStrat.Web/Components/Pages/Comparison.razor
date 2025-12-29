@@ -1,6 +1,7 @@
 @page "/comparison"
 @rendermode InteractiveServer
 @using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
 @inherits BaseDataPage<ComparisonFormModel, ParameterOptimizationResult>
 
 <PageTitle>A/B Comparison - TradingStrat</PageTitle>
@@ -38,7 +39,7 @@
                 </FormInputGroup>
 
                 <div class="flex items-end">
-                    <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
+                    <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
                             Variant="@ButtonVariant.Primary"
                             FullWidth="@true"
                             IsLoading="@ProgressService.IsProcessing"
@@ -71,7 +72,7 @@
     </div>
 
     <!-- Results -->
-    @if (Result is not null && Result.Comparison is not null)
+    @if (Result?.Comparison != null)
     {
         var comparison = Result.Comparison;
 
@@ -97,44 +98,46 @@
         <div class="card">
             <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Comparison</Heading>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-50 dark:bg-dark-elevated">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Metric</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-blue-700 dark:text-blue-400">Variant A</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-green-700 dark:text-green-400">Variant B</th>
-                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Difference</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-dark-border">
-                        @foreach ((string key, MetricComparison metricComparison) in comparison.Ranking.MetricBreakdown)
-                        {
-                            <tr class="bg-white dark:bg-dark-card">
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@key</td>
-                                <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantAValue)</span>
-                                    <span class="text-xs text-blue-600 dark:text-blue-400 ml-1">(@metricComparison.VariantAPoints.ToString("F1") pts)</span>
-                                </td>
-                                <td class="px-4 py-3 text-center text-sm">
-                                    <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantBValue)</span>
-                                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(@metricComparison.VariantBPoints.ToString("F1") pts)</span>
-                                </td>
-                                <td class="px-4 py-3 text-center text-sm @(metricComparison.Difference > 0 ? "metric-positive" : "metric-negative")">
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableHeader>Metric</TableHeader>
+                        <TableHeader Class="text-center text-blue-700 dark:text-blue-400">Variant A</TableHeader>
+                        <TableHeader Class="text-center text-green-700 dark:text-green-400">Variant B</TableHeader>
+                        <TableHeader Class="text-center">Difference</TableHeader>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    @foreach ((string key, MetricComparison metricComparison) in comparison.Ranking.MetricBreakdown)
+                    {
+                        <TableRow>
+                            <TableCell Class="font-medium text-gray-900 dark:text-dark-text-primary">@key</TableCell>
+                            <TableCell Class="text-center">
+                                <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantAValue)</span>
+                                <span class="text-xs text-blue-600 dark:text-blue-400 ml-1">(@metricComparison.VariantAPoints.ToString("F1") pts)</span>
+                            </TableCell>
+                            <TableCell Class="text-center">
+                                <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@StrategyUIFormatter.FormatMetricValue(key, metricComparison.VariantBValue)</span>
+                                <span class="text-xs text-green-600 dark:text-green-400 ml-1">(@metricComparison.VariantBPoints.ToString("F1") pts)</span>
+                            </TableCell>
+                            <TableCell Class="text-center">
+                                <span class="@(metricComparison.Difference > 0 ? "metric-positive" : "metric-negative")">
                                     @(metricComparison.Difference > 0 ? "+" : "")@StrategyUIFormatter.FormatMetricValue(key, metricComparison.Difference)
                                     (@(metricComparison.PercentageDifference > 0 ? "+" : "")@metricComparison.PercentageDifference.ToString("F1")%)
-                                </td>
-                            </tr>
-                        }
-                        <tr class="bg-gray-50 dark:bg-dark-elevated font-bold">
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-dark-text-primary">Total Score</td>
-                            <td class="px-4 py-3 text-center text-blue-700 dark:text-blue-400">@comparison.Ranking.VariantAScore.ToString("F1")</td>
-                            <td class="px-4 py-3 text-center text-green-700 dark:text-green-400">@comparison.Ranking.VariantBScore.ToString("F1")</td>
-                            <td class="px-4 py-3 text-center text-gray-900 dark:text-dark-text-primary">-</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                </span>
+                            </TableCell>
+                        </TableRow>
+                    }
+                </TableBody>
+                <tfoot class="bg-gray-50 dark:bg-dark-elevated font-bold">
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-dark-text-primary">Total Score</td>
+                        <td class="px-6 py-4 text-center text-blue-700 dark:text-blue-400">@comparison.Ranking.VariantAScore.ToString("F1")</td>
+                        <td class="px-6 py-4 text-center text-green-700 dark:text-green-400">@comparison.Ranking.VariantBScore.ToString("F1")</td>
+                        <td class="px-6 py-4 text-center text-gray-900 dark:text-dark-text-primary">-</td>
+                    </tr>
+                </tfoot>
+            </Table>
         </div>
 
         <!-- Detailed Results Tabs -->

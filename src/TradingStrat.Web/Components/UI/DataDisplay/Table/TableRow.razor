@@ -1,4 +1,4 @@
-<CascadingValue Value="@_rowConfig">
+<CascadingValue Value="@RowConfig">
     <tr class="@GetClasses()" @attributes="AdditionalAttributes">
         @ChildContent
     </tr>
@@ -14,7 +14,7 @@
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private TableRowConfig _rowConfig => new(Href, Target, Title);
+    private TableRowConfig RowConfig => new(Href, Target, Title);
 
     private string GetClasses()
     {

@@ -12,7 +12,7 @@ public class NotificationService : IDisposable
 
     private readonly LocalStorageService _localStorage;
     private NotificationHistory? _cachedHistory;
-    private bool _disposed = false;
+    private bool _disposed;
 
     public event Action<Notification>? OnNotificationAdded;
     public event Action? OnNotificationsChanged;

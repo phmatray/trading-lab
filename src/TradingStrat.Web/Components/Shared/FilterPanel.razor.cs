@@ -44,7 +44,7 @@ public partial class FilterPanel : ComponentBase
 
     #region Private Fields
 
-    private bool _isCollapsed = false;
+    private bool _isCollapsed;
 
     #endregion
 

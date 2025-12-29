@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
 <PageTitle>Portfolio Performance - TradingStrat</PageTitle>
 
 <div class="space-y-6">
@@ -187,41 +188,41 @@
                 else
                 {
                     <div class="overflow-x-auto" style="max-height: 600px;">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-                            <thead class="bg-gray-50 dark:bg-dark-elevated sticky top-0">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Date</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Total Value</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Cash</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Equity Value</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Daily Return</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
+                        <Table Dense Striped>
+                            <TableHead Class="sticky top-0 z-10">
+                                <TableRow>
+                                    <TableHeader>Date</TableHeader>
+                                    <TableHeader Class="text-right">Total Value</TableHeader>
+                                    <TableHeader Class="text-right">Cash</TableHeader>
+                                    <TableHeader Class="text-right">Equity Value</TableHeader>
+                                    <TableHeader Class="text-right">Daily Return</TableHeader>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
                                 @foreach (var point in _performanceHistory.DataPoints.TakeLast(50))
                                 {
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary">
+                                    <TableRow>
+                                        <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary">
                                             @point.Date.ToString("yyyy-MM-dd")
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right font-medium">
+                                        </TableCell>
+                                        <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary text-right font-medium">
                                             @point.TotalValue.ToString("C2")
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        </TableCell>
+                                        <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary text-right">
                                             @point.Cash.ToString("C2")
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        </TableCell>
+                                        <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary text-right">
                                             @point.EquityValue.ToString("C2")
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
+                                        </TableCell>
+                                        <TableCell Class="text-sm text-right">
                                             <span class="@(point.DailyReturn >= 0 ? "metric-positive" : "metric-negative") font-medium">
                                                 @((point.DailyReturn * 100).ToString("+0.00;-0.00;0.00"))%
                                             </span>
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 }
-                            </tbody>
-                        </table>
+                            </TableBody>
+                        </Table>
                     </div>
 
                     @if (_performanceHistory.DataPoints.Count > 50)
@@ -239,29 +240,27 @@
                 <div class="card">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Position Betas</Heading>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-                            <thead class="bg-gray-50 dark:bg-dark-elevated">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Ticker</th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Beta</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
-                                @foreach (KeyValuePair<string, decimal> beta in _performanceHistory.CurrentMetrics.PositionBetas)
-                                {
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary">
-                                            @beta.Key
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
-                                            @beta.Value.ToString("F2")
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                    <Table Dense Striped>
+                        <TableHead>
+                            <TableRow>
+                                <TableHeader>Ticker</TableHeader>
+                                <TableHeader Class="text-right">Beta</TableHeader>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            @foreach (KeyValuePair<string, decimal> beta in _performanceHistory.CurrentMetrics.PositionBetas)
+                            {
+                                <TableRow>
+                                    <TableCell Class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                        @beta.Key
+                                    </TableCell>
+                                    <TableCell Class="text-sm text-gray-900 dark:text-dark-text-primary text-right">
+                                        @beta.Value.ToString("F2")
+                                    </TableCell>
+                                </TableRow>
+                            }
+                        </TableBody>
+                    </Table>
                 </div>
             }
         }

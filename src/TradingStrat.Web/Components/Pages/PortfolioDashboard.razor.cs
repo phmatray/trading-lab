@@ -27,9 +27,9 @@ public partial class PortfolioDashboard : ComponentBase, IDisposable
     private Portfolio? _portfolio;
     private PortfolioSnapshot? _snapshot;
     private AddPositionFormModel _addPositionFormModel = new();
-    private bool _showAddPositionDialog = false;
-    private bool _isLoading = false;
-    private bool _isAddingPosition = false;
+    private bool _showAddPositionDialog;
+    private bool _isLoading;
+    private bool _isAddingPosition;
     private string? _errorMessage;
     private string? _successMessage;
 

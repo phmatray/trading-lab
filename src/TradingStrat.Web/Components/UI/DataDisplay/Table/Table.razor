@@ -1,4 +1,4 @@
-<CascadingValue Value="@_config">
+<CascadingValue Value="@Config">
     <div class="flow-root">
         <div class="@GetOuterClasses()" @attributes="AdditionalAttributes">
             <div class="@GetInnerClasses()">
@@ -11,15 +11,15 @@
 </CascadingValue>
 
 @code {
-    [Parameter] public bool Bleed { get; set; } = false;
-    [Parameter] public bool Dense { get; set; } = false;
-    [Parameter] public bool Grid { get; set; } = false;
-    [Parameter] public bool Striped { get; set; } = false;
+    [Parameter] public bool Bleed { get; set; }
+    [Parameter] public bool Dense { get; set; }
+    [Parameter] public bool Grid { get; set; }
+    [Parameter] public bool Striped { get; set; }
     [Parameter] public string? Class { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private TableConfig _config => new(Bleed, Dense, Grid, Striped);
+    private TableConfig Config => new(Bleed, Dense, Grid, Striped);
 
     private string GetOuterClasses()
     {

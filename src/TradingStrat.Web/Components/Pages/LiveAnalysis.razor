@@ -31,7 +31,7 @@
                 <FormInputGroup Label="Ticker Symbol"
                                 ValidationFor="@(() => FormModel.Ticker)">
                     <InputText id="ticker" @bind-Value="FormModel.Ticker"
-                               @oninput="@(async (ChangeEventArgs e) => { FormModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
+                               @oninput="@(async e => { FormModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
                                class="@TailwindStyles.InputText" />
                 </FormInputGroup>
 
@@ -61,7 +61,7 @@
                     </FormInputGroup>
                 </div>
 
-                <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
+                <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
                         Variant="@ButtonVariant.Primary"
                         FullWidth="@true"
                         IsLoading="@ProgressService.IsProcessing"

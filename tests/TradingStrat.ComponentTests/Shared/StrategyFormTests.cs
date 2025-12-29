@@ -135,7 +135,7 @@ public class StrategyFormTests : BunitTestContext
         // Arrange
         string? selectedStrategy = null;
         IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(parameters => parameters
-            .Add(p => p.SelectedStrategyChanged, (string strategy) => selectedStrategy = strategy));
+            .Add(p => p.SelectedStrategyChanged, strategy => selectedStrategy = strategy));
 
         IElement select = cut.Find("#strategy-select");
 
@@ -152,7 +152,7 @@ public class StrategyFormTests : BunitTestContext
         // Arrange
         Dictionary<string, object>? parameters = null;
         IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(builder => builder
-            .Add(p => p.ParametersChanged, (Dictionary<string, object> p) => parameters = p));
+            .Add(p => p.ParametersChanged, p => parameters = p));
 
         IElement select = cut.Find("#strategy-select");
 
@@ -351,7 +351,7 @@ public class StrategyFormTests : BunitTestContext
         // Arrange
         Dictionary<string, object>? parameters = null;
         IRenderedComponent<StrategyForm> cut = Render<StrategyForm>(builder => builder
-            .Add(p => p.ParametersChanged, (Dictionary<string, object> p) => parameters = p));
+            .Add(p => p.ParametersChanged, p => parameters = p));
 
         IElement select = cut.Find("#strategy-select");
 

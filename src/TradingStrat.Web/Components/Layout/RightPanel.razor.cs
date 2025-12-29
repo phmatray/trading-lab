@@ -23,8 +23,8 @@ public partial class RightPanel : ComponentBase, IDisposable
 
     // State
     private RightPanelTab _activeTab = RightPanelTab.StrategyCopilot;
-    private bool _isCollapsed = false;
-    private int _unreadCount = 0;
+    private bool _isCollapsed;
+    private int _unreadCount;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

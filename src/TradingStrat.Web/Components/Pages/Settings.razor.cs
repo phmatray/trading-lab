@@ -16,7 +16,7 @@ public partial class Settings : ComponentBase
     private Models.State.UserPreferences _preferences = new();
     private string? _successMessage;
     private string? _errorMessage;
-    private bool _isSaving = false;
+    private bool _isSaving;
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {

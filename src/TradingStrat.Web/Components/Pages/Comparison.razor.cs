@@ -123,7 +123,7 @@ public partial class Comparison
 
     protected override string GetSuccessMessage(ParameterOptimizationResult? result)
     {
-        if (result is null || result.Comparison is null)
+        if (result?.Comparison is null)
         {
             return "Comparison completed.";
         }

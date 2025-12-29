@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
 <PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
 
 <div class="space-y-6">
@@ -118,80 +119,78 @@
             }
             else
             {
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border">
-                        <thead class="bg-gray-50 dark:bg-dark-elevated">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Ticker</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Quantity</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Entry Price</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Current Price</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Market Value</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Gain/Loss</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Return %</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Allocation</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-dark-surface divide-y divide-gray-200 dark:divide-dark-border">
-                            @foreach (var position in _snapshot.Positions)
-                            {
-                                <tr class="hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary">
-                                        @position.Ticker
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
-                                        @position.Quantity.ToString("N0")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
-                                        @position.EntryPrice.ToString("C2")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
-                                        @position.CurrentPrice.ToString("C2")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right font-medium">
-                                        @position.MarketValue.ToString("C2")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                        <span class="@(position.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative") font-medium">
-                                            @((position.UnrealizedGainLoss >= 0 ? "+" : "") + position.UnrealizedGainLoss.ToString("C2"))
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
-                                        <span class="@(position.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative") font-medium">
-                                            @position.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-dark-text-primary text-right">
-                                        @position.AllocationPercentage.ToString("F1")%
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                        <tfoot class="bg-gray-50 dark:bg-dark-elevated">
-                            <tr>
-                                <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-dark-text-primary">
-                                    Total (@_snapshot.Positions.Count position@(_snapshot.Positions.Count == 1 ? "" : "s"))
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-dark-text-primary text-right">
-                                    @_snapshot.Positions.Sum(p => p.MarketValue).ToString("C2")
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
-                                    <span class="@(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
-                                        @((_snapshot.UnrealizedGainLoss >= 0 ? "+" : "") + _snapshot.UnrealizedGainLoss.ToString("C2"))
+                <Table Dense>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeader>Ticker</TableHeader>
+                            <TableHeader Class="text-right">Quantity</TableHeader>
+                            <TableHeader Class="text-right">Entry Price</TableHeader>
+                            <TableHeader Class="text-right">Current Price</TableHeader>
+                            <TableHeader Class="text-right">Market Value</TableHeader>
+                            <TableHeader Class="text-right">Gain/Loss</TableHeader>
+                            <TableHeader Class="text-right">Return %</TableHeader>
+                            <TableHeader Class="text-right">Allocation</TableHeader>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (var position in _snapshot.Positions)
+                        {
+                            <TableRow>
+                                <TableCell Class="font-medium text-gray-900 dark:text-dark-text-primary">
+                                    @position.Ticker
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.Quantity.ToString("N0")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.EntryPrice.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.CurrentPrice.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right font-medium">
+                                    @position.MarketValue.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-right">
+                                    <span class="@(position.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                        @((position.UnrealizedGainLoss >= 0 ? "+" : "") + position.UnrealizedGainLoss.ToString("C2"))
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
-                                    <span class="@(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
-                                        @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                </TableCell>
+                                <TableCell Class="text-right">
+                                    <span class="@(position.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                        @position.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
                                     </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary text-right">
-                                    100.0%
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.AllocationPercentage.ToString("F1")%
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                    <tfoot class="bg-gray-50 dark:bg-dark-elevated">
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                Total (@_snapshot.Positions.Count position@(_snapshot.Positions.Count == 1 ? "" : "s"))
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-dark-text-primary text-right">
+                                @_snapshot.Positions.Sum(p => p.MarketValue).ToString("C2")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                <span class="@(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
+                                    @((_snapshot.UnrealizedGainLoss >= 0 ? "+" : "") + _snapshot.UnrealizedGainLoss.ToString("C2"))
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                <span class="@(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                                    @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary text-right">
+                                100.0%
+                            </td>
+                        </tr>
+                    </tfoot>
+                </Table>
             }
         </div>
         }
@@ -249,7 +248,7 @@
                     OnClick="@CloseAddPositionDialog"
                     AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
                     Text="Cancel"></TradingStrat.Web.Components.Shared.Button>
-            <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
+            <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
                     Variant="@ButtonVariant.Primary"
                     OnClick="@HandleAddPosition"
                     IsLoading="@_isAddingPosition"

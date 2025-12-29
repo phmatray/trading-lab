@@ -62,7 +62,7 @@ public class StrategyDefinitionValidator
         }
 
         // Validate constant comparisons
-        if (rule.ValueType == RuleValueType.Constant && rule.ConstantValue is null)
+        if (rule is { ValueType: RuleValueType.Constant, ConstantValue: null })
         {
             errors.Add($"Rule with constant comparison must provide ConstantValue (Indicator: {rule.IndicatorName})");
         }
@@ -97,13 +97,12 @@ public class StrategyDefinitionValidator
         switch (definition.SizingMode)
         {
             case PositionSizingMode.FixedPercentage:
-                if (!definition.SizingParameters.ContainsKey("Percentage"))
+                if (!definition.SizingParameters.TryGetValue("Percentage", out decimal percentage))
                 {
                     errors.Add("FixedPercentage sizing mode requires 'Percentage' parameter");
                 }
                 else
                 {
-                    decimal percentage = definition.SizingParameters["Percentage"];
                     if (percentage <= 0 || percentage > 1)
                     {
                         errors.Add("Percentage must be between 0 and 1 (e.g., 0.95 for 95%)");
@@ -112,13 +111,12 @@ public class StrategyDefinitionValidator
                 break;
 
             case PositionSizingMode.FixedQuantity:
-                if (!definition.SizingParameters.ContainsKey("Quantity"))
+                if (!definition.SizingParameters.TryGetValue("Quantity", out decimal quantity))
                 {
                     errors.Add("FixedQuantity sizing mode requires 'Quantity' parameter");
                 }
                 else
                 {
-                    decimal quantity = definition.SizingParameters["Quantity"];
                     if (quantity <= 0)
                     {
                         errors.Add("Quantity must be greater than 0");
@@ -127,14 +125,13 @@ public class StrategyDefinitionValidator
                 break;
 
             case PositionSizingMode.RiskBased:
-                if (!definition.SizingParameters.ContainsKey("RiskPercentage"))
+                if (!definition.SizingParameters.TryGetValue("RiskPercentage", out decimal riskPercentage))
                 {
                     errors.Add("RiskBased sizing mode requires 'RiskPercentage' parameter");
                 }
                 else
                 {
-                    decimal riskPercentage = definition.SizingParameters["RiskPercentage"];
-                    if (riskPercentage <= 0 || riskPercentage > 0.1m)
+                    if (riskPercentage is <= 0 or > 0.1m)
                     {
                         errors.Add("RiskPercentage must be between 0 and 0.1 (e.g., 0.02 for 2%)");
                     }

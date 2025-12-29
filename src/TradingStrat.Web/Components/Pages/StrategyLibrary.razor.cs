@@ -26,12 +26,12 @@ public partial class StrategyLibrary
     }
 
     private StrategyTab _activeTab = StrategyTab.BuiltIn;
-    private bool _isLoading = false;
+    private bool _isLoading;
     private List<CustomStrategyResult> _customStrategies = [];
 
     // Delete dialog state
-    private bool _showDeleteDialog = false;
-    private int _strategyToDelete = 0;
+    private bool _showDeleteDialog;
+    private int _strategyToDelete;
     private string _strategyToDeleteName = string.Empty;
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()

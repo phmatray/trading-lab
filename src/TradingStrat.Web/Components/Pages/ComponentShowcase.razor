@@ -280,27 +280,27 @@
 
 @code {
     // Checkbox state
-    private bool _acceptTerms = false;
+    private bool _acceptTerms;
     private FeaturesModel _features = new();
     private ColorOptionsModel _colorOptions = new();
 
     // Radio state
     private bool _paymentCard = true;
-    private bool _paymentPaypal = false;
-    private bool _paymentBank = false;
-    private bool _priorityLow = false;
+    private bool _paymentPaypal;
+    private bool _paymentBank;
+    private bool _priorityLow;
     private bool _priorityMedium = true;
-    private bool _priorityHigh = false;
+    private bool _priorityHigh;
 
     // Switch state
-    private bool _featureEnabled = false;
+    private bool _featureEnabled;
     private SettingsModel _settings = new();
     private SwitchColorsModel _switchColors = new();
 
     // Dialog state
-    private bool _showSimpleDialog = false;
-    private bool _showLargeDialog = false;
-    private bool _showSmallDialog = false;
+    private bool _showSimpleDialog;
+    private bool _showLargeDialog;
+    private bool _showSmallDialog;
     private string _dialogResult = "None";
 
     private string GetSelectedPayment()
@@ -343,29 +343,29 @@
 
     private class FeaturesModel
     {
-        public bool EnableNotifications { get; set; } = false;
+        public bool EnableNotifications { get; set; }
         public bool EnableDarkMode { get; set; } = true;
-        public bool EnableAutoSave { get; set; } = false;
+        public bool EnableAutoSave { get; set; }
     }
 
     private class ColorOptionsModel
     {
-        public bool Blue { get; set; } = false;
-        public bool Red { get; set; } = false;
-        public bool Green { get; set; } = false;
+        public bool Blue { get; set; }
+        public bool Red { get; set; }
+        public bool Green { get; set; }
     }
 
     private class SettingsModel
     {
         public bool EnableAnalytics { get; set; } = true;
-        public bool EnableMarketing { get; set; } = false;
+        public bool EnableMarketing { get; set; }
         public bool EnablePushNotifications { get; set; } = true;
     }
 
     private class SwitchColorsModel
     {
-        public bool Blue { get; set; } = false;
-        public bool Red { get; set; } = false;
-        public bool Green { get; set; } = false;
+        public bool Blue { get; set; }
+        public bool Red { get; set; }
+        public bool Green { get; set; }
     }
 }

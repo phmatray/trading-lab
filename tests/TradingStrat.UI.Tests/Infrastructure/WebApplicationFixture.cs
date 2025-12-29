@@ -49,7 +49,7 @@ public class WebApplicationFixture : WebApplicationFactory<TradingStrat.Web.Prog
         _kestrelHost.Start();
 
         // Extract the actual address from Kestrel
-        IServer? server = _kestrelHost.Services.GetRequiredService<IServer>();
+        IServer server = _kestrelHost.Services.GetRequiredService<IServer>();
         IServerAddressesFeature? addresses = server.Features.Get<IServerAddressesFeature>();
 
         if (addresses is not null && addresses.Addresses.Any())

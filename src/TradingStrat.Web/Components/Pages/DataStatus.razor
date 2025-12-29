@@ -1,6 +1,7 @@
 @page "/data/status"
 @using TradingStrat.Web.Components.Base
 @using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
 @inherits BaseComponent
 @rendermode InteractiveServer
 
@@ -109,120 +110,114 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 w-12">
+                <Table Dense>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeader Class="w-12">
+                                <input
+                                    type="checkbox"
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                    checked="@IsAllSelected"
+                                    @onchange="HandleSelectAll"
+                                    aria-label="Select all" />
+                            </TableHeader>
+
+                            <SortableColumnHeader
+                                Label="Ticker"
+                                Column="SortColumn.Ticker"
+                                CurrentSortColumn="@_query.SortBy"
+                                CurrentSortDirection="@_query.SortDirection"
+                                OnSort="@HandleSort" />
+
+                            <SortableColumnHeader
+                                Label="Records"
+                                Column="SortColumn.RecordCount"
+                                CurrentSortColumn="@_query.SortBy"
+                                CurrentSortDirection="@_query.SortDirection"
+                                OnSort="@HandleSort" />
+
+                            <SortableColumnHeader
+                                Label="Coverage %"
+                                Column="SortColumn.Coverage"
+                                CurrentSortColumn="@_query.SortBy"
+                                CurrentSortDirection="@_query.SortDirection"
+                                OnSort="@HandleSort" />
+
+                            <SortableColumnHeader
+                                Label="Oldest Date"
+                                Column="SortColumn.OldestDate"
+                                CurrentSortColumn="@_query.SortBy"
+                                CurrentSortDirection="@_query.SortDirection"
+                                OnSort="@HandleSort" />
+
+                            <SortableColumnHeader
+                                Label="Latest Date"
+                                Column="SortColumn.LatestDate"
+                                CurrentSortColumn="@_query.SortBy"
+                                CurrentSortDirection="@_query.SortDirection"
+                                OnSort="@HandleSort" />
+
+                            <TableHeader>Status</TableHeader>
+
+                            <TableHeader>Actions</TableHeader>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (TickerDataStatus status in _dataStatus.TickerStatuses)
+                        {
+                            <TableRow Class="@(IsSelected(status.Ticker) ? "bg-blue-50 dark:bg-blue-900/20" : "")">
+                                <TableCell Class="w-12">
                                     <input
                                         type="checkbox"
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                        checked="@IsAllSelected"
-                                        @onchange="HandleSelectAll"
-                                        aria-label="Select all" />
-                                </th>
-
-                                <SortableColumnHeader
-                                    Label="Ticker"
-                                    Column="SortColumn.Ticker"
-                                    CurrentSortColumn="@_query.SortBy"
-                                    CurrentSortDirection="@_query.SortDirection"
-                                    OnSort="@HandleSort" />
-
-                                <SortableColumnHeader
-                                    Label="Records"
-                                    Column="SortColumn.RecordCount"
-                                    CurrentSortColumn="@_query.SortBy"
-                                    CurrentSortDirection="@_query.SortDirection"
-                                    OnSort="@HandleSort" />
-
-                                <SortableColumnHeader
-                                    Label="Coverage %"
-                                    Column="SortColumn.Coverage"
-                                    CurrentSortColumn="@_query.SortBy"
-                                    CurrentSortDirection="@_query.SortDirection"
-                                    OnSort="@HandleSort" />
-
-                                <SortableColumnHeader
-                                    Label="Oldest Date"
-                                    Column="SortColumn.OldestDate"
-                                    CurrentSortColumn="@_query.SortBy"
-                                    CurrentSortDirection="@_query.SortDirection"
-                                    OnSort="@HandleSort" />
-
-                                <SortableColumnHeader
-                                    Label="Latest Date"
-                                    Column="SortColumn.LatestDate"
-                                    CurrentSortColumn="@_query.SortBy"
-                                    CurrentSortDirection="@_query.SortDirection"
-                                    OnSort="@HandleSort" />
-
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                            @foreach (TickerDataStatus status in _dataStatus.TickerStatuses)
-                            {
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 @(IsSelected(status.Ticker) ? "bg-blue-50 dark:bg-blue-900/20" : "")">
-                                    <td class="px-6 py-4 w-12">
-                                        <input
-                                            type="checkbox"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                                            checked="@IsSelected(status.Ticker)"
-                                            @onchange="@(e => HandleRowSelectionChanged(status.Ticker, e))"
-                                            aria-label="@($"Select {status.Ticker}")" />
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                        @status.Ticker
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        @status.RecordCount.ToString("N0")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="@GetCoverageColorClass(status.CoveragePercentage)">
-                                            @status.CoveragePercentage.ToString("F1")%
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        @status.OldestDate?.ToString("yyyy-MM-dd")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        @status.LatestDate?.ToString("yyyy-MM-dd")
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="@GetStatusBadgeClass(status.CoveragePercentage)">
-                                            @GetStatusText(status.CoveragePercentage)
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div class="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                @onclick="@(() => RefreshTicker(status.Ticker))"
-                                                class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                                                title="Refresh">
-                                                <Icon Name="arrow-path" Size="IconSize.Small" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                @onclick="@(() => DeleteTicker(status.Ticker))"
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                title="Delete">
-                                                <Icon Name="trash" Size="IconSize.Small" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                                        checked="@IsSelected(status.Ticker)"
+                                        @onchange="@(e => HandleRowSelectionChanged(status.Ticker, e))"
+                                        aria-label="@($"Select {status.Ticker}")" />
+                                </TableCell>
+                                <TableCell Class="text-sm font-medium text-gray-900 dark:text-white">
+                                    @status.Ticker
+                                </TableCell>
+                                <TableCell Class="text-sm text-gray-500 dark:text-gray-400">
+                                    @status.RecordCount.ToString("N0")
+                                </TableCell>
+                                <TableCell Class="text-sm">
+                                    <span class="@GetCoverageColorClass(status.CoveragePercentage)">
+                                        @status.CoveragePercentage.ToString("F1")%
+                                    </span>
+                                </TableCell>
+                                <TableCell Class="text-sm text-gray-500 dark:text-gray-400">
+                                    @status.OldestDate?.ToString("yyyy-MM-dd")
+                                </TableCell>
+                                <TableCell Class="text-sm text-gray-500 dark:text-gray-400">
+                                    @status.LatestDate?.ToString("yyyy-MM-dd")
+                                </TableCell>
+                                <TableCell>
+                                    <span class="@GetStatusBadgeClass(status.CoveragePercentage)">
+                                        @GetStatusText(status.CoveragePercentage)
+                                    </span>
+                                </TableCell>
+                                <TableCell Class="text-sm text-gray-500">
+                                    <div class="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            @onclick="@(() => RefreshTicker(status.Ticker))"
+                                            class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                                            title="Refresh">
+                                            <Icon Name="arrow-path" Size="IconSize.Small" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @onclick="@(() => DeleteTicker(status.Ticker))"
+                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                            title="Delete">
+                                            <Icon Name="trash" Size="IconSize.Small" />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
 
                 <!-- Pagination Controls -->
                 <PaginationControls

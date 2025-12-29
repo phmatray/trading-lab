@@ -30,8 +30,8 @@ public partial class StrategyBuilder
     private bool IsEditMode => Id.HasValue;
 
     private readonly StrategyFormModel _formModel = new();
-    private bool _isLoading = false;
-    private bool _isSaving = false;
+    private bool _isLoading;
+    private bool _isSaving;
     private string _loadingMessage = "Loading...";
     private readonly List<string> _validationErrors = [];
 

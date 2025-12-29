@@ -4,7 +4,7 @@
     @if (!ComparisonResult.Strategies.Any())
     {
         <div class="flex items-center justify-center h-full">
-            <p class="text-gray-500 dark:text-dark-text-muted">No data to display</p>
+            <p class="text-gray-500 dark:text-dark-text-tertiary">No data to display</p>
         </div>
     }
     else
@@ -26,7 +26,7 @@
 
         <!-- Simple text-based chart placeholder -->
         <!-- TODO: Integrate ApexCharts or Chart.js for production -->
-        <div class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-gray-50 dark:bg-dark-bg-tertiary">
+        <div class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-gray-50 dark:bg-dark-elevated">
             <div class="space-y-4">
                 @foreach (var strategy in ComparisonResult.Strategies)
                 {
@@ -53,7 +53,7 @@
                                  style="width: @barWidth.ToString("F1")%"></div>
                         </div>
 
-                        <div class="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">
+                        <div class="mt-1 text-xs text-gray-500 dark:text-dark-text-tertiary">
                             @strategy.EquityCurve.Count points |
                             @strategy.TotalTrades trades
                         </div>

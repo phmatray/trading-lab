@@ -28,7 +28,7 @@
                             Ticker Symbol
                         </label>
                         <InputText @bind-Value="_config.Ticker"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent"
                                    placeholder="AAPL" />
                         <ValidationMessage For="@(() => _config.Ticker)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
@@ -39,7 +39,7 @@
                             Initial Capital ($)
                         </label>
                         <InputNumber @bind-Value="_config.InitialCapital"
-                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
+                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
                         <ValidationMessage For="@(() => _config.InitialCapital)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
 
@@ -49,7 +49,7 @@
                             Start Date
                         </label>
                         <InputDate @bind-Value="_config.StartDate"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
                         <ValidationMessage For="@(() => _config.StartDate)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
 
@@ -59,7 +59,7 @@
                             End Date
                         </label>
                         <InputDate @bind-Value="_config.EndDate"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
                         <ValidationMessage For="@(() => _config.EndDate)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
 
@@ -69,7 +69,7 @@
                             Commission (%)
                         </label>
                         <InputNumber @bind-Value="_config.CommissionPercentage"
-                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
+                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
                         <ValidationMessage For="@(() => _config.CommissionPercentage)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
 
@@ -79,7 +79,7 @@
                             Minimum Commission ($)
                         </label>
                         <InputNumber @bind-Value="_config.MinimumCommission"
-                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-bg-secondary text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
+                                     class="w-full px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary focus:ring-2 focus:ring-trading-blue dark:focus:ring-dark-accent-blue focus:border-transparent" />
                         <ValidationMessage For="@(() => _config.MinimumCommission)" class="text-red-600 dark:text-red-400 text-sm mt-1" />
                     </div>
                 </div>
@@ -120,28 +120,28 @@
 
                 <!-- Summary Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg">
+                    <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
                         <div class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">Total Return</div>
                         <div class="text-xl font-bold @(_result.Metrics.TotalReturnPercentage >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
                             @_result.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
                         </div>
                     </div>
 
-                    <div class="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg">
+                    <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
                         <div class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">Sharpe Ratio</div>
                         <div class="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
                             @_result.Metrics.SharpeRatio.ToString("F2")
                         </div>
                     </div>
 
-                    <div class="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg">
+                    <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
                         <div class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">Max Drawdown</div>
                         <div class="text-xl font-bold text-red-600 dark:text-red-400">
                             @_result.Metrics.MaxDrawdown.ToString("F2%")
                         </div>
                     </div>
 
-                    <div class="p-4 bg-gray-50 dark:bg-dark-bg-tertiary rounded-lg">
+                    <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
                         <div class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">Win Rate</div>
                         <div class="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
                             @_result.Metrics.WinRate.ToString("F1%")

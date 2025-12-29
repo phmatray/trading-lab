@@ -32,13 +32,13 @@ public partial class StrategyCopiloPanel : ComponentBase, IAsyncDisposable
     // Analysis mode state
     private string _selectedTicker = string.Empty;
     private TickerAnalysis? _tickerAnalysis;
-    private bool _isAnalyzing = false;
+    private bool _isAnalyzing;
     private string? _analysisError;
 
     // SignalR chat
     private HubConnection? _hubConnection;
     private ElementReference _messagesContainer;
-    private bool _isStreaming = false;
+    private bool _isStreaming;
     private string _userInput = string.Empty;
     private string _streamingMessage = string.Empty;
     private string _sessionId = Guid.NewGuid().ToString();

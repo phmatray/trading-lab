@@ -28,8 +28,8 @@ public partial class Rebalancing : ComponentBase, IDisposable
     private PortfolioSnapshot? _snapshot;
     private readonly RebalancingFormModel _formModel = new();
     private RebalancingPlan? _plan;
-    private bool _isLoading = false;
-    private bool _isCalculating = false;
+    private bool _isLoading;
+    private bool _isCalculating;
     private string? _errorMessage;
     private string? _warningMessage;
 

@@ -54,7 +54,7 @@
     private ElementReference _containerRef;
     private ElementReference _inputRef;
     private string _query = string.Empty;
-    private bool _isOpen = false;
+    private bool _isOpen;
     private int _focusedIndex = -1;
 
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;

@@ -23,11 +23,8 @@ public class DataCoverageServiceTests
     [Fact]
     public void DetectGaps_WithEmptyList_ReturnsEmptyList()
     {
-        // Arrange
-        List<HistoricalPrice> prices = [];
-
         // Act
-        List<DateGap> result = _service.DetectGaps(prices);
+        List<DateGap> result = _service.DetectGaps((List<HistoricalPrice>)[]);
 
         // Assert
         result.ShouldBeEmpty();

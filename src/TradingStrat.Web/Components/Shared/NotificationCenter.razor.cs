@@ -14,7 +14,7 @@ public partial class NotificationCenter : ComponentBase, IDisposable
 
     private bool _isOpen;
     private List<Notification> _notifications = new();
-    private bool _hasLoadedNotifications = false;
+    private bool _hasLoadedNotifications;
 
     protected override void OnInitialized()
     {

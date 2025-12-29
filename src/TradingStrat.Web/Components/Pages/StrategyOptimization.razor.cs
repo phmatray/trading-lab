@@ -25,8 +25,8 @@ public partial class StrategyOptimization : IDisposable
     private Domain.ValueObjects.OptimizationProgress? _optimizationProgress;
 
     private bool _isLoadingStrategies = true;
-    private bool _isOptimizing = false;
-    private int _estimatedIterations = 0;
+    private bool _isOptimizing;
+    private int _estimatedIterations;
 
     private readonly List<Shared.BreadcrumbNav.Breadcrumb> _breadcrumbs = new()
     {

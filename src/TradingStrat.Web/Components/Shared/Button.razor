@@ -45,7 +45,7 @@
     // Preserve existing parameters (no breaking changes)
     [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
-    [Parameter] public TradingStrat.Web.Components.Shared.ButtonType Type { get; set; } = TradingStrat.Web.Components.Shared.ButtonType.Button;
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool FullWidth { get; set; }
@@ -73,8 +73,8 @@
 
     private TradingStrat.Web.Components.UI.Buttons.ButtonType MapType() => Type switch
     {
-        TradingStrat.Web.Components.Shared.ButtonType.Submit => TradingStrat.Web.Components.UI.Buttons.ButtonType.Submit,
-        TradingStrat.Web.Components.Shared.ButtonType.Reset => TradingStrat.Web.Components.UI.Buttons.ButtonType.Reset,
+        ButtonType.Submit => TradingStrat.Web.Components.UI.Buttons.ButtonType.Submit,
+        ButtonType.Reset => TradingStrat.Web.Components.UI.Buttons.ButtonType.Reset,
         _ => TradingStrat.Web.Components.UI.Buttons.ButtonType.Button
     };
 
