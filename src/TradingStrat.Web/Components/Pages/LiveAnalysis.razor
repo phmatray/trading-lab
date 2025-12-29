@@ -17,7 +17,7 @@
                 Description="Get ML-based predictions and technical analysis for current market positions." />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
-                       CurrentMessage="ProgressService.CurrentMessage"
+                       CurrentMessage="@ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
     <AlertMessage Message="@ErrorMessage" Type="AlertType.Error" />

@@ -14,7 +14,7 @@
                 OnBack="NavigateBack" />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
-                       CurrentMessage="ProgressService.CurrentMessage"
+                       CurrentMessage="@ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
     <FormWrapper ErrorMessage="@_errorMessage" WarningMessage="@_warningMessage">
@@ -122,7 +122,7 @@
                         <TradingStrat.Web.Components.Shared.Button Type="@TradingStrat.Web.Components.Shared.ButtonType.Submit"
                                 Variant="@ButtonVariant.Primary"
                                 FullWidth="@true"
-                                IsLoading="@ProgressService.IsProcessing"
+                                IsLoading="@_isCalculating"
                                 Text="Calculate Rebalancing Plan"
                                 LoadingText="Calculating..."></TradingStrat.Web.Components.Shared.Button>
                     </EditForm>

@@ -36,7 +36,7 @@
     </PageHeader>
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
-                       CurrentMessage="ProgressService.CurrentMessage"
+                       CurrentMessage="@ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
     <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
@@ -154,7 +154,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                                         <span class="@(position.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative") font-medium">
-                                            @position.UnrealizedGainLoss.ToString("+C2;-C2;C2")
+                                            @((position.UnrealizedGainLoss >= 0 ? "+" : "") + position.UnrealizedGainLoss.ToString("C2"))
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
@@ -178,7 +178,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
                                     <span class="@(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
-                                        @_snapshot.UnrealizedGainLoss.ToString("+C2;-C2;C2")
+                                        @((_snapshot.UnrealizedGainLoss >= 0 ? "+" : "") + _snapshot.UnrealizedGainLoss.ToString("C2"))
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
@@ -206,7 +206,7 @@
                 <DataAnnotationsValidator />
 
                 <div>
-                    <label for="ticker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol *</label>
+                    <label for="ticker" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Ticker Symbol *</label>
                     <InputText id="ticker" @bind-Value="_addPositionFormModel.Ticker"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _addPositionFormModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
@@ -214,13 +214,13 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Quantity *</label>
+                        <label for="quantity" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Quantity *</label>
                         <InputNumber id="quantity" @bind-Value="_addPositionFormModel.Quantity"
                                      class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _addPositionFormModel.Quantity)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                     </div>
                     <div>
-                        <label for="entryPrice" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Entry Price *</label>
+                        <label for="entryPrice" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Entry Price *</label>
                         <InputNumber id="entryPrice" @bind-Value="_addPositionFormModel.EntryPrice"
                                      class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                         <ValidationMessage For="@(() => _addPositionFormModel.EntryPrice)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
@@ -228,14 +228,14 @@
                 </div>
 
                 <div>
-                    <label for="entryDate" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Entry Date *</label>
+                    <label for="entryDate" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Entry Date *</label>
                     <InputDate id="entryDate" @bind-Value="_addPositionFormModel.EntryDate"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                     <ValidationMessage For="@(() => _addPositionFormModel.EntryDate)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Notes</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Notes</label>
                     <InputTextArea id="notes" @bind-Value="_addPositionFormModel.Notes"
                                    rows="3"
                                    class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />

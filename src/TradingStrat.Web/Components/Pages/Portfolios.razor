@@ -71,14 +71,14 @@
             <DataAnnotationsValidator />
 
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Portfolio Name *</label>
+                <label for="name" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Portfolio Name *</label>
                 <InputText id="name" @bind-Value="_createFormModel.Name"
                            class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                 <ValidationMessage For="@(() => _createFormModel.Name)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Description</label>
+                <label for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Description</label>
                 <InputTextArea id="description" @bind-Value="_createFormModel.Description"
                                rows="3"
                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
@@ -86,7 +86,7 @@
             </div>
 
             <div>
-                <label for="initialCash" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Cash *</label>
+                <label for="initialCash" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Initial Cash *</label>
                 <InputNumber id="initialCash" @bind-Value="_createFormModel.InitialCash"
                              class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
                 <ValidationMessage For="@(() => _createFormModel.InitialCash)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />

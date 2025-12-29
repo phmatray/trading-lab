@@ -37,16 +37,26 @@ public partial class PerformanceAnalytics : ComponentBase, IDisposable
         new() { Label = "Performance", Href = "" }
     };
 
+    private bool _firstRender = true;
+
     protected override async Task OnInitializedAsync()
     {
         ProgressService.OnProgressChanged += StateHasChanged;
         await LoadPortfolio();
-        await HandleAnalyze();
     }
 
     protected override async Task OnParametersSetAsync()
     {
         await PortfolioState.SetSelectedPortfolioAsync(PortfolioId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            await HandleAnalyze();
+        }
     }
 
     private async Task LoadPortfolio()

@@ -14,7 +14,7 @@
                 OnBack="NavigateBack" />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
-                       CurrentMessage="ProgressService.CurrentMessage"
+                       CurrentMessage="@ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
     <FormWrapper ErrorMessage="@_errorMessage">

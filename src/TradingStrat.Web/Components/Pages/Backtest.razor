@@ -15,7 +15,7 @@
                 Description="Test trading strategies on historical data and analyze performance metrics." />
 
     <ProgressIndicator IsVisible="ProgressService.IsProcessing"
-                       CurrentMessage="ProgressService.CurrentMessage"
+                       CurrentMessage="@ProgressService.CurrentMessage"
                        Progress="ProgressService.CurrentProgress" />
 
     <AlertMessage Message="@ErrorMessage" Type="AlertType.Error" />

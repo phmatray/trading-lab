@@ -29,6 +29,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
     private readonly RebalancingFormModel _formModel = new();
     private RebalancingPlan? _plan;
     private bool _isLoading = false;
+    private bool _isCalculating = false;
     private string? _errorMessage;
     private string? _warningMessage;
 
@@ -134,6 +135,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
             return;
         }
 
+        _isCalculating = true;
         await InvokeAsync(() => ProgressService.Reset());
 
         var progress = new Progress<string>(message =>
@@ -187,6 +189,7 @@ public partial class Rebalancing : ComponentBase, IDisposable
         }
         finally
         {
+            _isCalculating = false;
             await InvokeAsync(() => ProgressService.Reset());
         }
     }
