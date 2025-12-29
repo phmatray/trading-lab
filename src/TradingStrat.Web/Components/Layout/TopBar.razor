@@ -1,5 +1,6 @@
 @using System.Globalization
-@using TradingStrat.Web.Components.UI.Navigation.Navbar
+@using TradingStrat.Web.Components.UI.Navigation.Dropdown
+@using TradingStrat.Web.Components.UI.Buttons
 @using TradingStrat.Web.Components.UI.Typography
 @* TopBar Component - Fixed top bar with portfolio info and quick actions *@
 
@@ -7,22 +8,64 @@
      data-testid="top-bar"
      role="banner">
     <div class="h-full px-4 flex items-center justify-between">
-        <!-- Left: App Title + Portfolio Info -->
+        <!-- Left: App Title + Portfolio Selector -->
         <div class="flex items-center gap-6">
             <!-- App Title -->
             <Heading Level="1" Class="text-xl font-bold text-trading-blue dark:text-dark-accent-blue whitespace-nowrap">
                 TradingStrat AI
             </Heading>
 
+            <!-- Portfolio Selector Dropdown -->
+            <Dropdown Class="relative">
+                <DropdownButton Plain="true"
+                               Class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-elevated rounded-lg transition-colors">
+                    @if (string.IsNullOrEmpty(SelectedPortfolioName))
+                    {
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">
+                            Select Portfolio
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    }
+                    else
+                    {
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-primary">
+                            @SelectedPortfolioName
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    }
+                    <svg class="w-4 h-4 text-gray-500 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </DropdownButton>
+
+                <DropdownMenu Anchor="bottom start">
+                    @if (_portfolios.Any())
+                    {
+                        @foreach (var portfolio in _portfolios)
+                        {
+                            <DropdownItem OnClick="@(() => HandlePortfolioSelection(portfolio.Id))">
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="font-medium">
+                                    @portfolio.Name
+                                </TradingStrat.Web.Components.UI.Typography.Text>
+                            </DropdownItem>
+                        }
+                    }
+                    else
+                    {
+                        <DropdownItem Disabled="true">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">
+                                No portfolios available
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+        </div>
+
+        <!-- Right: Metrics + Actions -->
+        <div class="flex items-center gap-6">
             <!-- Portfolio Metrics (3-section layout) -->
             @if (!string.IsNullOrEmpty(SelectedPortfolioName) && PortfolioValue.HasValue)
             {
                 <div class="hidden md:flex items-center gap-4 text-sm">
-                    <!-- Portfolio Name (small) -->
-                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary text-xs">
-                        @SelectedPortfolioName
-                    </TradingStrat.Web.Components.UI.Typography.Text>
-
                     <!-- Section 1: Portfolio Value -->
                     <div class="flex flex-col">
                         <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
@@ -68,32 +111,5 @@
                 </div>
             }
         </div>
-
-        <!-- Right: Actions -->
-        <Navbar Class="flex items-center gap-3">
-            <NavbarSection>
-                <!-- AI Mode Selector (optional) -->
-                @if (ShowAiModeSelector)
-                {
-                    <select class="hidden lg:block px-3 py-1 text-sm rounded border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue"
-                            aria-label="AI Mode">
-                        <option>Conservative</option>
-                        <option selected>Balanced</option>
-                        <option>Aggressive</option>
-                    </select>
-                }
-
-                <!-- Notification Bell -->
-                <NotificationBell />
-
-                <!-- Settings Button -->
-                <NavbarItem OnClick="@NavigateToSettings" aria-label="Settings">
-                    <svg data-slot="icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                </NavbarItem>
-            </NavbarSection>
-        </Navbar>
     </div>
 </div>

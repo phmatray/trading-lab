@@ -1,10 +1,16 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Entities;
+using TradingStrat.Web.Services.State;
 
 namespace TradingStrat.Web.Components.Layout;
 
 public partial class TopBar : ComponentBase
 {
-    [Inject] private NavigationManager Navigation { get; set; } = null!;
+    [Inject] private IPortfolioPort PortfolioPort { get; set; } = null!;
+    [Inject] private PortfolioStateService PortfolioState { get; set; } = null!;
+
+    private List<Portfolio> _portfolios = new();
 
     /// <summary>
     /// Selected portfolio name
@@ -36,11 +42,15 @@ public partial class TopBar : ComponentBase
     [Parameter]
     public decimal? WinRatePercentage { get; set; }
 
-    /// <summary>
-    /// Whether to show the AI mode selector
-    /// </summary>
-    [Parameter]
-    public bool ShowAiModeSelector { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+        _portfolios = await PortfolioPort.GetAllPortfoliosAsync();
+    }
+
+    private async Task HandlePortfolioSelection(int portfolioId)
+    {
+        await PortfolioState.SetSelectedPortfolioAsync(portfolioId);
+    }
 
     private string GetTodayReturnClass()
     {
@@ -73,10 +83,5 @@ public partial class TopBar : ComponentBase
         }
 
         return "text-sm font-semibold text-gray-900 dark:text-dark-text-primary";
-    }
-
-    private void NavigateToSettings()
-    {
-        Navigation.NavigateTo("/settings");
     }
 }
