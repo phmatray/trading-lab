@@ -21,7 +21,8 @@ public class FakeMarketDataAdapter : IMarketDataPort
         string ticker,
         TimeFrame timeFrame,
         DateTime startDate,
-        DateTime endDate)
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
     {
         var filtered = _fakeData
             .Where(p => p.DateTime >= startDate && p.DateTime <= endDate)
@@ -42,7 +43,7 @@ public class FakeMarketDataAdapter : IMarketDataPort
         return Task.FromResult<IReadOnlyList<HistoricalPrice>>(filtered);
     }
 
-    public Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker)
+    public Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker, CancellationToken cancellationToken = default)
     {
         HistoricalPrice? latest = _fakeData.OrderByDescending(p => p.DateTime).FirstOrDefault();
 

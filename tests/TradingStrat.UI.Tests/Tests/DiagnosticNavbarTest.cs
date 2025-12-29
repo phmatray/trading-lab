@@ -49,12 +49,9 @@ public class DiagnosticNavbarTest : BaseTest
         // Print HTML around navbar section
         if (navbarSectionVisible)
         {
-            string? navbarHtml = await Page!.Locator("[data-testid='navbar-section']").InnerHTMLAsync();
+            string navbarHtml = await Page!.Locator("[data-testid='navbar-section']").InnerHTMLAsync();
             _testOutputHelper.WriteLine($"\nNavbar section HTML (first 500 chars):");
-            if (navbarHtml != null)
-            {
-                _testOutputHelper.WriteLine(navbarHtml.Substring(0, Math.Min(500, navbarHtml.Length)));
-            }
+            _testOutputHelper.WriteLine(navbarHtml.Substring(0, Math.Min(500, navbarHtml.Length)));
         }
     }
 }

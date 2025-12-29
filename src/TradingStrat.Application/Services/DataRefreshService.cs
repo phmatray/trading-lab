@@ -158,7 +158,8 @@ public class DataRefreshService : IDataRefreshService
             summary.Ticker,
             timeFrame,
             startDate,
-            endDate);
+            endDate,
+            cancellationToken);
 
         if (prices.Any())
         {

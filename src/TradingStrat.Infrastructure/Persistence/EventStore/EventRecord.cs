@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TradingStrat.Infrastructure.Persistence.EventStore;
 
 /// <summary>
@@ -29,7 +31,9 @@ public class EventRecord
     /// <summary>
     /// The serialized domain event data in JSON format.
     /// Contains all event properties needed for aggregate reconstruction.
+    /// Maximum size: 1MB to prevent excessive memory usage.
     /// </summary>
+    [MaxLength(1_000_000)]
     public required string EventData { get; init; }
 
     /// <summary>

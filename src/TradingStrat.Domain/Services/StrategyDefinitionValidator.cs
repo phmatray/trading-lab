@@ -82,7 +82,7 @@ public class StrategyDefinitionValidator
         }
 
         // Validate indicator parameters
-        if (rule.IndicatorParameters is null || rule.IndicatorParameters.Count == 0)
+        if (rule.IndicatorParameters.Count == 0)
         {
             errors.Add($"Rule must provide IndicatorParameters (Indicator: {rule.IndicatorName})");
         }

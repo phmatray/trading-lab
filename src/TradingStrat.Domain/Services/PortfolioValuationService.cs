@@ -17,8 +17,8 @@ public class PortfolioValuationService
     /// <param name="currentPrices">Dictionary of ticker to current market price.</param>
     /// <returns>Result containing immutable portfolio snapshot or errors.</returns>
     public Result<PortfolioSnapshot> CalculateSnapshot(
-        Portfolio portfolio,
-        Dictionary<string, decimal> currentPrices)
+        Portfolio? portfolio,
+        Dictionary<string, decimal>? currentPrices)
     {
         List<Error> errors = new();
 
@@ -37,7 +37,7 @@ public class PortfolioValuationService
             return Result<PortfolioSnapshot>.Failure(errors);
         }
 
-        // Null-forgiving operators safe here because validation above ensures non-null
+        // Safe to use non-null assertion here because validation above ensures non-null
         var positionSnapshots = new List<PositionSnapshot>();
         decimal totalMarketValue = portfolio!.Cash;
         decimal totalCost = portfolio.Cash;

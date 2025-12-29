@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TradingStrat.Infrastructure.Persistence.EventStore;
 
 /// <summary>
@@ -29,7 +31,9 @@ public class SnapshotRecord
     /// <summary>
     /// The serialized aggregate state in JSON format.
     /// Contains the complete aggregate state at the snapshot version.
+    /// Maximum size: 1MB to prevent excessive memory usage.
     /// </summary>
+    [MaxLength(1_000_000)]
     public required string SnapshotData { get; init; }
 
     /// <summary>

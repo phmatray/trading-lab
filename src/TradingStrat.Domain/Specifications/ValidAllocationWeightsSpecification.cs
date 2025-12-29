@@ -24,12 +24,6 @@ public class ValidAllocationWeightsSpecification : ISpecification<AllocationWeig
     {
         Reason = string.Empty;
 
-        if (candidate is null)
-        {
-            Reason = "Allocation weights cannot be null";
-            return false;
-        }
-
         // Check for negative percentages
         if (candidate.CashPercentage < 0)
         {

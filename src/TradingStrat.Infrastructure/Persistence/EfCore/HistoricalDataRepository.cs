@@ -158,7 +158,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
         {
             string ticker = kvp.Key;
             string? isin = kvp.Value.isin;
-            IEnumerable<HistoricalPrice> data = kvp.Value.data;
+            List<HistoricalPrice> data = kvp.Value.data.ToList();
 
             progress?.Report(new BulkSaveProgress(
                 totalTickers,
@@ -169,7 +169,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
             await SaveHistoricalDataAsync(ticker, isin, timeFrame, data);
 
             completedTickers++;
-            totalRecordsSaved += data.Count();
+            totalRecordsSaved += data.Count;
         }
 
         // Report final progress
@@ -234,7 +234,7 @@ public class HistoricalDataRepository : IHistoricalDataPort
             .Select(g => new
             {
                 Ticker = g.Key,
-                ISIN = g.FirstOrDefault()!.ISIN,
+                g.FirstOrDefault()!.ISIN,
                 RecordCount = g.Count(),
                 OldestDate = g.Min(p => p.DateTime),
                 LatestDate = g.Max(p => p.DateTime)

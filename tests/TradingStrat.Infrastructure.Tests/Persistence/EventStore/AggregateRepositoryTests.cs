@@ -225,12 +225,13 @@ public class AggregateRepositoryTests
         call.Method.Name.ShouldBe("AppendEventsAsync");
 
         string? streamId = call.Arguments[0] as string;
-        IEnumerable<DomainEvent>? events = call.Arguments[1] as IEnumerable<DomainEvent>;
+        IEnumerable<DomainEvent>? eventsEnumerable = call.Arguments[1] as IEnumerable<DomainEvent>;
+        List<DomainEvent> events = eventsEnumerable?.ToList() ?? new List<DomainEvent>();
         object? expectedVersion = call.Arguments[2];
 
         streamId.ShouldBe("1");
         events.ShouldNotBeNull();
-        events.Count().ShouldBe(1);
+        events.Count.ShouldBe(1);
         events.First().ShouldBeOfType<PositionAddedEvent>();
         expectedVersion.ShouldBe(0);
     }

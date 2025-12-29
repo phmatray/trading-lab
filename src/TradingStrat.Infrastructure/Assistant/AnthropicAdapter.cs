@@ -90,7 +90,7 @@ public class AnthropicAdapter : IAssistantPort
             ChatResponse response = await _chatClient.GetResponseAsync(messages, options, cancellationToken);
 
             // Extract text from response - ChatResponse has a ToString() that returns the text
-            return response.ToString() ?? string.Empty;
+            return response.ToString();
         }
         catch (Exception ex)
         {

@@ -12,7 +12,8 @@ public class YahooFinanceAdapter : IMarketDataPort
         string ticker,
         TimeFrame timeFrame,
         DateTime startDate,
-        DateTime endDate)
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
     {
         // Yahoo Finance only supports daily, weekly, and monthly data
         if (timeFrame.IsIntraday())
@@ -24,6 +25,9 @@ public class YahooFinanceAdapter : IMarketDataPort
 
         try
         {
+            // Check for cancellation before making API call
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Convert DateTime to NodaTime Instant
             var startInstant = Instant.FromDateTimeUtc(DateTime.SpecifyKind(startDate, DateTimeKind.Utc));
 
@@ -32,7 +36,7 @@ public class YahooFinanceAdapter : IMarketDataPort
                 .WithHistoryStartDate(startInstant)
                 .Build();
 
-            // Fetch historical data
+            // Fetch historical data (YahooQuotesApi doesn't support CancellationToken)
             Result<History> result = await yahooQuotes.GetHistoryAsync(ticker).ConfigureAwait(false);
 
             if (!result.HasValue || result.Value.Ticks.IsEmpty)
@@ -68,7 +72,7 @@ public class YahooFinanceAdapter : IMarketDataPort
         }
     }
 
-    public async Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker)
+    public async Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -76,7 +80,7 @@ public class YahooFinanceAdapter : IMarketDataPort
             DateTime endDate = DateTime.Today;
             DateTime startDate = endDate.AddDays(-7);
 
-            IReadOnlyList<HistoricalPrice> data = await FetchHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate);
+            IReadOnlyList<HistoricalPrice> data = await FetchHistoricalDataAsync(ticker, TimeFrame.D1, startDate, endDate, cancellationToken);
 
             // Return the most recent data point
             return data.OrderByDescending(d => d.DateTime).FirstOrDefault();

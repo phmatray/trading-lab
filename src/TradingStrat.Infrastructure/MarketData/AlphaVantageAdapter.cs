@@ -43,7 +43,8 @@ public class AlphaVantageAdapter : IMarketDataPort
         string ticker,
         TimeFrame timeFrame,
         DateTime startDate,
-        DateTime endDate)
+        DateTime endDate,
+        CancellationToken cancellationToken = default)
     {
         // Validate API key is configured
         if (string.IsNullOrWhiteSpace(_settings.ApiKey))
@@ -70,14 +71,14 @@ public class AlphaVantageAdapter : IMarketDataPort
         string interval = MapTimeFrameToInterval(timeFrame);
 
         // Enforce rate limiting before API call
-        await _rateLimiter.WaitForSlotAsync();
+        await _rateLimiter.WaitForSlotAsync(cancellationToken);
 
         // Build API URL with query parameters
         string url = $"{BaseUrl}?function=TIME_SERIES_INTRADAY&symbol={ticker}&interval={interval}" +
                      $"&outputsize=full&apikey={_settings.ApiKey}";
 
         // Execute API call with retries
-        string jsonResponse = await FetchWithRetriesAsync(url);
+        string jsonResponse = await FetchWithRetriesAsync(url, cancellationToken);
 
         // Parse JSON response and convert to HistoricalPrice entities
         List<HistoricalPrice> prices = ParseIntradayResponse(jsonResponse, ticker, timeFrame);
@@ -110,7 +111,7 @@ public class AlphaVantageAdapter : IMarketDataPort
         };
     }
 
-    private async Task<string> FetchWithRetriesAsync(string url)
+    private async Task<string> FetchWithRetriesAsync(string url, CancellationToken cancellationToken)
     {
         Exception? lastException = null;
 
@@ -121,10 +122,10 @@ public class AlphaVantageAdapter : IMarketDataPort
                 _logger.LogDebug("Alpha Vantage API request (attempt {Attempt}/{MaxRetries})",
                     attempt, _settings.MaxRetries);
 
-                HttpResponseMessage response = await _httpClient.GetAsync(url);
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                string content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 // Check for API error messages
                 if (content.Contains("Error Message") || content.Contains("Note"))
@@ -146,7 +147,7 @@ public class AlphaVantageAdapter : IMarketDataPort
                 {
                     // Exponential backoff: 1s, 2s, 4s, ...
                     TimeSpan delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
-                    await Task.Delay(delay);
+                    await Task.Delay(delay, cancellationToken);
                 }
             }
         }
@@ -276,7 +277,7 @@ public class AlphaVantageAdapter : IMarketDataPort
             : jsonResponse;
     }
 
-    public async Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker)
+    public async Task<HistoricalPrice?> FetchLatestPriceAsync(string ticker, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -288,7 +289,8 @@ public class AlphaVantageAdapter : IMarketDataPort
                 ticker,
                 TimeFrame.M1,
                 startDate,
-                endDate);
+                endDate,
+                cancellationToken);
 
             // Return the most recent data point
             return data.OrderByDescending(d => d.DateTime).FirstOrDefault();

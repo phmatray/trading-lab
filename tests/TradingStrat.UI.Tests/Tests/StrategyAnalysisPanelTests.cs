@@ -289,7 +289,7 @@ public class StrategyAnalysisPanelTests : BaseTest
 
         // Assert - Verify dark theme classes are applied
         buttonClass.ShouldNotBeNullOrEmpty("Analyze button should have CSS classes");
-        (buttonClass?.Contains("dark:") ?? false).ShouldBeTrue("Analyze button should have dark theme variant classes");
+        buttonClass.Contains("dark:").ShouldBeTrue("Analyze button should have dark theme variant classes");
     }
 
     [Fact]

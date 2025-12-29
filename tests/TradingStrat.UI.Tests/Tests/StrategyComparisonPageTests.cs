@@ -164,7 +164,7 @@ public class StrategyComparisonPageTests : BaseTest
 
         // Assert
         className.ShouldNotBeNullOrEmpty("Root element should have CSS classes");
-        (className?.Contains("dark") ?? false).ShouldBeTrue("Root element should have 'dark' class for dark theme");
+        className.Contains("dark").ShouldBeTrue("Root element should have 'dark' class for dark theme");
     }
 
     [Fact]

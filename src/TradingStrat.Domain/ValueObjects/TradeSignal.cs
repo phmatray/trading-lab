@@ -32,7 +32,7 @@ public sealed class TradeSignal : ValueObject
     public SignalType Type { get; init; }
     public decimal Price { get; init; }
     public int Quantity { get; init; }
-    public string Reason { get; init; } = string.Empty;
+    public string Reason { get; init; }
 
     public TradeSignal(SignalType type, decimal price, int quantity, string reason)
     {

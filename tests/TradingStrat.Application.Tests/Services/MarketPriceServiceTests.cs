@@ -62,7 +62,7 @@ public class MarketPriceServiceTests
     {
         // Arrange
         List<string> tickers = new() { "AAPL" };
-        IProgress<string>? progress = A.Fake<IProgress<string>>();
+        IProgress<string> progress = A.Fake<IProgress<string>>();
 
         A.CallTo(() => _marketDataPort.FetchHistoricalDataAsync(
                 A<string>._,
@@ -228,8 +228,9 @@ public class MarketPriceServiceTests
                 ticker,
                 TimeFrame.D1,
                 A<DateTime>._,
-                A<DateTime>._))
-            .Invokes((string t, TimeFrame tf, DateTime start, DateTime end) => actualStartDate = start)
+                A<DateTime>._,
+                A<CancellationToken>._))
+            .Invokes((string _, TimeFrame _, DateTime start, DateTime _, CancellationToken _) => actualStartDate = start)
             .Returns(new List<HistoricalPrice>
             {
                 new() { Ticker = ticker, DateTime = DateTime.Today, Close = 150.00m }
