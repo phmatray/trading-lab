@@ -1,0 +1,121 @@
+@* RightPanel Component - Flexible tabbed panel replacing AiPanel *@
+@using TradingStrat.Web.Models.State
+
+<aside class="@GetPanelClasses()"
+       data-testid="right-panel"
+       role="complementary"
+       aria-label="@GetAriaLabel()">
+    <div class="h-full flex bg-white dark:bg-dark-card border-l border-gray-200 dark:border-dark-border">
+
+        <!-- Content Area (hidden when collapsed) -->
+        @if (!_isCollapsed)
+        {
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Header with active tab title -->
+                <div class="flex items-center justify-between px-4 py-3 bg-trading-blue dark:bg-dark-accent-blue text-white border-b border-gray-200 dark:border-dark-border">
+                    <div class="flex items-center gap-2">
+                        @GetActiveTabIcon()
+                        <h3 class="font-semibold">@GetActiveTabTitle()</h3>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="flex-1 overflow-hidden" role="tabpanel" aria-labelledby="@GetActiveTabAriaId()">
+                    @switch (_activeTab)
+                    {
+                        case RightPanelTab.Notifications:
+                            <NotificationsPanel />
+                            break;
+
+                        case RightPanelTab.StrategyCopilot:
+                            <StrategyCopiloPanel CurrentTicker="@CurrentTicker"
+                                                CurrentContext="@CurrentContext"
+                                                CurrentRegime="@CurrentRegime"
+                                                CurrentRecommendation="@CurrentRecommendation"
+                                                Confidence="@Confidence"
+                                                Reasons="@Reasons" />
+                            break;
+
+                        default:
+                            <div class="p-4 text-gray-500 dark:text-dark-text-secondary">
+                                Tab content not implemented
+                            </div>
+                            break;
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Vertical Tab Bar (always visible, icons when collapsed) -->
+        <div class="flex flex-col bg-gray-50 dark:bg-dark-elevated border-l border-gray-200 dark:border-dark-border @(_isCollapsed ? "w-12" : "w-16")">
+            <!-- Collapse Toggle (Top) -->
+            <button @onclick="ToggleCollapseAsync"
+                    class="@(_isCollapsed ? "p-3" : "flex items-center justify-center p-3") hover:bg-gray-100 dark:hover:bg-dark-card transition-colors border-b border-gray-200 dark:border-dark-border"
+                    aria-label="@(_isCollapsed ? "Expand panel" : "Collapse panel")"
+                    title="@(_isCollapsed ? "Expand" : "Collapse")"
+                    type="button">
+                <svg class="w-5 h-5 text-gray-600 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="@(_isCollapsed ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7")"></path>
+                </svg>
+            </button>
+
+            <!-- Tab Buttons -->
+            <div class="flex-1 flex flex-col py-2">
+                <!-- Notifications Tab -->
+                <button @onclick="() => SetActiveTabAsync(RightPanelTab.Notifications)"
+                        class="@GetTabButtonClasses(RightPanelTab.Notifications)"
+                        aria-label="Notifications"
+                        title="Notifications"
+                        aria-selected="@(_activeTab == RightPanelTab.Notifications)"
+                        role="tab"
+                        data-testid="notifications-tab"
+                        type="button">
+                    <div class="relative">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        @if (_unreadCount > 0)
+                        {
+                            <span class="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-600 rounded-full"
+                                  data-testid="notification-badge"
+                                  aria-label="@_unreadCount unread notifications">
+                                @(_unreadCount > 9 ? "9+" : _unreadCount.ToString())
+                            </span>
+                        }
+                    </div>
+                    @if (!_isCollapsed)
+                    {
+                        <span class="text-xs mt-1">Alerts</span>
+                    }
+                </button>
+
+                <!-- Strategy Copilot Tab -->
+                <button @onclick="() => SetActiveTabAsync(RightPanelTab.StrategyCopilot)"
+                        class="@GetTabButtonClasses(RightPanelTab.StrategyCopilot)"
+                        aria-label="Strategy Copilot"
+                        title="Strategy Copilot"
+                        aria-selected="@(_activeTab == RightPanelTab.StrategyCopilot)"
+                        role="tab"
+                        data-testid="strategy-copilot-tab"
+                        type="button">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    @if (!_isCollapsed)
+                    {
+                        <span class="text-xs mt-1">AI</span>
+                    }
+                </button>
+
+                <!-- Future tabs: Add here with same pattern -->
+                @*
+                <button class="...">Analytics</button>
+                <button class="...">Settings</button>
+                *@
+            </div>
+        </div>
+    </div>
+</aside>

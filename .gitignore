@@ -53,3 +53,4 @@ node_modules/
 
 # Temporary files
 catalyst-ui-kit/
+.playwright-mcp/

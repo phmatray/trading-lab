@@ -22,21 +22,20 @@
         <!-- Main Content Area (flexible width) -->
         <main id="main-content"
               class="flex-1 overflow-y-auto p-6 transition-all duration-300"
-              style="margin-left: @(_sidebarCollapsed ? "4rem" : "16rem"); margin-right: @(_aiPanelCollapsed ? "3rem" : "24rem");"
+              style="margin-left: @(_sidebarCollapsed ? "4rem" : "16rem"); margin-right: @(_rightPanelCollapsed ? "3rem" : "24rem");"
               role="main"
               aria-label="Main content">
             @Body
         </main>
 
-        <!-- Right AI Panel -->
-        <AiPanel IsCollapsed="_aiPanelCollapsed"
-                 IsCollapsedChanged="OnAiPanelCollapsedChanged"
-                 CurrentTicker="@_currentTicker"
-                 CurrentContext="@_currentContext"
-                 CurrentRegime="@_currentRegime"
-                 CurrentRecommendation="@_currentRecommendation"
-                 Confidence="@_confidence"
-                 Reasons="@_reasons" />
+        <!-- Right Panel (replaces AiPanel) -->
+        <RightPanel CurrentTicker="@_currentTicker"
+                    CurrentContext="@_currentContext"
+                    CurrentRegime="@_currentRegime"
+                    CurrentRecommendation="@_currentRecommendation"
+                    Confidence="@_confidence"
+                    Reasons="@_reasons"
+                    OnCollapsedChanged="OnRightPanelCollapsedChanged" />
     </div>
 
     <!-- Notification Toast Container (preserved) -->

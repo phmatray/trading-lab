@@ -17,7 +17,7 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
 
     // Layout state
     private bool _sidebarCollapsed = false;
-    private bool _aiPanelCollapsed = false;
+    private bool _rightPanelCollapsed = false;
 
     // TopBar data
     private string? _selectedPortfolioName = null;
@@ -46,12 +46,8 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
                 StateHasChanged();
             }
 
-            bool? aiPanelState = await LocalStorage.GetItemAsync<bool?>("layout_aipanel_collapsed");
-            if (aiPanelState.HasValue && aiPanelState.Value != _aiPanelCollapsed)
-            {
-                _aiPanelCollapsed = aiPanelState.Value;
-                StateHasChanged();
-            }
+            // Note: RightPanel manages its own collapse state via RightPanelStateService
+            // We only track collapse state here for margin calculation
 
             // Load portfolio data and AI insights
             await LoadPortfolioDataAsync();
@@ -152,10 +148,11 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
         await LocalStorage.SetItemAsync("layout_sidebar_collapsed", _sidebarCollapsed);
     }
 
-    private async Task OnAiPanelCollapsedChanged(bool value)
+    private async Task OnRightPanelCollapsedChanged(bool value)
     {
-        _aiPanelCollapsed = value;
-        await LocalStorage.SetItemAsync("layout_aipanel_collapsed", _aiPanelCollapsed);
+        _rightPanelCollapsed = value;
+        // Note: RightPanelStateService handles localStorage persistence
+        await Task.CompletedTask;
     }
 
     public async ValueTask DisposeAsync()
