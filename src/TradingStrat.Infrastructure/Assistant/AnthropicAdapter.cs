@@ -1,27 +1,26 @@
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Anthropic;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using TradingStrat.Application.Ports.Outbound;
 using TradingStrat.Application.Services;
-using TradingStrat.Domain.Entities;
+using DomainChatMessage = TradingStrat.Domain.Entities.ChatMessage;
+using AIChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 namespace TradingStrat.Infrastructure.Assistant;
 
 /// <summary>
 /// Infrastructure adapter for Anthropic's Claude API.
-/// Implements IAssistantPort to provide LLM capabilities via direct HTTP API calls.
+/// Implements IAssistantPort to provide LLM capabilities via the official Anthropic SDK
+/// and Microsoft.Extensions.AI IChatClient abstraction.
 /// Supports both streaming and non-streaming responses.
 /// </summary>
 public class AnthropicAdapter : IAssistantPort
 {
-    private readonly HttpClient _httpClient;
+    private readonly IChatClient _chatClient;
     private readonly AssistantConfiguration _config;
-    private const string ApiBaseUrl = "https://api.anthropic.com/v1";
 
-    public AnthropicAdapter(IHttpClientFactory httpClientFactory, IOptions<AssistantConfiguration> config)
+    public AnthropicAdapter(IOptions<AssistantConfiguration> config)
     {
         _config = config.Value;
 
@@ -32,171 +31,68 @@ public class AnthropicAdapter : IAssistantPort
                 "Please set Trading:Assistant:ApiKey in appsettings.json or via environment variables.");
         }
 
-        _httpClient = httpClientFactory.CreateClient("Anthropic");
-        _httpClient.BaseAddress = new Uri(ApiBaseUrl);
-        _httpClient.DefaultRequestHeaders.Add("x-api-key", _config.ApiKey);
-        _httpClient.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+        // Create Anthropic client with API key
+        var anthropicClient = new AnthropicClient { APIKey = _config.ApiKey };
+
+        // Expose as IChatClient with specified model
+        _chatClient = anthropicClient.AsIChatClient(_config.Model);
     }
 
     public async IAsyncEnumerable<string> StreamChatResponseAsync(
         string systemPrompt,
-        List<ChatMessage> conversationHistory,
+        List<DomainChatMessage> conversationHistory,
         string userMessage,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        List<AnthropicMessage> messages = new List<AnthropicMessage>();
+        // Build message list for IChatClient
+        var messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
 
-        // Convert conversation history
-        foreach (ChatMessage msg in conversationHistory)
+        // Create chat options
+        var options = new ChatOptions
         {
-            messages.Add(new AnthropicMessage
-            {
-                Role = msg.Role,
-                Content = msg.Content
-            });
-        }
-
-        // Add current user message
-        messages.Add(new AnthropicMessage
-        {
-            Role = "user",
-            Content = userMessage
-        });
-
-        AnthropicRequest request = new AnthropicRequest
-        {
-            Model = _config.Model,
-            MaxTokens = _config.MaxTokens,
-            Temperature = _config.Temperature,
-            System = systemPrompt,
-            Messages = messages,
-            Stream = true
+            MaxOutputTokens = _config.MaxTokens,
+            Temperature = (float)_config.Temperature
         };
 
-        string jsonRequest = JsonSerializer.Serialize(request, new JsonSerializerOptions
+        // Stream the response
+        await foreach (var update in _chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        });
-
-        HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, "/messages")
-        {
-            Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json")
-        };
-
-        using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using StreamReader reader = new StreamReader(stream);
-
-        while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
-        {
-            string? line = await reader.ReadLineAsync(cancellationToken);
-            if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data: "))
+            // Extract text content from streaming updates
+            foreach (var content in update.Contents.OfType<TextContent>())
             {
-                continue;
-            }
-
-            string data = line.Substring(6); // Remove "data: " prefix
-            if (data == "[DONE]")
-            {
-                break;
-            }
-
-            string? textToken = ExtractTextFromStreamEvent(data);
-            if (textToken is not null)
-            {
-                yield return textToken;
-            }
-        }
-    }
-
-    private string? ExtractTextFromStreamEvent(string jsonData)
-    {
-        try
-        {
-            using JsonDocument doc = JsonDocument.Parse(jsonData);
-            if (doc.RootElement.TryGetProperty("type", out JsonElement typeElement))
-            {
-                string eventType = typeElement.GetString() ?? string.Empty;
-                if (eventType == "content_block_delta")
+                if (!string.IsNullOrEmpty(content.Text))
                 {
-                    if (doc.RootElement.TryGetProperty("delta", out JsonElement delta) &&
-                        delta.TryGetProperty("text", out JsonElement text))
-                    {
-                        return text.GetString();
-                    }
+                    yield return content.Text;
                 }
             }
         }
-        catch (JsonException)
-        {
-            // Skip invalid JSON lines
-        }
-
-        return null;
     }
 
     public async Task<string> GetChatResponseAsync(
         string systemPrompt,
-        List<ChatMessage> conversationHistory,
+        List<DomainChatMessage> conversationHistory,
         string userMessage,
         CancellationToken cancellationToken = default)
     {
-        List<AnthropicMessage> messages = new List<AnthropicMessage>();
-
-        // Convert conversation history
-        foreach (ChatMessage msg in conversationHistory)
-        {
-            messages.Add(new AnthropicMessage
-            {
-                Role = msg.Role,
-                Content = msg.Content
-            });
-        }
-
-        // Add current user message
-        messages.Add(new AnthropicMessage
-        {
-            Role = "user",
-            Content = userMessage
-        });
-
-        AnthropicRequest request = new AnthropicRequest
-        {
-            Model = _config.Model,
-            MaxTokens = _config.MaxTokens,
-            Temperature = _config.Temperature,
-            System = systemPrompt,
-            Messages = messages,
-            Stream = false
-        };
-
         try
         {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("/messages", request, new JsonSerializerOptions
+            // Build message list for IChatClient
+            var messages = BuildChatMessageList(systemPrompt, conversationHistory, userMessage);
+
+            // Create chat options
+            var options = new ChatOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            }, cancellationToken);
+                MaxOutputTokens = _config.MaxTokens,
+                Temperature = (float)_config.Temperature
+            };
 
-            response.EnsureSuccessStatusCode();
+            // Get non-streaming response
+            ChatResponse response = await _chatClient.GetResponseAsync(messages, options, cancellationToken);
 
-            AnthropicResponse? anthropicResponse = await response.Content.ReadFromJsonAsync<AnthropicResponse>(
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }, cancellationToken);
-
-            if (anthropicResponse?.Content is not null && anthropicResponse.Content.Count > 0)
-            {
-                return anthropicResponse.Content[0].Text ?? string.Empty;
-            }
-
-            return string.Empty;
+            // Extract text from response - ChatResponse has a ToString() that returns the text
+            return response.ToString() ?? string.Empty;
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
             throw new InvalidOperationException(
                 $"Failed to get response from Anthropic API: {ex.Message}",
@@ -204,46 +100,40 @@ public class AnthropicAdapter : IAssistantPort
         }
     }
 
-    // Request/Response models for Anthropic API
-    private class AnthropicRequest
+    /// <summary>
+    /// Builds a list of Microsoft.Extensions.AI ChatMessage objects from the conversation history.
+    /// Includes the system prompt as the first message.
+    /// </summary>
+    private static List<AIChatMessage> BuildChatMessageList(
+        string systemPrompt,
+        List<DomainChatMessage> conversationHistory,
+        string userMessage)
     {
-        [JsonPropertyName("model")]
-        public string Model { get; set; } = string.Empty;
+        var messages = new List<AIChatMessage>();
 
-        [JsonPropertyName("max_tokens")]
-        public int MaxTokens { get; set; }
+        // Add system prompt as first message
+        if (!string.IsNullOrWhiteSpace(systemPrompt))
+        {
+            messages.Add(new AIChatMessage(ChatRole.System, systemPrompt));
+        }
 
-        [JsonPropertyName("temperature")]
-        public double Temperature { get; set; }
+        // Convert conversation history
+        foreach (var msg in conversationHistory)
+        {
+            var role = msg.Role.ToLowerInvariant() switch
+            {
+                "user" => ChatRole.User,
+                "assistant" => ChatRole.Assistant,
+                "system" => ChatRole.System,
+                _ => ChatRole.User
+            };
 
-        [JsonPropertyName("system")]
-        public string? System { get; set; }
+            messages.Add(new AIChatMessage(role, msg.Content));
+        }
 
-        [JsonPropertyName("messages")]
-        public List<AnthropicMessage> Messages { get; set; } = new();
+        // Add current user message
+        messages.Add(new AIChatMessage(ChatRole.User, userMessage));
 
-        [JsonPropertyName("stream")]
-        public bool Stream { get; set; }
-    }
-
-    private class AnthropicMessage
-    {
-        [JsonPropertyName("role")]
-        public string Role { get; set; } = string.Empty;
-
-        [JsonPropertyName("content")]
-        public string Content { get; set; } = string.Empty;
-    }
-
-    private class AnthropicResponse
-    {
-        [JsonPropertyName("content")]
-        public List<ContentBlock> Content { get; set; } = new();
-    }
-
-    private class ContentBlock
-    {
-        [JsonPropertyName("text")]
-        public string? Text { get; set; }
+        return messages;
     }
 }

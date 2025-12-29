@@ -259,7 +259,7 @@ public class PortfolioContextBuilder
         foreach (HistoricalPrice p in prices)
         {
             decimal change = 0;
-            if (p.Open.HasValue && p.Close.HasValue)
+            if (p.Open.HasValue && p.Close.HasValue && p.Open.Value != 0)
             {
                 change = (p.Close.Value - p.Open.Value) / p.Open.Value * 100;
             }
@@ -297,6 +297,11 @@ public class PortfolioContextBuilder
 
     private string GetTrendDescription(decimal price, decimal ma)
     {
+        if (ma == 0)
+        {
+            return "Insufficient data for trend analysis";
+        }
+
         decimal diff = (price - ma) / ma * 100;
         if (diff > 2)
         {

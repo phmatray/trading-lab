@@ -53,40 +53,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var strategy in _builtInStrategies)
                 {
-                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-6 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    @strategy.Name
-                                </Heading>
-                                <Badge Color="BadgeColor.Blue" Class="mt-1">@strategy.Category</Badge>
-                            </div>
-                        </div>
-
-                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-6 min-h-[3rem]">
-                            @strategy.Description
-                        </TradingStrat.Web.Components.UI.Typography.Text>
-
-                        <div class="space-y-2 mb-6 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600 dark:text-gray-400">Key:</span>
-                                <span class="font-mono text-gray-900 dark:text-white">@strategy.Key</span>
-                            </div>
-                            @if (strategy.DefaultParameters.Any())
-                            {
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Parameters:</span>
-                                    <span class="text-gray-900 dark:text-white">
-                                        @string.Join(", ", strategy.DefaultParameters.Select(p => $"{p.Key}={p.Value}"))
-                                    </span>
-                                </div>
-                            }
-                        </div>
-
-                        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@(() => NavigateToBacktest(strategy.Key))" Class="w-full">
-                            Run Backtest
-                        </TradingStrat.Web.Components.UI.Buttons.Button>
-                    </div>
+                    <BuiltInStrategyCard
+                        Name="@strategy.Name"
+                        Description="@strategy.Description"
+                        Category="@strategy.Category"
+                        StrategyKey="@strategy.Key"
+                        DefaultParameters="@strategy.DefaultParameters.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value)"
+                        OnRunBacktest="@(() => NavigateToBacktest(strategy.Key))" />
                 }
             </div>
         }
@@ -114,76 +87,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach (var strategy in _customStrategies)
                     {
-                        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-6 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        @strategy.Name
-                                    </Heading>
-                                    <Badge Color="BadgeColor.Green" Class="mt-1">@strategy.Category</Badge>
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    @strategy.LastUpdatedAt.ToString("MMM d, yyyy")
-                                </div>
-                            </div>
-
-                            @if (!string.IsNullOrWhiteSpace(strategy.Description))
-                            {
-                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-6 min-h-[3rem]">
-                                    @strategy.Description
-                                </TradingStrat.Web.Components.UI.Typography.Text>
-                            }
-
-                            <div class="space-y-2 mb-6 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Author:</span>
-                                    <span class="text-gray-900 dark:text-white">@strategy.Author</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Entry Rules:</span>
-                                    <span class="text-gray-900 dark:text-white">@strategy.Definition.EntryRules.Count</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Exit Rules:</span>
-                                    <span class="text-gray-900 dark:text-white">@strategy.Definition.ExitRules.Count</span>
-                                </div>
-                                @if (strategy.TimesUsed > 0)
-                                {
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600 dark:text-gray-400">Times Used:</span>
-                                        <span class="text-gray-900 dark:text-white">@strategy.TimesUsed</span>
-                                    </div>
-                                }
-                                @if (strategy.LastBacktestReturn.HasValue)
-                                {
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600 dark:text-gray-400">Last Return:</span>
-                                        <span class="@(strategy.LastBacktestReturn.Value >= 0 ? "metric-positive" : "metric-negative")">
-                                            @strategy.LastBacktestReturn.Value.ToString("P2")
-                                        </span>
-                                    </div>
-                                }
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@(() => NavigateToEdit(strategy.Id))">
-                                    Edit
-                                </TradingStrat.Web.Components.UI.Buttons.Button>
-                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@(() => CloneStrategy(strategy.Id))">
-                                    Clone
-                                </TradingStrat.Web.Components.UI.Buttons.Button>
-                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Indigo" OnClick="@(() => NavigateToOptimize(strategy.Id))">
-                                    Optimize
-                                </TradingStrat.Web.Components.UI.Buttons.Button>
-                                <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@(() => NavigateToBacktestWithCustom(strategy.Id))">
-                                    Test
-                                </TradingStrat.Web.Components.UI.Buttons.Button>
-                            </div>
-
-                            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Red" OnClick="@(() => ShowDeleteDialog(strategy.Id, strategy.Name))" Class="w-full mt-3">
-                                Delete
-                            </TradingStrat.Web.Components.UI.Buttons.Button>
-                        </div>
+                        <CustomStrategyCard
+                            Name="@strategy.Name"
+                            Description="@strategy.Description"
+                            Category="@strategy.Category"
+                            Author="@strategy.Author"
+                            LastUpdatedAt="@strategy.LastUpdatedAt"
+                            EntryRulesCount="@strategy.Definition.EntryRules.Count"
+                            ExitRulesCount="@strategy.Definition.ExitRules.Count"
+                            TimesUsed="@strategy.TimesUsed"
+                            LastBacktestReturn="@strategy.LastBacktestReturn"
+                            OnEdit="@(() => NavigateToEdit(strategy.Id))"
+                            OnClone="@(() => CloneStrategy(strategy.Id))"
+                            OnOptimize="@(() => NavigateToOptimize(strategy.Id))"
+                            OnTest="@(() => NavigateToBacktestWithCustom(strategy.Id))"
+                            OnDelete="@(() => ShowDeleteDialog(strategy.Id, strategy.Name))" />
                     }
                 </div>
             }

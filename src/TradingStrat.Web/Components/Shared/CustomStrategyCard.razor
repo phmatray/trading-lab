@@ -1,0 +1,75 @@
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay
+@using TradingStrat.Web.Components.UI.Buttons
+@using TradingStrat.Web.Components.UI
+
+<div class="bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-6 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white">
+                @Name
+            </Heading>
+            <Badge Color="BadgeColor.Green" Class="mt-1">@Category</Badge>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+            @LastUpdatedAt.ToString("MMM d, yyyy")
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Description))
+    {
+        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mb-6 min-h-[3rem]">
+            @Description
+        </TradingStrat.Web.Components.UI.Typography.Text>
+    }
+
+    <div class="space-y-2 mb-6 text-sm">
+        <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Author:</span>
+            <span class="text-gray-900 dark:text-white">@Author</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Entry Rules:</span>
+            <span class="text-gray-900 dark:text-white">@EntryRulesCount</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Exit Rules:</span>
+            <span class="text-gray-900 dark:text-white">@ExitRulesCount</span>
+        </div>
+        @if (TimesUsed > 0)
+        {
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Times Used:</span>
+                <span class="text-gray-900 dark:text-white">@TimesUsed</span>
+            </div>
+        }
+        @if (LastBacktestReturn.HasValue)
+        {
+            <div class="flex justify-between">
+                <span class="text-gray-600 dark:text-gray-400">Last Return:</span>
+                <span class="@(LastBacktestReturn.Value >= 0 ? "metric-positive" : "metric-negative")">
+                    @LastBacktestReturn.Value.ToString("P2")
+                </span>
+            </div>
+        }
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@OnEdit">
+            Edit
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@OnClone">
+            Clone
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Indigo" OnClick="@OnOptimize">
+            Optimize
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+        <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@OnTest">
+            Test
+        </TradingStrat.Web.Components.UI.Buttons.Button>
+    </div>
+
+    <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Red" OnClick="@OnDelete" Class="w-full mt-3">
+        Delete
+    </TradingStrat.Web.Components.UI.Buttons.Button>
+</div>

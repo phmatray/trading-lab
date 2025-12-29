@@ -16,7 +16,7 @@ public class PortfoliosPage : BasePage
     private ILocator PageTitle => Page.Locator("main h1");
     private ILocator CreatePortfolioButton => Page.Locator("main button:has-text('Create Portfolio')").First;
     private ILocator PortfolioGrid => Page.Locator(".grid");
-    private ILocator PortfolioCards => Page.Locator(".grid .card");
+    private ILocator PortfolioCards => Page.Locator(".grid > div.bg-white");
 
     // Create Portfolio Dialog
     private ILocator CreateDialog => Page.Locator("[data-testid='dialog']");
@@ -107,7 +107,7 @@ public class PortfoliosPage : BasePage
     /// </summary>
     public ILocator GetPortfolioCardByName(string portfolioName)
     {
-        return Page.Locator($".card:has-text('{portfolioName}')");
+        return Page.Locator($".bg-white.dark\\:bg-zinc-900:has(h3:has-text('{portfolioName}'))");
     }
 
     /// <summary>
@@ -134,7 +134,8 @@ public class PortfoliosPage : BasePage
     /// </summary>
     private ILocator GetDeleteButton(string portfolioName)
     {
-        return GetPortfolioCardByName(portfolioName).Locator("button:has-text('Delete')");
+        ILocator card = GetPortfolioCardByName(portfolioName);
+        return card.Locator("button[aria-label*='Delete portfolio']");
     }
 
     /// <summary>
@@ -181,7 +182,7 @@ public class PortfoliosPage : BasePage
     public async Task<string?> GetPortfolioCashAsync(string portfolioName)
     {
         ILocator card = GetPortfolioCardByName(portfolioName);
-        ILocator cashElement = card.Locator("p:has-text('Cash')");
+        ILocator cashElement = card.Locator("span:has-text('Cash Balance')");
         return await cashElement.TextContentAsync();
     }
 
@@ -191,7 +192,7 @@ public class PortfoliosPage : BasePage
     public async Task<string?> GetPortfolioPositionsCountAsync(string portfolioName)
     {
         ILocator card = GetPortfolioCardByName(portfolioName);
-        ILocator positionsElement = card.Locator("p:has-text('Positions')");
+        ILocator positionsElement = card.Locator("span:has-text('Positions')");
         return await positionsElement.TextContentAsync();
     }
 

@@ -116,6 +116,15 @@ public static class ErrorCodes
     }
 
     /// <summary>
+    /// TopBar metrics calculation error codes.
+    /// </summary>
+    public static class TopBar
+    {
+        public const string MetricsCalculationFailed = "TOPBAR_METRICS_CALCULATION_FAILED";
+        public const string InsufficientHistoricalData = "TOPBAR_INSUFFICIENT_HISTORICAL_DATA";
+    }
+
+    /// <summary>
     /// Common validation error codes.
     /// </summary>
     public static class Validation

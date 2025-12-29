@@ -57,6 +57,10 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IGetPortfolioSnapshotUseCase, GetPortfolioSnapshotUseCase>();
         services.AddScoped<ICalculateRebalancingUseCase, CalculateRebalancingUseCase>();
         services.AddScoped<IGetPortfolioPerformanceUseCase, GetPortfolioPerformanceUseCase>();
+        services.AddScoped<IGetPortfolioTopBarMetricsUseCase, GetPortfolioTopBarMetricsUseCase>();
+
+        // Ticker Analysis Use Cases
+        services.AddScoped<IAnalyzeTickerUseCase, AnalyzeTickerUseCase>();
 
         // Custom Strategy Use Cases (CQRS-lite)
         services.AddScoped<ICustomStrategyQueryUseCase, CustomStrategyQueryUseCase>();

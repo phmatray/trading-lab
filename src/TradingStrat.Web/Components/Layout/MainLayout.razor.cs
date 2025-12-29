@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Application.Ports.Inbound;
 using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Services;
 using TradingStrat.Web.Services.State;
 
@@ -11,6 +13,7 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
     [Inject] private AiInsightsService AiInsights { get; set; } = null!;
     [Inject] private PortfolioStateService PortfolioState { get; set; } = null!;
     [Inject] private IPortfolioPort PortfolioPort { get; set; } = null!;
+    [Inject] private IGetPortfolioTopBarMetricsUseCase GetTopBarMetricsUseCase { get; set; } = null!;
 
     // Layout state
     private bool _sidebarCollapsed = false;
@@ -19,7 +22,9 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
     // TopBar data
     private string? _selectedPortfolioName = null;
     private decimal? _portfolioValue = null;
-    private decimal? _ytdPerformance = null;
+    private decimal? _todayReturnDollars = null;
+    private decimal? _todayReturnPercentage = null;
+    private decimal? _winRatePercentage = null;
 
     // AI Panel data
     private readonly string? _currentTicker = null;
@@ -71,26 +76,48 @@ public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
             int? portfolioId = await PortfolioState.GetSelectedPortfolioIdAsync();
             if (portfolioId.HasValue)
             {
+                // Load portfolio for name
                 Domain.Entities.Portfolio? portfolio = await PortfolioPort.GetPortfolioByIdAsync(portfolioId.Value);
                 if (portfolio is not null)
                 {
                     _selectedPortfolioName = portfolio.Name;
-                    // Portfolio value and YTD performance would require additional calculations
-                    // For now, just showing the name
+
+                    // Load TopBar metrics using the use case
+                    var metricsResult = await GetTopBarMetricsUseCase.ExecuteAsync(portfolioId.Value);
+                    if (metricsResult.IsSuccess)
+                    {
+                        TopBarMetrics metrics = metricsResult.Value;
+                        _portfolioValue = metrics.TotalValue;
+                        _todayReturnDollars = metrics.TodayReturnDollars;
+                        _todayReturnPercentage = metrics.TodayReturnPercentage;
+                        _winRatePercentage = metrics.WinRatePercentage;
+                    }
+                    else
+                    {
+                        // Metrics calculation failed, show portfolio value only
+                        _portfolioValue = portfolio.Cash; // Fallback to cash only
+                        _todayReturnDollars = null;
+                        _todayReturnPercentage = null;
+                        _winRatePercentage = null;
+                    }
                 }
             }
             else
             {
                 _selectedPortfolioName = null;
                 _portfolioValue = null;
-                _ytdPerformance = null;
+                _todayReturnDollars = null;
+                _todayReturnPercentage = null;
+                _winRatePercentage = null;
             }
         }
         catch
         {
             _selectedPortfolioName = null;
             _portfolioValue = null;
-            _ytdPerformance = null;
+            _todayReturnDollars = null;
+            _todayReturnPercentage = null;
+            _winRatePercentage = null;
         }
     }
 

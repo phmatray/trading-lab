@@ -14,19 +14,56 @@
                 TradingStrat AI
             </Heading>
 
-            <!-- Portfolio Info -->
+            <!-- Portfolio Metrics (3-section layout) -->
             @if (!string.IsNullOrEmpty(SelectedPortfolioName) && PortfolioValue.HasValue)
             {
-                <div class="hidden md:flex items-center gap-2 text-sm">
-                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">Portfolio:</TradingStrat.Web.Components.UI.Typography.Text>
-                    <TradingStrat.Web.Components.UI.Typography.Text Class="font-medium text-gray-900 dark:text-dark-text-primary">@SelectedPortfolioName</TradingStrat.Web.Components.UI.Typography.Text>
-                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-primary">(@PortfolioValue.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US")))</TradingStrat.Web.Components.UI.Typography.Text>
+                <div class="hidden md:flex items-center gap-4 text-sm">
+                    <!-- Portfolio Name (small) -->
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary text-xs">
+                        @SelectedPortfolioName
+                    </TradingStrat.Web.Components.UI.Typography.Text>
 
-                    @if (YtdPerformance.HasValue)
-                    {
-                        <TradingStrat.Web.Components.UI.Typography.Text Class="@GetPerformanceClass()">
-                            @(YtdPerformance.Value >= 0 ? "+" : "")@YtdPerformance.Value.ToString("F2", CultureInfo.InvariantCulture)% YTD
+                    <!-- Section 1: Portfolio Value -->
+                    <div class="flex flex-col">
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                            Portfolio Value
                         </TradingStrat.Web.Components.UI.Typography.Text>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                            @PortfolioValue.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US"))
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-8 w-px bg-gray-300 dark:bg-dark-border"></div>
+
+                    <!-- Section 2: Today's Return -->
+                    @if (TodayReturnDollars.HasValue && TodayReturnPercentage.HasValue)
+                    {
+                        <div class="flex flex-col">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                                Today's Return
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="@GetTodayReturnClass()">
+                                @(TodayReturnDollars.Value >= 0 ? "+" : "")@TodayReturnDollars.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US"))
+                                (@(TodayReturnPercentage.Value >= 0 ? "+" : "")@TodayReturnPercentage.Value.ToString("F2", CultureInfo.InvariantCulture)%)
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-8 w-px bg-gray-300 dark:bg-dark-border"></div>
+                    }
+
+                    <!-- Section 3: Win Rate -->
+                    @if (WinRatePercentage.HasValue)
+                    {
+                        <div class="flex flex-col">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                                Win Rate
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="@GetWinRateClass()">
+                                @WinRatePercentage.Value.ToString("F1", CultureInfo.InvariantCulture)%
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
                     }
                 </div>
             }

@@ -133,4 +133,29 @@ public class PortfolioValuationService
 
         return totalValue;
     }
+
+    /// <summary>
+    /// Calculates win rate from a portfolio snapshot.
+    /// Win rate = percentage of positions with unrealized gains > 0.
+    /// </summary>
+    /// <param name="snapshot">The portfolio snapshot.</param>
+    /// <returns>Tuple containing win rate percentage, winning positions count, and total positions count.</returns>
+    public (decimal WinRatePercentage, int WinningPositions, int TotalPositions) CalculateWinRate(
+        PortfolioSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        int totalPositions = snapshot.Positions.Count;
+        if (totalPositions == 0)
+        {
+            return (0m, 0, 0);
+        }
+
+        int winningPositions = snapshot.Positions
+            .Count(p => p.UnrealizedGainLoss > 0);
+
+        decimal winRatePercentage = (decimal)winningPositions / totalPositions * 100m;
+
+        return (winRatePercentage, winningPositions, totalPositions);
+    }
 }

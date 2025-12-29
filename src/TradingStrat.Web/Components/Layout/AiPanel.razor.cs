@@ -2,16 +2,29 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Domain.ValueObjects;
 using TradingStrat.Web.Models.State;
 using TradingStrat.Web.Services.State;
 
 namespace TradingStrat.Web.Components.Layout;
+
+/// <summary>
+/// Panel mode for AI assistant.
+/// </summary>
+public enum PanelMode
+{
+    Chat,
+    Analysis
+}
 
 public partial class AiPanel : ComponentBase, IAsyncDisposable
 {
     [Inject] private NavigationManager Navigation { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private ChatStateService ChatState { get; set; } = null!;
+    [Inject] private TickerSelectionStateService TickerSelectionState { get; set; } = null!;
+    [Inject] private IAnalyzeTickerUseCase AnalyzeTickerUseCase { get; set; } = null!;
 
     [Parameter] public string? CurrentTicker { get; set; }
     [Parameter] public string? CurrentContext { get; set; }
@@ -24,6 +37,15 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
     [Parameter] public string? CurrentRecommendation { get; set; }
     [Parameter] public int? Confidence { get; set; }
     [Parameter] public List<string>? Reasons { get; set; }
+
+    // Panel mode state
+    private PanelMode _panelMode = PanelMode.Chat;
+
+    // Analysis mode state
+    private string _selectedTicker = string.Empty;
+    private TickerAnalysis? _tickerAnalysis;
+    private bool _isAnalyzing = false;
+    private string? _analysisError;
 
     // SignalR chat (migrated from AiAssistantWidget)
     private HubConnection? _hubConnection;
@@ -49,43 +71,20 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
                 }).ToList();
                 _sessionId = history.SessionId;
 
+                // Load selected ticker if any
+                _selectedTicker = await TickerSelectionState.GetSelectedTickerAsync() ?? string.Empty;
+
                 StateHasChanged();
 
-                _hubConnection = new HubConnectionBuilder()
-                    .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
-                    .WithAutomaticReconnect()
-                    .Build();
-
-                _hubConnection.On<string>("ReceiveMessageToken", (token) =>
+                // Only initialize chat hub if starting in Chat mode (lazy initialization)
+                if (_panelMode == PanelMode.Chat)
                 {
-                    _streamingMessage += token;
-                    InvokeAsync(StateHasChanged);
-                });
-
-                _hubConnection.On("MessageComplete", async () =>
-                {
-                    await InvokeAsync(async () =>
-                    {
-                        _messages.Add(new ChatDisplayMessage
-                        {
-                            Content = _streamingMessage,
-                            IsUser = false
-                        });
-
-                        await ChatState.AddMessageAsync(_streamingMessage, isUser: false);
-
-                        _streamingMessage = string.Empty;
-                        _isStreaming = false;
-                        StateHasChanged();
-                        _ = ScrollToBottomAsync();
-                    });
-                });
-
-                await _hubConnection.StartAsync();
+                    await InitializeChatHubAsync();
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to connect to chat hub: {ex.Message}");
+                Console.WriteLine($"Failed to initialize AI Panel: {ex.Message}");
             }
         }
     }
@@ -145,6 +144,100 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
         }
     }
 
+    // ========== Analysis Mode Methods ==========
+
+    private async Task OnModeChanged(PanelMode newMode)
+    {
+        _panelMode = newMode;
+
+        // Initialize chat hub only when switching to Chat mode (lazy initialization)
+        if (_panelMode == PanelMode.Chat && _hubConnection is null)
+        {
+            await InitializeChatHubAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task AnalyzeTickerAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedTicker))
+        {
+            _analysisError = "Please enter a ticker symbol";
+            return;
+        }
+
+        _isAnalyzing = true;
+        _analysisError = null;
+        _tickerAnalysis = null;
+
+        try
+        {
+            var result = await AnalyzeTickerUseCase.ExecuteAsync(_selectedTicker);
+
+            if (result.IsSuccess)
+            {
+                _tickerAnalysis = result.Value;
+                await TickerSelectionState.SetSelectedTickerAsync(_selectedTicker);
+            }
+            else
+            {
+                _analysisError = string.Join(", ", result.Errors.Select(e => e.Message));
+            }
+        }
+        catch (Exception ex)
+        {
+            _analysisError = $"Analysis failed: {ex.Message}";
+        }
+        finally
+        {
+            _isAnalyzing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task InitializeChatHubAsync()
+    {
+        try
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On<string>("ReceiveMessageToken", (token) =>
+            {
+                _streamingMessage += token;
+                InvokeAsync(StateHasChanged);
+            });
+
+            _hubConnection.On("MessageComplete", async () =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    _messages.Add(new ChatDisplayMessage
+                    {
+                        Content = _streamingMessage,
+                        IsUser = false
+                    });
+
+                    await ChatState.AddMessageAsync(_streamingMessage, isUser: false);
+
+                    _streamingMessage = string.Empty;
+                    _isStreaming = false;
+                    StateHasChanged();
+                    _ = ScrollToBottomAsync();
+                });
+            });
+
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to connect to chat hub: {ex.Message}");
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_hubConnection is not null)
@@ -160,33 +253,35 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
         return $"{baseClasses} {widthClasses}";
     }
 
-    private string GetRegimeColorClass() => CurrentRegime.ToUpperInvariant() switch
+    private string GetRecommendationColorClass()
     {
-        "BULLISH" => "text-green-600 dark:text-green-500",
-        "BEARISH" => "text-red-600 dark:text-red-500",
-        _ => "text-gray-600 dark:text-gray-400"
-    };
+        if (_tickerAnalysis is null)
+        {
+            return "text-gray-600 dark:text-gray-400";
+        }
 
-    private string GetRegimeIcon() => CurrentRegime.ToUpperInvariant() switch
-    {
-        "BULLISH" => "🟢",
-        "BEARISH" => "🔴",
-        _ => "⚪"
-    };
+        return _tickerAnalysis.Recommendation.ToUpperInvariant() switch
+        {
+            "BUY" => "text-green-600 dark:text-green-500",
+            "SELL" or "REDUCE" or "EXIT" => "text-red-600 dark:text-red-500",
+            _ => "text-gray-600 dark:text-gray-400"
+        };
+    }
 
-    private string GetRecommendationColorClass() => CurrentRecommendation?.ToUpperInvariant() switch
+    private string GetConfidenceBarClass()
     {
-        "BUY" => "text-green-600 dark:text-green-500",
-        "SELL" or "REDUCE" or "EXIT" => "text-red-600 dark:text-red-500",
-        _ => "text-gray-600 dark:text-gray-400"
-    };
+        if (_tickerAnalysis is null)
+        {
+            return "bg-gray-500";
+        }
 
-    private string GetConfidenceBarClass() => Confidence switch
-    {
-        >= 80 => "bg-green-500",
-        >= 60 => "bg-yellow-500",
-        _ => "bg-red-500"
-    };
+        return _tickerAnalysis.Confidence switch
+        {
+            >= 80 => "bg-green-500",
+            >= 60 => "bg-yellow-500",
+            _ => "bg-red-500"
+        };
+    }
 
     private class ChatDisplayMessage
     {

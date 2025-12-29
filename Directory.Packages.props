@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- CSV Handling -->
+    <PackageVersion Include="Anthropic" Version="12.0.1" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <!-- Entity Framework Core -->
     <PackageVersion Include="DotNetEnv" Version="3.1.1" />
@@ -14,6 +15,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
     <!-- Microsoft Extensions -->
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.1.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />

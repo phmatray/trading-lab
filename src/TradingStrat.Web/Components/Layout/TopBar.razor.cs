@@ -19,10 +19,22 @@ public partial class TopBar : ComponentBase
     public decimal? PortfolioValue { get; set; }
 
     /// <summary>
-    /// Year-to-date performance percentage
+    /// Today's return in dollars
     /// </summary>
     [Parameter]
-    public decimal? YtdPerformance { get; set; }
+    public decimal? TodayReturnDollars { get; set; }
+
+    /// <summary>
+    /// Today's return as a percentage
+    /// </summary>
+    [Parameter]
+    public decimal? TodayReturnPercentage { get; set; }
+
+    /// <summary>
+    /// Win rate percentage (% of positions with unrealized gains > 0)
+    /// </summary>
+    [Parameter]
+    public decimal? WinRatePercentage { get; set; }
 
     /// <summary>
     /// Whether to show the AI mode selector
@@ -30,16 +42,37 @@ public partial class TopBar : ComponentBase
     [Parameter]
     public bool ShowAiModeSelector { get; set; } = true;
 
-    private string GetPerformanceClass()
+    private string GetTodayReturnClass()
     {
-        if (!YtdPerformance.HasValue)
+        if (!TodayReturnDollars.HasValue)
         {
-            return "";
+            return "text-sm font-semibold text-gray-900 dark:text-dark-text-primary";
         }
 
-        return YtdPerformance.Value >= 0
-            ? "metric-positive text-sm font-semibold"
-            : "metric-negative text-sm font-semibold";
+        return TodayReturnDollars.Value >= 0
+            ? "text-sm font-semibold metric-positive"
+            : "text-sm font-semibold metric-negative";
+    }
+
+    private string GetWinRateClass()
+    {
+        if (!WinRatePercentage.HasValue)
+        {
+            return "text-sm font-semibold text-gray-900 dark:text-dark-text-primary";
+        }
+
+        // Green if > 60%, gray if 40-60%, red if < 40%
+        if (WinRatePercentage.Value > 60)
+        {
+            return "text-sm font-semibold metric-positive";
+        }
+
+        if (WinRatePercentage.Value < 40)
+        {
+            return "text-sm font-semibold metric-negative";
+        }
+
+        return "text-sm font-semibold text-gray-900 dark:text-dark-text-primary";
     }
 
     private void NavigateToSettings()

@@ -1,0 +1,172 @@
+using Bunit;
+using Microsoft.AspNetCore.Components;
+using Shouldly;
+using TradingStrat.Web.Components.Shared;
+using Xunit;
+
+namespace TradingStrat.ComponentTests.Shared;
+
+/// <summary>
+/// Tests for the BuiltInStrategyCard component.
+/// </summary>
+public class BuiltInStrategyCardTests : BunitTestContext
+{
+    [Fact]
+    public void BuiltInStrategyCard_WithRequiredProps_RendersCorrectly()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "RSI Strategy")
+            .Add(p => p.Description, "Buy oversold, sell overbought")
+            .Add(p => p.Category, "Momentum")
+            .Add(p => p.StrategyKey, "rsi"));
+
+        // Assert
+        cut.Find("h3").TextContent.ShouldBe("RSI Strategy");
+        cut.Markup.ShouldContain("Buy oversold, sell overbought");
+        cut.Markup.ShouldContain("Momentum");
+        cut.Markup.ShouldContain("rsi");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_Badge_ShowsBlueBadge()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test Strategy")
+            .Add(p => p.Description, "Test description")
+            .Add(p => p.Category, "Trend")
+            .Add(p => p.StrategyKey, "test"));
+
+        // Assert
+        cut.Markup.ShouldContain("Trend");
+        // Badge component should be present with blue color
+        var badge = cut.FindComponent<TradingStrat.Web.Components.UI.DataDisplay.Badge>();
+        badge.Instance.Color.ShouldBe(TradingStrat.Web.Components.UI.BadgeColor.Blue);
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_WithoutParameters_DoesNotShowParametersRow()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Simple Strategy")
+            .Add(p => p.Description, "No parameters")
+            .Add(p => p.Category, "Simple")
+            .Add(p => p.StrategyKey, "simple")
+            .Add(p => p.DefaultParameters, new Dictionary<string, object>()));
+
+        // Assert
+        cut.Markup.ShouldNotContain("Parameters:");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_WithParameters_DisplaysParameters()
+    {
+        // Arrange
+        var parameters = new Dictionary<string, object>
+        {
+            ["Period"] = 14,
+            ["Oversold"] = 30
+        };
+
+        // Act
+        var cut = RenderComponent<BuiltInStrategyCard>(p => p
+            .Add(x => x.Name, "RSI Strategy")
+            .Add(x => x.Description, "Test")
+            .Add(x => x.Category, "Momentum")
+            .Add(x => x.StrategyKey, "rsi")
+            .Add(x => x.DefaultParameters, parameters));
+
+        // Assert
+        cut.Markup.ShouldContain("Parameters:");
+        cut.Markup.ShouldContain("Period=14");
+        cut.Markup.ShouldContain("Oversold=30");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_DisplaysStrategyKey()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "MACD Strategy")
+            .Add(p => p.Description, "MACD crossover")
+            .Add(p => p.Category, "Trend")
+            .Add(p => p.StrategyKey, "macd"));
+
+        // Assert
+        cut.Markup.ShouldContain("Key:");
+        cut.Markup.ShouldContain("macd");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_RunBacktestButton_InvokesCallback()
+    {
+        // Arrange
+        bool backtestClicked = false;
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test Strategy")
+            .Add(p => p.Description, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.StrategyKey, "test")
+            .Add(p => p.OnRunBacktest, EventCallback.Factory.Create(this, () => backtestClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Run Backtest')");
+        button.Click();
+
+        // Assert
+        backtestClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_HasCorrectStyling()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Description, "Test description")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.StrategyKey, "test"));
+
+        // Assert
+        var card = cut.Find(".bg-white");
+        var classes = card.GetAttribute("class");
+
+        classes.ShouldContain("dark:bg-zinc-900");
+        classes.ShouldContain("rounded-lg");
+        classes.ShouldContain("border");
+        classes.ShouldContain("hover:border-gray-300");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_Description_HasMinimumHeight()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Description, "Short")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.StrategyKey, "test"));
+
+        // Assert
+        var descriptionElement = cut.FindAll("p").FirstOrDefault(p => p.TextContent.Contains("Short"));
+        descriptionElement.ShouldNotBeNull();
+        descriptionElement.GetAttribute("class").ShouldContain("min-h-[3rem]");
+    }
+
+    [Fact]
+    public void BuiltInStrategyCard_Button_IsFullWidth()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<BuiltInStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Description, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.StrategyKey, "test"));
+
+        // Assert
+        var button = cut.FindComponent<TradingStrat.Web.Components.UI.Buttons.Button>();
+        button.Instance.Class.ShouldContain("w-full");
+    }
+}

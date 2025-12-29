@@ -32,6 +32,7 @@ public static class WebServiceRegistration
         services.AddScoped<FormStateService>();
         services.AddScoped<PortfolioStateService>();
         services.AddScoped<WorkspaceStateService>();
+        services.AddScoped<TickerSelectionStateService>();
 
         // Notification service
         services.AddScoped<NotificationService>();
