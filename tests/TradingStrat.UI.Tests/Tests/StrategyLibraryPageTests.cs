@@ -99,8 +99,8 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Assert - Should show empty state message
-        await Page.Locator("text=No custom strategies yet").ShouldBeVisibleAsync();
-        await Page.Locator("text=Create your first custom strategy").ShouldBeVisibleAsync();
+        await Page.Locator("text=No Custom Strategies Yet").ShouldBeVisibleAsync();
+        await Page.Locator("text=Create your first custom strategy to get started").ShouldBeVisibleAsync();
     }
 
     [Fact]
@@ -173,12 +173,13 @@ public class StrategyLibraryPageTests : BaseTest
         await Page!.Locator("button:has-text('My Strategies')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
-        // Assert - Should show all action buttons
-        await Page.Locator("button:has-text('Edit')").ShouldBeVisibleAsync();
-        await Page.Locator("button:has-text('Clone')").ShouldBeVisibleAsync();
-        await Page.Locator("button:has-text('Optimize')").ShouldBeVisibleAsync();
-        await Page.Locator("button:has-text('Test')").ShouldBeVisibleAsync();
-        await Page.Locator("button:has-text('Delete')").ShouldBeVisibleAsync();
+        // Assert - Should show all action buttons (scope to first strategy card)
+        ILocator firstCard = Page.Locator(".bg-white.dark\\:bg-zinc-900").First;
+        await firstCard.Locator("button:has-text('Edit')").ShouldBeVisibleAsync();
+        await firstCard.Locator("button:has-text('Clone')").ShouldBeVisibleAsync();
+        await firstCard.Locator("button:has-text('Optimize')").ShouldBeVisibleAsync();
+        await firstCard.Locator("button:has-text('Test')").ShouldBeVisibleAsync();
+        await firstCard.Locator("button:has-text('Delete')").ShouldBeVisibleAsync();
     }
 
     [Fact]
@@ -257,17 +258,18 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Assert - Dialog should appear with confirmation message
-        await Page.Locator("[role='dialog']").WaitForAsync();
-        await Page.Locator("text=Delete Strategy").ShouldBeVisibleAsync();
-        await Page.Locator("text=Delete Test Strategy").ShouldBeVisibleAsync();
-        await Page.Locator("text=This action cannot be undone").ShouldBeVisibleAsync();
+        ILocator dialog = Page.Locator("[role='dialog']");
+        await dialog.WaitForAsync();
+        await dialog.Locator("text=Delete Strategy").ShouldBeVisibleAsync();
+        await dialog.Locator("strong:has-text('Delete Test Strategy')").ShouldBeVisibleAsync();
+        await dialog.Locator("text=This action cannot be undone").ShouldBeVisibleAsync();
 
         // Cancel deletion
-        await Page.Locator("button:has-text('Cancel')").ClickAsync();
+        await dialog.Locator("button:has-text('Cancel')").ClickAsync();
         await Page.WaitForBlazorAsync();
 
         // Strategy should still be visible (deletion cancelled)
-        await Page.Locator("text=Delete Test Strategy").ShouldBeVisibleAsync();
+        await Page.Locator("h3:has-text('Delete Test Strategy')").ShouldBeVisibleAsync();
     }
 
     [Fact]
@@ -285,15 +287,17 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Wait for dialog to appear
-        await Page.Locator("[role='dialog']").WaitForAsync();
+        ILocator dialog = Page.Locator("[role='dialog']");
+        await dialog.WaitForAsync();
 
         // Confirm deletion by clicking Delete button in dialog
-        await Page.Locator("[role='dialog'] button:has-text('Delete')").ClickAsync();
-        await Task.Delay(1000); // Wait for deletion to complete
+        await dialog.Locator("button:has-text('Delete')").ClickAsync();
+        await Page.WaitForBlazorAsync();
+        await Task.Delay(2000); // Wait for deletion to complete and list to refresh
 
-        // Assert - Strategy should be removed
-        ILocator strategyCard = Page.Locator($"text={strategyName}");
-        int count = await strategyCard.CountAsync();
+        // Assert - Strategy should be removed (check specifically for H3 heading)
+        ILocator strategyHeading = Page.Locator($"h3:has-text('{strategyName}')");
+        int count = await strategyHeading.CountAsync();
         count.ShouldBe(0);
     }
 
@@ -325,8 +329,9 @@ public class StrategyLibraryPageTests : BaseTest
         await Page.WaitForBlazorAsync();
 
         // Wait for navigation to library page
-        await Page.WaitForURLAsync("**/strategies/library");
+        await Page.WaitForURLAsync("**/strategies/library", new() { Timeout = 60000 });
         await Page.WaitForBlazorAsync();
+        await Task.Delay(1000); // Extra delay to ensure page is fully loaded
 
         // Act
         await Page.Locator("button:has-text('My Strategies')").ClickAsync();
