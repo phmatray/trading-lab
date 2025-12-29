@@ -2,6 +2,7 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Shouldly;
+using TradingStrat.ComponentTests.Infrastructure;
 using TradingStrat.Web.Components.Shared;
 using Xunit;
 
