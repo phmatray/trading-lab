@@ -67,7 +67,8 @@ public class MachineLearningStrategy : BaseStrategy
         MarketFeatures[] features = BuildFeatures(currentIndex + 1);
 
         // Train model with walk-forward approach (exclude last feature which is for prediction)
-        _predictionService.Train(features, currentIndex);
+        // Note: features array is indexed [0, features.Length-1], not by original data index
+        _predictionService.Train(features, features.Length - 2);
 
         // Predict for current bar (last feature in the array)
         MarketFeatures currentFeature = features[^1];
