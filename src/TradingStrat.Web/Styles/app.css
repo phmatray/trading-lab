@@ -636,6 +636,36 @@
   }
 }
 
+/* Native <dialog> element reset for full-screen overlays */
+@utility dialog-fullscreen {
+  /* Reset browser defaults */
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+
+  /* Backdrop styling */
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  /* When open, display as flex container for centering */
+  &[open] {
+    display: flex;
+    align-items: start;
+    justify-content: center;
+  }
+}
+
 /* Typing indicator animation - Keep as regular CSS (not a utility) */
 @layer components {
   .typing-indicator {
