@@ -1,3 +1,5 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* Breadcrumb Navigation Component *@
 
 <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-dark-text-secondary mb-4"
@@ -22,10 +24,10 @@
         else
         {
             @* Clickable breadcrumb *@
-            <a href="@crumb.Href"
-               class="hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
+            <TradingStrat.Web.Components.UI.Typography.Link Href="@crumb.Href"
+                  Class="!no-underline !decoration-0 hover:text-trading-blue dark:hover:text-dark-accent-blue transition-colors">
                 @crumb.Label
-            </a>
+            </TradingStrat.Web.Components.UI.Typography.Link>
         }
     }
 </nav>

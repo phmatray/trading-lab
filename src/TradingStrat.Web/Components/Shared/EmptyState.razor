@@ -1,3 +1,5 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* EmptyState Component - Standardized empty state with icon, message, and optional actions *@
 
 <div class="card" data-testid="empty-state">
@@ -8,12 +10,12 @@
         </svg>
 
         <!-- Title -->
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@Title</h3>
+        <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@Title</Heading>
 
         <!-- Description -->
         @if (!string.IsNullOrEmpty(Description))
         {
-            <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">@Description</p>
+            <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">@Description</TradingStrat.Web.Components.UI.Typography.Text>
         }
 
         <!-- Actions -->

@@ -1,3 +1,5 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* PageHeader Component - Standardized page title, description, and action buttons *@
 
 <div class="flex items-center justify-between" data-testid="page-header">
@@ -13,12 +15,12 @@
             </button>
         }
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Title</h1>
+            <Heading Level="1" Class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Title</Heading>
             @if (!string.IsNullOrEmpty(Description))
             {
-                <p class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
                     @Description
-                </p>
+                </TradingStrat.Web.Components.UI.Typography.Text>
             }
         </div>
     </div>

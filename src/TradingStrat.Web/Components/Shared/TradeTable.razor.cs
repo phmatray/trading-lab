@@ -20,4 +20,11 @@ public partial class TradeTable : ComponentBase
     {
         ShowAll = !ShowAll;
     }
+
+    private string GetProfitLossClass(Trade trade)
+    {
+        string baseClasses = "text-sm text-right whitespace-nowrap";
+        string colorClass = trade.ProfitLoss > 0 ? "metric-positive" : "metric-negative";
+        return $"{baseClasses} {colorClass}";
+    }
 }

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Web.Utilities;
 
 namespace TradingStrat.Web.Components.Shared;
 
@@ -46,4 +47,9 @@ public partial class FormInputGroup : ComponentBase
     /// </summary>
     [Parameter]
     public string ContainerClass { get; set; } = "";
+
+    private string GetHelpTextClass()
+    {
+        return $"{TailwindStyles.TextMuted} text-xs mt-1";
+    }
 }

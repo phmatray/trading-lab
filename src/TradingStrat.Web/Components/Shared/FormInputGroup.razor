@@ -1,3 +1,5 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* FormInputGroup - Standardized form field wrapper with label and validation *@
 
 <div class="@ContainerClass">
@@ -21,6 +23,6 @@
 
     @if (!string.IsNullOrWhiteSpace(HelpText))
     {
-        <p class="@TailwindStyles.TextMuted text-xs mt-1">@HelpText</p>
+        <TradingStrat.Web.Components.UI.Typography.Text Class="@GetHelpTextClass()">@HelpText</TradingStrat.Web.Components.UI.Typography.Text>
     }
 </div>

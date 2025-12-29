@@ -1,8 +1,8 @@
 namespace TradingStrat.UI.Tests.PageObjects;
 
 /// <summary>
-/// Page Object Model for the AI Assistant Widget (floating chat).
-/// Represents the AI chat interface that appears on various pages.
+/// Page Object Model for the Strategy Copilot (RightPanel chat interface).
+/// Represents the AI chat interface in the tabbed RightPanel.
 /// </summary>
 public class AiAssistantWidgetPage : BasePage
 {
@@ -10,50 +10,66 @@ public class AiAssistantWidgetPage : BasePage
     {
     }
 
-    protected override string PagePath => "/backtest"; // Widget appears on multiple pages
+    protected override string PagePath => "/backtest"; // Panel appears on multiple pages
 
-    // Widget Elements
-    private ILocator MinimizedButton => Page.Locator("button:has-text('AI Assistant')");
-    private ILocator ChatHeader => Page.Locator("h3:has-text('Trading Assistant')");
-    private ILocator MinimizeButton => Page.Locator("button").Filter(new() { Has = Page.Locator("svg path[d*='M19 9l-7 7-7-7']") });
-    private ILocator MessageInput => Page.Locator("input[placeholder*='Ask about strategies']");
-    private ILocator SendButton => Page.Locator("button[type='button']").Filter(new() { Has = Page.Locator("svg path[d*='M12 19l9 2']") });
+    // RightPanel Elements
+    private ILocator RightPanel => Page.Locator("[data-testid='right-panel']");
+    private ILocator StrategyCopilotTab => Page.Locator("[data-testid='strategy-copilot-tab']");
+    private ILocator CollapseButton => Page.Locator("[aria-label*='Collapse panel'], [aria-label*='Expand panel']");
+    private ILocator ChatModeButton => Page.Locator("button:has-text('Chat')");
+    private ILocator ChatHeader => Page.Locator("h3:has-text('Strategy Copilot')");
+    private ILocator MessageInput => Page.Locator("input[placeholder*='Ask about strategies, positions, or market data']");
+    private ILocator SendButton => Page.Locator("button").Filter(new() { Has = Page.Locator("svg path[d*='M12 19l9 2']") });
     private ILocator ClearHistoryButton => Page.Locator("button:has-text('Clear history')");
     private ILocator UserMessages => Page.Locator(".flex.justify-end");
     private ILocator AssistantMessages => Page.Locator(".flex.justify-start");
 
     /// <summary>
-    /// Checks if the widget is minimized.
+    /// Checks if the panel is collapsed (showing only icon bar).
     /// </summary>
     public async Task<bool> IsMinimizedAsync()
     {
-        return await MinimizedButton.IsVisibleAsync();
+        // Check if panel has collapsed width class or chat header is not visible
+        return !await ChatHeader.IsVisibleAsync();
     }
 
     /// <summary>
-    /// Checks if the widget is expanded.
+    /// Checks if the panel is expanded (showing content).
     /// </summary>
     public async Task<bool> IsExpandedAsync()
     {
-        return await ChatHeader.IsVisibleAsync();
+        // Ensure Strategy Copilot tab is active and chat interface is visible
+        return await ChatHeader.IsVisibleAsync() && await MessageInput.IsVisibleAsync();
     }
 
     /// <summary>
-    /// Clicks the minimized button to expand the widget.
+    /// Expands the panel and activates Strategy Copilot tab in Chat mode.
     /// </summary>
     public async Task ExpandAsync()
     {
-        await MinimizedButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(300);
+        // Click Strategy Copilot tab to activate it and expand if collapsed
+        await StrategyCopilotTab.ClickAsync();
+        await Page.WaitForTimeoutAsync(1000);
+
+        // Try to click Chat mode button if visible
+        if (await ChatModeButton.IsVisibleAsync())
+        {
+            await ChatModeButton.ClickAsync();
+            await Page.WaitForTimeoutAsync(500);
+        }
     }
 
     /// <summary>
-    /// Clicks the minimize button to collapse the widget.
+    /// Collapses the panel to icon bar.
     /// </summary>
     public async Task MinimizeAsync()
     {
-        await MinimizeButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(300);
+        // If panel is expanded, click collapse button
+        if (await ChatHeader.IsVisibleAsync())
+        {
+            await CollapseButton.ClickAsync();
+            await Page.WaitForTimeoutAsync(300);
+        }
     }
 
     /// <summary>
@@ -61,6 +77,10 @@ public class AiAssistantWidgetPage : BasePage
     /// </summary>
     public async Task<bool> AreChatElementsVisibleAsync()
     {
+        // Ensure Strategy Copilot tab is active and Chat mode is active
+        await ExpandAsync();
+
+        // Check if all chat elements are visible
         bool headerVisible = await ChatHeader.IsVisibleAsync();
         bool inputVisible = await MessageInput.IsVisibleAsync();
         bool sendVisible = await SendButton.IsVisibleAsync();
@@ -145,13 +165,12 @@ public class AiAssistantWidgetPage : BasePage
     }
 
     /// <summary>
-    /// Checks if the dark theme is applied to the widget.
+    /// Checks if the dark theme is applied to the panel.
     /// </summary>
     public async Task<bool> IsDarkThemeAppliedAsync()
     {
-        // Check if dark theme classes are applied
-        ILocator minimizedBtn = MinimizedButton;
-        string? className = await minimizedBtn.GetAttributeAsync("class");
+        // Check if dark theme classes are applied to the panel
+        string? className = await RightPanel.GetAttributeAsync("class");
         return className?.Contains("dark:") ?? false;
     }
 }

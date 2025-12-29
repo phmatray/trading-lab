@@ -1,14 +1,16 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* Reusable statistics card for dashboard *@
 
 <div @onclick="HandleClick"
      class="card hover:shadow-lg transition-shadow @(OnClick.HasDelegate ? "cursor-pointer hover:border-trading-blue dark:hover:border-dark-accent-blue" : "")">
     <div class="flex items-start justify-between">
         <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">@Title</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Value</p>
+            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">@Title</TradingStrat.Web.Components.UI.Typography.Text>
+            <Heading Level="2" Class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Value</Heading>
             @if (!string.IsNullOrEmpty(Subtitle))
             {
-                <p class="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">@Subtitle</p>
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-xs text-gray-500 dark:text-dark-text-muted">@Subtitle</TradingStrat.Web.Components.UI.Typography.Text>
             }
         </div>
         <div class="flex-shrink-0 ml-4">

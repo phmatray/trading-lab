@@ -1,3 +1,5 @@
+@using TradingStrat.Web.Components.UI.Typography
+
 @* LoadingState Component - Standardized loading state with spinner or skeleton *@
 
 <div class="card" data-testid="loading-state">
@@ -6,7 +8,7 @@
         {
             <!-- Spinner -->
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
-            <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">@Message</p>
+            <TradingStrat.Web.Components.UI.Typography.Text Class="mt-4 text-gray-600 dark:text-dark-text-secondary">@Message</TradingStrat.Web.Components.UI.Typography.Text>
         }
         else
         {

@@ -1,35 +1,38 @@
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay
+
 @* DataSummaryCard - Displays data fetching results in a standardized format *@
 
 @if (Summary is not null)
 {
     <div class="@TailwindStyles.Card">
-        <h2 class="@TailwindStyles.CardHeader">Data Summary</h2>
+        <Heading Level="2" Class="@TailwindStyles.CardHeader">Data Summary</Heading>
 
-        <dl class="space-y-3">
+        <DescriptionList Class="space-y-3">
             <!-- Ticker -->
             <div>
-                <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Ticker</dt>
-                <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.Ticker</dd>
+                <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Ticker</DescriptionTerm>
+                <DescriptionDetails Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.Ticker</DescriptionDetails>
             </div>
 
             <!-- ISIN (optional) -->
             @if (!string.IsNullOrEmpty(Summary.ISIN))
             {
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">ISIN</dt>
-                    <dd class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.ISIN</dd>
+                    <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">ISIN</DescriptionTerm>
+                    <DescriptionDetails Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">@Summary.ISIN</DescriptionDetails>
                 </div>
             }
 
             <!-- Total and New Records -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Total Records</dt>
-                    <dd class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@Summary.TotalRecords.ToString("N0")</dd>
+                    <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Total Records</DescriptionTerm>
+                    <DescriptionDetails Class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@Summary.TotalRecords.ToString("N0")</DescriptionDetails>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">New Records</dt>
-                    <dd class="text-2xl font-bold text-trading-green dark:text-dark-success">+@Summary.NewRecords.ToString("N0")</dd>
+                    <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">New Records</DescriptionTerm>
+                    <DescriptionDetails Class="text-2xl font-bold text-trading-green dark:text-dark-success">+@Summary.NewRecords.ToString("N0")</DescriptionDetails>
                 </div>
             </div>
 
@@ -38,12 +41,12 @@
             {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Oldest Date</dt>
-                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.OldestDate.Value.ToString("yyyy-MM-dd")</dd>
+                        <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Oldest Date</DescriptionTerm>
+                        <DescriptionDetails Class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.OldestDate.Value.ToString("yyyy-MM-dd")</DescriptionDetails>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Date</dt>
-                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.LatestDate.Value.ToString("yyyy-MM-dd")</dd>
+                        <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Date</DescriptionTerm>
+                        <DescriptionDetails Class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.LatestDate.Value.ToString("yyyy-MM-dd")</DescriptionDetails>
                     </div>
                 </div>
             }
@@ -53,19 +56,19 @@
             {
                 <div class="grid grid-cols-3 gap-4">
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Min Price</dt>
-                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MinPrice.Value.ToString("C2")</dd>
+                        <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Min Price</DescriptionTerm>
+                        <DescriptionDetails Class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MinPrice.Value.ToString("C2")</DescriptionDetails>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Max Price</dt>
-                        <dd class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MaxPrice.Value.ToString("C2")</dd>
+                        <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Max Price</DescriptionTerm>
+                        <DescriptionDetails Class="text-sm text-gray-900 dark:text-dark-text-primary">@Summary.MaxPrice.Value.ToString("C2")</DescriptionDetails>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Close</dt>
-                        <dd class="text-sm font-semibold text-trading-blue dark:text-dark-accent-blue">@Summary.LatestClose.Value.ToString("C2")</dd>
+                        <DescriptionTerm Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary">Latest Close</DescriptionTerm>
+                        <DescriptionDetails Class="text-sm font-semibold text-trading-blue dark:text-dark-accent-blue">@Summary.LatestClose.Value.ToString("C2")</DescriptionDetails>
                     </div>
                 </div>
             }
-        </dl>
+        </DescriptionList>
     </div>
 }

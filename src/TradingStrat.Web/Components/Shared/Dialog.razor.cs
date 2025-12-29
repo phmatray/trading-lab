@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Components;
+using TradingStrat.Web.Components.UI;
 
 namespace TradingStrat.Web.Components.Shared;
 
-public partial class Dialog : ComponentBase
+public partial class Dialog : ComponentBase, IAsyncDisposable
 {
     /// <summary>
     /// Controls the visibility of the dialog
@@ -52,7 +53,29 @@ public partial class Dialog : ComponentBase
     [Parameter]
     public bool CloseOnBackdropClick { get; set; } = true;
 
-    private async Task HandleClose()
+    protected DialogSize MapSize() => Width switch
+    {
+        "w-96" => DialogSize.Large,
+        "max-w-md" or "w-[500px]" => DialogSize.Medium,
+        "max-w-lg" => DialogSize.Large,
+        "max-w-xl" => DialogSize.XL,
+        "max-w-2xl" => DialogSize.XL2,
+        "max-w-3xl" => DialogSize.XL3,
+        "max-w-4xl" => DialogSize.XL4,
+        "max-w-5xl" => DialogSize.XL5,
+        _ => DialogSize.Large
+    };
+
+    protected async Task HandleIsOpenChanged(bool newValue)
+    {
+        // Only trigger OnClose when dialog is being closed (newValue = false)
+        if (!newValue && CloseOnBackdropClick && OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    protected async Task HandleClose()
     {
         if (OnClose.HasDelegate)
         {
@@ -60,11 +83,17 @@ public partial class Dialog : ComponentBase
         }
     }
 
-    private async Task HandleBackdropClick()
+    protected async Task HandleBackdropClick()
     {
-        if (CloseOnBackdropClick)
+        if (CloseOnBackdropClick && OnClose.HasDelegate)
         {
-            await HandleClose();
+            await OnClose.InvokeAsync();
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // UI.Dialog handles its own disposal
+        await Task.CompletedTask;
     }
 }

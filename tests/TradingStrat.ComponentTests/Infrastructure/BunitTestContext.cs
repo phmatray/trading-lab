@@ -60,6 +60,12 @@ public abstract class BunitTestContext : BunitContext
         Services.AddSingleton<ChatStateService>(FakeChatState);
         Services.AddSingleton<UserPreferencesService>(FakeUserPreferences);
 
+        // Setup JSInterop for Catalyst UI components (Dialog, etc.)
+        JSInterop.Mode = JSRuntimeMode.Loose; // Allow calls without explicit setup
+        JSInterop.SetupVoid("catalyst.initializeDialog", _ => true);
+        JSInterop.SetupVoid("catalyst.focusDialog", _ => true);
+        JSInterop.SetupVoid("catalyst.disposeDialog", _ => true);
+
         // Note: Components that require use case interfaces or application ports
         // should mock those dependencies in their specific test classes using FakeItEasy.
         // This base class only provides the common UI services.

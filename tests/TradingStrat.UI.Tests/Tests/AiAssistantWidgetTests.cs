@@ -1,8 +1,8 @@
 namespace TradingStrat.UI.Tests.Tests;
 
 /// <summary>
-/// E2E tests for the AI Assistant Widget (floating chat).
-/// Tests the chat interface, message sending, and widget behavior.
+/// E2E tests for the Strategy Copilot (RightPanel chat interface).
+/// Tests the chat interface, message sending, and panel behavior.
 /// </summary>
 public class AiAssistantWidgetTests : BaseTest
 {
@@ -12,32 +12,37 @@ public class AiAssistantWidgetTests : BaseTest
     }
 
     [Fact]
-    public async Task WhenLoaded_ShouldBeMinimized()
+    public async Task WhenLoaded_ShouldShowRightPanel()
     {
         // Arrange
         var widgetPage = new AiAssistantWidgetPage(Page!, BaseUrl);
 
         // Act
         await widgetPage.NavigateAsync();
-        bool isMinimized = await widgetPage.IsMinimizedAsync();
+        bool isExpanded = await widgetPage.IsExpandedAsync();
 
         // Assert
-        isMinimized.ShouldBeTrue("AI Assistant widget should be minimized by default");
+        isExpanded.ShouldBeTrue("RightPanel with Strategy Copilot should be visible by default");
     }
 
     [Fact]
-    public async Task ClickMinimizedButton_ShouldExpand()
+    public async Task CollapseAndExpand_ShouldTogglePanel()
     {
         // Arrange
         var widgetPage = new AiAssistantWidgetPage(Page!, BaseUrl);
         await widgetPage.NavigateAsync();
 
-        // Act
+        // Act - Collapse the panel
+        await widgetPage.MinimizeAsync();
+        bool isMinimized = await widgetPage.IsMinimizedAsync();
+
+        // Then expand it again
         await widgetPage.ExpandAsync();
         bool isExpanded = await widgetPage.IsExpandedAsync();
 
         // Assert
-        isExpanded.ShouldBeTrue("Widget should expand when minimized button is clicked");
+        isMinimized.ShouldBeTrue("Panel should be collapsed after minimize");
+        isExpanded.ShouldBeTrue("Panel should expand when Strategy Copilot tab is clicked");
     }
 
     [Fact]
