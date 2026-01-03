@@ -12,6 +12,7 @@ using TradingStrat.Infrastructure.MachineLearning;
 using TradingStrat.Infrastructure.MarketData;
 using TradingStrat.Infrastructure.Persistence;
 using TradingStrat.Infrastructure.Persistence.EfCore;
+using TradingStrat.Infrastructure.Python;
 
 namespace TradingStrat.Infrastructure.DependencyInjection;
 
@@ -63,6 +64,13 @@ public static class InfrastructureServiceRegistration
         services.Configure<DataRefreshConfiguration>(
             configuration.GetSection("Trading:DataRefresh"));
         services.AddHostedService<DataRefreshBackgroundService>();
+
+        // Python.NET services
+        services.Configure<PythonConfiguration>(
+            configuration.GetSection("Trading:Python"));
+        services.AddSingleton<PythonEnvironmentManager>();
+        services.AddScoped<IPythonExecutor, PythonExecutionService>();
+        services.AddHostedService<PythonInitializationHostedService>();
 
         return services;
     }

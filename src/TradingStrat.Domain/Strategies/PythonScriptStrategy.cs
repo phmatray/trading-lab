@@ -72,9 +72,9 @@ public class PythonScriptStrategy : BaseStrategy
 
     public override TradeSignal GenerateSignal(int currentIndex, decimal currentCash, int currentPosition)
     {
-        if (currentIndex >= ClosePrices.Count)
+        if (currentIndex >= ClosePrices.Length)
         {
-            return TradeSignal.Hold("Insufficient data");
+            return new TradeSignal(SignalType.Hold, 0, 0, "Insufficient data");
         }
 
         decimal currentPrice = ClosePrices[currentIndex];
