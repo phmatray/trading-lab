@@ -12,37 +12,55 @@ let monacoEditorDisposables = [];
  * @param {number} height - Editor height in pixels (default: 500)
  * @returns {Promise<void>}
  */
-window.monacoEditorHelper = {
+export const monacoEditorHelper = {
     initializeEditor: async function (containerId, initialCode, dotNetHelper, height = 500) {
-        // Cleanup existing editor if any
+        console.log(`[Monaco] Starting initialization for container: ${containerId}`);
+
+        // Step 1: Verify container exists
+        const container = document.getElementById(containerId);
+        if (!container) {
+            const error = `Container '${containerId}' not found in DOM`;
+            console.error(`[Monaco] ERROR: ${error}`);
+            throw new Error(error);
+        }
+        console.log(`[Monaco] Container found`);
+
+        // Step 2: Cleanup existing instance
         if (monacoEditorInstance) {
+            console.log('[Monaco] Disposing existing editor instance');
             this.disposeEditor();
         }
 
-        // Dynamically load Monaco Editor from node_modules
+        // Step 3: Load AMD loader
+        console.log('[Monaco] Loading AMD loader...');
         await this.loadMonacoLoader();
+        console.log('[Monaco] AMD loader ready');
 
-        // Configure Monaco loader
+        // Step 4: Configure requireJS paths
         require.config({
-            paths: {
-                'vs': '/node_modules/monaco-editor/min/vs'
-            }
+            paths: { 'vs': '/node_modules/monaco-editor/min/vs' }
         });
+        console.log('[Monaco] RequireJS configured');
 
-        // Initialize Monaco Editor
+        // Step 5: Load Monaco with timeout protection
         return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Monaco loading timeout (10 seconds)'));
+            }, 10000);
+
             require(['vs/editor/editor.main'], () => {
+                clearTimeout(timeout);
                 try {
-                    // Create editor instance
-                    const container = document.getElementById(containerId);
-                    if (!container) {
-                        reject(new Error(`Container element '${containerId}' not found`));
-                        return;
+                    console.log('[Monaco] Module loaded, creating editor instance...');
+
+                    if (typeof monaco === 'undefined') {
+                        throw new Error('Monaco object is undefined after module load');
                     }
 
                     // Set container height
                     container.style.height = `${height}px`;
 
+                    // Create editor instance
                     monacoEditorInstance = monaco.editor.create(container, {
                         value: initialCode || this.getDefaultPythonTemplate(),
                         language: 'python',
@@ -60,10 +78,13 @@ window.monacoEditorHelper = {
                         insertSpaces: true
                     });
 
+                    console.log('[Monaco] Editor instance created successfully');
+
                     // Register custom IntelliSense
                     this.registerTradingStratIntelliSense();
+                    console.log('[Monaco] IntelliSense registered');
 
-                    // Setup change callback to notify Blazor
+                    // Setup change callback
                     const changeDisposable = monacoEditorInstance.onDidChangeModelContent(() => {
                         if (dotNetHelper) {
                             const code = monacoEditorInstance.getValue();
@@ -72,10 +93,16 @@ window.monacoEditorHelper = {
                     });
                     monacoEditorDisposables.push(changeDisposable);
 
+                    console.log('[Monaco] Initialization complete');
                     resolve();
                 } catch (error) {
+                    console.error('[Monaco] ERROR during editor creation:', error);
                     reject(error);
                 }
+            }, (err) => {
+                clearTimeout(timeout);
+                console.error('[Monaco] ERROR loading Monaco module:', err);
+                reject(new Error(`Failed to load Monaco: ${err}`));
             });
         });
     },
@@ -352,3 +379,6 @@ def generate_signal(index, price, cash, position):
         }
     }
 };
+
+// Also expose on window for backwards compatibility and testing
+window.monacoEditorHelper = monacoEditorHelper;

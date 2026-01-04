@@ -315,9 +315,17 @@ public class StrategyBuilderPageTests : BaseTest
         await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
         await Page.WaitForBlazorAsync();
 
-        // Assert
+        // Assert - Wait for Monaco to fully load (not just container div)
+        await Page.WaitForMonacoAsync();
+
         await Page.Locator("text=Python Strategy Code").ShouldBeVisibleAsync();
         await Page.Locator(".monaco-editor-container").ShouldBeVisibleAsync();
+        await Page.Locator(".monaco-editor").ShouldBeVisibleAsync();
+
+        // Verify editor is functional
+        bool hasCode = await Page.EvaluateAsync<bool>(
+            "() => window.monacoEditorHelper && window.monacoEditorHelper.getCode().length > 0");
+        hasCode.ShouldBeTrue("Monaco editor should have default template code");
     }
 
     [Fact]

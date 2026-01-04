@@ -152,4 +152,32 @@ public static class WaitHelpers
             Timeout = 3000
         });
     }
+
+    /// <summary>
+    /// Waits for Monaco editor to be fully initialized and ready for interaction.
+    /// Checks for: Monaco object exists, helper is available, and editor DOM is rendered.
+    /// </summary>
+    public static async Task WaitForMonacoAsync(this IPage page, int timeoutMs = 15000)
+    {
+        await page.WaitForFunctionAsync(@"
+            () => {
+                // Check Monaco editor DOM element exists
+                const monacoEditor = document.querySelector('.monaco-editor');
+                if (!monacoEditor) return false;
+
+                // Check Monaco global object is loaded
+                if (typeof monaco === 'undefined') return false;
+
+                // Check our helper is available
+                if (!window.monacoEditorHelper) return false;
+
+                // Check editor has rendered content (lines-content is the actual code view)
+                const hasContent = monacoEditor.querySelector('.lines-content') !== null;
+                return hasContent;
+            }
+        ", new PageWaitForFunctionOptions { Timeout = timeoutMs });
+
+        // Small additional delay for stability
+        await Task.Delay(500);
+    }
 }
