@@ -1,6 +1,7 @@
 using TradingStrat.Application.Commands;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.ValueObjects;
+using AppPythonValidationResult = TradingStrat.Application.Commands.PythonValidationResult;
 
 namespace TradingStrat.Application.Ports.Inbound;
 
@@ -60,4 +61,21 @@ public interface ICustomStrategyManagementUseCase
     /// <param name="definition">The strategy definition to validate.</param>
     /// <returns>Result containing validation result with any errors found.</returns>
     Task<Result<ValidationResult>> ValidateStrategyDefinitionAsync(StrategyDefinition definition);
+
+    /// <summary>
+    /// Validates Python code syntax and required functions without persisting it.
+    /// Checks for required generate_signal() function and optional initialize() function.
+    /// </summary>
+    /// <param name="command">Command containing Python code to validate.</param>
+    /// <returns>Result containing validation result with syntax errors if any.</returns>
+    Task<Result<AppPythonValidationResult>> ValidatePythonCodeAsync(ValidatePythonCodeCommand command);
+
+    /// <summary>
+    /// Dry-runs a Python strategy on historical data without persisting it.
+    /// Validates syntax, fetches historical data, and executes a backtest.
+    /// Useful for testing Python code before saving the strategy.
+    /// </summary>
+    /// <param name="command">Command containing Python code, ticker, and backtest parameters.</param>
+    /// <returns>Result containing validation errors and/or backtest results.</returns>
+    Task<Result<DryRunResult>> DryRunPythonStrategyAsync(DryRunPythonStrategyCommand command);
 }

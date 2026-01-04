@@ -288,4 +288,207 @@ public class StrategyBuilderPageTests : BaseTest
         await Page.WaitForURLAsync("**/strategies/library");
         Page.Url.ShouldContain("/strategies/library");
     }
+
+    // ======================
+    // Python Strategy Tests
+    // ======================
+
+    [Fact]
+    public async Task PythonStrategy_WhenLoaded_ShouldShowStrategyTypeSelector()
+    {
+        // Arrange & Act
+        await NavigateToAsync("/strategies/builder");
+
+        // Assert
+        await Page!.Locator("text=Strategy Type").ShouldBeVisibleAsync();
+        await Page.Locator("text=Rule-Based Strategy").ShouldBeVisibleAsync();
+        await Page.Locator("text=Python Code Strategy").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_SelectPythonType_ShouldShowMonacoEditor()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act - Select Python strategy type
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        await Page.Locator("text=Python Strategy Code").ShouldBeVisibleAsync();
+        await Page.Locator(".monaco-editor-container").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_SelectPythonType_ShouldHideRuleEditor()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act - Select Python strategy type
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert - Rule sections should not be visible
+        int entryRulesCount = await Page.Locator("text=Entry Rules").CountAsync();
+        int exitRulesCount = await Page.Locator("text=Exit Rules").CountAsync();
+        int positionSizingCount = await Page.Locator("text=Position Sizing").CountAsync();
+
+        entryRulesCount.ShouldBe(0);
+        exitRulesCount.ShouldBe(0);
+        positionSizingCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task PythonStrategy_ShouldShowValidateSyntaxButton()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        await Page.Locator("button:has-text('Validate Syntax')").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_ShouldShowDryRunButton()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        await Page.Locator("button:has-text('Dry Run')").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_ShouldShowAllowedLibraries()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        await Page.Locator("text=Allowed Libraries:").ShouldBeVisibleAsync();
+        await Page.Locator("text=talib").ShouldBeVisibleAsync();
+        await Page.Locator("text=numpy").ShouldBeVisibleAsync();
+        await Page.Locator("text=pandas").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_ShouldShowSecurityNotice()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        await Page.Locator("text=Security:").ShouldBeVisibleAsync();
+        await Page.Locator("text=Network and file system access are disabled").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_SubmitWithEmptyCode_ShouldShowValidation()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Fill in basic info
+        await Page.Locator("#Name").FillAsync("Python Test Strategy");
+        await Page.Locator("#Author").FillAsync("Test Author");
+        await Page.Locator("#Category").FillAsync("Test");
+
+        // Act - Submit without Python code (assuming Monaco editor starts empty or we clear it)
+        await Page.Locator("button[type='submit']:has-text('Create Strategy')").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert - Should show validation error
+        await Page.Locator("text=Python code is required").ShouldBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_DefaultToRuleBasedType()
+    {
+        // Arrange & Act
+        await NavigateToAsync("/strategies/builder");
+
+        // Assert - Rule-Based should be selected by default
+        ILocator ruleBasedRadio = Page!.Locator("input[type='radio'][value='RuleBased']");
+        (await ruleBasedRadio.IsCheckedAsync()).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task PythonStrategy_SwitchBetweenTypes_ShouldUpdateUI()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act - Switch to Python
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert - Monaco editor visible
+        await Page.Locator(".monaco-editor-container").ShouldBeVisibleAsync();
+
+        // Act - Switch back to Rule-Based
+        await Page.Locator("input[type='radio'][value='RuleBased']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert - Rule editor visible again
+        await Page.Locator("text=Position Sizing").ShouldBeVisibleAsync();
+        await Page.Locator("text=Entry Rules").ShouldBeVisibleAsync();
+
+        // Monaco editor should be hidden
+        int monacoCount = await Page.Locator(".monaco-editor-container").CountAsync();
+        monacoCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task PythonStrategy_MonacoEditorContainer_ShouldHaveUniqueId()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert
+        ILocator container = Page.Locator(".monaco-editor-container");
+        await container.ShouldBeVisibleAsync();
+
+        string? id = await container.GetAttributeAsync("id");
+        id.ShouldNotBeNullOrEmpty();
+        id.ShouldStartWith("monaco-editor-");
+    }
+
+    [Fact]
+    public async Task PythonStrategy_RequiredFunction_ShouldBeDocumented()
+    {
+        // Arrange
+        await NavigateToAsync("/strategies/builder");
+
+        // Act
+        await Page!.Locator("input[type='radio'][value='Python']").ClickAsync();
+        await Page.WaitForBlazorAsync();
+
+        // Assert - Should show documentation about required function
+        await Page.Locator("text=generate_signal").ShouldBeVisibleAsync();
+        await Page.Locator("code:has-text('generate_signal(index, price, cash, position)')").ShouldBeVisibleAsync();
+    }
 }

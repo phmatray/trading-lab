@@ -30,12 +30,14 @@ public class RunParameterOptimizationUseCaseTests
         IndicatorCalculator indicatorCalculator = new IndicatorCalculator();
         StrategyRegistry strategyRegistry = new StrategyRegistry();
         IMLPredictionService mlPredictionService = A.Fake<IMLPredictionService>();
+        IPythonExecutor pythonExecutor = A.Fake<IPythonExecutor>();
         StrategyParameterDefaults parameterDefaults = new StrategyParameterDefaults();
         StrategyFactory strategyFactory = new StrategyFactory(
             indicatorCalculator,
             strategyRegistry,
             mlPredictionService,
-            parameterDefaults);
+            parameterDefaults,
+            pythonExecutor);
 
         _useCase = new RunParameterOptimizationUseCase(
             _historicalDataPort,

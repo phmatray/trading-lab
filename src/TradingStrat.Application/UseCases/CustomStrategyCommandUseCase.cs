@@ -65,14 +65,17 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
 
     private async Task<Result<CustomStrategyResult>> CreateStrategyCoreAsync(CreateCustomStrategyCommand command)
     {
-        // Validate definition using domain service
-        DomainValidationResult validation = _validator.Validate(command.Definition);
-        if (!validation.IsValid)
+        // Validate definition for RuleBased strategies only
+        if (command.StrategyType == CustomStrategyType.RuleBased && command.Definition != null)
         {
-            return Result<CustomStrategyResult>.Failure(
-                Error.Validation(
-                    $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
-                    ErrorCodes.Strategy.InvalidDefinition));
+            DomainValidationResult validation = _validator.Validate(command.Definition);
+            if (!validation.IsValid)
+            {
+                return Result<CustomStrategyResult>.Failure(
+                    Error.Validation(
+                        $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
+                        ErrorCodes.Strategy.InvalidDefinition));
+            }
         }
 
         // Create entity
@@ -82,9 +85,12 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
             Description = command.Description,
             Author = command.Author,
             Category = command.Category,
+            StrategyType = command.StrategyType,
             CreatedAt = DateTime.UtcNow,
             LastUpdatedAt = DateTime.UtcNow,
-            DefinitionJson = SerializeDefinition(command.Definition)
+            DefinitionJson = command.Definition != null ? SerializeDefinition(command.Definition) : string.Empty,
+            PythonCode = command.PythonCode,
+            PythonCodeVersion = command.PythonCode != null ? 1 : null
         };
 
         // Persist
@@ -96,14 +102,17 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
 
     private async Task<Result<CustomStrategyResult>> UpdateStrategyCoreAsync(UpdateCustomStrategyCommand command)
     {
-        // Validate definition using domain service
-        DomainValidationResult validation = _validator.Validate(command.Definition);
-        if (!validation.IsValid)
+        // Validate definition for RuleBased strategies only
+        if (command.StrategyType == CustomStrategyType.RuleBased && command.Definition != null)
         {
-            return Result<CustomStrategyResult>.Failure(
-                Error.Validation(
-                    $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
-                    ErrorCodes.Strategy.InvalidDefinition));
+            DomainValidationResult validation = _validator.Validate(command.Definition);
+            if (!validation.IsValid)
+            {
+                return Result<CustomStrategyResult>.Failure(
+                    Error.Validation(
+                        $"Invalid strategy definition: {string.Join(", ", validation.Errors)}",
+                        ErrorCodes.Strategy.InvalidDefinition));
+            }
         }
 
         // Load existing strategy
@@ -118,7 +127,10 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
         existing.Name = command.Name;
         existing.Description = command.Description;
         existing.Category = command.Category;
-        existing.DefinitionJson = SerializeDefinition(command.Definition);
+        existing.StrategyType = command.StrategyType;
+        existing.DefinitionJson = command.Definition != null ? SerializeDefinition(command.Definition) : string.Empty;
+        existing.PythonCode = command.PythonCode;
+        existing.PythonCodeVersion = command.PythonCode != null ? (existing.PythonCodeVersion ?? 0) + 1 : null;
         existing.LastUpdatedAt = DateTime.UtcNow;
 
         // Persist
@@ -176,7 +188,10 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
 
     private CustomStrategyResult MapToResult(CustomStrategy strategy)
     {
-        StrategyDefinition definition = DeserializeDefinition(strategy.DefinitionJson);
+        // Deserialize definition only for RuleBased strategies
+        StrategyDefinition? definition = strategy.StrategyType == CustomStrategyType.RuleBased
+            ? DeserializeDefinition(strategy.DefinitionJson)
+            : null;
 
         return new CustomStrategyResult(
             strategy.Id,
@@ -186,7 +201,10 @@ public class CustomStrategyCommandUseCase : ICustomStrategyCommandUseCase
             strategy.Category,
             strategy.CreatedAt,
             strategy.LastUpdatedAt,
+            strategy.StrategyType,
             definition,
+            strategy.PythonCode,
+            strategy.PythonCodeVersion,
             strategy.TimesUsed,
             strategy.LastBacktestReturn,
             strategy.LastBacktestDate

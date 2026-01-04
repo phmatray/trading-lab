@@ -32,12 +32,14 @@ public class RunBacktestUseCaseTests
         var indicatorCalculator = new IndicatorCalculator();
         var strategyRegistry = new StrategyRegistry();
         IMLPredictionService mlPredictionService = A.Fake<IMLPredictionService>();
+        IPythonExecutor pythonExecutor = A.Fake<IPythonExecutor>();
         var parameterDefaults = new StrategyParameterDefaults();
         _strategyFactory = new StrategyFactory(
             indicatorCalculator,
             strategyRegistry,
             mlPredictionService,
-            parameterDefaults);
+            parameterDefaults,
+            pythonExecutor);
 
         _useCase = new RunBacktestUseCase(
             _historicalDataPort,

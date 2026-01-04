@@ -2,6 +2,7 @@
 @page "/strategies/builder/{Id:int}"
 @rendermode InteractiveServer
 @using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Domain.Entities
 
 <PageTitle>@(IsEditMode ? "Edit Strategy" : "Strategy Builder") | TradingStrat</PageTitle>
 
@@ -66,7 +67,39 @@
                 </div>
             </div>
 
-            <!-- Position Sizing Card -->
+            <!-- Strategy Type Selector (only for new strategies) -->
+            @if (!IsEditMode)
+            {
+                <div class="card">
+                    <Heading Level="2" Class="text-xl font-semibold mb-4">Strategy Type</Heading>
+                    <InputRadioGroup @bind-Value="_formModel.StrategyType">
+                        <div class="flex gap-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <InputRadio Value="@CustomStrategyType.RuleBased" class="w-4 h-4 text-blue-600" />
+                                <div>
+                                    <div class="font-medium">Rule-Based Strategy</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                        Build strategy using visual rule editor with technical indicators
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <InputRadio Value="@CustomStrategyType.Python" class="w-4 h-4 text-blue-600" />
+                                <div>
+                                    <div class="font-medium">Python Code Strategy</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                        Write custom strategy in Python with NumPy, pandas, and TA-Lib
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </InputRadioGroup>
+                </div>
+            }
+
+            @if (_formModel.StrategyType == CustomStrategyType.RuleBased)
+            {
+                <!-- Position Sizing Card -->
             <div class="card">
                 <Heading Level="2" Class="text-xl font-semibold mb-4">Position Sizing</Heading>
 
@@ -148,6 +181,106 @@
                                    EmptyStateMessage="No exit rules defined. Add rules to specify when to sell."
                                    OnRulesChanged="StateHasChanged" />
             </div>
+            }
+            else if (_formModel.StrategyType == CustomStrategyType.Python)
+            {
+                <!-- Python Code Editor Card -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <Heading Level="2" Class="text-xl font-semibold">Python Strategy Code</Heading>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Write your trading strategy in Python. Required function: <code class="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded">generate_signal(index, price, cash, position)</code>
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+                        <div class="flex gap-2">
+                            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                    OnClick="@HandleValidateSyntax"
+                                    IsLoading="@_isValidating"
+                                    Text="Validate Syntax"
+                                    LoadingText="Validating..."
+                                    AriaLabel="Validate Python syntax"></TradingStrat.Web.Components.Shared.Button>
+                            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Info"
+                                    OnClick="@HandleDryRun"
+                                    IsLoading="@_isDryRunning"
+                                    Text="Dry Run"
+                                    LoadingText="Testing..."
+                                    AriaLabel="Test strategy on sample data"></TradingStrat.Web.Components.Shared.Button>
+                        </div>
+                    </div>
+
+                    <MonacoEditor Code="@_formModel.PythonCode"
+                                  CodeChanged="@((newCode) => _formModel.PythonCode = newCode)"
+                                  Height="600" />
+
+                    @if (_pythonValidationErrors.Any())
+                    {
+                        <div class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                            <Heading Level="3" Class="font-semibold text-red-800 dark:text-red-200 mb-2">Validation Errors:</Heading>
+                            <ul class="list-disc list-inside text-red-700 dark:text-red-300 text-sm space-y-1">
+                                @foreach (var error in _pythonValidationErrors)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    @if (_dryRunResult != null)
+                    {
+                        <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                            <Heading Level="3" Class="font-semibold text-blue-800 dark:text-blue-200 mb-3">Dry Run Results:</Heading>
+
+                            @if (_dryRunResult.IsValid)
+                            {
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">Total Trades</div>
+                                        <div class="text-lg font-bold text-blue-900 dark:text-blue-100">@_dryRunResult.TotalTrades</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">Final Equity</div>
+                                        <div class="text-lg font-bold text-blue-900 dark:text-blue-100">@_dryRunResult.FinalEquity?.ToString("C2")</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">Total Return</div>
+                                        <div class="text-lg font-bold text-blue-900 dark:text-blue-100">@_dryRunResult.TotalReturn?.ToString("P2")</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-blue-600 dark:text-blue-400 font-medium">Sharpe Ratio</div>
+                                        <div class="text-lg font-bold text-blue-900 dark:text-blue-100">@_dryRunResult.SharpeRatio?.ToString("F2")</div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-red-700 dark:text-red-300">
+                                    <ul class="list-disc list-inside text-sm space-y-1">
+                                        @foreach (var error in _dryRunResult.ValidationErrors)
+                                        {
+                                            <li>@error</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="mt-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <Heading Level="4" Class="font-semibold text-sm mb-2">Allowed Libraries:</Heading>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">talib</span>
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">numpy</span>
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">pandas</span>
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">math</span>
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded">datetime</span>
+                        </div>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            Security: Network and file system access are disabled. Only allowed libraries can be imported.
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    </div>
+                </div>
+            }
 
             <!-- Action Buttons -->
             <div class="flex justify-between items-center">

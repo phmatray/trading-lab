@@ -77,7 +77,10 @@ public class CustomStrategyQueryUseCase : ICustomStrategyQueryUseCase
 
     private CustomStrategyResult MapToResult(CustomStrategy strategy)
     {
-        StrategyDefinition definition = DeserializeDefinition(strategy.DefinitionJson);
+        // Deserialize definition only for RuleBased strategies
+        StrategyDefinition? definition = strategy.StrategyType == CustomStrategyType.RuleBased
+            ? DeserializeDefinition(strategy.DefinitionJson)
+            : null;
 
         return new CustomStrategyResult(
             strategy.Id,
@@ -87,7 +90,10 @@ public class CustomStrategyQueryUseCase : ICustomStrategyQueryUseCase
             strategy.Category,
             strategy.CreatedAt,
             strategy.LastUpdatedAt,
+            strategy.StrategyType,
             definition,
+            strategy.PythonCode,
+            strategy.PythonCodeVersion,
             strategy.TimesUsed,
             strategy.LastBacktestReturn,
             strategy.LastBacktestDate

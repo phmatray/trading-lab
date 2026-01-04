@@ -21,6 +21,7 @@ public class StrategyFactoryTests
     {
         _fakeIndicatorCalculator = A.Fake<IIndicatorCalculator>();
         _fakeMLPredictionService = A.Fake<IMLPredictionService>();
+        var fakePythonExecutor = A.Fake<IPythonExecutor>();
 
         // Use real implementations for tests (they're immutable metadata, no need to fake)
         _registry = new StrategyRegistry();
@@ -29,7 +30,8 @@ public class StrategyFactoryTests
             _fakeIndicatorCalculator,
             _registry,
             _fakeMLPredictionService,
-            _parameterDefaults);
+            _parameterDefaults,
+            fakePythonExecutor);
     }
 
     #region Strategy Creation Tests

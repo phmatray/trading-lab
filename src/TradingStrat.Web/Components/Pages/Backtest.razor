@@ -55,10 +55,47 @@
                 </EditForm>
             </div>
 
-            <StrategyForm @ref="_strategyForm"
-                          SelectedStrategy="@GetStrategyKey(FormModel.StrategyType)"
-                          SelectedStrategyChanged="@OnStrategyTypeChanged"
-                          ParametersChanged="@OnStrategyParametersChanged" />
+            @if (_customStrategy is not null)
+            {
+                <!-- Custom Strategy Information -->
+                <div class="card">
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Custom Strategy</Heading>
+
+                    <div class="space-y-3">
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Name</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.Name</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Type</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.StrategyType</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Description</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.Description</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        @if (_customStrategy.StrategyType == TradingStrat.Domain.Entities.CustomStrategyType.Python && !string.IsNullOrEmpty(_customStrategy.PythonCode))
+                        {
+                            <div>
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-2">Python Code Preview</TradingStrat.Web.Components.UI.Typography.Text>
+                                <div class="bg-gray-50 dark:bg-dark-card rounded-lg p-3 text-xs font-mono overflow-x-auto max-h-40 overflow-y-auto">
+                                    <pre class="text-gray-800 dark:text-dark-text-secondary">@_customStrategy.PythonCode.Substring(0, Math.Min(500, _customStrategy.PythonCode.Length))@(_customStrategy.PythonCode.Length > 500 ? "..." : "")</pre>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <StrategyForm @ref="_strategyForm"
+                              SelectedStrategy="@GetStrategyKey(FormModel.StrategyType)"
+                              SelectedStrategyChanged="@OnStrategyTypeChanged"
+                              ParametersChanged="@OnStrategyParametersChanged" />
+            }
         </div>
 
         <!-- Results -->

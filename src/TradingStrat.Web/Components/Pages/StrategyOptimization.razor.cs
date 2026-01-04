@@ -90,8 +90,12 @@ public partial class StrategyOptimization : IDisposable
 
             _selectedStrategy = result.Value;
 
-            if (_selectedStrategy is null)
+            if (_selectedStrategy is null || _selectedStrategy.Definition is null)
             {
+                if (_selectedStrategy?.Definition is null)
+                {
+                    await ShowErrorAsync("Strategy optimization is only available for rule-based strategies");
+                }
                 return;
             }
 
@@ -235,7 +239,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task ApplyBestParameters()
     {
-        if (_optimizationResult is null || _selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null || _selectedStrategy.Definition is null)
         {
             return;
         }
@@ -364,7 +368,7 @@ public partial class StrategyOptimization : IDisposable
 
     private async Task SaveAsNewStrategy()
     {
-        if (_optimizationResult is null || _selectedStrategy is null)
+        if (_optimizationResult is null || _selectedStrategy is null || _selectedStrategy.Definition is null)
         {
             return;
         }

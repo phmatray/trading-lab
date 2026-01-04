@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
+using TradingStrat.Application.Commands;
 using TradingStrat.Application.Configuration;
 using TradingStrat.Application.Factories;
 using TradingStrat.Application.Ports.Inbound;
@@ -27,6 +28,7 @@ public partial class Backtest
     [Inject] private ISaveBacktestRunUseCase SaveBacktestRunUseCase { get; set; } = null!;
     [Inject] private IStrategyFactory StrategyFactory { get; set; } = null!;
     [Inject] private IStrategyRegistry StrategyRegistry { get; set; } = null!;
+    [Inject] private ICustomStrategyQueryUseCase CustomStrategyQueryUseCase { get; set; } = null!;
     [Inject] private UserPreferencesService PreferencesService { get; set; } = null!;
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private NavigationManager Navigation { get; set; } = null!;
@@ -46,6 +48,7 @@ public partial class Backtest
     };
 
     private StrategyForm? _strategyForm;
+    private CustomStrategyResult? _customStrategy;
 
     protected override string FormKey => FORM_KEY;
 
@@ -59,6 +62,17 @@ public partial class Backtest
         if (QueryCustomStrategyId.HasValue)
         {
             model.CustomStrategyId = QueryCustomStrategyId.Value;
+
+            // Fetch custom strategy details
+            Result<CustomStrategyResult> strategyResult = await CustomStrategyQueryUseCase.GetStrategyByIdAsync(QueryCustomStrategyId.Value);
+            if (strategyResult.IsSuccess)
+            {
+                _customStrategy = strategyResult.Value;
+            }
+            else
+            {
+                ErrorMessage = $"Failed to load custom strategy: {string.Join(", ", strategyResult.Errors.Select(e => e.Message))}";
+            }
         }
         else if (!string.IsNullOrEmpty(QueryStrategy))
         {

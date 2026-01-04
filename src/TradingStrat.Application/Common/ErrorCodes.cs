@@ -86,6 +86,7 @@ public static class ErrorCodes
         public const string RetrievalFailed = "STRATEGY_RETRIEVAL_FAILED";
         public const string InvalidDefinition = "INVALID_STRATEGY_DEFINITION";
         public const string ValidationFailed = "VALIDATION_FAILED";
+        public const string ExecutionFailed = "STRATEGY_EXECUTION_FAILED";
     }
 
     /// <summary>

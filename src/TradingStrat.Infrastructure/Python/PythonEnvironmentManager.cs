@@ -11,7 +11,7 @@ namespace TradingStrat.Infrastructure.Python;
 /// </summary>
 public class PythonEnvironmentManager : IDisposable
 {
-    private static readonly object Lock = new();
+    private static readonly Lock _lock = new();
     private static bool _isInitialized;
 
     private readonly ILogger<PythonEnvironmentManager> _logger;
@@ -37,7 +37,7 @@ public class PythonEnvironmentManager : IDisposable
             return;
         }
 
-        lock (Lock)
+        lock (_lock)
         {
             if (_isInitialized)
             {
@@ -139,10 +139,17 @@ public class PythonEnvironmentManager : IDisposable
     {
         string[] paths =
         [
+            // Anaconda
+            "/opt/homebrew/anaconda3/lib/libpython3.12.dylib",
+            "/opt/homebrew/anaconda3/lib/libpython3.11.dylib",
+            "/usr/local/anaconda3/lib/libpython3.12.dylib",
+            "/usr/local/anaconda3/lib/libpython3.11.dylib",
+            // Homebrew
             "/opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/lib/libpython3.12.dylib",
             "/opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib",
             "/usr/local/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/lib/libpython3.12.dylib",
             "/usr/local/opt/python@3.11/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib",
+            // Standard Framework
             "/Library/Frameworks/Python.framework/Versions/3.12/lib/libpython3.12.dylib",
             "/Library/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib"
         ];
@@ -157,7 +164,9 @@ public class PythonEnvironmentManager : IDisposable
         }
 
         throw new FileNotFoundException(
-            "Python library not found. Install via Homebrew: brew install python@3.12\n" +
+            "Python library not found. Install Python 3.12 or 3.11 via:\n" +
+            "  - Homebrew: brew install python@3.12\n" +
+            "  - Anaconda: https://www.anaconda.com/download\n" +
             "Searched locations: " + string.Join(", ", paths));
     }
 
@@ -258,14 +267,31 @@ builtins.open = _blocked_open
     /// </summary>
     public void Dispose()
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (_isInitialized)
             {
                 _logger.LogInformation("Shutting down Python runtime...");
-                PythonEngine.Shutdown();
-                _isInitialized = false;
-                _logger.LogInformation("Python runtime shut down successfully");
+
+                try
+                {
+                    PythonEngine.Shutdown();
+                    _logger.LogInformation("Python runtime shut down successfully");
+                }
+                catch (PlatformNotSupportedException ex) when (ex.Message.Contains("BinaryFormatter"))
+                {
+                    // Known issue: Python.NET uses BinaryFormatter which is removed in .NET 10.0
+                    // Safe to ignore during shutdown as the process is terminating anyway
+                    _logger.LogWarning("Python runtime shutdown encountered BinaryFormatter error (expected in .NET 10.0+). This can be safely ignored.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to cleanly shutdown Python runtime. This may be harmless during application shutdown.");
+                }
+                finally
+                {
+                    _isInitialized = false;
+                }
             }
         }
     }

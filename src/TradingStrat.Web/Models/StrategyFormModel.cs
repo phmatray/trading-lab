@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TradingStrat.Domain.Entities;
 using TradingStrat.Domain.ValueObjects;
 using static TradingStrat.Web.Services.DebugLogger;
 
@@ -24,6 +25,14 @@ public class StrategyFormModel
     [StringLength(50, ErrorMessage = "Category cannot exceed 50 characters")]
     public string Category { get; set; } = "Custom";
 
+    // Strategy Type (RuleBased or Python)
+    [Required(ErrorMessage = "Strategy type is required")]
+    public CustomStrategyType StrategyType { get; set; } = CustomStrategyType.RuleBased;
+
+    // Python code (for Python strategies only)
+    public string? PythonCode { get; set; }
+
+    // Rule-based strategy properties
     [Required(ErrorMessage = "Position sizing mode is required")]
     public PositionSizingMode SizingMode { get; set; } = PositionSizingMode.FixedPercentage;
 

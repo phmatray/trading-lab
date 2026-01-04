@@ -66,6 +66,10 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ICustomStrategyQueryUseCase, CustomStrategyQueryUseCase>();
         services.AddScoped<ICustomStrategyCommandUseCase, CustomStrategyCommandUseCase>();
 
+        // Python Strategy Use Cases
+        services.AddScoped<ValidatePythonCodeUseCase>();
+        services.AddScoped<DryRunPythonStrategyUseCase>();
+
 #pragma warning disable CS0618 // Type or member is obsolete
         services.AddScoped<ICustomStrategyManagementUseCase, CustomStrategyManagementUseCase>(); // Legacy facade for backward compatibility
 #pragma warning restore CS0618 // Type or member is obsolete

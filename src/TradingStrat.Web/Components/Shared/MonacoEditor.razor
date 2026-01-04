@@ -1,0 +1,106 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<div id="@_editorContainerId" class="monaco-editor-container border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"></div>
+
+@code {
+    [Parameter]
+    public string Code { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> CodeChanged { get; set; }
+
+    [Parameter]
+    public int Height { get; set; } = 500;
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    private readonly string _editorContainerId = $"monaco-editor-{Guid.NewGuid():N}";
+    private IJSObjectReference? _moduleReference;
+    private DotNetObjectReference<MonacoEditor>? _dotNetReference;
+    private bool _isInitialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeEditorAsync();
+        }
+    }
+
+    private async Task InitializeEditorAsync()
+    {
+        try
+        {
+            // Load the monaco-editor-helper module
+            _moduleReference = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import", "./js/monaco-editor-helper.js");
+
+            // Create .NET reference for callbacks
+            _dotNetReference = DotNetObjectReference.Create(this);
+
+            // Initialize Monaco Editor
+            await _moduleReference.InvokeVoidAsync(
+                "monacoEditorHelper.initializeEditor",
+                _editorContainerId,
+                Code,
+                _dotNetReference,
+                Height);
+
+            // Set read-only state if needed
+            if (ReadOnly)
+            {
+                await _moduleReference.InvokeVoidAsync("monacoEditorHelper.setReadOnly", true);
+            }
+
+            _isInitialized = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to initialize Monaco Editor: {ex.Message}");
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnCodeChanged(string newCode)
+    {
+        Code = newCode;
+        await CodeChanged.InvokeAsync(newCode);
+    }
+
+    public async Task SetCodeAsync(string code)
+    {
+        if (_isInitialized && _moduleReference != null)
+        {
+            await _moduleReference.InvokeVoidAsync("monacoEditorHelper.setCode", code);
+        }
+    }
+
+    public async Task SetReadOnlyAsync(bool readOnly)
+    {
+        if (_isInitialized && _moduleReference != null)
+        {
+            await _moduleReference.InvokeVoidAsync("monacoEditorHelper.setReadOnly", readOnly);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_moduleReference != null)
+        {
+            try
+            {
+                await _moduleReference.InvokeVoidAsync("monacoEditorHelper.disposeEditor");
+                await _moduleReference.DisposeAsync();
+            }
+            catch
+            {
+                // Ignore disposal errors
+            }
+        }
+
+        _dotNetReference?.Dispose();
+    }
+}

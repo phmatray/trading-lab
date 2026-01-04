@@ -3,6 +3,7 @@ using Serilog;
 using TradingStrat.Application.DependencyInjection;
 using TradingStrat.Infrastructure.DependencyInjection;
 using TradingStrat.Infrastructure.Persistence.EfCore;
+using TradingStrat.Infrastructure.Python;
 using TradingStrat.Web.Components;
 using TradingStrat.Web.DependencyInjection;
 
@@ -50,6 +51,19 @@ public class Program
             using IServiceScope scope = app.Services.CreateScope();
             TradingContext context = scope.ServiceProvider.GetRequiredService<TradingContext>();
             await context.Database.MigrateAsync();
+        }
+
+        // Initialize Python runtime for custom strategies
+        try
+        {
+            using IServiceScope scope = app.Services.CreateScope();
+            PythonEnvironmentManager pythonManager = scope.ServiceProvider.GetRequiredService<PythonEnvironmentManager>();
+            pythonManager.Initialize();
+            Log.Information("Python environment initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to initialize Python environment. Python strategies will not be available.");
         }
 
         // Configure HTTP pipeline

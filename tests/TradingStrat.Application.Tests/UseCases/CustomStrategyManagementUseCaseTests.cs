@@ -1,10 +1,15 @@
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
 using Shouldly;
 using TradingStrat.Application.Commands;
+using TradingStrat.Application.Services;
 using TradingStrat.Application.Tests.TestDoubles;
 using TradingStrat.Application.UseCases;
 using TradingStrat.Domain.Common;
 using TradingStrat.Domain.Services;
+using TradingStrat.Domain.Services.Indicators;
 using TradingStrat.Domain.ValueObjects;
+using PositionSizingMode = TradingStrat.Domain.ValueObjects.PositionSizingMode;
 using ValidationResult = TradingStrat.Application.Commands.ValidationResult;
 
 namespace TradingStrat.Application.Tests.UseCases;
@@ -28,9 +33,31 @@ public class CustomStrategyManagementUseCaseTests
         var queryUseCase = new CustomStrategyQueryUseCase(_repository);
         var commandUseCase = new CustomStrategyCommandUseCase(_repository, validator);
 
+        // Create fake dependencies for Python use cases
+        var fakePythonExecutor = A.Fake<IPythonExecutor>();
+        var fakeHistoricalDataPort = new InMemoryHistoricalDataRepository();
+        var fakeIndicatorCalculator = A.Fake<IIndicatorCalculator>();
+        var fakeBacktestEngine = new BacktestEngine(fakeHistoricalDataPort, new PerformanceCalculator());
+        var fakeValidateLogger = A.Fake<ILogger<ValidatePythonCodeUseCase>>();
+        var fakeDryRunLogger = A.Fake<ILogger<DryRunPythonStrategyUseCase>>();
+
+        // Create Python use cases
+        var validatePythonCodeUseCase = new ValidatePythonCodeUseCase(fakePythonExecutor, fakeValidateLogger);
+        var dryRunPythonStrategyUseCase = new DryRunPythonStrategyUseCase(
+            fakePythonExecutor,
+            fakeHistoricalDataPort,
+            fakeBacktestEngine,
+            fakeIndicatorCalculator,
+            fakeDryRunLogger);
+
         // Create the facade for backward compatibility
 #pragma warning disable CS0618 // Type or member is obsolete
-        _useCase = new CustomStrategyManagementUseCase(queryUseCase, commandUseCase, validator);
+        _useCase = new CustomStrategyManagementUseCase(
+            queryUseCase,
+            commandUseCase,
+            validator,
+            validatePythonCodeUseCase,
+            dryRunPythonStrategyUseCase);
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 
@@ -136,9 +163,9 @@ public class CustomStrategyManagementUseCaseTests
                     LogicalOperator.None
                 )
             },
-            exitRules: created.Value.Definition.ExitRules,
-            sizingMode: created.Value.Definition.SizingMode,
-            sizingParameters: created.Value.Definition.SizingParameters
+            exitRules: created.Value.Definition!.ExitRules,
+            sizingMode: created.Value.Definition!.SizingMode,
+            sizingParameters: created.Value.Definition!.SizingParameters
         );
 
         UpdateCustomStrategyCommand updateCommand = new(
@@ -157,7 +184,7 @@ public class CustomStrategyManagementUseCaseTests
         result.Value.Name.ShouldBe("Updated Name");
         result.Value.Description.ShouldBe("Updated Description");
         result.Value.Category.ShouldBe("Updated Category");
-        result.Value.Definition.EntryRules[0].ConstantValue.ShouldBe(25);
+        result.Value.Definition!.EntryRules[0].ConstantValue.ShouldBe(25);
         result.Value.LastUpdatedAt.ShouldBeGreaterThan(created.Value.LastUpdatedAt);
     }
 
@@ -299,8 +326,8 @@ public class CustomStrategyManagementUseCaseTests
         cloneResult2.Value.Description.ShouldContain("Cloned from");
         cloneResult2.Value.Author.ShouldBe(originalResult.Value.Author);
         cloneResult2.Value.Category.ShouldBe(originalResult.Value.Category);
-        cloneResult2.Value.Definition.EntryRules.Count.ShouldBe(originalResult.Value.Definition.EntryRules.Count);
-        cloneResult2.Value.Definition.ExitRules.Count.ShouldBe(originalResult.Value.Definition.ExitRules.Count);
+        cloneResult2.Value.Definition!.EntryRules.Count.ShouldBe(originalResult.Value.Definition!.EntryRules.Count);
+        cloneResult2.Value.Definition!.ExitRules.Count.ShouldBe(originalResult.Value.Definition!.ExitRules.Count);
         cloneResult2.Value.TimesUsed.ShouldBe(0); // Clone starts fresh
 
         _repository.Count.ShouldBe(2);

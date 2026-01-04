@@ -17,18 +17,21 @@ public class StrategyFactory : IStrategyFactory
     private readonly ICustomStrategyPort? _customStrategyPort;
     private readonly IMLPredictionService _mlPredictionService;
     private readonly StrategyParameterDefaults _parameterDefaults;
+    private readonly IPythonExecutor _pythonExecutor;
 
     public StrategyFactory(
         IIndicatorCalculator indicatorCalculator,
         IStrategyRegistry registry,
         IMLPredictionService mlPredictionService,
         StrategyParameterDefaults parameterDefaults,
+        IPythonExecutor pythonExecutor,
         ICustomStrategyPort? customStrategyPort = null)
     {
         _indicatorCalculator = indicatorCalculator;
         _registry = registry;
         _mlPredictionService = mlPredictionService;
         _parameterDefaults = parameterDefaults;
+        _pythonExecutor = pythonExecutor;
         _customStrategyPort = customStrategyPort;
     }
 
@@ -187,11 +190,21 @@ public class StrategyFactory : IStrategyFactory
 
     /// <summary>
     /// Creates a custom strategy from a CustomStrategy entity.
-    /// The entity contains the serialized strategy definition.
+    /// Supports both rule-based strategies (with StrategyDefinition) and Python strategies (with PythonCode).
     /// </summary>
     /// <param name="customStrategy">The custom strategy entity from the database.</param>
-    /// <returns>A CustomRuleBasedStrategy ready for backtesting.</returns>
+    /// <returns>A strategy ready for backtesting (CustomRuleBasedStrategy or PythonScriptStrategy).</returns>
     public IStrategy CreateCustomStrategy(CustomStrategy customStrategy)
+    {
+        return customStrategy.StrategyType switch
+        {
+            CustomStrategyType.RuleBased => CreateRuleBasedCustomStrategy(customStrategy),
+            CustomStrategyType.Python => CreatePythonCustomStrategy(customStrategy),
+            _ => throw new InvalidOperationException($"Unknown custom strategy type: {customStrategy.StrategyType}")
+        };
+    }
+
+    private CustomRuleBasedStrategy CreateRuleBasedCustomStrategy(CustomStrategy customStrategy)
     {
         StrategyDefinition definition = JsonSerializer.Deserialize<StrategyDefinition>(
             customStrategy.DefinitionJson)
@@ -200,6 +213,21 @@ public class StrategyFactory : IStrategyFactory
         return new CustomRuleBasedStrategy(
             _indicatorCalculator,
             definition,
+            customStrategy.Name,
+            customStrategy.Description);
+    }
+
+    private PythonScriptStrategy CreatePythonCustomStrategy(CustomStrategy customStrategy)
+    {
+        if (string.IsNullOrWhiteSpace(customStrategy.PythonCode))
+        {
+            throw new InvalidOperationException($"Python strategy '{customStrategy.Name}' has no Python code");
+        }
+
+        return new PythonScriptStrategy(
+            _indicatorCalculator,
+            _pythonExecutor,
+            customStrategy.PythonCode,
             customStrategy.Name,
             customStrategy.Description);
     }
