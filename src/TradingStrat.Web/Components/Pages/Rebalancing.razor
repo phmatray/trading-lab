@@ -38,7 +38,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Configuration Form -->
             <div class="lg:col-span-1 space-y-6">
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Target Allocation</Heading>
 
                     @if (_snapshot is not null)
@@ -134,17 +134,17 @@
                 {
                     <!-- Summary Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="card">
+                        <div class="card-elevated">
                             <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Required Cash</Heading>
                             <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_plan.RequiredCash.ToString("C2")</p>
                         </div>
 
-                        <div class="card">
+                        <div class="card-elevated">
                             <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Available Cash</Heading>
                             <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_plan.AvailableCash.ToString("C2")</p>
                         </div>
 
-                        <div class="card">
+                        <div class="card-elevated">
                             <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Status</Heading>
                             <div class="flex items-center space-x-2">
                                 @if (_plan.IsExecutable)
@@ -180,7 +180,7 @@
                     }
 
                     <!-- Rebalancing Signals Table -->
-                    <div class="card">
+                    <div class="card-elevated">
                         <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Rebalancing Actions</Heading>
 
                         <div class="overflow-x-auto">
@@ -257,7 +257,7 @@
                 }
                 else
                 {
-                    <div class="card">
+                    <div class="card-elevated">
                         <div class="text-center py-12">
                             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>

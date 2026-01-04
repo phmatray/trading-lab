@@ -40,7 +40,7 @@
                 <!-- Configuration Panel -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Strategy Selection -->
-                    <div class="card">
+                    <div class="card-elevated">
                         <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             1. Select Strategy
                         </Heading>
@@ -73,7 +73,7 @@
                     <!-- Parameter Ranges -->
                     @if (_model.ParameterRanges.Any())
                     {
-                        <div class="card">
+                        <div class="card-elevated">
                             <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                                 2. Configure Parameter Ranges
                             </Heading>
@@ -134,7 +134,7 @@
                     }
 
                     <!-- Backtest Settings -->
-                    <div class="card">
+                    <div class="card-elevated">
                         <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             3. Backtest Configuration
                         </Heading>
@@ -168,7 +168,7 @@
                 <!-- Settings Panel -->
                 <div class="space-y-6">
                     <!-- Algorithm Settings -->
-                    <div class="card">
+                    <div class="card-elevated">
                         <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                             Optimization Settings
                         </Heading>
@@ -237,7 +237,7 @@
 
                     @if (_isOptimizing && _optimizationProgress is not null)
                     {
-                        <div class="card">
+                        <div class="card-elevated">
                             <Heading Level="3" Class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</Heading>
                             <div class="progress-bar mb-2">
                                 <div class="progress-bar-fill" style="width: @_optimizationProgress.PercentComplete%"></div>

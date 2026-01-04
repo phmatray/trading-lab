@@ -37,7 +37,7 @@
     else
     {
         <!-- Date Range Selector -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Date Range</Heading>
 
             <div class="flex flex-wrap items-end gap-4">
@@ -74,7 +74,7 @@
             <!-- Performance Metrics Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Return -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Return</Heading>
                     <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.TotalReturn >= 0 ? "metric-positive" : "metric-negative")">
                         @_performanceHistory.CurrentMetrics.TotalReturn.ToString("C2")
@@ -82,7 +82,7 @@
                 </div>
 
                 <!-- Total Return % -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Return %</Heading>
                     <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.TotalReturnPercentage >= 0 ? "metric-positive" : "metric-negative")">
                         @_performanceHistory.CurrentMetrics.TotalReturnPercentage.ToString("+0.00;-0.00;0.00")%
@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- Daily Return -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Daily Return</Heading>
                     <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.DailyReturn >= 0 ? "metric-positive" : "metric-negative")">
                         @_performanceHistory.CurrentMetrics.DailyReturn.ToString("C2")
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Daily Return % -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Daily Return %</Heading>
                     <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.DailyReturnPercentage >= 0 ? "metric-positive" : "metric-negative")">
                         @_performanceHistory.CurrentMetrics.DailyReturnPercentage.ToString("+0.00;-0.00;0.00")%
@@ -106,7 +106,7 @@
                 </div>
 
                 <!-- Volatility -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Volatility</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.PortfolioVolatility.ToString("F2")%
@@ -115,7 +115,7 @@
                 </div>
 
                 <!-- Sharpe Ratio -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Sharpe Ratio</Heading>
                     <p class="text-2xl font-bold @(_performanceHistory.CurrentMetrics.PortfolioSharpeRatio >= 0 ? "metric-positive" : "metric-negative")">
                         @_performanceHistory.CurrentMetrics.PortfolioSharpeRatio.ToString("F2")
@@ -123,7 +123,7 @@
                 </div>
 
                 <!-- Diversification Ratio -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Diversification Ratio</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.DiversificationRatio.ToString("F2")
@@ -131,7 +131,7 @@
                 </div>
 
                 <!-- Average Correlation -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Average Correlation</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @(_performanceHistory.CurrentMetrics.AverageCorrelation?.ToString("F2") ?? "N/A")
@@ -139,7 +139,7 @@
                 </div>
 
                 <!-- Number of Positions -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Number of Positions</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.NumberOfPositions
@@ -147,7 +147,7 @@
                 </div>
 
                 <!-- Cash % -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash %</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.CashPercentage.ToString("F1")%
@@ -155,7 +155,7 @@
                 </div>
 
                 <!-- Largest Position % -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Largest Position %</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.LargestPositionPercentage.ToString("F1")%
@@ -163,7 +163,7 @@
                 </div>
 
                 <!-- Most Valuable Position -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Most Valuable Position</Heading>
                     <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
                         @_performanceHistory.CurrentMetrics.MostValuablePosition
@@ -172,7 +172,7 @@
             </div>
 
             <!-- Historical Performance Chart -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Historical Performance</Heading>
 
                 @if (!_performanceHistory.DataPoints.Any())
@@ -237,7 +237,7 @@
             <!-- Position Beta Table -->
             @if (_performanceHistory.CurrentMetrics.PositionBetas is not null && _performanceHistory.CurrentMetrics.PositionBetas.Any())
             {
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Position Betas</Heading>
 
                     <Table Dense Striped>
@@ -266,7 +266,7 @@
         }
         else
         {
-            <div class="card">
+            <div class="card-elevated">
                 <div class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>

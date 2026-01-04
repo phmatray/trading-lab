@@ -15,7 +15,7 @@
                 Description="Compare up to 5 trading strategies side-by-side with performance metrics" />
 
     <!-- Configuration Form -->
-    <div class="card">
+    <div class="card-elevated">
         <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -97,7 +97,7 @@
     </div>
 
     <!-- Strategy Selection -->
-    <div class="card">
+    <div class="card-elevated">
         <div class="flex items-center justify-between mb-4">
             <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                 Selected Strategies (@_selectedStrategies.Count/@MaxStrategies)
@@ -192,7 +192,7 @@
     {
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Return</p>
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestByReturn?.StrategyName ?? "N/A"
@@ -205,7 +205,7 @@
                 }
             </div>
 
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Sharpe</p>
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestBySharpe?.StrategyName ?? "N/A"
@@ -218,7 +218,7 @@
                 }
             </div>
 
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Drawdown</p>
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @_comparisonResult.BestByDrawdown?.StrategyName ?? "N/A"
@@ -233,13 +233,13 @@
         </div>
 
         <!-- Performance Matrix -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Matrix</Heading>
             <StrategyComparisonMatrix ComparisonResult="@_comparisonResult" />
         </div>
 
         <!-- Equity Curve Chart -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Equity Curves</Heading>
             <EquityOverlayChart ComparisonResult="@_comparisonResult" />
         </div>

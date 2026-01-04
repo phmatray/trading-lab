@@ -23,7 +23,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Configuration Form -->
         <div class="lg:col-span-1 space-y-6">
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
 
                 <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-4">
@@ -58,7 +58,7 @@
             @if (_customStrategy is not null)
             {
                 <!-- Custom Strategy Information -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Custom Strategy</Heading>
 
                     <div class="space-y-3">
@@ -102,7 +102,7 @@
         <div class="lg:col-span-2 space-y-6">
             @if (Result is not null)
             {
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                         @Result.StrategyName
                     </Heading>
@@ -124,7 +124,7 @@
 
                 <TradeTable Trades="@Result.Trades" />
 
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</Heading>
                     <div class="flex flex-wrap gap-3">
                         <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
@@ -168,7 +168,7 @@
             }
             else
             {
-                <div class="card">
+                <div class="card-elevated">
                     <div class="text-center py-12">
                         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>

@@ -90,6 +90,35 @@
   --btn-border: var(--color-zinc-950);
   --btn-hover-overlay: var(--color-white);
   --btn-icon: var(--color-zinc-400);
+
+  /* Navigation Category Colors (NotebookLM-inspired) */
+  --color-category-workspace: #3b82f6;      /* Blue */
+  --color-category-strategy: #a855f7;       /* Purple */
+  --color-category-data: #10b981;           /* Green/Emerald */
+  --color-category-portfolio: #f97316;      /* Orange */
+  --color-category-system: #64748b;         /* Slate gray */
+
+  /* Enhanced Elevation Scale */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Dark mode shadows (deeper) */
+  --shadow-dark-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-dark-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  --shadow-dark-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-dark-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-dark-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+
+  /* Animation Timing */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 400ms;
+  --timing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --timing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --timing-ease-out: cubic-bezier(0.0, 0, 0.2, 1);
 }
 
 /* Dark Mode Variant - Class-based */
@@ -250,16 +279,66 @@
 
 @utility card {
   background-color: theme(colors.white);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1.5rem;
   border-width: 1px;
   border-color: theme(colors.gray.200);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--timing-smooth);
 
   &:where(.dark, .dark *) {
     background-color: theme(colors.dark-card);
     border-color: theme(colors.dark-border);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-dark-md);
+  }
+}
+
+@utility card-elevated {
+  background-color: theme(colors.white);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border-width: 1px;
+  border-color: theme(colors.gray.200);
+  box-shadow: var(--shadow-lg);
+  transition: box-shadow var(--duration-normal) var(--timing-smooth);
+
+  &:where(.dark, .dark *) {
+    background-color: theme(colors.dark-card);
+    border-color: theme(colors.dark-border);
+    box-shadow: var(--shadow-dark-xl);
+  }
+}
+
+@utility card-interactive {
+  background-color: theme(colors.white);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border-width: 1px;
+  border-color: theme(colors.gray.200);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-normal) var(--timing-smooth);
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    border-color: theme(colors.blue.300);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:where(.dark, .dark *) {
+    background-color: theme(colors.dark-card);
+    border-color: theme(colors.dark-border);
+    box-shadow: var(--shadow-dark-md);
+
+    &:hover {
+      box-shadow: var(--shadow-dark-2xl);
+      border-color: theme(colors.dark-accent-blue);
+    }
   }
 }
 
@@ -716,6 +795,205 @@
       transform: translateX(0);
       opacity: 1;
     }
+  }
+}
+
+/* ========================================
+   Background Texture System
+   ======================================== */
+
+/* Subtle grid pattern for depth */
+@utility bg-texture-grid {
+  background-image:
+    linear-gradient(to right, rgb(0 0 0 / 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+
+  &:where(.dark, .dark *) {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.02) 1px, transparent 1px);
+  }
+}
+
+/* Noise texture for subtle depth */
+@utility bg-texture-noise {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  &:where(.dark, .dark *)::before {
+    opacity: 0.05;
+  }
+}
+
+/* ========================================
+   Tooltip System
+   ======================================== */
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-tooltip-fade-in {
+  animation: tooltip-fade-in 200ms var(--timing-ease-out);
+}
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* ========================================
+   Animation Utilities
+   ======================================== */
+
+/* Panel slide animations */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Scale animation */
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.animate-slide-in-left {
+  animation: slide-in-left var(--duration-normal) var(--timing-smooth);
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right var(--duration-normal) var(--timing-smooth);
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-normal) var(--timing-bounce);
+}
+
+/* Hover lift effect */
+@utility hover-lift {
+  transition: transform var(--duration-fast) var(--timing-smooth),
+              box-shadow var(--duration-fast) var(--timing-smooth);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   Collapse System - NotebookLM Inspired
+   ======================================== */
+
+/* Collapse button styling */
+@utility collapse-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: theme(colors.gray.500);
+  transition: all var(--duration-fast) var(--timing-smooth);
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: theme(colors.gray.100);
+    color: theme(colors.gray.700);
+    border-color: theme(colors.gray.200);
+  }
+
+  &:active {
+    background-color: theme(colors.gray.200);
+    transform: scale(0.95);
+  }
+
+  &:where(.dark, .dark *) {
+    color: theme(colors.dark-text-secondary);
+
+    &:hover {
+      background-color: theme(colors.dark-card);
+      color: theme(colors.dark-text-primary);
+      border-color: theme(colors.dark-border);
+    }
+
+    &:active {
+      background-color: theme(colors.dark-elevated);
+    }
+  }
+}
+
+/* Sidebar smooth width transition */
+@utility sidebar-transition {
+  transition: width var(--duration-slow) var(--timing-smooth),
+              margin-left var(--duration-slow) var(--timing-smooth),
+              margin-right var(--duration-slow) var(--timing-smooth);
+}
+
+/* Collapse icon rotation animation */
+@utility collapse-icon {
+  transition: transform var(--duration-normal) var(--timing-smooth);
+
+  &.rotate-180 {
+    transform: rotate(180deg);
+  }
+}
+
+/* Collapse footer styling */
+@utility collapse-footer {
+  padding: 0.75rem;
+  border-top: 1px solid theme(colors.gray.200);
+  background-color: theme(colors.gray.50);
+
+  &:where(.dark, .dark *) {
+    border-color: theme(colors.dark-border);
+    background-color: theme(colors.dark-elevated);
   }
 }
 

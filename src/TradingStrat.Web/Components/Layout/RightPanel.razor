@@ -1,11 +1,11 @@
 @* RightPanel Component - Flexible tabbed panel replacing AiPanel *@
 @using TradingStrat.Web.Models.State
 
-<aside class="@GetPanelClasses()"
+<aside class="@GetPanelClasses() sidebar-transition"
        data-testid="right-panel"
        role="complementary"
        aria-label="@GetAriaLabel()">
-    <div class="h-full flex bg-white dark:bg-dark-card border-l border-gray-200 dark:border-dark-border">
+    <div class="h-full flex bg-white dark:bg-dark-card border-l-2 border-gray-200 dark:border-dark-border shadow-lg dark:shadow-dark-xl bg-texture-noise">
 
         <!-- Content Area (hidden when collapsed) -->
         @if (!_isCollapsed)
@@ -47,18 +47,19 @@
         }
 
         <!-- Vertical Tab Bar (always visible, icons when collapsed) -->
-        <div class="flex flex-col bg-gray-50 dark:bg-dark-elevated border-l border-gray-200 dark:border-dark-border @(_isCollapsed ? "w-12" : "w-16")">
+        <div class="flex flex-col bg-gray-50 dark:bg-dark-elevated border-l border-gray-200 dark:border-dark-border @(_isCollapsed ? "w-12" : "w-16") transition-all duration-300">
             <!-- Collapse Toggle (Top) -->
-            <button @onclick="ToggleCollapseAsync"
-                    class="@(_isCollapsed ? "p-3" : "flex items-center justify-center p-3") hover:bg-gray-100 dark:hover:bg-dark-card transition-colors border-b border-gray-200 dark:border-dark-border"
-                    aria-label="@(_isCollapsed ? "Expand panel" : "Collapse panel")"
-                    title="@(_isCollapsed ? "Expand" : "Collapse")"
-                    type="button">
-                <svg class="w-5 h-5 text-gray-600 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="@(_isCollapsed ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7")"></path>
-                </svg>
-            </button>
+            <div class="flex items-center justify-center p-2 border-b border-gray-200 dark:border-dark-border">
+                <button @onclick="ToggleCollapseAsync"
+                        class="collapse-button"
+                        aria-label="@(_isCollapsed ? "Expand panel" : "Collapse panel")"
+                        title="@(_isCollapsed ? "Expand" : "Collapse")"
+                        type="button">
+                    <svg class="w-4 h-4 collapse-icon @(_isCollapsed ? "" : "rotate-180")" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
 
             <!-- Tab Buttons -->
             <div class="flex-1 flex flex-col py-2">

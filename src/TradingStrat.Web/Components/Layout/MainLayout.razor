@@ -5,7 +5,7 @@
     Skip to main content
 </a>
 
-<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg flex flex-col">
+<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg bg-texture-grid flex flex-col">
     <!-- Top Bar (64px fixed) -->
     <TopBar SelectedPortfolioName="@_selectedPortfolioName"
             PortfolioValue="@_portfolioValue"
@@ -21,7 +21,7 @@
 
         <!-- Main Content Area (flexible width) -->
         <main id="main-content"
-              class="flex-1 overflow-y-auto p-6 transition-all duration-300"
+              class="flex-1 overflow-y-auto p-6 sidebar-transition"
               style="margin-left: @(_sidebarCollapsed ? "4rem" : "16rem"); margin-right: @(_rightPanelCollapsed ? "3rem" : "24rem");"
               role="main"
               aria-label="Main content">

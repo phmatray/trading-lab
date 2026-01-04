@@ -37,7 +37,7 @@
     }
     else if (_errorMessage is not null)
     {
-        <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <div class="card-elevated bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
             <TradingStrat.Web.Components.UI.Typography.Text Class="text-red-800 dark:text-red-400">@_errorMessage</TradingStrat.Web.Components.UI.Typography.Text>
         </div>
     }
@@ -45,35 +45,43 @@
     {
         <!-- Stats Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardStatsCard
-                Title="Strategies"
-                Value="@(_stats?.TotalStrategies.ToString() ?? "0")"
-                Icon="layers"
-                OnClick="@(() => NavigateToPage("/strategies/library"))" />
+            <div style="animation-delay: 0ms;">
+                <DashboardStatsCard
+                    Title="Strategies"
+                    Value="@(_stats?.TotalStrategies.ToString() ?? "0")"
+                    Icon="layers"
+                    OnClick="@(() => NavigateToPage("/strategies/library"))" />
+            </div>
 
-            <DashboardStatsCard
-                Title="Backtests"
-                Value="@(_stats?.TotalBacktests.ToString() ?? "0")"
-                Icon="chart"
-                Subtitle="@(_stats?.LastBacktestDate is not null ? $"Last: {_stats.LastBacktestDate:MMM d}" : "")"
-                OnClick="@(() => NavigateToPage("/backtests"))" />
+            <div style="animation-delay: 100ms;">
+                <DashboardStatsCard
+                    Title="Backtests"
+                    Value="@(_stats?.TotalBacktests.ToString() ?? "0")"
+                    Icon="chart"
+                    Subtitle="@(_stats?.LastBacktestDate is not null ? $"Last: {_stats.LastBacktestDate:MMM d}" : "")"
+                    OnClick="@(() => NavigateToPage("/backtests"))" />
+            </div>
 
-            <DashboardStatsCard
-                Title="Portfolios"
-                Value="@(_stats?.TotalPortfolios.ToString() ?? "0")"
-                Icon="wallet"
-                OnClick="@(() => NavigateToPage("/portfolios"))" />
+            <div style="animation-delay: 200ms;">
+                <DashboardStatsCard
+                    Title="Portfolios"
+                    Value="@(_stats?.TotalPortfolios.ToString() ?? "0")"
+                    Icon="wallet"
+                    OnClick="@(() => NavigateToPage("/portfolios"))" />
+            </div>
 
-            <DashboardStatsCard
-                Title="Securities"
-                Value="@(_stats?.TotalSecurities.ToString() ?? "0")"
-                Icon="database"
-                Subtitle="@($"{_stats?.DataCoveragePercentage ?? 0:F0}% coverage")"
-                OnClick="@(() => NavigateToPage("/data"))" />
+            <div style="animation-delay: 300ms;">
+                <DashboardStatsCard
+                    Title="Securities"
+                    Value="@(_stats?.TotalSecurities.ToString() ?? "0")"
+                    Icon="database"
+                    Subtitle="@($"{_stats?.DataCoveragePercentage ?? 0:F0}% coverage")"
+                    OnClick="@(() => NavigateToPage("/data"))" />
+            </div>
         </div>
 
         <!-- Quick Actions -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-lg font-semibold mb-4">Quick Actions</Heading>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <TradingStrat.Web.Components.UI.Buttons.Button
@@ -102,7 +110,7 @@
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Top Strategies -->
-            <div class="card">
+            <div class="card-elevated">
                 <div class="flex items-center justify-between mb-4">
                     <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Top Strategies
@@ -117,7 +125,7 @@
             </div>
 
             <!-- Recent Activity -->
-            <div class="card">
+            <div class="card-elevated">
                 <div class="flex items-center justify-between mb-4">
                     <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Recent Activity

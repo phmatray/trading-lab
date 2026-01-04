@@ -9,7 +9,7 @@
                 Description="Fetch and manage historical market data from Yahoo Finance." />
 
     <!-- Timeframe Selector -->
-    <div class="card">
+    <div class="card-elevated">
         <TimeFrameSelector
             Label="Global Timeframe:"
             SelectedTimeFrame="@_selectedTimeFrame"
@@ -49,7 +49,7 @@
         <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Form -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Fetch Historical Data</Heading>
 
                     <EditForm Model="@_formModel" OnValidSubmit="@HandleFetchData" class="space-y-4">
@@ -172,7 +172,7 @@
                 </div>
 
                 <!-- Bulk Progress & Results -->
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                         Progress & Results
                     </Heading>

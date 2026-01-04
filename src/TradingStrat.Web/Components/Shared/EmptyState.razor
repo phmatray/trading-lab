@@ -2,12 +2,15 @@
 
 @* EmptyState Component - Standardized empty state with icon, message, and optional actions *@
 
-<div class="card" data-testid="empty-state">
+<div class="card-elevated animate-scale-in" data-testid="empty-state">
     <div class="text-center py-12">
         <!-- Icon -->
-        <svg class="mx-auto @GetSizeClass() text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            @GetIconPath()
-        </svg>
+        <div class="flex justify-center mb-4">
+            <ColoredIcon Icon="@Icon"
+                         Size="@GetIconSize()"
+                         CustomColor="rgb(156 163 175)"
+                         AriaLabel="@Title" />
+        </div>
 
         <!-- Title -->
         <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@Title</Heading>

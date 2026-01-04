@@ -61,7 +61,7 @@
         <!-- Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Value -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Value</Heading>
                 <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.TotalValue.ToString("C2")</p>
                 <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Cash Balance -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash Balance</Heading>
                 <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.Cash.ToString("C2")</p>
                 <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
@@ -79,7 +79,7 @@
             </div>
 
             <!-- Unrealized Gain/Loss -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Unrealized Gain/Loss</Heading>
                 <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
                     @_snapshot.UnrealizedGainLoss.ToString("C2")
@@ -90,7 +90,7 @@
             </div>
 
             <!-- Return Percentage -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Return %</Heading>
                 <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
                     @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Positions Table -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Positions</Heading>
 
             @if (!_snapshot.Positions.Any())

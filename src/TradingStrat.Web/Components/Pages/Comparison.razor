@@ -16,7 +16,7 @@
 
     <FormWrapper ErrorMessage="@ErrorMessage">
         <!-- Configuration -->
-    <div class="card">
+    <div class="card-elevated">
         <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Test Configuration</Heading>
 
         <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-6">
@@ -95,7 +95,7 @@
         }
 
         <!-- Side-by-Side Metrics -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Comparison</Heading>
 
             <Table>

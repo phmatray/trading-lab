@@ -28,7 +28,7 @@ public partial class DashboardStatsCard : ComponentBase
     public string? Subtitle { get; set; }
 
     /// <summary>
-    /// Icon type to display (layers, chart, wallet, database).
+    /// Icon type to display (layers, chart, wallet, database, workspace, library, portfolio).
     /// </summary>
     [Parameter]
     public string Icon { get; set; } = "chart";
@@ -49,6 +49,30 @@ public partial class DashboardStatsCard : ComponentBase
         {
             await OnClick.InvokeAsync();
         }
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private string GetCardClasses()
+    {
+        return OnClick.HasDelegate
+            ? "card-interactive hover-lift animate-scale-in"
+            : "card-elevated hover-lift animate-scale-in";
+    }
+
+    private IconCategory GetIconCategory()
+    {
+        return Icon.ToLowerInvariant() switch
+        {
+            "workspace" or "layers" => IconCategory.Workspace,
+            "chart" or "library" or "lightbulb" => IconCategory.Strategy,
+            "database" or "status" => IconCategory.Data,
+            "wallet" or "portfolio" => IconCategory.Portfolio,
+            "settings" => IconCategory.System,
+            _ => IconCategory.Default
+        };
     }
 
     #endregion

@@ -544,4 +544,13 @@ def generate_signal(index, price, cash, position):
             _isDryRunning = false;
         }
     }
+
+    private async Task HandleMonacoError(string errorMessage)
+    {
+        _validationErrors.Add($"Monaco Editor Error: {errorMessage}");
+        await NotificationService.ShowErrorAsync(
+            "Editor Failed",
+            $"Monaco editor failed to initialize: {errorMessage}");
+        StateHasChanged();
+    }
 }

@@ -25,7 +25,7 @@
             <DataAnnotationsValidator />
 
             <!-- Strategy Metadata Card -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="2" Class="text-xl font-semibold mb-4">Strategy Information</Heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -70,7 +70,7 @@
             <!-- Strategy Type Selector (only for new strategies) -->
             @if (!IsEditMode)
             {
-                <div class="card">
+                <div class="card-elevated">
                     <Heading Level="2" Class="text-xl font-semibold mb-4">Strategy Type</Heading>
                     <InputRadioGroup @bind-Value="_formModel.StrategyType">
                         <div class="flex gap-4">
@@ -100,7 +100,7 @@
             @if (_formModel.StrategyType == CustomStrategyType.RuleBased)
             {
                 <!-- Position Sizing Card -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="2" Class="text-xl font-semibold mb-4">Position Sizing</Heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -149,7 +149,7 @@
             </div>
 
             <!-- Entry Rules Card -->
-            <div class="card">
+            <div class="card-elevated">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <Heading Level="2" Class="text-xl font-semibold">Entry Rules</Heading>
@@ -166,7 +166,7 @@
             </div>
 
             <!-- Exit Rules Card -->
-            <div class="card">
+            <div class="card-elevated">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <Heading Level="2" Class="text-xl font-semibold">Exit Rules</Heading>
@@ -185,7 +185,7 @@
             else if (_formModel.StrategyType == CustomStrategyType.Python)
             {
                 <!-- Python Code Editor Card -->
-                <div class="card">
+                <div class="card-elevated">
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <Heading Level="2" Class="text-xl font-semibold">Python Strategy Code</Heading>
@@ -211,6 +211,7 @@
 
                     <MonacoEditor Code="@_formModel.PythonCode"
                                   CodeChanged="@((newCode) => _formModel.PythonCode = newCode)"
+                                  OnInitializationError="@HandleMonacoError"
                                   Height="600" />
 
                     @if (_pythonValidationErrors.Any())

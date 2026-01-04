@@ -1,6 +1,12 @@
 @using TradingStrat.Web.Components.UI.Typography
 
-<div class="card">
-    <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-dark-text-secondary mb-1">@Label</TradingStrat.Web.Components.UI.Typography.Text>
+<div class="card-elevated hover-lift animate-scale-in">
+    <div class="flex items-center justify-between mb-2">
+        <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm text-gray-600 dark:text-dark-text-secondary">@Label</TradingStrat.Web.Components.UI.Typography.Text>
+        @if (ShowIcon)
+        {
+            <ColoredIcon Icon="@Icon" Category="@IconCategory" Size="IconSize.Medium" AriaLabel="@Label" />
+        }
+    </div>
     <Heading Level="2" Class="@($"text-2xl font-bold {GetColorClass()}")">@Value</Heading>
 </div>

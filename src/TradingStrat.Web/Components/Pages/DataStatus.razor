@@ -37,7 +37,7 @@
     </div>
 
     <!-- Timeframe Selector -->
-    <div class="card">
+    <div class="card-elevated">
         <TimeFrameSelector
             Label="Timeframe:"
             SelectedTimeFrame="@_query.TimeFrame"
@@ -83,15 +83,15 @@
     {
         <!-- Summary Stats (Filtered) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Total Tickers</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_dataStatus.TotalTickers</p>
             </div>
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Total Records</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_dataStatus.TotalRecords.ToString("N0")</p>
             </div>
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Average Coverage</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_dataStatus.AverageCoveragePercentage.ToString("F1")%</p>
             </div>
@@ -100,7 +100,7 @@
         @if (_dataStatus.TickerStatuses.Any())
         {
             <!-- Enhanced Data Table -->
-            <div class="card">
+            <div class="card-elevated">
                 <div class="flex items-center justify-between mb-4">
                     <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                         Ticker Coverage Details

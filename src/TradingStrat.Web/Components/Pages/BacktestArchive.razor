@@ -57,17 +57,17 @@
     {
         <!-- Summary Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Total Backtests</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_archiveResult.TotalCount</p>
             </div>
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Most Recent Run</p>
                 <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
                     @(_archiveResult.MostRecentDate?.ToString("MMM dd, yyyy HH:mm") ?? "N/A")
                 </p>
             </div>
-            <div class="card">
+            <div class="card-elevated">
                 <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Top Performer</p>
                 @if (_archiveResult.TopPerformer is not null)
                 {
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Filters -->
-        <div class="card">
+        <div class="card-elevated">
             <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Filters</Heading>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
@@ -142,7 +142,7 @@
         @if (_archiveResult.BacktestRuns.Any())
         {
             <!-- Backtest Results Table -->
-            <div class="card">
+            <div class="card-elevated">
                 <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
                     Backtest Results (@_archiveResult.BacktestRuns.Count)
                 </Heading>
