@@ -190,6 +190,33 @@ public class PythonExecutionService : IPythonExecutor
                     errors.Add($"Syntax error: {ex.Message}");
                     return new PythonValidationResult(false, errors);
                 }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("ValueFactory attempted to access the Value property"))
+                {
+                    // Python.NET circular dependency issue when decoding certain exceptions
+                    // This is a known issue with Python.NET 3.0 when certain errors occur
+                    _logger.LogDebug(ex, "Encountered Python.NET lazy initialization issue during syntax validation");
+
+                    // Fallback: Try to compile in a fresh scope to get a better error message
+                    try
+                    {
+                        using PyModule testScope = Py.CreateScope();
+                        testScope.Exec(pythonCode);
+                        // If we get here, the code is actually valid (shouldn't happen)
+                        errors.Add("Syntax validation inconclusive - please try again");
+                    }
+                    catch (PythonException pyEx)
+                    {
+                        // Got a proper error this time
+                        errors.Add($"Syntax error: {pyEx.Message}");
+                    }
+                    catch
+                    {
+                        // Still can't get error details, provide generic message
+                        errors.Add("Syntax error: Unable to compile Python code. Check for syntax errors like missing colons, mismatched parentheses, or invalid indentation.");
+                    }
+
+                    return new PythonValidationResult(false, errors);
+                }
             }
         });
     }
