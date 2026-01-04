@@ -117,7 +117,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
 
     private async Task HandleKeyPress(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !e.ShiftKey)
+        if (e is { Key: "Enter", ShiftKey: false })
         {
             await SendMessageAsync();
         }
@@ -249,7 +249,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
 
     private string GetPanelClasses()
     {
-        string baseClasses = "fixed top-16 right-0 bottom-0 z-30 transition-all duration-300";
+        const string baseClasses = "fixed top-16 right-0 bottom-0 z-30 transition-all duration-300";
         string widthClasses = IsCollapsed ? "w-12" : "w-96";
         return $"{baseClasses} {widthClasses}";
     }
@@ -286,7 +286,7 @@ public partial class AiPanel : ComponentBase, IAsyncDisposable
 
     private class ChatDisplayMessage
     {
-        public string Content { get; set; } = string.Empty;
-        public bool IsUser { get; set; }
+        public string Content { get; init; } = string.Empty;
+        public bool IsUser { get; init; }
     }
 }

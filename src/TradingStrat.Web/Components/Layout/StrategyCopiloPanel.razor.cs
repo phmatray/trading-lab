@@ -98,7 +98,7 @@ public partial class StrategyCopiloPanel : ComponentBase, IAsyncDisposable
 
     private async Task HandleKeyPress(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !e.ShiftKey)
+        if (e is { Key: "Enter", ShiftKey: false })
         {
             await SendMessageAsync();
         }
@@ -256,7 +256,7 @@ public partial class StrategyCopiloPanel : ComponentBase, IAsyncDisposable
 
     private class ChatDisplayMessage
     {
-        public string Content { get; set; } = string.Empty;
-        public bool IsUser { get; set; }
+        public string Content { get; init; } = string.Empty;
+        public bool IsUser { get; init; }
     }
 }

@@ -9,7 +9,7 @@ public partial class NotificationsPanel : ComponentBase, IDisposable
     [Inject] private NotificationService NotificationService { get; set; } = null!;
     [Inject] private NavigationManager Navigation { get; set; } = null!;
 
-    private List<Notification> _notifications = new();
+    private List<Notification> _notifications = [];
 
     protected override void OnInitialized()
     {
@@ -76,12 +76,10 @@ public partial class NotificationsPanel : ComponentBase, IDisposable
 
     private string GetNotificationItemClasses(Notification notification)
     {
-        string baseClasses = "border-l-4 transition-colors";
-        if (!notification.IsRead)
-        {
-            return $"{baseClasses} border-l-trading-blue dark:border-l-dark-accent-blue bg-blue-50 dark:bg-blue-900/10";
-        }
-        return $"{baseClasses} border-l-transparent bg-white dark:bg-dark-card";
+        const string baseClasses = "border-l-4 transition-colors";
+        return !notification.IsRead
+            ? $"{baseClasses} border-l-trading-blue dark:border-l-dark-accent-blue bg-blue-50 dark:bg-blue-900/10"
+            : $"{baseClasses} border-l-transparent bg-white dark:bg-dark-card";
     }
 
     private string GetNotificationIconClasses(Notification notification)

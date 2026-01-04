@@ -100,7 +100,7 @@ public partial class RightPanel : ComponentBase, IDisposable
 
     private string GetPanelClasses()
     {
-        string baseClasses = "fixed top-16 right-0 bottom-0 z-30 transition-all duration-300";
+        const string baseClasses = "fixed top-16 right-0 bottom-0 z-30 transition-all duration-300";
         string widthClasses = _isCollapsed ? "w-12" : "w-96";
         return $"{baseClasses} {widthClasses}";
     }
@@ -108,14 +108,11 @@ public partial class RightPanel : ComponentBase, IDisposable
     private string GetTabButtonClasses(RightPanelTab tab)
     {
         bool isActive = _activeTab == tab;
-        string baseClasses = "flex flex-col items-center justify-center p-3 transition-colors";
+        const string baseClasses = "flex flex-col items-center justify-center p-3 transition-colors";
 
-        if (isActive && !_isCollapsed)
-        {
-            return $"{baseClasses} bg-trading-blue dark:bg-dark-accent-blue text-white";
-        }
-
-        return $"{baseClasses} text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-card";
+        return isActive && !_isCollapsed
+            ? $"{baseClasses} bg-trading-blue dark:bg-dark-accent-blue text-white"
+            : $"{baseClasses} text-gray-600 dark:text-dark-text-secondary hover:bg-gray-100 dark:hover:bg-dark-card";
     }
 
     private string GetAriaLabel()
