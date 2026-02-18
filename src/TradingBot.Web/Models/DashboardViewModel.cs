@@ -5,6 +5,7 @@
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.Portfolio;
+using TradingBot.Core.Models.Strategy;
 using TradingBot.Core.Models.Trading;
 
 namespace TradingBot.Web.Models;
@@ -43,6 +44,11 @@ public sealed class DashboardViewModel
     /// Gets or sets the enabled strategies.
     /// </summary>
     public List<IStrategy> ActiveStrategies { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the enabled weekly cash-managed strategies.
+    /// </summary>
+    public List<WeeklyCashManagedStrategy> ActiveWeeklyCashStrategies { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the SignalR connection status.

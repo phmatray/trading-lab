@@ -290,14 +290,14 @@ Multi-project layered architecture:
 
 - [X] T116 [P] [US5] Create StrategyStateCard.razor component with real-time SignalR connection in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyStateCard.razor
 - [X] T117 [P] [US5] Create StrategyDetailsPanel.razor component with metrics and charts in src/TradingBot.Web/Components/Features/WeeklyCashStrategy/StrategyDetailsPanel.razor
-- [ ] T118 [US5] Add strategy details page route in src/TradingBot.Web/Components/Pages/WeeklyCashStrategyDetails.razor
-- [ ] T119 [US5] Add strategy summary card to strategies overview page in src/TradingBot.Web/Components/Pages/Strategies.razor
+- [X] T118 [US5] Add strategy details page route in src/TradingBot.Web/Components/Pages/WeeklyCashStrategyDetails.razor
+- [X] T119 [US5] Add strategy summary card to strategies overview page in src/TradingBot.Web/Components/Pages/Strategies.razor
 
 **Dashboard Integration**
 
-- [ ] T120 [US5] Extend DashboardService to include weekly strategy metrics in src/TradingBot.Web/Services/DashboardService.cs
+- [X] T120 [US5] Extend DashboardService to include weekly strategy metrics in src/TradingBot.Web/Services/DashboardService.cs
 - [ ] T121 [US5] Add strategy state section to main dashboard page in src/TradingBot.Web/Components/Pages/Index.razor
-- [ ] T122 [US5] Implement SignalR connection lifecycle management (connect, reconnect, dispose) in components
+- [X] T122 [US5] Implement SignalR connection lifecycle management (connect, reconnect, dispose) in components
 - [ ] T123 [US5] Add MessagePack serialization for StrategyStateDto
 
 **Integration and Validation**

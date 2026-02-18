@@ -14,6 +14,7 @@ public sealed class DashboardService : IDashboardService
 {
     private readonly IPortfolioManager _portfolioManager;
     private readonly IStrategyManagementService _strategyManagementService;
+    private readonly IWeeklyCashManagedStrategyRepository _weeklyCashStrategyRepository;
     private readonly ILogger<DashboardService> _logger;
 
     /// <summary>
@@ -21,14 +22,17 @@ public sealed class DashboardService : IDashboardService
     /// </summary>
     /// <param name="portfolioManager">The portfolio manager.</param>
     /// <param name="strategyManagementService">The strategy management service.</param>
+    /// <param name="weeklyCashStrategyRepository">The weekly cash strategy repository.</param>
     /// <param name="logger">The logger instance.</param>
     public DashboardService(
         IPortfolioManager portfolioManager,
         IStrategyManagementService strategyManagementService,
+        IWeeklyCashManagedStrategyRepository weeklyCashStrategyRepository,
         ILogger<DashboardService> logger)
     {
         _portfolioManager = portfolioManager;
         _strategyManagementService = strategyManagementService;
+        _weeklyCashStrategyRepository = weeklyCashStrategyRepository;
         _logger = logger;
     }
 
@@ -50,19 +54,22 @@ public sealed class DashboardService : IDashboardService
                 cancellationToken: cancellationToken);
             var metricsTask = _portfolioManager.GetPerformanceMetricsAsync(cancellationToken);
             var strategiesTask = _strategyManagementService.GetAllStrategiesAsync(cancellationToken);
+            var weeklyCashStrategiesTask = _weeklyCashStrategyRepository.GetEnabledStrategiesAsync(cancellationToken);
 
             await Task.WhenAll(
                 accountTask,
                 positionsTask,
                 tradesTask,
                 metricsTask,
-                strategiesTask);
+                strategiesTask,
+                weeklyCashStrategiesTask);
 
             var account = await accountTask;
             var positions = await positionsTask;
             var trades = await tradesTask;
             var metrics = await metricsTask;
             var strategies = await strategiesTask;
+            var weeklyCashStrategies = await weeklyCashStrategiesTask;
 
             // Use default risk settings for dashboard display
             // The actual risk settings are managed through the RiskSettingsPage
@@ -93,11 +100,15 @@ public sealed class DashboardService : IDashboardService
                 PerformanceMetrics = metrics,
                 RiskSettings = riskSettings,
                 ActiveStrategies = activeStrategies,
+                ActiveWeeklyCashStrategies = weeklyCashStrategies.ToList(),
                 ConnectionStatus = "connected",
                 LastUpdated = DateTime.UtcNow,
             };
 
-            _logger.LogInformation("Dashboard data loaded successfully");
+            _logger.LogInformation(
+                "Dashboard data loaded successfully - {StrategyCount} standard strategies, {WeeklyCashCount} weekly cash strategies",
+                activeStrategies.Count,
+                weeklyCashStrategies.Count);
 
             return viewModel;
         }

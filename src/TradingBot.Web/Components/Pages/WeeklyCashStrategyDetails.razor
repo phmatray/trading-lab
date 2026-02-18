@@ -1,0 +1,230 @@
+@* <copyright file="WeeklyCashStrategyDetails.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@page "/weekly-cash-strategy/{StrategyIdParam}"
+@using TradingBot.Web.Components.Features.WeeklyCashStrategy
+@using TradingBot.Web.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@inject ILogger<WeeklyCashStrategyDetails> Logger
+@inject IWeeklyCashManagedStrategyRepository StrategyRepository
+@inject IPortfolioManager PortfolioManager
+@implements IAsyncDisposable
+
+<PageTitle>@(StrategyName ?? "Strategy Details") - TradingBot</PageTitle>
+
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    @if (IsLoading)
+    {
+        <div class="flex items-center justify-center py-16">
+            <div class="text-center">
+                <TbSpinner Size="SpinnerSize.Large" />
+                <p class="mt-4 text-gray-600 dark:text-gray-400">Loading strategy details...</p>
+            </div>
+        </div>
+    }
+    else if (ErrorMessage != null)
+    {
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">Error Loading Strategy</h3>
+                    <p class="mt-1 text-red-700 dark:text-red-300">@ErrorMessage</p>
+                    <button @onclick="NavigateToOverview" class="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                        Back to Strategies
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else if (CurrentState != null)
+    {
+        @* Header with Actions *@
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    @StrategyName
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Real-time monitoring and detailed metrics
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button @onclick="NavigateToEdit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Edit Configuration
+                </button>
+                <button @onclick="NavigateToOverview" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    Back to Strategies
+                </button>
+            </div>
+        </div>
+
+        @* Real-time State Card *@
+        <div class="mb-6">
+            <StrategyStateCard StrategyId="@StrategyId" StrategyName="@StrategyName" />
+        </div>
+
+        @* Detailed Metrics Panel *@
+        <StrategyDetailsPanel State="@CurrentState" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string StrategyIdParam { get; set; } = string.Empty;
+
+    private Guid StrategyId { get; set; }
+    private string? StrategyName { get; set; }
+    private StrategyStateDto? CurrentState { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Guid.TryParse(StrategyIdParam, out var strategyId))
+        {
+            ErrorMessage = "Invalid strategy ID format";
+            IsLoading = false;
+            return;
+        }
+
+        StrategyId = strategyId;
+
+        try
+        {
+            await LoadStrategyDataAsync();
+            await InitializeSignalRConnection();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing strategy details page");
+            ErrorMessage = "Failed to load strategy details. Please try again.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadStrategyDataAsync()
+    {
+        var strategy = await StrategyRepository.GetByIdAsync(StrategyId, CancellationToken.None);
+        if (strategy == null)
+        {
+            ErrorMessage = $"Strategy with ID {StrategyId} not found";
+            return;
+        }
+
+        StrategyName = strategy.Name;
+
+        // Build initial state
+        var account = await PortfolioManager.GetAccountAsync(CancellationToken.None);
+        var cashRatio = account.Equity > 0 ? account.Cash / account.Equity : 0m;
+
+        CurrentState = new StrategyStateDto
+        {
+            StrategyId = strategy.Id,
+            Name = strategy.Name,
+            IsEnabled = strategy.IsEnabled,
+            EtpSymbol = strategy.EtpSymbol,
+            UnderlyingSymbol = strategy.UnderlyingSymbol,
+            CurrentUnderlyingPrice = strategy.CurrentUnderlyingPrice,
+            CurrentEtpPrice = strategy.CurrentEtpPrice,
+            CurrentMA20 = strategy.CurrentMA20,
+            DaysBelowMA20 = strategy.DaysBelowMA20,
+            CurrentCashRatio = cashRatio,
+            MinCashRatio = strategy.MinCashRatio,
+            MaxCashRatio = strategy.MaxCashRatio,
+            LastExecutionTimestamp = strategy.LastExecutionTimestamp,
+            LastDailyUpdateTimestamp = strategy.LastDailyUpdateTimestamp,
+            NextScheduledExecution = CalculateNextExecution(strategy),
+            ExecutionDayOfWeek = strategy.ExecutionDayOfWeek,
+            IsBullish = strategy.CurrentUnderlyingPrice.HasValue &&
+                        strategy.CurrentMA20.HasValue &&
+                        strategy.CurrentUnderlyingPrice.Value > strategy.CurrentMA20.Value,
+            IsSellConditionMet = strategy.DaysBelowMA20 >= 2,
+            IsBuyConditionMet = strategy.CurrentUnderlyingPrice.HasValue &&
+                                strategy.CurrentMA20.HasValue &&
+                                strategy.CurrentUnderlyingPrice.Value > strategy.CurrentMA20.Value &&
+                                cashRatio > strategy.MinCashRatio,
+        };
+    }
+
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/hubs/trading"))
+                .WithAutomaticReconnect()
+                .AddMessagePackProtocol()
+                .Build();
+
+            _hubConnection.On<StrategyStateDto>("ReceiveStrategyStateUpdate", async (state) =>
+            {
+                if (state.StrategyId == StrategyId)
+                {
+                    CurrentState = state;
+                    StrategyName = state.Name;
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+
+            await _hubConnection.StartAsync();
+            Logger.LogInformation("SignalR connection established for strategy details page");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing SignalR connection");
+        }
+    }
+
+    private static DateTime? CalculateNextExecution(TradingBot.Core.Models.Strategy.WeeklyCashManagedStrategy strategy)
+    {
+        if (!strategy.IsEnabled)
+        {
+            return null;
+        }
+
+        var now = DateTime.UtcNow;
+        var today = now.Date;
+        var targetDayOfWeek = (DayOfWeek)strategy.ExecutionDayOfWeek;
+        var daysUntilTarget = ((int)targetDayOfWeek - (int)today.DayOfWeek + 7) % 7;
+
+        if (daysUntilTarget == 0 &&
+            strategy.LastExecutionTimestamp.HasValue &&
+            strategy.LastExecutionTimestamp.Value.Date == today)
+        {
+            daysUntilTarget = 7;
+        }
+
+        var nextDate = today.AddDays(daysUntilTarget);
+        return new DateTime(nextDate.Year, nextDate.Month, nextDate.Day, 21, 0, 0, DateTimeKind.Utc);
+    }
+
+    private void NavigateToEdit()
+    {
+        Navigation.NavigateTo($"/weekly-cash-strategy/config/{StrategyId}");
+    }
+
+    private void NavigateToOverview()
+    {
+        Navigation.NavigateTo("/strategies");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}
