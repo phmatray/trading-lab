@@ -14,9 +14,9 @@ else
     if [ -e "/config/.wine/drive_c/windows/mono" ]; then
         echo "MONO is already installed"
     else
-        curl -o ~/.wine/drive_c/mono-8.0.0.msi https://dl.winehq.org/wine/wine-mono/8.0.0/wine-mono-8.0.0-x86.msi
-        WINEDLLOVERRIDES=mscoree=d wine msiexec /i ~/.wine/drive_c/mono-8.0.0.msi /qn
-        rm ~/.wine/drive_c/mono-8.0.0.msi
+        curl -o ~/.wine/drive_c/mono-8.1.0.msi https://dl.winehq.org/wine/wine-mono/8.0.0/wine-mono-8.1.0-x86.msi
+        WINEDLLOVERRIDES=mscoree=d wine msiexec /i ~/.wine/drive_c/mono-8.1.0.msi /qn
+        rm ~/.wine/drive_c/mono-8.1.0.msi
         echo "Installed MONO"
     fi
     exec wine "/config/.wine/drive_c/mt5setup.exe" "/auto" &
