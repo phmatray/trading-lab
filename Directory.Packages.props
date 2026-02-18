@@ -36,7 +36,7 @@
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
     <PackageVersion Include="Blazor-ApexCharts" Version="6.0.2" />
     <!-- Market Data -->
-    <PackageVersion Include="YahooQuotesApi" Version="7.0.5" />
+    <PackageVersion Include="YahooQuotesApi" Version="7.0.6" />
     <!-- AI / LLM -->
     <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
     <!-- Testing -->
