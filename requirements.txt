@@ -1,0 +1,2 @@
+openbb[all]==4.3.4
+pandas-datareader==0.10.0
