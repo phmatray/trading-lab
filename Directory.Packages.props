@@ -38,7 +38,7 @@
     <!-- Market Data -->
     <PackageVersion Include="YahooQuotesApi" Version="7.0.6" />
     <!-- AI / LLM -->
-    <PackageVersion Include="Anthropic.SDK" Version="5.8.0" />
+    <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
     <!-- Testing -->
     <PackageVersion Include="bunit" Version="2.4.2" />
     <PackageVersion Include="coverlet.collector" Version="8.0.0" />
