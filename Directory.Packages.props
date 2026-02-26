@@ -34,7 +34,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <!-- UI -->
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
-    <PackageVersion Include="Blazor-ApexCharts" Version="6.0.2" />
+    <PackageVersion Include="Blazor-ApexCharts" Version="6.1.0" />
     <!-- Market Data -->
     <PackageVersion Include="YahooQuotesApi" Version="7.0.6" />
     <!-- AI / LLM -->
