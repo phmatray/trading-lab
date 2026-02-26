@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for TradingStrat.Web
 # Stage 1: Node.js for Tailwind CSS build
-FROM node:20-alpine AS node-builder
+FROM node:24-alpine AS node-builder
 
 WORKDIR /src
 
