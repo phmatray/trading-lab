@@ -40,7 +40,7 @@
     <!-- AI / LLM -->
     <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
     <!-- Testing -->
-    <PackageVersion Include="bunit" Version="2.5.3" />
+    <PackageVersion Include="bunit" Version="2.6.2" />
     <PackageVersion Include="coverlet.collector" Version="8.0.0" />
     <PackageVersion Include="FakeItEasy" Version="9.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
