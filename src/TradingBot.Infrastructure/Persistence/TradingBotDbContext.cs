@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.Core.Entities;
@@ -12,7 +11,9 @@ using TradingBot.Core.Models.Backtest;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Core.Models.MarketData;
 using TradingBot.Core.Models.Portfolio;
+using TradingBot.Core.Models.Strategy;
 using TradingBot.Core.Models.Trading;
+using TradingBot.Core.SharedKernel;
 using TradingBot.Core.ValueObjects;
 
 namespace TradingBot.Infrastructure.Persistence;
@@ -80,7 +81,7 @@ public sealed class TradingBotDbContext : DbContext
     /// <summary>
     /// Gets the StrategyConfigurations DbSet.
     /// </summary>
-    public DbSet<StrategyConfiguration> StrategyConfigurations => Set<StrategyConfiguration>();
+    public DbSet<Core.Models.Configuration.StrategyConfiguration> StrategyConfigurations => Set<Core.Models.Configuration.StrategyConfiguration>();
 
     /// <summary>
     /// Gets the BacktestResults DbSet.
@@ -91,6 +92,11 @@ public sealed class TradingBotDbContext : DbContext
     /// Gets the RiskSettings DbSet.
     /// </summary>
     public DbSet<Core.Models.Configuration.RiskSettings> RiskSettings => Set<Core.Models.Configuration.RiskSettings>();
+
+    /// <summary>
+    /// Gets the WeeklyCashManagedStrategies DbSet.
+    /// </summary>
+    public DbSet<WeeklyCashManagedStrategy> WeeklyCashManagedStrategies => Set<WeeklyCashManagedStrategy>();
 
     /// <inheritdoc/>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

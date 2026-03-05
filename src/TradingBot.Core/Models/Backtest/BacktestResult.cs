@@ -2,9 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using TradingBot.Core.Models.Portfolio;
 using TradingBot.Core.Models.Trading;
+using TradingBot.Core.SharedKernel;
 
 namespace TradingBot.Core.Models.Backtest;
 

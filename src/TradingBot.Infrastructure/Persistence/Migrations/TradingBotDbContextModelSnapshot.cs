@@ -444,6 +444,121 @@ namespace TradingBot.Infrastructure.Persistence.Migrations
                     b.ToTable("accounts", (string)null);
                 });
 
+            modelBuilder.Entity("TradingBot.Core.Models.Strategy.WeeklyCashManagedStrategy", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BreakoutRuleConfigJson")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("breakout_rule_config_json");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal?>("CurrentEtpPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("current_etp_price");
+
+                    b.Property<decimal?>("CurrentMA20")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("current_ma20");
+
+                    b.Property<decimal?>("CurrentUnderlyingPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("current_underlying_price");
+
+                    b.Property<int>("DaysBelowMA20")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0)
+                        .HasColumnName("days_below_ma20");
+
+                    b.Property<string>("EtpSymbol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("etp_symbol");
+
+                    b.Property<int>("ExecutionDayOfWeek")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("execution_day_of_week");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_enabled");
+
+                    b.Property<DateTime?>("LastDailyUpdateTimestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_daily_update_timestamp");
+
+                    b.Property<DateTime?>("LastExecutionTimestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_execution_timestamp");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_modified");
+
+                    b.Property<decimal>("MaxCashRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("max_cash_ratio");
+
+                    b.Property<decimal>("MinCashRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("min_cash_ratio");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<string>("UnderlyingSymbol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("underlying_symbol");
+
+                    b.Property<decimal>("WeeklyBuyRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("weekly_buy_ratio");
+
+                    b.Property<decimal>("WeeklySellRatio")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("weekly_sell_ratio");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EtpSymbol")
+                        .HasDatabaseName("idx_wcm_strategy_etp_symbol");
+
+                    b.HasIndex("IsEnabled")
+                        .HasDatabaseName("idx_wcm_strategy_is_enabled");
+
+                    b.HasIndex("LastExecutionTimestamp")
+                        .HasDatabaseName("idx_wcm_strategy_last_execution");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("idx_wcm_strategy_name");
+
+                    b.HasIndex("UnderlyingSymbol")
+                        .HasDatabaseName("idx_wcm_strategy_underlying_symbol");
+
+                    b.ToTable("weekly_cash_managed_strategies", (string)null);
+                });
+
             modelBuilder.Entity("TradingBot.Core.Models.Trading.Order", b =>
                 {
                     b.Property<Guid>("Id")

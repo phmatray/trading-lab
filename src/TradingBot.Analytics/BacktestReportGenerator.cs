@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using TradingBot.Core.Models.Backtest;

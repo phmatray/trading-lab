@@ -62,7 +62,7 @@ public class TradeRepositoryTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(1);
-        result.First().Symbol.ShouldBe("AAPL");
+        result[0].Symbol.ShouldBe("AAPL");
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class TradeRepositoryTests : IDisposable
         result.ShouldNotBeNull();
         result.Count.ShouldBe(2);
         result.ShouldAllBe(t => t.RealizedPnL > 0);
-        result.First().RealizedPnL.ShouldBe(100m); // Ordered by PnL descending
+        result[0].RealizedPnL.ShouldBe(100m); // Ordered by PnL descending
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public class TradeRepositoryTests : IDisposable
         result.ShouldNotBeNull();
         result.Count.ShouldBe(2);
         result.ShouldAllBe(t => t.RealizedPnL < 0);
-        result.First().RealizedPnL.ShouldBe(-75m); // Ordered by PnL ascending (most loss first)
+        result[0].RealizedPnL.ShouldBe(-75m); // Ordered by PnL ascending (most loss first)
     }
 
     [Fact]

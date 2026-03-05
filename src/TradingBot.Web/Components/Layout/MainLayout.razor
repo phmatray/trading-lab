@@ -60,7 +60,7 @@
 @code {
     private HubConnection? _hubConnection;
     private string _connectionStatus = "disconnected";
-    private int _reconnectAttempts = 0;
+    private int _reconnectAttempts;
     private const int MaxReconnectAttempts = 5;
     private const int ReconnectDelayMs = 2000;
     private DotNetObjectReference<MainLayout>? _dotNetHelper;

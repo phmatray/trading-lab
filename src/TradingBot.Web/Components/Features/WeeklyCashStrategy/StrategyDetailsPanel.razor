@@ -1,0 +1,259 @@
+@* <copyright file="StrategyDetailsPanel.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@using TradingBot.Web.Models
+@namespace TradingBot.Web.Components.Features.WeeklyCashStrategy
+
+<div class="space-y-6">
+    <!-- Strategy Configuration -->
+    <TbCard>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Configuration</h3>
+        @if (State is not null)
+        {
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">ETP Symbol</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-gray-100">@State.EtpSymbol</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Underlying Symbol</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-gray-100">@State.UnderlyingSymbol</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Execution Day</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-gray-100">@GetDayOfWeekName(State.ExecutionDayOfWeek)</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Min Cash Ratio</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-gray-100">@State.MinCashRatio.ToString("P0")</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Max Cash Ratio</p>
+                    <p class="text-base font-medium text-gray-900 dark:text-gray-100">@State.MaxCashRatio.ToString("P0")</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Status</p>
+                    <p class="text-base font-medium @(State.IsEnabled ? "text-green-600 dark:text-green-400" : "text-gray-600 dark:text-gray-400")">
+                        @(State.IsEnabled ? "Enabled" : "Disabled")
+                    </p>
+                </div>
+            </div>
+        }
+    </TbCard>
+
+    <!-- Market Data -->
+    <TbCard>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Market Data</h3>
+        @if (State is not null)
+        {
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Price Information -->
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">@State.UnderlyingSymbol Price</p>
+                        <div class="flex items-baseline gap-2">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                @(State.CurrentUnderlyingPrice?.ToString("C2") ?? "N/A")
+                            </p>
+                            @if (State.CurrentUnderlyingPrice.HasValue && State.CurrentMA20.HasValue)
+                            {
+                                var difference = State.CurrentUnderlyingPrice.Value - State.CurrentMA20.Value;
+                                var percentDiff = (difference / State.CurrentMA20.Value) * 100;
+                                <span class="text-sm @(difference > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                                    @(difference > 0 ? "+" : "")@percentDiff.ToString("F2")%
+                                </span>
+                            }
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            vs MA20: @(State.CurrentMA20?.ToString("C2") ?? "N/A")
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">@State.EtpSymbol Price</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                            @(State.CurrentEtpPrice?.ToString("C2") ?? "N/A")
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Indicators -->
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Market Trend</p>
+                        <div class="flex items-center gap-2">
+                            @if (State.IsBullish)
+                            {
+                                <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                    <span class="font-semibold">Bullish</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="flex items-center gap-1 text-red-600 dark:text-red-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                                    </svg>
+                                    <span class="font-semibold">Bearish</span>
+                                </span>
+                            }
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Price @(State.IsBullish ? "above" : "below") MA20
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Days Below MA20</p>
+                        <div class="flex items-baseline gap-2">
+                            <p class="text-2xl font-bold @GetDaysBelowColorClass(State.DaysBelowMA20)">
+                                @State.DaysBelowMA20
+                            </p>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">days</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            @if (State.DaysBelowMA20 >= 2)
+                            {
+                                <span class="text-red-600 dark:text-red-400">Sell condition triggered</span>
+                            }
+                            else if (State.DaysBelowMA20 == 1)
+                            {
+                                <span class="text-yellow-600 dark:text-yellow-400">Watch for sell signal</span>
+                            }
+                            else
+                            {
+                                <span class="text-green-600 dark:text-green-400">No sell signal</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </TbCard>
+
+    <!-- Portfolio Status -->
+    <TbCard>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Portfolio Status</h3>
+        @if (State is not null)
+        {
+            <div class="space-y-4">
+                <!-- Cash Ratio Indicator -->
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Cash Ratio</span>
+                        <span class="text-sm font-semibold @GetCashRatioColorClass()">
+                            @(State.CurrentCashRatio.HasValue ? State.CurrentCashRatio.Value.ToString("P1") : "N/A")
+                        </span>
+                    </div>
+                    @if (State.CurrentCashRatio.HasValue)
+                    {
+                        <div class="relative w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <!-- Min/Max range background -->
+                            <div class="absolute h-full bg-green-200 dark:bg-green-900"
+                                 style="left: @((State.MinCashRatio * 100).ToString("F1"))%; width: @(((State.MaxCashRatio - State.MinCashRatio) * 100).ToString("F1"))%;"></div>
+
+                            <!-- Current ratio indicator -->
+                            <div class="absolute h-full w-1 @GetCashRatioIndicatorClass()"
+                                 style="left: @((State.CurrentCashRatio.Value * 100).ToString("F1"))%;"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <span>Min: @State.MinCashRatio.ToString("P0")</span>
+                            <span>Target Range</span>
+                            <span>Max: @State.MaxCashRatio.ToString("P0")</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Condition Status -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 border @(State.IsBuyConditionMet ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20" : "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800") rounded-lg">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Buy Condition</p>
+                        <p class="text-lg font-semibold @(State.IsBuyConditionMet ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400")">
+                            @(State.IsBuyConditionMet ? "✓ Ready" : "✗ Not Ready")
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            @if (State.IsBuyConditionMet)
+                            {
+                                <span>Price above MA20, sufficient cash</span>
+                            }
+                            else
+                            {
+                                <span>Waiting for bullish signal</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="p-3 border @(State.IsSellConditionMet ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20" : "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800") rounded-lg">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Sell Condition</p>
+                        <p class="text-lg font-semibold @(State.IsSellConditionMet ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-gray-400")">
+                            @(State.IsSellConditionMet ? "✓ Triggered" : "✗ Not Triggered")
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            @if (State.IsSellConditionMet)
+                            {
+                                <span>2+ days below MA20</span>
+                            }
+                            else
+                            {
+                                <span>No sell signal</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </TbCard>
+
+    <!-- Execution Schedule -->
+    <TbCard>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Execution Schedule</h3>
+        @if (State is not null)
+        {
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Next Scheduled Execution</p>
+                    <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        @if (State.NextScheduledExecution.HasValue)
+                        {
+                            <span>@State.NextScheduledExecution.Value.ToString("dddd, MMMM dd, yyyy 'at' HH:mm 'UTC'")</span>
+                        }
+                        else
+                        {
+                            <span class="text-gray-500 dark:text-gray-400">Not scheduled (strategy disabled)</span>
+                        }
+                    </p>
+                </div>
+
+                @if (State.LastExecutionTimestamp.HasValue)
+                {
+                    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Last Execution</p>
+                        <p class="text-base text-gray-900 dark:text-gray-100">
+                            @State.LastExecutionTimestamp.Value.ToString("dddd, MMMM dd, yyyy 'at' HH:mm 'UTC'")
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            @GetTimeAgo(State.LastExecutionTimestamp.Value)
+                        </p>
+                    </div>
+                }
+
+                @if (State.LastDailyUpdateTimestamp.HasValue)
+                {
+                    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Last Daily Update</p>
+                        <p class="text-base text-gray-900 dark:text-gray-100">
+                            @State.LastDailyUpdateTimestamp.Value.ToString("dddd, MMMM dd, yyyy 'at' HH:mm 'UTC'")
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            @GetTimeAgo(State.LastDailyUpdateTimestamp.Value)
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+    </TbCard>
+</div>

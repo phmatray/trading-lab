@@ -2,16 +2,13 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using FakeItEasy;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Shouldly;
 using TradingBot.Core.Interfaces;
 using TradingBot.Core.Models.Configuration;
 using TradingBot.Web.Hubs;
 using TradingBot.Web.Models;
 using TradingBot.Web.Services;
-using Xunit;
 
 namespace TradingBot.Web.Tests.Services;
 

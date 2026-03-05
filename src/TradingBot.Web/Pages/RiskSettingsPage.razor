@@ -1,10 +1,9 @@
 @page "/risk-settings"
-@using TradingBot.Core.Models.Configuration
 @implements IAsyncDisposable
 @inject IRiskSettingsService RiskSettingsService
 @inject IToastService ToastService
 @inject ILogger<RiskSettingsPage> Logger
-@inject Microsoft.AspNetCore.SignalR.Client.HubConnection HubConnection
+@inject HubConnection HubConnection
 
 <PageTitle>Risk Settings - TradingBot</PageTitle>
 
@@ -79,22 +78,22 @@ else
 }
 
 @code {
-    private TradingBot.Core.Models.Configuration.RiskSettings? _currentSettings;
+    private RiskSettings? _currentSettings;
     private bool _isLoading = true;
-    private bool _isSaving = false;
+    private bool _isSaving;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadRiskSettingsAsync();
 
         // Subscribe to SignalR risk settings updates
-        HubConnection.On<TradingBot.Core.Models.Configuration.RiskSettings>("ReceiveRiskSettingsUpdate", async (settings) =>
+        HubConnection.On<RiskSettings>("ReceiveRiskSettingsUpdate", async (settings) =>
         {
             _currentSettings = settings;
             await InvokeAsync(StateHasChanged);
         });
 
-        if (HubConnection.State != Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
+        if (HubConnection.State != HubConnectionState.Connected)
         {
             await HubConnection.StartAsync();
         }
@@ -119,7 +118,7 @@ else
         }
     }
 
-    private async Task HandleSaveAsync(TradingBot.Core.Models.Configuration.RiskSettings updatedSettings)
+    private async Task HandleSaveAsync(RiskSettings updatedSettings)
     {
         try
         {

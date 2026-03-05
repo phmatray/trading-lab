@@ -1,0 +1,102 @@
+@* <copyright file="WeeklyCashStrategyConfig.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@page "/weekly-cash-strategy/config"
+@page "/weekly-cash-strategy/config/{StrategyIdParam}"
+
+@using TradingBot.Web.Components.Features.WeeklyCashStrategy
+@inject NavigationManager Navigation
+@inject ILogger<WeeklyCashStrategyConfig> Logger
+
+<PageTitle>Weekly Cash Strategy Configuration - TradingBot</PageTitle>
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    @* Header *@
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            @(IsEditMode ? "Edit Strategy Configuration" : "Create Weekly Cash Strategy")
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Configure a weekly cash-managed strategy that automatically buys when the underlying asset is above MA20 and sells when below for 2+ days.
+        </p>
+    </div>
+
+    @* Configuration Form *@
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <StrategyConfigurationForm
+            StrategyId="@StrategyId"
+            OnSaved="HandleSaved"
+            OnCancelled="HandleCancelled" />
+    </div>
+
+    @* Information Panel *@
+    <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
+            How It Works
+        </h3>
+        <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+            <li class="flex items-start">
+                <span class="mr-2">•</span>
+                <span><strong>Daily Routine:</strong> Updates MA20 indicator and tracks consecutive days below MA20</span>
+            </li>
+            <li class="flex items-start">
+                <span class="mr-2">•</span>
+                <span><strong>Weekly Buy:</strong> Executes when underlying price > MA20 and cash ratio > minimum threshold</span>
+            </li>
+            <li class="flex items-start">
+                <span class="mr-2">•</span>
+                <span><strong>Weekly Sell:</strong> Executes when underlying stays below MA20 for 2+ consecutive days</span>
+            </li>
+            <li class="flex items-start">
+                <span class="mr-2">•</span>
+                <span><strong>Cash Buffer Management:</strong> Automatically rebalances to maintain cash ratio between min/max limits</span>
+            </li>
+            <li class="flex items-start">
+                <span class="mr-2">•</span>
+                <span><strong>Optional Breakout Rule:</strong> Doubles buy amount during strong momentum (configurable price + volume thresholds)</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the strategy ID parameter from route.
+    /// </summary>
+    [Parameter]
+    public string? StrategyIdParam { get; set; }
+
+    private Guid? StrategyId { get; set; }
+    private bool IsEditMode => StrategyId.HasValue;
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(StrategyIdParam) && Guid.TryParse(StrategyIdParam, out var id))
+        {
+            StrategyId = id;
+            Logger.LogInformation("Editing strategy: {StrategyId}", StrategyId);
+        }
+        else
+        {
+            StrategyId = null;
+            Logger.LogInformation("Creating new strategy");
+        }
+    }
+
+    private void HandleSaved(Guid strategyId)
+    {
+        Logger.LogInformation("Strategy saved: {StrategyId}", strategyId);
+
+        // Navigate to strategy details page (to be implemented in User Story 5)
+        // For now, navigate back to root
+        Navigation.NavigateTo("/");
+    }
+
+    private void HandleCancelled()
+    {
+        Logger.LogInformation("Strategy configuration cancelled");
+        Navigation.NavigateTo("/");
+    }
+}

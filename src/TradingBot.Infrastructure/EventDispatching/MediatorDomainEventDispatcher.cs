@@ -2,9 +2,9 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using TradingBot.Core.SharedKernel;
 
 namespace TradingBot.Infrastructure.EventDispatching;
 

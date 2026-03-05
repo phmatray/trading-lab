@@ -707,6 +707,8 @@ This constitution takes precedence for architectural decisions and coding standa
 - **Logging**: Serilog 4.3.0 with structured logging
 - **Code Analysis**: StyleCop, Roslynator, SonarAnalyzer, Microsoft.CodeAnalysis.NetAnalyzers
 - **Enums**: Ardalis.SmartEnum (type-safe enum pattern)
+- C# / .NET 10 (LangVersion 14) + ASP.NET Core Blazor Server, Entity Framework Core 10, Ardalis.SharedKernel (DDD patterns), MediatR (domain events), SignalR (real-time updates), Ardalis.SmartEnum (type-safe enums), Yahoo Finance API (market data) (007-weekly-cash-managed-strategy)
+- SQLite via Entity Framework Core 10 with fluent API configuration (007-weekly-cash-managed-strategy)
 
 ## Recent Changes
 - **2025-01-15**: DDD refactoring complete - removed CLI application, eliminated duplicate classes, implemented DDD patterns with Ardalis.SharedKernel (spec 006)

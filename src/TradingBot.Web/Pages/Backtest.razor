@@ -1,7 +1,5 @@
 @page "/backtest"
 @using TradingBot.Core.Models.Backtest
-@using TradingBot.Web.Models
-@using Microsoft.AspNetCore.SignalR.Client
 @inject IBacktestService BacktestService
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
@@ -18,22 +16,22 @@
 <div class="mb-6">
     <TbBacktestRunner OnBacktestSubmit="@HandleRunBacktest"
                      OnBacktestCancel="@HandleCancelBacktest"
-                     CurrentBacktestId="@currentBacktestId"
-                     CurrentProgress="@currentProgress"
-                     CurrentStatusMessage="@currentStatusMessage"
-                     IsRunning="@isRunningBacktest"
-                     IsComplete="@isBacktestComplete"
-                     IsFailed="@isBacktestFailed" />
+                     CurrentBacktestId="@_currentBacktestId"
+                     CurrentProgress="@_currentProgress"
+                     CurrentStatusMessage="@_currentStatusMessage"
+                     IsRunning="@_isRunningBacktest"
+                     IsComplete="@_isBacktestComplete"
+                     IsFailed="@_isBacktestFailed" />
 </div>
 
 @* Backtest Results Section *@
-@if (isLoading)
+@if (_isLoading)
 {
     <div class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 }
-else if (!string.IsNullOrEmpty(errorMessage))
+else if (!string.IsNullOrEmpty(_errorMessage))
 {
     <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div class="flex">
@@ -42,11 +40,11 @@ else if (!string.IsNullOrEmpty(errorMessage))
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <p class="text-red-800 dark:text-red-300">@errorMessage</p>
+            <p class="text-red-800 dark:text-red-300">@_errorMessage</p>
         </div>
     </div>
 }
-else if (backtestResults is null || !backtestResults.Any())
+else if (_backtestResults is null || !_backtestResults.Any())
 {
     <TbCard ContentClass="p-12">
         <div class="text-center">
@@ -65,20 +63,20 @@ else
         <!-- Backtest Results List -->
         <div class="lg:col-span-1">
             <TbBacktestResultsList
-                Results="@backtestResults"
-                SelectedBacktestId="@selectedBacktestId"
+                Results="@_backtestResults"
+                SelectedBacktestId="@_selectedBacktestId"
                 OnBacktestSelected="@HandleBacktestSelected"
-                ComparisonMode="@comparisonMode"
-                SelectedForComparison="@selectedForComparison"
+                ComparisonMode="@_comparisonMode"
+                SelectedForComparison="@_selectedForComparison"
                 OnToggleComparison="@HandleToggleComparison"/>
         </div>
 
         <!-- Backtest Detail -->
         <div class="lg:col-span-2">
-            @if (selectedBacktest is not null)
+            @if (_selectedBacktest is not null)
             {
                 <TbBacktestDetail
-                    Backtest="@selectedBacktest"
+                    Backtest="@_selectedBacktest"
                     ShowComparison="@ShowComparisonTable"
                     ComparisonResults="@GetComparisonResults()"/>
             }
@@ -98,12 +96,12 @@ else
         </div>
     </div>
 
-    @if (comparisonMode && selectedForComparison.Count > 1)
+    @if (_comparisonMode && _selectedForComparison.Count > 1)
     {
         <div class="mt-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Comparison
-                    (@selectedForComparison.Count selected)</h2>
+                    (@_selectedForComparison.Count selected)</h2>
                 <button @onclick="@ClearComparison"
                         class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
                     Clear Selection
@@ -116,23 +114,23 @@ else
 
 @code {
     private HubConnection? _hubConnection;
-    private List<BacktestResult>? backtestResults;
-    private BacktestResult? selectedBacktest;
-    private string? selectedBacktestId;
-    private bool isLoading = true;
-    private string? errorMessage;
-    private bool comparisonMode = false;
-    private readonly HashSet<string> selectedForComparison = new();
+    private List<BacktestResult>? _backtestResults;
+    private BacktestResult? _selectedBacktest;
+    private string? _selectedBacktestId;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private bool _comparisonMode;
+    private readonly HashSet<string> _selectedForComparison = new();
 
     // Backtest execution state
-    private string? currentBacktestId;
-    private int currentProgress = 0;
-    private string currentStatusMessage = string.Empty;
-    private bool isRunningBacktest = false;
-    private bool isBacktestComplete = false;
-    private bool isBacktestFailed = false;
+    private string? _currentBacktestId;
+    private int _currentProgress;
+    private string _currentStatusMessage = string.Empty;
+    private bool _isRunningBacktest;
+    private bool _isBacktestComplete;
+    private bool _isBacktestFailed;
 
-    private bool ShowComparisonTable => comparisonMode && selectedForComparison.Count > 1;
+    private bool ShowComparisonTable => _comparisonMode && _selectedForComparison.Count > 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -144,19 +142,19 @@ else
     {
         try
         {
-            isLoading = true;
-            errorMessage = null;
-            backtestResults = await BacktestService.GetBacktestResultsAsync();
-            Logger.LogInformation("Loaded {Count} backtest results", backtestResults?.Count ?? 0);
+            _isLoading = true;
+            _errorMessage = null;
+            _backtestResults = await BacktestService.GetBacktestResultsAsync();
+            Logger.LogInformation("Loaded {Count} backtest results", _backtestResults?.Count ?? 0);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to load backtest results");
-            errorMessage = "Failed to load backtest results. Please try again.";
+            _errorMessage = "Failed to load backtest results. Please try again.";
         }
         finally
         {
-            isLoading = false;
+            _isLoading = false;
         }
     }
 
@@ -164,48 +162,48 @@ else
     {
         try
         {
-            selectedBacktestId = backtestId;
-            selectedBacktest = await BacktestService.GetBacktestByIdAsync(backtestId);
+            _selectedBacktestId = backtestId;
+            _selectedBacktest = await BacktestService.GetBacktestByIdAsync(backtestId);
             Logger.LogInformation("Selected backtest {BacktestId}", backtestId);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to load backtest details for {BacktestId}", backtestId);
-            errorMessage = "Failed to load backtest details. Please try again.";
+            _errorMessage = "Failed to load backtest details. Please try again.";
         }
     }
 
     private void HandleToggleComparison(string backtestId)
     {
-        if (selectedForComparison.Contains(backtestId))
+        if (_selectedForComparison.Contains(backtestId))
         {
-            selectedForComparison.Remove(backtestId);
+            _selectedForComparison.Remove(backtestId);
         }
         else
         {
-            selectedForComparison.Add(backtestId);
+            _selectedForComparison.Add(backtestId);
         }
 
-        comparisonMode = selectedForComparison.Count > 0;
+        _comparisonMode = _selectedForComparison.Count > 0;
         StateHasChanged();
     }
 
     private void ClearComparison()
     {
-        selectedForComparison.Clear();
-        comparisonMode = false;
+        _selectedForComparison.Clear();
+        _comparisonMode = false;
         StateHasChanged();
     }
 
     private List<BacktestResult> GetComparisonResults()
     {
-        if (backtestResults is null)
+        if (_backtestResults is null)
         {
             return new List<BacktestResult>();
         }
 
-        return backtestResults
-            .Where(b => selectedForComparison.Contains(b.BacktestId))
+        return _backtestResults
+            .Where(b => _selectedForComparison.Contains(b.BacktestId))
             .ToList();
     }
 
@@ -217,26 +215,26 @@ else
             Logger.LogInformation("Starting backtest for strategy {Strategy} on symbol {Symbol}", request.StrategyName, request.Symbol);
 
             // Reset state
-            isRunningBacktest = true;
-            isBacktestComplete = false;
-            isBacktestFailed = false;
-            currentProgress = 0;
-            currentStatusMessage = "Submitting backtest request...";
+            _isRunningBacktest = true;
+            _isBacktestComplete = false;
+            _isBacktestFailed = false;
+            _currentProgress = 0;
+            _currentStatusMessage = "Submitting backtest request...";
 
             // Run the backtest
-            currentBacktestId = await BacktestService.RunBacktestAsync(request);
+            _currentBacktestId = await BacktestService.RunBacktestAsync(request);
 
-            ToastService.ShowInfo($"Backtest {currentBacktestId} started successfully", "Backtest Started");
-            Logger.LogInformation("Backtest {BacktestId} submitted successfully", currentBacktestId);
+            ToastService.ShowInfo($"Backtest {_currentBacktestId} started successfully", "Backtest Started");
+            Logger.LogInformation("Backtest {BacktestId} submitted successfully", _currentBacktestId);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to start backtest");
             ToastService.ShowError($"Failed to start backtest: {ex.Message}", "Backtest Failed");
 
-            isRunningBacktest = false;
-            isBacktestFailed = true;
-            currentStatusMessage = $"Error: {ex.Message}";
+            _isRunningBacktest = false;
+            _isBacktestFailed = true;
+            _currentStatusMessage = $"Error: {ex.Message}";
         }
     }
 
@@ -251,9 +249,9 @@ else
             if (success)
             {
                 ToastService.ShowInfo("Backtest cancelled successfully", "Cancelled");
-                isRunningBacktest = false;
-                isBacktestFailed = true;
-                currentStatusMessage = "Cancelled by user";
+                _isRunningBacktest = false;
+                _isBacktestFailed = true;
+                _currentStatusMessage = "Cancelled by user";
             }
             else
             {
@@ -308,10 +306,10 @@ else
                 await LoadBacktestResultsAsync();
 
                 // Clear selection if the deleted backtest was selected
-                if (selectedBacktestId == backtestId)
+                if (_selectedBacktestId == backtestId)
                 {
-                    selectedBacktest = null;
-                    selectedBacktestId = null;
+                    _selectedBacktest = null;
+                    _selectedBacktestId = null;
                 }
             }
             else
@@ -371,10 +369,10 @@ else
 
     private void HandleBacktestProgress(string backtestId, int progressPercent, string statusMessage)
     {
-        if (currentBacktestId == backtestId)
+        if (_currentBacktestId == backtestId)
         {
-            currentProgress = progressPercent;
-            currentStatusMessage = statusMessage;
+            _currentProgress = progressPercent;
+            _currentStatusMessage = statusMessage;
             InvokeAsync(StateHasChanged);
             Logger.LogDebug("Backtest {BacktestId} progress: {Progress}% - {Status}", backtestId, progressPercent, statusMessage);
         }
@@ -382,12 +380,12 @@ else
 
     private void HandleBacktestCompleted(string backtestId, BacktestResult result)
     {
-        if (currentBacktestId == backtestId)
+        if (_currentBacktestId == backtestId)
         {
-            currentProgress = 100;
-            currentStatusMessage = "Backtest completed successfully";
-            isBacktestComplete = true;
-            isRunningBacktest = false;
+            _currentProgress = 100;
+            _currentStatusMessage = "Backtest completed successfully";
+            _isBacktestComplete = true;
+            _isRunningBacktest = false;
 
             ToastService.ShowSuccess(
                 $"Backtest completed! Total Return: {result.TotalReturn:F2}%, Sharpe Ratio: {result.SharpeRatio:F2}",
@@ -407,11 +405,11 @@ else
 
     private void HandleBacktestFailed(string backtestId, string errorMessage)
     {
-        if (currentBacktestId == backtestId)
+        if (_currentBacktestId == backtestId)
         {
-            currentStatusMessage = $"Error: {errorMessage}";
-            isBacktestFailed = true;
-            isRunningBacktest = false;
+            _currentStatusMessage = $"Error: {errorMessage}";
+            _isBacktestFailed = true;
+            _isRunningBacktest = false;
 
             ToastService.ShowError($"Backtest failed: {errorMessage}", "Backtest Failed");
             InvokeAsync(StateHasChanged);

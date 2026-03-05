@@ -3,9 +3,13 @@
 </copyright> *@
 
 @page "/strategies"
-@using TradingBot.Web.Components.Features.Strategy
-@using TradingBot.Web.Components.Molecules
+@using Ardalis.Specification
+@using TradingBot.Core.Interfaces
+@using TradingBot.Core.Models.Strategy
+@using TradingBot.Web.Components.Features.WeeklyCashStrategy
 @inject IStrategyManagementService StrategyService
+@inject IWeeklyCashManagedStrategyRepository WeeklyCashStrategyRepository
+@inject NavigationManager Navigation
 @inject IToastService ToastService
 @inject ILogger<Strategies> Logger
 
@@ -36,7 +40,7 @@ else if (_error != null)
         </div>
     </div>
 }
-else if (_strategies == null || !_strategies.Any())
+else if ((_strategies == null || !_strategies.Any()) && (_weeklyCashStrategies == null || !_weeklyCashStrategies.Any()))
 {
     <TbCard ContentClass="p-12">
         <div class="text-center">
@@ -66,15 +70,91 @@ else
         </div>
     }
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        @foreach (var strategy in _strategies)
-        {
-            <TbStrategyCard
-                Strategy="@strategy"
-                OnStatusChanged="@HandleStatusChanged"
-                OnConfigure="@HandleConfigure"/>
-        }
-    </div>
+    @if (_strategies != null && _strategies.Any())
+    {
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Standard Strategies</h2>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                @foreach (var strategy in _strategies)
+                {
+                    <TbStrategyCard
+                        Strategy="@strategy"
+                        OnStatusChanged="@HandleStatusChanged"
+                        OnConfigure="@HandleConfigure"/>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_weeklyCashStrategies != null && _weeklyCashStrategies.Any())
+    {
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Weekly Cash-Managed Strategies</h2>
+                <button @onclick="NavigateToCreateWeeklyCashStrategy"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    New Strategy
+                </button>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                @foreach (var strategy in _weeklyCashStrategies)
+                {
+                    <TbCard>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">@strategy.Name</h3>
+                                @if (strategy.IsEnabled)
+                                {
+                                    <span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:text-green-100 dark:bg-green-800 rounded-full">
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 dark:text-gray-100 dark:bg-gray-800 rounded-full">
+                                        Inactive
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">ETP Symbol:</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">@strategy.EtpSymbol</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">Underlying:</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">@strategy.UnderlyingSymbol</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">Execution Day:</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">@GetDayOfWeekName(strategy.ExecutionDayOfWeek)</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600 dark:text-gray-400">Cash Range:</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">@strategy.MinCashRatio.ToString("P0") - @strategy.MaxCashRatio.ToString("P0")</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <button @onclick="() => NavigateToStrategyDetails(strategy.Id)"
+                                    class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
+                                View Details
+                            </button>
+                            <button @onclick="() => NavigateToStrategyConfig(strategy.Id)"
+                                    class="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors">
+                                Configure
+                            </button>
+                        </div>
+                    </TbCard>
+                }
+            </div>
+        </div>
+    }
 }
 
 <!-- Configuration Modal -->
@@ -92,6 +172,7 @@ else
 
 @code {
     private List<IStrategy>? _strategies;
+    private List<WeeklyCashManagedStrategy>? _weeklyCashStrategies;
     private bool _isLoading = true;
     private string? _error;
     private string? _successMessage;
@@ -102,6 +183,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadStrategiesAsync();
+        await LoadWeeklyCashStrategiesAsync();
     }
 
     private async Task LoadStrategiesAsync()
@@ -119,6 +201,21 @@ else
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private async Task LoadWeeklyCashStrategiesAsync()
+    {
+        try
+        {
+            // Load all weekly cash strategies (enabled and disabled) for management
+            var allStrategies = await WeeklyCashStrategyRepository.GetAllAsync();
+            _weeklyCashStrategies = allStrategies.ToList();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load weekly cash strategies");
+            _error = $"Failed to load weekly cash strategies: {ex.Message}";
         }
     }
 
@@ -253,6 +350,36 @@ else
         Logger.LogInformation("Cancelling configuration for strategy: {StrategyName}", _selectedStrategyName);
         _showConfigModal = false;
         _selectedStrategyName = null;
+    }
+
+    private void NavigateToCreateWeeklyCashStrategy()
+    {
+        Navigation.NavigateTo("/weekly-cash-strategy/config");
+    }
+
+    private void NavigateToStrategyDetails(Guid strategyId)
+    {
+        Navigation.NavigateTo($"/weekly-cash-strategy/{strategyId}");
+    }
+
+    private void NavigateToStrategyConfig(Guid strategyId)
+    {
+        Navigation.NavigateTo($"/weekly-cash-strategy/config/{strategyId}");
+    }
+
+    private static string GetDayOfWeekName(int dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            0 => "Sunday",
+            1 => "Monday",
+            2 => "Tuesday",
+            3 => "Wednesday",
+            4 => "Thursday",
+            5 => "Friday",
+            6 => "Saturday",
+            _ => "Unknown"
+        };
     }
 
     public class StrategyStatusChangedEventArgs

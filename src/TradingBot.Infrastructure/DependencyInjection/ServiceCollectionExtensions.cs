@@ -2,7 +2,6 @@
 // Copyright (c) TradingBot. All rights reserved.
 // </copyright>
 
-using Ardalis.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using TradingBot.Analytics;
 using TradingBot.Core.Interfaces;
+using TradingBot.Core.SharedKernel;
 using TradingBot.Engine;
 using TradingBot.Infrastructure.Configuration;
 using TradingBot.Infrastructure.MarketData;
@@ -59,8 +59,8 @@ public static class ServiceCollectionExtensions
         });
 
         // Generic repositories (Ardalis.SharedKernel support)
-        services.AddScoped(typeof(Ardalis.SharedKernel.IRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(Ardalis.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
+        services.AddScoped(typeof(Core.SharedKernel.IRepository<>), typeof(EfRepository<>));
+        services.AddScoped(typeof(Core.SharedKernel.IReadRepository<>), typeof(EfReadRepository<>));
 
         // Repositories (Scoped - tied to DbContext lifetime)
         services.AddScoped<IOrderRepository, OrderRepository>();
@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRiskSettingsRepository, RiskSettingsRepository>();
         services.AddScoped<IStrategyConfigurationRepository, StrategyConfigurationRepository>();
         services.AddScoped<IBacktestResultRepository, BacktestResultRepository>();
+        services.AddScoped<IWeeklyCashManagedStrategyRepository, WeeklyCashManagedStrategyRepository>();
 
         // Infrastructure services
         services.AddSingleton<IEncryptionService, EncryptionService>();
@@ -81,6 +82,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserPreferencesService, UserPreferencesService>();
         services.AddHttpClient<ISymbolSearchService, YahooFinanceSymbolSearchService>();
         services.AddMemoryCache();
+        services.AddSingleton<ITradingCalendar, TradingCalendar>();
+        services.AddScoped<IMA20IndicatorService, MA20IndicatorService>();
 
         // Engine services
         // Note: Changed to Scoped to avoid DI lifetime conflicts with DbContext-dependent services
@@ -91,6 +94,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStopLossManager, StopLossManager>();
         services.AddScoped<IPositionSizeCalculator, PositionSizeCalculator>();
         services.AddScoped<SignalProcessor>();
+        services.AddScoped<IWeeklyRoutineExecutor, Engine.WeeklyRoutine.WeeklyRoutineExecutor>();
 
         // Analytics services - Changed to Scoped as they depend on IPortfolioManager
         services.AddScoped<IBacktestingEngine, Analytics.BacktestingEngine>();

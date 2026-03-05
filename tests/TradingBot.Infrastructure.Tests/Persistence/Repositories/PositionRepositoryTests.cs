@@ -127,8 +127,8 @@ public class PositionRepositoryTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(3);
-        result.First().Id.ShouldBe(pos3.Id); // Most recent first
-        result.Last().Id.ShouldBe(pos1.Id);  // Oldest last
+        result[0].Id.ShouldBe(pos3.Id); // Most recent first
+        result[^1].Id.ShouldBe(pos1.Id);  // Oldest last
     }
 
     [Fact]
