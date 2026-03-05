@@ -56,7 +56,7 @@
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup Label="Domain - SmartEnum">
     <PackageVersion Include="Ardalis.SmartEnum" Version="8.2.0" />
