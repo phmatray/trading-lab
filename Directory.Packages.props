@@ -103,7 +103,7 @@
     </PackageVersion>
   </ItemGroup>
   <ItemGroup Label="Testing - Code Coverage">
-    <PackageVersion Include="coverlet.collector" Version="6.0.4">
+    <PackageVersion Include="coverlet.collector" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
