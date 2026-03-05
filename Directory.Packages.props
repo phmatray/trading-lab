@@ -66,9 +66,9 @@
     <PackageVersion Include="YahooFinanceApi" Version="2.3.3" />
   </ItemGroup>
   <ItemGroup Label="Resilience and Rate Limiting">
-    <PackageVersion Include="Polly" Version="8.6.4" />
-    <PackageVersion Include="Polly.Extensions" Version="8.6.4" />
-    <PackageVersion Include="Polly.RateLimiting" Version="8.6.4" />
+    <PackageVersion Include="Polly" Version="8.6.6" />
+    <PackageVersion Include="Polly.Extensions" Version="8.6.6" />
+    <PackageVersion Include="Polly.RateLimiting" Version="8.6.6" />
   </ItemGroup>
   <ItemGroup Label="Math and Statistics">
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
