@@ -24,7 +24,7 @@
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageVersion Include="Spectre.Console" Version="0.54.0" />
-    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.54.0" />
   </ItemGroup>
   <ItemGroup Label="Data Access - Entity Framework Core">
