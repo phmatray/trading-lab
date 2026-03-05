@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup Label="Background Jobs">
     <PackageVersion Include="NCrontab" Version="3.4.0" />
-    <PackageVersion Include="TickerQ" Version="2.5.3" />
+    <PackageVersion Include="TickerQ" Version="10.1.1" />
   </ItemGroup>
   <ItemGroup Label="Source Link for Debugging">
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
