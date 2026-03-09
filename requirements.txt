@@ -1,2 +1,2 @@
-openbb[all]==4.6.0
+openbb[all]==4.7.1
 pandas-datareader==0.10.0
