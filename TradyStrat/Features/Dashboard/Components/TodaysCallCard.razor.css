@@ -1,0 +1,64 @@
+.call {
+    padding: 36px 56px 40px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.label { margin-bottom: 14px; }
+.verb {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 60px;
+    line-height: 1;
+    margin: 0 0 8px;
+    color: var(--vault-ivory);
+}
+.order {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: rgba(236,230,214,0.78);
+    margin-bottom: 22px;
+}
+.reasons {
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(236,230,214,0.8);
+    max-width: 50ch;
+}
+.citations {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--vault-rule);
+    counter-reset: c;
+    list-style: none;
+}
+.citations li {
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: rgba(236,230,214,0.7);
+}
+.citations li::before {
+    counter-increment: c;
+    content: counter(c, lower-roman) ".";
+    position: absolute; left: 0; top: 0;
+    color: var(--vault-gold); font-style: italic;
+}
+.actions { margin-top: 28px; display: flex; gap: 10px; }
+.cta {
+    padding: 13px 18px;
+    background: var(--vault-gold);
+    color: #1B1710;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: background 150ms;
+}
+.cta:hover:not(:disabled) { background: var(--vault-ivory); }
+.cta:disabled { opacity: 0.4; cursor: not-allowed; }
+.cta.ghost { background: transparent; color: var(--vault-ivory); border: 1px solid var(--vault-rule); font-weight: 400; }
+.cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }

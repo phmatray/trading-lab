@@ -1,0 +1,50 @@
+@using System.Globalization
+@using TradyStrat.Shared.Domain
+<div class="call">
+    <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)</div>
+    <div class="verb">@Verb</div>
+
+    @if (Sug.QuantityHint is decimal q && Sug.MaxPriceHint is decimal mp)
+    {
+        <div class="order num">
+            @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
+            · ≈ €@(q * mp).ToString("F2", FrFr)
+        </div>
+    }
+
+    <p class="reasons">@Sug.Rationale</p>
+
+    @if (Sug.Citations.Count > 0)
+    {
+        <ol class="citations">
+            @foreach (var c in Sug.Citations)
+            {
+                <li><b>@c.Indicator (@c.Ticker):</b> @c.Claim · <em>@c.Value</em></li>
+            }
+        </ol>
+    }
+
+    <div class="actions">
+        <button class="cta" disabled="@(Sug.Action != SuggestionAction.Acquire)"
+                @onclick="OnLogTrade">Log trade</button>
+        <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Suggestion Sug { get; set; } = default!;
+    [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public EventCallback OnLogTrade { get; set; }
+    [Parameter] public EventCallback OnRerun { get; set; }
+
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private string Verb => Sug.Action switch
+    {
+        SuggestionAction.Acquire => "Acquire.",
+        SuggestionAction.Hold    => "Hold.",
+        SuggestionAction.Trim    => "Trim.",
+        SuggestionAction.Wait    => "Wait.",
+        _ => "—"
+    };
+}
