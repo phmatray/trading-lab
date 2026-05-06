@@ -1,9 +1,13 @@
 .masthead {
     padding: 26px 56px 22px;
-    display: flex; justify-content: space-between; align-items: baseline;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: baseline;
     border-bottom: 1px solid var(--vault-rule);
 }
 .brand {
+    justify-self: start;
     font-family: var(--font-display);
     font-size: 14px;
     letter-spacing: var(--tracking-xs);
@@ -20,7 +24,22 @@
     margin-left: 14px;
     font-size: 14px;
 }
+.nav {
+    justify-self: center;
+    display: flex;
+    gap: 22px;
+}
+.nav a {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: rgba(236,230,214,0.6);
+    transition: color 150ms;
+}
+.nav a:hover { color: var(--vault-gold); }
 .meta {
+    justify-self: end;
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: var(--tracking-md);

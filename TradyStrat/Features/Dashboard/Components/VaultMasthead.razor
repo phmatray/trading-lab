@@ -1,9 +1,14 @@
 @using System.Globalization
 <div class="masthead">
     <div class="brand">
-        Tradystrat
+        <a href="/">Tradystrat</a>
         <span class="arc">— a private chronicle of accumulation</span>
     </div>
+    <nav class="nav">
+        <a href="/">Dashboard</a>
+        <a href="/trades">Trades</a>
+        <a href="/settings">Settings</a>
+    </nav>
     <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)</div>
 </div>
 
