@@ -1,0 +1,25 @@
+.rail {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.cell {
+    padding: 24px 28px;
+    border-right: 1px solid var(--vault-rule);
+}
+.cell:last-child { border-right: none; }
+.lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-xs);
+       text-transform: uppercase; color: rgba(236,230,214,0.5); }
+.tk  { font-family: var(--font-display); font-style: italic; font-size: 14px;
+       letter-spacing: 0.04em; color: var(--vault-gold); margin-bottom: 4px; }
+.val {
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 30px;
+    letter-spacing: -0.012em;
+}
+.sub { margin-top: 6px; font-family: var(--font-mono); font-size: 10px;
+       letter-spacing: var(--tracking-md); color: rgba(236,230,214,0.55); }
+.delta { font-family: var(--font-mono); font-size: 11px; margin-left: 6px; color: var(--vault-green); }
+.delta.dn { color: var(--vault-red); }
