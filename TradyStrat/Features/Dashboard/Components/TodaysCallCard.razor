@@ -8,7 +8,7 @@
     {
         <div class="order num">
             @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
-            · ≈ €@(q * mp).ToString("F2", FrFr)
+            · ≈ €@((q * mp).ToString("F2", FrFr))
         </div>
     }
 
