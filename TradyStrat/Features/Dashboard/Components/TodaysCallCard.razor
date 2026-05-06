@@ -4,7 +4,9 @@
     <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)</div>
     <div class="verb">@Verb</div>
 
-    @if (Sug.QuantityHint is decimal q && Sug.MaxPriceHint is decimal mp)
+    @if (Sug.Action == SuggestionAction.Acquire
+         && Sug.QuantityHint is decimal q && q > 0m
+         && Sug.MaxPriceHint is decimal mp && mp > 0m)
     {
         <div class="order num">
             @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
