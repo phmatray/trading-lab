@@ -1,5 +1,5 @@
 using TheAppManager.Modules;
-using TradyStrat.Components;
+using TradyStrat.Features.Shell;
 
 namespace TradyStrat.Modules;
 
