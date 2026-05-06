@@ -8,6 +8,8 @@ obj/
 # IDE
 .idea/
 *.swp
+*.DotSettings
+*.DotSettings.user
 
 # Local data & logs
 *.db
