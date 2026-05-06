@@ -19,3 +19,6 @@ logs/
 
 # Brainstorming companion artefacts
 .superpowers/
+
+# Debug/inspection artefacts
+.dashboard-*.png
