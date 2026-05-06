@@ -22,7 +22,12 @@ public sealed class GrowthSeriesBuilder(
             .GroupBy(t => t.ExecutedOn)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var points = new List<GrowthPoint>(priceBars.Count);
+        var points = new List<GrowthPoint>(priceBars.Count + 1)
+        {
+            // Synthetic leading zero so the chart shows the rise from 0 even
+            // when there is only one (or a few) bars of post-trade history.
+            new(firstDate.AddDays(-1), 0m)
+        };
         var shares = 0m;
 
         foreach (var bar in priceBars)

@@ -37,11 +37,14 @@ public class GrowthSeriesBuilderTests
         var b = new GrowthSeriesBuilder(new TestRepo<Trade>(db), new TestRepo<PriceBar>(db));
         var pts = await b.BuildAsync("CON3.DE", ct);
 
-        pts.Count.ShouldBe(4);
-        pts[0].ValueEur.ShouldBe(10m * 4.0m);
-        pts[1].ValueEur.ShouldBe(10m * 4.5m);
-        pts[2].ValueEur.ShouldBe(15m * 5.0m);
-        pts[3].ValueEur.ShouldBe(15m * 5.2m);
+        // 1 synthetic leading-zero point + 4 daily bars
+        pts.Count.ShouldBe(5);
+        pts[0].Date.ShouldBe(new DateOnly(2025,12,31));
+        pts[0].ValueEur.ShouldBe(0m);
+        pts[1].ValueEur.ShouldBe(10m * 4.0m);
+        pts[2].ValueEur.ShouldBe(10m * 4.5m);
+        pts[3].ValueEur.ShouldBe(15m * 5.0m);
+        pts[4].ValueEur.ShouldBe(15m * 5.2m);
     }
 
     [Fact]

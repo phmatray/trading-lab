@@ -1,9 +1,18 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TradyStrat.Shared.Domain;
 
 public sealed record Suggestion
 {
+    // Citations are stored snake_case (matches the AI tool-call shape), so deserializing
+    // back to PascalCase records needs the same naming policy on the way out.
+    private static readonly JsonSerializerOptions CitationOpts = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
+    };
+
     public required int Id { get; init; }
     public required DateOnly ForDate { get; init; }
     public required SuggestionAction Action { get; init; }
@@ -19,5 +28,5 @@ public sealed record Suggestion
         QuantityHint is decimal q && MaxPriceHint is decimal p ? q * p : null;
 
     public IReadOnlyList<Citation> Citations =>
-        JsonSerializer.Deserialize<List<Citation>>(CitationsJson) ?? [];
+        JsonSerializer.Deserialize<List<Citation>>(CitationsJson, CitationOpts) ?? [];
 }

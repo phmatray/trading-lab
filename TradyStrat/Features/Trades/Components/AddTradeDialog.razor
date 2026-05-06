@@ -1,6 +1,6 @@
 @using TradyStrat.Application.UseCases.Trades
 @using TradyStrat.Shared.Domain
-<div class="modal" @onclick="OnCancel.InvokeAsync">
+<div class="modal" @onclick="() => OnCancel.InvokeAsync()">
     <div class="modal-body" @onclick:stopPropagation="true">
         <h3>@(Initial is null ? "Add trade" : "Edit trade")</h3>
         <div class="grid">
@@ -19,7 +19,7 @@
         }
         <div class="modal-actions">
             <button class="btn" @onclick="DoSubmit">Save</button>
-            <button class="btn ghost" @onclick="OnCancel.InvokeAsync">Cancel</button>
+            <button class="btn ghost" @onclick="() => OnCancel.InvokeAsync()">Cancel</button>
         </div>
     </div>
 </div>

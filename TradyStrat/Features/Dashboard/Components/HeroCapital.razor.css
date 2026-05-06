@@ -6,7 +6,8 @@
 .amount {
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: clamp(72px, 9vw, 128px);
+    /* Reach the mockup's ~128px on wide viewports while still scaling down. */
+    font-size: clamp(80px, 11vw, 132px);
     line-height: 0.9;
     letter-spacing: -0.035em;
 }

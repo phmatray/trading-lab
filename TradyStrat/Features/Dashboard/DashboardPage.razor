@@ -1,4 +1,5 @@
 @page "/"
+@rendermode InteractiveServer
 @using TradyStrat.Application.Abstractions
 @using TradyStrat.Application.UseCases.AiSuggestion
 @using TradyStrat.Application.UseCases.Dashboard
@@ -35,9 +36,11 @@ else
 {
     var vm = _vm!;
     <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber" />
-    <HeroCapital Snap="vm.Portfolio" />
-    <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
-                    OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+    <div class="hero-row">
+        <HeroCapital Snap="vm.Portfolio" />
+        <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
+                        OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+    </div>
     <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
     <GrowthChart Points="vm.Growth" Goal="vm.Goal" />
     <RefreshFab Busy="_busy" OnClick="OnRefreshClicked" />
