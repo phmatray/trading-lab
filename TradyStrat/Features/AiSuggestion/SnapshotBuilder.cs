@@ -17,7 +17,7 @@ public sealed class SnapshotBuilder(
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<Trade> tradeRepo,
-    IClock clock)
+    IClock clock) : ISnapshotBuilder
 {
     private static readonly (string Ticker, string Currency)[] Catalog =
     [

@@ -8,7 +8,7 @@ using TradyStrat.Shared.Time;
 namespace TradyStrat.Features.AiSuggestion;
 
 public sealed partial class SuggestionService(
-    IChatClient chat, IClock clock, ILogger<SuggestionService> log)
+    IChatClient chat, IClock clock, ILogger<SuggestionService> log) : IAiClient
 {
     private const string ToolName = "submit_suggestion";
     private const string SystemPrompt = """
