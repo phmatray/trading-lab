@@ -36,8 +36,26 @@ public sealed partial class DailyPriceCache(
             return;
         }
 
-        db.PriceBars.AddRange(fetched);
+        // Dedupe against rows already in the DB. Yahoo's day boundary doesn't
+        // align with the exchange's local date and the period query can return
+        // bars we already have (sometimes with UTC dates that fall before our
+        // local `from`). Filter against the actual fetched dates rather than a
+        // local-tz date range.
+        var fetchedDates = fetched.Select(b => b.Date).ToList();
+        var existingDates = await db.PriceBars
+            .Where(b => b.Ticker == ticker && fetchedDates.Contains(b.Date))
+            .Select(b => b.Date)
+            .ToListAsync(ct);
+        var existingSet = existingDates.ToHashSet();
+        var newBars = fetched.Where(b => !existingSet.Contains(b.Date)).ToList();
+        if (newBars.Count == 0)
+        {
+            LogNoBars(log, ticker);
+            return;
+        }
+
+        db.PriceBars.AddRange(newBars);
         await db.SaveChangesAsync(ct);
-        LogAppended(log, fetched.Count, ticker);
+        LogAppended(log, newBars.Count, ticker);
     }
 }

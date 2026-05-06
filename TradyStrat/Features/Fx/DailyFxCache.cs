@@ -30,9 +30,22 @@ public sealed partial class DailyFxCache(
             return;
         }
 
-        db.FxRates.AddRange(rates);
+        var fetchedDates = rates.Select(r => r.Date).ToList();
+        var existingDates = await db.FxRates
+            .Where(r => r.Pair == pair && fetchedDates.Contains(r.Date))
+            .Select(r => r.Date)
+            .ToListAsync(ct);
+        var existingSet = existingDates.ToHashSet();
+        var newRates = rates.Where(r => !existingSet.Contains(r.Date)).ToList();
+        if (newRates.Count == 0)
+        {
+            LogNoRates(log, pair);
+            return;
+        }
+
+        db.FxRates.AddRange(newRates);
         await db.SaveChangesAsync(ct);
-        LogAppended(log, rates.Count, pair);
+        LogAppended(log, newRates.Count, pair);
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Fx: no new rates for {Pair}")]
