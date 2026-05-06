@@ -19,15 +19,18 @@
     <div class="label">Settings</div>
     <h2>Goal</h2>
     <div class="grid">
-        <label>
-            Target (€)
+        <label class="field">
+            <span class="lbl">Target&nbsp;(€)</span>
             <input type="number" step="1000" min="1" @bind="_target" @bind:after="OnInputChanged" />
         </label>
-        <label>
-            Target date <span class="hint">— optional</span>
+        <label class="field">
+            <span class="lbl">Target date <em class="hint">optional</em></span>
             <input type="date" @bind="_date" @bind:after="OnInputChanged" />
         </label>
-        <label>Focus ticker<input value="CON3.L" disabled /></label>
+        <label class="field">
+            <span class="lbl">Focus ticker</span>
+            <input value="CON3.L" disabled />
+        </label>
     </div>
     <div class="actions">
         <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>

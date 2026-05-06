@@ -4,7 +4,7 @@
     border-bottom: 1px solid var(--vault-rule);
 }
 .cell {
-    padding: 24px 28px;
+    padding: 20px 26px 22px;
     border-right: 1px solid var(--vault-rule);
     position: relative;
     transition: background 200ms ease;
@@ -24,19 +24,19 @@
 }
 .cell:hover::after { transform: scaleX(1); }
 
-.lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-xs);
-       text-transform: uppercase; color: var(--ink-3); /* was rgba(.5) — bumped */ }
-.tk  { font-family: var(--font-display); font-style: italic; font-size: 14px;
+.lbl { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+       letter-spacing: var(--tracking-xs); text-transform: uppercase; color: var(--ink-3); }
+.tk  { font-family: var(--font-display); font-style: italic; font-size: 15px;
        letter-spacing: 0.04em; color: var(--vault-gold); margin-bottom: 4px; }
 .val {
-    margin-top: 10px;
+    margin-top: 8px;
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: 30px;
+    font-size: 28px;
     letter-spacing: -0.012em;
 }
-.sub { margin-top: 6px; font-family: var(--font-mono); font-size: 10px;
-       letter-spacing: var(--tracking-md); color: var(--ink-3); /* was rgba(.55) */ }
-.delta { font-family: var(--font-mono); font-size: 11px; margin-left: 6px;
+.sub { margin-top: 6px; font-family: var(--font-mono); font-size: 11px;
+       letter-spacing: var(--tracking-md); color: var(--ink-3); }
+.delta { font-family: var(--font-mono); font-size: 12px; margin-left: 6px;
          color: var(--vault-green); font-weight: 500; }
 .delta.dn { color: var(--vault-red); }

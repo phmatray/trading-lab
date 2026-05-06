@@ -1,46 +1,49 @@
 .call {
-    padding: 36px 56px 40px;
+    padding: 32px 48px 32px;
     border-bottom: 1px solid var(--vault-rule);
 }
-.label { margin-bottom: 14px; }
+.label { margin-bottom: 12px; }
 .verb {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
-    font-size: 60px;
+    font-size: 56px;
     line-height: 1;
     margin: 0 0 8px;
     color: var(--vault-ivory);
 }
 .order {
     font-family: var(--font-mono);
-    font-size: 13px;
-    letter-spacing: 0.16em;
+    font-size: 12px;
+    letter-spacing: 0.14em;
     color: var(--ink-2);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
-/* Rationale is the lede — slightly larger and brighter than citations
-   so the eye reads it FIRST. */
+/* Rationale is the lede — Newsreader (body face) at 16px reads sturdier
+   than display Cormorant for sustained prose, while still feeling editorial. */
 .reasons {
-    font-family: var(--font-display);
-    font-size: 18px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
     line-height: 1.55;
-    color: var(--ink-1);   /* was rgba(.8) — bumped to .92 */
-    max-width: 50ch;
+    color: var(--ink-1);
+    max-width: 54ch;
 }
 .citations {
-    margin-top: 18px;
-    padding-top: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px dashed var(--vault-rule);
     counter-reset: c;
     list-style: none;
 }
 .citations li {
-    padding-left: 28px;
+    padding-left: 26px;
     position: relative;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
+    font-family: var(--font-body);
     font-size: 13px;
-    color: var(--ink-3);   /* secondary tier — clearly subordinate to .reasons */
+    line-height: 1.5;
+    color: var(--ink-2);
 }
 .citations li::before {
     counter-increment: c;
@@ -48,7 +51,7 @@
     position: absolute; left: 0; top: 0;
     color: var(--vault-gold); font-style: italic;
 }
-.actions { margin-top: 28px; display: flex; gap: 10px; }
+.actions { margin-top: 22px; display: flex; gap: 10px; }
 .cta {
     padding: 13px 18px;
     background: var(--vault-gold);

@@ -1,14 +1,16 @@
 .hero {
-    padding: 72px 56px 52px;
+    /* Tightened from 72/52 — the hero was eating disproportionate vertical
+       real estate; same gravitas at smaller scale. */
+    padding: 48px 56px 36px;
     border-bottom: 1px solid var(--vault-rule);
 }
-.label { margin-bottom: 24px; }
+.label { margin-bottom: 18px; }
 .amount {
     font-family: var(--font-display);
     font-weight: 300;
-    /* Reach the mockup's ~128px on wide viewports while still scaling down. */
-    font-size: clamp(80px, 11vw, 132px);
-    line-height: 0.9;
+    /* Cap at 108px so hero doesn't crowd the call panel beside it. */
+    font-size: clamp(72px, 9.5vw, 108px);
+    line-height: 0.92;
     letter-spacing: -0.035em;
 }
 /* Smaller € as a refined unit prefix, baseline-aligned, gold. */
@@ -24,11 +26,11 @@
 .amount .of {
     display: block;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: var(--tracking-xs);
     text-transform: uppercase;
-    color: var(--ink-3);   /* was rgba(.55) — bumped to .65 for legibility */
-    margin-top: 20px;
+    color: var(--ink-3);
+    margin-top: 16px;
 }
 .amount .by {
     display: block;
@@ -39,12 +41,92 @@
     color: var(--vault-gold);
     margin-top: 6px;
 }
-.progress { margin-top: 18px; display: flex; align-items: center; gap: 16px; }
-.bar { flex: 1; height: 2px; background: var(--vault-rule); position: relative; }
-.bar > span {
-    position: absolute; left: 0; top: -2px; height: 6px;
-    background: var(--vault-gold);
-    box-shadow: 0 0 18px rgba(196,154,86,0.55);
-    transition: width 600ms ease-out;
+
+/* ── Segmented progress bar ─────────────────────────────────────
+   Track at 6px tall so segments register without screaming.
+   Segments are absolutely positioned slabs; each carries its own
+   surface treatment so the eye reads "principal vs. paper PnL".  */
+.progress { margin-top: 22px; display: flex; align-items: center; gap: 16px; }
+.bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(236, 230, 214, 0.06);
+    border: 1px solid var(--vault-rule);
+    position: relative;
+    border-radius: 1px;
 }
-.pct { font-size: 13px; letter-spacing: var(--tracking-md); color: var(--vault-gold); }
+.seg {
+    position: absolute; top: 0; bottom: 0;
+    transition: left 600ms ease-out, width 600ms ease-out;
+    pointer-events: none;
+}
+.seg.principal {
+    /* Muted gold — your principal: solid, present, unflashy. */
+    background: linear-gradient(180deg, #C49A56 0%, #A07F44 100%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+}
+.seg.realized {
+    /* Brighter gold accent for realized — booked, locked in. */
+    background: var(--vault-gold);
+    box-shadow: 0 0 10px rgba(196,154,86,0.55);
+}
+.seg.gain {
+    /* Unrealized gain — green, glowing softly above the rail. */
+    background: var(--vault-green);
+    box-shadow: 0 0 10px rgba(122,182,142,0.50);
+}
+.seg.loss {
+    /* Unrealized loss — red diagonal hatch occupying the gap that
+       principal would have filled if mark were par. */
+    background:
+        repeating-linear-gradient(
+            -38deg,
+            rgba(214, 120, 120, 0.85) 0 4px,
+            rgba(214, 120, 120, 0.35) 4px 8px
+        );
+    box-shadow: inset 0 0 0 1px rgba(214,120,120,0.5);
+}
+.tick.now {
+    position: absolute;
+    top: -3px; bottom: -3px;
+    width: 1px;
+    background: var(--vault-ivory);
+    box-shadow: 0 0 6px rgba(236,230,214,0.7);
+    transition: left 600ms ease-out;
+}
+.pct { font-size: 13px; letter-spacing: var(--tracking-md); color: var(--vault-gold); min-width: 4.5ch; text-align: right; }
+
+/* ── Legend ─────────────────────────────────────────────────────
+   Inline definition list; reads as one quiet line of accounting.   */
+.legend {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+}
+.legend > div { display: inline-flex; align-items: center; gap: 8px; }
+.legend dt {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-xs);
+    font-size: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.legend dd { color: var(--ink-1); }
+.legend dd.pos { color: var(--vault-green); }
+.legend dd.neg { color: var(--vault-red); }
+
+.swatch {
+    width: 10px; height: 10px;
+    border: 1px solid rgba(0,0,0,0.4);
+    border-radius: 1px;
+}
+.swatch.principal { background: linear-gradient(180deg, #C49A56 0%, #A07F44 100%); }
+.swatch.realized  { background: var(--vault-gold); }
+.swatch.gain      { background: var(--vault-green); }
+.swatch.loss      { background: repeating-linear-gradient(-38deg,
+                       rgba(214,120,120,0.85) 0 3px,
+                       rgba(214,120,120,0.35) 3px 6px); }

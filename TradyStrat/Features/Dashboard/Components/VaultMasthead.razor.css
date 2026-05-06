@@ -1,5 +1,5 @@
 .masthead {
-    padding: 26px 56px 22px;
+    padding: 22px 56px 18px;
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 32px;
@@ -9,7 +9,7 @@
 .brand {
     justify-self: start;
     font-family: var(--font-display);
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: var(--tracking-xs);
     text-transform: uppercase;
     color: var(--vault-gold);
@@ -17,12 +17,12 @@
 .brand .arc {
     font-family: var(--font-display);
     font-style: italic;
-    color: var(--ink-2);   /* was rgba(.7) — bumped */
-    font-weight: 300;
+    color: var(--ink-2);
+    font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
     margin-left: 14px;
-    font-size: 14px;
+    font-size: 15px;
 }
 .nav {
     justify-self: center;
@@ -32,7 +32,8 @@
 /* NavLink renders its own anchor (child component), so we need ::deep. */
 .nav ::deep .nav-link {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
+    font-weight: 500;
     letter-spacing: var(--tracking-xs);
     text-transform: uppercase;
     color: var(--ink-3);
@@ -63,5 +64,5 @@
     font-size: 11px;
     letter-spacing: var(--tracking-md);
     text-transform: uppercase;
-    color: var(--ink-3);   /* was rgba(.55) — bumped to .65 */
+    color: var(--ink-3);
 }

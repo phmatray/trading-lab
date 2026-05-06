@@ -11,19 +11,22 @@
 
   /* Muted-ivory tones — explicit named tokens replace ad-hoc rgba()
      literals scattered through component styles. Chosen so each tier
-     has a discernible step on dark and clears WCAG AA at 10–13px. */
-  --ink-1:        rgba(236, 230, 214, 0.92);   /* primary body / verb */
-  --ink-2:        rgba(236, 230, 214, 0.78);   /* secondary body / reasoning */
-  --ink-3:        rgba(236, 230, 214, 0.65);   /* tertiary / labels under values */
-  --ink-4:        rgba(236, 230, 214, 0.50);   /* annotations only */
+     has a discernible step on dark and clears WCAG AA at 11–14px. */
+  --ink-1:        rgba(236, 230, 214, 0.96);   /* primary body / verb */
+  --ink-2:        rgba(236, 230, 214, 0.82);   /* secondary body / reasoning */
+  --ink-3:        rgba(236, 230, 214, 0.70);   /* tertiary / labels under values */
+  --ink-4:        rgba(236, 230, 214, 0.55);   /* annotations only */
 
-  --font-display: "Cormorant Garamond", "Newsreader", Georgia, serif;
-  --font-body:    "Cormorant Garamond", "Newsreader", Georgia, serif;
+  /* Display = Cormorant for hero numbers, italic verbs, the "vault" soul.
+     Body  = Newsreader, a sturdier text-grade serif tuned for screen
+              prose at 14–18px (reasoning paragraph, citations). */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body:    "Newsreader", "Cormorant Garamond", Georgia, serif;
   --font-mono:    "JetBrains Mono", ui-monospace, monospace;
 
   --rule-soft:    1px solid var(--vault-rule);
-  --tracking-xs:  0.32em;
-  --tracking-md:  0.22em;
+  --tracking-xs:  0.28em;
+  --tracking-md:  0.20em;
 
   --focus-ring:   0 0 0 1px var(--vault-bg), 0 0 0 3px var(--vault-gold);
 }
@@ -37,7 +40,7 @@ body {
 }
 
 .num   { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.label { font-family: var(--font-mono); font-size: 10px;
+.label { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
          letter-spacing: var(--tracking-xs); text-transform: uppercase;
          color: var(--vault-gold); }
 .rule  { height: 1px; background: var(--vault-rule); }
