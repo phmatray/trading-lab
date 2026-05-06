@@ -1,0 +1,19 @@
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# IDE
+.idea/
+*.swp
+
+# Local data & logs
+*.db
+*.db-shm
+*.db-wal
+logs/
+
+# Brainstorming companion artefacts
+.superpowers/
