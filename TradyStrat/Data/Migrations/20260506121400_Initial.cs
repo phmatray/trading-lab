@@ -8,8 +8,6 @@ namespace TradyStrat.Data.Migrations
     /// <inheritdoc />
     public partial class Initial : Migration
     {
-        private static readonly string[] FxRatesIndexColumns = { "Pair", "Date" };
-        private static readonly string[] PriceBarsIndexColumns = { "Ticker", "Date" };
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,13 +105,13 @@ namespace TradyStrat.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_FxRates_Pair_Date",
                 table: "FxRates",
-                columns: FxRatesIndexColumns,
+                columns: new[] { "Pair", "Date" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PriceBars_Ticker_Date",
                 table: "PriceBars",
-                columns: PriceBarsIndexColumns,
+                columns: new[] { "Ticker", "Date" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

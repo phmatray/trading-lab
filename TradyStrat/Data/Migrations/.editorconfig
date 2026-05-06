@@ -1,0 +1,5 @@
+# EF Core auto-generated migrations follow upstream patterns we don't control.
+# Disable analyzers that would otherwise treat the generated style as errors,
+# so future `dotnet ef migrations add` output compiles without manual touch-up.
+[*.cs]
+dotnet_diagnostic.CA1861.severity = none
