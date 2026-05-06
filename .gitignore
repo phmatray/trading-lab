@@ -22,3 +22,4 @@ logs/
 
 # Debug/inspection artefacts
 .dashboard-*.png
+.audit-*.png
