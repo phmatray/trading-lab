@@ -13,7 +13,11 @@ public class ModuleSmokeTests
             $"tradystrat-smoke-{Guid.NewGuid()}.db");
 
         await using var factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b => b.UseSetting("Database:Path", dbPath));
+            .WithWebHostBuilder(b =>
+            {
+                b.UseSetting("Database:Path", dbPath);
+                b.UseSetting("Anthropic:ApiKey", "sk-ant-test-dummy-key-for-smoke-test");
+            });
 
         using var client = factory.CreateClient();
         var ct = TestContext.Current.CancellationToken;
