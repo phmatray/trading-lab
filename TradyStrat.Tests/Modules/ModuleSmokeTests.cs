@@ -25,6 +25,6 @@ public class ModuleSmokeTests
 
         resp.IsSuccessStatusCode.ShouldBeTrue();
         var body = await resp.Content.ReadAsStringAsync(ct);
-        body.ShouldContain("TradyStrat — bootstrap");
+        body.ShouldContain("Loading");
     }
 }

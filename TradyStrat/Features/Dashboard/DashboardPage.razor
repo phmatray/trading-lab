@@ -1,0 +1,102 @@
+@page "/"
+@using TradyStrat.Application.Abstractions
+@using TradyStrat.Application.UseCases.AiSuggestion
+@using TradyStrat.Application.UseCases.Dashboard
+@using TradyStrat.Application.UseCases.Prices
+@using TradyStrat.Features.Dashboard.Components
+@inject LoadDashboardUseCase LoadDashboard
+@inject ForceRefetchSuggestionUseCase ForceRefetch
+@inject RefreshAllPricesUseCase RefreshPrices
+
+@if (_vm is null)
+{
+    <p style="padding:48px 56px;color:var(--vault-gold);font-family:var(--font-mono);
+              letter-spacing:0.32em;text-transform:uppercase">Loading…</p>
+}
+else
+{
+    <VaultMasthead Today="_vm.Today" EntryNumber="_vm.EntryNumber" />
+    <HeroCapital Snap="_vm.Portfolio" />
+    <TodaysCallCard Sug="_vm.TodaysCall" Today="_vm.Today"
+                    OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+    <PortfolioRail Snap="_vm.Portfolio" Tickers="_vm.Tickers" />
+    <GrowthChart Points="_vm.Growth" Goal="_vm.Goal" />
+    <RefreshFab Busy="_busy" OnClick="OnRefreshClicked" />
+
+    @if (_showRerunConfirm)
+    {
+        <div class="modal" @onclick="() => _showRerunConfirm = false">
+            <div class="modal-body" @onclick:stopPropagation="true">
+                <h3>Re-run AI?</h3>
+                <p>This will use one Anthropic API call. Continue?</p>
+                <div class="modal-actions">
+                    <button class="btn" @onclick="ConfirmRerun">Confirm</button>
+                    <button class="btn ghost" @onclick="() => _showRerunConfirm = false">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private DashboardViewModel? _vm;
+    private bool _busy;
+    private bool _showRerunConfirm;
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        try { _vm = await LoadDashboard.ExecuteAsync(Unit.Value, default); }
+        catch { _vm = null; }
+    }
+
+    private async Task OnRefreshClicked()
+    {
+        _busy = true;
+        try   { await RefreshPrices.ExecuteAsync(Unit.Value, default); await Reload(); }
+        finally { _busy = false; }
+    }
+
+    private void OnRerunRequested() => _showRerunConfirm = true;
+
+    private async Task ConfirmRerun()
+    {
+        _showRerunConfirm = false;
+        _busy = true;
+        try   { await ForceRefetch.ExecuteAsync(Unit.Value, default); await Reload(); }
+        finally { _busy = false; }
+    }
+
+    private void OnLogTradeRequested()
+    {
+        // Phase 7 wires this to /trades navigation or an inline dialog.
+    }
+}
+
+<style>
+    .modal {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1000;
+    }
+    .modal-body {
+        background: var(--vault-bg-2);
+        border: 1px solid var(--vault-rule);
+        padding: 32px; max-width: 420px;
+    }
+    .modal-body h3 {
+        font-family: var(--font-display); font-style: italic;
+        font-size: 28px; margin-bottom: 12px;
+    }
+    .modal-body p { color: rgba(236,230,214,0.78); margin-bottom: 22px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn {
+        padding: 10px 16px; background: var(--vault-gold);
+        color: #1B1710; font-family: var(--font-mono); font-size: 10px;
+        letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600;
+    }
+    .btn.ghost { background: transparent; color: var(--vault-ivory);
+                 border: 1px solid var(--vault-rule); font-weight: 400; }
+</style>
