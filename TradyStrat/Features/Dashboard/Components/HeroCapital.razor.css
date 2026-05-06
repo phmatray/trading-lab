@@ -1,0 +1,31 @@
+.hero {
+    padding: 72px 56px 52px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.label { margin-bottom: 24px; }
+.amount {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(72px, 9vw, 128px);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+}
+.amount .euro { color: var(--vault-gold); margin-right: 2px; }
+.amount .of {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: rgba(236,230,214,0.55);
+    margin-top: 20px;
+}
+.progress { margin-top: 18px; display: flex; align-items: center; gap: 16px; }
+.bar { flex: 1; height: 2px; background: var(--vault-rule); position: relative; }
+.bar > span {
+    position: absolute; left: 0; top: -2px; height: 6px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 18px rgba(196,154,86,0.55);
+    transition: width 600ms ease-out;
+}
+.pct { font-size: 13px; letter-spacing: var(--tracking-md); color: var(--vault-gold); }
