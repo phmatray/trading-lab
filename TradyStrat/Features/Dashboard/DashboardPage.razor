@@ -37,7 +37,7 @@ else
     var vm = _vm!;
     <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber" />
     <div class="hero-row">
-        <HeroCapital Snap="vm.Portfolio" />
+        <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today" />
         <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
                         OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
     </div>

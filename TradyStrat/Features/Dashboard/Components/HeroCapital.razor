@@ -1,9 +1,14 @@
 @using System.Globalization
+@using TradyStrat.Shared.Domain
 <div class="hero">
     <div class="label">Capital under accumulation</div>
     <div class="amount">
         <span class="euro">€</span><span class="num">@Snap.CurrentValueEur.ToString("N0", FrFr)</span>
-        <span class="of">— of one million —</span>
+        <span class="of">— of €@Goal.TargetEur.ToString("N0", FrFr) —</span>
+        @if (Goal.TargetDate is { } target)
+        {
+            <span class="by">by @target.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture)@(DaysLeft(target) is { } d ? $" · {d}" : "")</span>
+        }
     </div>
     <div class="progress">
         <div class="bar">
@@ -14,8 +19,18 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public Shared.Domain.PortfolioSnapshot Snap { get; set; } = null!;
+    [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
+    [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
+    [Parameter, EditorRequired] public DateOnly Today { get; set; }
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
     private decimal Pct => Snap.ProgressPct;
+
+    private string? DaysLeft(DateOnly target)
+    {
+        var days = target.DayNumber - Today.DayNumber;
+        if (days < 0) return "past due";
+        if (days == 0) return "today";
+        return $"{days.ToString("N0", FrFr)} days left";
+    }
 }

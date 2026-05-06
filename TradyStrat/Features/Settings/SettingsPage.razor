@@ -1,9 +1,11 @@
 @page "/settings"
 @rendermode InteractiveServer
+@using System.Globalization
 @using Ardalis.Specification
 @using TradyStrat.Application.UseCases.Settings
 @using TradyStrat.Features.Dashboard.Components
 @using TradyStrat.Shared.Domain
+@using TradyStrat.Shared.Exceptions
 @using TradyStrat.Shared.Time
 @using TradyStrat.Specifications.Trades
 @inject IReadRepositoryBase<GoalConfig> GoalRepo
@@ -17,15 +19,25 @@
     <div class="label">Settings</div>
     <h2>Goal</h2>
     <div class="grid">
-        <label>Target (€)<input type="number" step="1000" @bind="_target" /></label>
-        <label>Target date<input type="date" @bind="_date" /></label>
+        <label>
+            Target (€)
+            <input type="number" step="1000" min="1" @bind="_target" @bind:after="OnInputChanged" />
+        </label>
+        <label>
+            Target date <span class="hint">— optional</span>
+            <input type="date" @bind="_date" @bind:after="OnInputChanged" />
+        </label>
         <label>Focus ticker<input value="CON3.L" disabled /></label>
     </div>
     <div class="actions">
-        <button class="btn" @onclick="SaveAsync">Save</button>
+        <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
         @if (!string.IsNullOrEmpty(_msg))
         {
-            <span class="msg">@_msg</span>
+            <span class="msg @(_isError ? "err" : "ok")">@_msg</span>
+        }
+        @if (_lastUpdated is { } t)
+        {
+            <span class="meta">last updated @t.ToLocalTime().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)</span>
         }
     </div>
 </div>
@@ -34,7 +46,10 @@
     private decimal _target = 1_000_000m;
     private DateTime? _date;
     private string? _msg;
+    private bool _isError;
+    private bool _busy;
     private int _count;
+    private DateTime? _lastUpdated;
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,14 +58,42 @@
         {
             _target = existing.TargetEur;
             _date   = existing.TargetDate?.ToDateTime(TimeOnly.MinValue);
+            _lastUpdated = existing.UpdatedAt;
         }
         _count = await TradeRepo.CountAsync(new AllTradesSpec(), CancellationToken.None);
     }
 
+    private void OnInputChanged()
+    {
+        if (_msg is not null) { _msg = null; _isError = false; }
+    }
+
     private async Task SaveAsync()
     {
-        var date = _date is { } d ? DateOnly.FromDateTime(d) : (DateOnly?)null;
-        await UpdateGoal.ExecuteAsync(new UpdateGoalInput(_target, date), CancellationToken.None);
-        _msg = "Saved.";
+        if (_busy) return;
+        _busy = true;
+        _msg = null;
+        _isError = false;
+        try
+        {
+            var date = _date is { } d ? DateOnly.FromDateTime(d) : (DateOnly?)null;
+            var saved = await UpdateGoal.ExecuteAsync(new UpdateGoalInput(_target, date), CancellationToken.None);
+            _lastUpdated = saved.UpdatedAt;
+            _msg = "Saved.";
+        }
+        catch (TradyStratException ex)
+        {
+            _msg = ex.Message;
+            _isError = true;
+        }
+        catch (Exception)
+        {
+            _msg = "Save failed — see logs.";
+            _isError = true;
+        }
+        finally
+        {
+            _busy = false;
+        }
     }
 }

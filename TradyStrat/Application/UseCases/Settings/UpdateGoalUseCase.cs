@@ -1,5 +1,7 @@
 using Ardalis.Specification;
+using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Abstractions;
+using TradyStrat.Data;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;
@@ -9,7 +11,7 @@ namespace TradyStrat.Application.UseCases.Settings;
 public sealed record UpdateGoalInput(decimal TargetEur, DateOnly? TargetDate);
 
 public sealed class UpdateGoalUseCase(
-    IRepositoryBase<GoalConfig> repo, IClock clock,
+    IRepositoryBase<GoalConfig> repo, AppDbContext db, IClock clock,
     ILogger<UpdateGoalUseCase> log)
     : UseCaseBase<UpdateGoalInput, GoalConfig>(log)
 {
@@ -41,6 +43,9 @@ public sealed class UpdateGoalUseCase(
             TargetDate = input.TargetDate,
             UpdatedAt = now,
         };
+
+        // Detach the tracked instance so UpdateAsync can attach the updated copy without conflict.
+        db.Entry(existing).State = EntityState.Detached;
         await repo.UpdateAsync(updated, ct);
         return updated;
     }

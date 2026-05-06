@@ -17,19 +17,27 @@
             <line x1="0" y1="220" x2="1200" y2="220"/>
         </g>
         <path class="goal" d="M0,225 L1200,8" />
-        <text class="axis-label" x="1186" y="20" text-anchor="end">€@Goal.TargetEur.ToString("N0", FrFr) — goal</text>
+        <text class="axis-label" x="1186" y="20" text-anchor="end">@GoalLabel</text>
         <path style="fill:url(#vault-grad)" d="@AreaPath" />
         <path class="line" d="@LinePath" />
         @if (Points.Count > 0)
         {
             var last = Points[^1];
-            const int lastX = 1200;
+            var lastX = (double)PathBuilder.XForIndex(Points, Points.Count - 1, 1200, EndDate);
             var lastY = (double)(220m - last.ValueEur / Math.Max(1m, Goal.TargetEur) * 220m);
+            var lastXStr = lastX.ToString("F1", CultureInfo.InvariantCulture);
             var lastYStr = lastY.ToString("F1", CultureInfo.InvariantCulture);
             var lastYLblStr = (lastY - 8).ToString("F1", CultureInfo.InvariantCulture);
+            var labelAnchor = lastX < 200 ? "start" : "end";
+            var labelX = (lastX < 200 ? lastX + 8 : lastX - 14).ToString("F1", CultureInfo.InvariantCulture);
             var lastValueStr = last.ValueEur.ToString("N0", FrFr);
-            <circle r="3.5" cx="@lastX" cy="@lastYStr" fill="#C49A56" />
-            <svg:text class="axis-label" x="@(lastX-14)" y="@lastYLblStr" text-anchor="end">
+            // Vertical "now" marker — only render when there's empty future runway to the right.
+            if (lastX < 1192)
+            {
+                <line class="now" x1="@lastXStr" y1="0" x2="@lastXStr" y2="220" />
+            }
+            <circle r="3.5" cx="@lastXStr" cy="@lastYStr" fill="#C49A56" />
+            <svg:text class="axis-label" x="@labelX" y="@lastYLblStr" text-anchor="@labelAnchor">
                 €@lastValueStr — today
             </svg:text>
         }
@@ -37,11 +45,12 @@
             @if (Points.Count > 0)
             {
                 var firstDate = Points[0].Date.ToString("MMM yyyy", CultureInfo.InvariantCulture);
-                var midDate   = Points[Points.Count/2].Date.ToString("MMM yyyy", CultureInfo.InvariantCulture);
-                var lastDate  = Points[^1].Date.ToString("MMM yyyy", CultureInfo.InvariantCulture);
+                var endDate   = (EndDate ?? Points[^1].Date).ToString("MMM yyyy", CultureInfo.InvariantCulture);
+                var midOffset = ((Points[0].Date.DayNumber + (EndDate ?? Points[^1].Date).DayNumber) / 2);
+                var midDate   = DateOnly.FromDayNumber(midOffset).ToString("MMM yyyy", CultureInfo.InvariantCulture);
                 <svg:text x="0" y="236">@firstDate</svg:text>
                 <svg:text x="600" y="236" text-anchor="middle">@midDate</svg:text>
-                <svg:text x="1200" y="236" text-anchor="end">@lastDate</svg:text>
+                <svg:text x="1200" y="236" text-anchor="end">@endDate</svg:text>
             }
         </g>
     </svg>
@@ -52,6 +61,14 @@
     [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
-    private string LinePath => PathBuilder.Line(Points, 1200, 220, Goal.TargetEur);
-    private string AreaPath => PathBuilder.Area(Points, 1200, 220, Goal.TargetEur);
+
+    private DateOnly? EndDate =>
+        Goal.TargetDate is { } d && Points.Count > 0 && d > Points[0].Date ? d : null;
+
+    private string LinePath => PathBuilder.Line(Points, 1200, 220, Goal.TargetEur, EndDate);
+    private string AreaPath => PathBuilder.Area(Points, 1200, 220, Goal.TargetEur, EndDate);
+
+    private string GoalLabel => Goal.TargetDate is { } td
+        ? $"€{Goal.TargetEur.ToString("N0", FrFr)} by {td.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
+        : $"€{Goal.TargetEur.ToString("N0", FrFr)} — goal";
 }

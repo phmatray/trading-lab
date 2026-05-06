@@ -30,6 +30,15 @@
     color: var(--ink-3);   /* was rgba(.55) — bumped to .65 for legibility */
     margin-top: 20px;
 }
+.amount .by {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin-top: 6px;
+}
 .progress { margin-top: 18px; display: flex; align-items: center; gap: 16px; }
 .bar { flex: 1; height: 2px; background: var(--vault-rule); position: relative; }
 .bar > span {
