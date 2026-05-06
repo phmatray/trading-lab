@@ -1,0 +1,21 @@
+@using System.Globalization
+<div class="masthead">
+    <div class="brand">
+        <a href="/">Tradystrat</a>
+        <span class="arc">— a private chronicle of accumulation</span>
+    </div>
+    <nav class="nav">
+        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+        <NavLink class="nav-link" href="/trades">Trades</NavLink>
+        <NavLink class="nav-link" href="/settings">Settings</NavLink>
+    </nav>
+    <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)</div>
+</div>
+
+@code {
+    [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public int EntryNumber { get; set; }
+
+    private static string FormatDate(DateOnly d)
+        => d.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture);
+}

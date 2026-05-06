@@ -1,0 +1,42 @@
+.rail {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.cell {
+    padding: 24px 28px;
+    border-right: 1px solid var(--vault-rule);
+    position: relative;
+    transition: background 200ms ease;
+}
+.cell:last-child { border-right: none; }
+.cell:hover { background: rgba(236,230,214,0.02); }
+.cell::after {
+    /* Hidden gold underline, revealed on hover for a quiet "you can read this closer" cue. */
+    content: "";
+    position: absolute;
+    left: 28px; right: 28px; bottom: 0;
+    height: 1px;
+    background: var(--vault-gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 220ms ease;
+}
+.cell:hover::after { transform: scaleX(1); }
+
+.lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-xs);
+       text-transform: uppercase; color: var(--ink-3); /* was rgba(.5) — bumped */ }
+.tk  { font-family: var(--font-display); font-style: italic; font-size: 14px;
+       letter-spacing: 0.04em; color: var(--vault-gold); margin-bottom: 4px; }
+.val {
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 30px;
+    letter-spacing: -0.012em;
+}
+.sub { margin-top: 6px; font-family: var(--font-mono); font-size: 10px;
+       letter-spacing: var(--tracking-md); color: var(--ink-3); /* was rgba(.55) */ }
+.delta { font-family: var(--font-mono); font-size: 11px; margin-left: 6px;
+         color: var(--vault-green); font-weight: 500; }
+.delta.dn { color: var(--vault-red); }

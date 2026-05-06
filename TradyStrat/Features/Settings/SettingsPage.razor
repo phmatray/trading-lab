@@ -1,0 +1,57 @@
+@page "/settings"
+@rendermode InteractiveServer
+@using Ardalis.Specification
+@using System.Globalization
+@using TradyStrat.Application.UseCases.Settings
+@using TradyStrat.Features.Dashboard.Components
+@using TradyStrat.Shared.Domain
+@using TradyStrat.Shared.Time
+@using TradyStrat.Specifications.Trades
+@inject IReadRepositoryBase<GoalConfig> GoalRepo
+@inject IReadRepositoryBase<Trade> TradeRepo
+@inject IClock Clock
+@inject UpdateGoalUseCase UpdateGoal
+
+<VaultMasthead Today="@(Clock.TodayInExchangeTzFor("CON3.L"))" EntryNumber="@_count" />
+
+<div class="settings">
+    <div class="label">Settings</div>
+    <h2>Goal</h2>
+    <div class="grid">
+        <label>Target (€)<input type="number" step="1000" @bind="_target" /></label>
+        <label>Target date<input type="date" @bind="_date" /></label>
+        <label>Focus ticker<input value="CON3.L" disabled /></label>
+    </div>
+    <div class="actions">
+        <button class="btn" @onclick="SaveAsync">Save</button>
+        @if (!string.IsNullOrEmpty(_msg))
+        {
+            <span class="msg">@_msg</span>
+        }
+    </div>
+</div>
+
+@code {
+    private decimal _target = 1_000_000m;
+    private DateTime? _date;
+    private string? _msg;
+    private int _count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existing = await GoalRepo.GetByIdAsync(1, default);
+        if (existing is not null)
+        {
+            _target = existing.TargetEur;
+            _date   = existing.TargetDate?.ToDateTime(TimeOnly.MinValue);
+        }
+        _count = await TradeRepo.CountAsync(new AllTradesSpec(), default);
+    }
+
+    private async Task SaveAsync()
+    {
+        var date = _date is { } d ? DateOnly.FromDateTime(d) : (DateOnly?)null;
+        await UpdateGoal.ExecuteAsync(new UpdateGoalInput(_target, date), default);
+        _msg = "Saved.";
+    }
+}

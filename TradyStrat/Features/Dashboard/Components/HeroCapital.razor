@@ -1,0 +1,21 @@
+@using System.Globalization
+<div class="hero">
+    <div class="label">Capital under accumulation</div>
+    <div class="amount">
+        <span class="euro">€</span><span class="num">@Snap.CurrentValueEur.ToString("N0", FrFr)</span>
+        <span class="of">— of one million —</span>
+    </div>
+    <div class="progress">
+        <div class="bar">
+            <span style="width:@Pct.ToString("F2", CultureInfo.InvariantCulture)%"></span>
+        </div>
+        <div class="pct num">@Pct.ToString("F1", FrFr) %</div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TradyStrat.Shared.Domain.PortfolioSnapshot Snap { get; set; } = default!;
+
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+    private decimal Pct => Snap.ProgressPct;
+}

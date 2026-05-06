@@ -1,0 +1,159 @@
+@page "/trades"
+@rendermode InteractiveServer
+@using Ardalis.Specification
+@using System.Globalization
+@using TradyStrat.Application.Abstractions
+@using TradyStrat.Application.UseCases.Trades
+@using TradyStrat.Features.Dashboard.Components
+@using TradyStrat.Features.Trades.Components
+@using TradyStrat.Shared.Domain
+@using TradyStrat.Shared.Time
+@using TradyStrat.Specifications.Trades
+@inject IReadRepositoryBase<Trade> Repo
+@inject IClock Clock
+@inject LogTradeUseCase LogTrade
+@inject EditTradeUseCase EditTrade
+@inject DeleteTradeUseCase DeleteTrade
+@inject ImportTradesCsvUseCase ImportCsv
+
+<VaultMasthead Today="@Clock.TodayInExchangeTzFor("CON3.L")" EntryNumber="@_count" />
+
+<div class="trades">
+    <div class="hdr">
+        <div class="label">Trade ledger</div>
+        <div>
+            <button class="btn" @onclick="OnAddClicked">+ Add trade</button>
+            <button class="btn ghost" @onclick="OnImportClicked">Import CSV</button>
+        </div>
+    </div>
+
+    <table class="t">
+        <thead><tr><th>Date</th><th>Side</th><th>Qty</th><th>Price</th><th>Fees</th><th>Note</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var t in _trades)
+        {
+            <tr>
+                <td class="num">@t.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</td>
+                <td>@t.Side</td>
+                <td class="num">@t.Quantity.ToString("N4", FrFr)</td>
+                <td class="num">€@t.PricePerShare.ToString("F2", FrFr)</td>
+                <td class="num">€@t.FeesEur.ToString("F2", FrFr)</td>
+                <td>@t.Note</td>
+                <td>
+                    <button class="link" @onclick="() => StartEdit(t)">edit</button>
+                    <button class="link danger" @onclick="() => DeleteAsync(t)">×</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@if (_showAdd)
+{
+    <AddTradeDialog Initial="_editing"
+                    OnCancel="CloseDialogs"
+                    OnSubmit="HandleSubmit" />
+}
+
+@if (_showImport)
+{
+    <div class="modal" @onclick="CloseDialogs">
+        <div class="modal-body" @onclick:stopPropagation="true">
+            <h3>Import CSV</h3>
+            <p>Paste a CSV with columns <code>date,side,qty,price,fees</code>.</p>
+            <textarea @bind="_csvText" rows="10"></textarea>
+            <div class="modal-actions">
+                <button class="btn" @onclick="DoImport">Import</button>
+                <button class="btn ghost" @onclick="CloseDialogs">Cancel</button>
+            </div>
+            @if (!string.IsNullOrEmpty(_importError))
+            {
+                <p class="err">@_importError</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+    private List<Trade> _trades = new();
+    private int _count;
+    private bool _showAdd;
+    private bool _showImport;
+    private Trade? _editing;
+    private string _csvText = "";
+    private string? _importError;
+
+    protected override async Task OnInitializedAsync() => await Reload();
+
+    private async Task Reload()
+    {
+        var list = await Repo.ListAsync(new AllTradesSpec(), default);
+        _trades = list.ToList();
+        _count = _trades.Count;
+    }
+
+    private void OnAddClicked()
+    {
+        _editing = null;
+        _showAdd = true;
+    }
+
+    private void OnImportClicked()
+    {
+        _csvText = "";
+        _importError = null;
+        _showImport = true;
+    }
+
+    private void StartEdit(Trade t)
+    {
+        _editing = t;
+        _showAdd = true;
+    }
+
+    private async Task HandleSubmit(LogTradeInput input)
+    {
+        if (_editing is null)
+        {
+            await LogTrade.ExecuteAsync(input, default);
+        }
+        else
+        {
+            await EditTrade.ExecuteAsync(new EditTradeInput(
+                _editing.Id, input.ExecutedOn, input.Side,
+                input.Quantity, input.PricePerShare, input.FeesEur, input.Note), default);
+        }
+        CloseDialogs();
+        await Reload();
+    }
+
+    private async Task DeleteAsync(Trade t)
+    {
+        await DeleteTrade.ExecuteAsync(new DeleteTradeInput(t.Id), default);
+        await Reload();
+    }
+
+    private async Task DoImport()
+    {
+        try
+        {
+            await ImportCsv.ExecuteAsync(new ImportTradesCsvInput(_csvText), default);
+            CloseDialogs();
+            await Reload();
+        }
+        catch (TradyStrat.Shared.Exceptions.CsvImportException ex)
+        {
+            _importError = ex.Message;
+        }
+    }
+
+    private void CloseDialogs()
+    {
+        _showAdd = false;
+        _showImport = false;
+        _editing = null;
+        _importError = null;
+    }
+}

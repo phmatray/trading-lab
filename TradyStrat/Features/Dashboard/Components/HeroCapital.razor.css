@@ -1,0 +1,41 @@
+.hero {
+    padding: 72px 56px 52px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.label { margin-bottom: 24px; }
+.amount {
+    font-family: var(--font-display);
+    font-weight: 300;
+    /* Reach the mockup's ~128px on wide viewports while still scaling down. */
+    font-size: clamp(80px, 11vw, 132px);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+}
+/* Smaller € as a refined unit prefix, baseline-aligned, gold. */
+.amount .euro {
+    color: var(--vault-gold);
+    font-size: 0.62em;
+    margin-right: 6px;
+    vertical-align: baseline;
+    position: relative;
+    top: -0.18em;
+    font-weight: 400;
+}
+.amount .of {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--ink-3);   /* was rgba(.55) — bumped to .65 for legibility */
+    margin-top: 20px;
+}
+.progress { margin-top: 18px; display: flex; align-items: center; gap: 16px; }
+.bar { flex: 1; height: 2px; background: var(--vault-rule); position: relative; }
+.bar > span {
+    position: absolute; left: 0; top: -2px; height: 6px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 18px rgba(196,154,86,0.55);
+    transition: width 600ms ease-out;
+}
+.pct { font-size: 13px; letter-spacing: var(--tracking-md); color: var(--vault-gold); }

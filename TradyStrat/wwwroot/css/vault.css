@@ -1,0 +1,74 @@
+:root {
+  --vault-bg:     #0E0D0A;
+  --vault-bg-2:   #15140F;
+  --vault-ivory:  #ECE6D6;
+  --vault-gold:   #C49A56;
+  /* Slightly warmer + brighter so column dividers register without screaming. */
+  --vault-rule:   #3A3327;
+  --vault-green:  #7AB68E;
+  /* Slightly more saturated red for ↓ deltas (ratio ~5.8 vs prior 5.17). */
+  --vault-red:    #D67878;
+
+  /* Muted-ivory tones — explicit named tokens replace ad-hoc rgba()
+     literals scattered through component styles. Chosen so each tier
+     has a discernible step on dark and clears WCAG AA at 10–13px. */
+  --ink-1:        rgba(236, 230, 214, 0.92);   /* primary body / verb */
+  --ink-2:        rgba(236, 230, 214, 0.78);   /* secondary body / reasoning */
+  --ink-3:        rgba(236, 230, 214, 0.65);   /* tertiary / labels under values */
+  --ink-4:        rgba(236, 230, 214, 0.50);   /* annotations only */
+
+  --font-display: "Cormorant Garamond", "Newsreader", Georgia, serif;
+  --font-body:    "Cormorant Garamond", "Newsreader", Georgia, serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  --rule-soft:    1px solid var(--vault-rule);
+  --tracking-xs:  0.32em;
+  --tracking-md:  0.22em;
+
+  --focus-ring:   0 0 0 1px var(--vault-bg), 0 0 0 3px var(--vault-gold);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--vault-bg); color: var(--vault-ivory); min-height: 100vh; }
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "liga", "onum";
+}
+
+.num   { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.label { font-family: var(--font-mono); font-size: 10px;
+         letter-spacing: var(--tracking-xs); text-transform: uppercase;
+         color: var(--vault-gold); }
+.rule  { height: 1px; background: var(--vault-rule); }
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* Keyboard focus — gold ring with a 1px dark inset so it reads on any bg. */
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 1px;
+}
+
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  border: 1px solid var(--vault-rule);
+  background: var(--vault-bg);
+  position: relative;
+  overflow: hidden;
+}
+main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 88% -8%, rgba(196,154,86,0.10), transparent 48%),
+    radial-gradient(circle at -5% 105%, rgba(196,154,86,0.06), transparent 42%);
+}
+main > * { position: relative; z-index: 1; }

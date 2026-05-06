@@ -1,0 +1,52 @@
+@using System.Globalization
+@using TradyStrat.Features.Dashboard
+@using TradyStrat.Shared.Domain
+<div class="rail">
+    <div class="cell">
+        <div class="lbl">Position</div>
+        <div class="val"><span class="num">@Snap.Shares.ToString("N0", FrFr)</span> sh</div>
+        <div class="sub">avg €@Snap.AvgCostEur.ToString("F2", FrFr)
+                         · P&amp;L @PnL(Snap.UnrealizedPnLEur, Snap.CurrentValueEur)</div>
+    </div>
+    @foreach (var t in Tickers)
+    {
+        <div class="cell">
+            <div class="tk">@t.Ticker</div>
+            <div class="val">
+                <span class="num">@FormatPrimary(t)</span>
+                @if (t.DeltaPct is decimal dp)
+                {
+                    <span class="delta @(dp >= 0 ? "" : "dn") num">@FormatDelta(dp)</span>
+                }
+            </div>
+            @if (t.PriceEur is decimal eur && t.Currency != "EUR")
+            {
+                <div class="sub">≈ €@eur.ToString("N2", FrFr)</div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<TickerView> Tickers { get; set; } = default!;
+
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private static string PnL(decimal pnl, decimal value)
+    {
+        if (value == 0m) return "—";
+        var pct = pnl / (value - pnl) * 100m;
+        return $"{(pct >= 0 ? "+" : "")}{pct.ToString("F1", FrFr)} %";
+    }
+
+    private static string FormatPrimary(TickerView t) => t.Currency switch
+    {
+        "EUR" => $"€{t.Price.ToString("N2", FrFr)}",
+        "USD" => $"${t.Price.ToString("N2", FrFr)}",
+        _     => t.Price.ToString("N2", FrFr)
+    };
+
+    private static string FormatDelta(decimal pct)
+        => $"{(pct >= 0 ? "+" : "")}{pct.ToString("F1", FrFr)}%";
+}

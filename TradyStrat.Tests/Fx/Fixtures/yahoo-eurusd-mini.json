@@ -1,0 +1,18 @@
+{
+  "chart": {
+    "result": [{
+      "meta": { "symbol": "EURUSD=X" },
+      "timestamp": [1714435200, 1714521600],
+      "indicators": {
+        "quote": [{
+          "open":   [1.0810, 1.0815],
+          "high":   [1.0830, 1.0840],
+          "low":    [1.0790, 1.0800],
+          "close":  [1.0820, 1.0835],
+          "volume": [0, 0]
+        }]
+      }
+    }],
+    "error": null
+  }
+}

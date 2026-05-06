@@ -8,6 +8,8 @@ obj/
 # IDE
 .idea/
 *.swp
+*.DotSettings
+*.DotSettings.user
 
 # Local data & logs
 *.db
@@ -17,3 +19,7 @@ logs/
 
 # Brainstorming companion artefacts
 .superpowers/
+
+# Debug/inspection artefacts
+.dashboard-*.png
+.audit-*.png

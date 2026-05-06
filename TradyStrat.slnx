@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TradyStrat.Tests/TradyStrat.Tests.csproj" />
+  <Project Path="TradyStrat/TradyStrat.csproj" />
+</Solution>

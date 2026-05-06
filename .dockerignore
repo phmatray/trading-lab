@@ -1,0 +1,14 @@
+bin/
+obj/
+.git/
+.superpowers/
+*.db*
+logs/
+docs/
+.idea/
+.vs/
+.vscode/
+*.user
+.run/
+*.DotSettings*
+.dashboard-*.png

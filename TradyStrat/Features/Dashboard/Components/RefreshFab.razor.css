@@ -1,0 +1,14 @@
+.fab {
+    position: fixed; right: 24px; bottom: 24px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--vault-gold);
+    color: #1B1710;
+    font-size: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    transition: background 150ms;
+}
+.fab:hover:not(:disabled) { background: var(--vault-ivory); }
+.fab:disabled { opacity: 0.6; cursor: wait; }
+.spin { display: inline-block; animation: spin 800ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
