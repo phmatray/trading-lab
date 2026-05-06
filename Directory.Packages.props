@@ -1,0 +1,31 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Web / DI -->
+    <PackageVersion Include="TheAppManager" Version="2.0.0" />
+    <!-- Data -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
+    <PackageVersion Include="Ardalis.Specification" Version="9.3.1" />
+    <PackageVersion Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
+    <!-- Indicators -->
+    <PackageVersion Include="Atypical.TechnicalAnalysis.Common" Version="3.0.0" />
+    <PackageVersion Include="Atypical.TechnicalAnalysis.Functions" Version="3.0.0" />
+    <!-- AI -->
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.5.2" />
+    <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
+    <!-- Resilience -->
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
+    <!-- Logging -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <!-- Tests -->
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
+  </ItemGroup>
+</Project>
