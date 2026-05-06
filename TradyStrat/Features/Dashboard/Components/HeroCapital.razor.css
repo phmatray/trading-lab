@@ -11,14 +11,23 @@
     line-height: 0.9;
     letter-spacing: -0.035em;
 }
-.amount .euro { color: var(--vault-gold); margin-right: 2px; }
+/* Smaller € as a refined unit prefix, baseline-aligned, gold. */
+.amount .euro {
+    color: var(--vault-gold);
+    font-size: 0.62em;
+    margin-right: 6px;
+    vertical-align: baseline;
+    position: relative;
+    top: -0.18em;
+    font-weight: 400;
+}
 .amount .of {
     display: block;
     font-family: var(--font-mono);
     font-size: 13px;
     letter-spacing: var(--tracking-xs);
     text-transform: uppercase;
-    color: rgba(236,230,214,0.55);
+    color: var(--ink-3);   /* was rgba(.55) — bumped to .65 for legibility */
     margin-top: 20px;
 }
 .progress { margin-top: 18px; display: flex; align-items: center; gap: 16px; }

@@ -16,19 +16,21 @@
     font-family: var(--font-mono);
     font-size: 13px;
     letter-spacing: 0.16em;
-    color: rgba(236,230,214,0.78);
+    color: var(--ink-2);
     margin-bottom: 22px;
 }
+/* Rationale is the lede — slightly larger and brighter than citations
+   so the eye reads it FIRST. */
 .reasons {
     font-family: var(--font-display);
-    font-size: 17px;
-    line-height: 1.6;
-    color: rgba(236,230,214,0.8);
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-1);   /* was rgba(.8) — bumped to .92 */
     max-width: 50ch;
 }
 .citations {
-    margin-top: 16px;
-    padding-top: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
     border-top: 1px dashed var(--vault-rule);
     counter-reset: c;
     list-style: none;
@@ -38,7 +40,7 @@
     position: relative;
     margin-bottom: 6px;
     font-size: 13px;
-    color: rgba(236,230,214,0.7);
+    color: var(--ink-3);   /* secondary tier — clearly subordinate to .reasons */
 }
 .citations li::before {
     counter-increment: c;
@@ -56,9 +58,16 @@
     letter-spacing: 0.26em;
     text-transform: uppercase;
     font-weight: 600;
-    transition: background 150ms;
+    transition: background 150ms, border-color 150ms, color 150ms;
 }
 .cta:hover:not(:disabled) { background: var(--vault-ivory); }
-.cta:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Disabled = "deliberately quiet", not broken. Same shape as ghost button. */
+.cta:disabled {
+    background: transparent;
+    color: var(--ink-4);
+    border: 1px solid var(--vault-rule);
+    cursor: not-allowed;
+    font-weight: 400;
+}
 .cta.ghost { background: transparent; color: var(--vault-ivory); border: 1px solid var(--vault-rule); font-weight: 400; }
 .cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }

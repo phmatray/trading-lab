@@ -5,9 +5,9 @@
         <span class="arc">— a private chronicle of accumulation</span>
     </div>
     <nav class="nav">
-        <a href="/">Dashboard</a>
-        <a href="/trades">Trades</a>
-        <a href="/settings">Settings</a>
+        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+        <NavLink class="nav-link" href="/trades">Trades</NavLink>
+        <NavLink class="nav-link" href="/settings">Settings</NavLink>
     </nav>
     <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)</div>
 </div>

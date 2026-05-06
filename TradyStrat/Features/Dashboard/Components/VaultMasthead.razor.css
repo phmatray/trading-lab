@@ -17,7 +17,7 @@
 .brand .arc {
     font-family: var(--font-display);
     font-style: italic;
-    color: rgba(236,230,214,0.7);
+    color: var(--ink-2);   /* was rgba(.7) — bumped */
     font-weight: 300;
     letter-spacing: 0;
     text-transform: none;
@@ -27,22 +27,41 @@
 .nav {
     justify-self: center;
     display: flex;
-    gap: 22px;
+    gap: 28px;
 }
-.nav a {
+/* NavLink renders its own anchor (child component), so we need ::deep. */
+.nav ::deep .nav-link {
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: var(--tracking-xs);
     text-transform: uppercase;
-    color: rgba(236,230,214,0.6);
-    transition: color 150ms;
+    color: var(--ink-3);
+    padding: 6px 0;
+    position: relative;
+    transition: color 180ms ease;
 }
-.nav a:hover { color: var(--vault-gold); }
+.nav ::deep .nav-link:hover { color: var(--vault-ivory); }
+
+/* Active route — gold underline. NavLink applies the `active` class
+   automatically based on the route match. */
+.nav ::deep .nav-link.active {
+    color: var(--vault-ivory);
+}
+.nav ::deep .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 8px rgba(196,154,86,0.45);
+}
+
 .meta {
     justify-self: end;
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: var(--tracking-md);
     text-transform: uppercase;
-    color: rgba(236,230,214,0.55);
+    color: var(--ink-3);   /* was rgba(.55) — bumped to .65 */
 }
