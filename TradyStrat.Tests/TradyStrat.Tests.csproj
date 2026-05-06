@@ -15,4 +15,9 @@
   <ItemGroup>
     <ProjectReference Include="..\TradyStrat\TradyStrat.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="PriceFeed/Fixtures/*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
