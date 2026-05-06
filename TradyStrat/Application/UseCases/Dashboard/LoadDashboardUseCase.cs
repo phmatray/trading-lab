@@ -1,5 +1,4 @@
 using Ardalis.Specification;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Application.Abstractions;
 using TradyStrat.Application.UseCases.AiSuggestion;
 using TradyStrat.Features.Dashboard;

@@ -4,9 +4,7 @@
     <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)</div>
     <div class="verb">@Verb</div>
 
-    @if (Sug.Action == SuggestionAction.Acquire
-         && Sug.QuantityHint is decimal q && q > 0m
-         && Sug.MaxPriceHint is decimal mp && mp > 0m)
+    @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
     {
         <div class="order num">
             @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
@@ -34,7 +32,7 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public Suggestion Sug { get; set; } = default!;
+    [Parameter, EditorRequired] public Suggestion Sug { get; set; } = null!;
     [Parameter] public DateOnly Today { get; set; }
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }

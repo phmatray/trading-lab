@@ -1,18 +1,11 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Shared.Exceptions;
 
 namespace TradyStrat.Application.Abstractions;
 
-public abstract class UseCaseBase<TInput, TOutput> : IUseCase<TInput, TOutput>
+public abstract class UseCaseBase<TInput, TOutput>(ILogger logger)
+    : IUseCase<TInput, TOutput>
 {
-    private readonly ILogger _logger;
-
-    protected UseCaseBase(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<TOutput> ExecuteAsync(TInput input, CancellationToken ct)
     {
         var name = GetType().Name;
@@ -20,7 +13,7 @@ public abstract class UseCaseBase<TInput, TOutput> : IUseCase<TInput, TOutput>
         try
         {
             var result = await ExecuteCore(input, ct);
-            UseCaseLog.Ok(_logger, name, sw.ElapsedMilliseconds);
+            UseCaseLog.Ok(logger, name, sw.ElapsedMilliseconds);
             return result;
         }
         catch (TradyStratException)
@@ -29,7 +22,7 @@ public abstract class UseCaseBase<TInput, TOutput> : IUseCase<TInput, TOutput>
         }
         catch (Exception ex)
         {
-            UseCaseLog.Failed(_logger, ex, name);
+            UseCaseLog.Failed(logger, ex, name);
             throw;
         }
     }

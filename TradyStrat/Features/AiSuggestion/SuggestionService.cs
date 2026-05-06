@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;

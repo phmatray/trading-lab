@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Shared.Domain;

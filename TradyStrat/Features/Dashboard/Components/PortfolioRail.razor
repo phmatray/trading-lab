@@ -14,12 +14,12 @@
             <div class="tk">@t.Ticker</div>
             <div class="val">
                 <span class="num">@FormatPrimary(t)</span>
-                @if (t.DeltaPct is decimal dp)
+                @if (t.DeltaPct is { } dp)
                 {
                     <span class="delta @(dp >= 0 ? "" : "dn") num">@FormatDelta(dp)</span>
                 }
             </div>
-            @if (t.PriceEur is decimal eur && t.Currency != "EUR")
+            @if (t.PriceEur is { } eur && t.Currency != "EUR")
             {
                 <div class="sub">≈ €@eur.ToString("N2", FrFr)</div>
             }
@@ -28,8 +28,8 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = default!;
-    [Parameter, EditorRequired] public IReadOnlyList<TickerView> Tickers { get; set; } = default!;
+    [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
+    [Parameter, EditorRequired] public IReadOnlyList<TickerView> Tickers { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 

@@ -1,6 +1,5 @@
 using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Application.Abstractions;
 using TradyStrat.Data;
 using TradyStrat.Shared.Domain;

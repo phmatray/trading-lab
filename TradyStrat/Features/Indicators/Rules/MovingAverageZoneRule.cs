@@ -8,7 +8,7 @@ public sealed class MovingAverageZoneRule : IZoneRule
 
     public ZoneVote? Apply(decimal price, IndicatorBundle r)
     {
-        if (r.Sma50 is not decimal s50 || r.Sma200 is not decimal s200) return null;
+        if (r.Sma50 is not { } s50 || r.Sma200 is not { } s200) return null;
 
         if (price < s200) return new(Zone.Accumulate, $"Below 200-SMA ({s200:F2})");
         if (price > s50)  return new(Zone.Distribute, $"Above 50-SMA ({s50:F2})");

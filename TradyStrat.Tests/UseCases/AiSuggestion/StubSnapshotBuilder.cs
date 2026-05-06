@@ -1,5 +1,4 @@
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Domain;
 
 namespace TradyStrat.Tests.UseCases.AiSuggestion;
 

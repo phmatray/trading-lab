@@ -23,7 +23,7 @@
         @if (Points.Count > 0)
         {
             var last = Points[^1];
-            var lastX = 1200;
+            const int lastX = 1200;
             var lastY = (double)(220m - last.ValueEur / Math.Max(1m, Goal.TargetEur) * 220m);
             var lastYStr = lastY.ToString("F1", CultureInfo.InvariantCulture);
             var lastYLblStr = (lastY - 8).ToString("F1", CultureInfo.InvariantCulture);
@@ -48,8 +48,8 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public IReadOnlyList<GrowthPoint> Points { get; set; } = default!;
-    [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<GrowthPoint> Points { get; set; } = null!;
+    [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
     private string LinePath => PathBuilder.Line(Points, 1200, 220, Goal.TargetEur);

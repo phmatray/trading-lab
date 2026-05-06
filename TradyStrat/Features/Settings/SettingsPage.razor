@@ -1,7 +1,6 @@
 @page "/settings"
 @rendermode InteractiveServer
 @using Ardalis.Specification
-@using System.Globalization
 @using TradyStrat.Application.UseCases.Settings
 @using TradyStrat.Features.Dashboard.Components
 @using TradyStrat.Shared.Domain
@@ -39,19 +38,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var existing = await GoalRepo.GetByIdAsync(1, default);
+        var existing = await GoalRepo.GetByIdAsync(1, CancellationToken.None);
         if (existing is not null)
         {
             _target = existing.TargetEur;
             _date   = existing.TargetDate?.ToDateTime(TimeOnly.MinValue);
         }
-        _count = await TradeRepo.CountAsync(new AllTradesSpec(), default);
+        _count = await TradeRepo.CountAsync(new AllTradesSpec(), CancellationToken.None);
     }
 
     private async Task SaveAsync()
     {
         var date = _date is { } d ? DateOnly.FromDateTime(d) : (DateOnly?)null;
-        await UpdateGoal.ExecuteAsync(new UpdateGoalInput(_target, date), default);
+        await UpdateGoal.ExecuteAsync(new UpdateGoalInput(_target, date), CancellationToken.None);
         _msg = "Saved.";
     }
 }

@@ -11,7 +11,7 @@ public class CsvImportServiceTests
     [Fact]
     public void Parses_header_then_rows()
     {
-        var csv = "date,side,qty,price,fees\n2026-05-01,Buy,10,4.20,0.50\n2026-05-03,Sell,5,4.80,0.50\n";
+        const string csv = "date,side,qty,price,fees\n2026-05-01,Buy,10,4.20,0.50\n2026-05-03,Sell,5,4.80,0.50\n";
         var rows = CsvImportService.Parse(new StringReader(csv));
 
         rows.Count.ShouldBe(2);
@@ -24,7 +24,7 @@ public class CsvImportServiceTests
     [Fact]
     public void Rejects_unknown_side()
     {
-        var csv = "date,side,qty,price,fees\n2026-05-01,Hold,1,1,0\n";
+        const string csv = "date,side,qty,price,fees\n2026-05-01,Hold,1,1,0\n";
         var ex = Should.Throw<CsvImportException>(() => CsvImportService.Parse(new StringReader(csv)));
         ex.LineNumber.ShouldBe(2);
     }
@@ -32,7 +32,7 @@ public class CsvImportServiceTests
     [Fact]
     public void Rejects_missing_columns()
     {
-        var csv = "date,side,qty\n2026-05-01,Buy,10\n";
+        const string csv = "date,side,qty\n2026-05-01,Buy,10\n";
         Should.Throw<CsvImportException>(() => CsvImportService.Parse(new StringReader(csv)));
     }
 
@@ -45,7 +45,7 @@ public class CsvImportServiceTests
     [Fact]
     public void Tolerates_lowercase_headers_and_whitespace()
     {
-        var csv = "  Date , Side , Qty , Price , Fees \n2026-05-01,buy,10,4.20,0\n";
+        const string csv = "  Date , Side , Qty , Price , Fees \n2026-05-01,buy,10,4.20,0\n";
         var rows = CsvImportService.Parse(new StringReader(csv));
         rows.Count.ShouldBe(1);
     }

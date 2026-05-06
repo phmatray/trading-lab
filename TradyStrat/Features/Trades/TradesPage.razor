@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @using Ardalis.Specification
 @using System.Globalization
-@using TradyStrat.Application.Abstractions
 @using TradyStrat.Application.UseCases.Trades
 @using TradyStrat.Features.Dashboard.Components
 @using TradyStrat.Features.Trades.Components
@@ -89,7 +88,7 @@
 
     private async Task Reload()
     {
-        var list = await Repo.ListAsync(new AllTradesSpec(), default);
+        var list = await Repo.ListAsync(new AllTradesSpec(), CancellationToken.None);
         _trades = list.ToList();
         _count = _trades.Count;
     }
@@ -117,13 +116,13 @@
     {
         if (_editing is null)
         {
-            await LogTrade.ExecuteAsync(input, default);
+            await LogTrade.ExecuteAsync(input, CancellationToken.None);
         }
         else
         {
             await EditTrade.ExecuteAsync(new EditTradeInput(
                 _editing.Id, input.ExecutedOn, input.Side,
-                input.Quantity, input.PricePerShare, input.FeesEur, input.Note), default);
+                input.Quantity, input.PricePerShare, input.FeesEur, input.Note), CancellationToken.None);
         }
         CloseDialogs();
         await Reload();
@@ -131,7 +130,7 @@
 
     private async Task DeleteAsync(Trade t)
     {
-        await DeleteTrade.ExecuteAsync(new DeleteTradeInput(t.Id), default);
+        await DeleteTrade.ExecuteAsync(new DeleteTradeInput(t.Id), CancellationToken.None);
         await Reload();
     }
 
@@ -139,11 +138,11 @@
     {
         try
         {
-            await ImportCsv.ExecuteAsync(new ImportTradesCsvInput(_csvText), default);
+            await ImportCsv.ExecuteAsync(new ImportTradesCsvInput(_csvText), CancellationToken.None);
             CloseDialogs();
             await Reload();
         }
-        catch (TradyStrat.Shared.Exceptions.CsvImportException ex)
+        catch (Shared.Exceptions.CsvImportException ex)
         {
             _importError = ex.Message;
         }

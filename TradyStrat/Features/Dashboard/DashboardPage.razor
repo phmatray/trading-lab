@@ -72,10 +72,10 @@ else
     {
         try
         {
-            _vm = await LoadDashboard.ExecuteAsync(Unit.Value, default);
+            _vm = await LoadDashboard.ExecuteAsync(Unit.Value, CancellationToken.None);
             _error = null;
         }
-        catch (TradyStrat.Shared.Exceptions.TradyStratException ex)
+        catch (Shared.Exceptions.TradyStratException ex)
         {
             _vm = null;
             _error = ex.Message;
@@ -85,7 +85,7 @@ else
     private async Task OnRefreshClicked()
     {
         _busy = true;
-        try   { await RefreshPrices.ExecuteAsync(Unit.Value, default); await Reload(); }
+        try   { await RefreshPrices.ExecuteAsync(Unit.Value, CancellationToken.None); await Reload(); }
         finally { _busy = false; }
     }
 
@@ -95,7 +95,7 @@ else
     {
         _showRerunConfirm = false;
         _busy = true;
-        try   { await ForceRefetch.ExecuteAsync(Unit.Value, default); await Reload(); }
+        try   { await ForceRefetch.ExecuteAsync(Unit.Value, CancellationToken.None); await Reload(); }
         finally { _busy = false; }
     }
 

@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Features.Fx;
 using TradyStrat.Shared.Exceptions;
 

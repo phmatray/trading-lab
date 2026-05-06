@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using TradyStrat.Application.Abstractions;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.PriceFeed;

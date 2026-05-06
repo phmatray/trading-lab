@@ -65,7 +65,7 @@ public sealed class SnapshotBuilder(
             var oneEurInEur = await fx.UsdToEurAsync(1m, today, ct); // 1 / UsdPerEur
             if (oneEurInEur != 0m) usdPerEur = 1m / oneEurInEur;
         }
-        catch (TradyStrat.Shared.Exceptions.FxRateUnavailableException)
+        catch (Shared.Exceptions.FxRateUnavailableException)
         {
             // Tolerant — snapshot can be built without the FX rate present.
         }

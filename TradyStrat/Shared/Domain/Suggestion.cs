@@ -25,7 +25,7 @@ public sealed record Suggestion
     public required DateTime CreatedAt { get; init; }
 
     public decimal? OrderValueEur =>
-        QuantityHint is decimal q && MaxPriceHint is decimal p ? q * p : null;
+        QuantityHint is { } q && MaxPriceHint is { } p ? q * p : null;
 
     public IReadOnlyList<Citation> Citations =>
         JsonSerializer.Deserialize<List<Citation>>(CitationsJson, CitationOpts) ?? [];

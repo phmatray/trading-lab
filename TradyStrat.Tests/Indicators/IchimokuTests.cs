@@ -28,7 +28,7 @@ public class IchimokuTests
         var ichi = Ichimoku.LatestFor(bars);
         ichi.ShouldNotBeNull();
 
-        var last9 = bars.TakeLast(9);
+        var last9 = bars.TakeLast(9).ToList();
         var expected = (last9.Max(b => b.High) + last9.Min(b => b.Low)) / 2m;
 
         ichi.Tenkan.ShouldBe(expected, tolerance: 0.0001m);

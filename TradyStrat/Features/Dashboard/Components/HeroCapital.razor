@@ -14,7 +14,7 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public TradyStrat.Shared.Domain.PortfolioSnapshot Snap { get; set; } = default!;
+    [Parameter, EditorRequired] public Shared.Domain.PortfolioSnapshot Snap { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
     private decimal Pct => Snap.ProgressPct;

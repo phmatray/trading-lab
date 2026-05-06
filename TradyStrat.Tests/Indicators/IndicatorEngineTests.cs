@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Indicators.Rules;
