@@ -13,7 +13,7 @@ public sealed record GoalConfig
         Id = 1,
         TargetEur = 1_000_000m,
         TargetDate = null,
-        FocusTicker = "CON3.DE",
+        FocusTicker = "CON3.L",
         UpdatedAt = now,
     };
 }

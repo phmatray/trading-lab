@@ -18,7 +18,7 @@ public sealed class GetTodaysSuggestionUseCase(
 {
     protected override async Task<Suggestion> ExecuteCore(Unit _, CancellationToken ct)
     {
-        var today = clock.TodayInExchangeTzFor("CON3.DE");
+        var today = clock.TodayInExchangeTzFor("CON3.L");
         var existing = await repo.FirstOrDefaultAsync(new SuggestionForDateSpec(today), ct);
         if (existing is not null) return existing;
 

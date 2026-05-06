@@ -19,20 +19,22 @@ public sealed class SnapshotBuilder(
     IReadRepositoryBase<Trade> tradeRepo,
     IClock clock) : ISnapshotBuilder
 {
+    private const string FocusTicker = "CON3.L";
+
     private static readonly (string Ticker, string Currency)[] Catalog =
     [
-        ("CON3.DE", "EUR"),
-        ("COIN",    "USD"),
-        ("BTC-USD", "USD"),
+        (FocusTicker, "USD"),
+        ("COIN",      "USD"),
+        ("BTC-USD",   "USD"),
     ];
 
     public async Task<AiSnapshot> BuildAsync(CancellationToken ct)
     {
-        var today = clock.TodayInExchangeTzFor("CON3.DE");
+        var today = clock.TodayInExchangeTzFor(FocusTicker);
         var goal  = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
 
         var tickers = new List<TickerContext>();
-        decimal? con3Price = null;
+        decimal? focusPriceEur = null;
 
         foreach (var (ticker, currency) in Catalog)
         {
@@ -41,14 +43,15 @@ public sealed class SnapshotBuilder(
             if (currency == "USD")
                 eur = await fx.UsdToEurAsync(reading.Price, today, ct);
 
-            if (ticker == "CON3.DE") con3Price = reading.Price;
+            // Portfolio math is in EUR, so use the EUR-converted focus price.
+            if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
 
             tickers.Add(new TickerContext(
                 ticker, currency, reading.Price, eur, reading.Zone, reading.Reasons));
         }
 
         var snap = await portfolio.SnapshotAsync(
-            currentPriceEur: con3Price ?? 0m,
+            currentPriceEur: focusPriceEur ?? 0m,
             goalEur: goal.TargetEur,
             ct: ct);
 

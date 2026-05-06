@@ -94,7 +94,7 @@ public class EntityDerivedPropertiesTests
 
         g.Id.ShouldBe(1);
         g.TargetEur.ShouldBe(1_000_000m);
-        g.FocusTicker.ShouldBe("CON3.DE");
+        g.FocusTicker.ShouldBe("CON3.L");
         g.UpdatedAt.ShouldBe(now);
     }
 }

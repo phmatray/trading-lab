@@ -4,6 +4,7 @@ public sealed class SystemClock : IClock
 {
     private static readonly Dictionary<string, string> TzByTicker = new()
     {
+        ["CON3.L"]  = "Europe/London",
         ["CON3.DE"] = "Europe/Berlin",
         ["COIN"]    = "America/New_York",
         ["BTC-USD"] = "Etc/UTC",

@@ -27,8 +27,8 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
-        // CON3.DE — 250-bar series so all indicators compute
-        foreach (var b in SeriesLoader.LoadCloses("CON3.DE")) db.PriceBars.Add(b);
+        // CON3.L — 250-bar series so all indicators compute
+        foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         // COIN, BTC-USD — minimal recent bar each
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),

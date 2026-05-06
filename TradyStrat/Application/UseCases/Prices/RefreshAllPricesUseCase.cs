@@ -10,7 +10,7 @@ public sealed class RefreshAllPricesUseCase(
     ILogger<RefreshAllPricesUseCase> log)
     : UseCaseBase<Unit, Unit>(log)
 {
-    private static readonly string[] Tickers = ["CON3.DE", "COIN", "BTC-USD"];
+    private static readonly string[] Tickers = ["CON3.L", "COIN", "BTC-USD"];
     private const string FxPair = "EURUSD";
 
     protected override async Task<Unit> ExecuteCore(Unit _, CancellationToken ct)

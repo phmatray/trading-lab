@@ -10,7 +10,7 @@ public sealed partial class PriceFeedHostedService(
     IServiceProvider services,
     ILogger<PriceFeedHostedService> log) : IHostedService
 {
-    private static readonly string[] Tickers = ["CON3.DE", "COIN", "BTC-USD"];
+    private static readonly string[] Tickers = ["CON3.L", "COIN", "BTC-USD"];
     private const string FxPair = "EURUSD";
 
     public async Task StartAsync(CancellationToken cancellationToken)

@@ -22,8 +22,8 @@ public class SnapshotBuilderTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
-        // CON3.DE — full 250-bar series so Bollinger/RSI/SMA can compute
-        foreach (var b in SeriesLoader.LoadCloses("CON3.DE")) db.PriceBars.Add(b);
+        // CON3.L — full 250-bar series so Bollinger/RSI/SMA can compute
+        foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         // COIN, BTC-USD — single recent bar so the engine returns a price (indicators may be null)
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),
@@ -54,7 +54,7 @@ public class SnapshotBuilderTests
         snap.Goal.TargetEur.ShouldBe(1_000_000m);
         snap.Tickers.Count.ShouldBe(3);
         snap.Tickers.Single(t => t.Ticker == "COIN").PriceEur!.Value.ShouldBe(200m / 1.08m, tolerance: 0.01m);
-        snap.Tickers.Single(t => t.Ticker == "CON3.DE").Currency.ShouldBe("EUR");
+        snap.Tickers.Single(t => t.Ticker == "CON3.L").Currency.ShouldBe("USD");
         snap.PromptHash.ShouldNotBeNullOrEmpty();
     }
 }

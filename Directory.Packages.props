@@ -13,8 +13,11 @@
     <!-- Indicators -->
     <PackageVersion Include="Atypical.TechnicalAnalysis.Common" Version="3.0.0" />
     <PackageVersion Include="Atypical.TechnicalAnalysis.Functions" Version="3.0.0" />
-    <!-- AI -->
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.5.2" />
+    <!-- AI: Anthropic.SDK 5.10 was compiled against M.E.AI.Abstractions 10.3.0;
+         pin both packages to that version to avoid MissingMethodException at runtime
+         (HostedMcpServerTool.AuthorizationToken changed in 10.5+). -->
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.3.0" />
     <PackageVersion Include="Anthropic.SDK" Version="5.10.0" />
     <!-- Resilience -->
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
