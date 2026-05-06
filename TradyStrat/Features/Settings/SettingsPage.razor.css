@@ -1,0 +1,17 @@
+.settings { padding: 36px 56px 60px; }
+.settings h2 { font-family: var(--font-display); font-style: italic;
+               font-size: 36px; margin: 18px 0 22px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; max-width: 720px; }
+.grid label { display: flex; flex-direction: column; gap: 4px;
+              font-family: var(--font-mono); font-size: 10px;
+              letter-spacing: var(--tracking-xs); text-transform: uppercase;
+              color: var(--vault-gold); }
+.grid input { background: var(--vault-bg); color: var(--vault-ivory);
+              border: 1px solid var(--vault-rule); padding: 8px;
+              font-family: var(--font-mono); font-size: 14px; }
+.grid input:disabled { opacity: 0.6; }
+.actions { margin-top: 24px; display: flex; align-items: center; gap: 14px; }
+.btn { padding: 10px 16px; background: var(--vault-gold);
+       color: #1B1710; font-family: var(--font-mono); font-size: 10px;
+       letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; }
+.msg { color: var(--vault-green); font-family: var(--font-mono); font-size: 12px; }
