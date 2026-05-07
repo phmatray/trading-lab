@@ -11,11 +11,23 @@ public sealed class PortfolioService(IReadRepositoryBase<Trade> trades)
         decimal currentPriceEur, decimal goalEur, CancellationToken ct)
     {
         var all = await trades.ListAsync(new AllTradesSpec(), ct);
+        return BuildSnapshot(all, currentPriceEur, goalEur);
+    }
 
+    public async Task<PortfolioSnapshot> SnapshotAsync(
+        DateOnly asOf, decimal currentPriceEur, decimal goalEur, CancellationToken ct)
+    {
+        var asOfTrades = await trades.ListAsync(new TradesAsOfSpec(asOf), ct);
+        return BuildSnapshot(asOfTrades, currentPriceEur, goalEur);
+    }
+
+    private static PortfolioSnapshot BuildSnapshot(
+        List<Trade> trades, decimal currentPriceEur, decimal goalEur)
+    {
         var openLots = new LinkedList<Lot>();
         var realized = 0m;
 
-        foreach (var t in all)
+        foreach (var t in trades)
         {
             if (t.IsBuy)
             {
