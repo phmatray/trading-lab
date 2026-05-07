@@ -7,7 +7,7 @@ using TradyStrat.Features.Indicators.MovingAverage;
 using TradyStrat.Features.Indicators.Rsi;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators;
+namespace TradyStrat.Tests.Indicators.Zones;
 
 public class ZoneClassifierTests
 {
