@@ -1,7 +1,7 @@
 # TradyStrat — Prediction-market signal (Polymarket)
 
-**Status:** Design approved · Ready for implementation plan
-**Date:** 2026-05-07
+**Status:** Design approved (revised after deep review) · Ready for implementation plan
+**Date:** 2026-05-07 (revised same day)
 **Author:** Philippe Matray (with Claude)
 **Depends on:** [`2026-05-06-tradystrat-dashboard-design.md`](./2026-05-06-tradystrat-dashboard-design.md)
 **Coexists with:** [`2026-05-07-multi-ticker-foundation-design.md`](./2026-05-07-multi-ticker-foundation-design.md) (orthogonal column on `Suggestions`; no schema conflict)
@@ -43,7 +43,11 @@ and which odds it weighted.
 | Migration | **Single EF migration**, applied automatically on startup. |
 | Backfill | **None.** Existing Suggestions stay markets-less. New Suggestions only. |
 | AI tool change | One added param `market_citations: IReadOnlyList<MarketCitation>?` on `submit_suggestion`. |
-| `PromptHash` | **Includes Markets** in input. Day-to-day odds drift produces a real `CallDiff` row. |
+| `PromptHash` | **Includes Markets** in input. Audit field only — no consumer reads it. CallDiff is **not** extended for market drift in Phase 1; that's deliberate scope-trim. |
+| HTTP client | **Typed** `AddHttpClient<IPredictionMarketProvider, PolymarketGammaProvider>(...)` with `.AddStandardResilienceHandler()`. Matches FxModule. |
+| Tag fetch concurrency | **`Task.WhenAll` over the tag list.** Worst-case latency = single tag's timeout, not N × timeout. |
+| Gamma JSON parsing | **Raw `JsonDocument` traversal in the provider** (camelCase, matches `YahooFxProvider`). `JsonOpts.Strict` is reserved for our internal snake_case `MarketSnapshotJson` round-trip. |
+| Citation dedup | The AI may return duplicate slugs; hygiene dedupes (first wins). System prompt also says "cite each market at most once." |
 | Dashboard surface | **Dedicated rail** between `TodaysCallCard` and `CitationsBlock`. Cited tiles get a `★` badge. |
 | Failure mode | **Graceful.** Polymarket failure → snapshot with `Markets = []` → AI proceeds → `MarketSnapshotJson = NULL`. AI never fails because of Polymarket. |
 | Citation hygiene | AI-cited slugs not present in snapshot are **dropped server-side** with a warning log; suggestion still saved. |
@@ -81,10 +85,19 @@ Lives in `Features/PredictionMarkets/MarketCitation.cs`.
 ```csharp
 public sealed record MarketSnapshot(
     IReadOnlyList<PredictionMarket> Markets,
-    IReadOnlyList<MarketCitation> Cited);
+    IReadOnlyList<MarketCitation> Cited)
+{
+    public static readonly MarketSnapshot Empty = new([], []);
+}
 ```
 
-Serialized into `Suggestions.MarketSnapshotJson` via `JsonOpts.Strict`.
+Mirrors the `CallDiff.None` Null Object (`Features/AiSuggestion/CallDiff/CallDiff.cs:14`).
+The dashboard render path can treat `Empty` and a populated snapshot uniformly
+(`Snapshot.Markets.Count > 0` test).
+
+Serialized into `Suggestions.MarketSnapshotJson` via `JsonOpts.Strict`
+(snake_case — our internal round-trip format, distinct from Polymarket's
+camelCase wire format; see §6).
 Lives in `Features/PredictionMarkets/MarketSnapshot.cs`.
 
 ### 3.4 Changed: `AiSnapshot`
@@ -101,14 +114,30 @@ public sealed record AiSnapshot(
     string PromptHash);
 ```
 
-`PromptHash` input includes the new `Markets` list. The hash payload
-ordering is: `today, snap, tickers, recent, markets`. Adding markets
-to the hash means a same-day re-run with shifted Polymarket prices
-correctly surfaces a `CallDiff` change row.
+`PromptHash` input includes the new `Markets` list (payload ordering:
+`today, snap, tickers, recent, markets`). `PromptHash` is a **write-only
+audit field** today — no production consumer reads it (`grep -rn PromptHash`
+returns only writes plus equality assertions in tests). Including markets
+keeps the hash a complete fingerprint of model input. **Phase 1 does not
+extend `CallDiff` to detect market drift**; if that capability is wanted
+later, it's a follow-up spec (new fields on the `CallDiff` record + new
+`CallDiffBuilder` logic over `MarketSnapshot`).
 
 ### 3.5 Changed: `Suggestion` (entity)
 
-Adds one nullable column:
+C# property added to `Common/Domain/Suggestion.cs`:
+
+```csharp
+public string? MarketSnapshotJson { get; set; }
+```
+
+Mirrors the existing `CitationsJson` shape (also `string?`, JSON-encoded).
+
+EF config (`Data/Configurations/SuggestionConfiguration.cs`): no
+`HasMaxLength` — match `CitationsJson`'s open-ended config (precedent there;
+distinct from `PromptHash` which is bounded at 128).
+
+Migration adds:
 
 ```
 MarketSnapshotJson  TEXT NULL
@@ -119,7 +148,7 @@ NULL semantics:
 - Polymarket fetch failed at call time (graceful degradation, see §10).
 - Polymarket fetch succeeded but the post-filter list was empty.
 
-When non-NULL, holds `MarketSnapshot` JSON.
+When non-NULL, holds `MarketSnapshot` JSON serialized via `JsonOpts.Strict`.
 
 ## 4. Module shape
 
@@ -135,12 +164,38 @@ TradyStrat/Features/PredictionMarkets/
 ```
 
 Wired in a new `PredictionMarketsModule.cs` under `Modules/`, following
-the existing `IAppModule` pattern. Registers:
+the existing `IAppModule` pattern. Mirrors `FxModule.cs:11` exactly:
 
-- `PolymarketOptions` bound from `Polymarket` config section.
-- `IPredictionMarketProvider` → `PolymarketGammaProvider`.
-- `HttpClient` for the provider via `IHttpClientFactory` named `"polymarket"` with
-  base address from `PolymarketOptions.BaseUrl` and a 10-second timeout.
+```csharp
+public sealed class PredictionMarketsModule : IAppModule
+{
+    public void ConfigureServices(WebApplicationBuilder builder)
+    {
+        var options = PolymarketOptionsBinder.Read(builder.Configuration);
+        builder.Services.AddSingleton(options);
+
+        builder.Services
+            .AddHttpClient<IPredictionMarketProvider, PolymarketGammaProvider>(c =>
+            {
+                c.BaseAddress = new Uri(options.BaseUrl);
+                c.Timeout     = TimeSpan.FromSeconds(10);
+                c.DefaultRequestHeaders.UserAgent.ParseAdd("TradyStrat/1.0");
+            })
+            .AddStandardResilienceHandler();
+    }
+}
+```
+
+`PolymarketOptionsBinder.Read(...)` reads each key with `??` defaults, so
+a missing `Polymarket` section yields a fully populated `PolymarketOptions`
+instance (no `required` modifiers — see §8). At-startup validation is
+performed inside `Read(...)`: throws if `MaxMarkets ≤ 0`, `MinVolumeUsd < 0`,
+or `MaxHorizonDays ≤ 0`.
+
+`.AddStandardResilienceHandler()` (Microsoft.Extensions.Http.Resilience)
+gives the provider the same retry / circuit-breaker / per-attempt-timeout
+behavior FX and price feed already get. Without it, transient blips would
+incorrectly trigger the §10 graceful-degradation path.
 
 `Program.cs` remains a single line.
 
@@ -149,11 +204,23 @@ the existing `IAppModule` pattern. Registers:
 ```csharp
 public interface IPredictionMarketProvider
 {
-    Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(
-        PolymarketOptions options,
-        CancellationToken ct);
+    Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(CancellationToken ct);
+}
+
+public sealed class PolymarketGammaProvider(
+    HttpClient http,
+    PolymarketOptions options)
+    : IPredictionMarketProvider
+{
+    public Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(CancellationToken ct) => …
 }
 ```
+
+Constructor-injected configuration matches the project pattern
+(`YahooFxProvider(HttpClient http)` reads its config from the registered
+`HttpClient.BaseAddress`; `PolymarketGammaProvider` extends that pattern
+to a typed options record because the filter has more knobs than a single
+URL).
 
 Returns the post-filter, post-normalization list (≤ `MaxMarkets`).
 On failure throws `PolymarketUnavailableException`.
@@ -172,7 +239,38 @@ Query parameters used:
 - `ascending=false`
 - `limit={MaxMarkets * 2}` per tag (over-fetch buffer for post-filtering)
 
-### 6.2 Field mapping
+Tag fetches dispatched via **`Task.WhenAll`** — single tag's timeout
+(10s, set on the typed HttpClient) caps the total. Sequential fetches
+would put `Tags.Count × 10s` on the AI critical path worst-case.
+
+### 6.2 JSON parsing
+
+Polymarket Gamma returns **camelCase** field names (`endDate`,
+`outcomePrices`, `outcomes`, `tags`). `JsonOpts.Strict` uses
+`SnakeCaseLower` and is reserved for our internal `MarketSnapshotJson`
+round-trip — **not** for the wire format. The provider parses the
+response with raw `JsonDocument` traversal (matches the `YahooFxProvider`
+shape verbatim — see `Features/Fx/Providers/YahooFxProvider.cs:29`):
+
+```csharp
+using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
+foreach (var el in doc.RootElement.EnumerateArray())
+{
+    var slug      = el.GetProperty("slug").GetString();
+    var question  = el.GetProperty("question").GetString();
+    var endDate   = el.GetProperty("endDate").GetDateTime();
+    // outcomes and outcomePrices are stringified JSON arrays in Gamma's payload —
+    //   e.g. outcomes: "[\"Yes\", \"No\"]"
+    //        outcomePrices: "[\"0.32\", \"0.68\"]"
+    // Inner-parse via JsonDocument.Parse on the string value.
+    …
+}
+```
+
+This isolates wire-format brittleness inside the provider. Anything
+downstream sees only `PredictionMarket` records.
+
+### 6.3 Field mapping
 
 | Gamma field | `PredictionMarket` field | Notes |
 |---|---|---|
@@ -183,7 +281,7 @@ Query parameters used:
 | `volume` | `VolumeUsd` | parsed from string to decimal |
 | `tags[].slug` | `Tags` | flatten |
 
-### 6.3 Normalization rules
+### 6.4 Normalization rules
 
 A market is dropped (logged at Debug) if:
 - `outcomes` is not exactly `["Yes", "No"]` (multi-outcome unsupported in Phase 1).
@@ -191,7 +289,7 @@ A market is dropped (logged at Debug) if:
 - `endDate` cannot be parsed.
 - `volume` cannot be parsed or is < 0.
 
-### 6.4 Final filter pipeline
+### 6.5 Final filter pipeline
 
 After all tag responses are received and merged:
 1. **Dedup** by `Slug` (a market may belong to multiple tags).
@@ -223,6 +321,7 @@ existing `SystemPrompt` constant):
 
 > You may also cite Polymarket markets you weighed.
 > Each `market_citations[].slug` MUST appear in the snapshot's `markets[]`.
+> Cite each market at most once.
 > Cite a market only when you actually weighted it; not every market needs a citation.
 
 ### 7.3 Citation hygiene
@@ -231,12 +330,19 @@ When the tool callback fires, before constructing the `Suggestion`:
 
 ```csharp
 var validSlugs = snapshot.Markets.Select(m => m.Slug).ToHashSet();
+
+// Drop unknown slugs, then dedupe (first claim per slug wins).
+// AI may legally return duplicates despite the prompt rule; a render-time
+// ToDictionary on the dashboard would otherwise throw.
 var cleaned = (market_citations ?? [])
-    .Where(c => {
-        var ok = validSlugs.Contains(c.Slug);
-        if (!ok) LogUnknownMarketCitation(log, c.Slug);
-        return ok;
+    .Where(c =>
+    {
+        if (validSlugs.Contains(c.Slug)) return true;
+        LogUnknownMarketCitation(log, c.Slug);
+        return false;
     })
+    .GroupBy(c => c.Slug)
+    .Select(g => g.First())
     .ToList();
 ```
 
@@ -264,9 +370,10 @@ private static string HashPrompt(DateOnly today, PortfolioSnapshot snap,
 }
 ```
 
-This deliberately changes existing hash values for any future re-run
-of an old day. Not a problem because old `Suggestion` rows already
-store their hash; CallDiff compares against that stored hash.
+This changes the hash format. **Safe** because no production consumer
+reads `PromptHash` (verified by `grep -rn PromptHash` — only writes plus
+test equality assertions). The hash is a write-only audit field; flipping
+its format breaks nothing.
 
 ## 8. Configuration
 
@@ -285,28 +392,57 @@ store their hash; CallDiff compares against that stored hash.
 Bound to:
 
 ```csharp
-public sealed class PolymarketOptions
+public sealed record PolymarketOptions(
+    string                BaseUrl,
+    IReadOnlyList<string> Tags,
+    int                   MaxMarkets,
+    decimal               MinVolumeUsd,
+    int                   MaxHorizonDays);
+
+internal static class PolymarketOptionsBinder
 {
-    public required string BaseUrl { get; init; }
-    public required IReadOnlyList<string> Tags { get; init; }
-    public required int MaxMarkets { get; init; }
-    public required decimal MinVolumeUsd { get; init; }
-    public required int MaxHorizonDays { get; init; }
+    public static PolymarketOptions Read(IConfiguration cfg)
+    {
+        var s = cfg.GetSection("Polymarket");
+        var opts = new PolymarketOptions(
+            BaseUrl:        s["BaseUrl"] ?? "https://gamma-api.polymarket.com",
+            Tags:           s.GetSection("Tags").Get<string[]>()
+                              ?? ["bitcoin", "crypto", "coinbase", "ethereum"],
+            MaxMarkets:     s.GetValue("MaxMarkets",     10),
+            MinVolumeUsd:   s.GetValue("MinVolumeUsd",   50_000m),
+            MaxHorizonDays: s.GetValue("MaxHorizonDays", 365));
+
+        if (opts.MaxMarkets     <= 0) throw new ArgumentOutOfRangeException(nameof(opts.MaxMarkets));
+        if (opts.MinVolumeUsd   <  0) throw new ArgumentOutOfRangeException(nameof(opts.MinVolumeUsd));
+        if (opts.MaxHorizonDays <= 0) throw new ArgumentOutOfRangeException(nameof(opts.MaxHorizonDays));
+        return opts;
+    }
 }
 ```
 
+No `required` modifiers — defaults preserve startup when the
+`Polymarket` section is missing entirely (matches the §13
+graceful-default promise). Validation runs at module-load time;
+mis-configured deployments fail fast.
+
+The same `appsettings.json` snippet works in both `appsettings.json`
+and `appsettings.Development.json` (`IConfiguration` merges both).
 No secret. The Gamma API requires no key for read access.
 
 ## 9. Dashboard surface
 
-### 9.1 New component
+### 9.1 New component (code-behind shape)
 
-`TradyStrat/Features/Dashboard/Components/MarketsRail.razor` (+ `.razor.cs` + `.razor.css`).
+Three files in `TradyStrat/Features/Dashboard/Components/`, matching the
+project-wide convention re-affirmed in commit `2026-05-06-blazor-code-behind`
+(`TodaysCallCard.razor.cs:8` is the canonical template):
+
+**`MarketsRail.razor`** (markup only — no `@code`):
 
 ```razor
 @using TradyStrat.Features.PredictionMarkets
 
-@if (Snapshot is { Markets.Count: > 0 })
+@if (Snapshot.Markets.Count > 0)
 {
     <div class="markets-rail">
         <div class="rail-label">Polymarket · @Snapshot.Markets.Count markets</div>
@@ -330,22 +466,47 @@ No secret. The Gamma API requires no key for read access.
         </div>
     </div>
 }
+```
 
-@code {
-    [Parameter, EditorRequired] public MarketSnapshot? Snapshot { get; set; }
+**`MarketsRail.razor.cs`** (code-behind):
+
+```csharp
+using System.Globalization;
+using Microsoft.AspNetCore.Components;
+using TradyStrat.Features.PredictionMarkets;
+
+namespace TradyStrat.Features.Dashboard.Components;
+
+public partial class MarketsRail : ComponentBase
+{
+    [Parameter, EditorRequired] public MarketSnapshot Snapshot { get; set; } = MarketSnapshot.Empty;
+
     private Dictionary<string, MarketCitation> _bySlug = new();
+
     protected override void OnParametersSet()
-        => _bySlug = (Snapshot?.Cited ?? []).ToDictionary(c => c.Slug);
-    private static readonly System.Globalization.CultureInfo FrFr = new("fr-FR");
+        => _bySlug = Snapshot.Cited.ToDictionary(c => c.Slug);   // hygiene already deduped (§7.3)
+
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 }
 ```
 
+`Snapshot` is **non-nullable**, defaulted to `MarketSnapshot.Empty` (§3.3
+Null Object). The parent (`DashboardPage`) supplies `Empty` when the
+`MarketSnapshotJson` column is NULL — see §9.3. Eliminates the
+`is { } pattern` dance and the EditorRequired-on-nullable contradiction.
+
+`OnParametersSet`'s `ToDictionary(c => c.Slug)` is safe because §7.3
+hygiene deduped before persistence. A sanity test in
+`AiSuggestionServiceCitationTests` confirms the invariant.
+
+**`MarketsRail.razor.css`** holds the styling described in §9.4.
+
 ### 9.2 ViewModel extension
 
-`DashboardViewModel` gains:
+`DashboardViewModel` gains a non-nullable property defaulted to the Null Object:
 
 ```csharp
-public MarketSnapshot? MarketSnapshot { get; init; }
+public MarketSnapshot MarketSnapshot { get; init; } = MarketSnapshot.Empty;
 ```
 
 ### 9.3 Page wiring
@@ -361,8 +522,10 @@ public MarketSnapshot? MarketSnapshot { get; init; }
 @if (vm.TodaysCall is not null) { <CitationsBlock ... /> }
 ```
 
-When `MarketSnapshot` is null (NULL column or feature off), the
-component renders nothing — no empty state, no banner.
+When `MarketSnapshotJson` is NULL or the deserialize failed,
+`vm.MarketSnapshot = MarketSnapshot.Empty` and the component's
+`@if (Snapshot.Markets.Count > 0)` short-circuits — nothing renders,
+no empty state, no banner.
 
 ### 9.4 Styling notes
 
@@ -372,25 +535,33 @@ component renders nothing — no empty state, no banner.
 
 ### 9.5 `LoadDashboardUseCase` change
 
-After loading `Suggestion`, deserialize:
+Insert immediately after the `todays = ...` block (today,
+`LoadDashboardUseCase.cs:89`), before the prior/CallDiff branch:
 
 ```csharp
-MarketSnapshot? marketSnap = null;
-if (sug?.MarketSnapshotJson is { Length: > 0 } json)
+var marketSnap = MarketSnapshot.Empty;
+if (todays?.MarketSnapshotJson is { Length: > 0 } json)
 {
     try
     {
-        marketSnap = JsonSerializer.Deserialize<MarketSnapshot>(json, JsonOpts.Strict);
+        marketSnap = JsonSerializer.Deserialize<MarketSnapshot>(json, JsonOpts.Strict)
+                     ?? MarketSnapshot.Empty;
     }
     catch (JsonException ex)
     {
-        LogMarketSnapshotMalformed(log, ex);
+        LoadDashboardLog.MarketSnapshotMalformed(log, ex);
+        // marketSnap stays Empty — rail will be absent for this entry.
     }
 }
 ```
 
-The dashboard renders correctly even if a row has malformed JSON;
-the rail is just absent.
+`marketSnap` is then passed into the `DashboardViewModel` constructor
+as `MarketSnapshot: marketSnap`. The dashboard renders correctly even
+if a row has malformed JSON; the rail is just absent.
+
+The `MarketSnapshotMalformed` `LoggerMessage` partial joins the
+existing `LoadDashboardLog` static partial (`LoadDashboardUseCase.cs:203`),
+not a new logger class — same shape as `BackfillCrashed`.
 
 ## 10. Failure handling
 
@@ -406,21 +577,23 @@ public sealed class PolymarketUnavailableException(string message, Exception? in
 
 ### 10.2 Failure matrix
 
-Tag fetches are sequential (or `Task.WhenAll` — implementer's choice;
-no semantic difference). **Any one tag failing fails the whole fetch**:
-the provider throws `PolymarketUnavailableException` and the partial
-set already collected is discarded. Rationale: silently weighting a
-partial market set can mislead the AI; "no markets at all" is a
-clearer state to render and reason about.
+Tag fetches run via **`Task.WhenAll`** (§6.1). **Any one tag failing
+fails the whole fetch**: the provider throws
+`PolymarketUnavailableException` and any successful sibling tags are
+discarded. Rationale: silently weighting a partial market set can
+mislead the AI; "no markets at all" is a clearer state to render
+and reason about. Worst-case latency is one tag's timeout (10s),
+not `Tags.Count × 10s`.
 
 | Failure | Where caught | Behavior |
 |---|---|---|
 | HTTP 5xx / network / timeout (any tag) | `PolymarketGammaProvider` → throws `PolymarketUnavailableException` | `SnapshotFactory` catches → `Markets = []` → AI runs without markets → `MarketSnapshotJson` saved as NULL |
-| HTTP 429 rate-limited | same | same |
+| HTTP 429 rate-limited | resilience handler retries; on persistent failure → `PolymarketUnavailableException` | same |
 | 200 OK, unparseable JSON | provider → throws | same |
 | 200 OK, empty post-filter result | provider returns `[]` (not exception) | `Markets = []`, `MarketSnapshotJson = NULL`. Warning log surfaces the empty filter result |
-| AI cites slug not in snapshot | `SuggestionService.AskAsync` validation | offending citations dropped, warning logged, suggestion saved cleanly |
-| Dashboard reads malformed JSON | `LoadDashboardUseCase` catches `JsonException` | logs, treats as null, rail not rendered |
+| AI cites slug not in snapshot | `SuggestionService.AskAsync` validation (§7.3) | offending citations dropped, warning logged, suggestion saved cleanly |
+| AI cites the same slug twice | `SuggestionService.AskAsync` validation (§7.3) | duplicates collapsed, first `Claim` wins, suggestion saved cleanly |
+| Dashboard reads malformed JSON | `LoadDashboardUseCase` catches `JsonException` | logs, `marketSnap = MarketSnapshot.Empty`, rail not rendered |
 
 ### 10.3 Logging
 
@@ -438,8 +611,9 @@ private static partial void LogPolymarketEmpty(ILogger logger);
 [LoggerMessage(Level = LogLevel.Warning, Message = "AI cited unknown market slug {Slug}; dropped")]
 private static partial void LogUnknownMarketCitation(ILogger logger, string slug);
 
+// Joins existing LoadDashboardLog static partial (LoadDashboardUseCase.cs:203), not a new logger class.
 [LoggerMessage(Level = LogLevel.Warning, Message = "MarketSnapshotJson malformed; rail will not render")]
-private static partial void LogMarketSnapshotMalformed(ILogger logger, Exception ex);
+public static partial void MarketSnapshotMalformed(ILogger logger, Exception ex);
 ```
 
 ## 11. Database migration
@@ -472,6 +646,7 @@ TradyStrat.Tests/
         PolymarketGammaProviderTests.cs        ← HttpMessageHandler stub + fixtures
       PolymarketNormalizationTests.cs           ← multi-outcome drop, parse failures, tag flatten
       PolymarketFilterTests.cs                  ← volume/horizon/sort/take/dedup pure logic
+      PolymarketOptionsBinderTests.cs           ← defaults applied; validation throws on bad config
       Fixtures/
         Polymarket/
           gamma-markets-bitcoin.json
@@ -483,13 +658,14 @@ TradyStrat.Tests/
         SnapshotFactoryTests.cs (extend)        ← markets in snapshot
                                                 ← PromptHash includes markets
                                                 ← tolerates PolymarketUnavailableException
-      AiSuggestionServiceCitationTests.cs       ← unknown-slug citations dropped
+      Citations/                                ← new subfolder, matches test-refactor convention
+        SuggestionServiceCitationTests.cs       ← unknown-slug citations dropped
+                                                ← duplicate slugs deduped (first wins)
                                                 ← MarketSnapshotJson NULL when Markets empty
-      CallDiff/
-        CallDiffTests.cs (extend)               ← market drift produces a diff row
     Dashboard/
-      LoadDashboardUseCaseTests.cs (extend)     ← MarketSnapshotJson deserialized correctly
-                                                ← malformed JSON tolerated (logged, null returned)
+      UseCases/
+        LoadDashboardUseCaseTests.cs (extend)   ← MarketSnapshotJson deserialized correctly
+                                                ← malformed JSON tolerated (Empty returned, logged)
 ```
 
 ### 12.2 Test fixtures
@@ -508,20 +684,22 @@ Every row in the §10.2 failure matrix has a corresponding test.
 - **Existing Suggestions:** untouched. `MarketSnapshotJson` is NULL;
   the rail does not render for those days. CallDiff between two old
   rows is unaffected (neither had markets); CallDiff between an old
-  row and a new row simply has no market drift to report (the old
-  side has no market state to compare against).
-- **Pre-feature `appsettings.json`:** still works. The
-  `PredictionMarketsModule` registers `PolymarketOptions` with default
-  values applied if the section is missing. (Concretely: a sealed
-  default instance returned when `Configuration.GetSection("Polymarket").Exists()` is false.)
+  row and a new row simply has no market drift to report (CallDiff is
+  not extended for markets in Phase 1, see §3.4).
+- **Pre-feature `appsettings.json`:** still works. `PolymarketOptionsBinder.Read`
+  (§8) returns a fully-populated `PolymarketOptions` even when the
+  `Polymarket` section is missing entirely.
 - **Phase 1 multi-ticker spec:** orthogonal. That spec adds
   `Trades.InstrumentId` and the `Instruments` table; this spec adds
   `Suggestions.MarketSnapshotJson`. Different tables / different columns.
   Migration order: whichever lands first.
 - **Phase 2 multi-ticker AI spec (future):** will add
-  `Suggestions.InstrumentId` FK. Coexists with `MarketSnapshotJson` —
-  one Suggestion row per (ForDate, InstrumentId), each with its own
-  market snapshot.
+  `Suggestions.InstrumentId` FK. The column coexists, but the **filter
+  is crypto-broad and not per-ticker** — meaning if Phase 2 has both
+  CON3.L and (say) AAPL Suggestions, both rows will reference the same
+  global crypto market list. **Per-ticker market filtering is explicit
+  Phase-2 work** (probably a `tag` mapping per `Instrument`); Phase 1
+  keeps markets global to the day. Acknowledged scope-trim, not silent.
 
 ## 14. Out of scope (Phase 1)
 
@@ -537,13 +715,43 @@ Every row in the §10.2 failure matrix has a corresponding test.
 - A Settings UI for editing tags / threshold.
 - Backfilling historical Suggestions with retroactive market data.
 - Polymarket auth or write-side (trading) integration.
+- Extending `CallDiff` to surface market-probability drift between re-runs.
 
 ## 15. Patterns referenced
 
-- **Adapter** — `PolymarketGammaProvider` adapts the Gamma REST shape to
-  the `PredictionMarket` domain record. Mirrors `YahooFxProvider`.
-- **Strategy seam** — `IPredictionMarketProvider` is the implicit
-  Strategy slot if Kalshi is added. Single implementation today (YAGNI).
+Following project convention (see the multi-ticker spec §15 for the
+project's pattern naming style). Strict GoF naming differs in places
+from project convention; flagged inline where it matters.
+
+- **Adapter (project convention) / Gateway (strict GoF/PoEAA naming)** —
+  `PolymarketGammaProvider` projects external HTTP responses to
+  `PredictionMarket`. Strictly this is **Gateway** (Fowler) or
+  **Anti-Corruption Layer** (Evans) since it's not adapting an existing
+  client class to a target interface — it speaks raw HTTP and emits
+  domain records. The project labels its sibling shape (`YahooFxProvider`)
+  as Adapter for cohesion; this spec keeps the same project naming.
+- **Strategy seam (not yet Strategy)** — `IPredictionMarketProvider` is
+  a single-implementation interface today, so it's polymorphic dispatch,
+  not Strategy. The seam exists for a future second source. **When Kalshi
+  lands, expect Composite** (combining results from N providers) more than
+  Strategy (selecting one).
+- **Decorator (delegated to the HTTP layer)** — no provider-level
+  decorator (cache or retry) is added here. Resilience comes from
+  `.AddStandardResilienceHandler()` on the typed HttpClient (§4),
+  which is itself a Decorator at the HTTP message-handler layer.
+  The project's `DailyFxCache` shows what a domain-level decorator
+  would look like; we don't need one for daily-cadence reads.
+- **Memento** — `MarketSnapshot` is a Memento: a frozen capture of
+  external provider state at AI-call time, replayed on dashboard render.
+  Mirrors `Suggestion.Citations` (memento of indicator state).
+- **Null Object** — `MarketSnapshot.Empty` (§3.3) mirrors `CallDiff.None`.
+  Consumed by `DashboardViewModel.MarketSnapshot` default and by
+  `LoadDashboardUseCase` on parse failure, so the dashboard render path
+  has no nullable variant to handle.
+- **Pipeline (implicit, future-pattern hint)** — §6.5's
+  `Dedup → VolumeFilter → HorizonFilter → Order → Take` is a textbook
+  Pipeline. Today as one method body it's right-sized; if extracted
+  later as `IMarketFilter` links it becomes Chain of Responsibility.
 - **Specification** — N/A: no DB queries against a markets table
   (snapshots live as JSON on `Suggestion`).
 - **Graceful degradation** — same family as `FxRateUnavailableException`:
