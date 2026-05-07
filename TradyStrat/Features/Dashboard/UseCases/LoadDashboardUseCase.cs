@@ -1,10 +1,8 @@
 using Ardalis.Specification;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;
-using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
@@ -76,11 +74,7 @@ public sealed class LoadDashboardUseCase(
         if (growthSeries.Count > 0)
         {
             var pinned = growthSeries.ToList();
-            pinned[^1] = pinned[^1] with
-            {
-                Date = today,
-                ValueEur = snap.CurrentValueEur
-            };
+            pinned[^1] = new GrowthPoint(today, snap.CurrentValueEur);
             growthSeries = pinned;
         }
 

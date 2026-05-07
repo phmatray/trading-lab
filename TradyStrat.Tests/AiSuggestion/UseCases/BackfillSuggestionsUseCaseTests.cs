@@ -2,8 +2,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;

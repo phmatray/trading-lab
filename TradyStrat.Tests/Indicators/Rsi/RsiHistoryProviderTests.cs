@@ -1,5 +1,4 @@
 using Shouldly;
-using TradyStrat.Features.Indicators;
 using TradyStrat.Common.Domain;
 using TradyStrat.Features.Indicators.Rsi;
 using Xunit;

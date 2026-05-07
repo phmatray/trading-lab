@@ -8,5 +8,5 @@ AppManager.Start(args, modules => modules.AddFromAssemblyOf<DatabaseModule>());
 
 namespace TradyStrat
 {
-    public partial class Program { }
+    public partial class Program;
 }

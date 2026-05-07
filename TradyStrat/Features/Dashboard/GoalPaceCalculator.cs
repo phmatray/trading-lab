@@ -36,12 +36,12 @@ public static class GoalPaceCalculator
         if (totalPlanDays <= 0 || elapsedDays < 0)
             return GoalPaceVm.Zero;
 
-        var baseline   = goal.TargetEur * (decimal)elapsedDays / totalPlanDays;
+        var baseline   = goal.TargetEur * elapsedDays / totalPlanDays;
         var vsPlan     = currentValueEur - baseline;
 
         var daysLeft   = targetDate.DayNumber - today.DayNumber;
-        var monthsLeft = (decimal)daysLeft / 30m;
-        var yearsLeft  = (decimal)daysLeft / 365m;
+        var monthsLeft = daysLeft / 30m;
+        var yearsLeft  = daysLeft / 365m;
 
         decimal monthlyPct = 0m, cagrPct = 0m;
         if (monthsLeft > 0m && currentValueEur > 0m)

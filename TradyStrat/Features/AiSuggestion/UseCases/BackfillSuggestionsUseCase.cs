@@ -1,6 +1,4 @@
 using Ardalis.Specification;
-using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Common.Domain;

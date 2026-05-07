@@ -1,6 +1,4 @@
 using System.Text.Json;
-using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using Microsoft.Extensions.AI;
 using TradyStrat.Common.Domain;
