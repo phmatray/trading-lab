@@ -3,7 +3,7 @@ using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Common.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.CallDiff;
 
 public class CallDiffBuilderTests
 {
@@ -34,7 +34,7 @@ public class CallDiffBuilderTests
         => new CallDiffBuilder()
             .WithToday(Make(SuggestionAction.Hold, 5))
             .WithPrior(null)
-            .Build().ShouldBe(CallDiff.None);
+            .Build().ShouldBe(Features.AiSuggestion.CallDiff.CallDiff.None);
 
     [Fact]
     public void Detects_action_change()

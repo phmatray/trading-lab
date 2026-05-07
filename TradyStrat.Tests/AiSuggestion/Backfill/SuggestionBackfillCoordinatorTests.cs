@@ -11,7 +11,7 @@ using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using Xunit;
 
-namespace TradyStrat.Tests.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.Backfill;
 
 public class SuggestionBackfillCoordinatorTests
 {

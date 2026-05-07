@@ -17,7 +17,7 @@ using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Time;
 using Xunit;
 
-namespace TradyStrat.Tests.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.Snapshot;
 
 public class SnapshotFactoryTests
 {
