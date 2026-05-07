@@ -1,5 +1,7 @@
-using TradyStrat.Features.Fx;
 using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.UseCases;
+using TradyStrat.Features.Fx;
+using TradyStrat.Features.Settings.UseCases;
 
 namespace TradyStrat.Features.PriceFeed;
 
@@ -7,18 +9,25 @@ public sealed partial class PriceFeedHostedService(
     IServiceProvider services,
     ILogger<PriceFeedHostedService> log) : IHostedService
 {
-    private static readonly string[] Tickers = ["CON3.L", "COIN", "BTC-USD"];
-
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = services.CreateAsyncScope();
-        var price = scope.ServiceProvider.GetRequiredService<DailyPriceCache>();
-        var fx    = scope.ServiceProvider.GetRequiredService<DailyFxCache>();
+        var price       = scope.ServiceProvider.GetRequiredService<DailyPriceCache>();
+        var fx          = scope.ServiceProvider.GetRequiredService<DailyFxCache>();
+        var listUseCase = scope.ServiceProvider.GetRequiredService<ListInstrumentsUseCase>();
 
-        foreach (var t in Tickers)
-            await SafeWarmPriceAsync(price, t, cancellationToken);
+        var instruments = await listUseCase.ExecuteAsync(Unit.Value, cancellationToken);
 
-        await SafeWarmFxAsync(fx, "EUR", "USD", cancellationToken);
+        foreach (var inst in instruments)
+            await SafeWarmPriceAsync(price, inst.Ticker, cancellationToken);
+
+        var quotes = instruments
+            .Where(i => !string.Equals(i.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
+            .Select(i => i.Currency.ToUpperInvariant())
+            .Distinct();
+
+        foreach (var quote in quotes)
+            await SafeWarmFxAsync(fx, "EUR", quote, cancellationToken);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
