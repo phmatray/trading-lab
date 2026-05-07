@@ -189,10 +189,16 @@ public class SnapshotFactoryTests
     [Fact]
     public async Task Catalog_produces_byte_identical_PromptHash_against_seeded_set()
     {
-        // Sentinel for spec §11.3: markets are now included in the hash payload
-        // (Task 12), so the hash will differ from pre-Task-12 captures. The
-        // assertion is that a hash is produced (non-empty and 16 hex chars) — the
-        // PromptHash_changes_when_markets_change test verifies sensitivity to content.
+        // Sentinel for spec §11.3: changing the prompt input shape (catalog
+        // order, ticker set, currency, snapshot field shape, etc.) MUST be a
+        // deliberate decision, not a silent regression. If this test fails,
+        // either (a) you changed something that affects the prompt and need
+        // to update the captured hash, or (b) you accidentally broke the
+        // legacy-order trick.
+        // Hash was updated at Task 12 (prediction-markets) because the markets list
+        // was added to the payload (previously "2EB10B0275AD1282").
+        const string ExpectedHash = "895EED53A280A470";
+
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
@@ -210,8 +216,7 @@ public class SnapshotFactoryTests
         var sut  = BuildSut(db);
         var snap = await sut.CreateAsync(asOf, ct);
 
-        snap.PromptHash.ShouldNotBeNullOrEmpty();
-        snap.PromptHash.Length.ShouldBe(16);
+        snap.PromptHash.ShouldBe(ExpectedHash);
     }
 
     [Fact]
