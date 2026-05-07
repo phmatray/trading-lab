@@ -1,6 +1,7 @@
 @page "/settings"
 @rendermode InteractiveServer
 @using TradyStrat.Features.Dashboard.Components
+@using TradyStrat.Features.Settings.Components
 
 <VaultMasthead Today="@(Clock.TodayInExchangeTzFor("CON3.L"))" EntryNumber="@_count" />
 
@@ -16,10 +17,6 @@
             <span class="lbl">Target date <em class="hint">optional</em></span>
             <input type="date" @bind="_date" @bind:after="OnInputChanged" />
         </label>
-        <label class="field">
-            <span class="lbl">Focus ticker</span>
-            <input value="CON3.L" disabled />
-        </label>
     </div>
     <div class="actions">
         <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
@@ -32,4 +29,5 @@
             <span class="meta">last updated @t.ToLocalTime().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)</span>
         }
     </div>
+    <AddInstrumentForm />
 </div>
