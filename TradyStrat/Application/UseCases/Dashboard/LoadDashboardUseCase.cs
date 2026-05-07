@@ -65,6 +65,23 @@ public sealed class LoadDashboardUseCase(
 
         var snap = await portfolio.SnapshotAsync(focusPriceEur ?? 0m, goal.TargetEur, ct);
         var growthSeries = await growth.BuildAsync(FocusTicker, ct);
+
+        // The growth series is computed from raw bar.Close values (no FX).
+        // Pin its trailing point to the hero's EUR-valued snapshot so the chart's
+        // "today" label and the big hero number agree on the same page.
+        // Followup-B: thread FxConverter through GrowthSeriesBuilder for a fully
+        // EUR-correct curve across all dates.
+        if (growthSeries.Count > 0)
+        {
+            var pinned = growthSeries.ToList();
+            pinned[^1] = pinned[^1] with
+            {
+                Date = today,
+                ValueEur = snap.CurrentValueEur
+            };
+            growthSeries = pinned;
+        }
+
         var todays    = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
         var entryNum  = await tradeRepo.CountAsync(new AllTradesSpec(), ct);
         var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(FocusTicker), ct);
