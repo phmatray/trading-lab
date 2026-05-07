@@ -1,6 +1,6 @@
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.PriceFeed;
+namespace TradyStrat.Features.PriceFeed.Providers;
 
 public interface IPriceFeed
 {

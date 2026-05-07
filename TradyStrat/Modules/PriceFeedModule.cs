@@ -1,4 +1,5 @@
 using TheAppManager.Modules;
+using TradyStrat.Features.PriceFeed.Providers;
 using TradyStrat.Features.PriceFeed;
 
 namespace TradyStrat.Modules;

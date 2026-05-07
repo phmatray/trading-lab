@@ -1,4 +1,5 @@
 using TradyStrat.Features.Fx;
+using TradyStrat.Features.Fx.Providers;
 using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Tests.Fx;

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TradyStrat.Features.PriceFeed.Providers;
 using TradyStrat.Data;
 using TradyStrat.Common.Time;
 

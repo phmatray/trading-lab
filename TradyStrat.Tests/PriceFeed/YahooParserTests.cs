@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TradyStrat.Features.PriceFeed.Providers;
 using Shouldly;
 using TradyStrat.Features.PriceFeed;
 using TradyStrat.Common.Exceptions;

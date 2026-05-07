@@ -2,7 +2,7 @@ using System.Text.Json;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 
-namespace TradyStrat.Features.PriceFeed;
+namespace TradyStrat.Features.PriceFeed.Providers;
 
 public sealed class YahooPriceFeed(HttpClient http) : IPriceFeed
 {

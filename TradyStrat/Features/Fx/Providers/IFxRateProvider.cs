@@ -1,6 +1,6 @@
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.Fx;
+namespace TradyStrat.Features.Fx.Providers;
 
 public interface IFxRateProvider
 {

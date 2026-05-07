@@ -3,7 +3,7 @@ using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 
-namespace TradyStrat.Features.Dashboard;
+namespace TradyStrat.Features.Dashboard.Components;
 
 /// <summary>One row of the today's-call diff list.</summary>
 /// <param name="Kind">"changed", "added", or "removed" — drives the side glyph.</param>

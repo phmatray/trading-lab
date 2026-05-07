@@ -2,7 +2,7 @@ using System.Text.Json;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 
-namespace TradyStrat.Features.Fx;
+namespace TradyStrat.Features.Fx.Providers;
 
 public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
 {

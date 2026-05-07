@@ -1,4 +1,5 @@
 using TheAppManager.Modules;
+using TradyStrat.Features.Fx.Providers;
 using TradyStrat.Features.Fx;
 
 namespace TradyStrat.Modules;
