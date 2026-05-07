@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Specifications.Suggestions;
+namespace TradyStrat.Features.AiSuggestion.Specifications;
 
 public sealed class LatestSuggestionSpec : Specification<Suggestion>
 {

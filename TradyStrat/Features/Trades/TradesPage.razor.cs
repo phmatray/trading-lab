@@ -5,7 +5,7 @@ using TradyStrat.Application.UseCases.Trades;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;
-using TradyStrat.Specifications.Trades;
+using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Trades;
 

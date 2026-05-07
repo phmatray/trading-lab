@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.UseCases.AiSuggestion;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
-using TradyStrat.Specifications.Suggestions;
+using TradyStrat.Features.AiSuggestion.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion;
 

@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
-using TradyStrat.Specifications.FxRates;
+using TradyStrat.Features.Fx.Specifications;
 
 namespace TradyStrat.Features.Fx;
 

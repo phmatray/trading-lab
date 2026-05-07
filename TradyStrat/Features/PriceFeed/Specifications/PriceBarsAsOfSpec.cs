@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Specifications.PriceBars;
+namespace TradyStrat.Features.PriceFeed.Specifications;
 
 public sealed class PriceBarsAsOfSpec : Specification<PriceBar>
 {

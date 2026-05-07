@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
-using TradyStrat.Specifications.PriceBars;
+using TradyStrat.Features.PriceFeed.Specifications;
 
 namespace TradyStrat.Features.Indicators;
 

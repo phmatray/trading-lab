@@ -7,7 +7,7 @@ using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
-using TradyStrat.Specifications.Trades;
+using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion;
 

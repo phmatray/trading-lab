@@ -3,7 +3,7 @@ using TradyStrat.Application.Abstractions;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
-using TradyStrat.Specifications.Suggestions;
+using TradyStrat.Features.AiSuggestion.Specifications;
 
 namespace TradyStrat.Application.UseCases.AiSuggestion;
 

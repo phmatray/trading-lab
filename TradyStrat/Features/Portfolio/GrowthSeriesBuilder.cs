@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
-using TradyStrat.Specifications.PriceBars;
-using TradyStrat.Specifications.Trades;
+using TradyStrat.Features.PriceFeed.Specifications;
+using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Portfolio;
 

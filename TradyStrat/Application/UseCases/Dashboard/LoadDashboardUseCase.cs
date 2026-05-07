@@ -8,10 +8,10 @@ using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
-using TradyStrat.Specifications.FxRates;
-using TradyStrat.Specifications.PriceBars;
-using TradyStrat.Specifications.Suggestions;
-using TradyStrat.Specifications.Trades;
+using TradyStrat.Features.Fx.Specifications;
+using TradyStrat.Features.PriceFeed.Specifications;
+using TradyStrat.Features.AiSuggestion.Specifications;
+using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Application.UseCases.Dashboard;
 

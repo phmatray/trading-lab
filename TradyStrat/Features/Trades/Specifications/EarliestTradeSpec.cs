@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Specifications.Trades;
+namespace TradyStrat.Features.Trades.Specifications;
 
 public sealed class EarliestTradeSpec : Specification<Trade>
 {

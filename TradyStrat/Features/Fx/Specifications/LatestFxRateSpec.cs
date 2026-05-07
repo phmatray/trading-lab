@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Specifications.FxRates;
+namespace TradyStrat.Features.Fx.Specifications;
 
 public sealed class LatestFxRateSpec : Specification<FxRate>
 {
