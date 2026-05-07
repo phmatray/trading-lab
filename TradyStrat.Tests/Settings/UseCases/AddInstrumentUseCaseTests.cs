@@ -1,0 +1,113 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
+using Shouldly;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.Time;
+using TradyStrat.Data;
+using TradyStrat.Features.Fx;
+using TradyStrat.Features.Fx.Providers;
+using TradyStrat.Features.PriceFeed;
+using TradyStrat.Features.PriceFeed.Providers;
+using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Tests.Fx;                  // TestRepo<T>
+using TradyStrat.Tests.Specifications;       // InMemoryDb.Create()
+using Xunit;
+
+namespace TradyStrat.Tests.Settings.UseCases;
+
+public class AddInstrumentUseCaseTests
+{
+    private sealed class FixedClock(DateTime utcNow) : IClock
+    {
+        public DateTime UtcNow() => utcNow;
+        public DateOnly TodayLocal() => DateOnly.FromDateTime(utcNow);
+        public DateOnly TodayInExchangeTzFor(string ticker) => DateOnly.FromDateTime(utcNow);
+    }
+
+    private sealed class ThrowingPriceFeed : IPriceFeed
+    {
+        public Task<IReadOnlyList<PriceBar>> FetchDailyAsync(
+            string ticker, DateOnly from, DateOnly to, CancellationToken ct)
+            => Task.FromException<IReadOnlyList<PriceBar>>(
+                new PriceFeedUnavailableException("simulated"));
+
+        public Task<InstrumentMetadata> GetInstrumentMetadataAsync(
+            string ticker, CancellationToken ct)
+            => throw new NotImplementedException();
+    }
+
+    private sealed class ThrowingFxProvider : IFxRateProvider
+    {
+        public Task<IReadOnlyList<FxRate>> FetchAsync(
+            string pair, DateOnly from, DateOnly to, CancellationToken ct)
+            => Task.FromException<IReadOnlyList<FxRate>>(
+                new FxRateUnavailableException("simulated"));
+    }
+
+    private static InstrumentMetadata Probe(string ticker, string currency = "USD")
+        => new(ticker, ticker, currency, "NMS", "America/New_York");
+
+    private static AddInstrumentUseCase NewSut(AppDbContext db)
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 7, 12, 0, 0, DateTimeKind.Utc));
+        var price = new DailyPriceCache(
+            new ThrowingPriceFeed(), db, clock,
+            NullLogger<DailyPriceCache>.Instance);
+        var fx = new DailyFxCache(
+            new ThrowingFxProvider(), db, clock,
+            NullLogger<DailyFxCache>.Instance);
+        return new AddInstrumentUseCase(
+            new TestRepo<Instrument>(db), price, fx, clock,
+            NullLogger<AddInstrumentUseCase>.Instance);
+    }
+
+    [Fact]
+    public async Task Inserts_instrument_on_happy_path()
+    {
+        await using var db = InMemoryDb.Create();
+        var sut = NewSut(db);
+
+        var inst = await sut.ExecuteAsync(
+            new AddInstrumentInput(Probe("ETHE.PA", "EUR"), InstrumentKind.Held),
+            TestContext.Current.CancellationToken);
+
+        inst.Ticker.ShouldBe("ETHE.PA");
+        inst.Kind.ShouldBe(InstrumentKind.Held);
+        (await db.Instruments.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Throws_DuplicateInstrumentException_when_ticker_exists()
+    {
+        await using var db = InMemoryDb.Create();
+        db.Instruments.Add(new Instrument
+        {
+            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
+            Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow,
+        });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = NewSut(db);
+
+        await Should.ThrowAsync<DuplicateInstrumentException>(
+            () => sut.ExecuteAsync(
+                new AddInstrumentInput(Probe("CON3.L"), InstrumentKind.Held),
+                TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Warm_failure_does_not_roll_back_insert()
+    {
+        await using var db = InMemoryDb.Create();
+        var sut = NewSut(db);
+
+        await sut.ExecuteAsync(
+            new AddInstrumentInput(Probe("XYZ", "USD"), InstrumentKind.Watchlist),
+            TestContext.Current.CancellationToken);
+
+        (await db.Instruments.CountAsync(
+            i => i.Ticker == "XYZ", TestContext.Current.CancellationToken)).ShouldBe(1);
+    }
+}
