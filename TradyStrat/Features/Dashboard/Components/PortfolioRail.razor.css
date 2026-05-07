@@ -40,3 +40,18 @@
 .delta { font-family: var(--font-mono); font-size: 12px; margin-left: 6px;
          color: var(--vault-green); font-weight: 500; }
 .delta.dn { color: var(--vault-red); }
+
+/* Mid-width: position cell goes full-width above three equally-sized
+   ticker cells. Avoids 28px display numerals being crushed in narrow
+   columns between the page-level 980px breakpoint and ~1180px. */
+@media (max-width: 1180px) and (min-width: 981px) {
+    .rail {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    .rail .cell:first-child {
+        grid-column: 1 / -1;
+        border-right: none;
+        border-bottom: 1px solid var(--vault-rule);
+    }
+    .val { font-size: 22px; }
+}
