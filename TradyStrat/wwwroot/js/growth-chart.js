@@ -8,9 +8,18 @@ function fmtSigned(n) {
     return (v >= 0 ? '+€' : '−€') + Math.abs(v).toLocaleString('fr-FR');
 }
 
-function findIndex(dates, mouseRatio) {
-    const idx = Math.round(mouseRatio * (dates.length - 1));
-    return Math.max(0, Math.min(dates.length - 1, idx));
+// Find the latest data index whose date is <= hoveredDate.
+// Data dates are ascending; binary search.
+function findIndexByDate(dates, hoveredMs) {
+    if (hoveredMs <= new Date(dates[0]).getTime()) return 0;
+    if (hoveredMs >= new Date(dates[dates.length - 1]).getTime()) return dates.length - 1;
+    let lo = 0, hi = dates.length - 1;
+    while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (new Date(dates[mid]).getTime() <= hoveredMs) lo = mid;
+        else hi = mid - 1;
+    }
+    return lo;
 }
 
 const tooltipsByElement = new WeakMap();
@@ -37,30 +46,50 @@ export function init(svg, data /*, locale */) {
     guide.style.display = 'none';
     svg.appendChild(guide);
 
+    // Axis spans first-trade-date → axisEndDate (goal date or last data date).
+    // Capital/position/focusTickerEur arrays only span first-trade-date → today
+    // (last data date). Past today, the chart's "future runway" shows the
+    // planned trajectory only — actual values are absent.
+    const axisStartMs = new Date(data.axisStartDate ?? data.dates[0]).getTime();
+    const axisEndMs   = new Date(data.axisEndDate   ?? data.dates[data.dates.length - 1]).getTime();
+    const axisSpanMs  = Math.max(1, axisEndMs - axisStartMs);
+    const lastDataMs  = new Date(data.dates[data.dates.length - 1]).getTime();
+
     function show(evt) {
         const rect = svg.getBoundingClientRect();
-        const ratio = (evt.clientX - rect.left) / rect.width;
-        const i = findIndex(data.dates, ratio);
-        const d = new Date(data.dates[i]);
-        const dateLabel = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        const ratio = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
+        const hoveredMs = axisStartMs + ratio * axisSpanMs;
+        const dateLabel = new Date(hoveredMs)
+            .toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 
-        const capital     = data.capital[i] ?? 0;
-        const prior       = i > 0 ? (data.capital[i - 1] ?? capital) : capital;
-        const dPrior      = capital - prior;
-        const position    = data.position?.[i];
-        const focusPxEur  = data.focusTickerEur?.[i];
-        const planAtIdx   = data.targetEur && data.targetDate
-            ? data.targetEur * (i / (data.dates.length - 1))
+        // Linear plan baseline at hovered date — works for any point on the axis.
+        const planAt = data.targetEur != null
+            ? data.targetEur * ((hoveredMs - axisStartMs) / axisSpanMs)
             : null;
-        const vsPlan      = planAtIdx != null ? capital - planAtIdx : null;
 
-        tooltip.innerHTML =
-            `<div class="date">${dateLabel}</div>` +
-            `<div class="big">${formatters.eur.format(capital)}</div>` +
-            `<div class="delta">${fmtSigned(dPrior)} vs. prior day</div>` +
-            (position != null ? `<div class="row"><span>POSITION</span><span>${Math.round(position).toLocaleString('fr-FR')} sh</span></div>` : '') +
-            (focusPxEur != null ? `<div class="row"><span>CON3.L</span><span>€${focusPxEur.toFixed(2)}</span></div>` : '') +
-            (vsPlan != null ? `<div class="row"><span>VS. PLAN</span><span>${fmtSigned(vsPlan)}</span></div>` : '');
+        if (hoveredMs > lastDataMs) {
+            // Future runway: no actual capital, just the planned trajectory.
+            tooltip.innerHTML =
+                `<div class="date">${dateLabel}</div>` +
+                `<div class="delta">future runway</div>` +
+                (planAt != null ? `<div class="row"><span>ON PLAN</span><span>${formatters.eur.format(planAt)}</span></div>` : '');
+        } else {
+            const i        = findIndexByDate(data.dates, hoveredMs);
+            const capital  = data.capital[i] ?? 0;
+            const prior    = i > 0 ? (data.capital[i - 1] ?? capital) : capital;
+            const dPrior   = capital - prior;
+            const position = data.position?.[i];
+            const focusEur = data.focusTickerEur?.[i];
+            const vsPlan   = planAt != null ? capital - planAt : null;
+
+            tooltip.innerHTML =
+                `<div class="date">${dateLabel}</div>` +
+                `<div class="big">${formatters.eur.format(capital)}</div>` +
+                `<div class="delta">${fmtSigned(dPrior)} vs. prior day</div>` +
+                (position != null ? `<div class="row"><span>POSITION</span><span>${Math.round(position).toLocaleString('fr-FR')} sh</span></div>` : '') +
+                (focusEur != null && focusEur > 0 ? `<div class="row"><span>CON3.L</span><span>€${focusEur.toFixed(2)}</span></div>` : '') +
+                (vsPlan != null ? `<div class="row"><span>VS. PLAN</span><span>${fmtSigned(vsPlan)}</span></div>` : '');
+        }
 
         tooltip.style.display = 'block';
         const x = ratio * rect.width;

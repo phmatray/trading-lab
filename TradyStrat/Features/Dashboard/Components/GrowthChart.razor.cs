@@ -40,15 +40,26 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
         catch (JSException) { /* graceful degradation: chart still renders without crosshair */ }
     }
 
-    private object BuildPayload() => new
+    private object BuildPayload()
     {
-        dates          = Points.Select(g => g.Date.ToString("o", CultureInfo.InvariantCulture)).ToArray(),
-        capital        = Points.Select(g => (double)g.ValueEur).ToArray(),
-        position       = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
-        focusTickerEur = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
-        targetEur      = (double)Goal.TargetEur,
-        targetDate     = Goal.TargetDate?.ToString("o", CultureInfo.InvariantCulture),
-    };
+        // The visible X-axis spans first-trade-date → axisEnd (goal date if set,
+        // otherwise last data date). Data arrays only span first-trade → today.
+        // The JS uses these explicit bounds for hover-date math.
+        var axisStart = Points.Count > 0 ? Points[0].Date : DateOnly.FromDateTime(DateTime.UtcNow);
+        var axisEnd   = EndDate ?? (Points.Count > 0 ? Points[^1].Date : axisStart);
+
+        return new
+        {
+            dates          = Points.Select(g => g.Date.ToString("o", CultureInfo.InvariantCulture)).ToArray(),
+            capital        = Points.Select(g => (double)g.ValueEur).ToArray(),
+            position       = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
+            focusTickerEur = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
+            targetEur      = (double)Goal.TargetEur,
+            targetDate     = Goal.TargetDate?.ToString("o", CultureInfo.InvariantCulture),
+            axisStartDate  = axisStart.ToString("o", CultureInfo.InvariantCulture),
+            axisEndDate    = axisEnd.ToString("o", CultureInfo.InvariantCulture),
+        };
+    }
 
     public async ValueTask DisposeAsync()
     {
