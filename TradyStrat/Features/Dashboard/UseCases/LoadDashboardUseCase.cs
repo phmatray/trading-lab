@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Ardalis.Specification;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Time;
 using TradyStrat.Common.UseCases;
+using TradyStrat.Features.AiSuggestion;        // JsonOpts
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.AiSuggestion.Specifications;
@@ -11,6 +13,7 @@ using TradyStrat.Features.Fx;
 using TradyStrat.Features.Fx.Specifications;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.PriceFeed.Specifications;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.Specifications;
@@ -96,6 +99,22 @@ public sealed class LoadDashboardUseCase(
         else
         {
             todays = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
+        }
+
+        // Prediction-market snapshot — Empty by default; deserialize if column present.
+        var marketSnap = MarketSnapshot.Empty;
+        if (todays?.MarketSnapshotJson is { Length: > 0 } marketJson)
+        {
+            try
+            {
+                marketSnap = JsonSerializer.Deserialize<MarketSnapshot>(marketJson, JsonOpts.Strict)
+                             ?? MarketSnapshot.Empty;
+            }
+            catch (JsonException ex)
+            {
+                LoadDashboardLog.MarketSnapshotMalformed(log, ex);
+                // marketSnap stays Empty — rail will be absent for this entry.
+            }
         }
 
         var entryNum  = await tradeRepo.CountAsync(new TradesAsOfSpec(target), ct);
@@ -188,7 +207,10 @@ public sealed class LoadDashboardUseCase(
             EarliestTradingDay: earliest,
             LatestTradingDay: latest,
             PrevTradingDay: prev,
-            NextTradingDay: next);
+            NextTradingDay: next)
+        {
+            MarketSnapshot = marketSnap,
+        };
     }
 
     private async Task<decimal?> ComputeDeltaPctAsync(string ticker, DateOnly asOf, CancellationToken ct)
@@ -240,4 +262,7 @@ internal static partial class LoadDashboardLog
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Backfill chain crashed unobserved")]
     public static partial void BackfillCrashed(ILogger logger, Exception? ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "MarketSnapshotJson malformed; rail will not render")]
+    public static partial void MarketSnapshotMalformed(ILogger logger, Exception ex);
 }

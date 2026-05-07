@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text.Json;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Indicators.History;
 using Shouldly;
@@ -19,6 +20,8 @@ using TradyStrat.Features.Indicators.Ichimoku;
 using TradyStrat.Features.Indicators.MovingAverage;
 using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Features.AiSuggestion.CallDiff;
+using TradyStrat.Features.AiSuggestion;        // JsonOpts
+using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Specifications;
@@ -246,5 +249,56 @@ public class LoadDashboardUseCaseTests
         var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: true), ct);
 
         vm.EntryNumber.ShouldBe(1); // only the original 2025-12-07 trade is on-or-before target
+    }
+
+    [Fact]
+    public async Task Deserializes_market_snapshot_when_present()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        var snap = new MarketSnapshot(
+            Markets: [new PredictionMarket("btc-100k", "Will BTC > $100k?",
+                0.32m, new DateOnly(2026, 12, 31), 1m, ["bitcoin"])],
+            Cited:   [new MarketCitation("btc-100k", "weighed for context")]);
+        var marketJson = JsonSerializer.Serialize(snap, JsonOpts.Strict);
+
+        await SeedBaseAsync(db, ct, new Suggestion
+        {
+            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Action = SuggestionAction.Hold, Conviction = 1,
+            Rationale = "x", CitationsJson = "[]",
+            MarketSnapshotJson = marketJson,
+            PromptHash = "h", CreatedAt = DateTime.UtcNow,
+        });
+
+        var (uc, _, _) = BuildSut(db);
+        var vm = await uc.ExecuteAsync(
+            new LoadDashboardInput(TargetDate: new DateOnly(2026, 5, 6), IsHistorical: true), ct);
+
+        vm.MarketSnapshot.Markets.Count.ShouldBe(1);
+        vm.MarketSnapshot.Cited.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Tolerates_malformed_market_snapshot_json()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        await SeedBaseAsync(db, ct, new Suggestion
+        {
+            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Action = SuggestionAction.Hold, Conviction = 1,
+            Rationale = "x", CitationsJson = "[]",
+            MarketSnapshotJson = "{ this is broken",
+            PromptHash = "h", CreatedAt = DateTime.UtcNow,
+        });
+
+        var (uc, _, _) = BuildSut(db);
+        var vm = await uc.ExecuteAsync(
+            new LoadDashboardInput(TargetDate: new DateOnly(2026, 5, 6), IsHistorical: true), ct);
+
+        vm.MarketSnapshot.ShouldBe(MarketSnapshot.Empty);
     }
 }
