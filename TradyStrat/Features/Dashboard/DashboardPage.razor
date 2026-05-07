@@ -26,11 +26,13 @@ else if (_error is not null)
 else
 {
     var vm = _vm!;
-    <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber" />
+    <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
+                   PriceAsOfRelative="vm.PriceAsOfRelative" />
     <div class="hero-row">
         <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                      GoalPace="vm.GoalPace" />
         <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
+                        CallAsOfRelative="vm.CallAsOfRelative"
                         OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
     </div>
     <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />

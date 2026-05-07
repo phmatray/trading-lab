@@ -3,6 +3,12 @@
     border-bottom: 1px solid var(--vault-rule);
 }
 .label { margin-bottom: 12px; }
+.freshness {
+    color: rgba(236,230,214,0.42);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
 .verb {
     font-family: var(--font-display);
     font-style: italic;

@@ -7,6 +7,7 @@ public partial class VaultMasthead : ComponentBase
 {
     [Parameter] public DateOnly Today { get; set; }
     [Parameter] public int EntryNumber { get; set; }
+    [Parameter] public string PriceAsOfRelative { get; set; } = "";
 
     private static string FormatDate(DateOnly d)
         => d.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture);

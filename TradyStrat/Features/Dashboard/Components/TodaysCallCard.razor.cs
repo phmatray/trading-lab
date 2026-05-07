@@ -8,6 +8,7 @@ public partial class TodaysCallCard : ComponentBase
 {
     [Parameter, EditorRequired] public Suggestion Sug { get; set; } = null!;
     [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public string CallAsOfRelative { get; set; } = "";
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }
 

@@ -8,5 +8,8 @@
         <NavLink class="nav-link" href="/trades">Trades</NavLink>
         <NavLink class="nav-link" href="/settings">Settings</NavLink>
     </nav>
-    <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)</div>
+    <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+    {
+        <span class="freshness"> · prices @PriceAsOfRelative</span>
+    }</div>
 </div>

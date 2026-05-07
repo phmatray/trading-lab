@@ -1,6 +1,9 @@
 @using TradyStrat.Shared.Domain
 <div class="call">
-    <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)</div>
+    <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)@if (!string.IsNullOrEmpty(CallAsOfRelative))
+    {
+        <span class="freshness"> · @CallAsOfRelative</span>
+    }</div>
     <div class="verb">@Verb</div>
 
     @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
