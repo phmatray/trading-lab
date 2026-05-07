@@ -329,11 +329,192 @@ export function init(svg, data /*, locale */) {
         if (els.xEnd)   els.xEnd.textContent   = monthLabel(axisStartMs + w1 * axisSpanMs);
     }
 
+    // ---- Navigator strip ----
+    const naviBg     = $('naviBg');
+    const naviLine   = $('naviLine');
+    const naviArea   = $('naviArea');
+    const naviPlan   = $('naviPlan');
+    const spotlight  = $('spotlight');
+    const handleL    = $('handleL');
+    const handleR    = $('handleR');
+    const naviLabelL = $('naviLabelL');
+    const naviLabelR = $('naviLabelR');
+    const naviPresets = $('naviPresets');
+
+    // Total time span in ms — used for preset windows.
+    const totalDays = Math.max(1, Math.round(axisSpanMs / (24 * 3600 * 1000)));
+    const MIN_SIZE  = Math.min(0.05, 30 / totalDays);  // 5% of axis or 30 days, whichever smaller
+
+    function renderNavigator() {
+        if (!naviBg || datesMs.length === 0) return;
+        const VBH = 40;
+        // Squeeze capital line into the bottom 70% of the strip; plan curve fills the top.
+        const navY = v => VBH - 4 - (v / goalEur) * (VBH - 6);
+
+        const linePts = data.capital.map((v, i) => {
+            const t = msToT(datesMs[i]);
+            const x = t * VB_W;
+            return (i ? 'L' : 'M') + x.toFixed(1) + ',' + navY(v).toFixed(2);
+        }).join(' ');
+        if (naviLine) naviLine.setAttribute('d', linePts);
+
+        const lastT = msToT(datesMs[datesMs.length - 1]);
+        const lastX = lastT * VB_W;
+        if (naviArea) naviArea.setAttribute('d',
+            linePts + ' L' + lastX.toFixed(1) + ',' + (VBH - 0.5) +
+            ' L0,' + (VBH - 0.5) + ' Z'
+        );
+
+        const planSegs = [];
+        for (let i = 0; i <= PLAN_SAMPLES; i++) {
+            const t  = i / PLAN_SAMPLES;
+            const ms = axisStartMs + t * axisSpanMs;
+            const x  = t * VB_W;
+            planSegs.push((i ? 'L' : 'M') + x.toFixed(1) + ',' + navY(planValueAtMs(ms)).toFixed(2));
+        }
+        if (naviPlan) naviPlan.setAttribute('d', planSegs.join(' '));
+    }
+
+    function updateNavigatorUI() {
+        if (!spotlight) return;
+        spotlight.style.left  = (w0 * 100) + '%';
+        spotlight.style.width = ((w1 - w0) * 100) + '%';
+        if (naviLabelL) {
+            naviLabelL.textContent = monthLabel(axisStartMs + w0 * axisSpanMs);
+            naviLabelL.style.left  = (w0 * 100) + '%';
+        }
+        if (naviLabelR) {
+            naviLabelR.textContent = monthLabel(axisStartMs + w1 * axisSpanMs);
+            naviLabelR.style.left  = (w1 * 100) + '%';
+        }
+        // Mark active preset (or none if window doesn't match a preset)
+        if (naviPresets) {
+            const sizeDays = Math.round((w1 - w0) * totalDays);
+            const isAll = (w1 - w0) >= 0.999;
+            naviPresets.querySelectorAll('button').forEach(btn => {
+                const r = btn.dataset.range;
+                if (r === 'all') {
+                    btn.classList.toggle('active', isAll);
+                } else {
+                    const months = parseInt(r, 10);
+                    const expected = Math.round(months * 30.4375); // average days/month
+                    btn.classList.toggle('active', !isAll && Math.abs(sizeDays - expected) <= 3);
+                }
+            });
+        }
+    }
+
+    function setWindow(newW0, newW1) {
+        if (newW0 < 0) newW0 = 0;
+        if (newW1 > 1) newW1 = 1;
+        if (newW1 - newW0 < MIN_SIZE) {
+            // Resize handles hit the floor — keep edge anchored, push opposite edge
+            if (newW0 === 0)        newW1 = MIN_SIZE;
+            else if (newW1 === 1)   newW0 = 1 - MIN_SIZE;
+            else                    newW1 = newW0 + MIN_SIZE;
+        }
+        w0 = newW0;
+        w1 = newW1;
+        updateNavigatorUI();
+        render();
+    }
+
+    function getNaviFraction(clientX) {
+        if (!naviBg) return 0;
+        const r = naviBg.getBoundingClientRect();
+        return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    }
+
+    let dragMode    = null;       // 'pan' | 'l' | 'r' | null
+    let dragMoved   = false;
+    let dragStartX  = 0;
+    let dragStartW0 = 0, dragStartW1 = 0;
+
+    function startDrag(mode, clientX) {
+        dragMode    = mode;
+        dragStartX  = getNaviFraction(clientX);
+        dragStartW0 = w0;
+        dragStartW1 = w1;
+        dragMoved   = false;
+        hideTooltip();   // prevent tooltip lingering during drag
+    }
+
+    function endDrag() {
+        dragMode = null;
+        // Clear dragMoved on the next tick so the synthetic `click` event
+        // (fires after pointerup) can still read it as true.
+        setTimeout(() => { dragMoved = false; }, 0);
+    }
+
+    if (spotlight) {
+        spotlight.addEventListener('pointerdown', e => {
+            if (e.target === handleL)      startDrag('l',   e.clientX);
+            else if (e.target === handleR) startDrag('r',   e.clientX);
+            else                           startDrag('pan', e.clientX);
+            spotlight.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+        spotlight.addEventListener('pointermove', e => {
+            if (!dragMode) return;
+            dragMoved = true;
+            const x  = getNaviFraction(e.clientX);
+            const dx = x - dragStartX;
+            if (dragMode === 'pan') {
+                const size = dragStartW1 - dragStartW0;
+                let nW0 = dragStartW0 + dx;
+                let nW1 = dragStartW1 + dx;
+                if (nW0 < 0) { nW0 = 0; nW1 = size; }
+                if (nW1 > 1) { nW1 = 1; nW0 = 1 - size; }
+                setWindow(nW0, nW1);
+            } else if (dragMode === 'l') {
+                setWindow(dragStartW0 + dx, dragStartW1);
+            } else if (dragMode === 'r') {
+                setWindow(dragStartW0, dragStartW1 + dx);
+            }
+        });
+        spotlight.addEventListener('pointerup',     endDrag);
+        spotlight.addEventListener('pointercancel', endDrag);
+    }
+
+    // Click on navigator background outside spotlight → recenter window there.
+    // Skip if the click is the synthetic trailing-click of a real drag.
+    if (naviBg) {
+        naviBg.addEventListener('click', e => {
+            if (dragMoved) return;
+            const x = getNaviFraction(e.clientX);
+            if (x >= w0 && x <= w1) return;
+            const size = w1 - w0;
+            setWindow(x - size / 2, x + size / 2);
+        });
+        naviBg.addEventListener('pointerdown', hideTooltip);
+    }
+
+    // Preset chips — anchor the window on today (or as much past as fits).
+    if (naviPresets) {
+        const todayFraction = msToT(todayMs);
+        naviPresets.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const r = btn.dataset.range;
+                if (r === 'all') { setWindow(0, 1); return; }
+                const months  = parseInt(r, 10);
+                const sizeDays = months * 30.4375;
+                const size    = sizeDays / totalDays;
+                if (size >= 1) { setWindow(0, 1); return; }
+                let nW1 = Math.min(1, todayFraction + size * 0.15);
+                let nW0 = nW1 - size;
+                if (nW0 < 0) { nW0 = 0; nW1 = size; }
+                setWindow(nW0, nW1);
+            });
+        });
+    }
+
+    renderNavigator();
+    updateNavigatorUI();
     render();
 
     instances.set(svg, {
         showTooltip, hideTooltip, tooltip, guide,
-        setWindow: (a, b) => { w0 = a; w1 = b; render(); },
+        setWindow,
     });
 }
 

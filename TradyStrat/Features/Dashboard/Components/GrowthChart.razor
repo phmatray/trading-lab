@@ -73,4 +73,30 @@
             }
         </div>
     </div>
+
+    @* Navigator strip — pan/zoom the visible time window.
+       Always shows the FULL timeline so "you are here" context is preserved
+       when zoomed in. Drag the spotlight to pan; drag handles to resize. *@
+    <div class="navigator">
+        <div class="navi-presets" id="@($"{_id}-naviPresets")">
+            <button data-range="3">3M</button>
+            <button data-range="6">6M</button>
+            <button data-range="12">1Y</button>
+            <button data-range="24">2Y</button>
+            <button data-range="all" class="active">All</button>
+        </div>
+        <div class="navi-track">
+            <svg class="navi-bg" id="@($"{_id}-naviBg")" viewBox="0 0 1200 40" preserveAspectRatio="none">
+                <path class="navi-area" id="@($"{_id}-naviArea")"/>
+                <path class="navi-plan" id="@($"{_id}-naviPlan")"/>
+                <path class="navi-line" id="@($"{_id}-naviLine")"/>
+            </svg>
+            <div class="navi-spotlight" id="@($"{_id}-spotlight")">
+                <div class="navi-handle navi-handle-l" id="@($"{_id}-handleL")"></div>
+                <div class="navi-handle navi-handle-r" id="@($"{_id}-handleR")"></div>
+            </div>
+            <span class="navi-label navi-label-l" id="@($"{_id}-naviLabelL")"></span>
+            <span class="navi-label navi-label-r" id="@($"{_id}-naviLabelR")"></span>
+        </div>
+    </div>
 </div>
