@@ -1,6 +1,5 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Features.Dashboard;
 using TradyStrat.Shared.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
