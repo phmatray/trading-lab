@@ -28,18 +28,22 @@ Out of scope (deliberately) — see §11.
 |---|---|
 | Scope of time travel | **Dashboard only.** `/trades` and `/settings` stay live. |
 | Read-only when historical | **Strict.** `RefreshFab`, "Re-run AI", "Log trade" are not rendered. |
+| Mode rule | `IsHistorical = (?on= was supplied and parsed successfully)`. URL presence is the state. Bare `/` is live; any valid `/?on=…` is historical. |
 | Step granularity | **Trading days only.** Closed days are skipped by prev / next; the date picker rounds non-trading days to the nearest *earlier* trading day. |
 | URL contract | Query parameter `?on=YYYY-MM-DD`. Bare `/` means today (live). |
 | Invalid / future / pre-floor dates | Server-side redirect to a canonical URL — never a rendered error. |
 | Floor | Earliest stored CON3.L price bar. No separate config. |
-| Ceiling | Today's trading day in CON3.L's exchange tz. |
+| Ceiling | Latest stored CON3.L price bar (the most recent trading day). Live mode is "calendar today" but resolves data via existing `*AsOf` queries that handle the gap on weekends/holidays. |
 | Schema changes | **None.** All required data already lives in `PriceBars` and `Suggestions`. |
 | New service | `IEntryNavigationService` — earliest / latest / prev / next / resolve-or-fallback. |
 | Module wiring | `IEntryNavigationService` is registered inside the existing `Modules/DashboardModule.cs`. No new module file. |
-| Use case change | `LoadDashboardUseCase` accepts a `targetDate` (already had a "today"); resolves prev / next / earliest / latest via the new service. |
-| Entry-no. computation | `TradesOnOrBeforeSpec(targetDate)` replaces `AllTradesSpec` for the masthead count. |
+| Use case input | `LoadDashboardUseCase` becomes `IUseCase<LoadDashboardInput, DashboardViewModel>`. The `LoadDashboardInput` record carries the resolved `TargetDate`. |
+| Use case internal change | Switch existing call sites to the `asOf` overloads that already exist (`IndicatorEngine.ComputeFor(...,DateOnly,...)`, `IndicatorEngine.HistoryFor(...,DateOnly,...)`, `PortfolioService.SnapshotAsync(asOf,...)`). |
+| Today's-call lookup | In **historical** mode, query `SuggestionForDateSpec(targetDate)` directly via the suggestion repo — **bypass** `GetTodaysSuggestionUseCase` so a missing past suggestion does not trigger an AI call. Live mode keeps using `GetTodaysSuggestionUseCase` unchanged. |
+| Entry-no. computation | `TradesAsOfSpec(targetDate).CountAsync` replaces `AllTradesSpec.CountAsync` on the dashboard. The existing `TradesAsOfSpec` is reused — no new spec class. |
+| Trade-count divergence | `TradesPage` and `SettingsPage` continue to use `AllTradesSpec().CountAsync` for their masthead. The dashboard's count diverges from those only if a trade is logged with a future `ExecutedOn`. Documented in §11; harmonization is out of scope. |
 | "entry no." rename | **Not now.** The label is currently misnamed (it counts trades, not entries) but renaming is out of scope. Spec records the debt. |
-| Test framework | xunit.v3 + Shouldly + EF Core InMemory. bUnit added if not already present, used for page-level redirect tests. |
+| Test framework | xunit.v3 + Shouldly + EF Core InMemory. **No bUnit.** Validation logic lives in a pure helper (`OnParamValidator`) that is unit-testable without the renderer. |
 
 ## 3. URL contract
 
@@ -50,56 +54,80 @@ Out of scope (deliberately) — see §11.
 /settings            → Unchanged.
 ```
 
-**Validation order** — applied in `DashboardPage.OnParametersSetAsync`:
+**Validation order** — `OnParamValidator.Validate(string?, IEntryNavigationService) → ValidationResult` (a sum-type of `Live | Historical(date) | RedirectTo(url)`), invoked from `DashboardPage.OnParametersSetAsync`:
 
-1. `on` missing or empty → live mode.
-2. `on` not parsable as `yyyy-MM-dd` → redirect to `/`. Logged at warning level. Not surfaced to the user.
-3. `on` parses but is **after** today → redirect to `/`.
-4. `on` parses but is **before** the earliest trading day → redirect to `/?on={earliest}`.
-5. `on` parses but is **not a trading day** (no price bar for CON3.L on that date) → redirect to `/?on={nearest earlier trading day}`.
-6. Otherwise → render historical view.
+1. `on` missing or empty → `Live`.
+2. `on` not parsable as `yyyy-MM-dd` → `RedirectTo("/")`. Logged at warning level. Not surfaced to the user.
+3. `on` parses but is **after the latest trading day** → `RedirectTo("/")`.
+4. `on` parses but is **before the earliest trading day** → `RedirectTo($"/?on={earliest}")`.
+5. `on` parses but is **not a trading day** (no price bar for CON3.L on that date) → `RedirectTo($"/?on={nearest earlier trading day}")`.
+6. Otherwise → `Historical(date)`.
+
+The page calls `NavigationManager.NavigateTo(url, replace: true)` for any `RedirectTo`, then short-circuits the data load. `Live` and `Historical(date)` both proceed to load the dashboard via `LoadDashboardUseCase` — they differ only in the `TargetDate` passed and in `IsHistorical` on the resulting view model.
 
 **Why redirects, not error renders:** every URL the user can copy / bookmark / share resolves to a canonical, valid trading day. Browser back / forward stays predictable; nothing breaks on stale links.
 
+**Unknown query params** are ignored. Adding `?range=3m` or `?focus=COIN` later (out of scope here) doesn't conflict — Blazor's `[SupplyParameterFromQuery]` only binds named params, leaving the rest untouched.
+
 ## 4. Patterns inventory
+
+GoF labels are applied only where they hold strictly. Components without a clean GoF mapping are listed without a forced label.
 
 | Component | Pattern | Notes |
 |---|---|---|
-| `IEntryNavigationService` | — (domain service) | Plain interface over five small queries. No GoF label warranted. |
-| `EntryNavigationService` | **Specification** (Ardalis) | All five queries are Ardalis specs against `PriceBars`. |
-| `ResolveOrFallbackAsync` | **Null Object** (sort of) | Returns the nearest valid trading day rather than throwing on closed-day input — callers never deal with `null`. |
-| `DashboardPage` validation chain | **Chain of Responsibility** (light) | Six ordered checks against `?on=`. First match wins; default is "render historical." |
-| `LoadDashboardUseCase` | **Command + Template Method** *(unchanged)* | Existing pattern preserved. |
+| `IEntryNavigationService` | **Facade** | Single interface fronting five spec-backed queries against `PriceBars`. Could equally be called a domain service with no label; Facade is the closest honest GoF fit. |
+| New `*Spec.cs` classes (`EarliestPriceBarSpec`, `PriceBarBeforeSpec`, `PriceBarAfterSpec`) | **Specification** (Ardalis) | The Specification pattern lives here, in the spec classes themselves — not in the service that uses them. |
+| `ResolveOrFallbackAsync` | — | Returns a fallback `DateOnly` so callers never deal with `null` for closed-day input. This is a total function, not the GoF Null Object pattern (which provides a do-nothing **object** for a non-null seam). No label. |
+| `OnParamValidator.Validate` | — | Pure function returning a sum-typed `ValidationResult`. Sequential `if/else if` over `?on=`. Not Chain of Responsibility — that pattern requires handler objects that decide whether to handle or pass. No label. |
+| `LoadDashboardUseCase` | **Command + Template Method** *(unchanged)* | Existing pattern preserved. Input record now `LoadDashboardInput(TargetDate)` instead of `Unit`. |
+| `UseCaseBase<,>` *(unchanged)* | **Template Method** | Existing. |
+| Existing `TradesAsOfSpec`, `SuggestionForDateSpec`, etc. *(unchanged)* | **Specification** | Existing. Reused for the as-of queries — no duplicates introduced. |
 
 ## 5. Project layout — additions
 
-### 5.1 New / modified production files
+### 5.1 New production files
 
 | File | Layer | Purpose |
 |---|---|---|
 | `Features/Dashboard/Navigation/IEntryNavigationService.cs` | Domain | Five-method interface (see §6). |
-| `Features/Dashboard/Navigation/EntryNavigationService.cs` | Domain | Ardalis-spec-backed implementation. |
-| `Common/Exceptions/NoTradingDaysException.cs` | Domain | Thrown when the price-bar table is empty. Inherits `TradyStratException`, lives alongside the existing typed exceptions. |
-| `Modules/DashboardModule.cs` *(modify)* | Composition | Registers `IEntryNavigationService → EntryNavigationService` (scoped). No new module file. |
-| `Features/Dashboard/DashboardPage.razor` *(modify)* | UI | Adds `[SupplyParameterFromQuery(Name="on")] string? OnParam`. Validation chain. Hides write actions when historical. |
-| `Features/Dashboard/DashboardPage.razor.cs` *(modify)* | UI | New `OnParametersSetAsync` validating `OnParam`. New `IsHistorical` field. Keyboard handler. |
-| `Features/Dashboard/DashboardViewModel.cs` *(modify)* | UI | Adds `IsHistorical`, `PrevTradingDay`, `NextTradingDay`, `EarliestTradingDay`, `LatestTradingDay`. |
-| `Features/Dashboard/UseCases/LoadDashboardUseCase.cs` *(modify)* | Use case | Accepts `targetDate`; calls `IEntryNavigationService` for prev / next / earliest / latest; uses `TradesOnOrBeforeSpec(targetDate)` for entry-no. |
-| `Features/Dashboard/Components/VaultMasthead.razor` *(modify)* | UI | Adds prev / next / date-pill / "return to today" controls. |
-| `Features/Dashboard/Components/VaultMasthead.razor.cs` *(modify)* | UI | New parameters per §7.1. Self-hides controls when no nav data passed. |
-| `Features/Dashboard/Components/RefreshFab.razor` *(modify)* | UI | New `Historical` parameter; early-returns when set. |
-| `Features/Dashboard/Components/TodaysCallCard.razor` *(modify)* | UI | New `Historical` parameter; wraps "Re-run AI" / "Log trade" in `@if (!Historical)`; flips title from "Today's call" to "Call for {date}". |
-| `Specifications/PriceBars/EarliestPriceBarSpec.cs` *(reuse or add)* | Persistence | Top-1 ascending by `Date`. |
-| `Specifications/PriceBars/LatestPriceBarSpec.cs` *(reuse or add)* | Persistence | Top-1 descending by `Date`. |
-| `Specifications/PriceBars/PriceBarOnOrBeforeSpec.cs` | Persistence | Top-1 desc where `Date <= input`. |
-| `Specifications/PriceBars/PriceBarBeforeSpec.cs` | Persistence | Top-1 desc where `Date < input`. |
-| `Specifications/PriceBars/PriceBarAfterSpec.cs` | Persistence | Top-1 asc where `Date > input`. |
-| `Specifications/Trades/TradesOnOrBeforeSpec.cs` | Persistence | `Where(t => t.ExecutedOn <= input)` — used for masthead count. |
-| `wwwroot/js/dashboard-keys.js` *(new)* | UI | Scoped ES module: subscribes to `←` / `→` on the dashboard root, calls back into Blazor via `DotNet.invokeMethodAsync`. Short-circuits when an editable element has focus. |
+| `Features/Dashboard/Navigation/EntryNavigationService.cs` | Domain | Spec-backed implementation. |
+| `Features/Dashboard/Navigation/OnParamValidator.cs` | Domain | Pure function `Validate(string? onParam, IEntryNavigationService nav, CancellationToken ct) → ValidationResult`. Returns one of `Live`, `Historical(DateOnly)`, `RedirectTo(string url)`. Tested in isolation (no bUnit). |
+| `Features/Dashboard/Navigation/ValidationResult.cs` | Domain | Sum-type as a sealed abstract record + three subtypes (or an `OneOf`-style discriminated union — implementer's choice). |
+| `Features/Dashboard/UseCases/LoadDashboardInput.cs` | Use case | `record LoadDashboardInput(DateOnly TargetDate, bool IsHistorical);` |
+| `Common/Exceptions/NoTradingDaysException.cs` | Domain | Thrown by `EntryNavigationService.EarliestAsync` / `LatestAsync` when the price-bar table is empty. Inherits `TradyStratException`. |
+| `Features/PriceFeed/Specifications/EarliestPriceBarSpec.cs` | Persistence | Top-1 ascending by `Date` for a given ticker. |
+| `Features/PriceFeed/Specifications/PriceBarBeforeSpec.cs` | Persistence | Top-1 desc where `Date < input`. |
+| `Features/PriceFeed/Specifications/PriceBarAfterSpec.cs` | Persistence | Top-1 asc where `Date > input`. |
+| `wwwroot/js/dashboard-keys.js` | UI | ES module: subscribes to `keydown` on `document`, invokes Blazor `[JSInvokable]` `OnPrev` / `OnNext` on the dashboard's `DotNetObjectReference`. Short-circuits when `document.activeElement` is editable. Imported in `OnAfterRenderAsync(firstRender: true)` and explicitly torn down in `DisposeAsync`. |
 
-### 5.2 Reuse audit
+### 5.2 Modified production files
 
-Before adding the five `PriceBars` specs above, check `Specifications/PriceBars/` — `EarliestPriceBarSpec` / `LatestPriceBarSpec` may already exist (depth-design spec lists similar queries). Reuse rather than duplicate; the plan step performs this audit explicitly.
+| File | Change |
+|---|---|
+| `Modules/DashboardModule.cs` | Register `IEntryNavigationService → EntryNavigationService` (scoped). |
+| `Features/Dashboard/DashboardPage.razor` | Add `[SupplyParameterFromQuery(Name="on")] string? OnParam` parameter on the page. Render `RefreshFab` / action buttons only when `!IsHistorical`. |
+| `Features/Dashboard/DashboardPage.razor.cs` | Replace `OnInitializedAsync` data-load with `OnParametersSetAsync` that runs `OnParamValidator.Validate(...)`, redirects via `NavigationManager.NavigateTo(url, replace: true)` on `RedirectTo`, otherwise calls `LoadDashboard.ExecuteAsync(new LoadDashboardInput(targetDate), ct)`. Implement `IAsyncDisposable`, `[JSInvokable] OnPrev` / `OnNext`, and the JS-module hookup. Set `_isHistorical` from the validator result. |
+| `Features/Dashboard/DashboardViewModel.cs` | Add `IsHistorical`, `PrevTradingDay`, `NextTradingDay`, `EarliestTradingDay`, `LatestTradingDay`. |
+| `Features/Dashboard/UseCases/LoadDashboardUseCase.cs` | Generic becomes `UseCaseBase<LoadDashboardInput, DashboardViewModel>`. Replace internal `var today = clock.TodayInExchangeTzFor(...)` with `var target = input.TargetDate`. Switch to `asOf` overloads on `IndicatorEngine.ComputeFor`, `IndicatorEngine.HistoryFor`, `PortfolioService.SnapshotAsync`. Replace `tradeRepo.CountAsync(new AllTradesSpec(), ct)` with `tradeRepo.CountAsync(new TradesAsOfSpec(target), ct)`. Inject `IEntryNavigationService` and populate the four nav fields. Today's-call lookup branches: live mode keeps `await todaysSuggestion.ExecuteAsync(Unit.Value, ct)`; historical mode does `await suggestionRepo.FirstOrDefaultAsync(new SuggestionForDateSpec(target), ct)` — no AI invocation, may be `null`. `IsHistorical` flag flows through to the view model. |
+| `Features/Dashboard/Components/VaultMasthead.razor` | Adds prev / next / date-pill / "return to today" controls. Inline date `<input type="date">` (hidden, focused by pill click). |
+| `Features/Dashboard/Components/VaultMasthead.razor.cs` | Add parameters per §7.1. Self-hide control row when `EarliestTradingDay`/`LatestTradingDay` are null (the `/trades` and `/settings` cases). |
+| `Features/Dashboard/Components/RefreshFab.razor` | Add `[Parameter] public bool Historical { get; set; }`. Early-return `null` render when set (or wrap entire markup in `@if (!Historical)`). |
+| `Features/Dashboard/Components/TodaysCallCard.razor` | Add `[Parameter] public bool Historical { get; set; }`. Wrap action buttons in `@if (!Historical)`. Render an empty-state row ("No AI call recorded for {date}.") when `Sug is null` (historical case where the suggestion wasn't ever generated). Title flips to "Call for {date}" when `Historical`. |
+| `Features/Dashboard/Components/TodaysCallCard.razor.cs` *(if it exists, otherwise add code-behind)* | Make `Sug` parameter nullable to support the historical-empty case. |
+| `wwwroot/css/vault.css` | Styles for `.masthead .nav-step`, `.masthead .date-pill`, `.masthead .return-today`, the disabled state, and the hidden `<input type="date">` shim. |
+
+### 5.3 Reuse — already in the codebase, no new file
+
+| Existing artifact | Used for |
+|---|---|
+| `LatestPriceBarSpec(ticker)` | `EntryNavigationService.LatestAsync`. |
+| `PriceBarsAsOfSpec(ticker, asOf)` (lists all on-or-before, ascending) | `EntryNavigationService.ResolveOrFallbackAsync` — `LastOrDefaultAsync` returns the nearest earlier (or exact) trading day in one query. Avoids adding a top-1 `OnOrBefore` spec. |
+| `TradesAsOfSpec(asOfInclusive)` | Dashboard masthead "entry no." count. |
+| `SuggestionForDateSpec(date)` | Historical-mode suggestion lookup. |
+| `IndicatorEngine.ComputeFor(ticker, DateOnly asOf, ct)` overload | Replaces the no-asOf overload in `LoadDashboardUseCase`. |
+| `IndicatorEngine.HistoryFor(ticker, kind, lastN, DateOnly asOf, ct)` overload | Replaces the no-asOf overload. |
+| `PortfolioService.SnapshotAsync(asOf, focusPriceEur, targetEur, ct)` overload | Replaces the no-asOf overload. |
+| `SnapshotFactory.CreateAsync(asOf, ct)` *(unchanged)* | Already date-parameterized; not a path the dashboard hits in historical mode (we don't regenerate AI calls). |
 
 ## 6. `IEntryNavigationService` contract
 
@@ -116,12 +144,15 @@ public interface IEntryNavigationService
 
 **Semantics:**
 
-- `EarliestAsync` / `LatestAsync` query CON3.L price bars. Throw `NoTradingDaysException` if the table is empty for that ticker.
-- `PreviousAsync(current)` returns the latest trading day strictly before `current`, or `null` when `current` is the floor.
-- `NextAsync(current)` returns the earliest trading day strictly after `current`, or `null` when `current` is the ceiling.
-- `ResolveOrFallbackAsync(requested)` returns `requested` if a price bar exists for that date, otherwise the nearest *earlier* trading day. Throws `NoTradingDaysException` only when nothing earlier exists either.
+- `EarliestAsync` queries the new `EarliestPriceBarSpec("CON3.L")`. Throws `NoTradingDaysException` if the table is empty for that ticker.
+- `LatestAsync` queries the existing `LatestPriceBarSpec("CON3.L")`. Throws `NoTradingDaysException` if empty.
+- `PreviousAsync(current)` queries the new `PriceBarBeforeSpec("CON3.L", current)`. Returns `null` when `current` is the floor.
+- `NextAsync(current)` queries the new `PriceBarAfterSpec("CON3.L", current)`. Returns `null` when `current` is the ceiling.
+- `ResolveOrFallbackAsync(requested)` queries the existing `PriceBarsAsOfSpec("CON3.L", requested)` and takes the last element (i.e., the most recent on-or-before). Returns the requested date when a bar exists for it; otherwise the nearest earlier trading day. Throws `NoTradingDaysException` only when nothing earlier exists either.
 
 **Caching:** none initially. SQLite + indexed `Date` column makes these sub-millisecond. Add a memory cache only if profiling proves it necessary.
+
+**Why a service rather than inline LINQ:** three callers — page-load validation (`OnParamValidator`), the masthead's prev/next button enablement (via `LoadDashboardUseCase`), and the date picker's "round to nearest trading day" landing (also via the validator). Centralizing the trading-day query keeps spec reuse coherent.
 
 ## 7. Component contracts
 
@@ -153,38 +184,110 @@ Both gain `[Parameter] public bool Historical { get; set; }`.
 
 ### 7.3 `DashboardPage` — validation flow
 
+The page replaces its current `OnInitializedAsync` data-load with `OnParametersSetAsync`, so query-param changes re-trigger the load:
+
+```csharp
+protected override async Task OnParametersSetAsync()
+{
+    var result = await OnParamValidator.Validate(OnParam, Nav, _ct);
+
+    bool isHistorical;
+    DateOnly targetDate;
+    switch (result)
+    {
+        case RedirectTo r:
+            NavigationManager.NavigateTo(r.Url, replace: true);
+            return;
+        case Live:
+            isHistorical = false;
+            targetDate   = Clock.TodayInExchangeTzFor("CON3.L"); // existing convention; asOf queries downstream handle the closed-day gap
+            break;
+        case Historical h:
+            isHistorical = true;
+            targetDate   = h.Date;
+            break;
+    }
+
+    _vm = await LoadDashboard.ExecuteAsync(
+        new LoadDashboardInput(targetDate, isHistorical), _ct);
+}
 ```
-OnParametersSetAsync:
-  resolved = ValidateOnParam(OnParam)   // either a DateOnly or a redirect
-  if (resolved is RedirectTo url) {
-    NavigationManager.NavigateTo(url, replace: true);
-    return;
-  }
-  vm = await loadDashboard.ExecuteAsync(new LoadDashboardInput(resolved.Date), ct);
-```
+
+> *Pseudo-code; concrete implementation matches existing busy/error handling around the existing `Reload()` helper.*
 
 **Navigation history rules:**
 
-- **Validation redirects** (steps 2–5 of §3): `replace: true`. Invalid URLs never appear in browser history; the user's back button doesn't trip on them.
+- **Validation redirects** (steps 2–5 of §3): `NavigateTo(url, replace: true)`. Invalid URLs never appear in browser history; the user's back button doesn't trip on them.
 - **User-initiated navigation** — clicking `‹` / `›`, picking a date in the picker, clicking "return to today", and the keyboard handler — all use the default `NavigateTo(url)` (push). Each step is a fresh history entry, so browser ◀ / ▶ retraces the user's actual viewing path.
 
 ### 7.4 Keyboard
 
-A scoped `wwwroot/js/dashboard-keys.js` module subscribes to `keydown` on the dashboard's root element (not document-global). When `←` / `→` is pressed and `document.activeElement` is not an editable element (`input`, `textarea`, `select`, `[contenteditable]`), it invokes a Blazor `[JSInvokable]` method on `DashboardPage` that re-uses the same prev / next handlers as the buttons.
+`wwwroot/js/dashboard-keys.js` attaches a `keydown` listener to **`document`** (not the dashboard root — element-level listeners only fire when that element or a descendant has focus, which is unreliable for a page-level shortcut). The listener:
 
-The module is imported by `DashboardPage` in `OnAfterRenderAsync(firstRender: true)` and torn down in `IAsyncDisposable.DisposeAsync`. Because the listener attaches to the dashboard's root element (not `window`), navigating away from `/` to `/trades` or `/settings` cleanly disposes the listener with the page; navigating back attaches a fresh one.
+1. Returns early if `document.activeElement` matches `input, textarea, select, [contenteditable=""], [contenteditable="true"]`.
+2. On `ArrowLeft`, calls `dotNetRef.invokeMethodAsync('OnPrev')`.
+3. On `ArrowRight`, calls `dotNetRef.invokeMethodAsync('OnNext')`.
+
+`DashboardPage` implements `IAsyncDisposable`. In `OnAfterRenderAsync(firstRender: true)` it imports the module, creates a `DotNetObjectReference<DashboardPage>`, and calls the module's `attach(dotNetRef)` which records both the ref and the `removeEventListener` cleanup function. In `DisposeAsync` it calls the module's `detach()` (which calls `removeEventListener` and disposes the `DotNetObjectReference`). Because the listener is on `document`, explicit teardown is mandatory — the listener does not auto-clean when the component unmounts.
+
+`OnPrev` and `OnNext` are `[JSInvokable]` methods on `DashboardPage` that share the same handlers as the masthead's `‹` / `›` button clicks (a `NavigateTo` to the prev / next URL).
 
 ## 8. Use case change
 
-`LoadDashboardUseCase` already takes an effective "today." The change:
+The current `LoadDashboardUseCase` is `IUseCase<Unit, DashboardViewModel>` and hardcodes `var today = clock.TodayInExchangeTzFor("CON3.L")` internally. The required changes:
 
-- Rename its date input to `targetDate`.
-- After loading the existing dashboard fields for `targetDate`, additionally resolve `EarliestTradingDay`, `LatestTradingDay`, `PrevTradingDay`, `NextTradingDay` via `IEntryNavigationService`.
-- Compute `IsHistorical = targetDate < LatestTradingDay`.
-- Replace `tradeRepo.CountAsync(new AllTradesSpec())` with `tradeRepo.CountAsync(new TradesOnOrBeforeSpec(targetDate))` so the masthead's "entry no." reflects trades as of the viewed date. Live mode's number is unchanged because today ≥ all stored trades.
-- Return all of the above on `DashboardViewModel`.
+**Signature change:**
 
-No other use case changes. Existing live-mode callers pass `targetDate = clock.TodayInExchangeTzFor("CON3.L")` and behave identically.
+- Add `record LoadDashboardInput(DateOnly TargetDate, bool IsHistorical)` (new file).
+- Generic becomes `UseCaseBase<LoadDashboardInput, DashboardViewModel>`.
+- Rename internal `today` → `target` and read it from `input.TargetDate`.
+
+**Switch to existing as-of overloads** (no new infrastructure):
+
+| Current call | Replacement |
+|---|---|
+| `indicators.ComputeFor(ticker, ct)` | `indicators.ComputeFor(ticker, target, ct)` |
+| `indicators.HistoryFor(c.Ticker, kind.Value, SparklineWindow, ct)` | `indicators.HistoryFor(c.Ticker, kind.Value, SparklineWindow, target, ct)` |
+| `portfolio.SnapshotAsync(focusPriceEur ?? 0m, goal.TargetEur, ct)` | `portfolio.SnapshotAsync(target, focusPriceEur ?? 0m, goal.TargetEur, ct)` |
+| `tradeRepo.CountAsync(new AllTradesSpec(), ct)` | `tradeRepo.CountAsync(new TradesAsOfSpec(target), ct)` |
+| `priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(FocusTicker), ct)` | unchanged — `LatestPriceDate` on the view model continues to mean "the data freshness of the displayed snapshot." |
+| `growth.BuildAsync(FocusTicker, ct)` | unchanged for now. Documented limitation: in historical mode the growth chart's right edge will still be the latest stored bar, not `target`. Acceptable for v1; flagged in §11. |
+
+**Today's-call lookup branch** (replacing the unconditional `todaysSuggestion.ExecuteAsync(Unit.Value, ct)`):
+
+```csharp
+Suggestion? call;
+if (input.IsHistorical)  // see "IsHistorical plumbing" below
+{
+    call = await suggestionRepo.FirstOrDefaultAsync(new SuggestionForDateSpec(target), ct);
+}
+else
+{
+    call = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
+}
+```
+
+This keeps the live path identical and prevents the AI from being invoked for missing past suggestions. `Suggestion?` is now nullable on the consumer side; `TodaysCallCard` renders an empty state when null.
+
+**`IsHistorical` plumbing.** The page already knows `IsHistorical` (validator output). It's part of `LoadDashboardInput`:
+
+```csharp
+public sealed record LoadDashboardInput(DateOnly TargetDate, bool IsHistorical);
+```
+
+The use case forwards `IsHistorical` to the view model. It's also used to guard the AI branch above and to skip the existing fire-and-forget backfill enqueue (lines 122–132 of the current `LoadDashboardUseCase.cs`), which should not run when viewing a past entry.
+
+**New navigation fields.** Inject `IEntryNavigationService`. Compute `Earliest`, `Latest`, `Prev`, `Next` for `target`. Populate the new view-model fields (§5.2 row for `DashboardViewModel`).
+
+**Skipped in historical mode:**
+
+- The fire-and-forget `EnsureBackfilledAsync` chain.
+- The AI invocation in `GetTodaysSuggestionUseCase` (already covered).
+- The `PriceFeedHostedService` warm path is unaffected (it's a startup-time hosted service, not a per-load call).
+
+**`growth.BuildAsync(FocusTicker, ct)` historical limitation.** The current `GrowthSeriesBuilder` always builds from earliest to latest stored bar. In historical mode the growth chart will therefore still show "today's" right-edge value — visually consistent but technically extends past the viewed date. Adding an `asOf` overload to `GrowthSeriesBuilder` is **out of scope** here; flagged in §11.
+
+No other use case changes. Existing live-mode call sites must be updated to pass `LoadDashboardInput(clock.TodayInExchangeTzFor("CON3.L"), IsHistorical: false)`.
 
 ## 9. Edge cases
 
@@ -203,41 +306,56 @@ No other use case changes. Existing live-mode callers pass `targetDate = clock.T
 
 ## 10. Testing
 
+xunit.v3 + Shouldly + EF Core InMemory. **No bUnit**. Page-level redirect logic is testable as a pure function via `OnParamValidator`; the page itself stays a thin shell.
+
 ### 10.1 Unit — `EntryNavigationService`
 
-In-memory `AppDbContext` seeded with a known trading-day calendar.
+In-memory `AppDbContext` seeded with a known trading-day calendar (e.g., Mon Apr 13, Tue 14, Wed 15, Thu 16, Fri 17 — skipping the Apr 18–19 weekend, then Mon 20).
 
-- `EarliestAsync` / `LatestAsync` return `Min` / `Max` of `Date`.
-- `PreviousAsync` skips weekend / holiday gaps; returns `null` at floor.
-- `NextAsync` skips gaps; returns `null` at ceiling.
-- `ResolveOrFallbackAsync` returns input when it's a trading day; nearest *earlier* when it isn't.
-- Empty-DB case throws `NoTradingDaysException`.
+- `EarliestAsync` / `LatestAsync` return `Min` / `Max` of `Date` for the focus ticker.
+- `PreviousAsync(Mon Apr 20)` returns Fri Apr 17 (gap-skip).
+- `PreviousAsync(Mon Apr 13)` returns `null` (floor).
+- `NextAsync(Fri Apr 17)` returns Mon Apr 20.
+- `NextAsync(Mon Apr 20)` returns `null` (ceiling).
+- `ResolveOrFallbackAsync(Sun Apr 19)` returns Fri Apr 17.
+- `ResolveOrFallbackAsync(Wed Apr 15)` returns Wed Apr 15 (input is itself a trading day).
+- `ResolveOrFallbackAsync(any date before earliest)` throws `NoTradingDaysException`.
+- `EarliestAsync` / `LatestAsync` on empty DB throws `NoTradingDaysException`.
 
-### 10.2 Unit — `LoadDashboardUseCase` (extends existing tests)
+### 10.2 Unit — `OnParamValidator`
 
-- `targetDate` in the past → loads price bar / suggestion / portfolio for that date; sets `IsHistorical = true`; populates prev / next.
-- `targetDate == today` → `IsHistorical = false`, `NextTradingDay = null`.
-- Masthead trade count reflects `TradesOnOrBeforeSpec(targetDate)`, not the global count.
+`IEntryNavigationService` is mocked (or fake-implemented) with a fixed earliest = Apr 13 and latest = Apr 20.
+
+| Input | Expected `ValidationResult` |
+|---|---|
+| `null` | `Live` |
+| `""` | `Live` |
+| `"foo"` | `RedirectTo("/")` |
+| `"2026-04-25"` (after latest) | `RedirectTo("/")` |
+| `"2026-04-10"` (before earliest) | `RedirectTo("/?on=2026-04-13")` |
+| `"2026-04-19"` (Sunday — closed) | `RedirectTo("/?on=2026-04-17")` |
+| `"2026-04-15"` (valid) | `Historical(2026-04-15)` |
+
+### 10.3 Unit — `LoadDashboardUseCase` (extends existing tests)
+
+- `LoadDashboardInput(target, IsHistorical: true)` → loads price bar / suggestion / portfolio **for that date** via the as-of overloads; sets `IsHistorical = true` on view model; populates `PrevTradingDay` / `NextTradingDay`.
+- `LoadDashboardInput(target, IsHistorical: false)` with `target == latest trading day` → uses live path (`GetTodaysSuggestionUseCase`), `IsHistorical = false`, `NextTradingDay = null`.
+- Historical mode does **not** call `GetTodaysSuggestionUseCase` (verified via a fake / counting decorator).
+- Historical mode does **not** enqueue the backfill chain.
+- Masthead `EntryNumber` reflects `TradesAsOfSpec(target).CountAsync`, not the global count.
+- Historical mode where `SuggestionForDateSpec(target)` returns null → view model carries `TodaysCall = null` (no exception, no AI invocation).
 - Existing live-mode tests stay green (regression guard).
-
-### 10.3 Page-level — `DashboardPage` via bUnit
-
-- `?on=` missing → live render, all three actions present.
-- `?on=foo` → `NavigateTo("/", replace: true)`.
-- Future `?on=` → `NavigateTo("/", replace: true)`.
-- Pre-floor `?on=` → `NavigateTo("/?on={earliest}", replace: true)`.
-- Non-trading-day `?on=` → `NavigateTo("/?on={prev trading day}", replace: true)`.
-- Historical render → `RefreshFab` not in DOM; "Re-run AI" / "Log trade" buttons not in DOM; "return to today" link present; card heading reads "Call for {date}".
 
 ### 10.4 Manual smoke — required before declaring done
 
-1. `dotnet run`, open `/`. Confirm live mode, click `‹` once → URL becomes `/?on={prev}`, dashboard updates, FAB gone.
+1. `dotnet run`, open `/`. Confirm live mode, click `‹` once → URL becomes `/?on={prev}`, dashboard updates, FAB gone, "Re-run AI" / "Log trade" gone, "return to today" link visible.
 2. Click date pill, pick a Sunday → page redirects to nearest Friday.
 3. Click "return to today" → URL collapses to `/`, FAB returns.
 4. Browser back arrow → returns to historical view; forward → returns to today.
-5. `←` / `→` keys step through dates; `‹` / `›` `disabled` at boundaries.
+5. `←` / `→` keys step through dates; `‹` / `›` `disabled` at boundaries; pressing `←` / `→` while focused inside the date `<input>` does **not** navigate (focus short-circuit works).
 6. Type `?on=garbage` manually → redirects cleanly to `/`.
 7. Visit `/trades` and `/settings` → masthead has no date control; behavior unchanged.
+8. Navigate to a historical day that has **no stored AI suggestion** → `TodaysCallCard` shows the empty state, no AI call fires (verify via logs).
 
 ## 11. Out of scope (deliberate)
 
@@ -247,6 +365,10 @@ In-memory `AppDbContext` seeded with a known trading-day calendar.
 - Additional URL filters (`?range=3m`, `?focus=COIN`). The query-param shape is forward-compatible with these but they're not added now.
 - Renaming "entry no." to honestly reflect that it's a trade count. Tracked here as known semantic debt.
 - Caching of trading-day lookups. Add only if profiling shows the need.
+- **Trade-count harmonization across pages.** `TradesPage` and `SettingsPage` continue to call `AllTradesSpec().CountAsync` (showing all trades including any future-dated). The dashboard, post-change, calls `TradesAsOfSpec(target).CountAsync`. The two diverge only if a trade has a future `ExecutedOn` — unlikely in practice. Harmonization (adopting `TradesAsOfSpec(today)` everywhere or another rule) is deferred.
+- **Native `<input type="date">` styling.** The browser's default picker doesn't blend with the Vault aesthetic. We accept the visual inconsistency for v1 rather than ship a custom calendar component. Listed as known UX debt.
+- **`GrowthSeriesBuilder` as-of view.** In historical mode, the growth chart's right edge will still be the latest stored bar, not `target`. The visible curve will look identical to live mode. Adding an `asOf` overload to `GrowthSeriesBuilder` is deliberately deferred — the dashboard's hero number, portfolio rail, and call card will all be correctly as-of `target`, which is what the user came to see.
+- **`OnLogTradeRequested` is a no-op stub today** (`DashboardPage.razor.cs:54-57`). Hiding it when historical is correct, but it's not yet wired to anything; this spec doesn't change that.
 
 ## 12. Acceptance
 
