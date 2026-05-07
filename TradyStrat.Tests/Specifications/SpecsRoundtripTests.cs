@@ -2,10 +2,10 @@ using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Shared.Domain;
+using TradyStrat.Specifications.FxRates;
 using TradyStrat.Specifications.PriceBars;
 using TradyStrat.Specifications.Suggestions;
 using TradyStrat.Specifications.Trades;
-using TradyStrat.Specifications.FxRates;
 using Xunit;
 
 namespace TradyStrat.Tests.Specifications;
@@ -17,6 +17,13 @@ public class SpecsRoundtripTests
         Id = 0, ExecutedOn = new DateOnly(2026, 1, day), Side = TradeSide.Buy,
         Quantity = qty, PricePerShare = price, FeesEur = 0, Note = null,
         CreatedAt = DateTime.UtcNow,
+    };
+
+    private static Suggestion Sugg(int month, int day) => new()
+    {
+        Id = 0, ForDate = new DateOnly(2026, month, day), Action = SuggestionAction.Hold,
+        Conviction = 3, Rationale = "x", CitationsJson = "[]",
+        PromptHash = "h", CreatedAt = DateTime.UtcNow,
     };
 
     [Fact]
@@ -84,5 +91,92 @@ public class SpecsRoundtripTests
 
         on4.ShouldNotBeNull();
         on4.Date.ShouldBe(new DateOnly(2026,1,3));
+    }
+
+    [Fact]
+    public async Task SuggestionsInRangeSpec_filters_inclusive_and_orders_ascending()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.Suggestions.AddRange(Sugg(5, 1), Sugg(5, 3), Sugg(5, 5), Sugg(5, 7));
+        await db.SaveChangesAsync(ct);
+
+        var spec = new SuggestionsInRangeSpec(new DateOnly(2026, 5, 3), new DateOnly(2026, 5, 6));
+        var rows = await db.Suggestions.WithSpecification(spec).ToListAsync(ct);
+
+        rows.Count.ShouldBe(2);
+        rows[0].ForDate.ShouldBe(new DateOnly(2026, 5, 3));
+        rows[1].ForDate.ShouldBe(new DateOnly(2026, 5, 5));
+    }
+
+    [Fact]
+    public async Task PriorSuggestionSpec_returns_most_recent_strictly_before()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.Suggestions.AddRange(Sugg(5, 1), Sugg(5, 5), Sugg(5, 7));
+        await db.SaveChangesAsync(ct);
+
+        var spec = new PriorSuggestionSpec(new DateOnly(2026, 5, 7));
+        var row = await db.Suggestions.WithSpecification(spec).FirstOrDefaultAsync(ct);
+
+        row.ShouldNotBeNull();
+        row.ForDate.ShouldBe(new DateOnly(2026, 5, 5));
+    }
+
+    [Fact]
+    public async Task TradesAsOfSpec_filters_inclusive_and_orders_ascending()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.Trades.AddRange(
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 1),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 5, 2),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+
+        var spec = new TradesAsOfSpec(new DateOnly(2026, 4, 30));
+        var rows = await db.Trades.WithSpecification(spec).ToListAsync(ct);
+
+        rows.Count.ShouldBe(2);
+        rows[0].ExecutedOn.ShouldBe(new DateOnly(2026, 4, 1));
+        rows[1].ExecutedOn.ShouldBe(new DateOnly(2026, 4, 15));
+    }
+
+    [Fact]
+    public async Task PriceBarsAsOfSpec_filters_by_ticker_and_date_inclusive()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.AddRange(
+            new PriceBar { Id = 0, Ticker = "CON3.L", Date = new(2026, 4, 1),  Open = 1, High = 1, Low = 1, Close = 1, Volume = 1 },
+            new PriceBar { Id = 0, Ticker = "CON3.L", Date = new(2026, 5, 2),  Open = 1, High = 1, Low = 1, Close = 1, Volume = 1 },
+            new PriceBar { Id = 0, Ticker = "COIN",   Date = new(2026, 4, 1),  Open = 1, High = 1, Low = 1, Close = 1, Volume = 1 });
+        await db.SaveChangesAsync(ct);
+
+        var spec = new PriceBarsAsOfSpec("CON3.L", new DateOnly(2026, 4, 30));
+        var rows = await db.PriceBars.WithSpecification(spec).ToListAsync(ct);
+
+        rows.Count.ShouldBe(1);
+        rows[0].Ticker.ShouldBe("CON3.L");
+        rows[0].Date.ShouldBe(new DateOnly(2026, 4, 1));
+    }
+
+    [Fact]
+    public async Task FxRateAsOfSpec_returns_most_recent_for_pair_le_date()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.FxRates.AddRange(
+            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 4, 28), UsdPerEur = 1.05m, FetchedAt = DateTime.UtcNow },
+            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 4, 30), UsdPerEur = 1.07m, FetchedAt = DateTime.UtcNow },
+            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 5, 5),  UsdPerEur = 1.09m, FetchedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+
+        var spec = new FxRateAsOfSpec("EURUSD", new DateOnly(2026, 5, 1));
+        var row = await db.FxRates.WithSpecification(spec).FirstOrDefaultAsync(ct);
+
+        row.ShouldNotBeNull();
+        row.Date.ShouldBe(new DateOnly(2026, 4, 30));
     }
 }
