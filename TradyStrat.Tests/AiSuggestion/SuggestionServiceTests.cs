@@ -43,7 +43,8 @@ public class SuggestionServiceTests
                 citations = new[]
                 {
                     new { claim = "x", indicator = "Bollinger", ticker = "CON3.DE", value = "below" }
-                }
+                },
+                market_citations = Array.Empty<object>()
             });
 
             // Build AIFunctionArguments from the JsonElement properties.

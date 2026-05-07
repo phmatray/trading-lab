@@ -1,5 +1,6 @@
 using System.Text.Json;
 using TradyStrat.Features.AiSuggestion.Snapshot;
+using TradyStrat.Features.PredictionMarkets;
 using Microsoft.Extensions.AI;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
@@ -17,6 +18,11 @@ public sealed partial class SuggestionService(
         Cite which indicators support each part of your suggestion.
         Be conservative: when signals conflict, say Hold.
         Always invoke the submit_suggestion tool exactly once.
+
+        You may also cite Polymarket markets you weighed.
+        Each market_citations[].slug MUST appear in the snapshot's markets[].
+        Cite each market at most once.
+        Cite a market only when you actually weighted it; not every market needs a citation.
         """;
 
     public async Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)
@@ -25,9 +31,30 @@ public sealed partial class SuggestionService(
 
         var submit = AIFunctionFactory.Create(
             (SuggestionAction action, decimal? quantity_hint, decimal? max_price_hint,
-             int conviction, string rationale, IReadOnlyList<Citation>? citations) =>
+             int conviction, string rationale,
+             IReadOnlyList<Citation>? citations,
+             IReadOnlyList<MarketCitation>? market_citations) =>
             {
                 var citationList = citations ?? [];
+
+                var validSlugs = snapshot.Markets.Select(m => m.Slug).ToHashSet();
+                var cleanedMarketCitations = (market_citations ?? [])
+                    .Where(c =>
+                    {
+                        if (validSlugs.Contains(c.Slug)) return true;
+                        LogUnknownMarketCitation(log, c.Slug);
+                        return false;
+                    })
+                    .GroupBy(c => c.Slug)
+                    .Select(g => g.First())
+                    .ToList();
+
+                var marketJson = snapshot.Markets.Count == 0
+                    ? null
+                    : JsonSerializer.Serialize(
+                        new MarketSnapshot(snapshot.Markets, cleanedMarketCitations),
+                        JsonOpts.Strict);
+
                 captured = new Suggestion
                 {
                     Id           = 0,
@@ -38,6 +65,7 @@ public sealed partial class SuggestionService(
                     Conviction   = conviction,
                     Rationale    = rationale,
                     CitationsJson = JsonSerializer.Serialize(citationList, JsonOpts.Strict),
+                    MarketSnapshotJson = marketJson,
                     PromptHash   = snapshot.PromptHash,
                     CreatedAt    = clock.UtcNow(),
                 };
@@ -77,4 +105,7 @@ public sealed partial class SuggestionService(
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Anthropic call failed")]
     private static partial void LogCallFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "AI cited unknown market slug {Slug}; dropped")]
+    private static partial void LogUnknownMarketCitation(ILogger logger, string slug);
 }
