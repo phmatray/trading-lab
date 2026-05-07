@@ -75,3 +75,86 @@ main::before {
     radial-gradient(circle at -5% 105%, rgba(196,154,86,0.06), transparent 42%);
 }
 main > * { position: relative; z-index: 1; }
+
+/* ---- Time-travel masthead controls ----------------------------------- */
+
+.masthead .entry-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.masthead .nav-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--vault-rule);
+    border-radius: 4px;
+    background: var(--vault-bg-2);
+    color: var(--ink-1);
+    text-decoration: none;
+    font-size: 18px;
+    line-height: 1;
+    user-select: none;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.masthead .nav-step:hover {
+    background: var(--vault-bg);
+    border-color: var(--vault-gold);
+}
+
+.masthead .nav-step.disabled,
+.masthead .nav-step[aria-disabled="true"] {
+    opacity: 0.30;
+    pointer-events: none;
+    cursor: default;
+}
+
+.masthead .date-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--vault-rule);
+    border-radius: 4px;
+    background: var(--vault-bg-2);
+    color: var(--ink-1);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.masthead .date-pill input[type="date"] {
+    /* Native picker, hidden visually but still focusable for the calendar UI. */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color-scheme: dark;
+}
+
+.masthead .return-today {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-3);
+    text-decoration: none;
+    padding: 3px 10px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.masthead .return-today:hover {
+    color: var(--vault-gold);
+    border-color: var(--vault-rule);
+}
