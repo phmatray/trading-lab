@@ -9,6 +9,7 @@ public class EntityDerivedPropertiesTests
     private static Trade Buy(decimal qty, decimal price, decimal fees = 0m) => new()
     {
         Id = 0,
+        InstrumentId = 1,
         ExecutedOn = new DateOnly(2026, 5, 6),
         Side = TradeSide.Buy,
         Quantity = qty,
@@ -52,15 +53,6 @@ public class EntityDerivedPropertiesTests
     }
 
     [Fact]
-    public void FxRate_EurPerUsd_is_inverse()
-    {
-        var fx = new FxRate { Id = 1, Date = new(2026,5,6), Pair = "EURUSD",
-                              UsdPerEur = 1.0820m, FetchedAt = DateTime.UtcNow };
-
-        fx.EurPerUsd.ShouldBe(1m / 1.0820m);
-    }
-
-    [Fact]
     public void Suggestion_OrderValueEur_is_qty_times_price_when_both_set()
     {
         var s = new Suggestion {
@@ -87,14 +79,13 @@ public class EntityDerivedPropertiesTests
     }
 
     [Fact]
-    public void GoalConfig_Default_is_one_million_with_focus_CON3()
+    public void GoalConfig_Default_is_one_million()
     {
         var now = DateTime.UtcNow;
         var g = GoalConfig.Default(now);
 
         g.Id.ShouldBe(1);
         g.TargetEur.ShouldBe(1_000_000m);
-        g.FocusTicker.ShouldBe("CON3.L");
         g.UpdatedAt.ShouldBe(now);
     }
 }

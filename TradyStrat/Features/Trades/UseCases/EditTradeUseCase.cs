@@ -8,7 +8,7 @@ using TradyStrat.Common.Exceptions;
 namespace TradyStrat.Features.Trades.UseCases;
 
 public sealed record EditTradeInput(
-    int Id, DateOnly ExecutedOn, TradeSide Side,
+    int Id, int InstrumentId, DateOnly ExecutedOn, TradeSide Side,
     decimal Quantity, decimal PricePerShare, decimal FeesEur, string? Note);
 
 public sealed class EditTradeUseCase(
@@ -25,6 +25,7 @@ public sealed class EditTradeUseCase(
 
         var updated = existing with
         {
+            InstrumentId  = input.InstrumentId,
             ExecutedOn    = input.ExecutedOn,
             Side          = input.Side,
             Quantity      = input.Quantity,

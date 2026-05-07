@@ -49,8 +49,8 @@ public class SnapshotFactoryTests
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),
                 Open=200, High=200, Low=200, Close=200, Volume=1 });
         // FX rate
-        db.FxRates.Add(new FxRate { Id=0, Pair="EURUSD", Date=new(2026,5,6),
-            UsdPerEur = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=new(2026,5,6),
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
         // Goal
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
@@ -81,8 +81,8 @@ public class SnapshotFactoryTests
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=asOf,
                 Open=300, High=300, Low=300, Close=300, Volume=1 });
         // FX rate for asOf
-        db.FxRates.Add(new FxRate { Id=0, Pair="EURUSD", Date=asOf,
-            UsdPerEur = 1.10m, FetchedAt = DateTime.UtcNow });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=asOf,
+            Rate = 1.10m, FetchedAt = DateTime.UtcNow });
         // Goal
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);

@@ -106,11 +106,11 @@ public class LoadDashboardUseCaseTests
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=Target,
                 Open=200, High=200, Low=200, Close=200, Volume=1 });
-        db.FxRates.Add(new FxRate { Id=0, Pair="EURUSD", Date=Target,
-            UsdPerEur = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=Target,
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         db.Trades.Add(new Trade {
-            Id = 0, ExecutedOn = new(2025,12,7), Side = TradeSide.Buy,
+            Id = 0, InstrumentId = 1, ExecutedOn = new(2025,12,7), Side = TradeSide.Buy,
             Quantity = 100m, PricePerShare = 4m, FeesEur = 0m, Note = null,
             CreatedAt = DateTime.UtcNow });
         if (seedSuggestion is not null) db.Suggestions.Add(seedSuggestion);
@@ -206,7 +206,7 @@ public class LoadDashboardUseCaseTests
 
         // One additional trade *after* the target date — should NOT be counted.
         db.Trades.Add(new Trade {
-            Id = 0, ExecutedOn = new(2026, 6, 1), Side = TradeSide.Buy,
+            Id = 0, InstrumentId = 1, ExecutedOn = new(2026, 6, 1), Side = TradeSide.Buy,
             Quantity = 1m, PricePerShare = 1m, FeesEur = 0m, Note = null,
             CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);

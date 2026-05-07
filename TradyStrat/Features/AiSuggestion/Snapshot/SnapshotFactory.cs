@@ -40,7 +40,7 @@ public sealed class SnapshotFactory(
             var reading = await indicators.ComputeFor(ticker, asOf, ct);
             decimal? eur = null;
             if (currency == "USD")
-                eur = await fx.UsdToEurAsync(reading.Price, asOf, ct);
+                eur = await fx.ToEurAsync(reading.Price, currency, asOf, ct);
 
             // Portfolio math is in EUR, so use the EUR-converted focus price.
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
@@ -61,8 +61,8 @@ public sealed class SnapshotFactory(
         decimal? usdPerEur = null;
         try
         {
-            var oneEurInEur = await fx.UsdToEurAsync(1m, asOf, ct);
-            if (oneEurInEur != 0m) usdPerEur = 1m / oneEurInEur;
+            var oneUsdInEur = await fx.ToEurAsync(1m, "USD", asOf, ct);
+            if (oneUsdInEur != 0m) usdPerEur = 1m / oneUsdInEur;
         }
         catch (Common.Exceptions.FxRateUnavailableException)
         {

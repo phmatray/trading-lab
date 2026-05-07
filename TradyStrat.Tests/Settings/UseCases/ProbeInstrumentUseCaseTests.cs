@@ -27,8 +27,9 @@ public class ProbeInstrumentUseCaseTests
     private sealed class FakeFxProvider : IFxRateProvider
     {
         public Task<IReadOnlyList<FxRate>> FetchAsync(
-            string pair, DateOnly from, DateOnly to, CancellationToken ct)
-            => Task.FromResult<IReadOnlyList<FxRate>>(Array.Empty<FxRate>());
+            string @base, string quote, DateOnly from, DateOnly to, CancellationToken ct)
+            => Task.FromResult<IReadOnlyList<FxRate>>(
+                [new FxRate { Id = 0, Base = @base, Quote = quote, Date = from, Rate = 1m, FetchedAt = DateTime.UtcNow }]);
     }
 
     [Fact]

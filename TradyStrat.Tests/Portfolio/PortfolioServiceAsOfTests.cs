@@ -15,9 +15,9 @@ public class PortfolioServiceAsOfTests
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
         db.Trades.AddRange(
-            new Trade { Id = 1, ExecutedOn = new DateOnly(2026, 4, 1), Side = TradeSide.Buy,
+            new Trade { Id = 1, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 4, 1), Side = TradeSide.Buy,
                 Quantity = 100m, PricePerShare = 1m, FeesEur = 0m, Note = "", CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 2, ExecutedOn = new DateOnly(2026, 5, 5), Side = TradeSide.Buy,
+            new Trade { Id = 2, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 5, 5), Side = TradeSide.Buy,
                 Quantity = 200m, PricePerShare = 1m, FeesEur = 0m, Note = "", CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
 

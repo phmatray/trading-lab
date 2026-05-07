@@ -23,9 +23,20 @@ public sealed class ProbeInstrumentUseCase(
 
         var meta = await priceFeed.GetInstrumentMetadataAsync(ticker, ct);
 
-        // FX-pair sanity check — implemented in Plan Task 9 once IFxRateProvider takes (base, quote).
-        // Until then, the use case trusts metadata and lets AddInstrumentUseCase warm best-effort.
-        _ = fx; // suppress unused-field analyzer warning
+        // FX-pair sanity check — surface unsupported currencies before commit.
+        if (!string.Equals(meta.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            try
+            {
+                _ = await fx.FetchAsync("EUR", meta.Currency, today.AddDays(-1), today, ct);
+            }
+            catch (FxRateUnavailableException ex)
+            {
+                throw new UnsupportedCurrencyException(
+                    $"EUR/{meta.Currency} FX rate is not available from Yahoo.", ex);
+            }
+        }
 
         return meta;
     }

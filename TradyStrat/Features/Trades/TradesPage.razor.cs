@@ -81,7 +81,7 @@ public partial class TradesPage : ComponentBase
         else
         {
             await EditTrade.ExecuteAsync(new EditTradeInput(
-                _editing.Id, input.ExecutedOn, input.Side,
+                _editing.Id, input.InstrumentId, input.ExecutedOn, input.Side,
                 input.Quantity, input.PricePerShare, input.FeesEur, input.Note), CancellationToken.None);
         }
         CloseDialogs();

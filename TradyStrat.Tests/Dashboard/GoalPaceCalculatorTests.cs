@@ -12,7 +12,6 @@ public class GoalPaceCalculatorTests
         Id = 1,
         TargetEur = target,
         TargetDate = targetDate ?? new DateOnly(2027, 6, 30),
-        FocusTicker = "CON3.L",
         UpdatedAt = DateTime.UtcNow,
     };
 
@@ -35,7 +34,7 @@ public class GoalPaceCalculatorTests
         var goalNoDate = new GoalConfig
         {
             Id = 1, TargetEur = 500_000m, TargetDate = null,
-            FocusTicker = "CON3.L", UpdatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
         };
         var vm = GoalPaceCalculator.Compute(30_000m, goalNoDate,
             new DateOnly(2026, 5, 7), new DateOnly(2026, 1, 1));

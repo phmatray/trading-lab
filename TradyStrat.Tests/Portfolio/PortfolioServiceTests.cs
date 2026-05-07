@@ -12,7 +12,7 @@ public class PortfolioServiceTests
 {
     private static Trade Buy(int day, decimal qty, decimal price, decimal fees = 0m) => new()
     {
-        Id = 0, ExecutedOn = new DateOnly(2026,1,day), Side = TradeSide.Buy,
+        Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026,1,day), Side = TradeSide.Buy,
         Quantity = qty, PricePerShare = price, FeesEur = fees, Note = null,
         CreatedAt = DateTime.UtcNow,
     };

@@ -23,7 +23,7 @@ public class LogTradeUseCaseTests
             NullLogger<LogTradeUseCase>.Instance);
 
         var t = await uc.ExecuteAsync(new LogTradeInput(
-            ExecutedOn: new(2026,5,6), Side: TradeSide.Buy,
+            InstrumentId: 1, ExecutedOn: new(2026,5,6), Side: TradeSide.Buy,
             Quantity: 10m, PricePerShare: 4.5m, FeesEur: 0.5m, Note: "first lot"), ct);
 
         t.Quantity.ShouldBe(10m);
@@ -38,7 +38,7 @@ public class LogTradeUseCaseTests
             new FakeClock(DateTime.UtcNow), NullLogger<LogTradeUseCase>.Instance);
 
         await Should.ThrowAsync<TradeValidationException>(() =>
-            uc.ExecuteAsync(new LogTradeInput(new(2026,5,6), TradeSide.Buy,
+            uc.ExecuteAsync(new LogTradeInput(InstrumentId: 1, new(2026,5,6), TradeSide.Buy,
                 Quantity: 0m, PricePerShare: 4m, FeesEur: 0m, Note: null),
                 TestContext.Current.CancellationToken));
     }
@@ -51,7 +51,7 @@ public class LogTradeUseCaseTests
             new FakeClock(DateTime.UtcNow), NullLogger<LogTradeUseCase>.Instance);
 
         await Should.ThrowAsync<TradeValidationException>(() =>
-            uc.ExecuteAsync(new LogTradeInput(new(2026,5,6), TradeSide.Buy,
+            uc.ExecuteAsync(new LogTradeInput(InstrumentId: 1, new(2026,5,6), TradeSide.Buy,
                 10m, PricePerShare: -1m, 0m, null),
                 TestContext.Current.CancellationToken));
     }

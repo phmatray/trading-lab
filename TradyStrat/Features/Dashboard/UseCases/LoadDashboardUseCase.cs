@@ -33,7 +33,6 @@ public sealed class LoadDashboardUseCase(
     : UseCaseBase<LoadDashboardInput, DashboardViewModel>(log)
 {
     private const string FocusTicker = "CON3.L";
-    private const string FxPair      = "EURUSD";
     private const int    SparklineWindow = 30;
 
     private static readonly (string Ticker, string Currency)[] Catalog =
@@ -55,8 +54,8 @@ public sealed class LoadDashboardUseCase(
         {
             var reading = await indicators.ComputeFor(ticker, target, ct);
             decimal? eur = null;
-            if (currency == "USD")
-                eur = await fx.UsdToEurAsync(reading.Price, target, ct);
+            if (currency != "EUR")
+                eur = await fx.ToEurAsync(reading.Price, currency, target, ct);
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
 
             var deltaPct = await ComputeDeltaPctAsync(ticker, target, ct);
@@ -126,7 +125,7 @@ public sealed class LoadDashboardUseCase(
 
         // Freshness pills.
         var nowUtc = DateTime.UtcNow;
-        var fxLatest = await fxRepo.FirstOrDefaultAsync(new LatestFxRateSpec(FxPair, target), ct);
+        var fxLatest = await fxRepo.FirstOrDefaultAsync(new LatestFxRateSpec("EUR", "USD", target), ct);
         var priceAsOf = latestBar is { } lb
             ? RelativeTimeFormatter.Format(lb.Date.ToDateTime(TimeOnly.MinValue), nowUtc)
             : "";

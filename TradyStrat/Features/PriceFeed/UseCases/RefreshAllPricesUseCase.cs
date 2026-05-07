@@ -9,12 +9,11 @@ public sealed class RefreshAllPricesUseCase(
     : UseCaseBase<Unit, Unit>(log)
 {
     private static readonly string[] Tickers = ["CON3.L", "COIN", "BTC-USD"];
-    private const string FxPair = "EURUSD";
 
     protected override async Task<Unit> ExecuteCore(Unit _, CancellationToken ct)
     {
         foreach (var t in Tickers) await prices.EnsureFreshAsync(t, ct);
-        await fx.EnsureFreshAsync(FxPair, ct);
+        await fx.EnsureFreshAsync("EUR", "USD", ct);
         return Unit.Value;
     }
 }

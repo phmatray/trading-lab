@@ -33,7 +33,7 @@ public class PriceFeedHostedServiceTests
 
         await svc.StartAsync(TestContext.Current.CancellationToken);
 
-        feed.CallCount.ShouldBe(3);    // CON3.DE, COIN, BTC-USD
-        fx.CallCount.ShouldBe(1);      // EURUSD
+        feed.CallCount.ShouldBe(3);    // CON3.L, COIN, BTC-USD
+        fx.CallCount.ShouldBe(1);      // EUR/USD
     }
 }

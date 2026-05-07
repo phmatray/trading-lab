@@ -47,8 +47,12 @@ public sealed partial class AddInstrumentUseCase(
         try { await priceCache.EnsureFreshAsync(entity.Ticker, ct); }
         catch (Exception ex) { LogPriceWarmFailed(log, ex, entity.Ticker); }
 
-        // FX-warm — re-enabled in Task 9 once DailyFxCache takes (base, quote).
-        _ = fxCache; // hold reference; FX warm block re-enabled in Task 9
+        // FX-warm — best-effort. Skip for EUR-denominated instruments.
+        if (!string.Equals(entity.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
+        {
+            try { await fxCache.EnsureFreshAsync("EUR", entity.Currency, ct); }
+            catch (Exception ex) { LogFxWarmFailed(log, ex, entity.Currency); }
+        }
 
         return entity;
     }

@@ -8,7 +8,7 @@ public sealed class StubFxProvider(IReadOnlyList<FxRate> rates) : IFxRateProvide
     public int CallCount { get; private set; }
 
     public Task<IReadOnlyList<FxRate>> FetchAsync(
-        string pair, DateOnly from, DateOnly to, CancellationToken ct)
+        string @base, string quote, DateOnly from, DateOnly to, CancellationToken ct)
     {
         CallCount++;
         return Task.FromResult(rates);

@@ -40,7 +40,7 @@ public class AddInstrumentUseCaseTests
     private sealed class ThrowingFxProvider : IFxRateProvider
     {
         public Task<IReadOnlyList<FxRate>> FetchAsync(
-            string pair, DateOnly from, DateOnly to, CancellationToken ct)
+            string @base, string quote, DateOnly from, DateOnly to, CancellationToken ct)
             => Task.FromException<IReadOnlyList<FxRate>>(
                 new FxRateUnavailableException("simulated"));
     }
@@ -98,8 +98,10 @@ public class AddInstrumentUseCaseTests
     }
 
     [Fact]
-    public async Task Warm_failure_does_not_roll_back_insert()
+    public async Task Warm_failure_does_not_roll_back_insert_for_non_eur()
     {
+        // Currency is USD so the FX-warm path is exercised; the throwing FX
+        // provider triggers an exception that the use case must swallow.
         await using var db = InMemoryDb.Create();
         var sut = NewSut(db);
 
@@ -109,5 +111,20 @@ public class AddInstrumentUseCaseTests
 
         (await db.Instruments.CountAsync(
             i => i.Ticker == "XYZ", TestContext.Current.CancellationToken)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Eur_instrument_skips_fx_warm()
+    {
+        // The fact that ThrowingFxProvider would throw, but the test passes,
+        // proves the EUR branch skips the FX warm path entirely.
+        await using var db = InMemoryDb.Create();
+        var sut = NewSut(db);
+
+        await sut.ExecuteAsync(
+            new AddInstrumentInput(Probe("ETHE.PA", "EUR"), InstrumentKind.Held),
+            TestContext.Current.CancellationToken);
+
+        (await db.Instruments.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(1);
     }
 }
