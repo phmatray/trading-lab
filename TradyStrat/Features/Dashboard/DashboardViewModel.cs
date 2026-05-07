@@ -1,6 +1,7 @@
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.Indicators;
+using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Features.Dashboard;
@@ -29,4 +30,7 @@ public sealed record DashboardViewModel(
     DateOnly EarliestTradingDay,
     DateOnly LatestTradingDay,
     DateOnly? PrevTradingDay,
-    DateOnly? NextTradingDay);
+    DateOnly? NextTradingDay)
+{
+    public MarketSnapshot MarketSnapshot { get; init; } = MarketSnapshot.Empty;
+}
