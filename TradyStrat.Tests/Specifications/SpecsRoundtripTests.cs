@@ -179,4 +179,94 @@ public class SpecsRoundtripTests
         rows[0].Date.ShouldBe(new DateOnly(2026, 4, 1));
     }
 
+    private static PriceBar Bar(string ticker, int day) => new()
+    {
+        Id = 0, Ticker = ticker, Date = new DateOnly(2026, 1, day),
+        Open = 1, High = 1, Low = 1, Close = 1, Volume = 1,
+    };
+
+    [Fact]
+    public async Task EarliestPriceBarSpec_returns_min_date_for_ticker()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.AddRange(
+            Bar("CON3.L", 5),
+            Bar("CON3.L", 2),
+            Bar("CON3.L", 9),
+            Bar("COIN",   1)); // different ticker — must be ignored
+        await db.SaveChangesAsync(ct);
+
+        var bar = await db.PriceBars
+            .WithSpecification(new EarliestPriceBarSpec("CON3.L"))
+            .FirstOrDefaultAsync(ct);
+
+        bar.ShouldNotBeNull();
+        bar.Date.ShouldBe(new DateOnly(2026, 1, 2));
+    }
+
+    [Fact]
+    public async Task PriceBarBeforeSpec_returns_latest_bar_strictly_before_date()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.AddRange(
+            Bar("CON3.L", 1), Bar("CON3.L", 5), Bar("CON3.L", 9));
+        await db.SaveChangesAsync(ct);
+
+        var bar = await db.PriceBars
+            .WithSpecification(new PriceBarBeforeSpec("CON3.L", new DateOnly(2026, 1, 9)))
+            .FirstOrDefaultAsync(ct);
+
+        bar.ShouldNotBeNull();
+        bar.Date.ShouldBe(new DateOnly(2026, 1, 5));
+    }
+
+    [Fact]
+    public async Task PriceBarBeforeSpec_returns_null_at_floor()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.Add(Bar("CON3.L", 5));
+        await db.SaveChangesAsync(ct);
+
+        var bar = await db.PriceBars
+            .WithSpecification(new PriceBarBeforeSpec("CON3.L", new DateOnly(2026, 1, 5)))
+            .FirstOrDefaultAsync(ct);
+
+        bar.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task PriceBarAfterSpec_returns_earliest_bar_strictly_after_date()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.AddRange(
+            Bar("CON3.L", 1), Bar("CON3.L", 5), Bar("CON3.L", 9));
+        await db.SaveChangesAsync(ct);
+
+        var bar = await db.PriceBars
+            .WithSpecification(new PriceBarAfterSpec("CON3.L", new DateOnly(2026, 1, 1)))
+            .FirstOrDefaultAsync(ct);
+
+        bar.ShouldNotBeNull();
+        bar.Date.ShouldBe(new DateOnly(2026, 1, 5));
+    }
+
+    [Fact]
+    public async Task PriceBarAfterSpec_returns_null_at_ceiling()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.PriceBars.Add(Bar("CON3.L", 9));
+        await db.SaveChangesAsync(ct);
+
+        var bar = await db.PriceBars
+            .WithSpecification(new PriceBarAfterSpec("CON3.L", new DateOnly(2026, 1, 9)))
+            .FirstOrDefaultAsync(ct);
+
+        bar.ShouldBeNull();
+    }
+
 }
