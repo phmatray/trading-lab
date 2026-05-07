@@ -1,9 +1,9 @@
 using Shouldly;
-using TradyStrat.Features.Indicators.Rules;
+using TradyStrat.Features.Indicators;
 using TradyStrat.Shared.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators.Rules;
+namespace TradyStrat.Tests.Indicators;
 
 public class ZoneRuleTests
 {

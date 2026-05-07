@@ -2,7 +2,7 @@ using TechnicalAnalysis.Common;
 using TechnicalAnalysis.Functions;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Features.Indicators.HistoryProviders;
+namespace TradyStrat.Features.Indicators;
 
 public sealed class BollingerHistoryProvider : IIndicatorHistoryProvider
 {

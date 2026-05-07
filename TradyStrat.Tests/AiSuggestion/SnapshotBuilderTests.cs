@@ -2,7 +2,6 @@ using Shouldly;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.Rules;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Tests.Fx;             // TestRepo<T>

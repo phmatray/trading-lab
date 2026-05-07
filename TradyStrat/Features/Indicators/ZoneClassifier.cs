@@ -1,4 +1,3 @@
-using TradyStrat.Features.Indicators.Rules;
 using TradyStrat.Shared.Domain;
 
 namespace TradyStrat.Features.Indicators;

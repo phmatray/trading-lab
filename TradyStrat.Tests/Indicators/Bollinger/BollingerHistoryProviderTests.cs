@@ -1,10 +1,10 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.HistoryProviders;
+
 using TradyStrat.Shared.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators.HistoryProviders;
+namespace TradyStrat.Tests.Indicators;
 
 public class BollingerHistoryProviderTests
 {

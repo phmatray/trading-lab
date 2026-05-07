@@ -1,6 +1,5 @@
 using TheAppManager.Modules;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.Rules;
 
 namespace TradyStrat.Modules;
 

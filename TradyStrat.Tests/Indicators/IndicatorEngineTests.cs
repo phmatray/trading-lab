@@ -1,6 +1,5 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.Rules;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Tests.Fx;          // TestRepo<T>
