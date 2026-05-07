@@ -83,7 +83,6 @@ main > * { position: relative; z-index: 1; }
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    margin-top: 6px;
 }
 
 .masthead .nav-step {

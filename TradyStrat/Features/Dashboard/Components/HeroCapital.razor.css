@@ -156,8 +156,8 @@
     letter-spacing: -0.3px;
     font-feature-settings: "tnum";
 }
-.pace-stats .stat .v.neg { color: #c87a5a; }
-.pace-stats .stat .v.pos { color: #6a9a6a; }
+.pace-stats .stat .v.neg { color: var(--vault-red); }
+.pace-stats .stat .v.pos { color: var(--vault-green); }
 .pace-line {
     font-style: italic;
     font-size: 13px;

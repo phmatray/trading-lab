@@ -8,36 +8,41 @@
         <NavLink class="nav-link" href="/trades">Trades</NavLink>
         <NavLink class="nav-link" href="/settings">Settings</NavLink>
     </nav>
-    @if (ShowNav)
-    {
-        <div class="entry-nav">
-            <a class="nav-step @(PrevTradingDay is null ? "disabled" : "")"
-               href="@PrevHref"
-               aria-disabled="@(PrevTradingDay is null)"
-               title="Previous trading day">‹</a>
+    <div class="head-right">
+        @if (ShowNav)
+        {
+            <div class="entry-nav">
+                <a class="nav-step @(PrevTradingDay is null ? "disabled" : "")"
+                   href="@PrevHref"
+                   aria-disabled="@(PrevTradingDay is null)"
+                   title="Previous trading day">‹</a>
 
-            <label class="date-pill">
-                <span>@FormatDate(Today)</span>
-                <input type="date"
-                       value="@FormatIso(Today)"
-                       min="@FormatIso(EarliestTradingDay!.Value)"
-                       max="@FormatIso(LatestTradingDay!.Value)"
-                       @onchange="OnPickerChanged" />
-            </label>
+                <label class="date-pill" for="masthead-entry-date">
+                    <span>@FormatDate(Today)</span>
+                    <input type="date"
+                           id="masthead-entry-date"
+                           name="entry-date"
+                           aria-label="Entry date"
+                           value="@FormatIso(Today)"
+                           min="@FormatIso(EarliestTradingDay!.Value)"
+                           max="@FormatIso(LatestTradingDay!.Value)"
+                           @onchange="OnPickerChanged" />
+                </label>
 
-            <a class="nav-step @(NextTradingDay is null ? "disabled" : "")"
-               href="@NextHref"
-               aria-disabled="@(NextTradingDay is null)"
-               title="Next trading day">›</a>
+                <a class="nav-step @(NextTradingDay is null ? "disabled" : "")"
+                   href="@NextHref"
+                   aria-disabled="@(NextTradingDay is null)"
+                   title="Next trading day">›</a>
 
-            @if (IsHistorical)
-            {
-                <a class="return-today" href="/">return to today</a>
-            }
-        </div>
-    }
-    <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
-    {
-        <span class="freshness"> · prices @PriceAsOfRelative</span>
-    }</div>
+                @if (IsHistorical)
+                {
+                    <a class="return-today" href="/">return to today</a>
+                }
+            </div>
+        }
+        <div class="meta">@(ShowNav ? "" : FormatDate(Today) + " · ")entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+        {
+            <span class="freshness"> · prices @PriceAsOfRelative</span>
+        }</div>
+    </div>
 </div>

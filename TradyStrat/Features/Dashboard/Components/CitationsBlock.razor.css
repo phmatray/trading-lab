@@ -111,9 +111,15 @@
     color: var(--vault-gold);
     font-feature-settings: "tnum";
     font-size: 13.5px;
-    white-space: nowrap;
     text-align: right;
     min-width: 64px;
+    /* Most values are short numerics ("51", "260.87 vs 195.89") that fit
+       on one line. A few citations carry long descriptive strings (e.g.
+       "57,650 shares accumulated…") — cap the column so they wrap inside
+       it instead of starving the claim text column to zero width. */
+    max-width: 22ch;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
 }
 
 .cit-spark {

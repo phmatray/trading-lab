@@ -56,9 +56,9 @@
     margin-right: 14px;
 }
 .verb-drop[data-verb="hold"]    { color: var(--vault-ivory); }
-.verb-drop[data-verb="trim"]    { color: #c87a5a; }
+.verb-drop[data-verb="trim"]    { color: var(--vault-red); }
 .verb-drop[data-verb="wait"]    { color: rgba(236,230,214,0.6); font-style: italic; }
-.verb-drop[data-verb="acquire"] { color: #6a9a6a; }
+.verb-drop[data-verb="acquire"] { color: var(--vault-green); }
 
 .verb-tail {
     /* Floats with the dropcap so the period sits at the same baseline
@@ -74,9 +74,9 @@
     letter-spacing: -0.01em;
 }
 .verb-tail[data-verb="hold"]    { color: var(--vault-ivory); }
-.verb-tail[data-verb="trim"]    { color: #c87a5a; }
+.verb-tail[data-verb="trim"]    { color: var(--vault-red); }
 .verb-tail[data-verb="wait"]    { color: rgba(236,230,214,0.6); }
-.verb-tail[data-verb="acquire"] { color: #6a9a6a; font-size: 64px; }
+.verb-tail[data-verb="acquire"] { color: var(--vault-green); font-size: 64px; }
 
 @media (max-width: 720px) {
     .verb-drop, .verb-tail { font-size: 64px; margin-right: 14px; }
