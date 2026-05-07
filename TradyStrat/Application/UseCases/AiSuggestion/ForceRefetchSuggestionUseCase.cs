@@ -9,7 +9,7 @@ namespace TradyStrat.Application.UseCases.AiSuggestion;
 
 public sealed class ForceRefetchSuggestionUseCase(
     IRepositoryBase<Suggestion> repo,
-    ISnapshotBuilder snapshotBuilder,
+    ISnapshotFactory snapshotFactory,
     IAiClient ai,
     IClock clock,
     ILogger<ForceRefetchSuggestionUseCase> log)
@@ -21,7 +21,7 @@ public sealed class ForceRefetchSuggestionUseCase(
         var existing = await repo.FirstOrDefaultAsync(new SuggestionForDateSpec(today), ct);
         if (existing is not null) await repo.DeleteAsync(existing, ct);
 
-        var snap  = await snapshotBuilder.BuildAsync(ct);
+        var snap  = await snapshotFactory.CreateAsync(today, ct);
         var fresh = await ai.AskAsync(snap, ct);
         await repo.AddAsync(fresh, ct);
         return fresh;

@@ -54,7 +54,7 @@ public class LoadDashboardUseCaseTests
         var clock      = new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc));
 
         // Use the existing AI stubs from T32 to plug GetTodaysSuggestionUseCase
-        var snapStub = new StubSnapshotBuilder(new AiSnapshot(
+        var snapStub = new StubSnapshotFactory(new AiSnapshot(
             new(2026,5,6), GoalConfig.Default(DateTime.UtcNow),
             new(0,0,0,0,0,0), [], [], 1.08m, "h"));
         var aiStub = new StubAiClient(new Suggestion {

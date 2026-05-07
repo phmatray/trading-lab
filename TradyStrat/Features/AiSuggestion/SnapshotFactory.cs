@@ -11,13 +11,13 @@ using TradyStrat.Specifications.Trades;
 
 namespace TradyStrat.Features.AiSuggestion;
 
-public sealed class SnapshotBuilder(
+public sealed class SnapshotFactory(
     IndicatorEngine indicators,
     PortfolioService portfolio,
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<Trade> tradeRepo,
-    IClock clock) : ISnapshotBuilder
+    IClock clock) : ISnapshotFactory
 {
     private const string FocusTicker = "CON3.L";
 
@@ -28,20 +28,19 @@ public sealed class SnapshotBuilder(
         ("BTC-USD",   "USD"),
     ];
 
-    public async Task<AiSnapshot> BuildAsync(CancellationToken ct)
+    public async Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct)
     {
-        var today = clock.TodayInExchangeTzFor(FocusTicker);
-        var goal  = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
+        var goal = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
 
         var tickers = new List<TickerContext>();
         decimal? focusPriceEur = null;
 
         foreach (var (ticker, currency) in Catalog)
         {
-            var reading = await indicators.ComputeFor(ticker, ct);
+            var reading = await indicators.ComputeFor(ticker, asOf, ct);
             decimal? eur = null;
             if (currency == "USD")
-                eur = await fx.UsdToEurAsync(reading.Price, today, ct);
+                eur = await fx.UsdToEurAsync(reading.Price, asOf, ct);
 
             // Portfolio math is in EUR, so use the EUR-converted focus price.
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
@@ -50,19 +49,19 @@ public sealed class SnapshotBuilder(
                 ticker, currency, reading.Price, eur, reading.Zone, reading.Reasons));
         }
 
-        var snap = await portfolio.SnapshotAsync(
-            currentPriceEur: focusPriceEur ?? 0m,
-            goalEur: goal.TargetEur,
-            ct: ct);
+        var snap = await portfolio.SnapshotAsync(asOf, focusPriceEur ?? 0m, goal.TargetEur, ct);
 
-        var recent = await tradeRepo.ListAsync(new LatestTradesSpec(20), ct);
-        var recentDtos = recent.Select(t => new TradeRecent(
-            t.ExecutedOn, t.Side, t.Quantity, t.PricePerShare)).ToList();
+        var asOfTrades = await tradeRepo.ListAsync(new TradesAsOfSpec(asOf), ct);
+        var recentDtos = asOfTrades
+            .OrderByDescending(t => t.ExecutedOn).Take(20)
+            .OrderBy(t => t.ExecutedOn)
+            .Select(t => new TradeRecent(t.ExecutedOn, t.Side, t.Quantity, t.PricePerShare))
+            .ToList();
 
         decimal? usdPerEur = null;
         try
         {
-            var oneEurInEur = await fx.UsdToEurAsync(1m, today, ct); // 1 / UsdPerEur
+            var oneEurInEur = await fx.UsdToEurAsync(1m, asOf, ct);
             if (oneEurInEur != 0m) usdPerEur = 1m / oneEurInEur;
         }
         catch (Shared.Exceptions.FxRateUnavailableException)
@@ -70,9 +69,9 @@ public sealed class SnapshotBuilder(
             // Tolerant — snapshot can be built without the FX rate present.
         }
 
-        var promptHash = HashPrompt(today, snap, tickers, recentDtos);
+        var promptHash = HashPrompt(asOf, snap, tickers, recentDtos);
 
-        return new AiSnapshot(today, goal, snap, tickers, recentDtos, usdPerEur, promptHash);
+        return new AiSnapshot(asOf, goal, snap, tickers, recentDtos, usdPerEur, promptHash);
     }
 
     private static string HashPrompt(DateOnly today, PortfolioSnapshot snap,

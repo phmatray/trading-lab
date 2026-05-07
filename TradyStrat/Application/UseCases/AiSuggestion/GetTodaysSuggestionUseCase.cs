@@ -9,7 +9,7 @@ namespace TradyStrat.Application.UseCases.AiSuggestion;
 
 public sealed class GetTodaysSuggestionUseCase(
     IRepositoryBase<Suggestion> repo,
-    ISnapshotBuilder snapshotBuilder,
+    ISnapshotFactory snapshotFactory,
     IAiClient ai,
     IClock clock,
     ILogger<GetTodaysSuggestionUseCase> log)
@@ -21,7 +21,7 @@ public sealed class GetTodaysSuggestionUseCase(
         var existing = await repo.FirstOrDefaultAsync(new SuggestionForDateSpec(today), ct);
         if (existing is not null) return existing;
 
-        var snap  = await snapshotBuilder.BuildAsync(ct);
+        var snap  = await snapshotFactory.CreateAsync(today, ct);
         var fresh = await ai.AskAsync(snap, ct);
         await repo.AddAsync(fresh, ct);
         return fresh;
