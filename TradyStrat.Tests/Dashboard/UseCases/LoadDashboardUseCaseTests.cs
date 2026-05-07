@@ -74,7 +74,7 @@ public class LoadDashboardUseCaseTests
 
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
             Target, GoalConfig.Default(DateTime.UtcNow),
-            new([],0,0,0,0,0,0,0), [], [], 1.08m, "h"));
+            new([],0,0,0,0,0,0,0), [], [], 1.08m, [], "h"));
         var aiStub = new StubAiClient(new Suggestion {
             Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",

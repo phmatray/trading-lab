@@ -1,4 +1,5 @@
 using TradyStrat.Common.Domain;
+using TradyStrat.Features.PredictionMarkets;
 
 namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
@@ -18,4 +19,5 @@ public sealed record AiSnapshot(
     IReadOnlyList<TickerContext> Tickers,
     IReadOnlyList<TradeRecent> RecentTrades,
     decimal? UsdPerEur,
+    IReadOnlyList<PredictionMarket> Markets,
     string PromptHash);

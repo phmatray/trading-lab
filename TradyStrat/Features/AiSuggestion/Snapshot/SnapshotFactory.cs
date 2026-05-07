@@ -97,7 +97,7 @@ public sealed class SnapshotFactory(
 
         var promptHash = HashPrompt(asOf, snap, tickers, recentDtos);
 
-        return new AiSnapshot(asOf, goal, snap, tickers, recentDtos, usdPerEur, promptHash);
+        return new AiSnapshot(asOf, goal, snap, tickers, recentDtos, usdPerEur, [], promptHash);
     }
 
     private static string HashPrompt(DateOnly today, PortfolioSnapshot snap,

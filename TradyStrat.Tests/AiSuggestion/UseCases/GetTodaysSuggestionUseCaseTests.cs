@@ -29,7 +29,7 @@ public class GetTodaysSuggestionUseCaseTests
         // Stubs that should NOT be invoked when a cached row exists for today.
         var snap = new StubSnapshotFactory(new AiSnapshot(
             new(2026,5,6), GoalConfig.Default(DateTime.UtcNow),
-            new([],0,0,0,0,0,0,0), [], [], 1.08m, "h2"));
+            new([],0,0,0,0,0,0,0), [], [], 1.08m, [], "h2"));
         var ai = new StubAiClient(new Suggestion {
             Id = 0, ForDate = new(2026,5,6), Action = SuggestionAction.Acquire,
             Conviction = 5, Rationale = "fresh", CitationsJson = "[]",

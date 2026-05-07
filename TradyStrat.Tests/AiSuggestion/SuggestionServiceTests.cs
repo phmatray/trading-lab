@@ -20,6 +20,7 @@ public class SuggestionServiceTests
         Tickers: [],
         RecentTrades: [],
         UsdPerEur: 1.08m,
+        Markets: [],
         PromptHash: "hashvalue");
 
     [Fact]

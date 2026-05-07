@@ -25,6 +25,7 @@ public class BackfillSuggestionsUseCaseTests
                 Tickers: [],
                 RecentTrades: [],
                 UsdPerEur: 1m,
+                Markets: [],
                 PromptHash: "test"));
         }
     }
