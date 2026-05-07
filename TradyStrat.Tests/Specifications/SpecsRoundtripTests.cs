@@ -144,6 +144,23 @@ public class SpecsRoundtripTests
     }
 
     [Fact]
+    public async Task EarliestTradeSpec_returns_oldest_trade()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var db = InMemoryDb.Create();
+        db.Trades.AddRange(
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4,  1), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 5,  2), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+
+        var rows = await db.Trades.WithSpecification(new EarliestTradeSpec()).ToListAsync(ct);
+
+        rows.Count.ShouldBe(1);
+        rows[0].ExecutedOn.ShouldBe(new DateOnly(2026, 4, 1));
+    }
+
+    [Fact]
     public async Task PriceBarsAsOfSpec_filters_by_ticker_and_date_inclusive()
     {
         var ct = TestContext.Current.CancellationToken;

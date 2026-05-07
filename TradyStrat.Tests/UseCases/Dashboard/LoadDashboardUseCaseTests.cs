@@ -19,6 +19,16 @@ namespace TradyStrat.Tests.UseCases.Dashboard;
 
 public class LoadDashboardUseCaseTests
 {
+    private sealed class NullCoordinator : ISuggestionBackfillCoordinator
+    {
+        public BackfillStatus Status => BackfillStatus.Idle.Instance;
+#pragma warning disable CS0067 // event never raised in stub
+        public event Action<BackfillStatus>? StatusChanged;
+#pragma warning restore CS0067
+        public Task EnsureBackfilledAsync(DateOnly fromExclusive, DateOnly toInclusive, CancellationToken ct)
+            => Task.CompletedTask;
+    }
+
     [Fact]
     public async Task Composes_view_model_with_three_tickers_and_growth_series()
     {
@@ -70,7 +80,11 @@ public class LoadDashboardUseCaseTests
             new TestRepo<GoalConfig>(db),
             new TestRepo<Trade>(db),
             new TestRepo<PriceBar>(db),
-            todays, clock,
+            new TestRepo<Suggestion>(db),
+            new TestRepo<FxRate>(db),
+            todays,
+            new NullCoordinator(),
+            clock,
             NullLogger<LoadDashboardUseCase>.Instance);
 
         var vm = await uc.ExecuteAsync(Unit.Value, ct);

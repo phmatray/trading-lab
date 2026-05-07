@@ -1,3 +1,5 @@
+using TradyStrat.Features.AiSuggestion;
+using TradyStrat.Features.Indicators;
 using TradyStrat.Shared.Domain;
 
 namespace TradyStrat.Features.Dashboard;
@@ -10,4 +12,12 @@ public sealed record DashboardViewModel(
     Suggestion TodaysCall,
     IReadOnlyList<TickerView> Tickers,
     IReadOnlyList<GrowthPoint> Growth,
-    DateOnly? LatestPriceDate);
+    DateOnly? LatestPriceDate,
+    // new for spec 1
+    GoalPaceVm GoalPace,
+    CallDiff CallDiff,
+    BackfillStatus BackfillStatus,
+    string PriceAsOfRelative,
+    string CallAsOfRelative,
+    string FxAsOfRelative,
+    IReadOnlyDictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries> IndicatorHistories);

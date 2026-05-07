@@ -1,13 +1,16 @@
 using Ardalis.Specification;
 using TradyStrat.Application.Abstractions;
 using TradyStrat.Application.UseCases.AiSuggestion;
+using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Dashboard;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
+using TradyStrat.Specifications.FxRates;
 using TradyStrat.Specifications.PriceBars;
+using TradyStrat.Specifications.Suggestions;
 using TradyStrat.Specifications.Trades;
 
 namespace TradyStrat.Application.UseCases.Dashboard;
@@ -20,12 +23,17 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<Trade> tradeRepo,
     IReadRepositoryBase<PriceBar> priceRepo,
+    IReadRepositoryBase<Suggestion> suggestionRepo,
+    IReadRepositoryBase<FxRate> fxRepo,
     GetTodaysSuggestionUseCase todaysSuggestion,
+    ISuggestionBackfillCoordinator backfillCoord,
     IClock clock,
     ILogger<LoadDashboardUseCase> log)
     : UseCaseBase<Unit, DashboardViewModel>(log)
 {
     private const string FocusTicker = "CON3.L";
+    private const string FxPair      = "EURUSD";
+    private const int    SparklineWindow = 30;
 
     private static readonly (string Ticker, string Currency)[] Catalog =
     [
@@ -51,17 +59,59 @@ public sealed class LoadDashboardUseCase(
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
 
             var deltaPct = await ComputeDeltaPctAsync(ticker, ct);
-
             tickers.Add(new TickerView(
                 ticker, currency, reading.Price, eur, deltaPct, reading.Zone));
         }
 
         var snap = await portfolio.SnapshotAsync(focusPriceEur ?? 0m, goal.TargetEur, ct);
         var growthSeries = await growth.BuildAsync(FocusTicker, ct);
-        var todays = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
-        var entryNum = await tradeRepo.CountAsync(new AllTradesSpec(), ct);
-        var latestBar = await priceRepo.FirstOrDefaultAsync(
-            new LatestPriceBarSpec(FocusTicker), ct);
+        var todays    = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
+        var entryNum  = await tradeRepo.CountAsync(new AllTradesSpec(), ct);
+        var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(FocusTicker), ct);
+
+        // ---- new: prior suggestion + call diff
+        var prior = await suggestionRepo.FirstOrDefaultAsync(new PriorSuggestionSpec(today), ct);
+        var callDiff = new CallDiffBuilder()
+            .WithToday(todays)
+            .WithPrior(prior)
+            .Build();
+
+        // ---- new: indicator histories per citation
+        var histories = new Dictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries>();
+        foreach (var c in todays.Citations)
+        {
+            var kind = IndicatorKindParser.From(c.Indicator);
+            if (kind is null) continue;
+            var key = (c.Ticker, kind.Value);
+            if (histories.ContainsKey(key)) continue;
+            histories[key] = await indicators.HistoryFor(c.Ticker, kind.Value, SparklineWindow, ct);
+        }
+
+        // ---- new: goal pace
+        var firstTrade = await tradeRepo.FirstOrDefaultAsync(new EarliestTradeSpec(), ct);
+        var goalPace = GoalPaceCalculator.Compute(
+            currentValueEur: snap.CurrentValueEur,
+            goal: goal,
+            today: today,
+            firstTradeDate: firstTrade?.ExecutedOn);
+
+        // ---- new: freshness pills
+        var nowUtc = clock.UtcNow();
+        var fxLatest = await fxRepo.FirstOrDefaultAsync(new LatestFxRateSpec(FxPair, today), ct);
+        var priceAsOf = latestBar is { } lb
+            ? RelativeTimeFormatter.Format(lb.Date.ToDateTime(TimeOnly.MinValue), nowUtc)
+            : "";
+        var callAsOf = RelativeTimeFormatter.Format(todays.CreatedAt, nowUtc);
+        var fxAsOf   = fxLatest is { } fxr
+            ? RelativeTimeFormatter.Format(fxr.FetchedAt, nowUtc)
+            : "";
+
+        // ---- new: enqueue backfill (fire-and-forget) & snapshot status
+        if (prior is { ForDate: var lastDate } && today.AddDays(-1) > lastDate)
+        {
+            var __ = backfillCoord.EnsureBackfilledAsync(lastDate, today.AddDays(-1), ct);
+        }
+        var backfillStatus = backfillCoord.Status;
 
         return new DashboardViewModel(
             Today: today,
@@ -71,7 +121,14 @@ public sealed class LoadDashboardUseCase(
             TodaysCall: todays,
             Tickers: tickers,
             Growth: growthSeries,
-            LatestPriceDate: latestBar?.Date);
+            LatestPriceDate: latestBar?.Date,
+            GoalPace: goalPace,
+            CallDiff: callDiff,
+            BackfillStatus: backfillStatus,
+            PriceAsOfRelative: priceAsOf,
+            CallAsOfRelative: callAsOf,
+            FxAsOfRelative: fxAsOf,
+            IndicatorHistories: histories);
     }
 
     private async Task<decimal?> ComputeDeltaPctAsync(string ticker, CancellationToken ct)
