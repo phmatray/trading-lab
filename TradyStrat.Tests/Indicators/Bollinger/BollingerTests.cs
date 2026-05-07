@@ -1,8 +1,7 @@
 using Shouldly;
-using TradyStrat.Features.Indicators;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators;
+namespace TradyStrat.Tests.Indicators.Bollinger;
 
 public class BollingerTests
 {
@@ -10,14 +9,14 @@ public class BollingerTests
     public void Returns_null_when_series_shorter_than_period()
     {
         var bars = SeriesLoader.LoadCloses().Take(10).ToList();
-        Bollinger.LatestFor(bars).ShouldBeNull();
+        Features.Indicators.Bollinger.LatestFor(bars).ShouldBeNull();
     }
 
     [Fact]
     public void Latest_band_lies_around_mean_with_positive_sigma()
     {
         var bars = SeriesLoader.LoadCloses();
-        var bb = Bollinger.LatestFor(bars);
+        var bb = Features.Indicators.Bollinger.LatestFor(bars);
 
         bb.ShouldNotBeNull();
         bb.Lower.ShouldBeLessThan(bb.Middle);

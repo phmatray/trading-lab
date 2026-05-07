@@ -1,9 +1,8 @@
 using Shouldly;
-using TradyStrat.Features.Indicators;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators;
+namespace TradyStrat.Tests.Indicators.Ichimoku;
 
 public class IchimokuTests
 {
@@ -18,14 +17,14 @@ public class IchimokuTests
     public void Returns_null_when_fewer_than_78_bars()
     {
         var bars = Series(Enumerable.Range(0, 50).Select(_ => (10m, 8m, 9m)));
-        Ichimoku.LatestFor(bars).ShouldBeNull();
+        Features.Indicators.Ichimoku.LatestFor(bars).ShouldBeNull();
     }
 
     [Fact]
     public void Computes_Tenkan_as_midpoint_of_last_9_high_low()
     {
         var bars = SeriesLoader.LoadCloses();
-        var ichi = Ichimoku.LatestFor(bars);
+        var ichi = Features.Indicators.Ichimoku.LatestFor(bars);
         ichi.ShouldNotBeNull();
 
         var last9 = bars.TakeLast(9).ToList();
@@ -40,7 +39,7 @@ public class IchimokuTests
         var bars = Series(Enumerable.Range(0, 100).Select(i =>
             i < 99 ? (5m, 4m, 4.5m) : (50m, 49m, 49.5m)));
 
-        var ichi = Ichimoku.LatestFor(bars);
+        var ichi = Features.Indicators.Ichimoku.LatestFor(bars);
 
         ichi.ShouldNotBeNull();
         ichi.Signal.ShouldBe(IchimokuSignal.AboveCloud);
@@ -52,7 +51,7 @@ public class IchimokuTests
         var bars = Series(Enumerable.Range(0, 100).Select(i =>
             i < 99 ? (50m, 49m, 49.5m) : (5m, 4m, 4.5m)));
 
-        var ichi = Ichimoku.LatestFor(bars);
+        var ichi = Features.Indicators.Ichimoku.LatestFor(bars);
 
         ichi.ShouldNotBeNull();
         ichi.Signal.ShouldBe(IchimokuSignal.BelowCloud);

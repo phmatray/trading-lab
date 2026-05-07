@@ -1,9 +1,9 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators;
+namespace TradyStrat.Tests.Indicators.Ichimoku;
 
 public class IchimokuHistoryProviderTests
 {

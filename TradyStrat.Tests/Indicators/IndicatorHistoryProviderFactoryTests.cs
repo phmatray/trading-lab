@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators;
