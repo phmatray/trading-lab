@@ -30,5 +30,8 @@
     <None Update="Settings/Providers/Fixtures/*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="PredictionMarkets/Fixtures/Polymarket/*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
