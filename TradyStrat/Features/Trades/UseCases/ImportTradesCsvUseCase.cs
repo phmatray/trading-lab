@@ -14,23 +14,25 @@ public sealed class ImportTradesCsvUseCase(
     IRepositoryBase<Trade> repo,
     IReadRepositoryBase<Instrument> instruments,
     IClock clock,
+    IConfiguration config,
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
-    // Phase 1 CSV import targets the focus instrument; the per-row Ticker
-    // column lands with the dropdown work in Task 15.
-    private const string FocusTicker = "CON3.L";
-
+    // Phase 1 CSV import targets the configured focus instrument; the per-row
+    // Ticker column is a separate Phase 2 concern (multi-ticker CSVs).
     protected override async Task<ImportTradesCsvResult> ExecuteCore(
         ImportTradesCsvInput input, CancellationToken ct)
     {
+        var focusTicker = config["Tickers:Focus"]
+            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+
         var rows = CsvImportService.Parse(new StringReader(input.CsvText));
         var now  = clock.UtcNow();
 
         var focus = await instruments.FirstOrDefaultAsync(
-            new InstrumentByTickerSpec(FocusTicker), ct)
+            new InstrumentByTickerSpec(focusTicker), ct)
             ?? throw new CsvImportException(
-                $"Focus instrument '{FocusTicker}' is not registered.");
+                $"Focus instrument '{focusTicker}' is not registered.");
 
         var trades = rows.Select(r => new Trade
         {
