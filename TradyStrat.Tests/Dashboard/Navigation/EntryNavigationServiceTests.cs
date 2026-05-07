@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
@@ -24,12 +25,16 @@ public class EntryNavigationServiceTests
         Open = 1, High = 1, Low = 1, Close = 1, Volume = 1,
     };
 
+    private static readonly IConfiguration TestConfig = new ConfigurationBuilder()
+        .AddInMemoryCollection(new Dictionary<string, string?> { ["Tickers:Focus"] = "CON3.L" })
+        .Build();
+
     private static async Task<EntryNavigationService> SeedAsync(
         TradyStrat.Data.AppDbContext db, params DateOnly[] dates)
     {
         foreach (var d in dates) db.PriceBars.Add(Bar(d));
         await db.SaveChangesAsync();
-        return new EntryNavigationService(new TestRepo<PriceBar>(db));
+        return new EntryNavigationService(new TestRepo<PriceBar>(db), TestConfig);
     }
 
     [Fact]
