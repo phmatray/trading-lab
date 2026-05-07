@@ -1,0 +1,15 @@
+{
+  "quoteResponse": {
+    "result": [
+      {
+        "symbol": "ETHE.PA",
+        "longName": "WisdomTree Physical Ethereum",
+        "shortName": "WT Physical Ethereum",
+        "currency": "EUR",
+        "fullExchangeName": "Euronext Paris",
+        "exchangeTimezoneName": "Europe/Paris"
+      }
+    ],
+    "error": null
+  }
+}

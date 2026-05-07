@@ -1,0 +1,11 @@
+{
+  "quoteResponse": {
+    "result": [
+      {
+        "symbol": "WEIRD",
+        "shortName": "Mystery Asset"
+      }
+    ],
+    "error": null
+  }
+}

@@ -15,4 +15,7 @@ public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars) : IPriceFeed
         Ranges.Add((from, to));
         return Task.FromResult(bars);
     }
+
+    public Task<InstrumentMetadata> GetInstrumentMetadataAsync(string ticker, CancellationToken ct)
+        => throw new NotImplementedException();
 }
