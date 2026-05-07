@@ -3,11 +3,13 @@ using System.Text;
 using System.Text.Json;
 using Ardalis.Specification;
 using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Common.Time;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.Specifications;
 
@@ -21,6 +23,7 @@ public sealed class SnapshotFactory(
     IReadRepositoryBase<Trade> tradeRepo,
     ListInstrumentsUseCase listInstruments,
     IConfiguration config,
+    IPredictionMarketProvider predictionMarkets,   // NEW
     IClock clock) : ISnapshotFactory
 {
     // Preserve legacy iteration order [COIN, BTC-USD] so the day-one PromptHash
@@ -95,15 +98,27 @@ public sealed class SnapshotFactory(
             // Tolerant — snapshot can be built without the FX rate present.
         }
 
-        var promptHash = HashPrompt(asOf, snap, tickers, recentDtos);
+        // Prediction markets — graceful degradation, never blocks the AI call.
+        IReadOnlyList<PredictionMarket> markets;
+        try
+        {
+            markets = await predictionMarkets.GetMarketsAsync(ct);
+        }
+        catch (PolymarketUnavailableException)
+        {
+            markets = [];
+        }
 
-        return new AiSnapshot(asOf, goal, snap, tickers, recentDtos, usdPerEur, [], promptHash);
+        var promptHash = HashPrompt(asOf, snap, tickers, recentDtos, markets);
+
+        return new AiSnapshot(asOf, goal, snap, tickers, recentDtos, usdPerEur, markets, promptHash);
     }
 
     private static string HashPrompt(DateOnly today, PortfolioSnapshot snap,
-        IEnumerable<TickerContext> tickers, IEnumerable<TradeRecent> recent)
+        IEnumerable<TickerContext> tickers, IEnumerable<TradeRecent> recent,
+        IEnumerable<PredictionMarket> markets)
     {
-        var payload = new { today, snap, tickers, recent };
+        var payload = new { today, snap, tickers, recent, markets };
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Strict));
         return Convert.ToHexString(SHA256.HashData(bytes))[..16];
     }

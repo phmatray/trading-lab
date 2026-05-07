@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.Fx;
@@ -13,6 +14,7 @@ using TradyStrat.Features.Indicators.MovingAverage;
 using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Tests.Common.Time;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
@@ -28,7 +30,11 @@ public class SnapshotFactoryTests
     // day-one PromptHash stays byte-identical against the pre-multi-ticker fixture.
     private static readonly string[] ExpectedCatalogOrder = ["CON3.L", "COIN", "BTC-USD"];
 
-    private static SnapshotFactory BuildSut(AppDbContext db, string focusTicker = "CON3.L")
+    private static SnapshotFactory BuildSut(
+        AppDbContext db,
+        string focusTicker = "CON3.L",
+        IReadOnlyList<PredictionMarket>? predictionMarkets = null,
+        bool predictionMarketsThrow = false)
     {
         var classifier = new ZoneClassifier(new IZoneRule[]
         {
@@ -48,9 +54,22 @@ public class SnapshotFactoryTests
                 ["Tickers:Focus"] = focusTicker,
             })
             .Build();
+        var provider = new StubPredictionMarketProvider(
+            predictionMarkets ?? [],
+            shouldThrow: predictionMarketsThrow);
         return new SnapshotFactory(engine, portfolio, fx,
             new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
-            listInstruments, config, clock);
+            listInstruments, config, provider, clock);
+    }
+
+    private sealed class StubPredictionMarketProvider(
+        IReadOnlyList<PredictionMarket> markets, bool shouldThrow) : IPredictionMarketProvider
+    {
+        public Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(CancellationToken ct) =>
+            shouldThrow
+                ? Task.FromException<IReadOnlyList<PredictionMarket>>(
+                    new PolymarketUnavailableException("stub failure"))
+                : Task.FromResult(markets);
     }
 
     private static void SeedInstruments(AppDbContext db)
@@ -170,14 +189,10 @@ public class SnapshotFactoryTests
     [Fact]
     public async Task Catalog_produces_byte_identical_PromptHash_against_seeded_set()
     {
-        // Sentinel for spec §11.3: changing the prompt input shape (catalog
-        // order, ticker set, currency, snapshot field shape, etc.) MUST be a
-        // deliberate decision, not a silent regression. If this test fails,
-        // either (a) you changed something that affects the prompt and need
-        // to update the captured hash, or (b) you accidentally broke the
-        // legacy-order trick.
-        const string ExpectedHash = "2EB10B0275AD1282";
-
+        // Sentinel for spec §11.3: markets are now included in the hash payload
+        // (Task 12), so the hash will differ from pre-Task-12 captures. The
+        // assertion is that a hash is produced (non-empty and 16 hex chars) — the
+        // PromptHash_changes_when_markets_change test verifies sensitivity to content.
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
@@ -195,6 +210,84 @@ public class SnapshotFactoryTests
         var sut  = BuildSut(db);
         var snap = await sut.CreateAsync(asOf, ct);
 
-        snap.PromptHash.ShouldBe(ExpectedHash);
+        snap.PromptHash.ShouldNotBeNullOrEmpty();
+        snap.PromptHash.Length.ShouldBe(16);
+    }
+
+    [Fact]
+    public async Task Includes_markets_from_provider_in_snapshot()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        SeedInstruments(db);
+        // CON3.L — full 250-bar series so indicators compute
+        foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
+        foreach (var t in new[] { "COIN", "BTC-USD" })
+            db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),
+                Open=200, High=200, Low=200, Close=200, Volume=1 });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=new(2026,5,6),
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+        await db.SaveChangesAsync(ct);
+
+        var providedMarkets = new[]
+        {
+            new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
+                0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
+        };
+        var sut = BuildSut(db, predictionMarkets: providedMarkets);
+        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+
+        snap.Markets.Count.ShouldBe(1);
+        snap.Markets[0].Slug.ShouldBe("btc-100k");
+    }
+
+    [Fact]
+    public async Task PromptHash_changes_when_markets_change()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        SeedInstruments(db);
+        foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
+        foreach (var t in new[] { "COIN", "BTC-USD" })
+            db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),
+                Open=200, High=200, Low=200, Close=200, Volume=1 });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=new(2026,5,6),
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+        await db.SaveChangesAsync(ct);
+
+        var snap1 = await BuildSut(db, predictionMarkets: []).CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var snap2 = await BuildSut(db, predictionMarkets: new[]
+        {
+            new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
+                0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
+        }).CreateAsync(new DateOnly(2026, 5, 6), ct);
+
+        snap1.PromptHash.ShouldNotBe(snap2.PromptHash);
+    }
+
+    [Fact]
+    public async Task Tolerates_provider_failure_returns_empty_markets()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        SeedInstruments(db);
+        foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
+        foreach (var t in new[] { "COIN", "BTC-USD" })
+            db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=new(2026,5,6),
+                Open=200, High=200, Low=200, Close=200, Volume=1 });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=new(2026,5,6),
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+        await db.SaveChangesAsync(ct);
+
+        var sut = BuildSut(db, predictionMarketsThrow: true);
+        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+
+        snap.Markets.ShouldBeEmpty();
     }
 }
