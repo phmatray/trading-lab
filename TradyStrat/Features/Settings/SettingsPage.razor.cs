@@ -13,7 +13,11 @@ public partial class SettingsPage : ComponentBase
     [Inject] private IReadRepositoryBase<GoalConfig> GoalRepo { get; set; } = default!;
     [Inject] private IReadRepositoryBase<Trade> TradeRepo { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
     [Inject] private UpdateGoalUseCase UpdateGoal { get; set; } = default!;
+
+    private string FocusTicker() => Configuration["Tickers:Focus"]
+        ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
 
     private decimal _target = 1_000_000m;
     private DateTime? _date;

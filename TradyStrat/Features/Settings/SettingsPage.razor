@@ -3,7 +3,7 @@
 @using TradyStrat.Features.Dashboard.Components
 @using TradyStrat.Features.Settings.Components
 
-<VaultMasthead Today="@(Clock.TodayInExchangeTzFor("CON3.L"))" EntryNumber="@_count" />
+<VaultMasthead Today="@(Clock.TodayInExchangeTzFor(FocusTicker()))" EntryNumber="@_count" />
 
 <div class="settings">
     <div class="label">Settings</div>

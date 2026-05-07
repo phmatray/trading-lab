@@ -17,6 +17,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     [Inject] private RefreshAllPricesUseCase RefreshPrices { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
     [Inject] private NavigationManager NavManager { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -46,7 +47,8 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
                     NavManager.NavigateTo(r.Url, replace: true);
                     return;
                 case ValidationResult.Live:
-                    target = Clock.TodayInExchangeTzFor("CON3.L");
+                    target = Clock.TodayInExchangeTzFor(Configuration["Tickers:Focus"]
+                        ?? throw new InvalidOperationException("Tickers:Focus is not configured."));
                     isHistorical = false;
                     break;
                 case ValidationResult.Historical h:

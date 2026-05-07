@@ -79,8 +79,15 @@ public class LoadDashboardUseCaseTests
             Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Tickers:Focus"] = "CON3.L",
+            })
+            .Build();
         var todays = new GetTodaysSuggestionUseCase(
             new TestRepo<Suggestion>(db), snapStub, aiStub, clock,
+            config,
             NullLogger<GetTodaysSuggestionUseCase>.Instance);
 
         var coord = new NullCoordinator();
@@ -89,12 +96,6 @@ public class LoadDashboardUseCaseTests
         var listInstruments = new ListInstrumentsUseCase(
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Tickers:Focus"] = "CON3.L",
-            })
-            .Build();
 
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,

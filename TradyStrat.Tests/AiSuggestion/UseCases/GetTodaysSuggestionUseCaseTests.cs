@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.UseCases;
@@ -34,9 +35,14 @@ public class GetTodaysSuggestionUseCaseTests
             Conviction = 5, Rationale = "fresh", CitationsJson = "[]",
             PromptHash = "h2", CreatedAt = DateTime.UtcNow });
 
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Tickers:Focus"] = "CON3.L" })
+            .Build();
+
         var uc = new GetTodaysSuggestionUseCase(
             new TestRepo<Suggestion>(db), snap, ai,
             new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc)),
+            config,
             NullLogger<GetTodaysSuggestionUseCase>.Instance);
 
         var s = await uc.ExecuteAsync(Unit.Value, ct);

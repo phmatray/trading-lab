@@ -15,11 +15,15 @@ public partial class TradesPage : ComponentBase
 {
     [Inject] private IReadRepositoryBase<Trade> Repo { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
     [Inject] private LogTradeUseCase LogTrade { get; set; } = default!;
     [Inject] private EditTradeUseCase EditTrade { get; set; } = default!;
     [Inject] private DeleteTradeUseCase DeleteTrade { get; set; } = default!;
     [Inject] private ImportTradesCsvUseCase ImportCsv { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
+
+    private string FocusTicker() => Configuration["Tickers:Focus"]
+        ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 

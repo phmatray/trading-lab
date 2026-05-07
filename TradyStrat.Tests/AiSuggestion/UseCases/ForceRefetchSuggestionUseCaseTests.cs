@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.UseCases;
@@ -35,8 +36,12 @@ public class ForceRefetchSuggestionUseCaseTests
             Conviction = 5, Rationale = "fresh", CitationsJson = "[]",
             PromptHash = "h2", CreatedAt = DateTime.UtcNow });
 
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Tickers:Focus"] = "CON3.L" })
+            .Build();
+
         var uc = new ForceRefetchSuggestionUseCase(
-            new TestRepo<Suggestion>(db), snap, ai, clock,
+            new TestRepo<Suggestion>(db), snap, ai, clock, config,
             NullLogger<ForceRefetchSuggestionUseCase>.Instance);
 
         var s = await uc.ExecuteAsync(Unit.Value, ct);

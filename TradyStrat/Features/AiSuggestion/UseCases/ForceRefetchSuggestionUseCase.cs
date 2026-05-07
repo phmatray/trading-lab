@@ -12,12 +12,15 @@ public sealed class ForceRefetchSuggestionUseCase(
     ISnapshotFactory snapshotFactory,
     IAiClient ai,
     IClock clock,
+    IConfiguration config,
     ILogger<ForceRefetchSuggestionUseCase> log)
     : UseCaseBase<Unit, Suggestion>(log)
 {
     protected override async Task<Suggestion> ExecuteCore(Unit _, CancellationToken ct)
     {
-        var today = clock.TodayInExchangeTzFor("CON3.L");
+        var focusTicker = config["Tickers:Focus"]
+            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+        var today = clock.TodayInExchangeTzFor(focusTicker);
         var existing = await repo.FirstOrDefaultAsync(new SuggestionForDateSpec(today), ct);
         if (existing is not null) await repo.DeleteAsync(existing, ct);
 
