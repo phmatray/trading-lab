@@ -2,11 +2,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Ardalis.Specification;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Time;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Time;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.Snapshot;
@@ -17,33 +19,50 @@ public sealed class SnapshotFactory(
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<Trade> tradeRepo,
+    ListInstrumentsUseCase listInstruments,
+    IConfiguration config,
     IClock clock) : ISnapshotFactory
 {
-    private const string FocusTicker = "CON3.L";
-
-    private static readonly (string Ticker, string Currency)[] Catalog =
-    [
-        (FocusTicker, "USD"),
-        ("COIN",      "USD"),
-        ("BTC-USD",   "USD"),
-    ];
+    // Preserve legacy iteration order [COIN, BTC-USD] so the day-one PromptHash
+    // remains byte-identical against the pre-multi-ticker fixture. New watchlist
+    // instruments fall through to alphabetical order via the ThenBy below.
+    private static readonly string[] LegacyWatchlistOrder = ["COIN", "BTC-USD"];
 
     public async Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct)
     {
         var goal = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
 
+        var focusTicker = config["Tickers:Focus"]
+            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+
+        var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
+        var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
+            ?? throw new InvalidOperationException(
+                $"Focus ticker '{focusTicker}' is not in the Instruments table. Add it via Settings.");
+
+        // Catalog order: focus first, then watchlist in legacy order, then any
+        // newer watchlist instruments alphabetically.
+        var watchlist = instruments
+            .Where(i => i.Kind == InstrumentKind.Watchlist)
+            .OrderBy(i => Array.IndexOf(LegacyWatchlistOrder, i.Ticker) is var idx && idx < 0
+                ? int.MaxValue : idx)
+            .ThenBy(i => i.Ticker);
+        var catalog = new[] { (focus.Ticker, focus.Currency) }
+            .Concat(watchlist.Select(i => (i.Ticker, i.Currency)))
+            .ToArray();
+
         var tickers = new List<TickerContext>();
         decimal? focusPriceEur = null;
 
-        foreach (var (ticker, currency) in Catalog)
+        foreach (var (ticker, currency) in catalog)
         {
             var reading = await indicators.ComputeFor(ticker, asOf, ct);
             decimal? eur = null;
-            if (currency == "USD")
+            if (!string.Equals(currency, "EUR", StringComparison.OrdinalIgnoreCase))
                 eur = await fx.ToEurAsync(reading.Price, currency, asOf, ct);
 
             // Portfolio math is in EUR, so use the EUR-converted focus price.
-            if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
+            if (ticker == focus.Ticker) focusPriceEur = eur ?? reading.Price;
 
             tickers.Add(new TickerContext(
                 ticker, currency, reading.Price, eur, reading.Zone, reading.Reasons));

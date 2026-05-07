@@ -1,27 +1,34 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Features.Indicators.Zones;
-using TradyStrat.Features.Indicators.History;
+using TradyStrat.Common.Domain;
 using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Portfolio;
-using TradyStrat.Common.Domain;
 using TradyStrat.Features.Indicators.Bollinger;
+using TradyStrat.Features.Indicators.History;
 using TradyStrat.Features.Indicators.Ichimoku;
 using TradyStrat.Features.Indicators.MovingAverage;
 using TradyStrat.Features.Indicators.Rsi;
+using TradyStrat.Features.Indicators.Zones;
+using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Tests.Common.Time;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Indicators;     // SeriesLoader
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.Snapshot;
 
 public class SnapshotFactoryTests
 {
-    private static SnapshotFactory BuildSut(AppDbContext db)
+    // Catalog order: focus first, then watchlist preserved in legacy order so the
+    // day-one PromptHash stays byte-identical against the pre-multi-ticker fixture.
+    private static readonly string[] ExpectedCatalogOrder = ["CON3.L", "COIN", "BTC-USD"];
+
+    private static SnapshotFactory BuildSut(AppDbContext db, string focusTicker = "CON3.L")
     {
         var classifier = new ZoneClassifier(new IZoneRule[]
         {
@@ -32,8 +39,35 @@ public class SnapshotFactoryTests
         var portfolio = new PortfolioService(new TestRepo<Trade>(db));
         var fx        = new FxConverter(new TestRepo<FxRate>(db));
         var clock     = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
+        var listInstruments = new ListInstrumentsUseCase(
+            new TestRepo<Instrument>(db),
+            NullLogger<ListInstrumentsUseCase>.Instance);
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Tickers:Focus"] = focusTicker,
+            })
+            .Build();
         return new SnapshotFactory(engine, portfolio, fx,
-            new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db), clock);
+            new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
+            listInstruments, config, clock);
+    }
+
+    private static void SeedInstruments(AppDbContext db)
+    {
+        var seedAt = DateTime.UtcNow;
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "Leverage Shares 3x Long Coinbase",
+            Currency = "USD", Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "COIN", Name = "Coinbase Global, Inc.",
+            Currency = "USD", Exchange = "NMS", TimezoneId = "America/New_York",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "BTC-USD", Name = "Bitcoin USD",
+            Currency = "USD", Exchange = "CCC", TimezoneId = "UTC",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
     }
 
     [Fact]
@@ -42,6 +76,7 @@ public class SnapshotFactoryTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
+        SeedInstruments(db);
         // CON3.L — full 250-bar series so Bollinger/RSI/SMA can compute
         foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         // COIN, BTC-USD — single recent bar so the engine returns a price (indicators may be null)
@@ -73,6 +108,7 @@ public class SnapshotFactoryTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
 
+        SeedInstruments(db);
         // CON3.L — full 250-bar series; CSV ends at 2025-12-08, which is our asOf
         foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         // COIN, BTC-USD — single bar at asOf
@@ -91,5 +127,43 @@ public class SnapshotFactoryTests
         var snapshot = await sut.CreateAsync(asOf, ct);
 
         snapshot.Today.ShouldBe(asOf);
+    }
+
+    [Fact]
+    public async Task Catalog_iterates_focus_then_legacy_watchlist_order()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        // Seed instruments in alphabetical (BTC-USD, COIN, CON3.L) order to prove
+        // the catalog ignores DB order and applies the legacy-order trick.
+        var seedAt = DateTime.UtcNow;
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "BTC-USD", Name = "Bitcoin USD",
+            Currency = "USD", Exchange = "CCC", TimezoneId = "UTC",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "COIN", Name = "Coinbase Global, Inc.",
+            Currency = "USD", Exchange = "NMS", TimezoneId = "America/New_York",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "Leverage Shares 3x Long Coinbase",
+            Currency = "USD", Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = seedAt });
+
+        // One-bar price series per instrument so IndicatorEngine returns a reading.
+        var asOf = new DateOnly(2026, 5, 6);
+        foreach (var t in new[] { "CON3.L", "COIN", "BTC-USD" })
+            db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=asOf,
+                Open=100, High=100, Low=100, Close=100, Volume=1 });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=asOf,
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+        await db.SaveChangesAsync(ct);
+
+        var sut  = BuildSut(db);
+        var snap = await sut.CreateAsync(asOf, ct);
+
+        snap.Tickers.Select(t => t.Ticker).ShouldBe(ExpectedCatalogOrder);
     }
 }
