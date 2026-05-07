@@ -29,5 +29,6 @@ public sealed class AiSuggestionModule : IAppModule
         builder.Services.AddScoped<IAiClient, SuggestionService>();
         builder.Services.AddScoped<GetTodaysSuggestionUseCase>();
         builder.Services.AddScoped<ForceRefetchSuggestionUseCase>();
+        builder.Services.AddScoped<BackfillSuggestionsUseCase>();
     }
 }
