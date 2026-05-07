@@ -29,6 +29,28 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
         ? $"€{Goal.TargetEur.ToString("N0", FrFr)} by {td.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
         : $"€{Goal.TargetEur.ToString("N0", FrFr)} — goal";
 
+    /// <summary>Y-axis labels keyed by their viewBox y coordinate.</summary>
+    /// <remarks>
+    /// Anchored at three of the four interior grid-line y values (40, 100, 160).
+    /// The values shown are 75 / 50 / 25 % of <see cref="GoalConfig.TargetEur"/>;
+    /// the bottom (€0) is implied by the axis baseline and the top is already
+    /// anchored by the existing "€X — goal" callout, so we don't double-label
+    /// either end.
+    /// </remarks>
+    private IReadOnlyList<(double Y, string Text)> YAxisLabels
+    {
+        get
+        {
+            var t = Goal.TargetEur;
+            return
+            [
+                (40,  $"€{(t * 0.75m).ToString("N0", FrFr)}"),
+                (100, $"€{(t * 0.50m).ToString("N0", FrFr)}"),
+                (160, $"€{(t * 0.25m).ToString("N0", FrFr)}"),
+            ];
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
