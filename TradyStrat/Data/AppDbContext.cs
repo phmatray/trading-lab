@@ -10,6 +10,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<FxRate>      FxRates      => Set<FxRate>();
     public DbSet<GoalConfig>  Goals        => Set<GoalConfig>();
     public DbSet<Suggestion>  Suggestions  => Set<Suggestion>();
+    public DbSet<Instrument>  Instruments  => Set<Instrument>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

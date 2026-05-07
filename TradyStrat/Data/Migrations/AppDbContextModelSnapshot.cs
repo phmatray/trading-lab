@@ -23,23 +23,28 @@ namespace TradyStrat.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Base")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("FetchedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Pair")
+                    b.Property<string>("Quote")
                         .IsRequired()
-                        .HasMaxLength(8)
+                        .HasMaxLength(3)
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("UsdPerEur")
+                    b.Property<decimal>("Rate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Pair", "Date")
+                    b.HasIndex("Base", "Quote", "Date")
                         .IsUnique();
 
                     b.ToTable("FxRates", (string)null);
@@ -49,11 +54,6 @@ namespace TradyStrat.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("FocusTicker")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("TEXT");
 
                     b.Property<DateOnly?>("TargetDate")
                         .HasColumnType("TEXT");
@@ -67,6 +67,51 @@ namespace TradyStrat.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Goals", (string)null);
+                });
+
+            modelBuilder.Entity("TradyStrat.Common.Domain.Instrument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Exchange")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ticker")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimezoneId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Ticker")
+                        .IsUnique();
+
+                    b.ToTable("Instruments", (string)null);
                 });
 
             modelBuilder.Entity("TradyStrat.Common.Domain.PriceBar", b =>
@@ -168,6 +213,9 @@ namespace TradyStrat.Data.Migrations
                     b.Property<decimal>("FeesEur")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("InstrumentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Note")
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT");
@@ -185,7 +233,18 @@ namespace TradyStrat.Data.Migrations
 
                     b.HasIndex("ExecutedOn");
 
+                    b.HasIndex("InstrumentId", "ExecutedOn");
+
                     b.ToTable("Trades", (string)null);
+                });
+
+            modelBuilder.Entity("TradyStrat.Common.Domain.Trade", b =>
+                {
+                    b.HasOne("TradyStrat.Common.Domain.Instrument", null)
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

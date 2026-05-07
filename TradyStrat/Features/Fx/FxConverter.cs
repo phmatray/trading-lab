@@ -7,11 +7,19 @@ namespace TradyStrat.Features.Fx;
 
 public sealed class FxConverter(IReadRepositoryBase<FxRate> rates)
 {
-    public async Task<decimal> UsdToEurAsync(decimal usd, DateOnly asOf, CancellationToken ct)
+    public async Task<decimal> ToEurAsync(
+        decimal amount, string fromCurrency, DateOnly asOf, CancellationToken ct)
     {
-        var fx = await rates.FirstOrDefaultAsync(new LatestFxRateSpec("EURUSD", asOf), ct)
+        var ccy = (fromCurrency ?? "").Trim().ToUpperInvariant();
+        if (ccy.Length == 0)
+            throw new FxRateUnavailableException("Currency must not be empty.");
+        if (ccy == "EUR") return amount;
+
+        var fx = await rates.FirstOrDefaultAsync(new LatestFxRateSpec("EUR", ccy, asOf), ct)
             ?? throw new FxRateUnavailableException(
-                $"No EURUSD rate on or before {asOf:yyyy-MM-dd}");
-        return usd * fx.EurPerUsd;
+                $"No EUR/{ccy} rate on or before {asOf:yyyy-MM-dd}");
+        // Rate = Quote per 1 Base. With Base=EUR, Quote=ccy:
+        //   to convert N ccy to EUR -> N / Rate.
+        return amount / fx.Rate;
     }
 }

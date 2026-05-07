@@ -3,6 +3,7 @@ namespace TradyStrat.Common.Domain;
 public sealed record Trade
 {
     public required int Id { get; init; }
+    public required int InstrumentId { get; init; }
     public required DateOnly ExecutedOn { get; init; }
     public required TradeSide Side { get; init; }
     public required decimal Quantity { get; init; }

@@ -14,7 +14,7 @@ public class DailyFxCacheTests
 {
     private static FxRate Rate(DateOnly d, decimal v) => new()
     {
-        Id = 0, Pair = "EURUSD", Date = d, UsdPerEur = v, FetchedAt = DateTime.UtcNow
+        Id = 0, Base = "EUR", Quote = "USD", Date = d, Rate = v, FetchedAt = DateTime.UtcNow
     };
 
     [Fact]
@@ -28,7 +28,7 @@ public class DailyFxCacheTests
         var prov = new StubFxProvider([]);
         var cache = new DailyFxCache(prov, db, clock, NullLogger<DailyFxCache>.Instance);
 
-        await cache.EnsureFreshAsync("EURUSD", TestContext.Current.CancellationToken);
+        await cache.EnsureFreshAsync("EUR", "USD", TestContext.Current.CancellationToken);
 
         prov.CallCount.ShouldBe(0);
     }
@@ -41,7 +41,7 @@ public class DailyFxCacheTests
         var prov = new StubFxProvider([Rate(new(2026,5,5), 1.08m), Rate(new(2026,5,6), 1.09m)]);
         var cache = new DailyFxCache(prov, db, clock, NullLogger<DailyFxCache>.Instance);
 
-        await cache.EnsureFreshAsync("EURUSD", TestContext.Current.CancellationToken);
+        await cache.EnsureFreshAsync("EUR", "USD", TestContext.Current.CancellationToken);
 
         (await db.FxRates.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(2);
     }

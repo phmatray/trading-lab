@@ -30,7 +30,6 @@ public sealed class UpdateGoalUseCase(
                 Id = 1,
                 TargetEur = input.TargetEur,
                 TargetDate = input.TargetDate,
-                FocusTicker = "CON3.L",
                 UpdatedAt = now,
             };
             await repo.AddAsync(fresh, ct);

@@ -12,7 +12,7 @@ public class PortfolioServiceTests
 {
     private static Trade Buy(int day, decimal qty, decimal price, decimal fees = 0m) => new()
     {
-        Id = 0, ExecutedOn = new DateOnly(2026,1,day), Side = TradeSide.Buy,
+        Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026,1,day), Side = TradeSide.Buy,
         Quantity = qty, PricePerShare = price, FeesEur = fees, Note = null,
         CreatedAt = DateTime.UtcNow,
     };
@@ -22,13 +22,21 @@ public class PortfolioServiceTests
     private static PortfolioService NewService(TradyStrat.Data.AppDbContext db)
         => new(new TestRepo<Trade>(db));
 
+    private static Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>
+        PriceMap(decimal priceEur, int instrumentId = 1)
+        => new()
+        {
+            [instrumentId] = (priceEur, "CON3.L", "USD"),
+        };
+
     [Fact]
     public async Task Empty_trade_log_returns_zero_snapshot()
     {
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
-        var snap = await NewService(db).SnapshotAsync(currentPriceEur: 5m, goalEur: 1_000_000m, ct: ct);
+        var snap = await NewService(db).SnapshotAsync(PriceMap(5m), goalEur: 1_000_000m, ct: ct);
 
+        snap.Positions.Count.ShouldBe(0);
         snap.Shares.ShouldBe(0m);
         snap.CurrentValueEur.ShouldBe(0m);
         snap.UnrealizedPnLEur.ShouldBe(0m);
@@ -44,7 +52,7 @@ public class PortfolioServiceTests
         db.Trades.Add(Buy(1, qty: 10m, price: 4.00m, fees: 2.00m));
         await db.SaveChangesAsync(ct);
 
-        var snap = await NewService(db).SnapshotAsync(5m, 1_000_000m, ct);
+        var snap = await NewService(db).SnapshotAsync(PriceMap(5m), 1_000_000m, ct);
 
         snap.Shares.ShouldBe(10m);
         // Avg cost = (10*4 + 2) / 10 = 4.20
@@ -64,7 +72,7 @@ public class PortfolioServiceTests
             Sell(8, qty: 5m, price: 6.00m));   // sell 5 → realize 5*(6-4)=10
         await db.SaveChangesAsync(ct);
 
-        var snap = await NewService(db).SnapshotAsync(7m, 1_000_000m, ct);
+        var snap = await NewService(db).SnapshotAsync(PriceMap(7m), 1_000_000m, ct);
 
         snap.Shares.ShouldBe(15m);
         snap.RealizedPnLEur.ShouldBe(10m);
@@ -80,7 +88,7 @@ public class PortfolioServiceTests
         db.Trades.Add(Buy(1, qty: 100m, price: 1m));
         await db.SaveChangesAsync(ct);
 
-        var snap = await NewService(db).SnapshotAsync(currentPriceEur: 5m, goalEur: 1000m, ct: ct);
+        var snap = await NewService(db).SnapshotAsync(PriceMap(5m), goalEur: 1000m, ct: ct);
 
         snap.CurrentValueEur.ShouldBe(500m);
         snap.ProgressPct.ShouldBe(50m);
@@ -95,6 +103,6 @@ public class PortfolioServiceTests
         await db.SaveChangesAsync(ct);
 
         await Should.ThrowAsync<TradeValidationException>(() =>
-            NewService(db).SnapshotAsync(5m, 1_000_000m, ct));
+            NewService(db).SnapshotAsync(PriceMap(5m), 1_000_000m, ct));
     }
 }

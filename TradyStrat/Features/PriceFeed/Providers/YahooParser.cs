@@ -66,4 +66,52 @@ public static class YahooParser
 
     private static decimal AsDecimal(JsonElement e)
         => e.ValueKind == JsonValueKind.Null ? 0m : (decimal)e.GetDouble();
+
+    public static InstrumentMetadata ParseMetadata(string ticker, JsonDocument doc)
+    {
+        try
+        {
+            var root = doc.RootElement.GetProperty("quoteResponse");
+            if (root.TryGetProperty("error", out var err) && err.ValueKind == JsonValueKind.Object)
+                throw new PriceFeedUnavailableException(
+                    $"Yahoo error for {ticker}: {err.GetRawText()}");
+
+            var result = root.GetProperty("result");
+            if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() == 0)
+                throw new InstrumentNotFoundException(
+                    $"Yahoo returned no quote for '{ticker}'.");
+
+            var first = result[0];
+            var name = ReadString(first, "longName")
+                    ?? ReadString(first, "shortName")
+                    ?? throw new InstrumentMetadataIncompleteException(
+                           $"Yahoo response for '{ticker}' has no longName or shortName.");
+
+            var currency = ReadString(first, "currency")
+                    ?? throw new InstrumentMetadataIncompleteException(
+                           $"Yahoo response for '{ticker}' has no currency.");
+
+            var exchange = ReadString(first, "fullExchangeName")
+                    ?? throw new InstrumentMetadataIncompleteException(
+                           $"Yahoo response for '{ticker}' has no fullExchangeName.");
+
+            var tz = ReadString(first, "exchangeTimezoneName")
+                    ?? throw new InstrumentMetadataIncompleteException(
+                           $"Yahoo response for '{ticker}' has no exchangeTimezoneName.");
+
+            return new InstrumentMetadata(ticker, name, currency, exchange, tz);
+        }
+        catch (TradyStratException) { throw; }
+        catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException
+                                    or JsonException)
+        {
+            throw new PriceFeedUnavailableException(
+                $"Failed to parse Yahoo metadata payload for {ticker}", ex);
+        }
+    }
+
+    private static string? ReadString(JsonElement el, string name)
+        => el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String
+            ? v.GetString()
+            : null;
 }

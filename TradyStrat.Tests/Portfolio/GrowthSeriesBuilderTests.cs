@@ -17,10 +17,10 @@ public class GrowthSeriesBuilderTests
 
         // 10 sh on day 1 at €4, 5 sh on day 3 at €5
         db.Trades.AddRange(
-            new Trade { Id = 0, ExecutedOn = new(2026,1,1), Side = TradeSide.Buy,
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new(2026,1,1), Side = TradeSide.Buy,
                         Quantity = 10m, PricePerShare = 4m, FeesEur = 0m, Note = null,
                         CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 0, ExecutedOn = new(2026,1,3), Side = TradeSide.Buy,
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new(2026,1,3), Side = TradeSide.Buy,
                         Quantity = 5m, PricePerShare = 5m, FeesEur = 0m, Note = null,
                         CreatedAt = DateTime.UtcNow });
 

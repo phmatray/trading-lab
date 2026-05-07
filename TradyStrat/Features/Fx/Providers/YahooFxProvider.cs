@@ -7,13 +7,12 @@ namespace TradyStrat.Features.Fx.Providers;
 public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
 {
     public async Task<IReadOnlyList<FxRate>> FetchAsync(
-        string pair, DateOnly from, DateOnly to, CancellationToken ct)
+        string @base, string quote, DateOnly from, DateOnly to, CancellationToken ct)
     {
-        var symbol = pair switch
-        {
-            "EURUSD" => "EURUSD=X",
-            _        => throw new FxRateUnavailableException($"Unsupported pair {pair}")
-        };
+        if (string.IsNullOrWhiteSpace(@base) || string.IsNullOrWhiteSpace(quote))
+            throw new FxRateUnavailableException("Base and quote must not be empty.");
+
+        var symbol = $"{@base.ToUpperInvariant()}{quote.ToUpperInvariant()}=X";
 
         var p1 = new DateTimeOffset(from.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero).ToUnixTimeSeconds();
         var p2 = new DateTimeOffset(to.ToDateTime(TimeOnly.MaxValue),   TimeSpan.Zero).ToUnixTimeSeconds();
@@ -41,9 +40,12 @@ public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
                     DateTimeOffset.FromUnixTimeSeconds(ts[i].GetInt64()).UtcDateTime);
                 rates.Add(new FxRate
                 {
-                    Id = 0, Pair = pair, Date = date,
-                    UsdPerEur = (decimal)close[i].GetDouble(),
-                    FetchedAt = fetchedAt
+                    Id = 0,
+                    Date = date,
+                    Base = @base.ToUpperInvariant(),
+                    Quote = quote.ToUpperInvariant(),
+                    Rate = (decimal)close[i].GetDouble(),
+                    FetchedAt = fetchedAt,
                 });
             }
             return rates;
@@ -53,7 +55,7 @@ public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
                                     or JsonException or KeyNotFoundException
                                     or InvalidOperationException)
         {
-            throw new FxRateUnavailableException($"FX fetch failed for {pair}", ex);
+            throw new FxRateUnavailableException($"FX fetch failed for {symbol}", ex);
         }
     }
 }

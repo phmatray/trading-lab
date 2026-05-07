@@ -16,7 +16,7 @@ else if (_error is not null)
             @_error
         </p>
         <p class="error-hint">
-            Common cause: no price bars for CON3.L (Leverage Shares 3x Long Coinbase ETP, LSE) in the database. Run with internet so the price feed can warm the cache, then refresh.
+            Common cause: no price bars for the focus instrument in the database. Run with internet so the price feed can warm the cache, then refresh.
         </p>
         <button class="btn error-action" @onclick="OnRefreshClicked" disabled="@_busy">
             @(_busy ? "Refreshing…" : "Retry")
@@ -43,8 +43,10 @@ else
                             CallAsOfRelative="@vm.CallAsOfRelative"
                             BackfillStatus="vm.BackfillStatus"
                             Historical="vm.IsHistorical"
+                            FocusLabel="@FocusLabelFor(vm.FocusTicker)"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
         </div>
+        <PositionsTable Rows="vm.Positions" />
         @if (vm.TodaysCall is not null)
         {
             <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"

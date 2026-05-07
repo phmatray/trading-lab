@@ -15,6 +15,8 @@
         letter-spacing: var(--tracking-xs); text-transform: uppercase;
         color: var(--vault-gold); padding-bottom: 10px; }
 .t td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+.t td.ticker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+               color: var(--vault-ivory); }
 .t td.note { color: var(--ink-2); font-style: italic; max-width: 32ch;
              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .t tr:hover td { background: rgba(236,230,214,0.025); }

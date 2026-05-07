@@ -26,7 +26,7 @@
         @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
         {
             <div class="order num">
-                @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
+                @q.ToString("F0", FrFr) sh @FocusLabel · ≤ €@mp.ToString("F2", FrFr)
                 · ≈ €@((q * mp).ToString("F2", FrFr))
             </div>
         }

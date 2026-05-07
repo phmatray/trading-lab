@@ -1,5 +1,7 @@
-using TradyStrat.Features.Fx;
 using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.UseCases;
+using TradyStrat.Features.Fx;
+using TradyStrat.Features.Settings.UseCases;
 
 namespace TradyStrat.Features.PriceFeed;
 
@@ -7,19 +9,25 @@ public sealed partial class PriceFeedHostedService(
     IServiceProvider services,
     ILogger<PriceFeedHostedService> log) : IHostedService
 {
-    private static readonly string[] Tickers = ["CON3.L", "COIN", "BTC-USD"];
-    private const string FxPair = "EURUSD";
-
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = services.CreateAsyncScope();
-        var price = scope.ServiceProvider.GetRequiredService<DailyPriceCache>();
-        var fx    = scope.ServiceProvider.GetRequiredService<DailyFxCache>();
+        var price       = scope.ServiceProvider.GetRequiredService<DailyPriceCache>();
+        var fx          = scope.ServiceProvider.GetRequiredService<DailyFxCache>();
+        var listUseCase = scope.ServiceProvider.GetRequiredService<ListInstrumentsUseCase>();
 
-        foreach (var t in Tickers)
-            await SafeWarmPriceAsync(price, t, cancellationToken);
+        var instruments = await listUseCase.ExecuteAsync(Unit.Value, cancellationToken);
 
-        await SafeWarmFxAsync(fx, FxPair, cancellationToken);
+        foreach (var inst in instruments)
+            await SafeWarmPriceAsync(price, inst.Ticker, cancellationToken);
+
+        var quotes = instruments
+            .Where(i => !string.Equals(i.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
+            .Select(i => i.Currency.ToUpperInvariant())
+            .Distinct();
+
+        foreach (var quote in quotes)
+            await SafeWarmFxAsync(fx, "EUR", quote, cancellationToken);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -30,15 +38,15 @@ public sealed partial class PriceFeedHostedService(
         catch (PriceFeedUnavailableException ex) { LogPriceWarmFailed(log, ex, ticker); }
     }
 
-    private async Task SafeWarmFxAsync(DailyFxCache cache, string pair, CancellationToken ct)
+    private async Task SafeWarmFxAsync(DailyFxCache cache, string @base, string quote, CancellationToken ct)
     {
-        try { await cache.EnsureFreshAsync(pair, ct); }
-        catch (FxRateUnavailableException ex) { LogFxWarmFailed(log, ex, pair); }
+        try { await cache.EnsureFreshAsync(@base, quote, ct); }
+        catch (FxRateUnavailableException ex) { LogFxWarmFailed(log, ex, @base, quote); }
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Price warm failed for {Ticker}")]
     private static partial void LogPriceWarmFailed(ILogger logger, Exception ex, string ticker);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "FX warm failed for {Pair}")]
-    private static partial void LogFxWarmFailed(ILogger logger, Exception ex, string pair);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "FX warm failed for {Base}/{Quote}")]
+    private static partial void LogFxWarmFailed(ILogger logger, Exception ex, string @base, string quote);
 }

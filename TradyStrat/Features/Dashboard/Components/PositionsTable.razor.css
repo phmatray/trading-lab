@@ -1,0 +1,80 @@
+.positions {
+    padding: 24px 56px 28px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+
+.positions h3 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-md);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin: 0 0 14px;
+}
+
+.positions .empty {
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: var(--tracking-xs);
+    margin: 0;
+}
+
+/* ── Positions table ──────────────────────────────────────────
+   Vault-ledger feel: thin gold rules, mono numerics, ivory ink.
+   Total row is divided by a brighter rule so the eye lands on
+   it without needing color contrast.                              */
+.positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--vault-ivory);
+    font-feature-settings: "tnum";
+}
+
+.positions-table thead th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--vault-rule);
+    padding: 8px 12px;
+}
+
+.positions-table thead th.num,
+.positions-table tbody td.num {
+    text-align: right;
+}
+
+.positions-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(196, 154, 86, 0.08);
+}
+
+.positions-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.positions-table tbody tr.total td {
+    border-top: 1px solid rgba(196, 154, 86, 0.4);
+    border-bottom: none;
+    padding-top: 12px;
+    color: var(--vault-gold);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.positions-table .num.pos { color: var(--vault-green); }
+.positions-table .num.neg { color: var(--vault-red); }
+
+@media (max-width: 720px) {
+    .positions { padding: 20px 24px; }
+    .positions-table { font-size: 12px; }
+    .positions-table thead th,
+    .positions-table tbody td { padding: 8px; }
+}

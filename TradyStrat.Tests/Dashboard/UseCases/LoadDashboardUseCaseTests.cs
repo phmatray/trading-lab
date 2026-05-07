@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Indicators.History;
@@ -11,6 +12,7 @@ using TradyStrat.Features.Dashboard.Navigation;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Features.Indicators.Bollinger;
 using TradyStrat.Features.Indicators.Ichimoku;
@@ -72,7 +74,7 @@ public class LoadDashboardUseCaseTests
 
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
             Target, GoalConfig.Default(DateTime.UtcNow),
-            new(0,0,0,0,0,0), [], [], 1.08m, "h"));
+            new([],0,0,0,0,0,0,0), [], [], 1.08m, "h"));
         var aiStub = new StubAiClient(new Suggestion {
             Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
@@ -84,6 +86,16 @@ public class LoadDashboardUseCaseTests
         var coord = new NullCoordinator();
         var nav   = new FakeNav();
 
+        var listInstruments = new ListInstrumentsUseCase(
+            new TestRepo<Instrument>(db),
+            NullLogger<ListInstrumentsUseCase>.Instance);
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Tickers:Focus"] = "CON3.L",
+            })
+            .Build();
+
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,
             new TestRepo<GoalConfig>(db),
@@ -91,6 +103,8 @@ public class LoadDashboardUseCaseTests
             new TestRepo<PriceBar>(db),
             new TestRepo<Suggestion>(db),
             new TestRepo<FxRate>(db),
+            listInstruments,
+            config,
             todays,
             coord,
             nav,
@@ -102,15 +116,31 @@ public class LoadDashboardUseCaseTests
     private static async Task SeedBaseAsync(TradyStrat.Data.AppDbContext db, CancellationToken ct,
         Suggestion? seedSuggestion = null)
     {
+        // Phase 1 dashboard: focus is configured as CON3.L; the use case enumerates
+        // all Instruments (Held + Watchlist) from the DB. CON3.L is the lone Held
+        // position; COIN and BTC-USD ride the Watchlist for zone analysis only.
+        var seedAt = DateTime.UtcNow;
+        db.Instruments.Add(new Instrument {
+            Id = 1, Ticker = "CON3.L", Name = "Leverage Shares 3x Long Coinbase",
+            Currency = "USD", Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 2, Ticker = "COIN", Name = "Coinbase Global, Inc.",
+            Currency = "USD", Exchange = "NMS", TimezoneId = "America/New_York",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 3, Ticker = "BTC-USD", Name = "Bitcoin USD",
+            Currency = "USD", Exchange = "CCC", TimezoneId = "UTC",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
         foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=Target,
                 Open=200, High=200, Low=200, Close=200, Volume=1 });
-        db.FxRates.Add(new FxRate { Id=0, Pair="EURUSD", Date=Target,
-            UsdPerEur = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=Target,
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         db.Trades.Add(new Trade {
-            Id = 0, ExecutedOn = new(2025,12,7), Side = TradeSide.Buy,
+            Id = 0, InstrumentId = 1, ExecutedOn = new(2025,12,7), Side = TradeSide.Buy,
             Quantity = 100m, PricePerShare = 4m, FeesEur = 0m, Note = null,
             CreatedAt = DateTime.UtcNow });
         if (seedSuggestion is not null) db.Suggestions.Add(seedSuggestion);
@@ -206,7 +236,7 @@ public class LoadDashboardUseCaseTests
 
         // One additional trade *after* the target date — should NOT be counted.
         db.Trades.Add(new Trade {
-            Id = 0, ExecutedOn = new(2026, 6, 1), Side = TradeSide.Buy,
+            Id = 0, InstrumentId = 1, ExecutedOn = new(2026, 6, 1), Side = TradeSide.Buy,
             Quantity = 1m, PricePerShare = 1m, FeesEur = 0m, Note = null,
             CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);

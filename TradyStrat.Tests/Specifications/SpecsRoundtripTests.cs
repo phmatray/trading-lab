@@ -14,7 +14,7 @@ public class SpecsRoundtripTests
 {
     private static Trade Buy(int day, decimal qty = 1m, decimal price = 1m) => new()
     {
-        Id = 0, ExecutedOn = new DateOnly(2026, 1, day), Side = TradeSide.Buy,
+        Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 1, day), Side = TradeSide.Buy,
         Quantity = qty, PricePerShare = price, FeesEur = 0, Note = null,
         CreatedAt = DateTime.UtcNow,
     };
@@ -82,12 +82,12 @@ public class SpecsRoundtripTests
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
         db.FxRates.AddRange(
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026,1,1), UsdPerEur = 1.05m, FetchedAt = DateTime.UtcNow },
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026,1,3), UsdPerEur = 1.08m, FetchedAt = DateTime.UtcNow },
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026,1,5), UsdPerEur = 1.10m, FetchedAt = DateTime.UtcNow });
+            new FxRate { Id = 0, Base = "EUR", Quote = "USD", Date = new(2026,1,1), Rate = 1.05m, FetchedAt = DateTime.UtcNow },
+            new FxRate { Id = 0, Base = "EUR", Quote = "USD", Date = new(2026,1,3), Rate = 1.08m, FetchedAt = DateTime.UtcNow },
+            new FxRate { Id = 0, Base = "EUR", Quote = "USD", Date = new(2026,1,5), Rate = 1.10m, FetchedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
 
-        var on4 = await db.FxRates.WithSpecification(new LatestFxRateSpec("EURUSD", new(2026,1,4))).FirstOrDefaultAsync(ct);
+        var on4 = await db.FxRates.WithSpecification(new LatestFxRateSpec("EUR", "USD", new(2026,1,4))).FirstOrDefaultAsync(ct);
 
         on4.ShouldNotBeNull();
         on4.Date.ShouldBe(new DateOnly(2026,1,3));
@@ -130,9 +130,9 @@ public class SpecsRoundtripTests
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
         db.Trades.AddRange(
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 1),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 5, 2),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 4, 1),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 5, 2),  Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
 
         var spec = new TradesAsOfSpec(new DateOnly(2026, 4, 30));
@@ -149,9 +149,9 @@ public class SpecsRoundtripTests
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
         db.Trades.AddRange(
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 4,  1), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
-            new Trade { Id = 0, ExecutedOn = new DateOnly(2026, 5,  2), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 4, 15), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 4,  1), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow },
+            new Trade { Id = 0, InstrumentId = 1, ExecutedOn = new DateOnly(2026, 5,  2), Side = TradeSide.Buy, Quantity = 1, PricePerShare = 1, FeesEur = 0, Note = null, CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
 
         var rows = await db.Trades.WithSpecification(new EarliestTradeSpec()).ToListAsync(ct);

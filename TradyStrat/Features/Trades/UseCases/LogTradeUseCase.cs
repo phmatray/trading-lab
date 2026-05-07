@@ -7,7 +7,7 @@ using TradyStrat.Common.Time;
 namespace TradyStrat.Features.Trades.UseCases;
 
 public sealed record LogTradeInput(
-    DateOnly ExecutedOn, TradeSide Side,
+    int InstrumentId, DateOnly ExecutedOn, TradeSide Side,
     decimal Quantity, decimal PricePerShare, decimal FeesEur, string? Note);
 
 public sealed class LogTradeUseCase(
@@ -24,6 +24,7 @@ public sealed class LogTradeUseCase(
         var trade = new Trade
         {
             Id = 0,
+            InstrumentId  = input.InstrumentId,
             ExecutedOn    = input.ExecutedOn,
             Side          = input.Side,
             Quantity      = input.Quantity,

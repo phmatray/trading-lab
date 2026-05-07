@@ -18,7 +18,7 @@ public class DeleteTradeUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         db.Trades.Add(new Trade {
-            Id = 0, ExecutedOn = new(2026,5,6), Side = TradeSide.Buy,
+            Id = 0, InstrumentId = 1, ExecutedOn = new(2026,5,6), Side = TradeSide.Buy,
             Quantity = 1m, PricePerShare = 1m, FeesEur = 0m, Note = null,
             CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
