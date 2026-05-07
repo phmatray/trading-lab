@@ -1,4 +1,5 @@
 using Ardalis.Specification;
+using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.UseCases.AiSuggestion;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
@@ -6,14 +7,40 @@ using TradyStrat.Specifications.Suggestions;
 
 namespace TradyStrat.Features.AiSuggestion;
 
-public sealed partial class SuggestionBackfillCoordinator(
-    IReadRepositoryBase<Suggestion> suggestions,
-    BackfillSuggestionsUseCase backfillOne,
-    ILogger<SuggestionBackfillCoordinator> log) : ISuggestionBackfillCoordinator
+public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillCoordinator
 {
     private readonly object _gate = new();
     private Task? _inflight;
     private volatile BackfillStatus _status = BackfillStatus.Idle.Instance;
+    private readonly Func<(IReadRepositoryBase<Suggestion> Suggestions, BackfillSuggestionsUseCase Backfill, IDisposable? Scope)> _resolveDeps;
+    private readonly ILogger<SuggestionBackfillCoordinator> _log;
+
+    // Test-friendly: direct deps (existing)
+    public SuggestionBackfillCoordinator(
+        IReadRepositoryBase<Suggestion> suggestions,
+        BackfillSuggestionsUseCase backfillOne,
+        ILogger<SuggestionBackfillCoordinator> log)
+    {
+        _resolveDeps = () => (suggestions, backfillOne, null);
+        _log = log;
+    }
+
+    // Production: scope-factory (new)
+    [ActivatorUtilitiesConstructor]
+    public SuggestionBackfillCoordinator(
+        IServiceScopeFactory scopeFactory,
+        ILogger<SuggestionBackfillCoordinator> log)
+    {
+        _resolveDeps = () =>
+        {
+            var scope = scopeFactory.CreateScope();
+            return (
+                scope.ServiceProvider.GetRequiredService<IReadRepositoryBase<Suggestion>>(),
+                scope.ServiceProvider.GetRequiredService<BackfillSuggestionsUseCase>(),
+                scope);
+        };
+        _log = log;
+    }
 
     public BackfillStatus Status => _status;
     public event Action<BackfillStatus>? StatusChanged;
@@ -30,51 +57,59 @@ public sealed partial class SuggestionBackfillCoordinator(
 
     private async Task RunChainAsync(DateOnly fromExclusive, DateOnly toInclusive, CancellationToken ct)
     {
-        // Build the set of dates already present (range is fromExclusive+1 .. toInclusive).
-        var firstNeeded = fromExclusive.AddDays(1);
-        var existing = await suggestions.ListAsync(
-            new SuggestionsInRangeSpec(firstNeeded, toInclusive), ct);
-        var existingDates = existing.Select(s => s.ForDate).ToHashSet();
-
-        var missing = new List<DateOnly>();
-        for (var d = firstNeeded; d <= toInclusive; d = d.AddDays(1))
-            if (!existingDates.Contains(d)) missing.Add(d);
-
-        // Empty range — stay Idle, emit no event.
-        if (missing.Count == 0)
+        var (suggestions, backfillOne, scope) = _resolveDeps();
+        try
         {
-            _status = BackfillStatus.Idle.Instance;
-            return;
-        }
+            // Build the set of dates already present (range is fromExclusive+1 .. toInclusive).
+            var firstNeeded = fromExclusive.AddDays(1);
+            var existing = await suggestions.ListAsync(
+                new SuggestionsInRangeSpec(firstNeeded, toInclusive), ct);
+            var existingDates = existing.Select(s => s.ForDate).ToHashSet();
 
-        DateOnly? lastOk = null;
-        for (var i = 0; i < missing.Count; i++)
-        {
-            var date = missing[i];
-            SetStatus(new BackfillStatus.Running(missing.Count - i, missing.Count, date));
+            var missing = new List<DateOnly>();
+            for (var d = firstNeeded; d <= toInclusive; d = d.AddDays(1))
+                if (!existingDates.Contains(d)) missing.Add(d);
 
-            try
+            // Empty range — stay Idle, emit no event.
+            if (missing.Count == 0)
             {
-                await backfillOne.ExecuteAsync(date, ct);
-                lastOk = date;
-            }
-            catch (OperationCanceledException)
-            {
-                SetStatus(BackfillStatus.Idle.Instance);   // notify subscribers the chain is no longer running
-                throw;
-            }
-            catch (TradyStratException ex)
-            {
-                LogChainHalted(log, date, lastOk, ex);
-                SetStatus(new BackfillStatus.Failed(
-                    LastSuccessful: lastOk ?? fromExclusive,
-                    FailedAt: date,
-                    Reason: ex.Message));
+                _status = BackfillStatus.Idle.Instance;
                 return;
             }
-        }
 
-        SetStatus(BackfillStatus.Idle.Instance);
+            DateOnly? lastOk = null;
+            for (var i = 0; i < missing.Count; i++)
+            {
+                var date = missing[i];
+                SetStatus(new BackfillStatus.Running(missing.Count - i, missing.Count, date));
+
+                try
+                {
+                    await backfillOne.ExecuteAsync(date, ct);
+                    lastOk = date;
+                }
+                catch (OperationCanceledException)
+                {
+                    SetStatus(BackfillStatus.Idle.Instance);   // notify subscribers the chain is no longer running
+                    throw;
+                }
+                catch (TradyStratException ex)
+                {
+                    LogChainHalted(_log, date, lastOk, ex);
+                    SetStatus(new BackfillStatus.Failed(
+                        LastSuccessful: lastOk ?? fromExclusive,
+                        FailedAt: date,
+                        Reason: ex.Message));
+                    return;
+                }
+            }
+
+            SetStatus(BackfillStatus.Idle.Instance);
+        }
+        finally
+        {
+            scope?.Dispose();
+        }
     }
 
     private void SetStatus(BackfillStatus next)

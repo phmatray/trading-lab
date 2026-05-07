@@ -30,5 +30,9 @@ public sealed class AiSuggestionModule : IAppModule
         builder.Services.AddScoped<GetTodaysSuggestionUseCase>();
         builder.Services.AddScoped<ForceRefetchSuggestionUseCase>();
         builder.Services.AddScoped<BackfillSuggestionsUseCase>();
+        builder.Services.AddSingleton<ISuggestionBackfillCoordinator>(sp =>
+            new SuggestionBackfillCoordinator(
+                sp.GetRequiredService<IServiceScopeFactory>(),
+                sp.GetRequiredService<ILogger<SuggestionBackfillCoordinator>>()));
     }
 }
