@@ -23,9 +23,15 @@ public class PortfolioServiceAsOfTests
 
         var svc = new PortfolioService(new TestRepo<Trade>(db));
 
+        var prices = new Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>
+        {
+            [1] = (2m, "CON3.L", "USD"),
+        };
         var snap = await svc.SnapshotAsync(
             asOf: new DateOnly(2026, 4, 30),
-            currentPriceEur: 2m, goalEur: 1000m, ct: ct);
+            priceByInstrument: prices,
+            goalEur: 1000m,
+            ct: ct);
 
         snap.Shares.ShouldBe(100m);   // only the April trade counted
     }

@@ -12,6 +12,7 @@ using TradyStrat.Features.Fx.Specifications;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Features.PriceFeed.Specifications;
+using TradyStrat.Features.Settings.Specifications;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Dashboard.UseCases;
@@ -26,6 +27,7 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<PriceBar> priceRepo,
     IReadRepositoryBase<Suggestion> suggestionRepo,
     IReadRepositoryBase<FxRate> fxRepo,
+    IReadRepositoryBase<Instrument> instrumentRepo,
     GetTodaysSuggestionUseCase todaysSuggestion,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
@@ -63,7 +65,21 @@ public sealed class LoadDashboardUseCase(
                 ticker, currency, reading.Price, eur, deltaPct, reading.Zone));
         }
 
-        var snap = await portfolio.SnapshotAsync(target, focusPriceEur ?? 0m, goal.TargetEur, ct);
+        // Build the per-instrument price map for portfolio valuation. Phase 1
+        // dashboard still has a hardcoded single-Held-instrument catalog; the
+        // DB-driven Held enumeration arrives in Task 14.
+        var priceMap = new Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>();
+        var focusInstrument = await instrumentRepo.FirstOrDefaultAsync(
+            new InstrumentByTickerSpec(FocusTicker), ct);
+        if (focusInstrument is not null)
+        {
+            priceMap[focusInstrument.Id] = (
+                focusPriceEur ?? 0m,
+                focusInstrument.Ticker,
+                focusInstrument.Currency);
+        }
+
+        var snap = await portfolio.SnapshotAsync(target, priceMap, goal.TargetEur, ct);
         var growthSeries = await growth.BuildAsync(FocusTicker, ct);
 
         // Pin trailing growth point to the EUR-valued snapshot so chart and hero agree.

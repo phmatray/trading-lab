@@ -21,7 +21,7 @@ public class BackfillSuggestionsUseCaseTests
             return Task.FromResult(new AiSnapshot(
                 Today: asOf,
                 Goal: GoalConfig.Default(DateTime.UtcNow),
-                Portfolio: new PortfolioSnapshot(0, 0, 0, 0, 0, 0),
+                Portfolio: new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0),
                 Tickers: [],
                 RecentTrades: [],
                 UsdPerEur: 1m,

@@ -52,7 +52,6 @@ public sealed class SnapshotFactory(
             .ToArray();
 
         var tickers = new List<TickerContext>();
-        decimal? focusPriceEur = null;
 
         foreach (var (ticker, currency) in catalog)
         {
@@ -61,14 +60,22 @@ public sealed class SnapshotFactory(
             if (!string.Equals(currency, "EUR", StringComparison.OrdinalIgnoreCase))
                 eur = await fx.ToEurAsync(reading.Price, currency, asOf, ct);
 
-            // Portfolio math is in EUR, so use the EUR-converted focus price.
-            if (ticker == focus.Ticker) focusPriceEur = eur ?? reading.Price;
-
             tickers.Add(new TickerContext(
                 ticker, currency, reading.Price, eur, reading.Zone, reading.Reasons));
         }
 
-        var snap = await portfolio.SnapshotAsync(asOf, focusPriceEur ?? 0m, goal.TargetEur, ct);
+        // Build the per-instrument price map for portfolio valuation. Only Held
+        // instruments contribute to the portfolio (watchlist items don't have
+        // positions). Lookup the EUR price from the per-ticker indicator loop.
+        var priceMap = new Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>();
+        foreach (var inst in instruments.Where(i => i.Kind == InstrumentKind.Held))
+        {
+            var ctx = tickers.SingleOrDefault(t => t.Ticker == inst.Ticker);
+            var priceEur = ctx?.PriceEur ?? ctx?.PriceNative ?? 0m;
+            priceMap[inst.Id] = (priceEur, inst.Ticker, inst.Currency);
+        }
+
+        var snap = await portfolio.SnapshotAsync(asOf, priceMap, goal.TargetEur, ct);
 
         var asOfTrades = await tradeRepo.ListAsync(new TradesAsOfSpec(asOf), ct);
         var recentDtos = asOfTrades

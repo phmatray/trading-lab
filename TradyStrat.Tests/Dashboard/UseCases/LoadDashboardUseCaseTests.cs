@@ -72,7 +72,7 @@ public class LoadDashboardUseCaseTests
 
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
             Target, GoalConfig.Default(DateTime.UtcNow),
-            new(0,0,0,0,0,0), [], [], 1.08m, "h"));
+            new([],0,0,0,0,0,0,0), [], [], 1.08m, "h"));
         var aiStub = new StubAiClient(new Suggestion {
             Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
@@ -91,6 +91,7 @@ public class LoadDashboardUseCaseTests
             new TestRepo<PriceBar>(db),
             new TestRepo<Suggestion>(db),
             new TestRepo<FxRate>(db),
+            new TestRepo<Instrument>(db),
             todays,
             coord,
             nav,
@@ -102,6 +103,12 @@ public class LoadDashboardUseCaseTests
     private static async Task SeedBaseAsync(TradyStrat.Data.AppDbContext db, CancellationToken ct,
         Suggestion? seedSuggestion = null)
     {
+        // Phase 1 dashboard: focus is hardcoded to CON3.L; the use case looks up
+        // the matching Instrument by ticker to obtain its Id for the price map.
+        db.Instruments.Add(new Instrument {
+            Id = 1, Ticker = "CON3.L", Name = "Leverage Shares 3x Long Coinbase",
+            Currency = "USD", Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
         foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=Target,
