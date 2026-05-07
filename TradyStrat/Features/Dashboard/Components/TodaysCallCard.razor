@@ -1,11 +1,11 @@
 @using TradyStrat.Common.Domain
 <div class="call">
     <div class="label">
-        @(Historical ? $"Call for {Today.ToString("d MMMM", FrFr)}" : $"Today's call · {Today.ToString("d MMMM", FrFr)}")
-        @if (!Historical && !string.IsNullOrEmpty(CallAsOfRelative))
+        <span class="section-roman">III.</span>
+        <span>@(Historical ? $"Call for {Today.ToString("d MMMM", FrFr)}" : $"Today's call · {Today.ToString("d MMMM", FrFr)}")@if (!Historical && !string.IsNullOrEmpty(CallAsOfRelative))
         {
             <span class="freshness"> · @CallAsOfRelative</span>
-        }
+        }</span>
     </div>
 
     @if (Sug is null)
@@ -14,10 +14,6 @@
     }
     else
     {
-        @if (HasDiff)
-        {
-            <CallDiffList Rows="CallDiffRowProjector.Project(CallDiff)" />
-        }
         @if (_backfillLabel is not null)
         {
             <div class="backfill-pill">@_backfillLabel</div>

@@ -35,6 +35,11 @@ public partial class HeroCapital : ComponentBase
     private static decimal Clamp01(decimal pct) => Math.Max(0m, Math.Min(100m, pct));
     private static string Fmt(decimal pct) => pct.ToString("F2", CultureInfo.InvariantCulture);
 
+    // Alarm thresholds — past these, the pace stats tint red and italicise
+    // because the path to goal is no longer plausible by ordinary means.
+    private bool IsAlarmingMonthly => GoalPace.MonthlyCompoundPct >= 15m;
+    private bool IsAlarmingCagr    => GoalPace.ImpliedCagrPct    >= 250m;
+
     private static string FormatSigned(decimal v)
         => $"{(v >= 0 ? "+€" : "−€")}{Math.Abs(v).ToString("N0", FrFr)}";
 

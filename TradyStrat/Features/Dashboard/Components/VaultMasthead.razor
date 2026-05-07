@@ -1,7 +1,6 @@
 <div class="masthead">
     <div class="brand">
         <a href="/">Tradystrat</a>
-        <span class="arc">— a private chronicle of accumulation</span>
     </div>
     <nav class="nav">
         <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
@@ -11,13 +10,13 @@
     <div class="head-right">
         @if (ShowNav)
         {
-            <div class="entry-nav">
-                <a class="nav-step @(PrevTradingDay is null ? "disabled" : "")"
+            <div class="travel-ribbon">
+                <a class="ribbon-step @(PrevTradingDay is null ? "disabled" : "")"
                    href="@PrevHref"
                    aria-disabled="@(PrevTradingDay is null)"
                    title="Previous trading day">‹</a>
 
-                <label class="date-pill" for="masthead-entry-date">
+                <label class="ribbon-date" for="masthead-entry-date">
                     <span>@FormatDate(Today)</span>
                     <input type="date"
                            id="masthead-entry-date"
@@ -29,20 +28,27 @@
                            @onchange="OnPickerChanged" />
                 </label>
 
-                <a class="nav-step @(NextTradingDay is null ? "disabled" : "")"
+                <a class="ribbon-step @(NextTradingDay is null ? "disabled" : "")"
                    href="@NextHref"
                    aria-disabled="@(NextTradingDay is null)"
                    title="Next trading day">›</a>
 
-                @if (IsHistorical)
+                <span class="ribbon-meta">entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
                 {
-                    <a class="return-today" href="/">return to today</a>
-                }
+                    <span class="freshness"> · @PriceAsOfRelative</span>
+                }</span>
             </div>
+            @if (IsHistorical)
+            {
+                <a class="return-today" href="/">return to today</a>
+            }
         }
-        <div class="meta">@(ShowNav ? "" : FormatDate(Today) + " · ")entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+        else
         {
-            <span class="freshness"> · prices @PriceAsOfRelative</span>
-        }</div>
+            <div class="meta">@FormatDate(Today) · entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+            {
+                <span class="freshness"> · prices @PriceAsOfRelative</span>
+            }</div>
+        }
     </div>
 </div>

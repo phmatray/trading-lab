@@ -1,7 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
@@ -15,7 +14,6 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }
 
-    [Parameter, EditorRequired] public CallDiff CallDiff { get; set; } = CallDiff.None;
     [Parameter, EditorRequired] public BackfillStatus BackfillStatus { get; set; } = BackfillStatus.Idle.Instance;
 
     [Inject] private ISuggestionBackfillCoordinator Coordinator { get; set; } = null!;
@@ -25,11 +23,6 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
 
     private string? _backfillLabel;
     private bool _disposed;
-
-    private bool HasDiff =>
-        Sug is not null &&
-        !ReferenceEquals(CallDiff, CallDiff.None) &&
-        !string.IsNullOrEmpty(CallDiff.SummaryParagraph);
 
     private string Verb => Sug?.Action switch
     {

@@ -34,10 +34,15 @@
    components, so they DO need ::deep. */
 
 .hero-row {
+    /* Column divider runs the full row height regardless of which card is taller. */
     display: grid;
     grid-template-columns: 1.15fr 1fr;
-    align-items: stretch;
+    align-items: start;
     border-bottom: 1px solid var(--vault-rule);
+    background:
+        linear-gradient(var(--vault-rule), var(--vault-rule)) no-repeat;
+    background-position: calc(1.15 / 2.15 * 100%) 0;
+    background-size: 1px 100%;
 }
 
 ::deep .hero-row .hero,
@@ -45,21 +50,15 @@
     border-bottom: none;
 }
 
-::deep .hero-row > *:nth-child(2) .call {
-    border-left: 1px solid var(--vault-rule);
-}
-
 @media (max-width: 980px) {
     .hero-row {
         grid-template-columns: 1fr;
         border-bottom: none;
+        background: none;
     }
     ::deep .hero-row .hero,
     ::deep .hero-row .call {
         border-bottom: 1px solid var(--vault-rule);
-    }
-    ::deep .hero-row > *:nth-child(2) .call {
-        border-left: none;
     }
 }
 

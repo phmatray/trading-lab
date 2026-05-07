@@ -5,14 +5,14 @@
 {
     <section class="citations-block">
         <header class="cit-head">
-            <span class="cit-label">Cited evidence · @Today.ToString("d MMMM", FrFr)</span>
+            <span class="cit-label"><span class="section-roman">IV.</span>Cited evidence · @Today.ToString("d MMMM", FrFr)</span>
             <span class="cit-count">@Sug.Citations.Count signals</span>
         </header>
 
         @{
-            var changedKeys = CallDiff.ChangedCitations
-                .Select(c => c.Key.ToLowerInvariant()).ToHashSet();
-            var addedKeys   = CallDiff.AddedCitationKeys
+            var changedMap = CallDiff.ChangedCitations
+                .ToDictionary(c => c.Key.ToLowerInvariant());
+            var addedKeys  = CallDiff.AddedCitationKeys
                 .Select(k => k.ToLowerInvariant()).ToHashSet();
         }
 
@@ -22,7 +22,8 @@
             {
                 citIdx++;
                 var key = $"{c.Indicator}:{c.Ticker}".ToLowerInvariant();
-                var isChanged = changedKeys.Contains(key);
+                var change   = changedMap.TryGetValue(key, out var ch) ? ch : null;
+                var isChanged = change is not null;
                 var isNew     = addedKeys.Contains(key);
                 var kind = IndicatorKindParser.From(c.Indicator);
                 IndicatorSeries? series = null;
@@ -34,9 +35,14 @@
                         <div class="cit-name">
                             <b>@c.Indicator</b>
                             <span class="cit-ticker">@c.Ticker</span>
-                            @if (isNew) { <span class="cit-new">new</span> }
+                            @if (isNew)     { <span class="cit-chip cit-new">new</span> }
+                            else if (isChanged) { <span class="cit-chip cit-changed">Δ</span> }
                         </div>
                         <div class="cit-claim">@c.Claim</div>
+                        @if (change is not null)
+                        {
+                            <div class="cit-since num">since: @change.PriorValue</div>
+                        }
                     </div>
                     <div class="cit-value num">@c.Value</div>
                     <div class="cit-spark">

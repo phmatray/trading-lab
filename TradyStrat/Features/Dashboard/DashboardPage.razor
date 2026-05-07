@@ -35,12 +35,12 @@ else
                        LatestTradingDay="vm.LatestTradingDay"
                        IsHistorical="vm.IsHistorical"
                        OnDateSelected="OnDateSelected" />
+        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
         <div class="hero-row">
             <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                          GoalPace="vm.GoalPace" />
             <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
                             CallAsOfRelative="@vm.CallAsOfRelative"
-                            CallDiff="vm.CallDiff"
                             BackfillStatus="vm.BackfillStatus"
                             Historical="vm.IsHistorical"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
@@ -52,7 +52,6 @@ else
                             IndicatorHistories="vm.IndicatorHistories" />
         }
         <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
-        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
     </div>
     <RefreshFab Busy="_busy" Historical="vm.IsHistorical" OnClick="OnRefreshClicked" />
 

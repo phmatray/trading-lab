@@ -1,5 +1,5 @@
 <div class="hero">
-    <div class="label">Capital under accumulation</div>
+    <div class="label"><span class="section-roman">II.</span>Capital under accumulation</div>
     <div class="amount">
         <span class="euro">€</span><span class="num">@Snap.CurrentValueEur.ToString("N0", FrFr)</span>
         <span class="of">— of €@Goal.TargetEur.ToString("N0", FrFr) —</span>
@@ -59,20 +59,28 @@
 
     @if (GoalPace.Mode == GoalPaceMode.Active)
     {
-        <div class="pace-stats">
+        <div class="pace-line-row">
             <div class="stat">
-                <div class="k">vs. plan</div>
-                <div class="v @(GoalPace.VsPlanEur < 0 ? "neg" : "pos")">
+                <span class="k">vs. plan</span>
+                <span class="v @(GoalPace.VsPlanEur < 0 ? "neg" : "pos")">
                     @FormatVsPlan(GoalPace.VsPlanEur)
-                </div>
+                </span>
             </div>
+            <span class="sep">·</span>
             <div class="stat">
-                <div class="k">monthly growth needed</div>
-                <div class="v">@GoalPace.MonthlyCompoundPct.ToString("F1", FrFr) % / mo</div>
+                <span class="k">monthly</span>
+                <span class="v @(IsAlarmingMonthly ? "alarm" : "")"
+                      title="@(IsAlarmingMonthly ? "Above 15 %/mo — implausible without exceptional luck" : null)">
+                    @GoalPace.MonthlyCompoundPct.ToString("F1", FrFr) % / mo
+                </span>
             </div>
+            <span class="sep">·</span>
             <div class="stat">
-                <div class="k">implied CAGR</div>
-                <div class="v">@GoalPace.ImpliedCagrPct.ToString("F0", FrFr) %</div>
+                <span class="k">CAGR</span>
+                <span class="v @(IsAlarmingCagr ? "alarm" : "")"
+                      title="@(IsAlarmingCagr ? "Above 250 % CAGR — implausible without exceptional luck" : null)">
+                    @GoalPace.ImpliedCagrPct.ToString("F0", FrFr) %
+                </span>
             </div>
         </div>
     }

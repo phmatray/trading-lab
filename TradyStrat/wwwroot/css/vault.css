@@ -45,6 +45,20 @@ body {
          color: var(--vault-gold); }
 .rule  { height: 1px; background: var(--vault-rule); }
 
+/* Editorial section marker — italic Cormorant numeral that precedes the
+   small-caps mono label. Reads like a chapter heading in a magazine.    */
+.section-roman {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--vault-gold);
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-right: 14px;
+    opacity: 0.85;
+}
+
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 
@@ -76,60 +90,62 @@ main::before {
 }
 main > * { position: relative; z-index: 1; }
 
-/* ---- Time-travel masthead controls ----------------------------------- */
+/* ---- Time-travel masthead ribbon -------------------------------------
+   One bordered group containing prev / date / next / entry-no / freshness.
+   Internal cells share borders so the whole thing reads as a single
+   continuous control rather than three separate pills.                  */
 
-.masthead .entry-nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.masthead .nav-step {
+.masthead .travel-ribbon {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
+    align-items: stretch;
     border: 1px solid var(--vault-rule);
     border-radius: 4px;
     background: var(--vault-bg-2);
+    overflow: hidden;
+    height: 28px;
+}
+
+.masthead .ribbon-step,
+.masthead .ribbon-date,
+.masthead .ribbon-meta {
+    display: inline-flex;
+    align-items: center;
     color: var(--ink-1);
-    text-decoration: none;
-    font-size: 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
     line-height: 1;
+    text-decoration: none;
     user-select: none;
-    transition: background-color 120ms ease, border-color 120ms ease;
+    transition: background-color 120ms ease, color 120ms ease;
 }
 
-.masthead .nav-step:hover {
-    background: var(--vault-bg);
-    border-color: var(--vault-gold);
+.masthead .ribbon-step {
+    width: 28px;
+    justify-content: center;
+    font-size: 18px;
+    border-right: 1px solid var(--vault-rule);
 }
+.masthead .ribbon-step:last-child,
+.masthead .ribbon-step + .ribbon-meta { /* nothing, just keeps specificity */ }
 
-.masthead .nav-step.disabled,
-.masthead .nav-step[aria-disabled="true"] {
+.masthead .ribbon-step:hover { background: var(--vault-bg); color: var(--vault-gold); }
+
+.masthead .ribbon-step.disabled,
+.masthead .ribbon-step[aria-disabled="true"] {
     opacity: 0.30;
     pointer-events: none;
     cursor: default;
 }
 
-.masthead .date-pill {
+.masthead .ribbon-date {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border: 1px solid var(--vault-rule);
-    border-radius: 4px;
-    background: var(--vault-bg-2);
-    color: var(--ink-1);
-    font-family: var(--font-mono);
-    font-size: 12px;
+    padding: 0 14px;
     cursor: pointer;
+    border-right: 1px solid var(--vault-rule);
 }
+.masthead .ribbon-date:hover { background: var(--vault-bg); }
 
-.masthead .date-pill input[type="date"] {
+.masthead .ribbon-date input[type="date"] {
     /* Native picker, hidden visually but still focusable for the calendar UI. */
     position: absolute;
     inset: 0;
@@ -140,6 +156,22 @@ main > * { position: relative; z-index: 1; }
     border: none;
     background: transparent;
     color-scheme: dark;
+}
+
+.masthead .ribbon-step + .ribbon-date { border-right: 1px solid var(--vault-rule); }
+
+.masthead .ribbon-meta {
+    padding: 0 14px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-md);
+    font-size: 10px;
+}
+.masthead .ribbon-meta .freshness {
+    color: rgba(236,230,214,0.42);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    margin-left: 2px;
 }
 
 .masthead .return-today {

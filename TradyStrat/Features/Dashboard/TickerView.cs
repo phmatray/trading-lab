@@ -8,4 +8,5 @@ public sealed record TickerView(
     decimal Price,
     decimal? PriceEur,
     decimal? DeltaPct,
-    Zone Zone);
+    Zone Zone,
+    IReadOnlyList<decimal> Spark);

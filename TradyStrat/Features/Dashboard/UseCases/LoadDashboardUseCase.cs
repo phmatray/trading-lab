@@ -60,8 +60,9 @@ public sealed class LoadDashboardUseCase(
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
 
             var deltaPct = await ComputeDeltaPctAsync(ticker, target, ct);
+            var spark    = await ComputeSparkAsync(ticker, target, ct);
             tickers.Add(new TickerView(
-                ticker, currency, reading.Price, eur, deltaPct, reading.Zone));
+                ticker, currency, reading.Price, eur, deltaPct, reading.Zone, spark));
         }
 
         var snap = await portfolio.SnapshotAsync(target, focusPriceEur ?? 0m, goal.TargetEur, ct);
@@ -185,6 +186,17 @@ public sealed class LoadDashboardUseCase(
         var curr = bars[^1].Close;
         if (prev == 0m) return null;
         return (curr - prev) / prev * 100m;
+    }
+
+    private async Task<IReadOnlyList<decimal>> ComputeSparkAsync(string ticker, DateOnly asOf, CancellationToken ct)
+    {
+        var bars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(ticker, asOf), ct);
+        if (bars.Count == 0) return [];
+        var window = Math.Min(bars.Count, SparklineWindow);
+        var slice = new decimal[window];
+        for (var i = 0; i < window; i++)
+            slice[i] = bars[bars.Count - window + i].Close;
+        return slice;
     }
 }
 

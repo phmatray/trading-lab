@@ -29,10 +29,9 @@ public partial class CitationsBlock : ComponentBase
         };
 
     /// <summary>
-    /// Renders a small inline SVG sparkline for an <see cref="IndicatorSeries"/>.
-    /// All interpolated values are numeric/constant — safe for <c>MarkupString</c>.
-    /// Larger here than in the old card view because the citations block is full-width:
-    /// 92×22 with a small dot at the latest value.
+    /// Renders a small inline SVG sparkline for an <see cref="IndicatorSeries"/>,
+    /// adding optional Hi/Lo threshold dashes that the bare <see cref="Sparkline"/>
+    /// helper doesn't carry. All interpolated values are numeric/constant.
     /// </summary>
     private static string RenderSparklineSvg(IndicatorSeries s)
     {
