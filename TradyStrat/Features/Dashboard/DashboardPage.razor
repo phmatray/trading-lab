@@ -35,7 +35,9 @@ else
                        LatestTradingDay="vm.LatestTradingDay"
                        IsHistorical="vm.IsHistorical"
                        OnDateSelected="OnDateSelected" />
-        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
+        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio"
+                     Events="vm.CapitalEvents" />
+        <EventFootnoteRail Events="vm.CapitalEvents" />
         <div class="hero-row">
             <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                          GoalPace="vm.GoalPace" />

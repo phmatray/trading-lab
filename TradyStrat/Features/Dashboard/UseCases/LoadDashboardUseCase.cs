@@ -183,6 +183,7 @@ public sealed class LoadDashboardUseCase(
             CallAsOfRelative: callAsOf,
             FxAsOfRelative: fxAsOf,
             IndicatorHistories: histories,
+            CapitalEvents: SeedCapitalEvents(),
             IsHistorical: input.IsHistorical,
             EarliestTradingDay: earliest,
             LatestTradingDay: latest,
@@ -210,6 +211,29 @@ public sealed class LoadDashboardUseCase(
             slice[i] = bars[bars.Count - window + i].Close;
         return slice;
     }
+
+    /// <summary>
+    /// Editorial event annotations plotted on the growth chart and elaborated
+    /// in the footnote rail beneath it. Hardcoded placeholder list — to be
+    /// replaced with a real persistence layer (or trade-derived inference)
+    /// once the design is locked. Dates align loosely with the seeded trade
+    /// history so the numerals visually anchor on the line during dev runs.
+    /// </summary>
+    private static IReadOnlyList<CapitalEvent> SeedCapitalEvents() =>
+    [
+        new(new DateOnly(2025, 12, 7), "i",
+            "Initial position.",
+            "CON3.L entry — UK construction sentiment turning, AI rationale cited macro-housing tailwind."),
+        new(new DateOnly(2026, 1, 21), "ii",
+            "Doubled the position.",
+            "Post-budget signal lifted the focus ticker; conviction added on confirmation, not anticipation."),
+        new(new DateOnly(2026, 3, 12), "iii",
+            "Trimmed 30%.",
+            "RSI 78, parabolic; reasoning explicitly flagged overbought and recommended partial exit."),
+        new(new DateOnly(2026, 4, 24), "iv",
+            "Re-entered after correction.",
+            "Position rebuilt at lower cost basis; capital +18% YTD when written."),
+    ];
 }
 
 internal static partial class LoadDashboardLog

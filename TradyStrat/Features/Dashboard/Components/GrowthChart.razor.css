@@ -69,8 +69,37 @@
 }
 .chart .plan-gap-cap.ahead { fill: var(--vault-green); }
 
+/* Editorial event annotations — geometry only (numerals are HTML overlays) */
+.chart .event {
+    opacity: 0;
+    animation: gc-rise 700ms ease-out forwards;
+}
+.chart .event-stalk {
+    stroke: rgba(196,154,86,0.32);
+    stroke-width: 0.8;
+    stroke-dasharray: 1 2;
+}
+.chart .event-dot {
+    fill: var(--vault-bg);
+    stroke: var(--vault-gold);
+    stroke-width: 1.4;
+}
+.chart .event:nth-of-type(1) { animation-delay: 1300ms; }
+.chart .event:nth-of-type(2) { animation-delay: 1450ms; }
+.chart .event:nth-of-type(3) { animation-delay: 1600ms; }
+.chart .event:nth-of-type(4) { animation-delay: 1750ms; }
+
 @keyframes gc-draw { to { stroke-dashoffset: 0; } }
 @keyframes gc-fade { to { opacity: 1; } }
+@keyframes gc-rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+/* event-num override: needs the translate(-50%,-100%) anchor preserved */
+@keyframes gc-rise-numeral {
+    from { opacity: 0; transform: translate(-50%, calc(-100% + 4px)); }
+    to   { opacity: 1; transform: translate(-50%, -100%); }
+}
 
 /* ---- HTML text overlays --------------------------------------- */
 .chart-text {
@@ -136,6 +165,24 @@
 }
 .chart-text .today-value.flip { transform: translate(0, -100%); }
 .chart-text .today-chip.flip  { transform: translate(0, 0); }
+
+.chart-text .event-num {
+    transform: translate(-50%, -100%);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--vault-gold);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    padding-bottom: 3px;          /* gap between numeral baseline and stalk top */
+    opacity: 0;
+    animation: gc-rise-numeral 700ms ease-out forwards;
+}
+.chart-text .event-num:nth-of-type(1) { animation-delay: 1300ms; }
+.chart-text .event-num:nth-of-type(2) { animation-delay: 1450ms; }
+.chart-text .event-num:nth-of-type(3) { animation-delay: 1600ms; }
+.chart-text .event-num:nth-of-type(4) { animation-delay: 1750ms; }
 
 .chart-text .x-axis {
     bottom: 0;

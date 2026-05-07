@@ -68,6 +68,18 @@ export function init(svg, data /*, locale */) {
     const startMs = data.startDate ? new Date(data.startDate).getTime() : axisStartMs;
     const planSpanMs = Math.max(1, axisEndMs - startMs);
 
+    // ---- Helpers ----
+    // t in [0,1] across the axis
+    const valueToY = v => PLOT_H - (v / goalEur) * PLOT_H;
+    const tToX     = (t, w0, w1) => ((t - w0) / (w1 - w0)) * VB_W;
+    const msToT    = ms => (ms - axisStartMs) / axisSpanMs;
+    // Required-CAGR plan: V(t) = V0 * (V_T / V0)^τ where τ is fraction of plan span
+    function planValueAtMs(ms) {
+        if (ms <= startMs) return startCapital;
+        const tau = (ms - startMs) / planSpanMs;
+        return startCapital * Math.pow(goalEur / startCapital, tau);
+    }
+
     // ---- Element refs ----
     const els = {
         line:        $('linePath'),
@@ -84,17 +96,22 @@ export function init(svg, data /*, locale */) {
         xEnd:        $('xEnd'),
     };
 
-    // ---- Helpers ----
-    // t in [0,1] across the axis
-    const valueToY = v => PLOT_H - (v / goalEur) * PLOT_H;
-    const tToX     = (t, w0, w1) => ((t - w0) / (w1 - w0)) * VB_W;
-    const msToT    = ms => (ms - axisStartMs) / axisSpanMs;
-    // Required-CAGR plan: V(t) = V0 * (V_T / V0)^τ where τ is fraction of plan span
-    const planValueAtMs = ms => {
-        if (ms <= startMs) return startCapital;
-        const tau = (ms - startMs) / planSpanMs;
-        return startCapital * Math.pow(goalEur / startCapital, tau);
-    };
+    // ---- Event annotations ----
+    // Each event resolves to:
+    //   ms: the event date
+    //   capital: actual capital at the closest data point on/before the event
+    //            — falls back to plan value if the event predates all data.
+    const events = (Array.isArray(data.events) ? data.events : []).map((e, i) => {
+        const eMs = new Date(e.date).getTime();
+        const idx = findIndexByDate(datesMs, eMs);
+        const cap = data.capital[idx] ?? 0;
+        return {
+            ms:      eMs,
+            capital: cap > 0 ? cap : planValueAtMs(eMs),
+            svg:     $(`event-svg-${i}`),
+            num:     $(`event-num-${i}`),
+        };
+    });
 
     // ---- Today (last data point) ----
     const todayMs    = lastDataMs;
@@ -272,6 +289,38 @@ export function init(svg, data /*, locale */) {
             if (els.todayChip)   { els.todayChip.classList.toggle('ahead', ahead);   els.todayChip.classList.toggle('behind', !ahead); }
             if (els.planGap)     { els.planGap.classList.toggle('ahead', ahead);     els.planGap.classList.toggle('behind', !ahead); }
             if (els.planGapCap)  { els.planGapCap.classList.toggle('ahead', ahead);  els.planGapCap.classList.toggle('behind', !ahead); }
+        }
+
+        // Events — italic Roman numeral above each event date on the line
+        for (const ev of events) {
+            const t = msToT(ev.ms);
+            const inWin = t >= w0 && t <= w1;
+            if (ev.svg) ev.svg.style.display = inWin ? '' : 'none';
+            if (ev.num) ev.num.style.display = inWin ? '' : 'none';
+            if (!inWin) continue;
+
+            const x        = tToX(t, w0, w1);
+            const y        = valueToY(ev.capital);
+            const stalkTop = y - 14;
+
+            if (ev.svg) {
+                const stalk = ev.svg.querySelector('.event-stalk');
+                const dot   = ev.svg.querySelector('.event-dot');
+                if (stalk) {
+                    stalk.setAttribute('x1', x);
+                    stalk.setAttribute('x2', x);
+                    stalk.setAttribute('y1', y);
+                    stalk.setAttribute('y2', stalkTop);
+                }
+                if (dot) {
+                    dot.setAttribute('cx', x);
+                    dot.setAttribute('cy', y);
+                }
+            }
+            if (ev.num) {
+                ev.num.style.left = (x / VB_W * 100) + '%';
+                ev.num.style.top  = (stalkTop / VB_H * 100) + '%';
+            }
         }
 
         // Date axis

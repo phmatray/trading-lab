@@ -37,6 +37,18 @@
 
             @* Today dot (positioned by JS) *@
             <circle class="today-dot" id="@($"{_id}-todayDot")" r="3.8"/>
+
+            @* Event geometry — stalk + hollow dot per event. Numerals are
+               HTML overlays (rendered below) so they stay legible despite
+               preserveAspectRatio="none". *@
+            @for (var i = 0; i < Events.Count; i++)
+            {
+                var idx = i;
+                <g class="event" id="@($"{_id}-event-svg-{idx}")">
+                    <line class="event-stalk"/>
+                    <circle class="event-dot" r="3"/>
+                </g>
+            }
         </svg>
 
         @* HTML text overlay (avoids preserveAspectRatio="none" stretching) *@
@@ -53,6 +65,12 @@
             <span class="x-axis x-start" id="@($"{_id}-xStart")"></span>
             <span class="x-axis x-mid"   id="@($"{_id}-xMid")"></span>
             <span class="x-axis x-end"   id="@($"{_id}-xEnd")"></span>
+
+            @for (var i = 0; i < Events.Count; i++)
+            {
+                var idx = i;
+                <span class="event-num" id="@($"{_id}-event-num-{idx}")">@Events[idx].RomanId</span>
+            }
         </div>
     </div>
 </div>

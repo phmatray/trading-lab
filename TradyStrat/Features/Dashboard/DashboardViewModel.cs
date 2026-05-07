@@ -23,6 +23,7 @@ public sealed record DashboardViewModel(
     string CallAsOfRelative,
     string FxAsOfRelative,
     IReadOnlyDictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries> IndicatorHistories,
+    IReadOnlyList<CapitalEvent> CapitalEvents,
     // new — time-travel
     bool IsHistorical,
     DateOnly EarliestTradingDay,

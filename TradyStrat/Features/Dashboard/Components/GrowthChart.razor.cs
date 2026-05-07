@@ -13,6 +13,7 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
     [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
     [Parameter, EditorRequired] public PortfolioSnapshot Portfolio { get; set; } = null!;
     [Parameter] public decimal? FocusTickerEur { get; set; }
+    [Parameter] public IReadOnlyList<CapitalEvent> Events { get; set; } = [];
 
     private ElementReference _svgRef;
     private IJSObjectReference? _module;
@@ -75,6 +76,11 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
             yLabel75        = $"€{(Goal.TargetEur * 0.75m).ToString("N0", FrFr)}",
             yLabel50        = $"€{(Goal.TargetEur * 0.50m).ToString("N0", FrFr)}",
             yLabel25        = $"€{(Goal.TargetEur * 0.25m).ToString("N0", FrFr)}",
+            events          = Events.Select(e => new
+            {
+                date    = e.Date.ToString("o", CultureInfo.InvariantCulture),
+                romanId = e.RomanId,
+            }).ToArray(),
         };
     }
 
