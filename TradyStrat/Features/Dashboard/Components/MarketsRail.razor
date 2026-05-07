@@ -1,0 +1,26 @@
+@using TradyStrat.Features.PredictionMarkets
+
+@if (Snapshot.Markets.Count > 0)
+{
+    <div class="markets-rail">
+        <div class="rail-label">Polymarket · @Snapshot.Markets.Count markets</div>
+        <div class="market-tiles">
+            @foreach (var m in Snapshot.Markets)
+            {
+                var citation = _bySlug.GetValueOrDefault(m.Slug);
+                <div class="tile @(citation is not null ? "cited" : "")">
+                    <div class="prob">@m.Probability.ToString("P0", FrFr)</div>
+                    <div class="question">@m.Question</div>
+                    <div class="meta">
+                        @m.EndDate.ToString("d MMM yyyy", FrFr) ·
+                        vol $@m.VolumeUsd.ToString("N0", FrFr)
+                    </div>
+                    @if (citation is not null)
+                    {
+                        <div class="claim">★ @citation.Claim</div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
