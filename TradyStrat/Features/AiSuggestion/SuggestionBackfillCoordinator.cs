@@ -13,7 +13,7 @@ public sealed partial class SuggestionBackfillCoordinator(
 {
     private readonly object _gate = new();
     private Task? _inflight;
-    private BackfillStatus _status = BackfillStatus.Idle.Instance;
+    private volatile BackfillStatus _status = BackfillStatus.Idle.Instance;
 
     public BackfillStatus Status => _status;
     public event Action<BackfillStatus>? StatusChanged;
@@ -60,8 +60,7 @@ public sealed partial class SuggestionBackfillCoordinator(
             }
             catch (OperationCanceledException)
             {
-                // Restore to Idle without emitting Failed, then propagate.
-                _status = BackfillStatus.Idle.Instance;
+                SetStatus(BackfillStatus.Idle.Instance);   // notify subscribers the chain is no longer running
                 throw;
             }
             catch (TradyStratException ex)
