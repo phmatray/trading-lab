@@ -57,6 +57,8 @@
 }
 .seg {
     position: absolute; top: 0; bottom: 0;
+    left: var(--l);
+    width: var(--w);
     transition: left 600ms ease-out, width 600ms ease-out;
     pointer-events: none;
 }
@@ -88,6 +90,7 @@
 }
 .tick.now {
     position: absolute;
+    left: var(--l);
     top: -3px; bottom: -3px;
     width: 1px;
     background: var(--vault-ivory);
