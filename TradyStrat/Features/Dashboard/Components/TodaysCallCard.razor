@@ -19,7 +19,7 @@
     }
 
     <p class="reasons">
-        <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail">.</span> @Sug.Rationale
+        <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail" data-verb="@VerbStem">.</span> @Sug.Rationale
     </p>
 
     @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
