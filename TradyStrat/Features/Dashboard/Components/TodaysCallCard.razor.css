@@ -77,6 +77,23 @@
 .verb-drop[data-verb="wait"]    { color: rgba(236,230,214,0.6); font-style: italic; }
 .verb-drop[data-verb="acquire"] { color: #6a9a6a; }
 
+.verb-tail {
+    /* Floats with the dropcap so the period sits at the same baseline
+       as the bottom of the giant glyph, not as part of the body prose. */
+    float: left;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--vault-ivory);
+    font-size: 86px;
+    line-height: 0.86;
+    margin: 8px 18px 2px -10px;
+    letter-spacing: -0.01em;
+}
+@media (max-width: 720px) {
+    .verb-tail { font-size: 64px; margin-right: 14px; }
+}
+
 @media (max-width: 720px) {
     .verb-drop { font-size: 64px; margin-right: 14px; }
     .verb-drop[data-verb="acquire"] { font-size: 48px; }

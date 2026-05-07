@@ -31,10 +31,10 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
 
     private string Verb => Sug.Action switch
     {
-        SuggestionAction.Acquire => "Acquire.",
-        SuggestionAction.Hold    => "Hold.",
-        SuggestionAction.Trim    => "Trim.",
-        SuggestionAction.Wait    => "Wait.",
+        SuggestionAction.Acquire => "Acquire",
+        SuggestionAction.Hold    => "Hold",
+        SuggestionAction.Trim    => "Trim",
+        SuggestionAction.Wait    => "Wait",
         _ => "—"
     };
 
