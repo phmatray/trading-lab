@@ -15,7 +15,7 @@ public class IndicatorEngineTests
     {
         await using var db = InMemoryDb.Create();
         var repo = new TestRepo<PriceBar>(db);
-        var engine = new IndicatorEngine(repo, new ZoneClassifier(Array.Empty<IZoneRule>()));
+        var engine = new IndicatorEngine(repo, new ZoneClassifier(Array.Empty<IZoneRule>()), new IndicatorHistoryProviderFactory([]));
 
         await Should.ThrowAsync<IndicatorComputationException>(() =>
             engine.ComputeFor("CON3.DE", TestContext.Current.CancellationToken));
@@ -36,7 +36,7 @@ public class IndicatorEngineTests
             new MovingAverageZoneRule(), new IchimokuZoneRule()
         });
 
-        var engine = new IndicatorEngine(repo, classifier);
+        var engine = new IndicatorEngine(repo, classifier, new IndicatorHistoryProviderFactory([]));
 
         var reading = await engine.ComputeFor("CON3.DE", TestContext.Current.CancellationToken);
 

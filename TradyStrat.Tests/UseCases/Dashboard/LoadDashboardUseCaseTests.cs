@@ -47,7 +47,7 @@ public class LoadDashboardUseCaseTests
         var classifier = new ZoneClassifier(new IZoneRule[] {
             new BollingerZoneRule(), new RsiZoneRule(),
             new MovingAverageZoneRule(), new IchimokuZoneRule() });
-        var indicators = new IndicatorEngine(new TestRepo<PriceBar>(db), classifier);
+        var indicators = new IndicatorEngine(new TestRepo<PriceBar>(db), classifier, new IndicatorHistoryProviderFactory([]));
         var portfolio  = new PortfolioService(new TestRepo<Trade>(db));
         var growth     = new GrowthSeriesBuilder(new TestRepo<Trade>(db), new TestRepo<PriceBar>(db));
         var fx         = new FxConverter(new TestRepo<FxRate>(db));

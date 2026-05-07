@@ -38,7 +38,7 @@ public class SnapshotBuilderTests
             new BollingerZoneRule(), new RsiZoneRule(),
             new MovingAverageZoneRule(), new IchimokuZoneRule()
         });
-        var engine    = new IndicatorEngine(new TestRepo<PriceBar>(db), classifier);
+        var engine    = new IndicatorEngine(new TestRepo<PriceBar>(db), classifier, new IndicatorHistoryProviderFactory([]));
         var portfolio = new PortfolioService(new TestRepo<Trade>(db));
         var fx        = new FxConverter(new TestRepo<FxRate>(db));
         var clock     = new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc));
