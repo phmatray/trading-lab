@@ -23,10 +23,12 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     [Parameter, EditorRequired] public BackfillStatus BackfillStatus { get; set; } = BackfillStatus.Idle.Instance;
 
     [Inject] private ISuggestionBackfillCoordinator Coordinator { get; set; } = null!;
+    [Inject] private ILogger<TodaysCallCard> Log { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
     private string? _backfillLabel;
+    private bool _disposed;
 
     private bool HasDiff =>
         !ReferenceEquals(CallDiff, global::TradyStrat.Features.AiSuggestion.CallDiff.None) &&
@@ -44,15 +46,24 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         Coordinator.StatusChanged += OnBackfillStatus;
-        UpdateBackfillLabel(BackfillStatus);
+        UpdateBackfillLabel(Coordinator.Status);  // read fresh after subscribe to close late-attach window
     }
 
     private void OnBackfillStatus(BackfillStatus status)
     {
+        if (_disposed) return;
         _ = InvokeAsync(() =>
         {
-            UpdateBackfillLabel(status);
-            StateHasChanged();
+            if (_disposed) return;       // double-check inside the queued continuation
+            try
+            {
+                UpdateBackfillLabel(status);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                TodaysCallCardLog.StatusChangedCallbackFailed(Log, ex);
+            }
         });
     }
 
@@ -68,6 +79,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
 
     public void Dispose()
     {
+        _disposed = true;                          // set before unsubscribe so in-flight continuations short-circuit
         Coordinator.StatusChanged -= OnBackfillStatus;
         GC.SuppressFinalize(this);
     }
@@ -119,4 +131,11 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
                $"<polyline points=\"{pts}\" fill=\"none\" stroke=\"#c49a56\" stroke-width=\"1.2\" />" +
                "</svg>";
     }
+}
+
+internal static partial class TodaysCallCardLog
+{
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "TodaysCallCard StatusChanged callback threw")]
+    public static partial void StatusChangedCallbackFailed(ILogger logger, Exception ex);
 }
