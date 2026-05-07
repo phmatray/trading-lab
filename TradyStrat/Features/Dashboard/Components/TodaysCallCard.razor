@@ -1,6 +1,7 @@
 @using TradyStrat.Shared.Domain
 @using TradyStrat.Features.Indicators
 @using TradyStrat.Features.AiSuggestion
+@using TradyStrat.Features.Dashboard
 <div class="call">
     <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)@if (!string.IsNullOrEmpty(CallAsOfRelative))
     {
@@ -9,9 +10,7 @@
 
     @if (HasDiff)
     {
-        <div class="summary-bar">
-            @CallDiff.SummaryParagraph
-        </div>
+        <CallDiffList Rows="CallDiffRowProjector.Project(CallDiff)" />
     }
     @if (_backfillLabel is not null)
     {

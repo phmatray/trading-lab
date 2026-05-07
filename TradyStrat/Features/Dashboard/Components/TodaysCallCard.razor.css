@@ -10,23 +10,6 @@
     text-transform: uppercase;
 }
 
-/* The italic summary bar from the call diff (T19/T24) — sits above the
-   rationale so the verdict drop cap reads as a fresh thought beneath. */
-.summary-bar {
-    background: linear-gradient(
-        90deg,
-        rgba(196,154,86,0.10) 0%,
-        rgba(196,154,86,0.03) 80%,
-        transparent 100%);
-    border-left: 2px solid rgba(196,154,86,0.55);
-    padding: 9px 14px;
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: rgba(236,230,214,0.78);
-    margin-bottom: 18px;
-    font-style: italic;
-}
-
 .backfill-pill {
     margin-bottom: 12px;
     font-family: var(--font-mono);

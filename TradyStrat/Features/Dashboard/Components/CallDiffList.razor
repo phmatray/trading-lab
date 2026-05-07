@@ -1,0 +1,23 @@
+@using TradyStrat.Features.Dashboard
+@using TradyStrat.Features.AiSuggestion
+
+@if (Rows.Count > 0)
+{
+    <ul class="cdl">
+        @foreach (var row in Rows)
+        {
+            <li class="cdl-row" data-kind="@row.Kind">
+                <span class="cdl-glyph" aria-hidden="true">@GlyphFor(row.Kind)</span>
+                <span class="cdl-name"><b>@row.Indicator</b><span class="cdl-tk">@row.Ticker</span></span>
+                @if (!string.IsNullOrEmpty(row.Detail))
+                {
+                    <span class="cdl-detail">@row.Detail</span>
+                }
+                else
+                {
+                    <span class="cdl-detail cdl-keyword">@row.Kind</span>
+                }
+            </li>
+        }
+    </ul>
+}
