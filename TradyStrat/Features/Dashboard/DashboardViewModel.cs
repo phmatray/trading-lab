@@ -12,6 +12,8 @@ public sealed record DashboardViewModel(
     GoalConfig Goal,
     Suggestion? TodaysCall,
     IReadOnlyList<TickerView> Tickers,
+    IReadOnlyList<PositionRow> Positions,
+    string FocusTicker,
     IReadOnlyList<GrowthPoint> Growth,
     DateOnly? LatestPriceDate,
     GoalPaceVm GoalPace,

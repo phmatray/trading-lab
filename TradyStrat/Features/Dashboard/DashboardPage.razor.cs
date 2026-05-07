@@ -128,6 +128,15 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
         // Stub — see VaultMasthead nav for /trades.
     }
 
+    // Strip exchange suffixes so the call card reads "100 sh CON3" instead of
+    // "100 sh CON3.L". Cheap, deterministic, and keeps the suggestion line
+    // visually aligned with the prior single-ticker design.
+    private static string FocusLabelFor(string ticker)
+    {
+        var dot = ticker.IndexOf('.', StringComparison.Ordinal);
+        return dot < 0 ? ticker : ticker[..dot];
+    }
+
     private async Task ReloadAsync()
     {
         if (_vm is null) return;

@@ -12,6 +12,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     [Parameter] public DateOnly Today { get; set; }
     [Parameter] public string CallAsOfRelative { get; set; } = "";
     [Parameter] public bool Historical { get; set; }
+    [Parameter] public string FocusLabel { get; set; } = "CON3";
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }
 

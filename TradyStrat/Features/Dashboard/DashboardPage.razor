@@ -43,8 +43,10 @@ else
                             CallDiff="vm.CallDiff"
                             BackfillStatus="vm.BackfillStatus"
                             Historical="vm.IsHistorical"
+                            FocusLabel="@FocusLabelFor(vm.FocusTicker)"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
         </div>
+        <PositionsTable Rows="vm.Positions" />
         @if (vm.TodaysCall is not null)
         {
             <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"

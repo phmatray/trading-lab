@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Indicators.History;
@@ -11,6 +12,7 @@ using TradyStrat.Features.Dashboard.Navigation;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Features.Indicators.Bollinger;
 using TradyStrat.Features.Indicators.Ichimoku;
@@ -84,6 +86,16 @@ public class LoadDashboardUseCaseTests
         var coord = new NullCoordinator();
         var nav   = new FakeNav();
 
+        var listInstruments = new ListInstrumentsUseCase(
+            new TestRepo<Instrument>(db),
+            NullLogger<ListInstrumentsUseCase>.Instance);
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Tickers:Focus"] = "CON3.L",
+            })
+            .Build();
+
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,
             new TestRepo<GoalConfig>(db),
@@ -91,7 +103,8 @@ public class LoadDashboardUseCaseTests
             new TestRepo<PriceBar>(db),
             new TestRepo<Suggestion>(db),
             new TestRepo<FxRate>(db),
-            new TestRepo<Instrument>(db),
+            listInstruments,
+            config,
             todays,
             coord,
             nav,
@@ -103,12 +116,22 @@ public class LoadDashboardUseCaseTests
     private static async Task SeedBaseAsync(TradyStrat.Data.AppDbContext db, CancellationToken ct,
         Suggestion? seedSuggestion = null)
     {
-        // Phase 1 dashboard: focus is hardcoded to CON3.L; the use case looks up
-        // the matching Instrument by ticker to obtain its Id for the price map.
+        // Phase 1 dashboard: focus is configured as CON3.L; the use case enumerates
+        // all Instruments (Held + Watchlist) from the DB. CON3.L is the lone Held
+        // position; COIN and BTC-USD ride the Watchlist for zone analysis only.
+        var seedAt = DateTime.UtcNow;
         db.Instruments.Add(new Instrument {
             Id = 1, Ticker = "CON3.L", Name = "Leverage Shares 3x Long Coinbase",
             Currency = "USD", Exchange = "LSE", TimezoneId = "Europe/London",
-            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
+            Kind = InstrumentKind.Held, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 2, Ticker = "COIN", Name = "Coinbase Global, Inc.",
+            Currency = "USD", Exchange = "NMS", TimezoneId = "America/New_York",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
+        db.Instruments.Add(new Instrument {
+            Id = 3, Ticker = "BTC-USD", Name = "Bitcoin USD",
+            Currency = "USD", Exchange = "CCC", TimezoneId = "UTC",
+            Kind = InstrumentKind.Watchlist, AddedAt = seedAt });
         foreach (var b in SeriesLoader.LoadCloses("CON3.L")) db.PriceBars.Add(b);
         foreach (var t in new[] { "COIN", "BTC-USD" })
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=Target,

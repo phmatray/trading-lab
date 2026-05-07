@@ -1,0 +1,53 @@
+@using System.Globalization
+@using TradyStrat.Common.Domain
+
+<section class="positions">
+    <h3>Positions</h3>
+    @if (Rows.Count == 0)
+    {
+        <p class="empty">No positions yet — add an instrument in Settings to start tracking.</p>
+    }
+    else
+    {
+        <table class="positions-table">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th class="num">Qty</th>
+                    <th class="num">Cost basis</th>
+                    <th class="num">Mkt value</th>
+                    <th class="num">Unrealised PnL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Rows)
+                {
+                    <tr>
+                        <td>@r.Ticker</td>
+                        <td class="num">@r.Quantity.ToString("F2", FrFr)</td>
+                        <td class="num">€@r.CostBasisEur.ToString("N0", FrFr)</td>
+                        <td class="num">€@r.MarketValueEur.ToString("N0", FrFr)</td>
+                        <td class="num @(r.UnrealizedPnLEur >= 0 ? "pos" : "neg")">
+                            @FormatSigned(r.UnrealizedPnLEur)
+                        </td>
+                    </tr>
+                }
+                <tr class="total">
+                    <td>Total</td>
+                    <td></td>
+                    <td class="num">€@Rows.Sum(r => r.CostBasisEur).ToString("N0", FrFr)</td>
+                    <td class="num">€@Rows.Sum(r => r.MarketValueEur).ToString("N0", FrFr)</td>
+                    <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@FormatSigned(TotalUnreal)</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<PositionRow> Rows { get; set; } = [];
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+    private decimal TotalUnreal => Rows.Sum(r => r.UnrealizedPnLEur);
+    private static string FormatSigned(decimal v)
+        => (v >= 0 ? "+" : "") + "€" + v.ToString("N0", FrFr);
+}

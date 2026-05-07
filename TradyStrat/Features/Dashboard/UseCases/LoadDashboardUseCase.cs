@@ -12,7 +12,7 @@ using TradyStrat.Features.Fx.Specifications;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Features.PriceFeed.Specifications;
-using TradyStrat.Features.Settings.Specifications;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Dashboard.UseCases;
@@ -27,60 +27,55 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<PriceBar> priceRepo,
     IReadRepositoryBase<Suggestion> suggestionRepo,
     IReadRepositoryBase<FxRate> fxRepo,
-    IReadRepositoryBase<Instrument> instrumentRepo,
+    ListInstrumentsUseCase listInstruments,
+    IConfiguration config,
     GetTodaysSuggestionUseCase todaysSuggestion,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
     ILogger<LoadDashboardUseCase> log)
     : UseCaseBase<LoadDashboardInput, DashboardViewModel>(log)
 {
-    private const string FocusTicker = "CON3.L";
-    private const int    SparklineWindow = 30;
-
-    private static readonly (string Ticker, string Currency)[] Catalog =
-    [
-        (FocusTicker, "USD"),
-        ("COIN",      "USD"),
-        ("BTC-USD",   "USD"),
-    ];
+    private const int SparklineWindow = 30;
 
     protected override async Task<DashboardViewModel> ExecuteCore(LoadDashboardInput input, CancellationToken ct)
     {
         var target = input.TargetDate;
         var goal   = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(DateTime.UtcNow);
 
+        var focusTicker = config["Tickers:Focus"]
+            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+
+        // Catalog order: focus first, then Held alphabetically (excluding focus),
+        // then Watchlist alphabetically. Stable ordering keeps zone-card layout
+        // predictable as new instruments are added.
+        var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
+        var ordered = instruments
+            .OrderBy(i => i.Ticker == focusTicker ? 0 : i.Kind == InstrumentKind.Held ? 1 : 2)
+            .ThenBy(i => i.Ticker, StringComparer.Ordinal)
+            .ToList();
+
+        // Iterate Held + Watchlist for zone analysis. Held instruments contribute
+        // to the priceMap (used by PortfolioService.SnapshotAsync); Watchlist do not.
         var tickers = new List<TickerView>();
-        decimal? focusPriceEur = null;
-
-        foreach (var (ticker, currency) in Catalog)
-        {
-            var reading = await indicators.ComputeFor(ticker, target, ct);
-            decimal? eur = null;
-            if (currency != "EUR")
-                eur = await fx.ToEurAsync(reading.Price, currency, target, ct);
-            if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
-
-            var deltaPct = await ComputeDeltaPctAsync(ticker, target, ct);
-            tickers.Add(new TickerView(
-                ticker, currency, reading.Price, eur, deltaPct, reading.Zone));
-        }
-
-        // Build the per-instrument price map for portfolio valuation. Phase 1
-        // dashboard still has a hardcoded single-Held-instrument catalog; the
-        // DB-driven Held enumeration arrives in Task 14.
         var priceMap = new Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>();
-        var focusInstrument = await instrumentRepo.FirstOrDefaultAsync(
-            new InstrumentByTickerSpec(FocusTicker), ct);
-        if (focusInstrument is not null)
+
+        foreach (var inst in ordered)
         {
-            priceMap[focusInstrument.Id] = (
-                focusPriceEur ?? 0m,
-                focusInstrument.Ticker,
-                focusInstrument.Currency);
+            var reading = await indicators.ComputeFor(inst.Ticker, target, ct);
+            decimal? eur = string.Equals(inst.Currency, "EUR", StringComparison.OrdinalIgnoreCase)
+                ? reading.Price
+                : await fx.ToEurAsync(reading.Price, inst.Currency, target, ct);
+
+            var deltaPct = await ComputeDeltaPctAsync(inst.Ticker, target, ct);
+            tickers.Add(new TickerView(
+                inst.Ticker, inst.Currency, reading.Price, eur, deltaPct, reading.Zone));
+
+            if (inst.Kind == InstrumentKind.Held && eur is { } e)
+                priceMap[inst.Id] = (e, inst.Ticker, inst.Currency);
         }
 
         var snap = await portfolio.SnapshotAsync(target, priceMap, goal.TargetEur, ct);
-        var growthSeries = await growth.BuildAsync(FocusTicker, ct);
+        var growthSeries = await growth.BuildAsync(focusTicker, ct);
 
         // Pin trailing growth point to the EUR-valued snapshot so chart and hero agree.
         // (Historical mode: this still anchors at the latest stored bar; documented limitation.)
@@ -103,7 +98,7 @@ public sealed class LoadDashboardUseCase(
         }
 
         var entryNum  = await tradeRepo.CountAsync(new TradesAsOfSpec(target), ct);
-        var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(FocusTicker), ct);
+        var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(focusTicker), ct);
 
         // Prior suggestion + call diff. Skip when today's call is null (historical-empty).
         Suggestion? prior = null;
@@ -176,6 +171,8 @@ public sealed class LoadDashboardUseCase(
             Goal: goal,
             TodaysCall: todays,
             Tickers: tickers,
+            Positions: snap.Positions,
+            FocusTicker: focusTicker,
             Growth: growthSeries,
             LatestPriceDate: latestBar?.Date,
             GoalPace: goalPace,
