@@ -76,15 +76,12 @@
 .verb-tail[data-verb="hold"]    { color: var(--vault-ivory); }
 .verb-tail[data-verb="trim"]    { color: #c87a5a; }
 .verb-tail[data-verb="wait"]    { color: rgba(236,230,214,0.6); }
-.verb-tail[data-verb="acquire"] { color: #6a9a6a; }
+.verb-tail[data-verb="acquire"] { color: #6a9a6a; font-size: 64px; }
 
 @media (max-width: 720px) {
-    .verb-tail { font-size: 64px; margin-right: 14px; }
-}
-
-@media (max-width: 720px) {
-    .verb-drop { font-size: 64px; margin-right: 14px; }
-    .verb-drop[data-verb="acquire"] { font-size: 48px; }
+    .verb-drop, .verb-tail { font-size: 64px; margin-right: 14px; }
+    .verb-drop[data-verb="acquire"],
+    .verb-tail[data-verb="acquire"] { font-size: 48px; }
 }
 
 .order {
