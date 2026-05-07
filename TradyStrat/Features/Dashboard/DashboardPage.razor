@@ -39,7 +39,7 @@ else
                         OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
     </div>
     <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
-    <GrowthChart Points="vm.Growth" Goal="vm.Goal" />
+    <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
     <RefreshFab Busy="_busy" OnClick="OnRefreshClicked" />
 
     @if (_showRerunConfirm)

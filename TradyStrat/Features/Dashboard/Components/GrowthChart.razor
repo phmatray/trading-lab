@@ -1,7 +1,8 @@
 @using TradyStrat.Features.Dashboard
 <div class="chart-wrap">
     <div class="lbl">Capital growth · trajectory toward goal</div>
-    <svg viewBox="0 0 1200 240" preserveAspectRatio="none" class="chart">
+    <div class="growth-chart-wrap">
+    <svg @ref="_svgRef" viewBox="0 0 1200 240" preserveAspectRatio="none" class="chart">
         <defs>
             <linearGradient id="vault-grad" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stop-color="#C49A56" stop-opacity="0.35" />
@@ -52,4 +53,5 @@
             }
         </g>
     </svg>
+    </div>
 </div>
