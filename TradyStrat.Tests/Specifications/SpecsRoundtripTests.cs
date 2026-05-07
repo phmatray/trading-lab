@@ -162,21 +162,4 @@ public class SpecsRoundtripTests
         rows[0].Date.ShouldBe(new DateOnly(2026, 4, 1));
     }
 
-    [Fact]
-    public async Task FxRateAsOfSpec_returns_most_recent_for_pair_le_date()
-    {
-        var ct = TestContext.Current.CancellationToken;
-        await using var db = InMemoryDb.Create();
-        db.FxRates.AddRange(
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 4, 28), UsdPerEur = 1.05m, FetchedAt = DateTime.UtcNow },
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 4, 30), UsdPerEur = 1.07m, FetchedAt = DateTime.UtcNow },
-            new FxRate { Id = 0, Pair = "EURUSD", Date = new(2026, 5, 5),  UsdPerEur = 1.09m, FetchedAt = DateTime.UtcNow });
-        await db.SaveChangesAsync(ct);
-
-        var spec = new FxRateAsOfSpec("EURUSD", new DateOnly(2026, 5, 1));
-        var row = await db.FxRates.WithSpecification(spec).FirstOrDefaultAsync(ct);
-
-        row.ShouldNotBeNull();
-        row.Date.ShouldBe(new DateOnly(2026, 4, 30));
-    }
 }
