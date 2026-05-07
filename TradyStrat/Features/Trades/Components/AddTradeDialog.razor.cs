@@ -1,19 +1,14 @@
-using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.Domain;
-using TradyStrat.Features.Settings.Specifications;
+using TradyStrat.Common.UseCases;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.UseCases;
 
 namespace TradyStrat.Features.Trades.Components;
 
 public partial class AddTradeDialog : ComponentBase
 {
-    // The instrument-picker dropdown lands in Task 15. Until then the dialog
-    // resolves the focus instrument (CON3.L) via repository lookup so trades
-    // log with a valid InstrumentId after the schema widening in Task 9.
-    private const string FocusTicker = "CON3.L";
-
-    [Inject] private IReadRepositoryBase<Instrument> Instruments { get; set; } = default!;
+    [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
 
     [Parameter] public Trade? Initial { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
@@ -26,10 +21,14 @@ public partial class AddTradeDialog : ComponentBase
     private decimal _fees;
     private string? _note;
     private string? _err;
-    private int? _instrumentId;
+    private int _instrumentId;
+    private List<Instrument> _heldInstruments = new();
 
     protected override async Task OnInitializedAsync()
     {
+        var all = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
+        _heldInstruments = all.Where(i => i.Kind == InstrumentKind.Held).ToList();
+
         if (Initial is { } t)
         {
             _date  = t.ExecutedOn.ToDateTime(TimeOnly.MinValue);
@@ -40,28 +39,26 @@ public partial class AddTradeDialog : ComponentBase
             _note  = t.Note;
             _instrumentId = t.InstrumentId;
         }
-        else
+        else if (_heldInstruments.Count == 1)
         {
-            var focus = await Instruments.FirstOrDefaultAsync(
-                new InstrumentByTickerSpec(FocusTicker), CancellationToken.None);
-            _instrumentId = focus?.Id;
+            _instrumentId = _heldInstruments[0].Id;
         }
     }
 
     private async Task DoSubmit()
     {
+        if (_instrumentId == 0)
+        {
+            _err = "Pick an instrument.";
+            return;
+        }
         if (_qty <= 0 || _price <= 0)
         {
             _err = "Quantity and price must be positive.";
             return;
         }
-        if (_instrumentId is null)
-        {
-            _err = $"Focus instrument '{FocusTicker}' is not registered. Add it from Settings first.";
-            return;
-        }
         var input = new LogTradeInput(
-            _instrumentId.Value,
+            _instrumentId,
             DateOnly.FromDateTime(_date),
             Enum.Parse<TradeSide>(_side),
             _qty, _price, _fees, _note);
