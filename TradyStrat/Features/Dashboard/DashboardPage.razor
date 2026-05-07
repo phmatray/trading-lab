@@ -27,12 +27,12 @@ else
 {
     var vm = _vm!;
     <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
-                   PriceAsOfRelative="vm.PriceAsOfRelative" />
+                   PriceAsOfRelative="@vm.PriceAsOfRelative" />
     <div class="hero-row">
         <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                      GoalPace="vm.GoalPace" />
         <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
-                        CallAsOfRelative="vm.CallAsOfRelative"
+                        CallAsOfRelative="@vm.CallAsOfRelative"
                         CallDiff="vm.CallDiff"
                         IndicatorHistories="vm.IndicatorHistories"
                         BackfillStatus="vm.BackfillStatus"
