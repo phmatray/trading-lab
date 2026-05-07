@@ -16,6 +16,7 @@ public class ExceptionHierarchyTests
         new IndicatorComputationException("x").ShouldBeAssignableTo<TradyStratException>();
         new TradeValidationException("x").ShouldBeAssignableTo<TradyStratException>();
         new CsvImportException("x", lineNumber: 7).ShouldBeAssignableTo<TradyStratException>();
+        new NoTradingDaysException("x").ShouldBeAssignableTo<TradyStratException>();
     }
 
     [Fact]
