@@ -48,6 +48,7 @@ else
                             FocusLabel="@FocusLabelFor(vm.FocusTicker)"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
         </div>
+        <MarketsRail Snapshot="vm.MarketSnapshot" />
         @if (vm.TodaysCall is not null)
         {
             <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"
