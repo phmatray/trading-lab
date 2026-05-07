@@ -59,7 +59,7 @@ public sealed class LoadDashboardUseCase(
                 eur = await fx.UsdToEurAsync(reading.Price, target, ct);
             if (ticker == FocusTicker) focusPriceEur = eur ?? reading.Price;
 
-            var deltaPct = await ComputeDeltaPctAsync(ticker, ct);
+            var deltaPct = await ComputeDeltaPctAsync(ticker, target, ct);
             tickers.Add(new TickerView(
                 ticker, currency, reading.Price, eur, deltaPct, reading.Zone));
         }
@@ -177,9 +177,9 @@ public sealed class LoadDashboardUseCase(
             NextTradingDay: next);
     }
 
-    private async Task<decimal?> ComputeDeltaPctAsync(string ticker, CancellationToken ct)
+    private async Task<decimal?> ComputeDeltaPctAsync(string ticker, DateOnly asOf, CancellationToken ct)
     {
-        var bars = await priceRepo.ListAsync(new PriceBarsForTickerSpec(ticker), ct);
+        var bars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(ticker, asOf), ct);
         if (bars.Count < 2) return null;
         var prev = bars[^2].Close;
         var curr = bars[^1].Close;

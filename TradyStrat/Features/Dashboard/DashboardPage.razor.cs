@@ -33,29 +33,30 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     protected override async Task OnParametersSetAsync()
     {
         var ct = CancellationToken.None;
-        var result = await OnParamValidator.Validate(OnParam, Nav, ct);
-
-        DateOnly target;
-        bool isHistorical;
-        switch (result)
-        {
-            case ValidationResult.RedirectTo r:
-                NavManager.NavigateTo(r.Url, replace: true);
-                return;
-            case ValidationResult.Live:
-                target = Clock.TodayInExchangeTzFor("CON3.L");
-                isHistorical = false;
-                break;
-            case ValidationResult.Historical h:
-                target = h.Date;
-                isHistorical = true;
-                break;
-            default:
-                return;
-        }
 
         try
         {
+            var result = await OnParamValidator.Validate(OnParam, Nav, ct);
+
+            DateOnly target;
+            bool isHistorical;
+            switch (result)
+            {
+                case ValidationResult.RedirectTo r:
+                    NavManager.NavigateTo(r.Url, replace: true);
+                    return;
+                case ValidationResult.Live:
+                    target = Clock.TodayInExchangeTzFor("CON3.L");
+                    isHistorical = false;
+                    break;
+                case ValidationResult.Historical h:
+                    target = h.Date;
+                    isHistorical = true;
+                    break;
+                default:
+                    return;
+            }
+
             _vm = await LoadDashboard.ExecuteAsync(
                 new LoadDashboardInput(target, isHistorical), ct);
             _error = null;
@@ -115,6 +116,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
 
     private async Task ConfirmRerun()
     {
+        if (_vm?.IsHistorical == true) return;
         _showRerunConfirm = false;
         _busy = true;
         try   { await ForceRefetch.ExecuteAsync(Common.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
