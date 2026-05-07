@@ -1,4 +1,3 @@
-@using System.Globalization
 @using TradyStrat.Shared.Domain
 <div class="call">
     <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)</div>
@@ -30,21 +29,3 @@
         <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
     </div>
 </div>
-
-@code {
-    [Parameter, EditorRequired] public Suggestion Sug { get; set; } = null!;
-    [Parameter] public DateOnly Today { get; set; }
-    [Parameter] public EventCallback OnLogTrade { get; set; }
-    [Parameter] public EventCallback OnRerun { get; set; }
-
-    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
-
-    private string Verb => Sug.Action switch
-    {
-        SuggestionAction.Acquire => "Acquire.",
-        SuggestionAction.Hold    => "Hold.",
-        SuggestionAction.Trim    => "Trim.",
-        SuggestionAction.Wait    => "Wait.",
-        _ => "—"
-    };
-}
