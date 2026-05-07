@@ -4,7 +4,7 @@ using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.AiSuggestion.Specifications;
 
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.Backfill;
 
 public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillCoordinator
 {

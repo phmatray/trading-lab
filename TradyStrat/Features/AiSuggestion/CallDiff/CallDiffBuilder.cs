@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.CallDiff;
 
 public sealed class CallDiffBuilder
 {

@@ -1,6 +1,6 @@
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
 public sealed record TickerContext(
     string Ticker, string Currency,

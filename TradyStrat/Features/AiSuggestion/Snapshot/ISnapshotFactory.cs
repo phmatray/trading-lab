@@ -1,4 +1,4 @@
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
 public interface ISnapshotFactory
 {

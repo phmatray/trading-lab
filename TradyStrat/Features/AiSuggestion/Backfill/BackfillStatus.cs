@@ -1,4 +1,4 @@
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.Backfill;
 
 public abstract record BackfillStatus
 {

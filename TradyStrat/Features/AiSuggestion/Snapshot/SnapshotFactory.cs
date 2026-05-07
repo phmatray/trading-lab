@@ -9,7 +9,7 @@ using TradyStrat.Common.Domain;
 using TradyStrat.Common.Time;
 using TradyStrat.Features.Trades.Specifications;
 
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
 public sealed class SnapshotFactory(
     IndicatorEngine indicators,
