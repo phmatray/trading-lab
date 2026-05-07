@@ -1,34 +1,47 @@
 @using TradyStrat.Common.Domain
 <div class="call">
-    <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)@if (!string.IsNullOrEmpty(CallAsOfRelative))
-    {
-        <span class="freshness"> · @CallAsOfRelative</span>
-    }</div>
-
-    @if (HasDiff)
-    {
-        <CallDiffList Rows="CallDiffRowProjector.Project(CallDiff)" />
-    }
-    @if (_backfillLabel is not null)
-    {
-        <div class="backfill-pill">@_backfillLabel</div>
-    }
-
-    <p class="reasons">
-        <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail" data-verb="@VerbStem">.</span> @Sug.Rationale
-    </p>
-
-    @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
-    {
-        <div class="order num">
-            @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
-            · ≈ €@((q * mp).ToString("F2", FrFr))
-        </div>
-    }
-
-    <div class="actions">
-        <button class="cta" disabled="@(Sug.Action != SuggestionAction.Acquire)"
-                @onclick="OnLogTrade">Log trade</button>
-        <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
+    <div class="label">
+        @(Historical ? $"Call for {Today.ToString("d MMMM", FrFr)}" : $"Today's call · {Today.ToString("d MMMM", FrFr)}")
+        @if (!Historical && !string.IsNullOrEmpty(CallAsOfRelative))
+        {
+            <span class="freshness"> · @CallAsOfRelative</span>
+        }
     </div>
+
+    @if (Sug is null)
+    {
+        <p class="reasons empty">No AI call recorded for @Today.ToString("d MMMM yyyy", FrFr).</p>
+    }
+    else
+    {
+        @if (HasDiff)
+        {
+            <CallDiffList Rows="CallDiffRowProjector.Project(CallDiff)" />
+        }
+        @if (_backfillLabel is not null)
+        {
+            <div class="backfill-pill">@_backfillLabel</div>
+        }
+
+        <p class="reasons">
+            <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail" data-verb="@VerbStem">.</span> @Sug.Rationale
+        </p>
+
+        @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
+        {
+            <div class="order num">
+                @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
+                · ≈ €@((q * mp).ToString("F2", FrFr))
+            </div>
+        }
+
+        @if (!Historical)
+        {
+            <div class="actions">
+                <button class="cta" disabled="@(Sug.Action != SuggestionAction.Acquire)"
+                        @onclick="OnLogTrade">Log trade</button>
+                <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
+            </div>
+        }
+    }
 </div>

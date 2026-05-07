@@ -1,3 +1,6 @@
-<button class="fab" @onclick="OnClick" disabled="@Busy" title="Refresh prices">
-    @if (Busy) { <span class="spin">↻</span> } else { <span>↻</span> }
-</button>
+@if (!Historical)
+{
+    <button class="fab" @onclick="OnClick" disabled="@Busy" title="Refresh prices">
+        @if (Busy) { <span class="spin">↻</span> } else { <span>↻</span> }
+    </button>
+}

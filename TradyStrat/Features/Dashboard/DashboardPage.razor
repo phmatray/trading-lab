@@ -28,7 +28,13 @@ else
     var vm = _vm!;
     <div class="dash-stage">
         <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
-                       PriceAsOfRelative="@vm.PriceAsOfRelative" />
+                       PriceAsOfRelative="@vm.PriceAsOfRelative"
+                       PrevTradingDay="vm.PrevTradingDay"
+                       NextTradingDay="vm.NextTradingDay"
+                       EarliestTradingDay="vm.EarliestTradingDay"
+                       LatestTradingDay="vm.LatestTradingDay"
+                       IsHistorical="vm.IsHistorical"
+                       OnDateSelected="OnDateSelected" />
         <div class="hero-row">
             <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                          GoalPace="vm.GoalPace" />
@@ -36,15 +42,19 @@ else
                             CallAsOfRelative="@vm.CallAsOfRelative"
                             CallDiff="vm.CallDiff"
                             BackfillStatus="vm.BackfillStatus"
+                            Historical="vm.IsHistorical"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
         </div>
-        <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"
-                        CallDiff="vm.CallDiff"
-                        IndicatorHistories="vm.IndicatorHistories" />
+        @if (vm.TodaysCall is not null)
+        {
+            <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"
+                            CallDiff="vm.CallDiff"
+                            IndicatorHistories="vm.IndicatorHistories" />
+        }
         <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
         <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
     </div>
-    <RefreshFab Busy="_busy" OnClick="OnRefreshClicked" />
+    <RefreshFab Busy="_busy" Historical="vm.IsHistorical" OnClick="OnRefreshClicked" />
 
     @if (_showRerunConfirm)
     {

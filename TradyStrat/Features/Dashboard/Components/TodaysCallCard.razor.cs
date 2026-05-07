@@ -8,14 +8,14 @@ namespace TradyStrat.Features.Dashboard.Components;
 
 public partial class TodaysCallCard : ComponentBase, IDisposable
 {
-    [Parameter, EditorRequired] public Suggestion Sug { get; set; } = null!;
+    [Parameter] public Suggestion? Sug { get; set; }
     [Parameter] public DateOnly Today { get; set; }
     [Parameter] public string CallAsOfRelative { get; set; } = "";
+    [Parameter] public bool Historical { get; set; }
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }
 
     [Parameter, EditorRequired] public CallDiff CallDiff { get; set; } = CallDiff.None;
-
     [Parameter, EditorRequired] public BackfillStatus BackfillStatus { get; set; } = BackfillStatus.Idle.Instance;
 
     [Inject] private ISuggestionBackfillCoordinator Coordinator { get; set; } = null!;
@@ -27,10 +27,11 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     private bool _disposed;
 
     private bool HasDiff =>
+        Sug is not null &&
         !ReferenceEquals(CallDiff, CallDiff.None) &&
         !string.IsNullOrEmpty(CallDiff.SummaryParagraph);
 
-    private string Verb => Sug.Action switch
+    private string Verb => Sug?.Action switch
     {
         SuggestionAction.Acquire => "Acquire",
         SuggestionAction.Hold    => "Hold",
@@ -39,9 +40,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
         _ => "—"
     };
 
-    // Used as a data-attribute on the drop element so CSS can size the
-    // longer verbs ("Acquire.") slightly tighter without a measure script.
-    private string VerbStem => Sug.Action switch
+    private string VerbStem => Sug?.Action switch
     {
         SuggestionAction.Acquire => "acquire",
         SuggestionAction.Hold    => "hold",
@@ -53,7 +52,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         Coordinator.StatusChanged += OnBackfillStatus;
-        UpdateBackfillLabel(Coordinator.Status);  // read fresh after subscribe to close late-attach window
+        UpdateBackfillLabel(Coordinator.Status);
     }
 
     private void OnBackfillStatus(BackfillStatus status)
@@ -61,7 +60,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
         if (_disposed) return;
         _ = InvokeAsync(() =>
         {
-            if (_disposed) return;       // double-check inside the queued continuation
+            if (_disposed) return;
             try
             {
                 UpdateBackfillLabel(status);
@@ -86,11 +85,10 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
 
     public void Dispose()
     {
-        _disposed = true;                          // set before unsubscribe so in-flight continuations short-circuit
+        _disposed = true;
         Coordinator.StatusChanged -= OnBackfillStatus;
         GC.SuppressFinalize(this);
     }
-
 }
 
 internal static partial class TodaysCallCardLog

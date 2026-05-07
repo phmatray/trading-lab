@@ -10,15 +10,20 @@ public sealed record DashboardViewModel(
     int EntryNumber,
     PortfolioSnapshot Portfolio,
     GoalConfig Goal,
-    Suggestion TodaysCall,
+    Suggestion? TodaysCall,
     IReadOnlyList<TickerView> Tickers,
     IReadOnlyList<GrowthPoint> Growth,
     DateOnly? LatestPriceDate,
-    // new for spec 1
     GoalPaceVm GoalPace,
     CallDiff CallDiff,
     BackfillStatus BackfillStatus,
     string PriceAsOfRelative,
     string CallAsOfRelative,
     string FxAsOfRelative,
-    IReadOnlyDictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries> IndicatorHistories);
+    IReadOnlyDictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries> IndicatorHistories,
+    // new — time-travel
+    bool IsHistorical,
+    DateOnly EarliestTradingDay,
+    DateOnly LatestTradingDay,
+    DateOnly? PrevTradingDay,
+    DateOnly? NextTradingDay);
