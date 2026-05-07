@@ -42,7 +42,7 @@ public sealed class LoadDashboardUseCase(
         ("BTC-USD",   "USD"),
     ];
 
-    protected override async Task<DashboardViewModel> ExecuteCore(Unit _, CancellationToken ct)
+    protected override async Task<DashboardViewModel> ExecuteCore(Unit unit, CancellationToken ct)
     {
         var today = clock.TodayInExchangeTzFor(FocusTicker);
         var goal  = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
@@ -109,7 +109,13 @@ public sealed class LoadDashboardUseCase(
         // ---- new: enqueue backfill (fire-and-forget) & snapshot status
         if (prior is { ForDate: var lastDate } && today.AddDays(-1) > lastDate)
         {
-            var __ = backfillCoord.EnsureBackfilledAsync(lastDate, today.AddDays(-1), ct);
+            _ = backfillCoord
+                .EnsureBackfilledAsync(lastDate, today.AddDays(-1), CancellationToken.None)
+                .ContinueWith(
+                    t => LoadDashboardLog.BackfillCrashed(log, t.Exception),
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
         }
         var backfillStatus = backfillCoord.Status;
 
@@ -140,4 +146,10 @@ public sealed class LoadDashboardUseCase(
         if (prev == 0m) return null;
         return (curr - prev) / prev * 100m;
     }
+}
+
+internal static partial class LoadDashboardLog
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Backfill chain crashed unobserved")]
+    public static partial void BackfillCrashed(ILogger logger, Exception? ex);
 }
