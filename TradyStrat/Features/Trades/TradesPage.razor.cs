@@ -1,6 +1,8 @@
 using System.Globalization;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Common.UseCases;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
@@ -17,6 +19,7 @@ public partial class TradesPage : ComponentBase
     [Inject] private EditTradeUseCase EditTrade { get; set; } = default!;
     [Inject] private DeleteTradeUseCase DeleteTrade { get; set; } = default!;
     [Inject] private ImportTradesCsvUseCase ImportCsv { get; set; } = default!;
+    [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
@@ -37,6 +40,7 @@ public partial class TradesPage : ComponentBase
     }
 
     private List<Trade> _trades = new();
+    private Dictionary<int, string> _instrumentTickers = new();
     private int _count;
     private bool _showAdd;
     private bool _showImport;
@@ -51,7 +55,13 @@ public partial class TradesPage : ComponentBase
         var list = await Repo.ListAsync(new AllTradesSpec(), CancellationToken.None);
         _trades = list.ToList();
         _count = _trades.Count;
+
+        var instruments = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
+        _instrumentTickers = instruments.ToDictionary(i => i.Id, i => i.Ticker);
     }
+
+    private string TickerFor(int instrumentId) =>
+        _instrumentTickers.TryGetValue(instrumentId, out var ticker) ? ticker : "—";
 
     private void OnAddClicked()
     {
