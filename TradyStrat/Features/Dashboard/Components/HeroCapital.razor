@@ -56,4 +56,32 @@
             <dd class="num @(Snap.UnrealizedPnLEur >= 0 ? "pos" : "neg")">@FormatSigned(Snap.UnrealizedPnLEur)</dd>
         </div>
     </dl>
+
+    @if (GoalPace.Mode == GoalPaceMode.Active)
+    {
+        <div class="pace-stats">
+            <div class="stat">
+                <div class="k">vs. plan</div>
+                <div class="v @(GoalPace.VsPlanEur < 0 ? "neg" : "pos")">
+                    @FormatVsPlan(GoalPace.VsPlanEur)
+                </div>
+            </div>
+            <div class="stat">
+                <div class="k">monthly growth needed</div>
+                <div class="v">@GoalPace.MonthlyCompoundPct.ToString("F1", FrFr) % / mo</div>
+            </div>
+            <div class="stat">
+                <div class="k">implied CAGR</div>
+                <div class="v">@GoalPace.ImpliedCagrPct.ToString("F0", FrFr) %</div>
+            </div>
+        </div>
+    }
+    else if (GoalPace.Mode == GoalPaceMode.TargetReached)
+    {
+        <p class="pace-line italic">Target reached — keep going.</p>
+    }
+    else if (GoalPace.Mode == GoalPaceMode.GoalDatePassed)
+    {
+        <p class="pace-line italic">Goal date passed — €@GoalPace.VsPlanEur.ToString("N0", FrFr) over.</p>
+    }
 </div>

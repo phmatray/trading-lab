@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Features.Dashboard;
 using TradyStrat.Shared.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
@@ -9,6 +10,7 @@ public partial class HeroCapital : ComponentBase
     [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
     [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
     [Parameter, EditorRequired] public DateOnly Today { get; set; }
+    [Parameter, EditorRequired] public GoalPaceVm GoalPace { get; set; } = null!;
 
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
@@ -36,6 +38,9 @@ public partial class HeroCapital : ComponentBase
 
     private static string FormatSigned(decimal v)
         => $"{(v >= 0 ? "+€" : "−€")}{Math.Abs(v).ToString("N0", FrFr)}";
+
+    private static string FormatVsPlan(decimal eur)
+        => (eur >= 0 ? "+€" : "−€") + Math.Abs(eur).ToString("N0", FrFr);
 
     private string AriaSummary =>
         $"Progress {Pct.ToString("F1", FrFr)}% — own capital €{CostBasisEur.ToString("N0", FrFr)}, " +
