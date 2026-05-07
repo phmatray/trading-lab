@@ -15,6 +15,7 @@ public sealed class SuggestionConfiguration : IEntityTypeConfiguration<Suggestio
         builder.Property(s => s.MaxPriceHint).HasColumnType("TEXT");
         builder.Property(s => s.Rationale).HasMaxLength(4000);
         builder.Property(s => s.CitationsJson).HasMaxLength(8000);
+        builder.Property(s => s.MarketSnapshotJson).HasMaxLength(8000);
         builder.Property(s => s.PromptHash).HasMaxLength(128);
         builder.HasIndex(s => s.ForDate).IsUnique();
         builder.Ignore(s => s.OrderValueEur);

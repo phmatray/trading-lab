@@ -21,6 +21,7 @@ public sealed record Suggestion
     public required int Conviction { get; init; }
     public required string Rationale { get; init; }
     public required string CitationsJson { get; init; }
+    public string? MarketSnapshotJson { get; init; }
     public required string PromptHash { get; init; }
     public required DateTime CreatedAt { get; init; }
 
