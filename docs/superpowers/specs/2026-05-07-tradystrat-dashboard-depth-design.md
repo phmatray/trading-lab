@@ -41,16 +41,18 @@ Out of scope (for separate spec): the Entries archive (turning `ENTRY NO. 0003` 
 
 ## 3. Patterns inventory
 
-| Component | GoF role | Notes |
+GoF labels are applied where they hold strictly. Components without a clean GoF mapping are listed without a forced label rather than mislabelled.
+
+| Component | Pattern | Notes |
 |---|---|---|
-| `SuggestionBackfillCoordinator` | **Singleton** + **Observer** | Single shared instance; pushes `StatusChanged` events to subscribers. |
-| `BackfillStatus` discriminated record | **State** (record-shaped) | `Idle` / `Running` / `Failed` — exhaustive switch in the UI. |
-| `IIndicatorHistoryProvider` per kind | **Strategy** | Parallels existing `IZoneRule` strategies. Resolved via `IIndicatorHistoryProviderFactory`. |
-| `IIndicatorHistoryProviderFactory` | **Factory Method** | Maps `IndicatorKind` → strategy. |
-| `ISnapshotFactory` | **Factory Method** | Replaces existing `SnapshotBuilder` constructor-style call site. Today's snapshot becomes `factory.CreateAsync(today)`. |
+| `SuggestionBackfillCoordinator` | **Singleton** + **Observer** | Single shared instance; raises `StatusChanged` to subscribers via the C# `event` mechanism. |
+| `BackfillStatus` (`Idle` / `Running` / `Failed` records) | — (algebraic data type via record inheritance) | Exhaustive `switch` expressions in callers. Not the GoF State pattern; behavior lives in callers, not in the state objects. |
+| `IIndicatorHistoryProvider` (one per `IndicatorKind`) | **Strategy** | Interchangeable algorithms behind one interface. Solves a different problem than the existing `IZoneRule` strategies (series production vs. zone classification) — same pattern, separate hierarchy. |
+| `IndicatorHistoryProviderFactory` | **Factory** | Maps `IndicatorKind` → concrete strategy. Simple factory rather than the GoF Factory Method (no inheritance involved). |
+| `ISnapshotFactory` | **Factory** | Replaces the existing `ISnapshotBuilder` interface (renamed and re-shaped, see §5.2). Returns an `AiSnapshot` for any `DateOnly`. |
 | `RetryingAiClient` *(optional)* | **Decorator** | Wraps `IAiClient` with retry + jittered backoff. Wired via a delegate factory in `AiSuggestionModule` (the project does not use Scrutor). |
 | `CallDiffBuilder` | **Builder** | `.WithToday(s).WithPrior(s?).Build()` → `CallDiff`. Composable for tests. |
-| `RelativeTimeFormatter` | **Strategy** internally | Bucket strategies (just-now / minutes / hours / days / absolute) selected by elapsed range. |
+| `RelativeTimeFormatter` | — | Bucket dispatch via a private `switch`. The pattern overhead of injecting `IFormatBucket` strategies is not earned here. |
 | Persistence access | **Specification** (Ardalis) | All new queries land in `Specifications/<Aggregate>/`. |
 
 ## 4. Project layout — additions
@@ -59,13 +61,15 @@ Out of scope (for separate spec): the Entries archive (turning `ENTRY NO. 0003` 
 
 | File | Layer | Purpose |
 |---|---|---|
-| `Features/Indicators/IndicatorEngine.cs` *(extend)* | Domain | Add `HistoryFor(ticker, kind, lastN)` returning `IndicatorSeries` (Values, ThresholdHi?, ThresholdLo?). |
+| `Shared/Domain/IndicatorKind.cs` | Domain | New enum: `Rsi, Bollinger, Ichimoku, Sma50, Sma200`. Currently no enum exists — `IndicatorBundle` uses named properties and `Citation.Indicator` is a free-form string. |
+| `Shared/Domain/IndicatorKindParser.cs` | Domain | `static IndicatorKind? From(string indicatorLabel)` — maps `Citation.Indicator` strings (`"RSI(14)"`, `"200-SMA"`, `"Bollinger"`, `"Ichimoku"`) to the enum. Returns null for unknown labels (sparkline cell renders blank). |
+| `Features/Indicators/IndicatorEngine.cs` *(extend)* | Domain | Add `HistoryFor(ticker, kind, lastN)` returning `IndicatorSeries`. |
 | `Features/Indicators/HistoryProviders/{Rsi,Bollinger,Ichimoku,Sma200}HistoryProvider.cs` | Domain | One `IIndicatorHistoryProvider` per kind. |
 | `Features/Indicators/IndicatorHistoryProviderFactory.cs` | Domain | Factory mapping `IndicatorKind` → strategy. |
 | `Features/Dashboard/GoalPaceCalculator.cs` | Domain | Pure derivation → `GoalPaceVm`. |
 | `Features/AiSuggestion/CallDiffBuilder.cs` + `CallDiff.cs` | Domain | Diff `(today, prior?)` → typed record. `CallDiff.None` sentinel for null prior. |
 | `Features/AiSuggestion/SuggestionBackfillCoordinator.cs` (+ `BackfillStatus.cs`) | Service | Singleton + Observer. |
-| `Features/AiSuggestion/ISnapshotFactory.cs` (+ `SnapshotFactory.cs` impl) | Domain | New interface and implementation. The implementation absorbs the body of the existing `SnapshotBuilder.BuildAsync()`, accepts an as-of `DateOnly`, and consumes the new as-of specs. The existing `SnapshotBuilder` class is **deleted** in favor of `SnapshotFactory` (call sites updated). |
+| `Features/AiSuggestion/ISnapshotFactory.cs` + `SnapshotFactory.cs` | Domain | **Renames** the existing `ISnapshotBuilder` and `SnapshotBuilder` (existing files deleted). New interface adds an `asOf` `DateOnly` parameter and consumes the new as-of specs. Call sites in `GetTodaysSuggestionUseCase` and `ForceRefetchSuggestionUseCase` updated to inject `ISnapshotFactory` and pass `clock.TodayInExchangeTzFor(focusTicker)`. |
 | `Application/UseCases/AiSuggestion/BackfillSuggestionsUseCase.cs` | Use case | For one missing date: reconstruct snapshot → call AI → persist `Suggestion`. |
 | `Shared/Time/RelativeTimeFormatter.cs` | Utility | "12 min ago" / "14h ago" / "yesterday" / absolute. |
 | `wwwroot/js/growth-chart.js` | UI | Scoped ES module for crosshair tooltip via JSInterop. |
@@ -183,7 +187,7 @@ Behavior:
 - **Failure**: `TradyStratException` halts the chain at that date and emits `Failed`. Prior persisted dates remain.
 - **Cancellation**: propagates `OperationCanceledException`; not treated as failure.
 
-### 5.2 `SnapshotFactory` (Factory Method) + as-of extension
+### 5.2 `SnapshotFactory` (renames `SnapshotBuilder`, adds as-of)
 
 ```csharp
 public interface ISnapshotFactory
@@ -192,7 +196,13 @@ public interface ISnapshotFactory
 }
 ```
 
-Replaces the existing `SnapshotBuilder` class (deleted; not wrapped). Today's snapshot becomes `factory.CreateAsync(today)`. Internally consumes the new as-of specs (`PriceBarsAsOfSpec`, `FxRateAsOfSpec`, `TradesAsOfSpec`) so portfolio state and indicator inputs reflect only data available on that date. Existing call sites in `GetTodaysSuggestionUseCase` and `ForceRefetchSuggestionUseCase` migrate to `ISnapshotFactory`.
+Migration steps:
+
+1. Delete `Features/AiSuggestion/ISnapshotBuilder.cs` and `SnapshotBuilder.cs`.
+2. Create `ISnapshotFactory.cs` and `SnapshotFactory.cs`. The implementation reuses the body of the deleted `SnapshotBuilder.BuildAsync()` but reads through the new as-of specs (`PriceBarsAsOfSpec`, `FxRateAsOfSpec`, `TradesAsOfSpec`) instead of "latest" specs, so portfolio state and indicator inputs reflect only data available on the requested date.
+3. **Critical contract**: `CreateAsync(asOf)` MUST set `AiSnapshot.Today = asOf`. The AI client (`SuggestionService.AskAsync`) reads `snapshot.Today` to set `Suggestion.ForDate`, so the snapshot's `Today` is the single source of truth for the date a suggestion is "for".
+4. Update `Application/UseCases/AiSuggestion/GetTodaysSuggestionUseCase.cs` and `ForceRefetchSuggestionUseCase.cs` to inject `ISnapshotFactory` and call `factory.CreateAsync(today, ct)` where `today = clock.TodayInExchangeTzFor("CON3.L")`.
+5. Update DI registration in `Modules/AiSuggestionModule.cs`: replace `AddScoped<ISnapshotBuilder, SnapshotBuilder>()` with `AddScoped<ISnapshotFactory, SnapshotFactory>()`.
 
 ### 5.3 `IIndicatorHistoryProvider` (Strategy) + Factory
 
@@ -235,16 +245,16 @@ public sealed class CallDiffBuilder
 
 public sealed record CallDiff(
     bool ActionChanged,
-    TradeAction PriorAction,
+    SuggestionAction? PriorAction,        // existing enum: Acquire=1, Hold=2, Trim=3, Wait=4. Null when no prior.
     int? ConvictionDelta,
-    IReadOnlyList<string> AddedCitationKeys,    // "RSI(14):BTC-USD"
-    IReadOnlyList<string> RemovedCitationKeys,
+    IReadOnlyList<string> AddedCitationKeys,    // e.g. "RSI(14):BTC-USD"
+    IReadOnlyList<string> RemovedCitationKeys,  // same shape
     IReadOnlyList<CitationChange> ChangedCitations,
     string SummaryParagraph)
 {
     public static CallDiff None { get; } = new(
         ActionChanged: false,
-        PriorAction: default,
+        PriorAction: null,
         ConvictionDelta: null,
         AddedCitationKeys: [],
         RemovedCitationKeys: [],
@@ -255,7 +265,7 @@ public sealed record CallDiff(
 public sealed record CitationChange(string Key, string PriorValue, string NewValue);
 ```
 
-Citation identity = `(IndicatorKind, Ticker)` tuple stable across days. `SummaryParagraph` is templated deterministically from typed deltas — no AI call. Example output: *"Action unchanged. Conviction 5 (+1). Ichimoku regained cloud · 200-SMA CON3.L drifted lower · BTC RSI(14) added to citations."*
+Citation identity = `$"{c.Indicator}:{c.Ticker}"` — both fields are strings on the existing `Citation` record (`Citation(Claim, Indicator, Ticker, Value)`), stable across days. The builder uses `Suggestion.Citations` (existing derived property — `JsonSerializer.Deserialize<List<Citation>>(CitationsJson)`); no manual JSON parsing. `SummaryParagraph` is templated deterministically from the typed deltas — no AI call. Example output: *"Action unchanged. Conviction 5 (+1). Ichimoku regained cloud · 200-SMA CON3.L drifted lower · BTC RSI(14) added to citations."*
 
 ### 5.5 `GoalPaceCalculator` (pure)
 
@@ -271,25 +281,28 @@ public enum GoalPaceMode { Active, NotStarted, GoalDatePassed, TargetReached }
 public static class GoalPaceCalculator
 {
     public static GoalPaceVm Compute(
-        decimal todayCapitalEur,
+        decimal currentValueEur,    // PortfolioSnapshot.CurrentValueEur — the hero figure
         GoalConfig goal,
         DateOnly today,
         DateOnly? firstTradeDate);
 }
 ```
 
+Input choice: the hero already shows `Snap.CurrentValueEur` as "Capital under accumulation" (see `HeroCapital.razor:4`). The goal-pace banner aligns with that: progress toward `TargetEur` is measured in mark-to-market terms, not cost basis. `PortfolioSnapshot` has no `OwnCapitalEur` field — "own capital" is a *derived* legend item (`Shares × AvgCostEur`) and is not the right input here.
+
 Math:
 
 - **Linear plan baseline** = `goal.TargetEur × (daysSinceFirstTrade / totalPlanDays)`.
-- **VsPlanEur** = `todayCapitalEur − linearPlanBaseline`.
-- **MonthlyCompoundPct** = `(target / today)^(1 / monthsLeft) − 1`.
-- **ImpliedCagrPct** = `(target / today)^(1 / yearsLeft) − 1`.
+- **VsPlanEur** = `currentValueEur − linearPlanBaseline`.
+- **MonthlyCompoundPct** = `(target / current)^(1 / monthsLeft) − 1`.
+- **ImpliedCagrPct** = `(target / current)^(1 / yearsLeft) − 1`.
 
 Sentinel modes:
 
 - `firstTradeDate is null` → `Mode = NotStarted`, all values zero.
+- `goal.TargetDate is null` → `Mode = NotStarted` (no horizon to compute against).
 - `today > goal.TargetDate` → `Mode = GoalDatePassed`.
-- `todayCapitalEur >= goal.TargetEur` → `Mode = TargetReached`.
+- `currentValueEur >= goal.TargetEur` → `Mode = TargetReached`.
 - otherwise → `Mode = Active`.
 
 ### 5.6 `RetryingAiClient` (Decorator, optional)
@@ -302,12 +315,15 @@ public sealed class RetryingAiClient(IAiClient inner, RetryPolicy policy) : IAiC
 }
 ```
 
-Wired manually in `AiSuggestionModule` (the existing concrete `AnthropicAiClient` is registered first, then wrapped):
+Wired manually in `AiSuggestionModule` — the existing concrete `SuggestionService` is registered as itself, then wrapped behind the interface:
 
 ```csharp
-builder.Services.AddScoped<AnthropicAiClient>();
+// before:
+//   builder.Services.AddScoped<IAiClient, SuggestionService>();
+// after:
+builder.Services.AddScoped<SuggestionService>();
 builder.Services.AddScoped<IAiClient>(sp =>
-    new RetryingAiClient(sp.GetRequiredService<AnthropicAiClient>(), RetryPolicy.Default));
+    new RetryingAiClient(sp.GetRequiredService<SuggestionService>(), RetryPolicy.Default));
 ```
 
 Marked **optional** for the implementation plan — implement only if the no-retry baseline causes friction during backfill chains.
@@ -353,9 +369,11 @@ Behavior:
 - Touch: tap pins tooltip to the chart's top edge; subsequent tap moves it.
 - All formatting (currency, percentages) reads `locale` to match `Newsreader` typography.
 
-Server-side (`GrowthChart.razor.cs`):
+Server-side (`GrowthChart.razor.cs`). The component currently has **no** JS interop — it renders only static SVG paths via `PathBuilder`. The interop scaffolding below is added from scratch:
 
 ```csharp
+[Inject] private IJSRuntime JS { get; set; } = null!;
+private ElementReference _svgRef;
 private IJSObjectReference? _module;
 
 protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -392,9 +410,12 @@ public async ValueTask DisposeAsync()
         .WithToday(today)
         .WithPrior(prior)
         .Build()                          → CallDiff
-7.  For each citation kind in today:
-       IndicatorEngine.HistoryFor(focus, kind, 30)   → IndicatorSeries
-8.  GoalPaceCalculator.Compute(...)       → GoalPaceVm
+7.  For each citation in today.Citations:
+       kind = IndicatorKindParser.From(citation.Indicator)
+       if kind is non-null:
+         IndicatorEngine.HistoryFor(citation.Ticker, kind, 30)   → IndicatorSeries
+8.  GoalPaceCalculator.Compute(
+        portfolio.CurrentValueEur, goal, today, firstTradeDate)   → GoalPaceVm
 9.  RelativeTimeFormatter.Format(...)     → preformatted freshness strings
 10. missingRange = (lastEntryBefore today, today - 1)
     if non-empty → coordinator.EnsureBackfilledAsync(missingRange)   // fire-and-forget
@@ -437,8 +458,8 @@ Each event re-runs the prior-suggestion spec and rebuilds the diff so it sharpen
 sort missingDates ASCENDING
 foreach date in missingDates:
     Status = Running(remaining, total, date); fire StatusChanged
-    snapshot = await snapshotFactory.CreateAsync(date, ct)
-    suggestion = await aiClient.AskAsync(snapshot, ct) with { ForDate = date }
+    snapshot = await snapshotFactory.CreateAsync(date, ct)   // sets snapshot.Today = date
+    suggestion = await aiClient.AskAsync(snapshot, ct)        // sets ForDate from snapshot.Today
     await repo.AddAsync(suggestion, ct)
 Status = Idle; fire StatusChanged
 ```
@@ -484,8 +505,8 @@ foreach (var date in missingDates)
 {
     try
     {
-        var snapshot = await snapshotFactory.CreateAsync(date, ct);
-        var suggestion = (await aiClient.AskAsync(snapshot, ct)) with { ForDate = date };
+        var snapshot = await snapshotFactory.CreateAsync(date, ct);   // snapshot.Today == date
+        var suggestion = await aiClient.AskAsync(snapshot, ct);        // ForDate set from snapshot.Today
         await repo.AddAsync(suggestion, ct);
     }
     catch (TradyStratException ex)
