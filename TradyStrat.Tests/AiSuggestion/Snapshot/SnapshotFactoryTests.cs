@@ -166,4 +166,35 @@ public class SnapshotFactoryTests
 
         snap.Tickers.Select(t => t.Ticker).ShouldBe(ExpectedCatalogOrder);
     }
+
+    [Fact]
+    public async Task Catalog_produces_byte_identical_PromptHash_against_seeded_set()
+    {
+        // Sentinel for spec §11.3: changing the prompt input shape (catalog
+        // order, ticker set, currency, snapshot field shape, etc.) MUST be a
+        // deliberate decision, not a silent regression. If this test fails,
+        // either (a) you changed something that affects the prompt and need
+        // to update the captured hash, or (b) you accidentally broke the
+        // legacy-order trick.
+        const string ExpectedHash = "2EB10B0275AD1282";
+
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+
+        SeedInstruments(db);
+        // One-bar price series per instrument so IndicatorEngine returns a reading.
+        var asOf = new DateOnly(2026, 5, 6);
+        foreach (var t in new[] { "CON3.L", "COIN", "BTC-USD" })
+            db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=asOf,
+                Open=100, High=100, Low=100, Close=100, Volume=1 });
+        db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=asOf,
+            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
+        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+        await db.SaveChangesAsync(ct);
+
+        var sut  = BuildSut(db);
+        var snap = await sut.CreateAsync(asOf, ct);
+
+        snap.PromptHash.ShouldBe(ExpectedHash);
+    }
 }
