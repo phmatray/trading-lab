@@ -2,7 +2,7 @@ using Shouldly;
 using TradyStrat.Common.Time;
 using Xunit;
 
-namespace TradyStrat.Tests.Time;
+namespace TradyStrat.Tests.Common.Time;
 
 public class SystemClockTests
 {

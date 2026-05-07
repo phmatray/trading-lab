@@ -14,7 +14,7 @@ using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Indicators;     // SeriesLoader
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.Snapshot;

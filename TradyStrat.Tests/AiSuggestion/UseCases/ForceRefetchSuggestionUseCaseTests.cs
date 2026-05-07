@@ -7,7 +7,7 @@ using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.UseCases;

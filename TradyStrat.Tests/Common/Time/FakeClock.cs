@@ -1,6 +1,6 @@
 using TradyStrat.Common.Time;
 
-namespace TradyStrat.Tests.Time;
+namespace TradyStrat.Tests.Common.Time;
 
 public sealed class FakeClock(DateTime utcNow) : IClock
 {

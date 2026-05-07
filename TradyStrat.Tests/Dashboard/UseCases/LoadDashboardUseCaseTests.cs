@@ -18,7 +18,7 @@ using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using TradyStrat.Tests.AiSuggestion.UseCases;  // StubSnapshotBuilder, StubAiClient
 using Xunit;
 

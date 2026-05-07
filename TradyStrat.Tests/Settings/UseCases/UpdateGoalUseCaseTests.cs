@@ -5,7 +5,7 @@ using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Specifications; // InMemoryDb
-using TradyStrat.Tests.Time;           // FakeClock
+using TradyStrat.Tests.Common.Time;           // FakeClock
 using Xunit;
 
 namespace TradyStrat.Tests.Settings.UseCases;

@@ -5,7 +5,7 @@ using Shouldly;
 using TradyStrat.Features.Fx;
 using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.Fx;

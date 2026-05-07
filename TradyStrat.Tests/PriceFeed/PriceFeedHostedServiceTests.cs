@@ -7,7 +7,7 @@ using TradyStrat.Features.Fx;
 using TradyStrat.Features.PriceFeed;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.PriceFeed;

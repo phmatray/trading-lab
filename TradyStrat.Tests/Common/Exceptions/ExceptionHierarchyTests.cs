@@ -2,7 +2,7 @@ using Xunit;
 using Shouldly;
 using TradyStrat.Common.Exceptions;
 
-namespace TradyStrat.Tests.Exceptions;
+namespace TradyStrat.Tests.Common.Exceptions;
 
 public class ExceptionHierarchyTests
 {

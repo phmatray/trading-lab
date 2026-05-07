@@ -2,7 +2,7 @@ using Shouldly;
 using TradyStrat.Common.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Domain;
+namespace TradyStrat.Tests.Common.Domain;
 
 public class EntityDerivedPropertiesTests
 {

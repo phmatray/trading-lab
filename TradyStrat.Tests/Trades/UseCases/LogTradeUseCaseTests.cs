@@ -6,7 +6,7 @@ using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Specifications; // InMemoryDb
-using TradyStrat.Tests.Time;
+using TradyStrat.Tests.Common.Time;
 using Xunit;
 
 namespace TradyStrat.Tests.Trades.UseCases;
