@@ -1,4 +1,6 @@
 @using TradyStrat.Shared.Domain
+@using TradyStrat.Features.Indicators
+@using TradyStrat.Features.AiSuggestion
 <div class="call">
     <div class="label">Today's call · @Today.ToString("d MMMM", FrFr)@if (!string.IsNullOrEmpty(CallAsOfRelative))
     {
@@ -16,14 +18,52 @@
 
     <p class="reasons">@Sug.Rationale</p>
 
+    @if (HasDiff)
+    {
+        <div class="summary-bar">
+            @CallDiff.SummaryParagraph
+        </div>
+    }
+    @if (_backfillLabel is not null)
+    {
+        <div class="backfill-pill">@_backfillLabel</div>
+    }
+
     @if (Sug.Citations.Count > 0)
     {
-        <ol class="citations">
+        var changedKeys = CallDiff.ChangedCitations.Select(c => c.Key).ToHashSet();
+        var addedKeys   = CallDiff.AddedCitationKeys.ToHashSet();
+        <ul class="citations">
+            @{ var citIdx = 0; }
             @foreach (var c in Sug.Citations)
             {
-                <li><b>@c.Indicator (@c.Ticker):</b> @c.Claim · <em>@c.Value</em></li>
+                citIdx++;
+                var key = $"{c.Indicator}:{c.Ticker}";
+                var isChanged = changedKeys.Contains(key);
+                var isNew     = addedKeys.Contains(key);
+                var kind = IndicatorKindParser.From(c.Indicator);
+                IndicatorSeries? series = null;
+                if (kind is { } k && IndicatorHistories.TryGetValue((c.Ticker, k), out var s))
+                    series = s;
+                <li class="@(isChanged ? "changed" : "")">
+                    <span class="roman">@RomanLowercase(citIdx).</span>
+                    <span class="claim"><b>@c.Indicator</b> (@c.Ticker): @c.Claim
+                        @if (isNew) { <span class="new-tag">new</span> }
+                    </span>
+                    <span class="v">@c.Value</span>
+                    @if (series is not null && series.Values.Count > 0)
+                    {
+                        <span class="spark">
+                            @((MarkupString)RenderSparklineSvg(series))
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="spark"></span>
+                    }
+                </li>
             }
-        </ol>
+        </ul>
     }
 
     <div class="actions">

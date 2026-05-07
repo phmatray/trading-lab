@@ -43,19 +43,15 @@
     list-style: none;
 }
 .citations li {
-    padding-left: 26px;
-    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 5px;
     font-family: var(--font-body);
     font-size: 13px;
     line-height: 1.5;
     color: var(--ink-2);
-}
-.citations li::before {
-    counter-increment: c;
-    content: counter(c, lower-roman) ".";
-    position: absolute; left: 0; top: 0;
-    color: var(--vault-gold); font-style: italic;
 }
 .actions { margin-top: 22px; display: flex; gap: 10px; }
 .cta {
@@ -80,3 +76,45 @@
 }
 .cta.ghost { background: transparent; color: var(--vault-ivory); border: 1px solid var(--vault-rule); font-weight: 400; }
 .cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }
+.summary-bar {
+    background: rgba(196,154,86,0.06);
+    border-left: 2px solid rgba(196,154,86,0.45);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: rgba(236,230,214,0.72);
+    margin-bottom: 14px;
+    font-style: italic;
+}
+.backfill-pill {
+    margin-bottom: 10px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: rgba(196,154,86,0.85);
+    text-transform: uppercase;
+}
+.citations li.changed {
+    background: rgba(196,154,86,0.06);
+    margin: 0 -6px;
+    padding: 6px;
+    border-radius: 2px;
+}
+.citations .roman {
+    color: var(--vault-gold);
+    font-style: italic;
+}
+.citations .spark {
+    width: 60px;
+    display: inline-flex;
+    justify-content: flex-end;
+}
+.new-tag {
+    display: inline-block;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    color: #c49a56;
+    border: 1px solid rgba(196,154,86,0.45);
+    padding: 1px 6px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
