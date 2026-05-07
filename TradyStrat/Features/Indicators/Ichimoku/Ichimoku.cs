@@ -1,6 +1,6 @@
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.Indicators;
+namespace TradyStrat.Features.Indicators.Ichimoku;
 
 public static class Ichimoku
 {

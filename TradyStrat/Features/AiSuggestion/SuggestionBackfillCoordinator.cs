@@ -1,5 +1,4 @@
 using Ardalis.Specification;
-using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;

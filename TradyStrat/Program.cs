@@ -6,4 +6,7 @@ using TradyStrat.Modules;
 // returns the test runner rather than this app.
 AppManager.Start(args, modules => modules.AddFromAssemblyOf<DatabaseModule>());
 
-public partial class Program { }
+namespace TradyStrat
+{
+    public partial class Program { }
+}

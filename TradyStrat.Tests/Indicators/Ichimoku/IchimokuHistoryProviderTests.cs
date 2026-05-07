@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Common.Domain;
+using TradyStrat.Features.Indicators.Ichimoku;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Ichimoku;
@@ -13,7 +14,7 @@ public class IchimokuHistoryProviderTests
             Id = i + 1, Ticker = "T",
             Date = new DateOnly(2026, 1, 1).AddDays(i),
             Open = 100m, High = 101m, Low = 99m,
-            Close = 100m + (decimal)i * 0.1m,
+            Close = 100m + i * 0.1m,
             Volume = 1000,
         }).ToList();
 

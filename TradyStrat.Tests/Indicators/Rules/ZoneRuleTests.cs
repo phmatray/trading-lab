@@ -1,6 +1,10 @@
 using Shouldly;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Common.Domain;
+using TradyStrat.Features.Indicators.Bollinger;
+using TradyStrat.Features.Indicators.Ichimoku;
+using TradyStrat.Features.Indicators.MovingAverage;
+using TradyStrat.Features.Indicators.Rsi;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Rules;

@@ -26,7 +26,7 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     private bool _disposed;
 
     private bool HasDiff =>
-        !ReferenceEquals(CallDiff, global::TradyStrat.Features.AiSuggestion.CallDiff.None) &&
+        !ReferenceEquals(CallDiff, CallDiff.None) &&
         !string.IsNullOrEmpty(CallDiff.SummaryParagraph);
 
     private string Verb => Sug.Action switch

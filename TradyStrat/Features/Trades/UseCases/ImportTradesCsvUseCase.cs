@@ -1,6 +1,5 @@
 using Ardalis.Specification;
 using TradyStrat.Common.UseCases;
-using TradyStrat.Features.Trades;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Time;
 

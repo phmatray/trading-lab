@@ -3,7 +3,7 @@ using TechnicalAnalysis.Functions;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 
-namespace TradyStrat.Features.Indicators;
+namespace TradyStrat.Features.Indicators.Bollinger;
 
 public static class Bollinger
 {

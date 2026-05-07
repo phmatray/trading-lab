@@ -43,11 +43,11 @@ public sealed class IndicatorEngine(
 
         var price  = series[^1].Close;
         var bundle = new IndicatorBundle(
-            Bollinger.LatestFor(series),
-            Rsi.LatestFor(series),
-            MovingAverage.LatestFor(series, 50),
-            MovingAverage.LatestFor(series, 200),
-            Ichimoku.LatestFor(series));
+            Bollinger.Bollinger.LatestFor(series),
+            Rsi.Rsi.LatestFor(series),
+            MovingAverage.MovingAverage.LatestFor(series, 50),
+            MovingAverage.MovingAverage.LatestFor(series, 200),
+            Ichimoku.Ichimoku.LatestFor(series));
 
         var (zone, reasons) = classifier.Classify(price, bundle);
         return new IndicatorReading(ticker, price,

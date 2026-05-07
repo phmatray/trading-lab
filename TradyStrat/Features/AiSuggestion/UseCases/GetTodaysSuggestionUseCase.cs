@@ -1,6 +1,5 @@
 using Ardalis.Specification;
 using TradyStrat.Common.UseCases;
-using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Time;
 using TradyStrat.Features.AiSuggestion.Specifications;

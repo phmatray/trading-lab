@@ -2,7 +2,7 @@ using TechnicalAnalysis.Common;
 using TechnicalAnalysis.Functions;
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.Indicators;
+namespace TradyStrat.Features.Indicators.Rsi;
 
 public sealed class RsiHistoryProvider : IIndicatorHistoryProvider
 {

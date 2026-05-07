@@ -8,6 +8,10 @@ using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Common.Domain;
+using TradyStrat.Features.Indicators.Bollinger;
+using TradyStrat.Features.Indicators.Ichimoku;
+using TradyStrat.Features.Indicators.MovingAverage;
+using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Specifications;

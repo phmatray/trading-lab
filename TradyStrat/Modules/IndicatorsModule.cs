@@ -1,5 +1,9 @@
 using TheAppManager.Modules;
 using TradyStrat.Features.Indicators;
+using TradyStrat.Features.Indicators.Bollinger;
+using TradyStrat.Features.Indicators.Ichimoku;
+using TradyStrat.Features.Indicators.MovingAverage;
+using TradyStrat.Features.Indicators.Rsi;
 
 namespace TradyStrat.Modules;
 
