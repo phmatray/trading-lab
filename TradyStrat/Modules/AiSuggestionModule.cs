@@ -1,6 +1,6 @@
 using Microsoft.Extensions.AI;
 using TheAppManager.Modules;
-using TradyStrat.Application.UseCases.AiSuggestion;
+using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Exceptions;
 

@@ -1,6 +1,6 @@
 using TradyStrat.Features.AiSuggestion;
 
-namespace TradyStrat.Tests.UseCases.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public sealed class StubSnapshotFactory(AiSnapshot snapshot) : ISnapshotFactory
 {

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.Abstractions;
-using TradyStrat.Application.UseCases.AiSuggestion;
-using TradyStrat.Application.UseCases.Dashboard;
+using TradyStrat.Features.AiSuggestion.UseCases;
+using TradyStrat.Features.Dashboard.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
@@ -12,10 +12,10 @@ using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Time;
-using TradyStrat.Tests.UseCases.AiSuggestion;  // StubSnapshotBuilder, StubAiClient
+using TradyStrat.Tests.AiSuggestion.UseCases;  // StubSnapshotBuilder, StubAiClient
 using Xunit;
 
-namespace TradyStrat.Tests.UseCases.Dashboard;
+namespace TradyStrat.Tests.Dashboard.UseCases;
 
 public class LoadDashboardUseCaseTests
 {

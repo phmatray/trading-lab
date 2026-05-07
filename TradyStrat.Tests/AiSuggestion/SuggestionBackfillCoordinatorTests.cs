@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.UseCases.AiSuggestion;
+using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Domain;

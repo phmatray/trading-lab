@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.UseCases.Settings;
+using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Specifications; // InMemoryDb
 using TradyStrat.Tests.Time;           // FakeClock
 using Xunit;
 
-namespace TradyStrat.Tests.UseCases.Settings;
+namespace TradyStrat.Tests.Settings.UseCases;
 
 public class UpdateGoalUseCaseTests
 {

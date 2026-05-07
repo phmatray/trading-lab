@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.UseCases.AiSuggestion;
+using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using Xunit;
 
-namespace TradyStrat.Tests.UseCases.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public class BackfillSuggestionsUseCaseTests
 {

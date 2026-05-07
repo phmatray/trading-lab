@@ -1,7 +1,7 @@
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Tests.UseCases.AiSuggestion;
+namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public sealed class StubAiClient(Suggestion suggestion) : IAiClient
 {

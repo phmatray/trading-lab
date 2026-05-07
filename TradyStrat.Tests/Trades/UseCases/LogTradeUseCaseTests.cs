@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.UseCases.Trades;
+using TradyStrat.Features.Trades.UseCases;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
@@ -9,7 +9,7 @@ using TradyStrat.Tests.Specifications; // InMemoryDb
 using TradyStrat.Tests.Time;
 using Xunit;
 
-namespace TradyStrat.Tests.UseCases.Trades;
+namespace TradyStrat.Tests.Trades.UseCases;
 
 public class LogTradeUseCaseTests
 {

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Abstractions;
-using TradyStrat.Application.UseCases.AiSuggestion;
-using TradyStrat.Application.UseCases.Dashboard;
-using TradyStrat.Application.UseCases.Prices;
+using TradyStrat.Features.AiSuggestion.UseCases;
+using TradyStrat.Features.Dashboard.UseCases;
+using TradyStrat.Features.PriceFeed.UseCases;
 using TradyStrat.Shared.Exceptions;
 
 namespace TradyStrat.Features.Dashboard;

@@ -4,7 +4,7 @@ using TradyStrat.Features.Trades;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
 
-namespace TradyStrat.Application.UseCases.Trades;
+namespace TradyStrat.Features.Trades.UseCases;
 
 public sealed record ImportTradesCsvInput(string CsvText);
 public sealed record ImportTradesCsvResult(int RowsImported);

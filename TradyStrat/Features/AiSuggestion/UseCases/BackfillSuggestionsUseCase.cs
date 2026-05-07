@@ -3,7 +3,7 @@ using TradyStrat.Application.Abstractions;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Application.UseCases.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.UseCases;
 
 public sealed class BackfillSuggestionsUseCase(
     IRepositoryBase<Suggestion> repo,

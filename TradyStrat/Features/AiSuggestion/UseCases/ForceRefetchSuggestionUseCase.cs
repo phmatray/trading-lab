@@ -5,7 +5,7 @@ using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Time;
 using TradyStrat.Features.AiSuggestion.Specifications;
 
-namespace TradyStrat.Application.UseCases.AiSuggestion;
+namespace TradyStrat.Features.AiSuggestion.UseCases;
 
 public sealed class ForceRefetchSuggestionUseCase(
     IRepositoryBase<Suggestion> repo,

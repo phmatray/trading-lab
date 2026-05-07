@@ -4,7 +4,7 @@ using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;
 
-namespace TradyStrat.Application.UseCases.Trades;
+namespace TradyStrat.Features.Trades.UseCases;
 
 public sealed record LogTradeInput(
     DateOnly ExecutedOn, TradeSide Side,

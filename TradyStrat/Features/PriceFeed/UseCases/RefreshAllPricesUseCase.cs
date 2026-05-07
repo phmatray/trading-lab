@@ -2,7 +2,7 @@ using TradyStrat.Application.Abstractions;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.PriceFeed;
 
-namespace TradyStrat.Application.UseCases.Prices;
+namespace TradyStrat.Features.PriceFeed.UseCases;
 
 public sealed class RefreshAllPricesUseCase(
     DailyPriceCache prices, DailyFxCache fx,

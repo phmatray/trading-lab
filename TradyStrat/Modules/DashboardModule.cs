@@ -1,5 +1,5 @@
 using TheAppManager.Modules;
-using TradyStrat.Application.UseCases.Dashboard;
+using TradyStrat.Features.Dashboard.UseCases;
 
 namespace TradyStrat.Modules;
 

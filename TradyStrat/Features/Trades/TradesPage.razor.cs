@@ -1,7 +1,7 @@
 using System.Globalization;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Application.UseCases.Trades;
+using TradyStrat.Features.Trades.UseCases;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;

@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.UseCases.Trades;
+using TradyStrat.Features.Trades.UseCases;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using Xunit;
 
-namespace TradyStrat.Tests.UseCases.Trades;
+namespace TradyStrat.Tests.Trades.UseCases;
 
 public class DeleteTradeUseCaseTests
 {

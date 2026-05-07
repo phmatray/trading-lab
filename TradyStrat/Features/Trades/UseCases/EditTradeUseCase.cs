@@ -5,7 +5,7 @@ using TradyStrat.Data;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 
-namespace TradyStrat.Application.UseCases.Trades;
+namespace TradyStrat.Features.Trades.UseCases;
 
 public sealed record EditTradeInput(
     int Id, DateOnly ExecutedOn, TradeSide Side,

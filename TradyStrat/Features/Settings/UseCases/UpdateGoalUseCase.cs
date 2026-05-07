@@ -6,7 +6,7 @@ using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using TradyStrat.Shared.Time;
 
-namespace TradyStrat.Application.UseCases.Settings;
+namespace TradyStrat.Features.Settings.UseCases;
 
 public sealed record UpdateGoalInput(decimal TargetEur, DateOnly? TargetDate);
 

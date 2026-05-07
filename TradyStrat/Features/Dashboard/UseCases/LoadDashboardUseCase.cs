@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using TradyStrat.Application.Abstractions;
-using TradyStrat.Application.UseCases.AiSuggestion;
+using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Dashboard;
 using TradyStrat.Features.Fx;
@@ -13,7 +13,7 @@ using TradyStrat.Features.PriceFeed.Specifications;
 using TradyStrat.Features.AiSuggestion.Specifications;
 using TradyStrat.Features.Trades.Specifications;
 
-namespace TradyStrat.Application.UseCases.Dashboard;
+namespace TradyStrat.Features.Dashboard.UseCases;
 
 public sealed class LoadDashboardUseCase(
     IndicatorEngine indicators,
