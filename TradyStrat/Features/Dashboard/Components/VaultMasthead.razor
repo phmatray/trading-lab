@@ -11,11 +11,3 @@
     </nav>
     <div class="meta">@FormatDate(Today) · entry no. @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)</div>
 </div>
-
-@code {
-    [Parameter] public DateOnly Today { get; set; }
-    [Parameter] public int EntryNumber { get; set; }
-
-    private static string FormatDate(DateOnly d)
-        => d.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture);
-}
