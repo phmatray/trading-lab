@@ -21,6 +21,9 @@ logs/
 # Brainstorming companion artefacts
 .superpowers/
 
+# Claude Code harness state (worktrees, etc.)
+.claude/
+
 # Debug/inspection artefacts
 .dashboard-*.png
 .audit-*.png
