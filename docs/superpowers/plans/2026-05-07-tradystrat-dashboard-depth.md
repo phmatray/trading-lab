@@ -849,8 +849,8 @@ git commit -m "feat(indicators): add BollingerHistoryProvider"
 ## Task 7 — `IchimokuHistoryProvider`
 
 **Files:**
-- Create: `TradyStrat/Features/Indicators/HistoryProviders/IchimokuHistoryProvider.cs`
-- Test: `TradyStrat.Tests/Indicators/HistoryProviders/IchimokuHistoryProviderTests.cs`
+- Create: `TradyStrat/Features/Indicators/Ichimoku/IchimokuHistoryProvider.cs`
+- Test: `TradyStrat.Tests/Indicators/Ichimoku/IchimokuHistoryProviderTests.cs`
 
 Threshold semantics: thresholds null; sparkline shows the close-price line (the underlying price the cloud is overlaid against). The existing `Ichimoku.cs` computes Ichimoku locally — read it before implementing this task to match the conventions.
 
@@ -865,14 +865,13 @@ Note its computation style and outputs (Tenkan, Kijun, Senkou A/B, Chikou). Use 
 - [ ] **Step 2: Write failing test**
 
 ```csharp
-// TradyStrat.Tests/Indicators/HistoryProviders/IchimokuHistoryProviderTests.cs
+// TradyStrat.Tests/Indicators/Ichimoku/IchimokuHistoryProviderTests.cs
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.HistoryProviders;
 using TradyStrat.Shared.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators.HistoryProviders;
+namespace TradyStrat.Tests.Indicators;
 
 public class IchimokuHistoryProviderTests
 {
@@ -917,10 +916,10 @@ Expected: build error.
 - [ ] **Step 4: Implement provider**
 
 ```csharp
-// TradyStrat/Features/Indicators/HistoryProviders/IchimokuHistoryProvider.cs
+// TradyStrat/Features/Indicators/Ichimoku/IchimokuHistoryProvider.cs
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Features.Indicators.HistoryProviders;
+namespace TradyStrat.Features.Indicators;
 
 public sealed class IchimokuHistoryProvider : IIndicatorHistoryProvider
 {
@@ -950,8 +949,8 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add TradyStrat/Features/Indicators/HistoryProviders/IchimokuHistoryProvider.cs \
-        TradyStrat.Tests/Indicators/HistoryProviders/IchimokuHistoryProviderTests.cs
+git add TradyStrat/Features/Indicators/Ichimoku/IchimokuHistoryProvider.cs \
+        TradyStrat.Tests/Indicators/Ichimoku/IchimokuHistoryProviderTests.cs
 git commit -m "feat(indicators): add IchimokuHistoryProvider"
 ```
 
@@ -960,22 +959,21 @@ git commit -m "feat(indicators): add IchimokuHistoryProvider"
 ## Task 8 — `Sma200HistoryProvider`
 
 **Files:**
-- Create: `TradyStrat/Features/Indicators/HistoryProviders/Sma200HistoryProvider.cs`
-- Test: `TradyStrat.Tests/Indicators/HistoryProviders/Sma200HistoryProviderTests.cs`
+- Create: `TradyStrat/Features/Indicators/MovingAverage/Sma200HistoryProvider.cs`
+- Test: `TradyStrat.Tests/Indicators/MovingAverage/Sma200HistoryProviderTests.cs`
 
 Threshold semantics: Values = SMA(200) series; ThresholdHi = SMA value at last bar drawn as a horizontal target line. ThresholdLo null.
 
 - [ ] **Step 1: Write failing test**
 
 ```csharp
-// TradyStrat.Tests/Indicators/HistoryProviders/Sma200HistoryProviderTests.cs
+// TradyStrat.Tests/Indicators/MovingAverage/Sma200HistoryProviderTests.cs
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.HistoryProviders;
 using TradyStrat.Shared.Domain;
 using Xunit;
 
-namespace TradyStrat.Tests.Indicators.HistoryProviders;
+namespace TradyStrat.Tests.Indicators;
 
 public class Sma200HistoryProviderTests
 {
@@ -1019,12 +1017,12 @@ Expected: build error.
 Use the same `TAFunc` MovingAverage / SMA call style as the existing `Features/Indicators/MovingAverage.cs` — read it once, then mirror its parameter shape.
 
 ```csharp
-// TradyStrat/Features/Indicators/HistoryProviders/Sma200HistoryProvider.cs
+// TradyStrat/Features/Indicators/MovingAverage/Sma200HistoryProvider.cs
 using TechnicalAnalysis.Common;
 using TechnicalAnalysis.Functions;
 using TradyStrat.Shared.Domain;
 
-namespace TradyStrat.Features.Indicators.HistoryProviders;
+namespace TradyStrat.Features.Indicators;
 
 public sealed class Sma200HistoryProvider : IIndicatorHistoryProvider
 {
@@ -1070,8 +1068,8 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add TradyStrat/Features/Indicators/HistoryProviders/Sma200HistoryProvider.cs \
-        TradyStrat.Tests/Indicators/HistoryProviders/Sma200HistoryProviderTests.cs
+git add TradyStrat/Features/Indicators/MovingAverage/Sma200HistoryProvider.cs \
+        TradyStrat.Tests/Indicators/MovingAverage/Sma200HistoryProviderTests.cs
 git commit -m "feat(indicators): add Sma200HistoryProvider"
 ```
 
@@ -1090,7 +1088,6 @@ git commit -m "feat(indicators): add Sma200HistoryProvider"
 // TradyStrat.Tests/Indicators/IndicatorHistoryProviderFactoryTests.cs
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.HistoryProviders;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Shared.Exceptions;
 using Xunit;
@@ -1207,8 +1204,6 @@ The engine takes `IReadRepositoryBase<PriceBar>` and a `ZoneClassifier`. Loads b
 using Ardalis.Specification.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.HistoryProviders;
-using TradyStrat.Features.Indicators.Rules;
 using TradyStrat.Shared.Domain;
 using TradyStrat.Tests.Specifications;
 using Xunit;
@@ -1375,8 +1370,6 @@ builder.Services.AddScoped<IIndicatorHistoryProvider, IchimokuHistoryProvider>()
 builder.Services.AddScoped<IIndicatorHistoryProvider, Sma200HistoryProvider>();
 builder.Services.AddScoped<IIndicatorHistoryProviderFactory, IndicatorHistoryProviderFactory>();
 ```
-
-Add `using TradyStrat.Features.Indicators.HistoryProviders;` at the top of the file.
 
 - [ ] **Step 3: Build**
 
