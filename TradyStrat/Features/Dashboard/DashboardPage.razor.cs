@@ -51,8 +51,7 @@ public partial class DashboardPage : ComponentBase
         finally { _busy = false; }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CA1822:Mark members as static")]
-    private void OnLogTradeRequested()
+    private static void OnLogTradeRequested()
     {
         // Phase 7 wires this to /trades navigation or an inline dialog.
     }
