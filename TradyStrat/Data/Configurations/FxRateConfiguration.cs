@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Data.Configurations;
 

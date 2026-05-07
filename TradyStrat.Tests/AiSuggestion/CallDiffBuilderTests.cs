@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion;

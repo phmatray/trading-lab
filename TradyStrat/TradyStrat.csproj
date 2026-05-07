@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <UserSecretsId>tradystrat-local</UserSecretsId>
     <RootNamespace>TradyStrat</RootNamespace>
-    <!-- CA1716: namespace `Shared` matches a VB keyword. We don't target VB; spec uses Shared/. -->
+    <!-- CA1716: a few member/parameter names (e.g. `to`, `For`) clash with VB keywords. We don't target VB. -->
     <NoWarn>$(NoWarn);CA1716</NoWarn>
   </PropertyGroup>
   <ItemGroup>

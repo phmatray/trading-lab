@@ -4,7 +4,7 @@ using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Indicators;     // SeriesLoader
 using TradyStrat.Tests.Specifications;

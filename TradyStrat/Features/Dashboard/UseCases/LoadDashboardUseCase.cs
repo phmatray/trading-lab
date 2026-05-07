@@ -1,13 +1,13 @@
 using Ardalis.Specification;
-using TradyStrat.Application.Abstractions;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Dashboard;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Time;
 using TradyStrat.Features.Fx.Specifications;
 using TradyStrat.Features.PriceFeed.Specifications;
 using TradyStrat.Features.AiSuggestion.Specifications;

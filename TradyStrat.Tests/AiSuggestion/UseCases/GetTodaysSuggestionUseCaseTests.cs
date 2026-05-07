@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.Abstractions;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Time;

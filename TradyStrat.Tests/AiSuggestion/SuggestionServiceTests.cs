@@ -3,8 +3,8 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Tests.Time;
 using Xunit;
 

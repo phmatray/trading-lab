@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Data;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Time;
 
 namespace TradyStrat.Features.PriceFeed;
 

@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.Abstractions;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.Dashboard.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Specifications;

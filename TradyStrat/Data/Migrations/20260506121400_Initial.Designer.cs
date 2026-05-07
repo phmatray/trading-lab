@@ -20,7 +20,7 @@ namespace TradyStrat.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
 
-            modelBuilder.Entity("TradyStrat.Shared.Domain.FxRate", b =>
+            modelBuilder.Entity("TradyStrat.Common.Domain.FxRate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,7 +48,7 @@ namespace TradyStrat.Data.Migrations
                     b.ToTable("FxRates", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Shared.Domain.GoalConfig", b =>
+            modelBuilder.Entity("TradyStrat.Common.Domain.GoalConfig", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
@@ -72,7 +72,7 @@ namespace TradyStrat.Data.Migrations
                     b.ToTable("Goals", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Shared.Domain.PriceBar", b =>
+            modelBuilder.Entity("TradyStrat.Common.Domain.PriceBar", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -109,7 +109,7 @@ namespace TradyStrat.Data.Migrations
                     b.ToTable("PriceBars", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Shared.Domain.Suggestion", b =>
+            modelBuilder.Entity("TradyStrat.Common.Domain.Suggestion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,7 +156,7 @@ namespace TradyStrat.Data.Migrations
                     b.ToTable("Suggestions", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Shared.Domain.Trade", b =>
+            modelBuilder.Entity("TradyStrat.Common.Domain.Trade", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

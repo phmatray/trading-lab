@@ -1,4 +1,4 @@
-using TradyStrat.Application.Abstractions;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.PriceFeed;
 

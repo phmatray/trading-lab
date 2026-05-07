@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.AI;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.Time;
 
 namespace TradyStrat.Features.AiSuggestion;
 

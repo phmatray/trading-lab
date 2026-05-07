@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Features.Fx;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Tests.Specifications;
 using Xunit;
 

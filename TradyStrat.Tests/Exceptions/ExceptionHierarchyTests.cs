@@ -1,6 +1,6 @@
 using Xunit;
 using Shouldly;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Exceptions;
 
 namespace TradyStrat.Tests.Exceptions;
 

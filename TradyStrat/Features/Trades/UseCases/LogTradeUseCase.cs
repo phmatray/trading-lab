@@ -1,8 +1,8 @@
 using Ardalis.Specification;
-using TradyStrat.Application.Abstractions;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.UseCases;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.Time;
 
 namespace TradyStrat.Features.Trades.UseCases;
 

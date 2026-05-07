@@ -1,6 +1,6 @@
 using TechnicalAnalysis.Common;
 using TechnicalAnalysis.Functions;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Features.Indicators;
 

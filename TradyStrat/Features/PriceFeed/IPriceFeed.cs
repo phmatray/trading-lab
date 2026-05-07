@@ -1,4 +1,4 @@
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Features.PriceFeed;
 

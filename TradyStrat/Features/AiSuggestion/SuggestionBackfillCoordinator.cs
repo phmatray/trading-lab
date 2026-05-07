@@ -1,8 +1,8 @@
 using Ardalis.Specification;
 using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.AiSuggestion.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion;

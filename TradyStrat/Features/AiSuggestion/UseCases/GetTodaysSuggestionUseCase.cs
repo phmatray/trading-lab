@@ -1,8 +1,8 @@
 using Ardalis.Specification;
-using TradyStrat.Application.Abstractions;
+using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Time;
 using TradyStrat.Features.AiSuggestion.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.UseCases;

@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 using TheAppManager.Modules;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Exceptions;
 
 namespace TradyStrat.Modules;
 

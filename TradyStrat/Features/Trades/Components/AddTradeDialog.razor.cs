@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Features.Trades.UseCases;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 
 namespace TradyStrat.Features.Trades.Components;
 

@@ -1,5 +1,5 @@
 using TradyStrat.Features.Fx;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Exceptions;
 
 namespace TradyStrat.Features.PriceFeed;
 

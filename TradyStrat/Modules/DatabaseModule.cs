@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TheAppManager.Modules;
 using TradyStrat.Data;
 using TradyStrat.Data.Sqlite;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Time;
 
 namespace TradyStrat.Modules;
 

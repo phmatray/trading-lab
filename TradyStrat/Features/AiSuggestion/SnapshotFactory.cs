@@ -5,8 +5,8 @@ using Ardalis.Specification;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Time;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion;
@@ -64,7 +64,7 @@ public sealed class SnapshotFactory(
             var oneEurInEur = await fx.UsdToEurAsync(1m, asOf, ct);
             if (oneEurInEur != 0m) usdPerEur = 1m / oneEurInEur;
         }
-        catch (Shared.Exceptions.FxRateUnavailableException)
+        catch (Common.Exceptions.FxRateUnavailableException)
         {
             // Tolerant — snapshot can be built without the FX rate present.
         }

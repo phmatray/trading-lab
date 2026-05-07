@@ -2,9 +2,9 @@ using System.Globalization;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Features.Trades.UseCases;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
-using TradyStrat.Shared.Time;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
+using TradyStrat.Common.Time;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Trades;

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.PriceFeed;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Time;
 using Xunit;

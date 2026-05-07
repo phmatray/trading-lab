@@ -1,6 +1,6 @@
 using Ardalis.Specification;
-using TradyStrat.Shared.Domain;
-using TradyStrat.Shared.Exceptions;
+using TradyStrat.Common.Domain;
+using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Portfolio;

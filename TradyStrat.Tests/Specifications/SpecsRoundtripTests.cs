@@ -1,7 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using TradyStrat.Shared.Domain;
+using TradyStrat.Common.Domain;
 using TradyStrat.Features.Fx.Specifications;
 using TradyStrat.Features.PriceFeed.Specifications;
 using TradyStrat.Features.AiSuggestion.Specifications;
