@@ -10,32 +10,148 @@
     margin-bottom: 18px;
     display: flex; align-items: baseline;
 }
-.chart { width: 100%; height: 360px; display: block; }
-.chart .grid line { stroke: var(--vault-rule); }
-.chart .axis text { font-family: var(--font-mono); font-size: 13px;
-                    fill: rgba(236,230,214,0.7); letter-spacing: 0.08em; }
-.chart .y-axis text {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    fill: rgba(236,230,214,0.42);
-    letter-spacing: 0.08em;
-    font-feature-settings: "tnum";
-}
-.chart .area { fill: url(#vault-grad); }
-.chart .line { stroke: var(--vault-gold); stroke-width: 1.4; fill: none;
-               filter: drop-shadow(0 0 6px rgba(196,154,86,0.45));
-               stroke-dasharray: 3000; stroke-dashoffset: 3000;
-               animation: draw 1200ms ease-out forwards; }
-.chart .goal { stroke: rgba(196,154,86,0.45); stroke-width: 1; stroke-dasharray: 2 4; fill: none; }
-.chart .now  { stroke: rgba(236,230,214,0.18); stroke-width: 1; stroke-dasharray: 1 4; }
-.axis-label { font-family: var(--font-display); font-style: italic;
-              font-size: 13px; fill: rgba(236,230,214,0.7); }
-@keyframes draw { to { stroke-dashoffset: 0; } }
 
+/* The SVG uses preserveAspectRatio="none" which non-uniformly scales any
+   <text> inside it (text gets stretched ~1.58x vertically at our 360px height
+   + 1200x240 viewBox). We render all labels as absolutely-positioned HTML
+   over the chart so glyphs stay crisp and proportions are preserved. */
 .growth-chart-wrap {
     position: relative;
+    /* room below the SVG for the date axis labels (HTML overlay) */
+    padding-bottom: 24px;
 }
+.chart {
+    width: 100%;
+    height: 360px;
+    display: block;
+    overflow: visible;
+}
+.chart .grid line { stroke: var(--vault-rule); }
+.chart .area { fill: url(#vault-grad); }
+.chart .line {
+    stroke: var(--vault-gold);
+    stroke-width: 1.4;
+    fill: none;
+    filter: drop-shadow(0 0 6px rgba(196,154,86,0.45));
+    /* pathLength="1" attr on the path lets us animate cleanly regardless of length */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: gc-draw 1400ms ease-out forwards;
+}
+.chart .plan-curve {
+    stroke: rgba(196,154,86,0.55);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    fill: none;
+    opacity: 0;
+    animation: gc-fade 1200ms ease-out 700ms forwards;
+}
+.chart .now { stroke: rgba(236,230,214,0.18); stroke-width: 1; stroke-dasharray: 1 4; }
+
+.chart .today-dot {
+    fill: var(--vault-gold);
+    filter: drop-shadow(0 0 8px rgba(196,154,86,0.65));
+}
+
+/* Tiny dashed gap-marker between actual and plan-at-today */
+.chart .plan-gap {
+    stroke: var(--vault-red);
+    stroke-width: 1;
+    stroke-dasharray: 1 2;
+    opacity: 0;
+    animation: gc-fade 600ms ease-out 1500ms forwards;
+}
+.chart .plan-gap.ahead { stroke: var(--vault-green); }
+.chart .plan-gap-cap {
+    fill: var(--vault-red);
+    opacity: 0;
+    animation: gc-fade 600ms ease-out 1500ms forwards;
+}
+.chart .plan-gap-cap.ahead { fill: var(--vault-green); }
+
+@keyframes gc-draw { to { stroke-dashoffset: 0; } }
+@keyframes gc-fade { to { opacity: 1; } }
+
+/* ---- HTML text overlays --------------------------------------- */
+.chart-text {
+    position: absolute;
+    inset: 0 0 24px 0;          /* matches .growth-chart-wrap padding-bottom */
+    pointer-events: none;
+}
+.chart-text > * { position: absolute; }
+
+.chart-text .y-label {
+    left: 6px;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(236,230,214,0.55);
+    letter-spacing: 0.08em;
+    font-feature-settings: "tnum";
+    white-space: nowrap;
+}
+
+.chart-text .goal-label {
+    right: 8px;
+    top: 7%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(236,230,214,0.70);
+    white-space: nowrap;
+}
+
+/* Today value anchored bottom-right just above the dot; chip anchored top-right
+   just below. The today dot sits visually between them. */
+.chart-text .today-value,
+.chart-text .today-chip {
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 18px;
+    font-family: var(--font-display);
+    font-style: italic;
+    line-height: 1;
+}
+.chart-text .today-value {
+    transform: translate(-100%, -100%);
+    font-size: 15px;
+    color: var(--vault-ivory);
+}
+.chart-text .today-chip {
+    transform: translate(-100%, 0);
+    font-weight: 500;
+    font-size: 13px;
+}
+.chart-text .today-chip.behind { color: var(--vault-red); }
+.chart-text .today-chip.ahead  { color: var(--vault-green); }
+
+/* Flip the today callout's anchor when today is near the left edge of the
+   visible window (keeps text inside the chart). */
+.chart-text .today-value.flip,
+.chart-text .today-chip.flip {
+    text-align: left;
+    padding-right: 0;
+    padding-left: 18px;
+}
+.chart-text .today-value.flip { transform: translate(0, -100%); }
+.chart-text .today-chip.flip  { transform: translate(0, 0); }
+
+.chart-text .x-axis {
+    bottom: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(236,230,214,0.70);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.chart-text .x-start { left: 0; }
+.chart-text .x-mid   { left: 50%; transform: translateX(-50%); }
+.chart-text .x-end   { right: 0; }
+
+/* ---- Tooltip + crosshair on the main chart -------------------- */
 ::deep .gc-tooltip {
+    position: absolute;
     background: rgba(20,18,14,0.96);
     border: 1px solid rgba(196,154,86,0.35);
     padding: 10px 14px;
@@ -45,6 +161,7 @@
     font-size: 12px;
     pointer-events: none;
     min-width: 200px;
+    z-index: 10;
 }
 ::deep .gc-tooltip .date {
     font-size: 10px; letter-spacing: 0.2em; color: #c49a56;
@@ -65,3 +182,5 @@
     letter-spacing: 0.1em; text-transform: uppercase; font-size: 9px;
     color: rgba(236,230,214,0.45);
 }
+::deep .gc-tooltip .row.behind span:last-child { color: var(--vault-red); }
+::deep .gc-tooltip .row.ahead  span:last-child { color: var(--vault-green); }

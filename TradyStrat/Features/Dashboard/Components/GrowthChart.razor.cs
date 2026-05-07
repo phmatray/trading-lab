@@ -17,39 +17,17 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
     private ElementReference _svgRef;
     private IJSObjectReference? _module;
 
+    /// <summary>
+    /// Per-instance DOM id prefix. JS resolves all chart sub-elements via these
+    /// ids — using a unique prefix per component instance keeps the page safe
+    /// if a chart is ever rendered twice (defensive, not a current scenario).
+    /// </summary>
+    private readonly string _id = $"gc-{Guid.NewGuid():N}";
+
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
     private DateOnly? EndDate =>
         Goal.TargetDate is { } d && Points.Count > 0 && d > Points[0].Date ? d : null;
-
-    private string LinePath => PathBuilder.Line(Points, 1200, 220, Goal.TargetEur, EndDate);
-    private string AreaPath => PathBuilder.Area(Points, 1200, 220, Goal.TargetEur, EndDate);
-
-    private string GoalLabel => Goal.TargetDate is { } td
-        ? $"€{Goal.TargetEur.ToString("N0", FrFr)} by {td.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
-        : $"€{Goal.TargetEur.ToString("N0", FrFr)} — goal";
-
-    /// <summary>Y-axis labels keyed by their viewBox y coordinate.</summary>
-    /// <remarks>
-    /// Anchored at three of the four interior grid-line y values (40, 100, 160).
-    /// The values shown are 75 / 50 / 25 % of <see cref="GoalConfig.TargetEur"/>;
-    /// the bottom (€0) is implied by the axis baseline and the top is already
-    /// anchored by the existing "€X — goal" callout, so we don't double-label
-    /// either end.
-    /// </remarks>
-    private IReadOnlyList<(double Y, string Text)> YAxisLabels
-    {
-        get
-        {
-            var t = Goal.TargetEur;
-            return
-            [
-                (40,  $"€{(t * 0.75m).ToString("N0", FrFr)}"),
-                (100, $"€{(t * 0.50m).ToString("N0", FrFr)}"),
-                (160, $"€{(t * 0.25m).ToString("N0", FrFr)}"),
-            ];
-        }
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -64,24 +42,45 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
 
     private object BuildPayload()
     {
-        // The visible X-axis spans first-trade-date → axisEnd (goal date if set,
+        // Visible X-axis spans first-trade-date → axisEnd (goal date if set,
         // otherwise last data date). Data arrays only span first-trade → today.
-        // The JS uses these explicit bounds for hover-date math.
         var axisStart = Points.Count > 0 ? Points[0].Date : DateOnly.FromDateTime(DateTime.UtcNow);
         var axisEnd   = EndDate ?? (Points.Count > 0 ? Points[^1].Date : axisStart);
 
+        // For the required-CAGR plan curve we need a *positive* starting capital;
+        // the GrowthSeriesBuilder injects a synthetic 0 at firstDate-1 to draw the
+        // rise from baseline. Find the first strictly-positive point to use as V0
+        // for the compound-growth formula. Falls back to 1 if everything is zero.
+        decimal startCapital = 1m;
+        DateOnly startDate = axisStart;
+        foreach (var p in Points)
+        {
+            if (p.ValueEur > 0m) { startCapital = p.ValueEur; startDate = p.Date; break; }
+        }
+
         return new
         {
-            dates          = Points.Select(g => g.Date.ToString("o", CultureInfo.InvariantCulture)).ToArray(),
-            capital        = Points.Select(g => (double)g.ValueEur).ToArray(),
-            position       = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
-            focusTickerEur = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
-            targetEur      = (double)Goal.TargetEur,
-            targetDate     = Goal.TargetDate?.ToString("o", CultureInfo.InvariantCulture),
-            axisStartDate  = axisStart.ToString("o", CultureInfo.InvariantCulture),
-            axisEndDate    = axisEnd.ToString("o", CultureInfo.InvariantCulture),
+            id              = _id,
+            dates           = Points.Select(g => g.Date.ToString("o", CultureInfo.InvariantCulture)).ToArray(),
+            capital         = Points.Select(g => (double)g.ValueEur).ToArray(),
+            position        = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
+            focusTickerEur  = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
+            targetEur       = (double)Goal.TargetEur,
+            targetDate      = Goal.TargetDate?.ToString("o", CultureInfo.InvariantCulture),
+            axisStartDate   = axisStart.ToString("o", CultureInfo.InvariantCulture),
+            axisEndDate     = axisEnd.ToString("o", CultureInfo.InvariantCulture),
+            startCapitalEur = (double)startCapital,
+            startDate       = startDate.ToString("o", CultureInfo.InvariantCulture),
+            goalLabel       = BuildGoalLabel(),
+            yLabel75        = $"€{(Goal.TargetEur * 0.75m).ToString("N0", FrFr)}",
+            yLabel50        = $"€{(Goal.TargetEur * 0.50m).ToString("N0", FrFr)}",
+            yLabel25        = $"€{(Goal.TargetEur * 0.25m).ToString("N0", FrFr)}",
         };
     }
+
+    private string BuildGoalLabel() => Goal.TargetDate is { } td
+        ? $"€{Goal.TargetEur.ToString("N0", FrFr)} by {td.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
+        : $"€{Goal.TargetEur.ToString("N0", FrFr)} — goal";
 
     public async ValueTask DisposeAsync()
     {
