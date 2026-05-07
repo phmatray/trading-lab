@@ -1,6 +1,6 @@
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Features.Indicators;
+namespace TradyStrat.Features.Indicators.Zones;
 
 public sealed class ZoneClassifier(IEnumerable<IZoneRule> rules)
 {

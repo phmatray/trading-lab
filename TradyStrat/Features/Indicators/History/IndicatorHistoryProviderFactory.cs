@@ -1,7 +1,7 @@
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 
-namespace TradyStrat.Features.Indicators;
+namespace TradyStrat.Features.Indicators.History;
 
 public sealed class IndicatorHistoryProviderFactory(
     IEnumerable<IIndicatorHistoryProvider> providers) : IIndicatorHistoryProviderFactory

@@ -1,4 +1,6 @@
 using TheAppManager.Modules;
+using TradyStrat.Features.Indicators.Zones;
+using TradyStrat.Features.Indicators.History;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Indicators.Bollinger;
 using TradyStrat.Features.Indicators.Ichimoku;

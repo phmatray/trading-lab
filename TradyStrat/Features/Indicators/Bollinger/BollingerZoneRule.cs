@@ -1,4 +1,5 @@
 using TradyStrat.Common.Domain;
+using TradyStrat.Features.Indicators.Zones;
 
 namespace TradyStrat.Features.Indicators.Bollinger;
 

@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using TradyStrat.Features.Indicators.Zones;
+using TradyStrat.Features.Indicators.History;
 using Shouldly;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;

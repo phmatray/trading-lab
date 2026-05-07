@@ -1,4 +1,5 @@
 using Shouldly;
+using TradyStrat.Features.Indicators.History;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;

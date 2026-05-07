@@ -1,4 +1,6 @@
 using Ardalis.Specification;
+using TradyStrat.Features.Indicators.Zones;
+using TradyStrat.Features.Indicators.History;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.PriceFeed.Specifications;

@@ -1,4 +1,6 @@
 using Shouldly;
+using TradyStrat.Features.Indicators.Zones;
+using TradyStrat.Features.Indicators.History;
 using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Backfill;
