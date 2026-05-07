@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TradyStrat.Tests.PriceFeed.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.PriceFeed;

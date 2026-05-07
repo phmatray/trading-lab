@@ -4,7 +4,7 @@ using Shouldly;
 using TradyStrat.Tests.PriceFeed;
 using Xunit;
 
-namespace TradyStrat.Tests.Fx;
+namespace TradyStrat.Tests.Fx.Providers;
 
 public class YahooFxProviderTests
 {

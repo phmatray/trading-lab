@@ -1,7 +1,7 @@
 using TradyStrat.Features.Fx.Providers;
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Tests.Fx;
+namespace TradyStrat.Tests.Fx.Providers;
 
 public sealed class StubFxProvider(IReadOnlyList<FxRate> rates) : IFxRateProvider
 {

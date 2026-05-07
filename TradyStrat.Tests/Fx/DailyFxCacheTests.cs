@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TradyStrat.Tests.Fx.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.Fx;

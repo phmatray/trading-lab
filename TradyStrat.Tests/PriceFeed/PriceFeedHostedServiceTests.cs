@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using TradyStrat.Tests.Fx.Providers;
+using TradyStrat.Tests.PriceFeed.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.Fx;

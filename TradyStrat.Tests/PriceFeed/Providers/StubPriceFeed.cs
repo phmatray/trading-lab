@@ -1,7 +1,7 @@
 using TradyStrat.Features.PriceFeed.Providers;
 using TradyStrat.Common.Domain;
 
-namespace TradyStrat.Tests.PriceFeed;
+namespace TradyStrat.Tests.PriceFeed.Providers;
 
 public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars) : IPriceFeed
 {

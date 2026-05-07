@@ -4,7 +4,7 @@ using Shouldly;
 using TradyStrat.Common.Exceptions;
 using Xunit;
 
-namespace TradyStrat.Tests.PriceFeed;
+namespace TradyStrat.Tests.PriceFeed.Providers;
 
 public class YahooParserTests
 {
