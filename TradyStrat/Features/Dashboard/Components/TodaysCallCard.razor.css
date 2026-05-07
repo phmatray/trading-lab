@@ -2,58 +2,96 @@
     padding: 32px 48px 32px;
     border-bottom: 1px solid var(--vault-rule);
 }
-.label { margin-bottom: 12px; }
+.label { margin-bottom: 14px; }
 .freshness {
     color: rgba(236,230,214,0.42);
     font-size: 9px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }
-.verb {
+
+/* The italic summary bar from the call diff (T19/T24) — sits above the
+   rationale so the verdict drop cap reads as a fresh thought beneath. */
+.summary-bar {
+    background: linear-gradient(
+        90deg,
+        rgba(196,154,86,0.10) 0%,
+        rgba(196,154,86,0.03) 80%,
+        transparent 100%);
+    border-left: 2px solid rgba(196,154,86,0.55);
+    padding: 9px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(236,230,214,0.78);
+    margin-bottom: 18px;
+    font-style: italic;
+}
+
+.backfill-pill {
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: rgba(196,154,86,0.85);
+    text-transform: uppercase;
+}
+
+/* ── Verdict drop cap ──────────────────────────────────────────────
+   The verdict floats flush-left and the rationale paragraph wraps
+   around it. Dramatic editorial typography: oversized italic Cormorant
+   that anchors the journal entry. The "data-verb" attribute lets us
+   tighten "Acquire." (8 chars) without affecting "Hold." / "Trim." /
+   "Wait." (4-5 chars).                                              */
+.reasons {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink-1);
+    max-width: 56ch;
+    margin: 0;
+}
+.reasons::after { content: ""; display: block; clear: both; }
+
+.verb-drop {
+    float: left;
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
-    font-size: 56px;
-    line-height: 1;
-    margin: 0 0 8px;
+    font-size: 86px;
+    line-height: 0.86;
     color: var(--vault-ivory);
+    margin: 8px 18px 2px 0;
+    letter-spacing: -0.01em;
+    /* Slight tonal lift so the drop reads as ink-on-page, not painted on. */
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    /* Tighter shape for narrow verbs so wrapping starts close to the glyph. */
+    shape-outside: margin-box;
 }
+.verb-drop[data-verb="acquire"] {
+    font-size: 64px;
+    margin-right: 14px;
+}
+.verb-drop[data-verb="hold"]    { color: var(--vault-ivory); }
+.verb-drop[data-verb="trim"]    { color: #c87a5a; }
+.verb-drop[data-verb="wait"]    { color: rgba(236,230,214,0.6); font-style: italic; }
+.verb-drop[data-verb="acquire"] { color: #6a9a6a; }
+
+@media (max-width: 720px) {
+    .verb-drop { font-size: 64px; margin-right: 14px; }
+    .verb-drop[data-verb="acquire"] { font-size: 48px; }
+}
+
 .order {
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 0.14em;
     color: var(--ink-2);
-    margin-bottom: 18px;
+    margin: 14px 0 0;
+    clear: both;
 }
-/* Rationale is the lede — Newsreader (body face) at 16px reads sturdier
-   than display Cormorant for sustained prose, while still feeling editorial. */
-.reasons {
-    font-family: var(--font-body);
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.55;
-    color: var(--ink-1);
-    max-width: 54ch;
-}
-.citations {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--vault-rule);
-    counter-reset: c;
-    list-style: none;
-}
-.citations li {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 5px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--ink-2);
-}
-.actions { margin-top: 22px; display: flex; gap: 10px; }
+
+.actions { margin-top: 26px; display: flex; gap: 10px; clear: both; }
 .cta {
     padding: 13px 18px;
     background: var(--vault-gold);
@@ -74,47 +112,10 @@
     cursor: not-allowed;
     font-weight: 400;
 }
-.cta.ghost { background: transparent; color: var(--vault-ivory); border: 1px solid var(--vault-rule); font-weight: 400; }
+.cta.ghost {
+    background: transparent;
+    color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule);
+    font-weight: 400;
+}
 .cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }
-.summary-bar {
-    background: rgba(196,154,86,0.06);
-    border-left: 2px solid rgba(196,154,86,0.45);
-    padding: 8px 12px;
-    font-size: 12px;
-    color: rgba(236,230,214,0.72);
-    margin-bottom: 14px;
-    font-style: italic;
-}
-.backfill-pill {
-    margin-bottom: 10px;
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    color: rgba(196,154,86,0.85);
-    text-transform: uppercase;
-}
-.citations li.changed {
-    background: rgba(196,154,86,0.06);
-    margin: 0 -6px;
-    padding: 6px;
-    border-radius: 2px;
-}
-.citations .roman {
-    color: var(--vault-gold);
-    font-style: italic;
-}
-.citations .spark {
-    width: 60px;
-    display: inline-flex;
-    justify-content: flex-end;
-}
-.new-tag {
-    display: inline-block;
-    font-size: 8px;
-    letter-spacing: 0.18em;
-    color: #c49a56;
-    border: 1px solid rgba(196,154,86,0.45);
-    padding: 1px 6px;
-    margin-left: 8px;
-    text-transform: uppercase;
-    vertical-align: middle;
-}

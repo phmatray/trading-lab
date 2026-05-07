@@ -6,17 +6,6 @@
     {
         <span class="freshness"> · @CallAsOfRelative</span>
     }</div>
-    <div class="verb">@Verb</div>
-
-    @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
-    {
-        <div class="order num">
-            @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
-            · ≈ €@((q * mp).ToString("F2", FrFr))
-        </div>
-    }
-
-    <p class="reasons">@Sug.Rationale</p>
 
     @if (HasDiff)
     {
@@ -29,41 +18,16 @@
         <div class="backfill-pill">@_backfillLabel</div>
     }
 
-    @if (Sug.Citations.Count > 0)
+    <p class="reasons">
+        <span class="verb-drop" data-verb="@VerbStem">@Verb</span>@Sug.Rationale
+    </p>
+
+    @if (Sug is { Action: SuggestionAction.Acquire, QuantityHint: { } q and > 0m, MaxPriceHint: { } mp and > 0m })
     {
-        var changedKeys = CallDiff.ChangedCitations.Select(c => c.Key).ToHashSet();
-        var addedKeys   = CallDiff.AddedCitationKeys.ToHashSet();
-        <ul class="citations">
-            @{ var citIdx = 0; }
-            @foreach (var c in Sug.Citations)
-            {
-                citIdx++;
-                var key = $"{c.Indicator}:{c.Ticker}";
-                var isChanged = changedKeys.Contains(key);
-                var isNew     = addedKeys.Contains(key);
-                var kind = IndicatorKindParser.From(c.Indicator);
-                IndicatorSeries? series = null;
-                if (kind is { } k && IndicatorHistories.TryGetValue((c.Ticker, k), out var s))
-                    series = s;
-                <li class="@(isChanged ? "changed" : "")">
-                    <span class="roman">@RomanLowercase(citIdx).</span>
-                    <span class="claim"><b>@c.Indicator</b> (@c.Ticker): @c.Claim
-                        @if (isNew) { <span class="new-tag">new</span> }
-                    </span>
-                    <span class="v">@c.Value</span>
-                    @if (series is not null && series.Values.Count > 0)
-                    {
-                        <span class="spark">
-                            @((MarkupString)RenderSparklineSvg(series))
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="spark"></span>
-                    }
-                </li>
-            }
-        </ul>
+        <div class="order num">
+            @q.ToString("F0", FrFr) sh CON3 · ≤ €@mp.ToString("F2", FrFr)
+            · ≈ €@((q * mp).ToString("F2", FrFr))
+        </div>
     }
 
     <div class="actions">

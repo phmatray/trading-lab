@@ -26,20 +26,24 @@ else if (_error is not null)
 else
 {
     var vm = _vm!;
-    <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
-                   PriceAsOfRelative="@vm.PriceAsOfRelative" />
-    <div class="hero-row">
-        <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
-                     GoalPace="vm.GoalPace" />
-        <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
-                        CallAsOfRelative="@vm.CallAsOfRelative"
+    <div class="dash-stage">
+        <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
+                       PriceAsOfRelative="@vm.PriceAsOfRelative" />
+        <div class="hero-row">
+            <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
+                         GoalPace="vm.GoalPace" />
+            <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
+                            CallAsOfRelative="@vm.CallAsOfRelative"
+                            CallDiff="vm.CallDiff"
+                            BackfillStatus="vm.BackfillStatus"
+                            OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+        </div>
+        <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"
                         CallDiff="vm.CallDiff"
-                        IndicatorHistories="vm.IndicatorHistories"
-                        BackfillStatus="vm.BackfillStatus"
-                        OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+                        IndicatorHistories="vm.IndicatorHistories" />
+        <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
+        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
     </div>
-    <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
-    <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio" />
     <RefreshFab Busy="_busy" OnClick="OnRefreshClicked" />
 
     @if (_showRerunConfirm)

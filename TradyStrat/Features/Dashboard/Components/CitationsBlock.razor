@@ -1,0 +1,53 @@
+@using TradyStrat.Shared.Domain
+@using TradyStrat.Features.Indicators
+@using TradyStrat.Features.AiSuggestion
+
+@if (Sug.Citations.Count > 0)
+{
+    <section class="citations-block">
+        <header class="cit-head">
+            <span class="cit-label">Cited evidence · @Today.ToString("d MMMM", FrFr)</span>
+            <span class="cit-count">@Sug.Citations.Count signals</span>
+        </header>
+
+        @{
+            var changedKeys = CallDiff.ChangedCitations
+                .Select(c => c.Key.ToLowerInvariant()).ToHashSet();
+            var addedKeys   = CallDiff.AddedCitationKeys
+                .Select(k => k.ToLowerInvariant()).ToHashSet();
+        }
+
+        <ol class="cit-list">
+            @{ var citIdx = 0; }
+            @foreach (var c in Sug.Citations)
+            {
+                citIdx++;
+                var key = $"{c.Indicator}:{c.Ticker}".ToLowerInvariant();
+                var isChanged = changedKeys.Contains(key);
+                var isNew     = addedKeys.Contains(key);
+                var kind = IndicatorKindParser.From(c.Indicator);
+                IndicatorSeries? series = null;
+                if (kind is { } k && IndicatorHistories.TryGetValue((c.Ticker, k), out var s))
+                    series = s;
+                <li class="cit-row @(isChanged ? "is-changed" : "")">
+                    <span class="cit-roman">@RomanLowercase(citIdx).</span>
+                    <div class="cit-text">
+                        <div class="cit-name">
+                            <b>@c.Indicator</b>
+                            <span class="cit-ticker">@c.Ticker</span>
+                            @if (isNew) { <span class="cit-new">new</span> }
+                        </div>
+                        <div class="cit-claim">@c.Claim</div>
+                    </div>
+                    <div class="cit-value num">@c.Value</div>
+                    <div class="cit-spark">
+                        @if (series is not null && series.Values.Count >= 2)
+                        {
+                            @((MarkupString)RenderSparklineSvg(series))
+                        }
+                    </div>
+                </li>
+            }
+        </ol>
+    </section>
+}

@@ -1,3 +1,33 @@
+/* ── Page-load reveal ──────────────────────────────────────────────
+   The dashboard's children (masthead, hero-row, citations, position
+   rail, chart) fade in with a 120ms cascade. One coherent moment of
+   arrival; the page composes itself in front of the reader.
+   prefers-reduced-motion is respected.                              */
+
+.dash-stage > * {
+    opacity: 0;
+    animation: vault-rise 620ms cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+    will-change: opacity, transform;
+}
+.dash-stage > *:nth-child(1) { animation-delay: 0ms;   }
+.dash-stage > *:nth-child(2) { animation-delay: 130ms; }
+.dash-stage > *:nth-child(3) { animation-delay: 260ms; }
+.dash-stage > *:nth-child(4) { animation-delay: 390ms; }
+.dash-stage > *:nth-child(5) { animation-delay: 520ms; }
+
+@keyframes vault-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dash-stage > * {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
 /* Hero row: HeroCapital on the left, TodaysCallCard on the right.
    `.hero-row` is declared in DashboardPage.razor's own markup, so it does NOT
    need ::deep. The inner `.hero` and `.call` selectors live inside child
