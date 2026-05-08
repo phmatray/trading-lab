@@ -9,4 +9,5 @@ public sealed record TickerView(
     decimal? PriceEur,
     decimal? DeltaPct,
     Zone Zone,
-    IReadOnlyList<decimal> Spark);
+    IReadOnlyList<decimal> Spark,
+    Suggestion? TodaysCall);    // NEW (Phase 2) — non-null for Held with successful call

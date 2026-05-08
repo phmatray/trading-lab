@@ -12,14 +12,18 @@ namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public class BackfillSuggestionsUseCaseTests
 {
-    private sealed class StubFactory : ISnapshotFactory
+    private sealed class StubFactory : IAiSnapshotService
     {
-        public DateOnly? Captured { get; private set; }
-        public Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct)
+        public DateOnly? CapturedDate { get; private set; }
+        public int? CapturedInstrumentId { get; private set; }
+
+        public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct)
         {
-            Captured = asOf;
+            CapturedDate = asOf;
+            CapturedInstrumentId = instrumentId;
             return Task.FromResult(new AiSnapshot(
                 Today: asOf,
+                InstrumentId: instrumentId,
                 Goal: GoalConfig.Default(DateTime.UtcNow),
                 Portfolio: new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0),
                 Tickers: [],
@@ -36,6 +40,7 @@ public class BackfillSuggestionsUseCaseTests
             Task.FromResult(new Suggestion
             {
                 Id = 0,
+                InstrumentId = snapshot.InstrumentId,    // NEW
                 ForDate = snapshot.Today,
                 Action = SuggestionAction.Hold,
                 Conviction = 5,
@@ -58,10 +63,12 @@ public class BackfillSuggestionsUseCaseTests
             NullLogger<BackfillSuggestionsUseCase>.Instance);
 
         var asOf = new DateOnly(2026, 5, 4);
-        var s = await sut.ExecuteAsync(asOf, ct);
+        const int focusId = 7;
+        var s = await sut.ExecuteAsync(new BackfillSuggestionsInput(asOf, focusId), ct);
 
         s.ForDate.ShouldBe(asOf);
-        factory.Captured.ShouldBe(asOf);
+        factory.CapturedDate.ShouldBe(asOf);
+        factory.CapturedInstrumentId.ShouldBe(focusId);
         db.Suggestions.Single().ForDate.ShouldBe(asOf);
     }
 }

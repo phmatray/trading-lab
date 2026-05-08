@@ -14,6 +14,7 @@ public sealed record Suggestion
     };
 
     public required int Id { get; init; }
+    public required int InstrumentId { get; init; }   // NEW (Phase 2)
     public required DateOnly ForDate { get; init; }
     public required SuggestionAction Action { get; init; }
     public decimal? QuantityHint { get; init; }

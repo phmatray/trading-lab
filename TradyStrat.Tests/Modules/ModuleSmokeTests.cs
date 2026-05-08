@@ -25,11 +25,15 @@ public class ModuleSmokeTests
 
         resp.IsSuccessStatusCode.ShouldBeTrue();
         var body = await resp.Content.ReadAsStringAsync(ct);
-        // Smoke DB is empty, so LoadDashboardUseCase fails fast with
-        // IndicatorComputationException; page renders the error state.
-        // Either branch (loading or error) is fine — both prove the page
-        // routed and rendered without a 500.
-        (body.Contains("Loading") || body.Contains("Could not load dashboard"))
+        // Phase 2: GetAllTodaysSuggestionsUseCase is a Saga that swallows
+        // per-ticker AI failures, so the dashboard can render in full even
+        // when the dummy Anthropic key fails — there's no longer a guaranteed
+        // "Could not load dashboard" branch on a fresh DB. Accept any of
+        // (loading placeholder, error fallback, fully rendered dash-stage)
+        // as proof the route resolved without a 500.
+        (body.Contains("Loading")
+            || body.Contains("Could not load dashboard")
+            || body.Contains("dash-stage"))
             .ShouldBeTrue();
     }
 }

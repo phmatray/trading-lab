@@ -75,11 +75,14 @@ public class LoadDashboardUseCaseTests
         var fx         = new FxConverter(new TestRepo<FxRate>(db));
         var clock      = new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc));
 
+        // SeedBaseAsync seeds CON3.L as Id=1 (deterministic via fixed Id assignment).
+        const int focusId = 1;
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
-            Target, GoalConfig.Default(DateTime.UtcNow),
+            Target, focusId, GoalConfig.Default(DateTime.UtcNow),
             new([],0,0,0,0,0,0,0), [], [], 1.08m, [], "h"));
         var aiStub = new StubAiClient(new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = focusId, ForDate = Target,
+            Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
         var config = new ConfigurationBuilder()
@@ -90,7 +93,7 @@ public class LoadDashboardUseCaseTests
             .Build();
         var todays = new GetTodaysSuggestionUseCase(
             new TestRepo<Suggestion>(db), snapStub, aiStub, clock,
-            config,
+            new TestRepo<Instrument>(db),
             NullLogger<GetTodaysSuggestionUseCase>.Instance);
 
         var coord = new NullCoordinator();
@@ -99,6 +102,10 @@ public class LoadDashboardUseCaseTests
         var listInstruments = new ListInstrumentsUseCase(
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
+
+        var getAllTodays = new GetAllTodaysSuggestionsUseCase(
+            todays, listInstruments,
+            NullLogger<GetAllTodaysSuggestionsUseCase>.Instance);
 
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,
@@ -109,7 +116,7 @@ public class LoadDashboardUseCaseTests
             new TestRepo<FxRate>(db),
             listInstruments,
             config,
-            todays,
+            getAllTodays,
             coord,
             nav,
             NullLogger<LoadDashboardUseCase>.Instance);
@@ -157,7 +164,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "stable", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -181,7 +188,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "stable", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -200,7 +207,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-db", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -234,7 +241,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "x", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -265,7 +272,7 @@ public class LoadDashboardUseCaseTests
 
         await SeedBaseAsync(db, ct, new Suggestion
         {
-            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 6),
             Action = SuggestionAction.Hold, Conviction = 1,
             Rationale = "x", CitationsJson = "[]",
             MarketSnapshotJson = marketJson,
@@ -281,6 +288,24 @@ public class LoadDashboardUseCaseTests
     }
 
     [Fact]
+    public async Task Tickers_have_TodaysCall_for_Held_only()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+        // Seed without a stored Suggestion — live mode will hit the StubAiClient
+        // through the Saga aggregator, populating TodaysCall for the Held instrument.
+        await SeedBaseAsync(db, ct, seedSuggestion: null);
+
+        var (uc, _, _) = BuildSut(db);
+        var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: false), ct);
+
+        // SeedBaseAsync seeds: CON3.L (Held), COIN (Watchlist), BTC-USD (Watchlist).
+        vm.Tickers.Single(t => t.Ticker == "CON3.L").TodaysCall.ShouldNotBeNull();
+        vm.Tickers.Single(t => t.Ticker == "COIN").TodaysCall.ShouldBeNull();
+        vm.Tickers.Single(t => t.Ticker == "BTC-USD").TodaysCall.ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Tolerates_malformed_market_snapshot_json()
     {
         await using var db = InMemoryDb.Create();
@@ -288,7 +313,7 @@ public class LoadDashboardUseCaseTests
 
         await SeedBaseAsync(db, ct, new Suggestion
         {
-            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 6),
             Action = SuggestionAction.Hold, Conviction = 1,
             Rationale = "x", CitationsJson = "[]",
             MarketSnapshotJson = "{ this is broken",

@@ -27,9 +27,10 @@ public sealed class AiSuggestionModule : IAppModule
                 .UseFunctionInvocation()
                 .Build());
 
-        builder.Services.AddScoped<ISnapshotFactory, SnapshotFactory>();
+        builder.Services.AddScoped<IAiSnapshotService, AiSnapshotService>();
         builder.Services.AddScoped<IAiClient, SuggestionService>();
         builder.Services.AddScoped<GetTodaysSuggestionUseCase>();
+        builder.Services.AddScoped<GetAllTodaysSuggestionsUseCase>();
         builder.Services.AddScoped<ForceRefetchSuggestionUseCase>();
         builder.Services.AddScoped<BackfillSuggestionsUseCase>();
         builder.Services.AddSingleton<ISuggestionBackfillCoordinator>(sp =>

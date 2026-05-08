@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.Domain;
@@ -24,15 +24,14 @@ using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.Snapshot;
 
-public class SnapshotFactoryTests
+public class AiSnapshotServiceTests
 {
     // Catalog order: focus first, then watchlist preserved in legacy order so the
     // day-one PromptHash stays byte-identical against the pre-multi-ticker fixture.
     private static readonly string[] ExpectedCatalogOrder = ["CON3.L", "COIN", "BTC-USD"];
 
-    private static SnapshotFactory BuildSut(
+    private static AiSnapshotService BuildSut(
         AppDbContext db,
-        string focusTicker = "CON3.L",
         IReadOnlyList<PredictionMarket>? predictionMarkets = null,
         bool predictionMarketsThrow = false)
     {
@@ -48,19 +47,13 @@ public class SnapshotFactoryTests
         var listInstruments = new ListInstrumentsUseCase(
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Tickers:Focus"] = focusTicker,
-            })
-            .Build();
         var provider = new StubPredictionMarketProvider(
             predictionMarkets ?? [],
             shouldThrow: predictionMarketsThrow);
-        return new SnapshotFactory(engine, portfolio, fx,
+        return new AiSnapshotService(engine, portfolio, fx,
             new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
-            listInstruments, config, provider,
-            NullLogger<SnapshotFactory>.Instance, clock);
+            listInstruments, provider,
+            NullLogger<AiSnapshotService>.Instance, clock);
     }
 
     private sealed class StubPredictionMarketProvider(
@@ -110,9 +103,10 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
         var today = new DateOnly(2026, 5, 6);
-        var snap = await sut.CreateAsync(today, ct);
+        var snap = await sut.CreateAsync(focusId, today, ct);
 
         snap.Today.ShouldBe(new DateOnly(2026,5,6));
         snap.Goal.TargetEur.ShouldBe(1_000_000m);
@@ -143,8 +137,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db);
-        var snapshot = await sut.CreateAsync(asOf, ct);
+        var snapshot = await sut.CreateAsync(focusId, asOf, ct);
 
         snapshot.Today.ShouldBe(asOf);
     }
@@ -181,8 +176,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
-        var snap = await sut.CreateAsync(asOf, ct);
+        var snap = await sut.CreateAsync(focusId, asOf, ct);
 
         snap.Tickers.Select(t => t.Ticker).ShouldBe(ExpectedCatalogOrder);
     }
@@ -198,6 +194,8 @@ public class SnapshotFactoryTests
         // legacy-order trick.
         // Hash was updated at Task 12 (prediction-markets) because the markets list
         // was added to the payload (previously "2EB10B0275AD1282").
+        // Class renamed at Task 5 of the multi-ticker AI plan (SnapshotFactory ->
+        // AiSnapshotService); the hash MUST stay identical across that rename.
         const string ExpectedHash = "895EED53A280A470";
 
         await using var db = InMemoryDb.Create();
@@ -214,8 +212,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
-        var snap = await sut.CreateAsync(asOf, ct);
+        var snap = await sut.CreateAsync(focusId, asOf, ct);
 
         snap.PromptHash.ShouldBe(ExpectedHash);
     }
@@ -242,8 +241,9 @@ public class SnapshotFactoryTests
             new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
                 0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
         };
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db, predictionMarkets: providedMarkets);
-        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var snap = await sut.CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap.Markets.Count.ShouldBe(1);
         snap.Markets[0].Slug.ShouldBe("btc-100k");
@@ -265,12 +265,13 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
-        var snap1 = await BuildSut(db, predictionMarkets: []).CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
+        var snap1 = await BuildSut(db, predictionMarkets: []).CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
         var snap2 = await BuildSut(db, predictionMarkets: new[]
         {
             new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
                 0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
-        }).CreateAsync(new DateOnly(2026, 5, 6), ct);
+        }).CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap1.PromptHash.ShouldNotBe(snap2.PromptHash);
     }
@@ -291,8 +292,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db, predictionMarketsThrow: true);
-        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var snap = await sut.CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap.Markets.ShouldBeEmpty();
     }

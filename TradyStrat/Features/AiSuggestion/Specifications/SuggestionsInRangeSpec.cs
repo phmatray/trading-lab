@@ -5,7 +5,11 @@ namespace TradyStrat.Features.AiSuggestion.Specifications;
 
 public sealed class SuggestionsInRangeSpec : Specification<Suggestion>
 {
-    public SuggestionsInRangeSpec(DateOnly fromInclusive, DateOnly toInclusive)
-        => Query.Where(s => s.ForDate >= fromInclusive && s.ForDate <= toInclusive)
-                .OrderBy(s => s.ForDate);
+    public SuggestionsInRangeSpec(DateOnly fromInclusive, DateOnly toInclusive, int instrumentId)
+    {
+        Query.Where(s => s.ForDate >= fromInclusive
+                      && s.ForDate <= toInclusive
+                      && s.InstrumentId == instrumentId)
+             .OrderBy(s => s.ForDate);
+    }
 }

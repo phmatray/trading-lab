@@ -32,7 +32,7 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<FxRate> fxRepo,
     ListInstrumentsUseCase listInstruments,
     IConfiguration config,
-    GetTodaysSuggestionUseCase todaysSuggestion,
+    GetAllTodaysSuggestionsUseCase getAllTodaysSuggestions,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
     ILogger<LoadDashboardUseCase> log)
@@ -57,6 +57,34 @@ public sealed class LoadDashboardUseCase(
             .ThenBy(i => i.Ticker, StringComparer.Ordinal)
             .ToList();
 
+        // Today's-call batch — read-only in historical mode, no AI invocation.
+        // Computed before the per-ticker loop so each TickerView can pull its
+        // own call from the batch (priceMap is still built by the loop
+        // downstream). Focus-instrument resolution is intentionally deferred
+        // until after the per-ticker loop so an empty-Instruments DB hits the
+        // indicator path first (which throws TradyStratException, surfaced as
+        // the "Could not load dashboard" fallback) rather than escaping with
+        // an uncaught InvalidOperationException.
+        IReadOnlyList<Suggestion> allTodays;
+        if (input.IsHistorical)
+        {
+            // Historical mode — read-only across all held instruments.
+            var heldIds = ordered.Where(i => i.Kind == InstrumentKind.Held).Select(i => i.Id).ToList();
+            var historicalRows = new List<Suggestion>();
+            foreach (var id in heldIds)
+            {
+                var row = await suggestionRepo.FirstOrDefaultAsync(
+                    new SuggestionForDateSpec(target, id), ct);
+                if (row is not null) historicalRows.Add(row);
+            }
+            allTodays = historicalRows;
+        }
+        else
+        {
+            // Live mode — Saga aggregator fans out per held instrument.
+            allTodays = await getAllTodaysSuggestions.ExecuteAsync(Unit.Value, ct);
+        }
+
         // Iterate Held + Watchlist for zone analysis. Held instruments contribute
         // to the priceMap (used by PortfolioService.SnapshotAsync); Watchlist do not.
         var tickers = new List<TickerView>();
@@ -71,8 +99,14 @@ public sealed class LoadDashboardUseCase(
 
             var deltaPct = await ComputeDeltaPctAsync(inst.Ticker, target, ct);
             var spark    = await ComputeSparkAsync(inst.Ticker, target, ct);
+
+            // Held tickers surface their own call; Watchlist stays null.
+            var todaysCall = inst.Kind == InstrumentKind.Held
+                ? allTodays.FirstOrDefault(s => s.InstrumentId == inst.Id)
+                : null;
+
             tickers.Add(new TickerView(
-                inst.Ticker, inst.Currency, reading.Price, eur, deltaPct, reading.Zone, spark));
+                inst.Ticker, inst.Currency, reading.Price, eur, deltaPct, reading.Zone, spark, todaysCall));
 
             if (inst.Kind == InstrumentKind.Held && eur is { } e)
                 priceMap[inst.Id] = (e, inst.Ticker, inst.Currency);
@@ -90,16 +124,13 @@ public sealed class LoadDashboardUseCase(
             growthSeries = pinned;
         }
 
-        // Today's-call branch — read-only in historical mode, no AI invocation.
-        Suggestion? todays;
-        if (input.IsHistorical)
-        {
-            todays = await suggestionRepo.FirstOrDefaultAsync(new SuggestionForDateSpec(target), ct);
-        }
-        else
-        {
-            todays = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
-        }
+        // Resolve the focus instrument id once — needed for the focus's TodaysCall
+        // pick from the batch and for the prior-suggestion lookup below.
+        var focusInstrument = ordered.SingleOrDefault(i => i.Ticker == focusTicker)
+            ?? throw new InvalidOperationException(
+                $"Focus ticker '{focusTicker}' is not in the Instruments table.");
+
+        var todays = allTodays.SingleOrDefault(s => s.InstrumentId == focusInstrument.Id);
 
         // Prediction-market snapshot — Empty by default; deserialize if column present.
         var marketSnap = MarketSnapshot.Empty;
@@ -125,7 +156,8 @@ public sealed class LoadDashboardUseCase(
         var callDiff = CallDiff.None;
         if (todays is not null)
         {
-            prior = await suggestionRepo.FirstOrDefaultAsync(new PriorSuggestionSpec(target), ct);
+            prior = await suggestionRepo.FirstOrDefaultAsync(
+                new PriorSuggestionSpec(target, focusInstrument.Id), ct);
             callDiff = new CallDiffBuilder()
                 .WithToday(todays)
                 .WithPrior(prior)

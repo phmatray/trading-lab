@@ -19,9 +19,10 @@ public class SpecsRoundtripTests
         CreatedAt = DateTime.UtcNow,
     };
 
-    private static Suggestion Sugg(int month, int day) => new()
+    private static Suggestion Sugg(int month, int day, int instrumentId = 1) => new()
     {
-        Id = 0, ForDate = new DateOnly(2026, month, day), Action = SuggestionAction.Hold,
+        Id = 0, InstrumentId = instrumentId,
+        ForDate = new DateOnly(2026, month, day), Action = SuggestionAction.Hold,
         Conviction = 3, Rationale = "x", CitationsJson = "[]",
         PromptHash = "h", CreatedAt = DateTime.UtcNow,
     };
@@ -63,14 +64,22 @@ public class SpecsRoundtripTests
     {
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
+
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
+            Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
+
         db.Suggestions.Add(new Suggestion {
-            Id = 0, ForDate = new(2026,5,6), Action = SuggestionAction.Hold,
-            Conviction = 3, Rationale = "x", CitationsJson = "[]",
-            PromptHash = "h", CreatedAt = DateTime.UtcNow });
+            Id = 0, InstrumentId = focusId, ForDate = new(2026,5,6),
+            Action = SuggestionAction.Hold, Conviction = 3, Rationale = "x",
+            CitationsJson = "[]", PromptHash = "h", CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(ct);
 
-        var hit  = await db.Suggestions.WithSpecification(new SuggestionForDateSpec(new(2026,5,6))).FirstOrDefaultAsync(ct);
-        var miss = await db.Suggestions.WithSpecification(new SuggestionForDateSpec(new(2026,5,7))).FirstOrDefaultAsync(ct);
+        var hit  = await db.Suggestions.WithSpecification(new SuggestionForDateSpec(new(2026,5,6), focusId)).FirstOrDefaultAsync(ct);
+        var miss = await db.Suggestions.WithSpecification(new SuggestionForDateSpec(new(2026,5,7), focusId)).FirstOrDefaultAsync(ct);
 
         hit.ShouldNotBeNull();
         miss.ShouldBeNull();
@@ -98,10 +107,20 @@ public class SpecsRoundtripTests
     {
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
-        db.Suggestions.AddRange(Sugg(5, 1), Sugg(5, 3), Sugg(5, 5), Sugg(5, 7));
+
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
+            Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
+
+        db.Suggestions.AddRange(
+            Sugg(5, 1, focusId), Sugg(5, 3, focusId),
+            Sugg(5, 5, focusId), Sugg(5, 7, focusId));
         await db.SaveChangesAsync(ct);
 
-        var spec = new SuggestionsInRangeSpec(new DateOnly(2026, 5, 3), new DateOnly(2026, 5, 6));
+        var spec = new SuggestionsInRangeSpec(new DateOnly(2026, 5, 3), new DateOnly(2026, 5, 6), focusId);
         var rows = await db.Suggestions.WithSpecification(spec).ToListAsync(ct);
 
         rows.Count.ShouldBe(2);
@@ -114,10 +133,19 @@ public class SpecsRoundtripTests
     {
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
-        db.Suggestions.AddRange(Sugg(5, 1), Sugg(5, 5), Sugg(5, 7));
+
+        db.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
+            Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
+        await db.SaveChangesAsync(ct);
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
+
+        db.Suggestions.AddRange(
+            Sugg(5, 1, focusId), Sugg(5, 5, focusId), Sugg(5, 7, focusId));
         await db.SaveChangesAsync(ct);
 
-        var spec = new PriorSuggestionSpec(new DateOnly(2026, 5, 7));
+        var spec = new PriorSuggestionSpec(new DateOnly(2026, 5, 7), focusId);
         var row = await db.Suggestions.WithSpecification(spec).FirstOrDefaultAsync(ct);
 
         row.ShouldNotBeNull();

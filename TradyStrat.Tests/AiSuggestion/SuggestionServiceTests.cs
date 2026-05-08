@@ -15,6 +15,7 @@ public class SuggestionServiceTests
 {
     private static AiSnapshot SampleSnapshot() => new(
         Today: new DateOnly(2026, 5, 6),
+        InstrumentId: 1,
         Goal: GoalConfig.Default(DateTime.UtcNow),
         Portfolio: new([], 0, 0, 0, 0, 0, 0, 0),
         Tickers: [],

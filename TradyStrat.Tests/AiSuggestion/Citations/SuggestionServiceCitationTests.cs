@@ -16,6 +16,7 @@ public class SuggestionServiceCitationTests
 {
     private static AiSnapshot SnapshotWith(params PredictionMarket[] markets) => new(
         Today: new DateOnly(2026, 5, 6),
+        InstrumentId: 1,
         Goal: GoalConfig.Default(DateTime.UtcNow),
         Portfolio: new([], 0, 0, 0, 0, 0, 0, 0),
         Tickers: [],

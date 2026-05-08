@@ -27,6 +27,13 @@
             {
                 <div class="cell-spark">@((MarkupString)Sparkline.Render(t.Spark, 140, 28))</div>
             }
+            @if (t.TodaysCall is { } call)
+            {
+                <div class="rail-call">
+                    <span class="action @(call.Action.ToString().ToLowerInvariant())">@call.Action</span>
+                    <span class="rationale">@TruncateRationale(call.Rationale, 80)</span>
+                </div>
+            }
         </div>
     }
 </div>

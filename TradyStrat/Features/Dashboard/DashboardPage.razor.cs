@@ -7,6 +7,7 @@ using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.Dashboard.Navigation;
 using TradyStrat.Features.Dashboard.UseCases;
 using TradyStrat.Features.PriceFeed.UseCases;
+using TradyStrat.Features.Settings.UseCases;
 
 namespace TradyStrat.Features.Dashboard;
 
@@ -14,6 +15,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
 {
     [Inject] private LoadDashboardUseCase LoadDashboard { get; set; } = default!;
     [Inject] private ForceRefetchSuggestionUseCase ForceRefetch { get; set; } = default!;
+    [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
     [Inject] private RefreshAllPricesUseCase RefreshPrices { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
@@ -121,7 +123,19 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
         if (_vm?.IsHistorical == true) return;
         _showRerunConfirm = false;
         _busy = true;
-        try   { await ForceRefetch.ExecuteAsync(Common.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
+        try
+        {
+            var ct = CancellationToken.None;
+            var focusTicker = _vm?.FocusTicker
+                ?? Configuration["Tickers:Focus"]
+                ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+            var instruments = await ListInstruments.ExecuteAsync(Common.UseCases.Unit.Value, ct);
+            var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
+                ?? throw new InvalidOperationException(
+                    $"Focus ticker '{focusTicker}' is not in the Instruments table.");
+            await ForceRefetch.ExecuteAsync(new ForceRefetchSuggestionInput(focus.Id), ct);
+            await ReloadAsync();
+        }
         finally { _busy = false; }
     }
 
