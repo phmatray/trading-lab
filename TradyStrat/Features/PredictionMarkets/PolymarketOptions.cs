@@ -24,7 +24,7 @@ public static class PolymarketOptionsBinder
             SearchQueries:  s.GetSection("SearchQueries").Get<string[]>()
                               ?? s.GetSection("Tags").Get<string[]>()    // back-compat
                               ?? ["bitcoin", "ethereum", "coinbase", "fed"],
-            MaxMarkets:     s.GetValue("MaxMarkets",     10),
+            MaxMarkets:     s.GetValue("MaxMarkets",     8),
             MinVolumeUsd:   s.GetValue("MinVolumeUsd",   50_000m),
             MaxHorizonDays: s.GetValue("MaxHorizonDays", 365));
 

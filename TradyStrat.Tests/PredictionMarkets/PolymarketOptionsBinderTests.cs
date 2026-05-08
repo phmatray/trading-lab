@@ -15,7 +15,7 @@ public class PolymarketOptionsBinderTests
 
         opts.BaseUrl.ShouldBe("https://gamma-api.polymarket.com");
         opts.SearchQueries.ShouldBe(["bitcoin", "ethereum", "coinbase", "fed"]);
-        opts.MaxMarkets.ShouldBe(10);
+        opts.MaxMarkets.ShouldBe(8);
         opts.MinVolumeUsd.ShouldBe(50_000m);
         opts.MaxHorizonDays.ShouldBe(365);
     }
