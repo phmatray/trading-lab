@@ -78,3 +78,36 @@
     }
     .val { font-size: 22px; }
 }
+
+.rail-call {
+    margin-top: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.rail-call .action {
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border: 1px solid var(--vault-rule);
+    color: var(--vault-ivory);
+    flex-shrink: 0;
+}
+.rail-call .action.acquire { color: var(--vault-green); border-color: var(--vault-green); }
+.rail-call .action.hold    { color: var(--ink-3); }
+.rail-call .action.trim    { color: #c8a857; border-color: #c8a857; }
+.rail-call .action.wait    { color: var(--ink-3); }
+
+.rail-call .rationale {
+    color: var(--ink-3);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+}

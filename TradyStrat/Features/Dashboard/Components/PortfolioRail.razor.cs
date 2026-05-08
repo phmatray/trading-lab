@@ -27,4 +27,15 @@ public partial class PortfolioRail : ComponentBase
 
     private static string FormatDelta(decimal pct)
         => $"{(pct >= 0 ? "+" : "")}{pct.ToString("F1", FrFr)}%";
+
+    private static string TruncateRationale(string rationale, int maxChars)
+    {
+        if (string.IsNullOrEmpty(rationale)) return "";
+        if (rationale.Length <= maxChars) return rationale;
+        var slice = rationale[..maxChars];
+        var lastDot = slice.LastIndexOfAny(['.', '!', '?']);
+        return lastDot > maxChars / 2
+            ? slice[..(lastDot + 1)]
+            : slice + "…";
+    }
 }
