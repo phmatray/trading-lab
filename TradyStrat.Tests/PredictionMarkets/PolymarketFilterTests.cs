@@ -1,6 +1,5 @@
 using Shouldly;
 using TradyStrat.Features.PredictionMarkets;
-using TradyStrat.Features.PredictionMarkets.Providers;
 using Xunit;
 
 namespace TradyStrat.Tests.PredictionMarkets;
