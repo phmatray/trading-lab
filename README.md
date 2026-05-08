@@ -79,7 +79,7 @@ Top-level folders inside `TradyStrat/`:
 | `Features/Fx/` | EUR/USD provider + cache + USD→EUR converter. |
 | `Features/Indicators/` | TaLibStandard wrappers + IZoneRule strategies + ZoneClassifier composite. |
 | `Features/Trades/` | Trade ledger UI + CSV import. |
-| `Features/AiSuggestion/` | SnapshotBuilder + IChatClient-backed SuggestionService. |
+| `Features/AiSuggestion/` | AiSnapshotService + IChatClient-backed SuggestionService. |
 | `Features/Settings/` | Goal editor. |
 | `Features/Portfolio/` | FIFO lot accounting + daily growth series. |
 | `Application/UseCases/` | One class per command/query (`IUseCase<TIn,TOut>`). Razor pages depend on these, not on services. |
@@ -128,7 +128,8 @@ Design patterns called out in the spec (§17):
 - **Strategy + Composite** — `IZoneRule` implementations + `ZoneClassifier`
 - **Decorator** — `DailyPriceCache` / `DailyFxCache` wrap the raw providers
 - **Command + Template Method** — `IUseCase` + `UseCaseBase`
-- **Factory Method** — `SnapshotBuilder.BuildAsync`
+- **Service-orchestrator** — `AiSnapshotService.CreateAsync` (10 collaborators; was naming-mislabelled as Factory Method through Phase 1)
+- **Saga (per-ticker fan-out)** — `GetAllTodaysSuggestionsUseCase` (swallow-and-continue) and `SuggestionBackfillCoordinator` (first-fail-stop) — same shape, deliberately distinct failure policies
 - **Specification** — Ardalis specs for all DB queries
 - **Facade** — `LoadDashboardUseCase`, `PortfolioService`
 
