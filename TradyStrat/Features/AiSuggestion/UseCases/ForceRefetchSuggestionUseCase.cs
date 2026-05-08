@@ -10,7 +10,7 @@ namespace TradyStrat.Features.AiSuggestion.UseCases;
 
 public sealed class ForceRefetchSuggestionUseCase(
     IRepositoryBase<Suggestion> repo,
-    ISnapshotFactory snapshotFactory,
+    IAiSnapshotService snapshotService,
     IAiClient ai,
     IClock clock,
     IReadRepositoryBase<Instrument> instruments,
@@ -30,7 +30,7 @@ public sealed class ForceRefetchSuggestionUseCase(
             new SuggestionForDateSpec(today, instrument.Id), ct);
         if (existing is not null) await repo.DeleteAsync(existing, ct);
 
-        var snap  = await snapshotFactory.CreateAsync(instrument.Id, today, ct);
+        var snap  = await snapshotService.CreateAsync(instrument.Id, today, ct);
         var fresh = await ai.AskAsync(snap, ct);
         await repo.AddAsync(fresh, ct);
         return fresh;

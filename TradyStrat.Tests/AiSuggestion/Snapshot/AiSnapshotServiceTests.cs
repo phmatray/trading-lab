@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.Domain;
@@ -25,15 +24,14 @@ using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.Snapshot;
 
-public class SnapshotFactoryTests
+public class AiSnapshotServiceTests
 {
     // Catalog order: focus first, then watchlist preserved in legacy order so the
     // day-one PromptHash stays byte-identical against the pre-multi-ticker fixture.
     private static readonly string[] ExpectedCatalogOrder = ["CON3.L", "COIN", "BTC-USD"];
 
-    private static SnapshotFactory BuildSut(
+    private static AiSnapshotService BuildSut(
         AppDbContext db,
-        string focusTicker = "CON3.L",
         IReadOnlyList<PredictionMarket>? predictionMarkets = null,
         bool predictionMarketsThrow = false)
     {
@@ -49,19 +47,13 @@ public class SnapshotFactoryTests
         var listInstruments = new ListInstrumentsUseCase(
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Tickers:Focus"] = focusTicker,
-            })
-            .Build();
         var provider = new StubPredictionMarketProvider(
             predictionMarkets ?? [],
             shouldThrow: predictionMarketsThrow);
-        return new SnapshotFactory(engine, portfolio, fx,
+        return new AiSnapshotService(engine, portfolio, fx,
             new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
-            listInstruments, config, provider,
-            NullLogger<SnapshotFactory>.Instance, clock);
+            listInstruments, provider,
+            NullLogger<AiSnapshotService>.Instance, clock);
     }
 
     private sealed class StubPredictionMarketProvider(
@@ -202,6 +194,8 @@ public class SnapshotFactoryTests
         // legacy-order trick.
         // Hash was updated at Task 12 (prediction-markets) because the markets list
         // was added to the payload (previously "2EB10B0275AD1282").
+        // Class renamed at Task 5 of the multi-ticker AI plan (SnapshotFactory ->
+        // AiSnapshotService); the hash MUST stay identical across that rename.
         const string ExpectedHash = "895EED53A280A470";
 
         await using var db = InMemoryDb.Create();

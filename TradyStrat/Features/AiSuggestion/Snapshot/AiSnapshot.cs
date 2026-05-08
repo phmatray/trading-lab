@@ -18,7 +18,7 @@ public sealed record AiSnapshot(
     // [JsonIgnore]: keeps the user-message JSON byte-identical to Phase 1 for
     // the focus ticker. The AI never sees this field; SuggestionService reads
     // it via property access to set Suggestion.InstrumentId on the persisted
-    // entity row. PromptHash already excludes it (see SnapshotFactory.HashPrompt).
+    // entity row. PromptHash already excludes it (see AiSnapshotService.HashPrompt).
     [property: JsonIgnore] int InstrumentId,         // NEW (Phase 2)
     GoalConfig Goal,
     PortfolioSnapshot Portfolio,

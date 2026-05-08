@@ -100,7 +100,7 @@ public class GetAllTodaysSuggestionsUseCaseTests
         results.Count.ShouldBe(1);
     }
 
-    private sealed class RecordingFactory : ISnapshotFactory, IAiClient
+    private sealed class RecordingFactory : IAiSnapshotService, IAiClient
     {
         private readonly IDictionary<int, Exception>? _throws;
         private readonly IReadOnlyDictionary<int, string> _idToTicker;

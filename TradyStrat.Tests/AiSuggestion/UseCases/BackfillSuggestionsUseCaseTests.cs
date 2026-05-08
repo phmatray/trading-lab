@@ -12,7 +12,7 @@ namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public class BackfillSuggestionsUseCaseTests
 {
-    private sealed class StubFactory : ISnapshotFactory
+    private sealed class StubFactory : IAiSnapshotService
     {
         public DateOnly? CapturedDate { get; private set; }
         public int? CapturedInstrumentId { get; private set; }

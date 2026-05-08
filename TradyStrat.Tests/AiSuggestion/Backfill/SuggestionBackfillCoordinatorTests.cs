@@ -175,7 +175,7 @@ public class SuggestionBackfillCoordinatorTests
         CreatedAt = DateTime.UtcNow,
     };
 
-    private sealed class PassthroughFactory : ISnapshotFactory
+    private sealed class PassthroughFactory : IAiSnapshotService
     {
         public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct) =>
             Task.FromResult(new AiSnapshot(

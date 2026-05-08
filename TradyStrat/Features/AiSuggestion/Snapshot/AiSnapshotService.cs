@@ -15,17 +15,16 @@ using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
-public sealed class SnapshotFactory(
+public sealed class AiSnapshotService(
     IndicatorEngine indicators,
     PortfolioService portfolio,
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<Trade> tradeRepo,
     ListInstrumentsUseCase listInstruments,
-    IConfiguration config,
     IPredictionMarketProvider predictionMarkets,
-    ILogger<SnapshotFactory> log,
-    IClock clock) : ISnapshotFactory
+    ILogger<AiSnapshotService> log,
+    IClock clock) : IAiSnapshotService
 {
     // Preserve legacy iteration order [COIN, BTC-USD] so the day-one PromptHash
     // remains byte-identical against the pre-multi-ticker fixture. New watchlist
@@ -34,10 +33,6 @@ public sealed class SnapshotFactory(
 
     public async Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct)
     {
-        _ = config; // Pre-Phase-2 the factory read Tickers:Focus from config; that
-                    // role moved to the caller. Constructor stays unchanged so
-                    // dependency-shape doesn't drift across Phase 2.
-
         var goal = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(clock.UtcNow());
 
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
@@ -110,12 +105,12 @@ public sealed class SnapshotFactory(
         }
         catch (PolymarketUnavailableException ex)
         {
-            SnapshotFactoryLog.PolymarketUnavailable(log, ex);
+            AiSnapshotServiceLog.PolymarketUnavailable(log, ex);
             markets = [];
         }
         if (markets.Count == 0)
         {
-            SnapshotFactoryLog.PolymarketEmpty(log);
+            AiSnapshotServiceLog.PolymarketEmpty(log);
         }
 
         var promptHash = HashPrompt(asOf, snap, tickers, recentDtos, markets);
@@ -132,7 +127,7 @@ public sealed class SnapshotFactory(
         IEnumerable<PredictionMarket> markets)
     {
         // Do NOT add instrumentId to this payload — see spec §4.7. Adding it
-        // would break the SnapshotFactoryTests sentinel "895EED53A280A470" and
+        // would break the AiSnapshotServiceTests sentinel "895EED53A280A470" and
         // make CON3.L's day-zero hash drift, defeating the no-regression check
         // on prompt-input shape across the Phase 2 refactor.
         var payload = new { today, snap, tickers, recent, markets };
@@ -141,7 +136,7 @@ public sealed class SnapshotFactory(
     }
 }
 
-internal static partial class SnapshotFactoryLog
+internal static partial class AiSnapshotServiceLog
 {
     [LoggerMessage(Level = LogLevel.Warning, Message = "Polymarket unavailable, snapshot will omit markets")]
     public static partial void PolymarketUnavailable(ILogger logger, Exception ex);

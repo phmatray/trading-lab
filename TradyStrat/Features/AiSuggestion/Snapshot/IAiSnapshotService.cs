@@ -1,6 +1,6 @@
 namespace TradyStrat.Features.AiSuggestion.Snapshot;
 
-public interface ISnapshotFactory
+public interface IAiSnapshotService
 {
     Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct);
 }
