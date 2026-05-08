@@ -23,7 +23,8 @@ public sealed class SnapshotFactory(
     IReadRepositoryBase<Trade> tradeRepo,
     ListInstrumentsUseCase listInstruments,
     IConfiguration config,
-    IPredictionMarketProvider predictionMarkets,   // NEW
+    IPredictionMarketProvider predictionMarkets,
+    ILogger<SnapshotFactory> log,
     IClock clock) : ISnapshotFactory
 {
     // Preserve legacy iteration order [COIN, BTC-USD] so the day-one PromptHash
@@ -104,9 +105,14 @@ public sealed class SnapshotFactory(
         {
             markets = await predictionMarkets.GetMarketsAsync(ct);
         }
-        catch (PolymarketUnavailableException)
+        catch (PolymarketUnavailableException ex)
         {
+            SnapshotFactoryLog.PolymarketUnavailable(log, ex);
             markets = [];
+        }
+        if (markets.Count == 0)
+        {
+            SnapshotFactoryLog.PolymarketEmpty(log);
         }
 
         var promptHash = HashPrompt(asOf, snap, tickers, recentDtos, markets);
@@ -122,4 +128,14 @@ public sealed class SnapshotFactory(
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Strict));
         return Convert.ToHexString(SHA256.HashData(bytes))[..16];
     }
+}
+
+internal static partial class SnapshotFactoryLog
+{
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Polymarket unavailable, snapshot will omit markets")]
+    public static partial void PolymarketUnavailable(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Polymarket filter returned 0 markets — adjust Tags / MinVolumeUsd / MaxHorizonDays")]
+    public static partial void PolymarketEmpty(ILogger logger);
 }

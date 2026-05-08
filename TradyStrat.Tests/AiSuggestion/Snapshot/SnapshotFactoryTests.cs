@@ -59,7 +59,8 @@ public class SnapshotFactoryTests
             shouldThrow: predictionMarketsThrow);
         return new SnapshotFactory(engine, portfolio, fx,
             new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
-            listInstruments, config, provider, clock);
+            listInstruments, config, provider,
+            NullLogger<SnapshotFactory>.Instance, clock);
     }
 
     private sealed class StubPredictionMarketProvider(
