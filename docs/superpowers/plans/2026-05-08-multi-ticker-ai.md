@@ -8,6 +8,8 @@
 
 **Architecture:** `Suggestions` table gains an `InstrumentId` FK with UQ on `(ForDate, InstrumentId)`. `GetTodaysSuggestionUseCase` widens to take an instrument-scoped input. New `GetAllTodaysSuggestionsUseCase` orchestrates the per-ticker loop with Saga-style failure isolation. `SnapshotFactory.CreateAsync` widens to take `instrumentId` (caller-driven primary). Migration backfills existing rows to focus = `'CON3.L'`. PromptHash byte-identity for the focus ticker preserved (sentinel test pinned at `"895EED53A280A470"` post-prediction-markets baseline). Optional final rename of `SnapshotFactory` → `AiSnapshotService` to match its 10-collaborator service shape.
 
+**One-model-multiple-views note:** the rail chip (Section VII Holdings) and the focus `TodaysCallCard` (Section III) consume the **same `Suggestion` data, just different presentations** — full rationale on the focus card, truncated chip per held instrument on the rail. The chip is not a separate fetch; it reads from the same `allTodays` list `LoadDashboardUseCase` already builds.
+
 **Tech Stack:** .NET 10 · Blazor Server · EF Core 10 (SQLite) · Ardalis.Specification 9.3 · Anthropic.SDK 5.10 · Microsoft.Extensions.AI 10.3 · xunit.v3 · Shouldly · Microsoft.EntityFrameworkCore.InMemory · Microsoft.Data.Sqlite (migration tests).
 
 ---
@@ -310,6 +312,8 @@ public sealed record AiSnapshot(
 
 Open `TradyStrat/Features/AiSuggestion/Snapshot/SnapshotFactory.cs`. **Constructor unchanged** (preserves all 10 deps including `IPredictionMarketProvider`). Method body changes:
 
+**Pattern note:** the new `instrumentId` parameter is the **parameterised Strategy** for primary-instrument selection. Pre-Phase-2: the factory embedded the strategy ("read `Tickers:Focus` from config"). Post-Phase-2: the strategy is a caller-driven argument. This inversion is what enables `GetAllTodaysSuggestionsUseCase` (Task 2) to reuse one factory instance for N different primaries within a single dashboard load.
+
 ```csharp
 public async Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct)
 {
@@ -400,13 +404,17 @@ public async Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, Cance
 
 **Critical: `HashPrompt` does NOT include `instrumentId` in the hashed payload.** Per spec §4.7, `InstrumentId` is set on the snapshot record and persisted on the entity, but not part of the hash. The byte-identity sentinel `895EED53A280A470` depends on this — collision-resistance comes from the differentiated `tickers`/`snap`/`recent` payload content, not from `instrumentId`. Don't add `instrumentId` to `HashPrompt`'s payload object.
 
-The `HashPrompt` body stays exactly as it is today (signature unchanged):
+The `HashPrompt` body stays exactly as it is today (signature unchanged); add a defensive comment above the `payload` line so a future refactor doesn't accidentally include `instrumentId`:
 
 ```csharp
 private static string HashPrompt(DateOnly today, PortfolioSnapshot snap,
     IEnumerable<TickerContext> tickers, IEnumerable<TradeRecent> recent,
     IEnumerable<PredictionMarket> markets)
 {
+    // Do NOT add instrumentId to this payload — see spec §4.7. Adding it
+    // would break the SnapshotFactoryTests sentinel "895EED53A280A470" and
+    // make CON3.L's day-zero hash drift, defeating the no-regression check
+    // on prompt-input shape across the Phase 2 refactor.
     var payload = new { today, snap, tickers, recent, markets };
     var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Strict));
     return Convert.ToHexString(SHA256.HashData(bytes))[..16];
@@ -429,7 +437,7 @@ public interface ISnapshotFactory
 
 - [ ] **Step 6: Update `SuggestionService.AskAsync`**
 
-Open `TradyStrat/Features/AiSuggestion/SuggestionService.cs`. Inside the `submit` `AIFunctionFactory.Create` callback, the `Suggestion` literal construction (currently around line 58–71) gains one line:
+Open `TradyStrat/Features/AiSuggestion/SuggestionService.cs`. Inside the `submit` `AIFunctionFactory.Create` callback, locate the `Suggestion` literal — grep for `captured = new Suggestion` to land on the right line. Add `InstrumentId = snapshot.InstrumentId,` directly after `Id = 0,`:
 
 ```csharp
 captured = new Suggestion
@@ -605,6 +613,8 @@ public sealed class BackfillSuggestionsUseCase(
 - [ ] **Step 11: Plumb the focus instrument id through the coordinator**
 
 `SuggestionBackfillCoordinator` has two constructors. Both now also resolve `IConfiguration` and `IReadRepositoryBase<Instrument>` so the coordinator can look up the focus's id once at the start of `RunChainAsync` and pass it to every per-day call.
+
+**Pattern note:** `SuggestionBackfillCoordinator` is a **Saga with a "first-fail-stop" failure policy** — if any per-day call throws, the chain halts and `BackfillStatus.Failed(LastSuccessful, FailedAt, Reason)` records where it stopped. This is **deliberately different** from `GetAllTodaysSuggestionsUseCase`'s "swallow-and-continue" policy (Task 2): backfill is an explicit user-initiated repair operation where the user wants to know *which* day failed so they can investigate, while the daily fan-out is best-effort and should never block other tickers' calls. The two Sagas share a shape but not a policy. Don't paper over a backfill failure by extending the Task 2 swallow policy here.
 
 Replace `TradyStrat/Features/AiSuggestion/Backfill/SuggestionBackfillCoordinator.cs`:
 
@@ -829,6 +839,12 @@ public partial class MultiTickerAiPhase2 : Migration
         //    ever been one Suggestion per ForDate. Hardcoded literal matches
         //    the precedent set by the Trades.InstrumentId backfill in
         //    MultiTickerFoundation (Phase 1).
+        //
+        //    Caveat (see spec §3.4): if the user changed Tickers:Focus
+        //    between Phase 1 and Phase 2 *and* generated Suggestions for the
+        //    new focus before running this migration, the backfill would
+        //    mis-attribute those rows. Accepted as a Phase-2-author-time
+        //    assumption; no production guard.
         migrationBuilder.Sql(@"
             UPDATE Suggestions
                SET InstrumentId = (SELECT Id FROM Instruments WHERE Ticker = 'CON3.L')
@@ -961,6 +977,16 @@ public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, Cancellatio
 Locate `StubSnapshotFactory.cs` (likely under `TradyStrat.Tests/AiSuggestion/Snapshot/`) and update its single method.
 
 - [ ] **Step 17: Update `BackfillSuggestionsUseCaseTests.cs`**
+
+**Sweep first.** Before editing this specific file, run a grep across the whole test project to find every `Suggestion` literal that needs `InstrumentId` set:
+
+```bash
+grep -rn "new Suggestion {" TradyStrat.Tests
+```
+
+Each hit needs `InstrumentId = ?,` added to the literal (the `?` is whatever instrument id the test's seed established — usually `1` for the first seeded `Instrument` row, or a captured `focusId` variable). The plan enumerates the major files (Steps 16–20), but the grep guarantees nothing slips through — including `StubAiClient.cs` itself if it constructs a `Suggestion` literal.
+
+Then proceed with this file's edits:
 
 The test calls `sut.ExecuteAsync(asOf, ct)` with a bare `DateOnly`. After Phase 2 it becomes `sut.ExecuteAsync(new BackfillSuggestionsInput(asOf, focusId), ct)`. The `StubFactory.CreateAsync` signature also widens to take `instrumentId` (ignored):
 
@@ -1726,24 +1752,22 @@ Append the chip block immediately after the spark block (still inside the cell):
 }
 ```
 
-Add the helper to the existing `@code` block at the bottom of the file. If there is no `@code` block today, append one:
+The `TruncateRationale` helper goes in the **`PortfolioRail.razor.cs` code-behind**, alongside the existing `PnL`/`FormatPrimary`/`FormatDelta` helpers (matching the file's prevailing convention — there is no `@code` block in the `.razor` file today, and we don't introduce one). Add this method to the partial class:
 
-```razor
-@code {
-    private static string TruncateRationale(string rationale, int maxChars)
-    {
-        if (string.IsNullOrEmpty(rationale)) return "";
-        if (rationale.Length <= maxChars) return rationale;
-        var slice = rationale[..maxChars];
-        var lastDot = slice.LastIndexOfAny(['.', '!', '?']);
-        return lastDot > maxChars / 2
-            ? slice[..(lastDot + 1)]
-            : slice + "…";
-    }
+```csharp
+// In TradyStrat/Features/Dashboard/Components/PortfolioRail.razor.cs,
+// alongside the existing helper methods.
+private static string TruncateRationale(string rationale, int maxChars)
+{
+    if (string.IsNullOrEmpty(rationale)) return "";
+    if (rationale.Length <= maxChars) return rationale;
+    var slice = rationale[..maxChars];
+    var lastDot = slice.LastIndexOfAny(['.', '!', '?']);
+    return lastDot > maxChars / 2
+        ? slice[..(lastDot + 1)]
+        : slice + "…";
 }
 ```
-
-(If a `@code` block already exists in the file with other helpers, just add the `TruncateRationale` method to it.)
 
 - [ ] **Step 2: Add scoped CSS**
 
@@ -1800,7 +1824,7 @@ dotnet run --project TradyStrat
 ```
 
 Open http://127.0.0.1:5180/. Confirm:
-- Holdings rail (Section VI) renders chips below each held instrument's sparkline.
+- Holdings rail (Section VII) renders chips below each held instrument's sparkline.
 - Focus ticker (CON3.L) shows the same Action as the `TodaysCallCard` (Section III) — sanity check that they're reading the same Suggestion.
 
 If only one Held instrument exists today (CON3.L), add a second via Settings → Add instrument (e.g. ETHE.PA, currency EUR). After the next dashboard reload the rail will show ETHE.PA's chip. **While doing this**, tail the daily log file:
