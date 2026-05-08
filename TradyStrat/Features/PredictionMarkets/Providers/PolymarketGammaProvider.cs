@@ -46,7 +46,9 @@ public sealed class PolymarketGammaProvider(
 
             await using var stream = await resp.Content.ReadAsStreamAsync(ct);
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
-            return PolymarketNormalizer.Normalize(doc.RootElement).ToList();
+            return PolymarketNormalizer.Normalize(doc.RootElement)
+                .Where(m => PolymarketRelevance.IsRelevant(m.Question))
+                .ToList();
         }
         catch (PolymarketUnavailableException) { throw; }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
