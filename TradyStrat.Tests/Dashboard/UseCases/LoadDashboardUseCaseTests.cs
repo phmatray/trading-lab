@@ -103,6 +103,10 @@ public class LoadDashboardUseCaseTests
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
 
+        var getAllTodays = new GetAllTodaysSuggestionsUseCase(
+            todays, listInstruments,
+            NullLogger<GetAllTodaysSuggestionsUseCase>.Instance);
+
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,
             new TestRepo<GoalConfig>(db),
@@ -112,7 +116,7 @@ public class LoadDashboardUseCaseTests
             new TestRepo<FxRate>(db),
             listInstruments,
             config,
-            todays,
+            getAllTodays,
             coord,
             nav,
             NullLogger<LoadDashboardUseCase>.Instance);
@@ -281,6 +285,24 @@ public class LoadDashboardUseCaseTests
 
         vm.MarketSnapshot.Markets.Count.ShouldBe(1);
         vm.MarketSnapshot.Cited.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Tickers_have_TodaysCall_for_Held_only()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+        // Seed without a stored Suggestion — live mode will hit the StubAiClient
+        // through the Saga aggregator, populating TodaysCall for the Held instrument.
+        await SeedBaseAsync(db, ct, seedSuggestion: null);
+
+        var (uc, _, _) = BuildSut(db);
+        var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: false), ct);
+
+        // SeedBaseAsync seeds: CON3.L (Held), COIN (Watchlist), BTC-USD (Watchlist).
+        vm.Tickers.Single(t => t.Ticker == "CON3.L").TodaysCall.ShouldNotBeNull();
+        vm.Tickers.Single(t => t.Ticker == "COIN").TodaysCall.ShouldBeNull();
+        vm.Tickers.Single(t => t.Ticker == "BTC-USD").TodaysCall.ShouldBeNull();
     }
 
     [Fact]
