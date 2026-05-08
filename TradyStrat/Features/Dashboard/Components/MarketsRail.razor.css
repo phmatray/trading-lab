@@ -61,10 +61,10 @@
 .tile .meta {
     margin-top: 8px;
     font-family: var(--font-mono);
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(236, 230, 214, 0.62);
+    color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
 

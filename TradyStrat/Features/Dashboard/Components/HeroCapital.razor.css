@@ -156,9 +156,9 @@
     gap: 8px;
 }
 .pace-line-row .stat .k {
-    font-size: 9px;
+    font-size: 10px;
     letter-spacing: 0.22em;
-    color: rgba(236,230,214,0.45);
+    color: var(--ink-4);
     text-transform: uppercase;
 }
 .pace-line-row .stat .v {
@@ -171,8 +171,8 @@
 .pace-line-row .stat .v.pos   { color: var(--vault-green); }
 .pace-line-row .stat .v.alarm { color: var(--vault-red); font-style: italic; }
 .pace-line-row .sep {
-    color: rgba(236,230,214,0.22);
-    font-size: 10px;
+    color: rgba(236,230,214,0.45);
+    font-size: 11px;
 }
 .pace-line {
     font-style: italic;

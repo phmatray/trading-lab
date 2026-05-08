@@ -30,7 +30,7 @@ public class PolymarketGammaProviderTests
 
     private static PolymarketOptions Options(int maxMarkets = 10) => new(
         BaseUrl: "https://gamma-api.polymarket.com",
-        Tags: ["bitcoin"],
+        SearchQueries: ["bitcoin"],
         MaxMarkets: maxMarkets,
         MinVolumeUsd: 0m,
         MaxHorizonDays: 3650);   // wide so fixtures don't get filtered out
@@ -87,11 +87,11 @@ public class PolymarketGammaProviderTests
     }
 
     [Fact]
-    public async Task Issues_one_request_per_tag_and_dedupes()
+    public async Task Issues_one_request_per_query_and_dedupes()
     {
         var options = new PolymarketOptions(
             BaseUrl: "https://gamma-api.polymarket.com",
-            Tags: ["bitcoin", "crypto"],
+            SearchQueries: ["bitcoin", "crypto"],
             MaxMarkets: 10, MinVolumeUsd: 0m, MaxHorizonDays: 3650);
 
         var requested = new List<string>();
@@ -108,23 +108,23 @@ public class PolymarketGammaProviderTests
         var result = await sut.GetMarketsAsync(TestContext.Current.CancellationToken);
 
         requested.Count.ShouldBe(2);
-        requested.ShouldContain(q => q.Contains("tag_slug=bitcoin"));
-        requested.ShouldContain(q => q.Contains("tag_slug=crypto"));
+        requested.ShouldContain(q => q.Contains("q=bitcoin"));
+        requested.ShouldContain(q => q.Contains("q=crypto"));
         // Same fixture returned twice → 3 unique markets after dedup.
         result.Count.ShouldBe(3);
     }
 
     [Fact]
-    public async Task One_tag_failing_throws_and_discards_others()
+    public async Task One_query_failing_throws_and_discards_others()
     {
         var options = new PolymarketOptions(
             BaseUrl: "https://gamma-api.polymarket.com",
-            Tags: ["bitcoin", "crypto"],
+            SearchQueries: ["bitcoin", "crypto"],
             MaxMarkets: 10, MinVolumeUsd: 0m, MaxHorizonDays: 3650);
 
         var (http, _) = BuildHttp(respond: req =>
         {
-            if (req.RequestUri!.Query.Contains("tag_slug=crypto"))
+            if (req.RequestUri!.Query.Contains("q=crypto"))
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {

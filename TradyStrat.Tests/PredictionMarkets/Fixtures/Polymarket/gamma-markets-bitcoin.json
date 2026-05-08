@@ -1,29 +1,37 @@
-[
-  {
-    "slug": "btc-above-100k-eoy-2026",
-    "question": "Will Bitcoin close above $100,000 on Dec 31, 2026?",
-    "outcomes": "[\"Yes\", \"No\"]",
-    "outcomePrices": "[\"0.32\", \"0.68\"]",
-    "endDate": "2026-12-31T00:00:00Z",
-    "volume": "1250000",
-    "tags": [{"slug": "bitcoin"}, {"slug": "crypto"}]
-  },
-  {
-    "slug": "btc-above-80k-eoy-2026",
-    "question": "Will Bitcoin close above $80,000 on Dec 31, 2026?",
-    "outcomes": "[\"Yes\", \"No\"]",
-    "outcomePrices": "[\"0.71\", \"0.29\"]",
-    "endDate": "2026-12-31T00:00:00Z",
-    "volume": "780000",
-    "tags": [{"slug": "bitcoin"}]
-  },
-  {
-    "slug": "btc-below-50k-q3-2026",
-    "question": "Will Bitcoin trade below $50,000 at any point in Q3 2026?",
-    "outcomes": "[\"Yes\", \"No\"]",
-    "outcomePrices": "[\"0.12\", \"0.88\"]",
-    "endDate": "2026-09-30T00:00:00Z",
-    "volume": "320000",
-    "tags": [{"slug": "bitcoin"}, {"slug": "crypto"}]
-  }
-]
+{
+  "events": [
+    {
+      "title": "Bitcoin price targets",
+      "markets": [
+        {
+          "slug": "btc-above-100k-eoy-2026",
+          "question": "Will Bitcoin close above $100,000 on Dec 31, 2026?",
+          "outcomes": "[\"Yes\", \"No\"]",
+          "outcomePrices": "[\"0.32\", \"0.68\"]",
+          "endDate": "2026-12-31T00:00:00Z",
+          "volume": "1250000",
+          "tags": [{"slug": "bitcoin"}, {"slug": "crypto"}]
+        },
+        {
+          "slug": "btc-above-80k-eoy-2026",
+          "question": "Will Bitcoin close above $80,000 on Dec 31, 2026?",
+          "outcomes": "[\"Yes\", \"No\"]",
+          "outcomePrices": "[\"0.71\", \"0.29\"]",
+          "endDate": "2026-12-31T00:00:00Z",
+          "volume": "780000",
+          "tags": [{"slug": "bitcoin"}]
+        },
+        {
+          "slug": "btc-below-50k-q3-2026",
+          "question": "Will Bitcoin trade below $50,000 at any point in Q3 2026?",
+          "outcomes": "[\"Yes\", \"No\"]",
+          "outcomePrices": "[\"0.12\", \"0.88\"]",
+          "endDate": "2026-09-30T00:00:00Z",
+          "volume": "320000",
+          "tags": [{"slug": "bitcoin"}, {"slug": "crypto"}]
+        }
+      ]
+    }
+  ],
+  "pagination": {"hasMore": false}
+}

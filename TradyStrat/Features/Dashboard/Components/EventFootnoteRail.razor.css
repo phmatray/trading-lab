@@ -24,10 +24,10 @@
 }
 .footnote .when {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: var(--tracking-md);
-    color: rgba(236,230,214,0.55);
+    color: var(--ink-4);
     white-space: nowrap;
     padding-top: 5px;
 }

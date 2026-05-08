@@ -14,7 +14,7 @@ public class PolymarketOptionsBinderTests
         var opts = PolymarketOptionsBinder.Read(cfg);
 
         opts.BaseUrl.ShouldBe("https://gamma-api.polymarket.com");
-        opts.Tags.ShouldBe(["bitcoin", "crypto", "coinbase", "ethereum"]);
+        opts.SearchQueries.ShouldBe(["bitcoin", "ethereum", "coinbase", "fed"]);
         opts.MaxMarkets.ShouldBe(10);
         opts.MinVolumeUsd.ShouldBe(50_000m);
         opts.MaxHorizonDays.ShouldBe(365);
@@ -26,9 +26,9 @@ public class PolymarketOptionsBinderTests
         var cfg = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Polymarket:BaseUrl"]        = "https://example.test",
-                ["Polymarket:Tags:0"]         = "ethereum",
-                ["Polymarket:MaxMarkets"]     = "5",
+                ["Polymarket:BaseUrl"]         = "https://example.test",
+                ["Polymarket:SearchQueries:0"] = "ethereum",
+                ["Polymarket:MaxMarkets"]      = "5",
                 ["Polymarket:MinVolumeUsd"]   = "1000",
                 ["Polymarket:MaxHorizonDays"] = "90",
             })
@@ -36,10 +36,25 @@ public class PolymarketOptionsBinderTests
         var opts = PolymarketOptionsBinder.Read(cfg);
 
         opts.BaseUrl.ShouldBe("https://example.test");
-        opts.Tags.ShouldBe(["ethereum"]);
+        opts.SearchQueries.ShouldBe(["ethereum"]);
         opts.MaxMarkets.ShouldBe(5);
         opts.MinVolumeUsd.ShouldBe(1000m);
         opts.MaxHorizonDays.ShouldBe(90);
+    }
+
+    [Fact]
+    public void Falls_back_to_legacy_Tags_when_SearchQueries_missing()
+    {
+        var cfg = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Polymarket:Tags:0"] = "bitcoin",
+                ["Polymarket:Tags:1"] = "ethereum",
+            })
+            .Build();
+        var opts = PolymarketOptionsBinder.Read(cfg);
+
+        opts.SearchQueries.ShouldBe(["bitcoin", "ethereum"]);
     }
 
     [Theory]

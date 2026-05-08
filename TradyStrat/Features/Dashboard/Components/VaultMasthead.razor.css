@@ -62,8 +62,8 @@
     color: var(--ink-3);
 }
 .freshness {
-    color: rgba(236,230,214,0.42);
-    font-size: 9px;
+    color: var(--ink-4);
+    font-size: 11px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }

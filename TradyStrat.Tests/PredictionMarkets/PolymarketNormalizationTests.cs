@@ -1,25 +1,52 @@
 using System.Text.Json;
 using Shouldly;
-using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.PredictionMarkets.Providers;
 using Xunit;
 
 namespace TradyStrat.Tests.PredictionMarkets;
 
+// Pure parsing logic. Inline JSON keeps these tests independent of the API
+// envelope shape (the public-search `{events: [{markets: [...]}]}` wrapping
+// is the provider's concern; this layer is given a flat market array).
 public class PolymarketNormalizationTests
 {
-    private static JsonElement Load(string fixtureName)
-    {
-        var path = Path.Combine(AppContext.BaseDirectory,
-            "PredictionMarkets", "Fixtures", "Polymarket", fixtureName);
-        var doc = JsonDocument.Parse(File.ReadAllText(path));
-        return doc.RootElement.Clone();
-    }
+    private static JsonElement Parse(string json) =>
+        JsonDocument.Parse(json).RootElement.Clone();
 
     [Fact]
     public void Parses_three_binary_btc_markets()
     {
-        var arr = Load("gamma-markets-bitcoin.json");
+        var arr = Parse("""
+            [
+              {
+                "slug": "btc-above-100k-eoy-2026",
+                "question": "Will Bitcoin close above $100,000 on Dec 31, 2026?",
+                "outcomes": "[\"Yes\", \"No\"]",
+                "outcomePrices": "[\"0.32\", \"0.68\"]",
+                "endDate": "2026-12-31T00:00:00Z",
+                "volume": "1250000",
+                "tags": [{"slug": "bitcoin"}, {"slug": "crypto"}]
+              },
+              {
+                "slug": "btc-above-80k-eoy-2026",
+                "question": "Will Bitcoin close above $80,000 on Dec 31, 2026?",
+                "outcomes": "[\"Yes\", \"No\"]",
+                "outcomePrices": "[\"0.71\", \"0.29\"]",
+                "endDate": "2026-12-31T00:00:00Z",
+                "volume": "780000",
+                "tags": [{"slug": "bitcoin"}]
+              },
+              {
+                "slug": "btc-below-50k-q3-2026",
+                "question": "Will Bitcoin trade below $50,000 at any point in Q3 2026?",
+                "outcomes": "[\"Yes\", \"No\"]",
+                "outcomePrices": "[\"0.12\", \"0.88\"]",
+                "endDate": "2026-09-30T00:00:00Z",
+                "volume": "320000",
+                "tags": [{"slug": "bitcoin"}]
+              }
+            ]
+            """);
         var markets = PolymarketNormalizer.Normalize(arr).ToList();
 
         markets.Count.ShouldBe(3);
@@ -33,7 +60,37 @@ public class PolymarketNormalizationTests
     [Fact]
     public void Drops_multi_outcome_and_malformed_markets()
     {
-        var arr = Load("gamma-markets-multi-outcome.json");
+        var arr = Parse("""
+            [
+              {
+                "slug": "coin-beats-q3-2026",
+                "question": "Will Coinbase beat Q3 2026 EPS estimates?",
+                "outcomes": "[\"Yes\", \"No\"]",
+                "outcomePrices": "[\"0.58\", \"0.42\"]",
+                "endDate": "2026-11-15T00:00:00Z",
+                "volume": "450000",
+                "tags": [{"slug": "coinbase"}]
+              },
+              {
+                "slug": "next-fomc-decision",
+                "question": "Next FOMC rate decision",
+                "outcomes": "[\"Cut 25bp\", \"Cut 50bp\", \"Hold\", \"Hike\"]",
+                "outcomePrices": "[\"0.40\", \"0.10\", \"0.45\", \"0.05\"]",
+                "endDate": "2026-09-17T00:00:00Z",
+                "volume": "2000000",
+                "tags": [{"slug": "fed"}]
+              },
+              {
+                "slug": "weird-market",
+                "question": "Will a meteor strike?",
+                "outcomes": "[\"Maybe\"]",
+                "outcomePrices": "[\"0.50\"]",
+                "endDate": "2099-01-01T00:00:00Z",
+                "volume": "100",
+                "tags": []
+              }
+            ]
+            """);
         var markets = PolymarketNormalizer.Normalize(arr).ToList();
 
         markets.Count.ShouldBe(1);                       // only "coin-beats-q3-2026" survives
@@ -43,7 +100,7 @@ public class PolymarketNormalizationTests
     [Fact]
     public void Returns_empty_for_empty_input()
     {
-        var arr = Load("gamma-markets-empty.json");
+        var arr = Parse("[]");
         PolymarketNormalizer.Normalize(arr).ShouldBeEmpty();
     }
 }
