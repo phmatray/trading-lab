@@ -2,9 +2,14 @@ using Microsoft.Extensions.Configuration;
 
 namespace TradyStrat.Features.PredictionMarkets;
 
+/// <summary>
+/// Polymarket pre-filter knobs. <see cref="SearchQueries"/> hits Gamma's
+/// public-search endpoint (the tag-based market filter on the gamma /markets
+/// endpoint is silently ignored — see PolymarketGammaProvider for context).
+/// </summary>
 public sealed record PolymarketOptions(
     string                BaseUrl,
-    IReadOnlyList<string> Tags,
+    IReadOnlyList<string> SearchQueries,
     int                   MaxMarkets,
     decimal               MinVolumeUsd,
     int                   MaxHorizonDays);
@@ -16,8 +21,9 @@ public static class PolymarketOptionsBinder
         var s = cfg.GetSection("Polymarket");
         var opts = new PolymarketOptions(
             BaseUrl:        s["BaseUrl"] ?? "https://gamma-api.polymarket.com",
-            Tags:           s.GetSection("Tags").Get<string[]>()
-                              ?? ["bitcoin", "crypto", "coinbase", "ethereum"],
+            SearchQueries:  s.GetSection("SearchQueries").Get<string[]>()
+                              ?? s.GetSection("Tags").Get<string[]>()    // back-compat
+                              ?? ["bitcoin", "ethereum", "coinbase", "fed"],
             MaxMarkets:     s.GetValue("MaxMarkets",     10),
             MinVolumeUsd:   s.GetValue("MinVolumeUsd",   50_000m),
             MaxHorizonDays: s.GetValue("MaxHorizonDays", 365));

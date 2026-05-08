@@ -1,29 +1,47 @@
-[
-  {
-    "slug": "coin-beats-q3-2026",
-    "question": "Will Coinbase beat Q3 2026 EPS estimates?",
-    "outcomes": "[\"Yes\", \"No\"]",
-    "outcomePrices": "[\"0.58\", \"0.42\"]",
-    "endDate": "2026-11-15T00:00:00Z",
-    "volume": "450000",
-    "tags": [{"slug": "coinbase"}]
-  },
-  {
-    "slug": "next-fomc-decision",
-    "question": "Next FOMC rate decision",
-    "outcomes": "[\"Cut 25bp\", \"Cut 50bp\", \"Hold\", \"Hike\"]",
-    "outcomePrices": "[\"0.40\", \"0.10\", \"0.45\", \"0.05\"]",
-    "endDate": "2026-09-17T00:00:00Z",
-    "volume": "2000000",
-    "tags": [{"slug": "fed"}]
-  },
-  {
-    "slug": "weird-market",
-    "question": "Will a meteor strike?",
-    "outcomes": "[\"Maybe\"]",
-    "outcomePrices": "[\"0.50\"]",
-    "endDate": "2099-01-01T00:00:00Z",
-    "volume": "100",
-    "tags": []
-  }
-]
+{
+  "events": [
+    {
+      "title": "Coinbase Q3",
+      "markets": [
+        {
+          "slug": "coin-beats-q3-2026",
+          "question": "Will Coinbase beat Q3 2026 EPS estimates?",
+          "outcomes": "[\"Yes\", \"No\"]",
+          "outcomePrices": "[\"0.58\", \"0.42\"]",
+          "endDate": "2026-11-15T00:00:00Z",
+          "volume": "450000",
+          "tags": [{"slug": "coinbase"}]
+        }
+      ]
+    },
+    {
+      "title": "FOMC decision",
+      "markets": [
+        {
+          "slug": "next-fomc-decision",
+          "question": "Next FOMC rate decision",
+          "outcomes": "[\"Cut 25bp\", \"Cut 50bp\", \"Hold\", \"Hike\"]",
+          "outcomePrices": "[\"0.40\", \"0.10\", \"0.45\", \"0.05\"]",
+          "endDate": "2026-09-17T00:00:00Z",
+          "volume": "2000000",
+          "tags": [{"slug": "fed"}]
+        }
+      ]
+    },
+    {
+      "title": "Sanity check",
+      "markets": [
+        {
+          "slug": "weird-market",
+          "question": "Will a meteor strike?",
+          "outcomes": "[\"Maybe\"]",
+          "outcomePrices": "[\"0.50\"]",
+          "endDate": "2099-01-01T00:00:00Z",
+          "volume": "100",
+          "tags": []
+        }
+      ]
+    }
+  ],
+  "pagination": {"hasMore": false}
+}
