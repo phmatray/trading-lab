@@ -51,9 +51,14 @@ backfilled to the focus ticker's seeded id.
 ### 3.1 Domain model
 
 ```
-Suggestion (CHANGED)
-  + InstrumentId  int FK Instruments.Id   -- NOT NULL after backfill
-  -- existing columns unchanged
+Suggestion (CHANGED — Phase 2 only adds InstrumentId; everything else
+                     including the recently-added MarketSnapshotJson
+                     stays exactly as-is)
+  + InstrumentId       int FK Instruments.Id   -- NEW, NOT NULL after backfill
+  -- existing columns unchanged:
+  Id, ForDate, Action, QuantityHint, MaxPriceHint, Conviction,
+  Rationale, CitationsJson, MarketSnapshotJson (post-Phase-1 polish),
+  PromptHash, CreatedAt
 ```
 
 ### 3.2 EF configuration (`SuggestionConfiguration.cs`)
@@ -164,7 +169,8 @@ existing tests for those.
 - `Suggestion` entity gains `required int InstrumentId`.
 - `SuggestionConfiguration.cs` updated per §3.2.
 - All call sites of the four spec classes pass an `InstrumentId`.
-- Tests that construct `Suggestion` literals (existing test fixtures) gain `InstrumentId = 1` (or the equivalent seeded focus id).
+- **`SuggestionService.AskAsync` (`Features/AiSuggestion/SuggestionService.cs`)** — the line constructing the returned `Suggestion` literal (currently around line 58–71) must add `InstrumentId = snapshot.InstrumentId,`. Without this assignment, `required int InstrumentId` stays unset and entity construction throws at runtime. This is the most consequential plumbing change after the schema migration itself.
+- Tests that construct `Suggestion` literals (existing test fixtures across `SuggestionService`, `BackfillSuggestionsUseCase`, `LoadDashboardUseCase`, `SuggestionBackfillCoordinator` test files) gain `InstrumentId = 1` (or the equivalent seeded-focus id from the test's `Instrument` seed).
 
 ### 3.7 Rollback policy
 
@@ -257,6 +263,16 @@ The delete is per-instrument-scoped — refetching the focus's call doesn't touc
 
 ### 4.3 New: `GetAllTodaysSuggestionsUseCase`
 
+**Pattern.** This is a **Saga-style aggregator**, not a conventional use
+case: it runs N independent units of work (one Anthropic call per held
+instrument), tolerates partial failures, and returns the partial set of
+successes to its consumer. Per-ticker `try/catch` on
+`TradyStratException` is non-negotiable — without it, one ticker's
+`PriceFeedUnavailableException` or `FxRateUnavailableException` would
+abort the whole batch, leaving the dashboard with a stale or
+inconsistent set of calls. The same shape Phase 1 used for
+`AddInstrumentUseCase`'s "commit-then-warm-best-effort" policy.
+
 ```csharp
 public sealed partial class GetAllTodaysSuggestionsUseCase(
     GetTodaysSuggestionUseCase singleTicker,
@@ -331,12 +347,29 @@ Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct);
 Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct);
 ```
 
+**Constructor unchanged.** The recent prediction-markets work
+(`ae1e346`) injected `IPredictionMarketProvider` into `SnapshotFactory`'s
+constructor; this Phase 2 change is a *public method signature*
+widening only — the existing constructor parameters (including
+`IPredictionMarketProvider`, `IndicatorEngine`, `PortfolioService`,
+`FxConverter`, repos, `ListInstrumentsUseCase`, `IConfiguration`, `IClock`)
+all stay. Don't accidentally drop the prediction-markets dep when
+editing the file.
+
 The passed `instrumentId` becomes the prompt's "primary" subject. The
 loop over Held + Watchlist instruments runs as before, but the *primary*
-identification shifts:
+identification shifts — an architectural inversion of strategy:
 
-- Pre-Phase-2: primary = `IConfiguration["Tickers:Focus"]`.
-- Post-Phase-2: primary = `instruments.GetByIdAsync(instrumentId)` resolved at the start of `CreateAsync`.
+- Pre-Phase-2: primary = `IConfiguration["Tickers:Focus"]`. Strategy is
+  config-driven and singular per process.
+- Post-Phase-2: primary = `instruments.GetByIdAsync(instrumentId)`
+  resolved at the start of `CreateAsync`. Strategy is caller-driven and
+  varies per call within a process.
+
+This pivot — from "the factory looks up its own primary" to "the caller
+passes which primary it wants" — is what enables the per-ticker loop in
+`GetAllTodaysSuggestionsUseCase` to reuse one `SnapshotFactory` instance
+for N different instruments.
 
 The `legacyOrder` trick (Phase 1 commit `7f794c9`) — `["COIN", "BTC-USD"]` for the seeded watchlist — is preserved when the primary is the focus, so day-zero PromptHash for CON3.L stays byte-identical.
 
@@ -344,23 +377,35 @@ The `legacyOrder` trick (Phase 1 commit `7f794c9`) — `["COIN", "BTC-USD"]` for
 
 `AiSnapshot` gains an `InstrumentId` field so the produced
 `Suggestion.InstrumentId` is set by `SuggestionService.AskAsync`
-without re-resolving:
+without re-resolving. The pre-existing `Markets` field (added by the
+prediction-markets work, post-Phase-1) is preserved unchanged:
 
 ```csharp
 public sealed record AiSnapshot(
-    DateOnly AsOf,
-    int InstrumentId,            // NEW
+    DateOnly Today,
+    int InstrumentId,                              // NEW (Phase 2)
     GoalConfig Goal,
     PortfolioSnapshot Portfolio,
     IReadOnlyList<TickerContext> Tickers,
     IReadOnlyList<TradeRecent> RecentTrades,
     decimal? UsdPerEur,
+    IReadOnlyList<PredictionMarket> Markets,        // pre-existing — preserved
     string PromptHash);
 ```
 
-`PromptHash` is computed over a JSON serialisation of the full payload
-including `InstrumentId` — different instruments produce different
-hashes, even on the same date.
+**`PromptHash` payload composition.** `PromptHash` is computed over a
+JSON serialisation of the snapshot's prompt-input fields *excluding*
+`InstrumentId`. Two different instruments will always produce different
+hashes in practice — their per-ticker indicator readings, prices, and
+FX rates differ — so collision-resistance is preserved without the
+extra discriminator. The trade-off goes the other way: **excluding
+`InstrumentId` keeps Phase 1's day-zero sentinel hash
+`2EB10B0275AD1282` byte-identical** for CON3.L's call after the Phase 2
+refactor. That sentinel is the most reliable safety belt against silent
+prompt drift across this AI-loop rewrite; we keep it. The
+`Suggestion.InstrumentId` column is set separately by
+`SuggestionService.AskAsync` from `snapshot.InstrumentId` — it lives on
+the entity row, not in the hashed prompt payload.
 
 ### 4.8 `LoadDashboardUseCase` — call the "all" variant in live mode
 
@@ -395,25 +440,28 @@ a nullable `Suggestion`:
 public sealed record TickerView(
     string Ticker,
     string Currency,
-    decimal PriceNative,
+    decimal Price,
     decimal? PriceEur,
     decimal? DeltaPct,
     Zone Zone,
-    Sparkline Spark,
+    IReadOnlyList<decimal> Spark,
     Suggestion? TodaysCall);   // NEW — non-null for Held, null for Watchlist
 ```
+
+(The pre-existing field shapes — `Price` not `PriceNative`,
+`IReadOnlyList<decimal>` not `Sparkline` — match the current record
+in `Features/Dashboard/TickerView.cs`. Phase 2 only appends the
+`Suggestion?` field at the end.)
 
 ### 5.2 `PortfolioRail.razor` — per-ticker call chip
 
 Each per-ticker cell in the rail gains a small chip below the existing
-content (price + delta + sparkline + zone label). The exact iteration
-variable name (`t`, `Ticker`, `i`, …) is whatever the existing rail's
-`@foreach` uses today — implementation reads the file first and matches
-the prevailing convention.
+content (price + delta + sparkline + zone label). The current rail's
+`@foreach (var t in Tickers) { … }` already uses `t` as the iteration
+variable, so the Razor block reads:
 
 ```razor
-@* substituting <iter> for whichever the existing rail uses *@
-@if (<iter>.TodaysCall is { } call)
+@if (t.TodaysCall is { } call)
 {
     <div class="rail-call">
         <span class="action @(call.Action.ToString().ToLowerInvariant())">
@@ -424,10 +472,15 @@ the prevailing convention.
 }
 ```
 
-`SuggestionAction` enum already exists (`Acquire` / `Hold` / `Sell`).
-`TruncateRationale(text, maxChars)` is a helper that cuts at the
-nearest sentence boundary up to ~80 chars; full rationale stays in
-`TodaysCallCard` for the focus.
+`SuggestionAction` enum already exists with four values
+(`Acquire = 1` / `Hold = 2` / `Trim = 3` / `Wait = 4`). The Razor's
+`@(call.Action.ToString().ToLowerInvariant())` produces `acquire` /
+`hold` / `trim` / `wait` CSS class hooks; the rail's stylesheet should
+provide a colour for each (palette suggestion: green / neutral / amber
+/ neutral-dim respectively, but choose to match the rest of the
+Vault aesthetic). `TruncateRationale(text, maxChars)` is a helper that
+cuts at the nearest sentence boundary up to ~80 chars; full rationale
+stays in `TodaysCallCard` for the focus.
 
 ### 5.3 Empty state
 
@@ -507,7 +560,7 @@ This is a personal project; manual smoke is part of the contract.
 1. Back up the live DB: `cp ~/Library/Application\ Support/TradyStrat/tradystrat.db ~/tradystrat.db.pre-phase2.bak`.
 2. Run the new code; verify the migration applies and the two existing CON3.L Suggestions get `InstrumentId` set to CON3.L's seeded id.
 3. Verify the dashboard renders today's call for CON3.L unchanged. PromptHash byte-identity is enforced by the sentinel test in §7.3 — this manual step is for confidence, not for catching the regression.
-4. Add a second Held instrument (e.g. `ETHE.PA`) via the Settings flow; refresh the dashboard; verify ETHE.PA gets its own AI call rendered as a chip in the Holdings rail with Action + truncated rationale.
+4. Add a second Held instrument (e.g. `ETHE.PA`) via the Settings flow; refresh the dashboard; verify ETHE.PA gets its own AI call rendered as a chip in the Holdings rail with Action + truncated rationale. **Important:** because `GetAllTodaysSuggestionsUseCase` swallows per-ticker `TradyStratException`s for failure isolation (correct behavior), an Anthropic auth/quota failure on the new instrument's call will silently produce *no chip* — the absence is indistinguishable from "haven't loaded yet" at first glance. While running this step, tail the daily log file (`tail -f ~/Library/Application\ Support/TradyStrat/logs/tradystrat-yyyymmdd.log`) and confirm there are **no** `Warning: AI call failed for ETHE.PA` lines. If you see one, the call is failing for a real reason; investigate before claiming the smoke passed.
 5. Tail the app log during a fresh dashboard load and confirm only one "AI call" line fires for the focus ticker via the backfill coordinator if there's a missing-day gap; non-focus tickers' fresh calls fire only once per day via `GetAllTodaysSuggestionsUseCase`. (You don't need to contrive a gap to verify this — the log message naming alone tells you which path fired.)
 
 ## 8. GoF pattern drift recorded for this phase
@@ -517,13 +570,41 @@ Phase 1's §13 noted two pieces of pattern drift:
 1. `SnapshotFactory` becoming a service (was Factory Method).
 2. Symbol resolution wanting a future Strategy.
 
-Phase 2 deepens drift #1 — `SnapshotFactory.CreateAsync` now accepts a
-runtime parameter (`instrumentId`) and resolves an entity from the DB
-inside the factory. The factory has fully crossed into service
-territory; "Factory" is now a pure naming holdover.
+Phase 2 deepens drift #1 substantially. By the end of this phase
+`SnapshotFactory` will:
 
-**Recommendation:** rename `SnapshotFactory` → `AiSnapshotService` (or
-similar) at the start of Phase 3 when the citations/scorecard work
-warrants other refactoring around AI. Don't rename in this phase —
-churn-without-payoff. README §17 should be updated when the rename
-lands.
+- Take a `DateOnly` and an `instrumentId` per call (caller-driven primary, §4.6).
+- Resolve `Instrument` from the DB inside the factory.
+- Fan out to `IndicatorEngine`, `PortfolioService`, `FxConverter`,
+  `IPredictionMarketProvider` (added by `ae1e346`),
+  `ListInstrumentsUseCase`, `IConfiguration`, `IClock`, and three
+  read-repos. Eight to ten injected collaborators.
+- Compose their results into the snapshot record.
+
+This is unambiguously a Service that orchestrates collaborators — the
+"Factory" name is now actively misleading, not just slightly drifted.
+A reader looking for a Factory Method (a stateless creator with no
+dependencies) and finding this 10-collaborator orchestrator gets the
+wrong mental model.
+
+**Recommendation: rename in this phase, not "later."** The rename is
+mechanical (`SnapshotFactory` → `AiSnapshotService`,
+`ISnapshotFactory` → `IAiSnapshotService`) and lands cleanly alongside
+the per-instrument signature change — the file is being touched
+heavily anyway. Deferring it bumps the rename onto Phase 3's
+already-larger scope (citations table, scorecard, template
+versioning), where churn-without-payoff is more costly.
+
+**Pattern note for Strategy in §4.6.** The pivot from
+config-driven primary → caller-driven primary is itself a textbook
+parameterise-the-strategy refactor. Worth naming explicitly: the
+"primary instrument selector" was an embedded behaviour; it's now a
+first-class parameter on the public method. The Strategy is "which
+instrument is primary," and the strategy choice is made by the caller
+at each call site.
+
+**README §17 should be updated** when the rename lands to remove
+"Factory Method — `SnapshotFactory.BuildAsync`" from the listed
+patterns. The rename also means moving the file from
+`Features/AiSuggestion/Snapshot/` to a less Factory-implying location
+is *optional*; not strictly required.
