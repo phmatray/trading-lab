@@ -4,5 +4,6 @@ namespace TradyStrat.Tests.AiSuggestion.UseCases;
 
 public sealed class StubSnapshotFactory(AiSnapshot snapshot) : ISnapshotFactory
 {
-    public Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct) => Task.FromResult(snapshot);
+    public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct)
+        => Task.FromResult(snapshot);
 }

@@ -14,6 +14,7 @@ public sealed record TradeRecent(
 
 public sealed record AiSnapshot(
     DateOnly Today,
+    int InstrumentId,                              // NEW (Phase 2)
     GoalConfig Goal,
     PortfolioSnapshot Portfolio,
     IReadOnlyList<TickerContext> Tickers,

@@ -75,11 +75,14 @@ public class LoadDashboardUseCaseTests
         var fx         = new FxConverter(new TestRepo<FxRate>(db));
         var clock      = new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc));
 
+        // SeedBaseAsync seeds CON3.L as Id=1 (deterministic via fixed Id assignment).
+        const int focusId = 1;
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
-            Target, GoalConfig.Default(DateTime.UtcNow),
+            Target, focusId, GoalConfig.Default(DateTime.UtcNow),
             new([],0,0,0,0,0,0,0), [], [], 1.08m, [], "h"));
         var aiStub = new StubAiClient(new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = focusId, ForDate = Target,
+            Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
         var config = new ConfigurationBuilder()
@@ -90,7 +93,7 @@ public class LoadDashboardUseCaseTests
             .Build();
         var todays = new GetTodaysSuggestionUseCase(
             new TestRepo<Suggestion>(db), snapStub, aiStub, clock,
-            config,
+            new TestRepo<Instrument>(db),
             NullLogger<GetTodaysSuggestionUseCase>.Instance);
 
         var coord = new NullCoordinator();
@@ -157,7 +160,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "stable", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -181,7 +184,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "stable", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -200,7 +203,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-db", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -234,7 +237,7 @@ public class LoadDashboardUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         await SeedBaseAsync(db, ct, new Suggestion {
-            Id = 0, ForDate = Target, Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = Target, Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "x", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
 
@@ -265,7 +268,7 @@ public class LoadDashboardUseCaseTests
 
         await SeedBaseAsync(db, ct, new Suggestion
         {
-            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 6),
             Action = SuggestionAction.Hold, Conviction = 1,
             Rationale = "x", CitationsJson = "[]",
             MarketSnapshotJson = marketJson,
@@ -288,7 +291,7 @@ public class LoadDashboardUseCaseTests
 
         await SeedBaseAsync(db, ct, new Suggestion
         {
-            Id = 0, ForDate = new DateOnly(2026, 5, 6),
+            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 6),
             Action = SuggestionAction.Hold, Conviction = 1,
             Rationale = "x", CitationsJson = "[]",
             MarketSnapshotJson = "{ this is broken",

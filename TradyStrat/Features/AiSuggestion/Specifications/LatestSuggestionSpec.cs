@@ -5,8 +5,10 @@ namespace TradyStrat.Features.AiSuggestion.Specifications;
 
 public sealed class LatestSuggestionSpec : Specification<Suggestion>
 {
-    public LatestSuggestionSpec()
+    public LatestSuggestionSpec(int instrumentId)
     {
-        Query.OrderByDescending(s => s.ForDate).Take(1);
+        Query.Where(s => s.InstrumentId == instrumentId)
+             .OrderByDescending(s => s.ForDate)
+             .Take(1);
     }
 }

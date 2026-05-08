@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
@@ -110,9 +111,10 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
         var today = new DateOnly(2026, 5, 6);
-        var snap = await sut.CreateAsync(today, ct);
+        var snap = await sut.CreateAsync(focusId, today, ct);
 
         snap.Today.ShouldBe(new DateOnly(2026,5,6));
         snap.Goal.TargetEur.ShouldBe(1_000_000m);
@@ -143,8 +145,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db);
-        var snapshot = await sut.CreateAsync(asOf, ct);
+        var snapshot = await sut.CreateAsync(focusId, asOf, ct);
 
         snapshot.Today.ShouldBe(asOf);
     }
@@ -181,8 +184,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
-        var snap = await sut.CreateAsync(asOf, ct);
+        var snap = await sut.CreateAsync(focusId, asOf, ct);
 
         snap.Tickers.Select(t => t.Ticker).ShouldBe(ExpectedCatalogOrder);
     }
@@ -214,8 +218,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut  = BuildSut(db);
-        var snap = await sut.CreateAsync(asOf, ct);
+        var snap = await sut.CreateAsync(focusId, asOf, ct);
 
         snap.PromptHash.ShouldBe(ExpectedHash);
     }
@@ -242,8 +247,9 @@ public class SnapshotFactoryTests
             new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
                 0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
         };
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db, predictionMarkets: providedMarkets);
-        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var snap = await sut.CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap.Markets.Count.ShouldBe(1);
         snap.Markets[0].Slug.ShouldBe("btc-100k");
@@ -265,12 +271,13 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
-        var snap1 = await BuildSut(db, predictionMarkets: []).CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
+        var snap1 = await BuildSut(db, predictionMarkets: []).CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
         var snap2 = await BuildSut(db, predictionMarkets: new[]
         {
             new PredictionMarket("btc-100k", "Will BTC > $100k EOY?",
                 0.32m, new DateOnly(2026, 12, 31), 1_000_000m, ["bitcoin"]),
-        }).CreateAsync(new DateOnly(2026, 5, 6), ct);
+        }).CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap1.PromptHash.ShouldNotBe(snap2.PromptHash);
     }
@@ -291,8 +298,9 @@ public class SnapshotFactoryTests
         db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
         await db.SaveChangesAsync(ct);
 
+        var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;
         var sut = BuildSut(db, predictionMarketsThrow: true);
-        var snap = await sut.CreateAsync(new DateOnly(2026, 5, 6), ct);
+        var snap = await sut.CreateAsync(focusId, new DateOnly(2026, 5, 6), ct);
 
         snap.Markets.ShouldBeEmpty();
     }

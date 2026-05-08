@@ -1,8 +1,9 @@
 using Ardalis.Specification;
-using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.AiSuggestion.Specifications;
+using TradyStrat.Features.AiSuggestion.UseCases;
+using TradyStrat.Features.Settings.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.Backfill;
 
@@ -11,20 +12,27 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
     private readonly object _gate = new();
     private Task? _inflight;
     private volatile BackfillStatus _status = BackfillStatus.Idle.Instance;
-    private readonly Func<(IReadRepositoryBase<Suggestion> Suggestions, BackfillSuggestionsUseCase Backfill, IDisposable? Scope)> _resolveDeps;
+    private readonly Func<Resolved> _resolveDeps;
     private readonly ILogger<SuggestionBackfillCoordinator> _log;
 
-    // Test-friendly: direct deps (existing)
+    private sealed record Resolved(
+        IReadRepositoryBase<Suggestion> Suggestions,
+        IReadRepositoryBase<Instrument> Instruments,
+        BackfillSuggestionsUseCase Backfill,
+        IConfiguration Config,
+        IDisposable? Scope);
+
     public SuggestionBackfillCoordinator(
         IReadRepositoryBase<Suggestion> suggestions,
+        IReadRepositoryBase<Instrument> instruments,
         BackfillSuggestionsUseCase backfillOne,
+        IConfiguration config,
         ILogger<SuggestionBackfillCoordinator> log)
     {
-        _resolveDeps = () => (suggestions, backfillOne, null);
+        _resolveDeps = () => new Resolved(suggestions, instruments, backfillOne, config, null);
         _log = log;
     }
 
-    // Production: scope-factory (new)
     [ActivatorUtilitiesConstructor]
     public SuggestionBackfillCoordinator(
         IServiceScopeFactory scopeFactory,
@@ -33,9 +41,12 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         _resolveDeps = () =>
         {
             var scope = scopeFactory.CreateScope();
-            return (
-                scope.ServiceProvider.GetRequiredService<IReadRepositoryBase<Suggestion>>(),
-                scope.ServiceProvider.GetRequiredService<BackfillSuggestionsUseCase>(),
+            var sp = scope.ServiceProvider;
+            return new Resolved(
+                sp.GetRequiredService<IReadRepositoryBase<Suggestion>>(),
+                sp.GetRequiredService<IReadRepositoryBase<Instrument>>(),
+                sp.GetRequiredService<BackfillSuggestionsUseCase>(),
+                sp.GetRequiredService<IConfiguration>(),
                 scope);
         };
         _log = log;
@@ -56,20 +67,25 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
 
     private async Task RunChainAsync(DateOnly fromExclusive, DateOnly toInclusive, CancellationToken ct)
     {
-        var (suggestions, backfillOne, scope) = _resolveDeps();
+        var resolved = _resolveDeps();
         try
         {
-            // Build the set of dates already present (range is fromExclusive+1 .. toInclusive).
+            var focusTicker = resolved.Config["Tickers:Focus"]
+                ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+            var focus = await resolved.Instruments.FirstOrDefaultAsync(
+                new InstrumentByTickerSpec(focusTicker), ct)
+                ?? throw new InvalidOperationException(
+                    $"Focus instrument '{focusTicker}' is not registered.");
+
             var firstNeeded = fromExclusive.AddDays(1);
-            var existing = await suggestions.ListAsync(
-                new SuggestionsInRangeSpec(firstNeeded, toInclusive), ct);
+            var existing = await resolved.Suggestions.ListAsync(
+                new SuggestionsInRangeSpec(firstNeeded, toInclusive, focus.Id), ct);
             var existingDates = existing.Select(s => s.ForDate).ToHashSet();
 
             var missing = new List<DateOnly>();
             for (var d = firstNeeded; d <= toInclusive; d = d.AddDays(1))
                 if (!existingDates.Contains(d)) missing.Add(d);
 
-            // Empty range — stay Idle, emit no event.
             if (missing.Count == 0)
             {
                 _status = BackfillStatus.Idle.Instance;
@@ -84,12 +100,13 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
 
                 try
                 {
-                    await backfillOne.ExecuteAsync(date, ct);
+                    await resolved.Backfill.ExecuteAsync(
+                        new BackfillSuggestionsInput(date, focus.Id), ct);
                     lastOk = date;
                 }
                 catch (OperationCanceledException)
                 {
-                    SetStatus(BackfillStatus.Idle.Instance);   // notify subscribers the chain is no longer running
+                    SetStatus(BackfillStatus.Idle.Instance);
                     throw;
                 }
                 catch (TradyStratException ex)
@@ -107,7 +124,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         }
         finally
         {
-            scope?.Dispose();
+            resolved.Scope?.Dispose();
         }
     }
 

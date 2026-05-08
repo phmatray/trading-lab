@@ -56,7 +56,8 @@ public class EntityDerivedPropertiesTests
     public void Suggestion_OrderValueEur_is_qty_times_price_when_both_set()
     {
         var s = new Suggestion {
-            Id = 0, ForDate = new(2026,5,6), Action = SuggestionAction.Acquire,
+            Id = 0, InstrumentId = 1, ForDate = new(2026,5,6),
+            Action = SuggestionAction.Acquire,
             QuantityHint = 8m, MaxPriceHint = 4.85m, Conviction = 4,
             Rationale = "x", CitationsJson = "[]", PromptHash = "h",
             CreatedAt = DateTime.UtcNow
@@ -69,7 +70,8 @@ public class EntityDerivedPropertiesTests
     public void Suggestion_OrderValueEur_is_null_when_either_missing()
     {
         var s = new Suggestion {
-            Id = 0, ForDate = new(2026,5,6), Action = SuggestionAction.Hold,
+            Id = 0, InstrumentId = 1, ForDate = new(2026,5,6),
+            Action = SuggestionAction.Hold,
             QuantityHint = null, MaxPriceHint = 4.85m, Conviction = 3,
             Rationale = "x", CitationsJson = "[]", PromptHash = "h",
             CreatedAt = DateTime.UtcNow

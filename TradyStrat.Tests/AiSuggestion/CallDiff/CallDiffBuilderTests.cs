@@ -22,7 +22,7 @@ public class CallDiffBuilderTests
             CitationOpts);
         return new Suggestion
         {
-            Id = 0, ForDate = new DateOnly(2026, 5, 7),
+            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 7),
             Action = action, Conviction = conviction,
             Rationale = "", CitationsJson = json, PromptHash = "h",
             CreatedAt = DateTime.UtcNow,

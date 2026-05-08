@@ -90,15 +90,22 @@ public sealed class LoadDashboardUseCase(
             growthSeries = pinned;
         }
 
+        // Resolve the focus instrument id once — both branches need it.
+        var focusInstrument = ordered.SingleOrDefault(i => i.Ticker == focusTicker)
+            ?? throw new InvalidOperationException(
+                $"Focus ticker '{focusTicker}' is not in the Instruments table.");
+
         // Today's-call branch — read-only in historical mode, no AI invocation.
         Suggestion? todays;
         if (input.IsHistorical)
         {
-            todays = await suggestionRepo.FirstOrDefaultAsync(new SuggestionForDateSpec(target), ct);
+            todays = await suggestionRepo.FirstOrDefaultAsync(
+                new SuggestionForDateSpec(target, focusInstrument.Id), ct);
         }
         else
         {
-            todays = await todaysSuggestion.ExecuteAsync(Unit.Value, ct);
+            todays = await todaysSuggestion.ExecuteAsync(
+                new GetTodaysSuggestionInput(focusInstrument.Id), ct);
         }
 
         // Prediction-market snapshot — Empty by default; deserialize if column present.
@@ -125,7 +132,8 @@ public sealed class LoadDashboardUseCase(
         var callDiff = CallDiff.None;
         if (todays is not null)
         {
-            prior = await suggestionRepo.FirstOrDefaultAsync(new PriorSuggestionSpec(target), ct);
+            prior = await suggestionRepo.FirstOrDefaultAsync(
+                new PriorSuggestionSpec(target, focusInstrument.Id), ct);
             callDiff = new CallDiffBuilder()
                 .WithToday(todays)
                 .WithPrior(prior)

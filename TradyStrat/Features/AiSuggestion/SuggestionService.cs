@@ -58,6 +58,7 @@ public sealed partial class SuggestionService(
                 captured = new Suggestion
                 {
                     Id           = 0,
+                    InstrumentId = snapshot.InstrumentId,        // NEW (Phase 2)
                     ForDate      = snapshot.Today,
                     Action       = action,
                     QuantityHint = quantity_hint,

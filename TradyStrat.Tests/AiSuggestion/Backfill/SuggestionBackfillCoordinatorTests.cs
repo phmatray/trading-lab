@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.AiSuggestion.UseCases;
@@ -19,13 +20,29 @@ public class SuggestionBackfillCoordinatorTests
         BuildSut(Func<DateOnly, Task<Suggestion>>? aiOverride = null)
     {
         var ctx = InMemoryDb.Create();
+
+        // Seed CON3.L so focus resolution succeeds.
+        ctx.Instruments.Add(new Instrument {
+            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
+            Exchange = "LSE", TimezoneId = "Europe/London",
+            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow });
+        ctx.SaveChanges();
+
         var ai = new RecordingAi(aiOverride);
         var factory = new PassthroughFactory();
         var useCase = new BackfillSuggestionsUseCase(
             new TestRepo<Suggestion>(ctx), factory, ai,
             NullLogger<BackfillSuggestionsUseCase>.Instance);
+
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Tickers:Focus"] = "CON3.L" })
+            .Build();
+
         var coord = new SuggestionBackfillCoordinator(
-            new TestRepo<Suggestion>(ctx), useCase,
+            new TestRepo<Suggestion>(ctx),
+            new TestRepo<Instrument>(ctx),
+            useCase,
+            config,
             NullLogger<SuggestionBackfillCoordinator>.Instance);
         return (coord, ctx, ai);
     }
@@ -150,18 +167,19 @@ public class SuggestionBackfillCoordinatorTests
         a.Count.ShouldBeGreaterThan(0);
     }
 
-    private static Suggestion StubSuggestion(DateOnly d) => new()
+    private static Suggestion StubSuggestion(DateOnly d, int instrumentId = 1) => new()
     {
-        Id = 0, ForDate = d, Action = SuggestionAction.Hold, Conviction = 5,
+        Id = 0, InstrumentId = instrumentId,
+        ForDate = d, Action = SuggestionAction.Hold, Conviction = 5,
         Rationale = "stub", CitationsJson = "[]", PromptHash = "test",
         CreatedAt = DateTime.UtcNow,
     };
 
     private sealed class PassthroughFactory : ISnapshotFactory
     {
-        public Task<AiSnapshot> CreateAsync(DateOnly asOf, CancellationToken ct) =>
+        public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct) =>
             Task.FromResult(new AiSnapshot(
-                asOf, GoalConfig.Default(DateTime.UtcNow),
+                asOf, instrumentId, GoalConfig.Default(DateTime.UtcNow),
                 new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0), [], [], 1m, [], "test"));
     }
 
@@ -171,7 +189,7 @@ public class SuggestionBackfillCoordinatorTests
         public async Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)
         {
             Calls.Add(snapshot.Today);
-            if (handler is null) return StubSuggestion(snapshot.Today);
+            if (handler is null) return StubSuggestion(snapshot.Today, snapshot.InstrumentId);
             return await handler(snapshot.Today);
         }
     }
