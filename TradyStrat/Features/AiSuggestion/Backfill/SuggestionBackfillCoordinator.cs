@@ -7,6 +7,17 @@ using TradyStrat.Features.Settings.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.Backfill;
 
+/// <summary>
+/// Saga (first-fail-stop): replays missing daily AI calls for the focus ticker
+/// in chronological order. Halts at the first failed day and records
+/// <see cref="BackfillStatus.Failed"/> with the date that broke the chain.
+///
+/// Distinct from <c>GetAllTodaysSuggestionsUseCase</c> (Phase 2 Task 2) which
+/// uses a swallow-and-continue policy: backfill is an explicit user-initiated
+/// repair operation where knowing exactly which day failed is the goal,
+/// while the daily fan-out is best-effort and should never block other
+/// tickers' calls. Don't unify the two policies.
+/// </summary>
 public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillCoordinator
 {
     private readonly object _gate = new();
