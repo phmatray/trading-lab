@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.Domain;
+using TradyStrat.Common.Formatting;
 
 namespace TradyStrat.Features.Dashboard.Components;
 
@@ -15,14 +16,15 @@ public partial class PortfolioRail : ComponentBase
     {
         if (value == 0m) return "—";
         var pct = pnl / (value - pnl) * 100m;
-        return $"{(pct >= 0 ? "+" : "")}{pct.ToString("F1", FrFr)} %";
+        var sign = pct < 0m ? "−" : "+";
+        return sign + NumberFormat.Pct(Math.Abs(pct));
     }
 
     private static string FormatPrimary(TickerView t) => t.Currency switch
     {
-        "EUR" => $"€{t.Price.ToString("N2", FrFr)}",
-        "USD" => $"${t.Price.ToString("N2", FrFr)}",
-        _     => t.Price.ToString("N2", FrFr)
+        "EUR" => NumberFormat.Price(t.Price, "€"),
+        "USD" => NumberFormat.Price(t.Price, "$"),
+        _     => NumberFormat.Price(t.Price, ""),
     };
 
     private static string FormatDelta(decimal pct)

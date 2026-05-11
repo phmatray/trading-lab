@@ -1,5 +1,5 @@
-@using System.Globalization
 @using TradyStrat.Common.Domain
+@using TradyStrat.Common.Formatting
 
 <section class="positions">
     <h3><span class="section-roman">VI.</span>Positions</h3>
@@ -24,20 +24,20 @@
                 {
                     <tr>
                         <td>@r.Ticker</td>
-                        <td class="num">@r.Quantity.ToString("F2", FrFr)</td>
-                        <td class="num">€@r.CostBasisEur.ToString("N0", FrFr)</td>
-                        <td class="num">€@r.MarketValueEur.ToString("N0", FrFr)</td>
+                        <td class="num">@NumberFormat.Qty(r.Quantity)</td>
+                        <td class="num">@NumberFormat.Eur(r.CostBasisEur)</td>
+                        <td class="num">@NumberFormat.Eur(r.MarketValueEur)</td>
                         <td class="num @(r.UnrealizedPnLEur >= 0 ? "pos" : "neg")">
-                            @FormatSigned(r.UnrealizedPnLEur)
+                            @NumberFormat.SignedEur(r.UnrealizedPnLEur)
                         </td>
                     </tr>
                 }
                 <tr class="total">
                     <td>Total</td>
                     <td></td>
-                    <td class="num">€@Rows.Sum(r => r.CostBasisEur).ToString("N0", FrFr)</td>
-                    <td class="num">€@Rows.Sum(r => r.MarketValueEur).ToString("N0", FrFr)</td>
-                    <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@FormatSigned(TotalUnreal)</td>
+                    <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur))</td>
+                    <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur))</td>
+                    <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(TotalUnreal)</td>
                 </tr>
             </tbody>
         </table>
@@ -46,8 +46,5 @@
 
 @code {
     [Parameter] public IReadOnlyList<PositionRow> Rows { get; set; } = [];
-    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
     private decimal TotalUnreal => Rows.Sum(r => r.UnrealizedPnLEur);
-    private static string FormatSigned(decimal v)
-        => (v >= 0 ? "+" : "") + "€" + v.ToString("N0", FrFr);
 }

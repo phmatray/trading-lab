@@ -1,11 +1,12 @@
+@using TradyStrat.Common.Formatting
 <header class="rail-head">
     <span class="rail-label"><span class="section-roman">VII.</span>Holdings</span>
 </header>
 <div class="rail">
     <div class="cell">
         <div class="lbl">Position</div>
-        <div class="val"><span class="num">@Snap.Shares.ToString("N0", FrFr)</span> sh</div>
-        <div class="sub">avg €@Snap.AvgCostEur.ToString("F2", FrFr)
+        <div class="val"><span class="num">@NumberFormat.Qty(Snap.Shares)</span> sh</div>
+        <div class="sub">avg @NumberFormat.Price(Snap.AvgCostEur, "€")
                          · P&amp;L @PnL(Snap.UnrealizedPnLEur, Snap.CurrentValueEur)</div>
     </div>
     @foreach (var t in Tickers)
@@ -21,7 +22,7 @@
             </div>
             @if (t.PriceEur is { } eur && t.Currency != "EUR")
             {
-                <div class="sub">≈ €@eur.ToString("N2", FrFr)</div>
+                <div class="sub">≈ @NumberFormat.Price(eur, "€")</div>
             }
             @if (t.Spark.Count >= 2)
             {

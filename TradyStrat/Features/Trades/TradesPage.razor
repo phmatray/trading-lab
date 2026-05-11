@@ -3,6 +3,7 @@
 @using TradyStrat.Features.Dashboard.Components
 @using TradyStrat.Features.Trades.Components
 @using TradyStrat.Common.Domain
+@using TradyStrat.Common.Formatting
 
 <VaultMasthead Today="@Clock.TodayInExchangeTzFor(_focusTicker)" EntryNumber="@_count" />
 
@@ -24,9 +25,9 @@
                 <td class="ticker">@TickerFor(t.InstrumentId)</td>
                 <td class="num">@t.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</td>
                 <td><span class="side @(t.Side == TradeSide.Buy ? "buy" : "sell")">@t.Side</span></td>
-                <td class="num">@FormatQty(t.Quantity)</td>
-                <td class="num">€@t.PricePerShare.ToString("F2", FrFr)</td>
-                <td class="num">€@t.FeesEur.ToString("F2", FrFr)</td>
+                <td class="num">@NumberFormat.Qty(t.Quantity)</td>
+                <td class="num">@NumberFormat.Price(t.PricePerShare, "€")</td>
+                <td class="num">@NumberFormat.Price(t.FeesEur, "€")</td>
                 <td class="note">@t.Note</td>
                 <td class="row-actions">
                     <button class="link" @onclick="() => StartEdit(t)">edit</button>

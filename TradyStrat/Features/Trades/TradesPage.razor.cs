@@ -24,23 +24,6 @@ public partial class TradesPage : ComponentBase
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
 
     private string _focusTicker = "";
-    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
-
-    // Show share counts compactly: integers as N0, fractional shares with up
-    // to 4 decimals but trailing zeros trimmed. So 42100,0000 → 42 100, but
-    // 12,5000 → 12,5 — no decimal noise on integer trades.
-    private static string FormatQty(decimal q)
-    {
-        if (q == decimal.Truncate(q)) return q.ToString("N0", FrFr);
-        var s = q.ToString("N4", FrFr);
-        // Trim trailing zeros after the decimal separator, then a hanging separator.
-        var sep = FrFr.NumberFormat.NumberDecimalSeparator;
-        var idx = s.IndexOf(sep, StringComparison.Ordinal);
-        if (idx < 0) return s;
-        s = s.TrimEnd('0');
-        if (s.EndsWith(sep, StringComparison.Ordinal)) s = s[..^sep.Length];
-        return s;
-    }
 
     private List<Trade> _trades = new();
     private Dictionary<int, string> _instrumentTickers = new();
