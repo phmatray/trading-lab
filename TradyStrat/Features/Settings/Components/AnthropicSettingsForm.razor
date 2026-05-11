@@ -1,0 +1,26 @@
+@using System.Globalization
+
+<section class="settings-section">
+    <h2>AI suggestion</h2>
+    <div class="grid">
+        <label class="field">
+            <span class="lbl">Model</span>
+            <input type="text" @bind="_model" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Max tokens</span>
+            <input type="number" min="1" max="100000" step="1" @bind="_maxTokens" @bind:after="OnChanged" />
+        </label>
+    </div>
+    <div class="actions">
+        <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
+        @if (!string.IsNullOrEmpty(_msg))
+        {
+            <span class="msg @(_isError ? "err" : "ok")">@_msg</span>
+        }
+        @if (_lastUpdated is { } t)
+        {
+            <span class="meta">last updated @t.ToLocalTime().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)</span>
+        }
+    </div>
+</section>
