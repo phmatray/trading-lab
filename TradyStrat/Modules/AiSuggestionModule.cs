@@ -14,16 +14,14 @@ public sealed class AiSuggestionModule : IAppModule
     {
         var apiKey = builder.Configuration["Anthropic:ApiKey"]
             ?? throw new AnthropicConfigurationException("Anthropic:ApiKey is not configured.");
-        var model = builder.Configuration["Anthropic:Model"] ?? "claude-opus-4-7";
 
         // MessagesEndpoint directly implements IChatClient in Anthropic.SDK 5.10.
         // No AsChatClient() adapter is needed — .AsBuilder() is the M.E.AI extension
-        // on IChatClient itself. The model is set via ConfigureOptions.
+        // on IChatClient itself. Model is set per-call via ChatOptions.ModelId from ISettingsReader.
         builder.Services.AddSingleton<IChatClient>(_ =>
             new Anthropic.SDK.AnthropicClient(apiKey)
                 .Messages
                 .AsBuilder()
-                .ConfigureOptions(o => o.ModelId = model)
                 .UseFunctionInvocation()
                 .Build());
 

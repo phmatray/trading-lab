@@ -9,11 +9,15 @@ namespace TradyStrat.Tests.AiSuggestion;
 /// </summary>
 public sealed class FakeChatClient(Func<IList<AIFunction>, Task> invoker) : IChatClient
 {
+    public ChatOptions? LastOptions { get; private set; }
+
     public async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        LastOptions = options;
+
         var tools = options?.Tools
             ?.OfType<AIFunction>()
             .ToList()

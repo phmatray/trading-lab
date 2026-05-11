@@ -1,6 +1,7 @@
 using System.Text.Json;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.PredictionMarkets;
+using TradyStrat.Features.Settings.Config;
 using Microsoft.Extensions.AI;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
@@ -9,7 +10,7 @@ using TradyStrat.Common.Time;
 namespace TradyStrat.Features.AiSuggestion;
 
 public sealed partial class SuggestionService(
-    IChatClient chat, IClock clock, ILogger<SuggestionService> log) : IAiClient
+    IChatClient chat, IClock clock, ILogger<SuggestionService> log, ISettingsReader settings) : IAiClient
 {
     private const string ToolName = "submit_suggestion";
     private const string SystemPrompt = """
@@ -27,6 +28,7 @@ public sealed partial class SuggestionService(
 
     public async Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)
     {
+        var ai = await settings.AnthropicAsync(ct);
         Suggestion? captured = null;
 
         var submit = AIFunctionFactory.Create(
@@ -79,7 +81,8 @@ public sealed partial class SuggestionService(
         {
             Tools           = [submit],
             ToolMode        = ChatToolMode.RequireSpecific(ToolName),
-            MaxOutputTokens = 1500,
+            ModelId         = ai.Model,
+            MaxOutputTokens = ai.MaxTokens,
         };
 
         var messages = new List<ChatMessage>

@@ -6,6 +6,7 @@ using TradyStrat.Common.Domain;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.PredictionMarkets;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Tests.AiSuggestion;          // FakeChatClient
 using TradyStrat.Tests.Common.Time;
 using Xunit;
@@ -36,7 +37,8 @@ public class SuggestionServiceCitationTests
             new FakeChatClient(InvokeWithCitations([
                 ("known", "claim-a"), ("unknown", "claim-b")
             ])),
-            clock, NullLogger<SuggestionService>.Instance);
+            clock, NullLogger<SuggestionService>.Instance,
+            new StubSettingsReader("claude-opus-4-7", 1500));
 
         var sug = await svc.AskAsync(SnapshotWith(M("known")), TestContext.Current.CancellationToken);
 
@@ -53,7 +55,8 @@ public class SuggestionServiceCitationTests
             new FakeChatClient(InvokeWithCitations([
                 ("dup", "first-claim"), ("dup", "second-claim")
             ])),
-            clock, NullLogger<SuggestionService>.Instance);
+            clock, NullLogger<SuggestionService>.Instance,
+            new StubSettingsReader("claude-opus-4-7", 1500));
 
         var sug = await svc.AskAsync(SnapshotWith(M("dup")), TestContext.Current.CancellationToken);
 
@@ -68,11 +71,21 @@ public class SuggestionServiceCitationTests
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
         var svc = new SuggestionService(
             new FakeChatClient(InvokeWithCitations([])),
-            clock, NullLogger<SuggestionService>.Instance);
+            clock, NullLogger<SuggestionService>.Instance,
+            new StubSettingsReader("claude-opus-4-7", 1500));
 
         var sug = await svc.AskAsync(SnapshotWith(/* no markets */), TestContext.Current.CancellationToken);
 
         sug.MarketSnapshotJson.ShouldBeNull();
+    }
+
+    private sealed class StubSettingsReader(string model, int maxTokens) : ISettingsReader
+    {
+        public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct)
+            => Task.FromResult(new AnthropicSettings(model, maxTokens));
+        public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
     }
 
     private static Func<IList<AIFunction>, Task> InvokeWithCitations(

@@ -6,6 +6,7 @@ using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Tests.Common.Time;
 using Xunit;
 
@@ -57,7 +58,7 @@ public class SuggestionServiceTests
         }
 
         var svc = new SuggestionService(new FakeChatClient(Invoke), clock,
-            NullLogger<SuggestionService>.Instance);
+            NullLogger<SuggestionService>.Instance, new StubSettingsReader("claude-opus-4-7", 1500));
 
         var sug = await svc.AskAsync(SampleSnapshot(), TestContext.Current.CancellationToken);
 
@@ -74,9 +75,36 @@ public class SuggestionServiceTests
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
         var svc = new SuggestionService(
             new FakeChatClient(_ => Task.CompletedTask),
-            clock, NullLogger<SuggestionService>.Instance);
+            clock, NullLogger<SuggestionService>.Instance,
+            new StubSettingsReader("claude-opus-4-7", 1500));
 
         await Should.ThrowAsync<AnthropicCallFailedException>(() =>
             svc.AskAsync(SampleSnapshot(), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Sets_ModelId_and_MaxOutputTokens_from_settings_reader()
+    {
+        var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
+        var fake = new FakeChatClient(_ => Task.CompletedTask);   // never invokes the tool
+
+        var svc = new SuggestionService(fake, clock, NullLogger<SuggestionService>.Instance,
+            new StubSettingsReader("claude-test-model", 4242));
+
+        await Should.ThrowAsync<AnthropicCallFailedException>(() =>   // tool not invoked → expected throw
+            svc.AskAsync(SampleSnapshot(), TestContext.Current.CancellationToken));
+
+        fake.LastOptions.ShouldNotBeNull();
+        fake.LastOptions!.ModelId.ShouldBe("claude-test-model");
+        fake.LastOptions.MaxOutputTokens.ShouldBe(4242);
+    }
+
+    private sealed class StubSettingsReader(string model, int maxTokens) : ISettingsReader
+    {
+        public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct)
+            => Task.FromResult(new AnthropicSettings(model, maxTokens));
+        public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
     }
 }
