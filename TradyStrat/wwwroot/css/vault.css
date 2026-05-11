@@ -9,6 +9,13 @@
   /* Slightly more saturated red for ↓ deltas (ratio ~5.8 vs prior 5.17). */
   --vault-red:    #D67878;
 
+  /* Verb palette — referenced by TodaysCallCard, PortfolioRail, StickyCapitalBar.
+     One place to change "trim is amber, not red". */
+  --verb-color-hold:    var(--vault-ivory);
+  --verb-color-acquire: var(--vault-green);
+  --verb-color-trim:    var(--vault-red);
+  --verb-color-wait:    rgba(236, 230, 214, 0.6);
+
   /* Muted-ivory tones — explicit named tokens replace ad-hoc rgba()
      literals scattered through component styles. Chosen so each tier
      has a discernible step on dark and clears WCAG AA at 11–14px. */

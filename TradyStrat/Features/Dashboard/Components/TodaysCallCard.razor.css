@@ -55,10 +55,10 @@
     font-size: 64px;
     margin-right: 14px;
 }
-.verb-drop[data-verb="hold"]    { color: var(--vault-ivory); }
-.verb-drop[data-verb="trim"]    { color: var(--vault-red); }
-.verb-drop[data-verb="wait"]    { color: rgba(236,230,214,0.6); font-style: italic; }
-.verb-drop[data-verb="acquire"] { color: var(--vault-green); }
+.verb-drop[data-verb="hold"]    { color: var(--verb-color-hold); }
+.verb-drop[data-verb="trim"]    { color: var(--verb-color-trim); }
+.verb-drop[data-verb="wait"]    { color: var(--verb-color-wait); font-style: italic; }
+.verb-drop[data-verb="acquire"] { color: var(--verb-color-acquire); }
 
 .verb-tail {
     /* Floats with the dropcap so the period sits at the same baseline
@@ -73,10 +73,10 @@
     margin: 8px 18px 2px -10px;
     letter-spacing: -0.01em;
 }
-.verb-tail[data-verb="hold"]    { color: var(--vault-ivory); }
-.verb-tail[data-verb="trim"]    { color: var(--vault-red); }
-.verb-tail[data-verb="wait"]    { color: rgba(236,230,214,0.6); }
-.verb-tail[data-verb="acquire"] { color: var(--vault-green); font-size: 64px; }
+.verb-tail[data-verb="hold"]    { color: var(--verb-color-hold); }
+.verb-tail[data-verb="trim"]    { color: var(--verb-color-trim); }
+.verb-tail[data-verb="wait"]    { color: var(--verb-color-wait); }
+.verb-tail[data-verb="acquire"] { color: var(--verb-color-acquire); font-size: 64px; }
 
 @media (max-width: 720px) {
     .verb-drop, .verb-tail { font-size: 64px; margin-right: 14px; }

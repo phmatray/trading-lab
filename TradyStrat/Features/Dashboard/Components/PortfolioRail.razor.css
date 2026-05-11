@@ -98,9 +98,9 @@
     color: var(--vault-ivory);
     flex-shrink: 0;
 }
-.rail-call .action.acquire { color: var(--vault-green); border-color: var(--vault-green); }
+.rail-call .action.acquire { color: var(--verb-color-acquire); border-color: var(--verb-color-acquire); }
 .rail-call .action.hold    { color: var(--ink-3); }
-.rail-call .action.trim    { color: #c8a857; border-color: #c8a857; }
+.rail-call .action.trim    { color: var(--verb-color-trim); border-color: var(--verb-color-trim); }
 .rail-call .action.wait    { color: var(--ink-3); }
 
 .rail-call .rationale {

@@ -25,23 +25,9 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     private string? _backfillLabel;
     private bool _disposed;
 
-    private string Verb => Sug?.Action switch
-    {
-        SuggestionAction.Acquire => "Acquire",
-        SuggestionAction.Hold    => "Hold",
-        SuggestionAction.Trim    => "Trim",
-        SuggestionAction.Wait    => "Wait",
-        _ => "—"
-    };
+    private string Verb => SuggestionActionDisplay.Verb(Sug?.Action);
 
-    private string VerbStem => Sug?.Action switch
-    {
-        SuggestionAction.Acquire => "acquire",
-        SuggestionAction.Hold    => "hold",
-        SuggestionAction.Trim    => "trim",
-        SuggestionAction.Wait    => "wait",
-        _ => "none"
-    };
+    private string VerbStem => SuggestionActionDisplay.Stem(Sug?.Action);
 
     protected override void OnInitialized()
     {
