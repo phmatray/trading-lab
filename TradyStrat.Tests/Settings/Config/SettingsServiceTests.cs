@@ -88,6 +88,16 @@ public class SettingsServiceTests
     }
 
     [Fact]
+    public async Task GetAsync_missing_key_throws_InvalidOperationException()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+        var svc = NewService(db);
+
+        await Should.ThrowAsync<InvalidOperationException>(() => svc.GetAsync<int>(SettingsKeys.AnthropicMaxTokens, ct));
+    }
+
+    [Fact]
     public async Task LastUpdated_returns_max_over_keys()
     {
         await using var db = InMemoryDb.Create();

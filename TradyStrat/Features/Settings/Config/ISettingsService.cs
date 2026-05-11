@@ -10,7 +10,8 @@ public interface ISettingsService
     /// Parsed via the key's SettingDescriptor and cast to T. T MUST be the descriptor's parsed type
     /// exactly (e.g. int for "anthropic.maxTokens", decimal for "polymarket.minVolumeUsd", string[] for
     /// "polymarket.searchQueries") — this is an unchecked unbox, so e.g. GetAsync&lt;long&gt; on an int-typed
-    /// setting throws InvalidCastException. ISettingsReader always uses the right type.
+    /// setting throws InvalidCastException. ISettingsReader always uses the right type. Also throws
+    /// InvalidOperationException if the key has no row (delegates to <see cref="GetRawAsync"/>).
     /// </summary>
     Task<T> GetAsync<T>(string key, CancellationToken ct);
 
