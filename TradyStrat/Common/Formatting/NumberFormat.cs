@@ -23,11 +23,20 @@ public static class NumberFormat
     private static int DecimalsFor(decimal amount)
         => (amount == decimal.Truncate(amount) || Math.Abs(amount) >= NoDecimalsThreshold) ? 0 : 2;
 
+    /// <summary>Body of a euro amount (no currency symbol). Amount must be ≥ 0;
+    /// use <see cref="SignedEur"/> for signed display.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="amount"/> is negative.</exception>
     public static string EurBody(decimal amount)
-        => amount.ToString("N" + DecimalsFor(amount), Nfi);
+    {
+        if (amount < 0m)
+            throw new ArgumentOutOfRangeException(nameof(amount),
+                "Use SignedEur for negative amounts.");
+        return amount.ToString("N" + DecimalsFor(amount), Nfi);
+    }
 
-    public static string Eur(decimal amount)
-        => "€" + EurBody(amount);
+    /// <summary>"€" + <see cref="EurBody(decimal)"/>. Amount must be ≥ 0;
+    /// use <see cref="SignedEur"/> for signed display.</summary>
+    public static string Eur(decimal amount) => "€" + EurBody(amount);
 
     public static string SignedEur(decimal amount)
     {
@@ -42,7 +51,10 @@ public static class NumberFormat
             : quantity.ToString("#,##0.################", Nfi);
 
     public static string Pct(decimal value)
-        => value.ToString("0.0", Nfi) + NarrowNbsp + "%";
+    {
+        var sign = value < 0m ? Minus.ToString() : "";
+        return sign + Math.Abs(value).ToString("0.0", Nfi) + NarrowNbsp + "%";
+    }
 
     public static string Price(decimal value, string currencySymbol)
         => currencySymbol + value.ToString("N2", Nfi);

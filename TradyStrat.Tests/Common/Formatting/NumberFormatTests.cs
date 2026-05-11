@@ -26,4 +26,13 @@ public class NumberFormatTests
 
     [Fact] public void Price_TwoDecimals_Prefix()    => NumberFormat.Price(203.04m, "$").ShouldBe("$203,04");
     [Fact] public void Price_GroupedAbove1000()      => NumberFormat.Price(1203.04m, "€").ShouldBe("€1 203,04");
+
+    [Fact] public void Eur_Negative_Throws() =>
+        Should.Throw<ArgumentOutOfRangeException>(() => NumberFormat.Eur(-1m));
+
+    [Fact] public void EurBody_Negative_Throws() =>
+        Should.Throw<ArgumentOutOfRangeException>(() => NumberFormat.EurBody(-1m));
+
+    [Fact] public void Pct_Negative_RealMinus() =>
+        NumberFormat.Pct(-1.5m).ShouldBe("−" + "1,5" + " " + "%");
 }
