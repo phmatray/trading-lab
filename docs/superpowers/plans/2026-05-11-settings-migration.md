@@ -4,7 +4,7 @@
 
 **Goal:** Move the user-tunable settings (`Anthropic:Model`, `Anthropic:MaxTokens`, the four `Polymarket:*` knobs, `Tickers:Focus`) out of `appsettings.json` into a SQLite-backed `Settings` table editable from the `/settings` page, with changes that take effect live (no restart).
 
-**Architecture:** A key/value `Settings` table; a `SettingsRegistry` of `SettingDescriptor` objects holding each setting's default + parse + validate logic (Strategy + Registry — single source of truth); a scoped `ISettingsService` (raw KV read/write) with an `ISettingsReader` typed facade over it; one registry-driven `UpdateSettingUseCase`; a `SettingsSeederHostedService` that idempotently back-fills missing rows on startup. Existing consumers (`SuggestionService`, `PolymarketGammaProvider`, three Razor pages) switch from `IConfiguration` to `ISettingsReader`, read per call. `appsettings.json` keeps only deployment/infra config (`Anthropic:ApiKey`, the two `BaseUrl`s, `Database`, `Logging`).
+**Architecture:** A key/value `Settings` table; a `SettingsRegistry` of `SettingDescriptor` objects holding each setting's default + parse + validate logic (Strategy + Registry — single source of truth); a scoped `ISettingsService` (raw KV read/write) with an `ISettingsReader` typed facade over it; one registry-driven `UpdateSettingUseCase`; a `SettingsSeederHostedService` that idempotently back-fills missing rows on startup. Existing consumers (`SuggestionService`, `PolymarketGammaProvider`, three Razor pages) switch from `IConfiguration` to `ISettingsReader`, read per call. `appsettings.json` keeps only deployment/infra config (the two `BaseUrl`s, `Database`, `Logging`); the `Anthropic:ApiKey` secret stays sourced from env / user-secrets / `appsettings.Development.json` exactly as today.
 
 **Tech Stack:** .NET 10, ASP.NET Core / Blazor Server (InteractiveServer), EF Core + SQLite, Ardalis.Specification repositories, `TheAppManager` module system, xUnit v3 + Shouldly + EF Core InMemory for tests.
 
@@ -366,8 +366,9 @@ public sealed class SettingsRegistry : ISettingsRegistry
             {
                 Key = SettingsKeys.AnthropicModel,
                 DefaultRaw = "claude-opus-4-7",
-                Parse = s => s,
+                Parse = s => s.Trim(),                      // trimmed so a stray-whitespace model id can't reach the API
                 Validate = v => RequireNonEmpty((string)v, "Model"),
+                Format = v => (string)v,                    // store the trimmed value
             },
             new()
             {
@@ -608,7 +609,12 @@ public interface ISettingsService
     /// <summary>Raw stored string. Throws InvalidOperationException if the key has no row (= bug; startup seeds all keys).</summary>
     Task<string> GetRawAsync(string key, CancellationToken ct);
 
-    /// <summary>Parsed via the key's SettingDescriptor and cast to T.</summary>
+    /// <summary>
+    /// Parsed via the key's SettingDescriptor and cast to T. T MUST be the descriptor's parsed type
+    /// exactly (e.g. int for "anthropic.maxTokens", decimal for "polymarket.minVolumeUsd", string[] for
+    /// "polymarket.searchQueries") — this is an unchecked unbox, so e.g. GetAsync&lt;long&gt; on an int-typed
+    /// setting throws InvalidCastException. ISettingsReader always uses the right type.
+    /// </summary>
     Task<T> GetAsync<T>(string key, CancellationToken ct);
 
     /// <summary>Upserts the row and stamps UpdatedAt.</summary>
@@ -767,6 +773,20 @@ public class SettingsReaderTests
 
         (await reader.FocusTickerAsync(ct)).ShouldBe("COIN");
     }
+
+    [Fact]
+    public async Task LastUpdated_delegates_to_the_service()
+    {
+        await using var db = InMemoryDb.Create();
+        var ct = TestContext.Current.CancellationToken;
+        var (svc, reader) = Build(db);
+
+        await svc.SetAsync(SettingsKeys.AnthropicModel, "claude-x", ct);
+
+        (await reader.LastUpdatedAsync([SettingsKeys.AnthropicModel], ct))
+            .ShouldBe(new DateTime(2026, 5, 11, 0, 0, 0, DateTimeKind.Utc));
+        (await reader.LastUpdatedAsync([SettingsKeys.TickersFocus], ct)).ShouldBeNull();
+    }
 }
 ```
 
@@ -798,12 +818,15 @@ Create `TradyStrat/Features/Settings/Config/ISettingsReader.cs`:
 ```csharp
 namespace TradyStrat.Features.Settings.Config;
 
-/// <summary>Typed facade over ISettingsService for the app's consumers.</summary>
+/// <summary>Typed facade over ISettingsService for the app's consumers (incl. the Settings-page forms).</summary>
 public interface ISettingsReader
 {
     Task<AnthropicSettings> AnthropicAsync(CancellationToken ct);
     Task<PolymarketSettings> PolymarketAsync(CancellationToken ct);
     Task<string> FocusTickerAsync(CancellationToken ct);
+
+    /// <summary>MAX(UpdatedAt) over the given keys, or null if none have rows. Used by the forms to show "last updated".</summary>
+    Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct);
 }
 ```
 
@@ -828,6 +851,9 @@ public sealed class SettingsReader(ISettingsService settings) : ISettingsReader
 
     public Task<string> FocusTickerAsync(CancellationToken ct)
         => settings.GetRawAsync(SettingsKeys.TickersFocus, ct);
+
+    public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct)
+        => settings.LastUpdatedAsync(keys, ct);
 }
 ```
 
@@ -1011,7 +1037,6 @@ public sealed class UpdateSettingUseCase(
 
         object parsed;
         try { parsed = descriptor.Parse(input.RawValue); }
-        catch (SettingValidationException) { throw; }
         catch (Exception ex) { throw new SettingValidationException($"'{input.Key}' value is not valid.", ex); }
 
         descriptor.Validate?.Invoke(parsed);         // throws SettingValidationException
@@ -1165,7 +1190,7 @@ public sealed class SettingsSeederHostedService(
 }
 ```
 
-(`IServiceScopeFactory`, `IHostedService`, `GetRequiredService`, `ILogger` are available via the web app's implicit usings — if a `using` is missing, add `Microsoft.Extensions.DependencyInjection` / `Microsoft.Extensions.Hosting`. Mirror `PriceFeedHostedService.cs` if in doubt.)
+(`IServiceScopeFactory`, `IHostedService`, `GetRequiredService`, `ILogger` are available via the web app's implicit usings — if a `using` is missing, add `Microsoft.Extensions.DependencyInjection` / `Microsoft.Extensions.Hosting`. Mirror `PriceFeedHostedService.cs` if in doubt. `ToHashSetAsync` is an EF Core 9+ extension on `Microsoft.EntityFrameworkCore`; if a version issue ever surfaces, `(await db.Settings.Select(e => e.Key).ToListAsync(ct)).ToHashSet()` is the equivalent.)
 
 - [ ] **Step 4: Run the test to verify it passes**
 
@@ -1268,23 +1293,23 @@ public sealed class FakeChatClient(Func<IList<AIFunction>, Task> invoker) : ICha
 
 - [ ] **Step 2: Add a failing test for the model/max-tokens wiring**
 
-In `TradyStrat.Tests/AiSuggestion/SuggestionServiceTests.cs`, add a stub reader and a new test. Add this nested class and test inside `SuggestionServiceTests`:
+In `TradyStrat.Tests/AiSuggestion/SuggestionServiceTests.cs`, add `using TradyStrat.Features.Settings.Config;` to the usings, then add this nested stub reader and test inside `SuggestionServiceTests`:
 
 ```csharp
-private sealed class StubSettingsReader(string model, int maxTokens) : TradyStrat.Features.Settings.Config.ISettingsReader
+private sealed class StubSettingsReader(string model, int maxTokens) : ISettingsReader
 {
-    public Task<TradyStrat.Features.Settings.Config.AnthropicSettings> AnthropicAsync(CancellationToken ct)
-        => Task.FromResult(new TradyStrat.Features.Settings.Config.AnthropicSettings(model, maxTokens));
-    public Task<TradyStrat.Features.Settings.Config.PolymarketSettings> PolymarketAsync(CancellationToken ct)
-        => throw new NotSupportedException();
+    public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct)
+        => Task.FromResult(new AnthropicSettings(model, maxTokens));
+    public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct) => throw new NotSupportedException();
     public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
+    public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
 }
 
 [Fact]
 public async Task Sets_ModelId_and_MaxOutputTokens_from_settings_reader()
 {
     var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
-    var fake = new FakeChatClient(tools => { tools.Single(); return Task.CompletedTask; });
+    var fake = new FakeChatClient(_ => Task.CompletedTask);   // never invokes the tool
 
     var svc = new SuggestionService(fake, clock, NullLogger<SuggestionService>.Instance,
         new StubSettingsReader("claude-test-model", 4242));
@@ -1357,6 +1382,8 @@ builder.Services.AddSingleton<IChatClient>(_ =>
 
 Delete the now-unused `var model = builder.Configuration["Anthropic:Model"] ...;` line. Leave the rest of the module (the `AddScoped`/`AddSingleton` registrations, including whatever snapshot-service registration currently exists) unchanged.
 
+Note: dropping `.ConfigureOptions(o => o.ModelId = model)` is safe — `MessagesEndpoint` (Anthropic.SDK's `IChatClient`) maps `ChatOptions.ModelId → MessageParameters.Model`, and `FunctionInvokingChatClient` (added by `UseFunctionInvocation()`) reuses the same `ChatOptions` for tool-result follow-up turns, so the per-request `ModelId` flows through every turn. There's no default model anymore, so if `SuggestionService` ever fails to set `ModelId` the call fails fast — that's intentional. (The unit test in Step 2 only proves the *options* are set; the real client's honouring of them is covered by the manual check in Task 16.)
+
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run: `dotnet test --filter "FullyQualifiedName~SuggestionServiceTests"`
@@ -1400,6 +1427,7 @@ private sealed class StubReader(int maxMarkets, decimal minVolumeUsd, int maxHor
     public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct)
         => Task.FromResult(new PolymarketSettings(queries, maxMarkets, minVolumeUsd, maxHorizonDays));
     public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
+    public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
 }
 
 private static ISettingsReader Reader(int maxMarkets = 10)
@@ -1538,10 +1566,12 @@ git rm TradyStrat.Tests/PredictionMarkets/PolymarketOptionsBinderTests.cs
 Run: `dotnet test --filter "FullyQualifiedName~PredictionMarkets"`
 Expected: PASS. (`PolymarketFilterTests`, `PolymarketNormalizationTests`, `PolymarketRelevanceTests` are untouched and should still pass; `PolymarketGammaProviderTests` now uses the stub reader.)
 
-- [ ] **Step 7: Build the whole solution**
+- [ ] **Step 7: Build the whole solution + sanity checks**
 
 Run: `dotnet build`
 Expected: succeeds — no remaining references to `PolymarketOptions` / `PolymarketOptionsBinder`. (If `grep -rn "PolymarketOptions" TradyStrat TradyStrat.Tests` returns anything other than this plan, fix it.)
+
+Also run `grep -rn "IPredictionMarketProvider" TradyStrat --include=*.cs` and confirm nothing resolves it from a singleton or `IHostedService` — it must only be resolved inside request/use-case scopes, since `PolymarketGammaProvider` (a transient typed `HttpClient`) now depends on the *scoped* `ISettingsReader`. Today only snapshot/use-case code resolves it, all within scopes; if that's changed, the new resolver needs a `CreateScope()` instead.
 
 - [ ] **Step 8: Commit**
 
@@ -1643,13 +1673,12 @@ git commit -m "feat(settings): resolve focus ticker from ISettingsReader in page
 
 - [ ] **Step 1: Trim `appsettings.json`**
 
-Replace `TradyStrat/appsettings.json` with (drop `Anthropic:Model`, `Anthropic:MaxTokens`, the four `Polymarket:*` knobs, and the entire `Tickers` section; keep `Anthropic:ApiKey` even if empty, `Yahoo:BaseUrl`, `Polymarket:BaseUrl`, `Database`, `Logging`):
+Drop `Anthropic:Model`, `Anthropic:MaxTokens`, the four `Polymarket:*` knobs, and the entire `Tickers` section. The current file has **no** `Anthropic:ApiKey` (it's sourced from env / user-secrets / `appsettings.Development.json`), so removing `Model` + `MaxTokens` leaves the `Anthropic` section empty — **remove the whole `Anthropic` section** rather than leaving `"Anthropic": {}` or adding `"ApiKey": ""`. (Adding an empty `ApiKey` would turn the current clear startup failure — `Configuration["Anthropic:ApiKey"] ?? throw new AnthropicConfigurationException(...)` — into a silent empty key that only fails as a 401 at call time. If, and only if, the file *already* contains a real `Anthropic:ApiKey` value or a comment, preserve it as-is and don't commit a real key.)
+
+The resulting `TradyStrat/appsettings.json`:
 
 ```json
 {
-  "Anthropic": {
-    "ApiKey": ""
-  },
   "Yahoo": {
     "BaseUrl": "https://query1.finance.yahoo.com"
   },
@@ -1664,8 +1693,6 @@ Replace `TradyStrat/appsettings.json` with (drop `Anthropic:Model`, `Anthropic:M
   }
 }
 ```
-
-(If `appsettings.json` currently has a real value or a comment for `Anthropic:ApiKey`, preserve it — the key just needs to stay; the real secret comes from env / user-secrets / `appsettings.Development.json` in dev. Do not commit a real key.)
 
 - [ ] **Step 2: Build and full test run**
 
@@ -1738,6 +1765,8 @@ public partial class AnthropicSettingsForm : ComponentBase
     [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
+    private static readonly string[] Keys = [SettingsKeys.AnthropicModel, SettingsKeys.AnthropicMaxTokens];
+
     private string _model = "";
     private int _maxTokens = 1500;
     private string _initialModel = "";
@@ -1752,6 +1781,7 @@ public partial class AnthropicSettingsForm : ComponentBase
         var ai = await Settings.AnthropicAsync(CancellationToken.None);
         _model = _initialModel = ai.Model;
         _maxTokens = _initialMaxTokens = ai.MaxTokens;
+        _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 
     private void OnChanged()
@@ -1765,21 +1795,21 @@ public partial class AnthropicSettingsForm : ComponentBase
         _busy = true; _msg = null; _isError = false;
         try
         {
-            var keys = new List<string>();
+            var changed = 0;
             if (_model != _initialModel)
             {
                 await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicModel, _model), CancellationToken.None);
                 _initialModel = _model;
-                keys.Add(SettingsKeys.AnthropicModel);
+                changed++;
             }
             if (_maxTokens != _initialMaxTokens)
             {
                 await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicMaxTokens, _maxTokens.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
                 _initialMaxTokens = _maxTokens;
-                keys.Add(SettingsKeys.AnthropicMaxTokens);
+                changed++;
             }
-            _lastUpdated = DateTime.UtcNow;   // approximate; the use case returns exact timestamps if a precise value is wanted
-            _msg = keys.Count == 0 ? "No changes." : "Saved.";
+            if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
+            _msg = changed == 0 ? "No changes." : "Saved.";
         }
         catch (TradyStratException ex) { _msg = ex.Message; _isError = true; }
         catch (Exception) { _msg = "Save failed — see logs."; _isError = true; }
@@ -1788,7 +1818,7 @@ public partial class AnthropicSettingsForm : ComponentBase
 }
 ```
 
-(If you prefer the exact server timestamp instead of `DateTime.UtcNow`, capture the `DateTime` returned by the last `UpdateSetting.ExecuteAsync` call and assign it to `_lastUpdated`.)
+Note: `_model` is sent verbatim to `UpdateSettingUseCase`, whose `anthropic.model` descriptor `Trim()`s it, so `_initialModel = _model` after a save may differ from what's actually stored if the user typed leading/trailing spaces. Harmless (the next page load shows the stored trimmed value); if you want the form to reflect the trimmed value immediately, re-read `await Settings.AnthropicAsync(...)` after a successful save.
 
 - [ ] **Step 3: Create the scoped CSS**
 
@@ -1827,7 +1857,7 @@ Create `TradyStrat/Features/Settings/Components/PolymarketSettingsForm.razor`:
     <h2>Prediction markets</h2>
     <div class="grid">
         <label class="field">
-            <span class="lbl">Search queries <em class="hint">comma-separated</em></span>
+            <span class="lbl">Search queries <em class="hint">comma-separated; no commas inside a query</em></span>
             <input type="text" @bind="_queriesText" @bind:after="OnChanged" />
         </label>
         <label class="field">
@@ -1876,6 +1906,12 @@ public partial class PolymarketSettingsForm : ComponentBase
     [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
+    private static readonly string[] Keys =
+    [
+        SettingsKeys.PolymarketSearchQueries, SettingsKeys.PolymarketMaxMarkets,
+        SettingsKeys.PolymarketMinVolumeUsd, SettingsKeys.PolymarketMaxHorizonDays,
+    ];
+
     private string _queriesText = "";
     private int _maxMarkets = 8;
     private decimal _minVolumeUsd = 50_000m;
@@ -1899,6 +1935,7 @@ public partial class PolymarketSettingsForm : ComponentBase
         _maxMarkets = _initialMaxMarkets = p.MaxMarkets;
         _minVolumeUsd = _initialMinVolumeUsd = p.MinVolumeUsd;
         _maxHorizonDays = _initialMaxHorizonDays = p.MaxHorizonDays;
+        _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 
     private void OnChanged()
@@ -1922,7 +1959,7 @@ public partial class PolymarketSettingsForm : ComponentBase
             if (queriesJson != _initialQueriesJson)
             {
                 await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.PolymarketSearchQueries, queriesJson), CancellationToken.None);
-                _initialQueriesJson = JsonSerializer.Serialize(queries);
+                _initialQueriesJson = queriesJson;
                 changed++;
             }
             if (_maxMarkets != _initialMaxMarkets)
@@ -1941,7 +1978,7 @@ public partial class PolymarketSettingsForm : ComponentBase
                 _initialMaxHorizonDays = _maxHorizonDays; changed++;
             }
 
-            _lastUpdated = DateTime.UtcNow;
+            if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
             _msg = changed == 0 ? "No changes." : "Saved.";
         }
         catch (TradyStratException ex) { _msg = ex.Message; _isError = true; }
@@ -2048,6 +2085,7 @@ public partial class FocusTickerForm : ComponentBase
         _ticker = _initialTicker = await Settings.FocusTickerAsync(CancellationToken.None);
         // If the stored focus isn't among current instruments, show it anyway so the <select> has a value.
         if (!_tickers.Contains(_ticker) && !string.IsNullOrEmpty(_ticker)) _tickers.Insert(0, _ticker);
+        _lastUpdated = await Settings.LastUpdatedAsync([SettingsKeys.TickersFocus], CancellationToken.None);
     }
 
     private void OnChanged()
@@ -2123,7 +2161,11 @@ Set `Max tokens` to `0` and Save → an error message appears (`Max tokens must 
 
 With the app running, change the Focus ticker (if more than one instrument exists) and Save. Navigate to `/trades` and `/dashboard` → the masthead date / dashboard reflects the new focus's exchange timezone without restarting the app. (The `/settings` masthead itself stays on the old value until you re-navigate — that's the accepted known limitation.)
 
-- [ ] **Step 6: Final full test run**
+- [ ] **Step 6: Real Anthropic call honours the configured model (if an API key is available)**
+
+`AiSuggestionModule` no longer sets a default `ModelId` on the chat client — it relies entirely on `SuggestionService` passing `ChatOptions.ModelId`. If you have a working `Anthropic:ApiKey` (env / user-secret / `appsettings.Development.json`), trigger a suggestion fetch (e.g. force-refetch today's suggestion from the dashboard) and confirm it succeeds. If you don't have a key, skip this step — but note the risk: a broken `ModelId` plumbing would only surface here, not in the unit tests.
+
+- [ ] **Step 7: Final full test run**
 
 Run: `dotnet test`
 Expected: PASS. Then `git status` should be clean (everything committed).
