@@ -12,6 +12,5 @@ public sealed class SettingEntryConfiguration : IEntityTypeConfiguration<Setting
         builder.HasKey(e => e.Key);
         builder.Property(e => e.Key).HasMaxLength(64);
         builder.Property(e => e.Value).IsRequired();
-        builder.Property(e => e.UpdatedAt).IsRequired();
     }
 }

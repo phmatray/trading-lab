@@ -11,7 +11,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<GoalConfig>  Goals        => Set<GoalConfig>();
     public DbSet<Suggestion>  Suggestions  => Set<Suggestion>();
     public DbSet<Instrument>  Instruments  => Set<Instrument>();
-    public DbSet<SettingEntry>  Settings     => Set<SettingEntry>();
+    public DbSet<SettingEntry> Settings    => Set<SettingEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
