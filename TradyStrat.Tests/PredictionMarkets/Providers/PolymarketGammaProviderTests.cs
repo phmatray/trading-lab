@@ -3,6 +3,7 @@ using Shouldly;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.PredictionMarkets.Providers;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Tests.Common.Time;
 using Xunit;
 
@@ -28,18 +29,24 @@ public class PolymarketGammaProviderTests
         return (http, handler);
     }
 
-    private static PolymarketOptions Options(int maxMarkets = 10) => new(
-        BaseUrl: "https://gamma-api.polymarket.com",
-        SearchQueries: ["bitcoin"],
-        MaxMarkets: maxMarkets,
-        MinVolumeUsd: 0m,
-        MaxHorizonDays: 3650);   // wide so fixtures don't get filtered out
+    private sealed class StubReader(int maxMarkets, decimal minVolumeUsd, int maxHorizonDays, params string[] queries)
+        : ISettingsReader
+    {
+        public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct)
+            => Task.FromResult(new PolymarketSettings(queries, maxMarkets, minVolumeUsd, maxHorizonDays));
+        public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
+        public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
+    }
+
+    private static StubReader Reader(int maxMarkets = 10)
+        => new StubReader(maxMarkets, 0m, 3650, "bitcoin");   // wide horizon so fixtures aren't filtered out
 
     [Fact]
     public async Task Returns_normalized_filtered_list_on_success()
     {
         var (http, _) = BuildHttp();
-        var sut = new PolymarketGammaProvider(http, Options(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, Reader(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         var result = await sut.GetMarketsAsync(TestContext.Current.CancellationToken);
 
@@ -52,7 +59,7 @@ public class PolymarketGammaProviderTests
     {
         var (http, _) = BuildHttp(respond: _ =>
             Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)));
-        var sut = new PolymarketGammaProvider(http, Options(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, Reader(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         await Should.ThrowAsync<PolymarketUnavailableException>(() =>
             sut.GetMarketsAsync(TestContext.Current.CancellationToken));
@@ -66,7 +73,7 @@ public class PolymarketGammaProviderTests
             {
                 Content = new StringContent(ReadFixture("gamma-markets-malformed.json")),
             }));
-        var sut = new PolymarketGammaProvider(http, Options(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, Reader(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         await Should.ThrowAsync<PolymarketUnavailableException>(() =>
             sut.GetMarketsAsync(TestContext.Current.CancellationToken));
@@ -80,7 +87,7 @@ public class PolymarketGammaProviderTests
             {
                 Content = new StringContent(ReadFixture("gamma-markets-empty.json")),
             }));
-        var sut = new PolymarketGammaProvider(http, Options(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, Reader(), new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         var result = await sut.GetMarketsAsync(TestContext.Current.CancellationToken);
         result.ShouldBeEmpty();
@@ -89,10 +96,7 @@ public class PolymarketGammaProviderTests
     [Fact]
     public async Task Issues_one_request_per_query_and_dedupes()
     {
-        var options = new PolymarketOptions(
-            BaseUrl: "https://gamma-api.polymarket.com",
-            SearchQueries: ["bitcoin", "crypto"],
-            MaxMarkets: 10, MinVolumeUsd: 0m, MaxHorizonDays: 3650);
+        var reader = new StubReader(10, 0m, 3650, "bitcoin", "crypto");
 
         var requested = new List<string>();
         var (http, _) = BuildHttp(respond: req =>
@@ -103,7 +107,7 @@ public class PolymarketGammaProviderTests
                 Content = new StringContent(ReadFixture("gamma-markets-bitcoin.json")),
             });
         });
-        var sut = new PolymarketGammaProvider(http, options, new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, reader, new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         var result = await sut.GetMarketsAsync(TestContext.Current.CancellationToken);
 
@@ -117,10 +121,7 @@ public class PolymarketGammaProviderTests
     [Fact]
     public async Task One_query_failing_throws_and_discards_others()
     {
-        var options = new PolymarketOptions(
-            BaseUrl: "https://gamma-api.polymarket.com",
-            SearchQueries: ["bitcoin", "crypto"],
-            MaxMarkets: 10, MinVolumeUsd: 0m, MaxHorizonDays: 3650);
+        var reader = new StubReader(10, 0m, 3650, "bitcoin", "crypto");
 
         var (http, _) = BuildHttp(respond: req =>
         {
@@ -131,7 +132,7 @@ public class PolymarketGammaProviderTests
                 Content = new StringContent(ReadFixture("gamma-markets-bitcoin.json")),
             });
         });
-        var sut = new PolymarketGammaProvider(http, options, new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
+        var sut = new PolymarketGammaProvider(http, reader, new FakeClock(new DateTime(2026, 5, 7, 0, 0, 0, DateTimeKind.Utc)));
 
         await Should.ThrowAsync<PolymarketUnavailableException>(() =>
             sut.GetMarketsAsync(TestContext.Current.CancellationToken));

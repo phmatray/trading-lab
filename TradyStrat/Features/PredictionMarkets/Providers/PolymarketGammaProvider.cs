@@ -1,12 +1,13 @@
 using System.Text.Json;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Common.Time;
+using TradyStrat.Features.Settings.Config;
 
 namespace TradyStrat.Features.PredictionMarkets.Providers;
 
 public sealed class PolymarketGammaProvider(
     HttpClient http,
-    PolymarketOptions options,
+    ISettingsReader settings,
     IClock clock) : IPredictionMarketProvider
 {
     // Gamma's tag-based market filter (`/markets?tag_slug=...`) is silently
@@ -15,8 +16,10 @@ public sealed class PolymarketGammaProvider(
     // filter; it returns events grouped above their constituent markets.
     public async Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(CancellationToken ct)
     {
-        var perQuery = options.SearchQueries
-            .Select(q => FetchQueryAsync(q, ct))
+        var opts = await settings.PolymarketAsync(ct);
+
+        var perQuery = opts.SearchQueries
+            .Select(q => FetchQueryAsync(q, opts.MaxMarkets, ct))
             .ToArray();
 
         IReadOnlyList<PredictionMarket>[] results;
@@ -32,14 +35,14 @@ public sealed class PolymarketGammaProvider(
 
         var merged = results.SelectMany(r => r);
         var today = DateOnly.FromDateTime(clock.UtcNow().Date);
-        return PolymarketFilter.Apply(merged, today, options.MinVolumeUsd, options.MaxHorizonDays, options.MaxMarkets);
+        return PolymarketFilter.Apply(merged, today, opts.MinVolumeUsd, opts.MaxHorizonDays, opts.MaxMarkets);
     }
 
-    private async Task<IReadOnlyList<PredictionMarket>> FetchQueryAsync(string query, CancellationToken ct)
+    private async Task<IReadOnlyList<PredictionMarket>> FetchQueryAsync(string query, int maxMarkets, CancellationToken ct)
     {
         // Over-fetch event-level buffer so post-filter (relevance + volume + horizon)
         // has room to drop noisy markets without starving the final list.
-        var limit = options.MaxMarkets * 2;
+        var limit = maxMarkets * 2;
         var url = $"/public-search?q={Uri.EscapeDataString(query)}&limit={limit}";
 
         try

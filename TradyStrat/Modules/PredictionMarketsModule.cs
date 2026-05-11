@@ -8,13 +8,11 @@ public sealed class PredictionMarketsModule : IAppModule
 {
     public void ConfigureServices(WebApplicationBuilder builder)
     {
-        var options = PolymarketOptionsBinder.Read(builder.Configuration);
-        builder.Services.AddSingleton(options);
-
         builder.Services
             .AddHttpClient<IPredictionMarketProvider, PolymarketGammaProvider>(c =>
             {
-                c.BaseAddress = new Uri(options.BaseUrl);
+                c.BaseAddress = new Uri(builder.Configuration["Polymarket:BaseUrl"]
+                    ?? "https://gamma-api.polymarket.com");
                 c.Timeout     = TimeSpan.FromSeconds(10);
                 c.DefaultRequestHeaders.UserAgent.ParseAdd("TradyStrat/1.0");
             })
