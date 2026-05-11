@@ -1,5 +1,8 @@
-/* Scoped styles for PolymarketSettingsForm. Mirrors SettingsPage.razor.css for
-   parity with the Goal section; Blazor scoped CSS does not inherit parent rules. */
+/* Shared styles for the per-feature forms on the Settings page
+   (AnthropicSettingsForm, PolymarketSettingsForm, FocusTickerForm). Each renders
+   <section class="settings-section">…</section>. This is a global stylesheet
+   (linked from App.razor) rather than per-component scoped CSS so the rules live
+   once; it mirrors the Goal section in SettingsPage.razor.css. */
 
 .settings-section {
     margin-top: 48px;
@@ -8,7 +11,7 @@
     max-width: 760px;
 }
 
-h2 {
+.settings-section h2 {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
@@ -17,21 +20,21 @@ h2 {
     color: var(--vault-ivory);
 }
 
-.grid {
+.settings-section .grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: end;
     gap: 14px 24px;
 }
 
-.field {
+.settings-section .field {
     display: grid;
     grid-template-rows: auto auto;
     gap: 8px;
     min-width: 0;
 }
 
-.field .lbl {
+.settings-section .field .lbl {
     font-family: var(--font-mono);
     font-size: 11px; font-weight: 500;
     letter-spacing: var(--tracking-xs);
@@ -42,7 +45,7 @@ h2 {
     text-overflow: ellipsis;
 }
 
-.field .hint {
+.settings-section .field .hint {
     color: var(--ink-3);
     text-transform: lowercase;
     letter-spacing: 0.04em;
@@ -52,7 +55,8 @@ h2 {
     margin-left: 6px;
 }
 
-.field input {
+.settings-section .field input,
+.settings-section .field select {
     background: var(--vault-bg);
     color: var(--vault-ivory);
     border: 1px solid var(--vault-rule);
@@ -65,10 +69,12 @@ h2 {
     box-sizing: border-box;
     transition: border-color 160ms ease;
 }
-.field input:focus { border-color: var(--vault-gold); outline: none; }
-.field input:disabled { opacity: 0.55; cursor: not-allowed; }
+.settings-section .field input:focus,
+.settings-section .field select:focus { border-color: var(--vault-gold); outline: none; }
+.settings-section .field input:disabled,
+.settings-section .field select:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.actions {
+.settings-section .actions {
     margin-top: 28px;
     display: flex;
     align-items: center;
@@ -76,7 +82,7 @@ h2 {
     flex-wrap: wrap;
 }
 
-.btn {
+.settings-section .btn {
     padding: 11px 20px;
     background: var(--vault-gold);
     color: #1B1710;
@@ -88,14 +94,14 @@ h2 {
     cursor: pointer;
     transition: background 160ms ease, opacity 160ms ease;
 }
-.btn:hover:not(:disabled) { background: var(--vault-ivory); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.settings-section .btn:hover:not(:disabled) { background: var(--vault-ivory); }
+.settings-section .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.msg { font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-md); }
-.msg.ok  { color: var(--vault-green); }
-.msg.err { color: var(--vault-red); }
+.settings-section .msg { font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-md); }
+.settings-section .msg.ok  { color: var(--vault-green); }
+.settings-section .msg.err { color: var(--vault-red); }
 
-.meta {
+.settings-section .meta {
     color: var(--ink-3);
     font-family: var(--font-mono);
     font-size: 11px;
@@ -105,6 +111,6 @@ h2 {
 }
 
 @media (max-width: 720px) {
-    .grid { grid-template-columns: 1fr; }
-    .meta { margin-left: 0; }
+    .settings-section .grid { grid-template-columns: 1fr; }
+    .settings-section .meta { margin-left: 0; }
 }
