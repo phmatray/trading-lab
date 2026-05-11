@@ -1,5 +1,6 @@
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
@@ -13,12 +14,10 @@ public partial class SettingsPage : ComponentBase
     [Inject] private IReadRepositoryBase<GoalConfig> GoalRepo { get; set; } = default!;
     [Inject] private IReadRepositoryBase<Trade> TradeRepo { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IConfiguration Configuration { get; set; } = default!;
+    [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private UpdateGoalUseCase UpdateGoal { get; set; } = default!;
 
-    private string FocusTicker() => Configuration["Tickers:Focus"]
-        ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
-
+    private string _focusTicker = "";
     private decimal _target = 1_000_000m;
     private DateTime? _date;
     private string? _msg;
@@ -29,6 +28,7 @@ public partial class SettingsPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        _focusTicker = await Settings.FocusTickerAsync(CancellationToken.None);
         var existing = await GoalRepo.GetByIdAsync(1, CancellationToken.None);
         if (existing is not null)
         {

@@ -2,6 +2,7 @@ using System.Globalization;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.UseCases;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.UseCases;
 using TradyStrat.Common.Domain;
@@ -15,16 +16,14 @@ public partial class TradesPage : ComponentBase
 {
     [Inject] private IReadRepositoryBase<Trade> Repo { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IConfiguration Configuration { get; set; } = default!;
+    [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private LogTradeUseCase LogTrade { get; set; } = default!;
     [Inject] private EditTradeUseCase EditTrade { get; set; } = default!;
     [Inject] private DeleteTradeUseCase DeleteTrade { get; set; } = default!;
     [Inject] private ImportTradesCsvUseCase ImportCsv { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
 
-    private string FocusTicker() => Configuration["Tickers:Focus"]
-        ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
-
+    private string _focusTicker = "";
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
     // Show share counts compactly: integers as N0, fractional shares with up
@@ -52,7 +51,11 @@ public partial class TradesPage : ComponentBase
     private string _csvText = "";
     private string? _importError;
 
-    protected override async Task OnInitializedAsync() => await Reload();
+    protected override async Task OnInitializedAsync()
+    {
+        _focusTicker = await Settings.FocusTickerAsync(CancellationToken.None);
+        await Reload();
+    }
 
     private async Task Reload()
     {

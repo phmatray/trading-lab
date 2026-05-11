@@ -3,6 +3,7 @@ using TradyStrat.Common.UseCases;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Common.Time;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.Specifications;
 
 namespace TradyStrat.Features.Trades.UseCases;
@@ -14,7 +15,7 @@ public sealed class ImportTradesCsvUseCase(
     IRepositoryBase<Trade> repo,
     IReadRepositoryBase<Instrument> instruments,
     IClock clock,
-    IConfiguration config,
+    ISettingsReader settings,
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
@@ -23,8 +24,7 @@ public sealed class ImportTradesCsvUseCase(
     protected override async Task<ImportTradesCsvResult> ExecuteCore(
         ImportTradesCsvInput input, CancellationToken ct)
     {
-        var focusTicker = config["Tickers:Focus"]
-            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+        var focusTicker = await settings.FocusTickerAsync(ct);
 
         var rows = CsvImportService.Parse(new StringReader(input.CsvText));
         var now  = clock.UtcNow();

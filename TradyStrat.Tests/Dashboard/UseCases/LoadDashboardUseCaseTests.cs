@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using TradyStrat.Features.Indicators.Zones;
@@ -24,6 +23,7 @@ using TradyStrat.Features.AiSuggestion;        // JsonOpts
 using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
+using TradyStrat.Tests.Settings;          // FakeSettingsReader
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Common.Time;
 using TradyStrat.Tests.AiSuggestion.UseCases;  // StubSnapshotFactory, StubAiClient
@@ -85,12 +85,6 @@ public class LoadDashboardUseCaseTests
             Action = SuggestionAction.Hold,
             Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
             PromptHash = "h", CreatedAt = DateTime.UtcNow });
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Tickers:Focus"] = "CON3.L",
-            })
-            .Build();
         var todays = new GetTodaysSuggestionUseCase(
             new TestRepo<Suggestion>(db), snapStub, aiStub, clock,
             new TestRepo<Instrument>(db),
@@ -115,7 +109,7 @@ public class LoadDashboardUseCaseTests
             new TestRepo<Suggestion>(db),
             new TestRepo<FxRate>(db),
             listInstruments,
-            config,
+            new FakeSettingsReader(),
             getAllTodays,
             coord,
             nav,

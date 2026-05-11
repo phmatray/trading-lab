@@ -4,7 +4,7 @@
 @using TradyStrat.Features.Trades.Components
 @using TradyStrat.Common.Domain
 
-<VaultMasthead Today="@Clock.TodayInExchangeTzFor(FocusTicker())" EntryNumber="@_count" />
+<VaultMasthead Today="@Clock.TodayInExchangeTzFor(_focusTicker)" EntryNumber="@_count" />
 
 <div class="trades">
     <div class="hdr">

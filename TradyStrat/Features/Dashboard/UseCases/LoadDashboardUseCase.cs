@@ -15,6 +15,7 @@ using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.PriceFeed.Specifications;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.Specifications;
 
@@ -31,7 +32,7 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<Suggestion> suggestionRepo,
     IReadRepositoryBase<FxRate> fxRepo,
     ListInstrumentsUseCase listInstruments,
-    IConfiguration config,
+    ISettingsReader settings,
     GetAllTodaysSuggestionsUseCase getAllTodaysSuggestions,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
@@ -45,8 +46,7 @@ public sealed class LoadDashboardUseCase(
         var target = input.TargetDate;
         var goal   = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(DateTime.UtcNow);
 
-        var focusTicker = config["Tickers:Focus"]
-            ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+        var focusTicker = await settings.FocusTickerAsync(ct);
 
         // Catalog order: focus first, then Held alphabetically (excluding focus),
         // then Watchlist alphabetically. Stable ordering keeps zone-card layout

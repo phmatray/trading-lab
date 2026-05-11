@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.AiSuggestion.UseCases;
@@ -9,6 +8,7 @@ using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Tests.Fx;
+using TradyStrat.Tests.Settings;       // FakeSettingsReader
 using TradyStrat.Tests.Specifications;
 using Xunit;
 
@@ -34,15 +34,11 @@ public class SuggestionBackfillCoordinatorTests
             new TestRepo<Suggestion>(ctx), factory, ai,
             NullLogger<BackfillSuggestionsUseCase>.Instance);
 
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["Tickers:Focus"] = "CON3.L" })
-            .Build();
-
         var coord = new SuggestionBackfillCoordinator(
             new TestRepo<Suggestion>(ctx),
             new TestRepo<Instrument>(ctx),
             useCase,
-            config,
+            new FakeSettingsReader(),
             NullLogger<SuggestionBackfillCoordinator>.Instance);
         return (coord, ctx, ai);
     }

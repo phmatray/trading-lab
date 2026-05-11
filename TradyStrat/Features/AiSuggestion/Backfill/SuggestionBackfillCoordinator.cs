@@ -3,6 +3,7 @@ using TradyStrat.Common.Domain;
 using TradyStrat.Common.Exceptions;
 using TradyStrat.Features.AiSuggestion.Specifications;
 using TradyStrat.Features.AiSuggestion.UseCases;
+using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.Specifications;
 
 namespace TradyStrat.Features.AiSuggestion.Backfill;
@@ -30,17 +31,17 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         IReadRepositoryBase<Suggestion> Suggestions,
         IReadRepositoryBase<Instrument> Instruments,
         BackfillSuggestionsUseCase Backfill,
-        IConfiguration Config,
+        ISettingsReader Settings,
         IDisposable? Scope);
 
     public SuggestionBackfillCoordinator(
         IReadRepositoryBase<Suggestion> suggestions,
         IReadRepositoryBase<Instrument> instruments,
         BackfillSuggestionsUseCase backfillOne,
-        IConfiguration config,
+        ISettingsReader settings,
         ILogger<SuggestionBackfillCoordinator> log)
     {
-        _resolveDeps = () => new Resolved(suggestions, instruments, backfillOne, config, null);
+        _resolveDeps = () => new Resolved(suggestions, instruments, backfillOne, settings, null);
         _log = log;
     }
 
@@ -57,7 +58,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
                 sp.GetRequiredService<IReadRepositoryBase<Suggestion>>(),
                 sp.GetRequiredService<IReadRepositoryBase<Instrument>>(),
                 sp.GetRequiredService<BackfillSuggestionsUseCase>(),
-                sp.GetRequiredService<IConfiguration>(),
+                sp.GetRequiredService<ISettingsReader>(),
                 scope);
         };
         _log = log;
@@ -81,8 +82,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         var resolved = _resolveDeps();
         try
         {
-            var focusTicker = resolved.Config["Tickers:Focus"]
-                ?? throw new InvalidOperationException("Tickers:Focus is not configured.");
+            var focusTicker = await resolved.Settings.FocusTickerAsync(ct);
             var focus = await resolved.Instruments.FirstOrDefaultAsync(
                 new InstrumentByTickerSpec(focusTicker), ct)
                 ?? throw new InvalidOperationException(
