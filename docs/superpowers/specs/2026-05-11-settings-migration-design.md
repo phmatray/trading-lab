@@ -125,22 +125,27 @@ canonical JSON.
 
 Two abstractions only.
 
+All reads are async — these services ride `AppDbContext` and every caller
+(`SuggestionService.AskAsync`, `PolymarketGammaProvider.GetMarketsAsync`, the
+pages' `OnInitializedAsync`) is already in an async context, so async EF reads
+slot in naturally.
+
 ```csharp
 namespace TradyStrat.Features.Settings.Config;
 
 public interface ISettingsService                       // raw KV read/write
 {
-    string  GetRaw(string key);                          // throws InvalidOperationException if missing (= bug)
-    T       Get<T>(string key);                           // descriptor.Parse, cast to T
-    Task    SetAsync(string key, string rawValue, CancellationToken ct);   // upsert + stamp UpdatedAt
+    Task<string> GetRawAsync(string key, CancellationToken ct);            // throws InvalidOperationException if missing (= bug)
+    Task<T>      GetAsync<T>(string key, CancellationToken ct);            // descriptor.Parse, cast to T
+    Task         SetAsync(string key, string rawValue, CancellationToken ct);   // upsert + stamp UpdatedAt
     Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct);  // MAX over the keys
 }
 
 public interface ISettingsReader                        // typed Facade over ISettingsService
 {
-    AnthropicSettings  Anthropic();
-    PolymarketSettings Polymarket();
-    string             FocusTicker();
+    Task<AnthropicSettings>  AnthropicAsync(CancellationToken ct);
+    Task<PolymarketSettings> PolymarketAsync(CancellationToken ct);
+    Task<string>             FocusTickerAsync(CancellationToken ct);
 }
 
 public sealed record AnthropicSettings(string Model, int MaxTokens);
@@ -191,7 +196,7 @@ public sealed class UpdateSettingUseCase(
 
         var raw = descriptor.Format?.Invoke(parsed) ?? input.RawValue;   // normalise (e.g. re-serialise the array)
         await settings.SetAsync(input.Key, raw, ct);
-        return (await settings.LastUpdatedAsync([input.Key], ct))!.Value;
+        return (await settings.LastUpdatedAsync([input.Key], ct))!.Value;   // never null right after SetAsync
     }
 }
 ```
@@ -222,8 +227,8 @@ Net effect:
 - Adding a setting in a later release → just add a descriptor; the next startup
   back-fills its row. No new EF migration needed for seed data.
 
-This also makes `ISettingsService.GetRaw` throwing on a missing key *safe* — by the
-time any request runs, every registry key has a row.
+This also makes `ISettingsService.GetRawAsync` throwing on a missing key *safe* —
+by the time any request runs, every registry key has a row.
 
 ### Wiring the existing consumers
 
@@ -241,7 +246,7 @@ builder.Services.AddSingleton<IChatClient>(_ =>
 ```
 
 `SuggestionService` injects `ISettingsReader`. In `AskAsync`, before building
-`ChatOptions`, read `var ai = settingsReader.Anthropic();` and set
+`ChatOptions`, read `var ai = await settingsReader.AnthropicAsync(ct);` and set
 `ModelId = ai.Model` and `MaxOutputTokens = ai.MaxTokens` on the `ChatOptions` it
 already constructs (`SuggestionService.cs:79-83`). The hard-coded
 `MaxOutputTokens = 1500` is removed. Because `SuggestionService` is scoped and a
@@ -253,10 +258,10 @@ with no restart.
 read `BaseUrl` from the options (it uses relative URLs), and the only `BaseUrl`
 consumer is the `AddHttpClient` registration, which reads it straight from
 `IConfiguration` (kept). `PolymarketGammaProvider`'s constructor changes from
-`PolymarketOptions options` to `ISettingsReader settingsReader`; inside
-`GetMarketsAsync`/`FetchQueryAsync` it calls `var p = settingsReader.Polymarket();`
-once and uses `p.SearchQueries`, `p.MaxMarkets`, `p.MinVolumeUsd`,
-`p.MaxHorizonDays`. The typed `HttpClient` registration stays:
+`PolymarketOptions options` to `ISettingsReader settingsReader`;
+`GetMarketsAsync` calls `var p = await settingsReader.PolymarketAsync(ct);` once at
+the top and passes the relevant fields down to `FetchQueryAsync`/`PolymarketFilter`.
+The typed `HttpClient` registration stays:
 
 ```csharp
 builder.Services
@@ -280,9 +285,11 @@ value can't reach the provider.
 
 **`Tickers:Focus` callsites** — `SettingsPage.razor.cs:19-20`,
 `TradesPage.razor.cs:25`, `DashboardPage.razor.cs:50`. Replace
-`Configuration["Tickers:Focus"]` with `ISettingsReader.FocusTicker()`. Drop the
-`[Inject] IConfiguration` where it's no longer used. (`DatabaseModule` and the
-HttpClient registrations still use `IConfiguration` — that stays.)
+`Configuration["Tickers:Focus"]` with `await ISettingsReader.FocusTickerAsync(ct)`,
+resolved in each page's `OnInitializedAsync` and cached in a field the markup
+reads. Drop the `[Inject] IConfiguration` where it's no longer used.
+(`DatabaseModule` and the HttpClient registrations still use `IConfiguration` —
+that stays.)
 
 **`appsettings.json`** — remove `Anthropic:Model`, `Anthropic:MaxTokens`, the four
 `Polymarket:*` knob keys (keep `Polymarket:BaseUrl`), and the entire `Tickers`
@@ -324,12 +331,12 @@ Each new form:
   the server (`UpdateSettingUseCase`) is the authority — a `SettingValidationException`
   surfaces in the red `.msg.err` line.
 
-**Known limitation (accepted):** `SettingsPage` also renders
-`<VaultMasthead Today=@(Clock.TodayInExchangeTzFor(FocusTicker())) … />`. Saving a
-new focus ticker won't refresh that masthead until the page is re-navigated. After
-a successful focus save the `FocusTickerForm` may call its parent's
-`StateHasChanged` (cascaded callback) to re-render the page; if that's more
-plumbing than it's worth, leaving the masthead stale until navigation is
+**Known limitation (accepted):** `SettingsPage` also renders a `VaultMasthead`
+whose `Today` is derived from the focus ticker (resolved once in
+`OnInitializedAsync`). Saving a new focus ticker won't refresh that masthead until
+the page is re-navigated. After a successful focus save the `FocusTickerForm` may
+invoke a parent callback that re-resolves the focus + `StateHasChanged`; if that's
+more plumbing than it's worth, leaving the masthead stale until navigation is
 acceptable for a single-user app. No settings-changed event bus — YAGNI.
 
 ### Module registration (`SettingsModule`)
@@ -371,8 +378,8 @@ so registration order doesn't matter.
    `settings.SetAsync("polymarket.maxMarkets","12")` upserts the row, stamps `UpdatedAt`.
 4. Next time `LoadDashboardUseCase` (or whatever) triggers a prediction-markets
    fetch, `PolymarketGammaProvider.GetMarketsAsync` calls
-   `settingsReader.Polymarket()`, which reads the four keys fresh from the DB →
-   `MaxMarkets == 12`. No restart.
+   `await settingsReader.PolymarketAsync(ct)`, which reads the four keys fresh from
+   the DB → `MaxMarkets == 12`. No restart.
 
 Same shape for `anthropic.*` (read by `SuggestionService` per `AskAsync`) and
 `tickers.focus` (read by the pages on render).
@@ -384,13 +391,13 @@ Same shape for `anthropic.*` (read by `SuggestionService` per `AskAsync`) and
   ticker). `UseCaseBase` re-throws `TradyStratException` untouched; the form shows
   `ex.Message` in `.msg.err`. Unexpected exceptions show a generic
   "Save failed — see logs." like the existing Goal form.
-- **Missing key on read** — `ISettingsService.GetRaw` throws
+- **Missing key on read** — `ISettingsService.GetRawAsync` throws
   `InvalidOperationException`. This is a programmer/seed bug (the startup upsert
   guarantees every registry key has a row), not a user condition; no silent
   fallback to `appsettings.json` — the migration is one-way.
 - **Corrupt stored value** (e.g. non-JSON in `polymarket.searchQueries`,
-  non-numeric in a numeric key) — the descriptor `Parse` throws; `Get<T>` lets it
-  propagate. Can't happen via the UI (the descriptor `Format` re-normalises on
+  non-numeric in a numeric key) — the descriptor `Parse` throws; `GetAsync<T>` lets
+  it propagate. Can't happen via the UI (the descriptor `Format` re-normalises on
   write) or via seeding (defaults are valid). Treated as corruption, not handled
   gracefully.
 - **Unknown key passed to `UpdateSettingUseCase`** — `registry.Get` throws
@@ -408,9 +415,9 @@ Project `TradyStrat.Tests`, following its existing structure (`Settings/`,
   every descriptor's `DefaultRaw` round-trips through its own `Parse` (and `Format`
   where present) without throwing; `Get` on an unknown key throws
   `InvalidOperationException`.
-- **`SettingsServiceTests`** — `SetAsync` then `GetRaw`/`Get<T>` round-trip for
-  each type (string, int, decimal, `string[]`); decimal/int parse is
-  culture-invariant (run a case under a `,`-decimal culture); `GetRaw` throws
+- **`SettingsServiceTests`** — `SetAsync` then `GetRawAsync`/`GetAsync<T>`
+  round-trip for each type (string, int, decimal, `string[]`); decimal/int parse is
+  culture-invariant (run a case under a `,`-decimal culture); `GetRawAsync` throws
   `InvalidOperationException` for a key with no row; `LastUpdatedAsync` returns the
   `MAX` over multiple keys.
 - **`SettingsSeedingTests`** — after migrations + `SettingsSeederHostedService.StartAsync`,
@@ -423,9 +430,10 @@ Project `TradyStrat.Tests`, following its existing structure (`Settings/`,
   `tickers.focus` set to a ticker absent from `Instruments` fails; `tickers.focus`
   set to a seeded ticker (`CON3.L`) succeeds; an unknown key throws
   `InvalidOperationException`.
-- **`SettingsReaderTests`** — `Anthropic()`, `Polymarket()`, `FocusTicker()`
-  reflect the current DB state: write a change via `ISettingsService`, re-read via
-  `ISettingsReader`, assert the new value (proves no caching).
+- **`SettingsReaderTests`** — `AnthropicAsync`, `PolymarketAsync`,
+  `FocusTickerAsync` reflect the current DB state: write a change via
+  `ISettingsService`, re-read via `ISettingsReader`, assert the new value (proves
+  no caching).
 - **Consumer smoke tests** —
   - `SuggestionService` builds `ChatOptions` with `ModelId`/`MaxOutputTokens` from
     `ISettingsReader` (mock the `IChatClient`, capture the `ChatOptions`); after a
@@ -434,8 +442,8 @@ Project `TradyStrat.Tests`, following its existing structure (`Settings/`,
     from `ISettingsReader` (mock `HttpMessageHandler`, assert the over-fetch
     `limit` and the post-filter cutoffs reflect a freshly-written value).
   - `TradesPage` / `DashboardPage` resolve their focus ticker from
-    `ISettingsReader.FocusTicker()` (existing page tests, swap the config stub for
-    the reader).
+    `ISettingsReader.FocusTickerAsync` (existing page tests, swap the config stub
+    for the reader).
 - **Existing tests** — anything currently stubbing `Tickers:Focus` /
   `Anthropic:Model` / `Polymarket:*` via `IConfiguration` in `WebApplicationFactory`
   setups must be updated to seed the `Settings` table (or rely on the startup
