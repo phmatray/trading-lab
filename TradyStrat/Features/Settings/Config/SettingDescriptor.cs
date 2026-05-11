@@ -20,9 +20,12 @@ public sealed class SettingDescriptor
     public Func<object, string>? Format { get; init; }
 }
 
+/// <summary>The set of <see cref="SettingDescriptor"/>s keyed by setting key — the single source of truth downstream consumers dispatch through.</summary>
 public interface ISettingsRegistry
 {
     IReadOnlyDictionary<string, SettingDescriptor> All { get; }
+
+    /// <summary>The descriptor for <paramref name="key"/>; throws <see cref="InvalidOperationException"/> if the key is unknown (= bug).</summary>
     SettingDescriptor Get(string key);
 }
 
@@ -76,7 +79,7 @@ public sealed class SettingsRegistry : ISettingsRegistry
                 Key = SettingsKeys.PolymarketMaxMarkets,
                 DefaultRaw = "8",
                 Parse = s => int.Parse(s, CultureInfo.InvariantCulture),
-                Validate = v => RequireRange((int)v, 1, int.MaxValue, "Max markets"),
+                Validate = v => RequireAtLeast((int)v, 1, "Max markets"),
                 Format = v => ((int)v).ToString(CultureInfo.InvariantCulture),
             },
             new()
@@ -96,15 +99,16 @@ public sealed class SettingsRegistry : ISettingsRegistry
                 Key = SettingsKeys.PolymarketMaxHorizonDays,
                 DefaultRaw = "365",
                 Parse = s => int.Parse(s, CultureInfo.InvariantCulture),
-                Validate = v => RequireRange((int)v, 1, int.MaxValue, "Max horizon days"),
+                Validate = v => RequireAtLeast((int)v, 1, "Max horizon days"),
                 Format = v => ((int)v).ToString(CultureInfo.InvariantCulture),
             },
             new()
             {
                 Key = SettingsKeys.TickersFocus,
                 DefaultRaw = "CON3.L",
-                Parse = s => s,
+                Parse = s => s.Trim(),                       // defensive: a stray space shouldn't reach instrument lookup
                 Validate = v => RequireNonEmpty((string)v, "Focus ticker"),
+                Format = v => (string)v,                     // store the trimmed value
             },
         ];
         return list.ToDictionary(d => d.Key);
@@ -120,5 +124,11 @@ public sealed class SettingsRegistry : ISettingsRegistry
     {
         if (n < min || n > max)
             throw new SettingValidationException($"{name} must be between {min} and {max}.");
+    }
+
+    private static void RequireAtLeast(int n, int min, string name)
+    {
+        if (n < min)
+            throw new SettingValidationException($"{name} must be at least {min}.");
     }
 }
