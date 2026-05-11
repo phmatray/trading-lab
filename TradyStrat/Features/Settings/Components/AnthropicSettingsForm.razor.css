@@ -42,16 +42,6 @@ h2 {
     text-overflow: ellipsis;
 }
 
-.field .hint {
-    color: var(--ink-3);
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
-    font-size: 10px;
-    font-style: italic;
-    font-weight: 400;
-    margin-left: 6px;
-}
-
 .field input {
     background: var(--vault-bg);
     color: var(--vault-ivory);
