@@ -1,73 +1,14 @@
-/* Scoped styles for AddInstrumentForm. Mirrors SettingsPage.razor.css for
-   parity with the Goal section above it. */
+/* AddInstrument-specific styling. The base section / heading / field / button
+   styling comes from the shared wwwroot/css/settings-forms.css via the
+   `settings-section` class on the root <section>; this file only adds what
+   differs (the probe → result → kind-pick → add/cancel flow). */
 
-.add-instrument {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 1px solid var(--vault-rule);
-    max-width: 760px;
-}
+/* Ticker input + Probe button side by side, not two equal columns. */
+.add-instrument .grid { grid-template-columns: minmax(0, 1fr) auto; }
 
-.add-instrument h3 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 24px;
-    margin: 0 0 20px;
-    color: var(--vault-ivory);
-}
+/* The Add / Cancel row sits closer to the kind picker above it. */
+.add-instrument .actions { margin-top: 16px; }
 
-.add-instrument .grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-    gap: 14px 24px;
-}
-
-.add-instrument .field {
-    display: grid;
-    grid-template-rows: auto auto;
-    gap: 8px;
-    min-width: 0;
-}
-
-.add-instrument .field .lbl {
-    font-family: var(--font-mono);
-    font-size: 11px; font-weight: 500;
-    letter-spacing: var(--tracking-xs);
-    text-transform: uppercase;
-    color: var(--vault-gold);
-}
-
-.add-instrument .field input {
-    background: var(--vault-bg);
-    color: var(--vault-ivory);
-    border: 1px solid var(--vault-rule);
-    height: 40px;
-    padding: 0 12px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 160ms ease;
-}
-.add-instrument .field input:focus { border-color: var(--vault-gold); outline: none; }
-
-.add-instrument .btn {
-    padding: 11px 20px;
-    background: var(--vault-gold);
-    color: #1B1710;
-    font-family: var(--font-mono);
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    border: 0;
-    cursor: pointer;
-    transition: background 160ms ease, opacity 160ms ease;
-}
-.add-instrument .btn:hover:not(:disabled) { background: var(--vault-ivory); }
-.add-instrument .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .add-instrument .btn.ghost {
     background: transparent;
     color: var(--vault-gold);
@@ -78,7 +19,7 @@
     color: var(--vault-ivory);
 }
 
-.probe-result {
+.add-instrument .probe-result {
     display: grid;
     grid-template-columns: max-content 1fr;
     gap: 6px 16px;
@@ -89,15 +30,15 @@
     font-family: var(--font-mono);
     font-size: 13px;
 }
-.probe-result dt {
+.add-instrument .probe-result dt {
     color: var(--vault-gold);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: var(--tracking-xs);
 }
-.probe-result dd { margin: 0; color: var(--vault-ivory); }
+.add-instrument .probe-result dd { margin: 0; color: var(--vault-ivory); }
 
-.kind-pick {
+.add-instrument .kind-pick {
     display: flex;
     gap: 24px;
     margin-bottom: 16px;
@@ -105,25 +46,17 @@
     font-size: 13px;
     color: var(--vault-ivory);
 }
-.kind-pick label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
-.kind-pick input[type="radio"] { accent-color: var(--vault-gold); }
+.add-instrument .kind-pick label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.add-instrument .kind-pick input[type="radio"] { accent-color: var(--vault-gold); }
 
-.actions {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.err {
+.add-instrument .err {
     color: var(--vault-red);
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: var(--tracking-md);
     margin: 12px 0 0;
 }
-.ok {
+.add-instrument .ok {
     color: var(--vault-green);
     font-family: var(--font-mono);
     font-size: 12px;
