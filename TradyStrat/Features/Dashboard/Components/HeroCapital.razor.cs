@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.Domain;
+using TradyStrat.Common.Formatting;
 
 namespace TradyStrat.Features.Dashboard.Components;
 
@@ -40,15 +41,9 @@ public partial class HeroCapital : ComponentBase
     private bool IsAlarmingMonthly => GoalPace.MonthlyCompoundPct >= 15m;
     private bool IsAlarmingCagr    => GoalPace.ImpliedCagrPct    >= 250m;
 
-    private static string FormatSigned(decimal v)
-        => $"{(v >= 0 ? "+€" : "−€")}{Math.Abs(v).ToString("N0", FrFr)}";
-
-    private static string FormatVsPlan(decimal eur)
-        => (eur >= 0 ? "+€" : "−€") + Math.Abs(eur).ToString("N0", FrFr);
-
     private string AriaSummary =>
-        $"Progress {Pct.ToString("F1", FrFr)}% — own capital €{CostBasisEur.ToString("N0", FrFr)}, " +
-        $"unrealized {FormatSigned(Snap.UnrealizedPnLEur)}, realized {FormatSigned(Snap.RealizedPnLEur)}";
+        $"Progress {NumberFormat.Pct(Pct)} — own capital {NumberFormat.Eur(CostBasisEur)}, " +
+        $"unrealized {NumberFormat.SignedEur(Snap.UnrealizedPnLEur)}, realized {NumberFormat.SignedEur(Snap.RealizedPnLEur)}";
 
     private string? DaysLeft(DateOnly target)
     {

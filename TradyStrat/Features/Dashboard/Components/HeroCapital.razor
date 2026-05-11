@@ -1,8 +1,9 @@
+@using TradyStrat.Common.Formatting
 <div class="hero">
     <div class="label"><span class="section-roman">II.</span>Capital under accumulation</div>
     <div class="amount">
-        <span class="euro">€</span><span class="num">@Snap.CurrentValueEur.ToString("N0", FrFr)</span>
-        <span class="of">— of €@Goal.TargetEur.ToString("N0", FrFr) —</span>
+        <span class="euro">€</span><span class="num">@NumberFormat.EurBody(Snap.CurrentValueEur)</span>
+        <span class="of">— of €@NumberFormat.EurBody(Goal.TargetEur) —</span>
         @if (Goal.TargetDate is { } target)
         {
             <span class="by">by @target.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture)@(DaysLeft(target) is { } d ? $" · {d}" : "")</span>
@@ -36,24 +37,24 @@
             @* Current-position tick at exact "today" mark *@
             <span class="tick now" style="--l:@Fmt(CurrentPct)%" title="today"></span>
         </div>
-        <div class="pct num">@Pct.ToString("F1", FrFr) %</div>
+        <div class="pct num">@NumberFormat.Pct(Pct)</div>
     </div>
 
     <dl class="legend">
         <div>
             <dt><span class="swatch principal"></span> Own capital</dt>
-            <dd class="num">€@CostBasisEur.ToString("N0", FrFr)</dd>
+            <dd class="num">€@NumberFormat.EurBody(CostBasisEur)</dd>
         </div>
         @if (Snap.RealizedPnLEur != 0m)
         {
             <div>
                 <dt><span class="swatch realized"></span> Realized</dt>
-                <dd class="num @(Snap.RealizedPnLEur >= 0 ? "pos" : "neg")">@FormatSigned(Snap.RealizedPnLEur)</dd>
+                <dd class="num @(Snap.RealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.RealizedPnLEur)</dd>
             </div>
         }
         <div>
             <dt><span class="swatch @(Snap.UnrealizedPnLEur >= 0 ? "gain" : "loss")"></span> Unrealized</dt>
-            <dd class="num @(Snap.UnrealizedPnLEur >= 0 ? "pos" : "neg")">@FormatSigned(Snap.UnrealizedPnLEur)</dd>
+            <dd class="num @(Snap.UnrealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.UnrealizedPnLEur)</dd>
         </div>
     </dl>
 
@@ -63,7 +64,7 @@
             <div class="stat">
                 <span class="k">vs. plan</span>
                 <span class="v @(GoalPace.VsPlanEur < 0 ? "neg" : "pos")">
-                    @FormatVsPlan(GoalPace.VsPlanEur)
+                    @NumberFormat.SignedEur(GoalPace.VsPlanEur)
                 </span>
             </div>
             <span class="sep">·</span>
@@ -71,7 +72,7 @@
                 <span class="k">monthly</span>
                 <span class="v @(IsAlarmingMonthly ? "alarm" : "")"
                       title="@(IsAlarmingMonthly ? "Above 15 %/mo — implausible without exceptional luck" : null)">
-                    @GoalPace.MonthlyCompoundPct.ToString("F1", FrFr) % / mo
+                    @NumberFormat.Pct(GoalPace.MonthlyCompoundPct) / mo
                 </span>
             </div>
             <span class="sep">·</span>
@@ -90,6 +91,6 @@
     }
     else if (GoalPace.Mode == GoalPaceMode.GoalDatePassed)
     {
-        <p class="pace-line italic">Goal date passed — €@GoalPace.VsPlanEur.ToString("N0", FrFr) over.</p>
+        <p class="pace-line italic">Goal date passed — @NumberFormat.SignedEur(GoalPace.VsPlanEur) over.</p>
     }
 </div>
