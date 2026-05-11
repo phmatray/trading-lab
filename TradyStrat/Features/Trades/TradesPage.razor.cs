@@ -1,4 +1,3 @@
-using System.Globalization;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.UseCases;
