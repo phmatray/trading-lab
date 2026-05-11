@@ -17,7 +17,7 @@ public sealed class SettingsSeederHostedService(
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = scopes.CreateScope();
+        await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var clock = scope.ServiceProvider.GetRequiredService<IClock>();
 
