@@ -66,6 +66,21 @@ body {
     opacity: 0.85;
 }
 
+/* Section heading — semantic <h2> styled like the legacy .label/.rail-label divs.
+   Components keep their own positioning wrapper class for margins; this owns the
+   typography. Task 2.2 migrates each section to use it. */
+h2.section-heading {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+}
+
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
 
