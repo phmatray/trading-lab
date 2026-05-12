@@ -68,3 +68,23 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }
+
+@media (max-width: 860px) {
+  .masthead { grid-template-columns: 1fr; gap: 14px; padding: 18px 24px 14px; }
+  .brand { justify-self: start; }
+  .nav { justify-self: start; flex-wrap: wrap; gap: 18px 22px; }
+  .head-right { justify-self: start; flex-wrap: wrap; gap: 10px; }
+}
+@media (max-width: 560px) {
+  /* Ribbon cells share borders so they must stay 28px tall; let the trailing
+     meta cell wrap onto its own row inside the box. */
+  .masthead .travel-ribbon { flex-wrap: wrap; height: auto; }
+  .masthead .ribbon-step, .masthead .ribbon-date { height: 28px; }
+  .masthead .ribbon-date { border-right: 1px solid var(--vault-rule); }
+  .masthead .ribbon-meta {
+    flex-basis: 100%;
+    border-top: 1px solid var(--vault-rule);
+    padding: 6px 12px;
+    justify-content: flex-start;
+  }
+}
