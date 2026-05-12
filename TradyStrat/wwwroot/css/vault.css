@@ -211,3 +211,12 @@ main > * { position: relative; z-index: 1; }
     color: var(--vault-gold);
     border-color: var(--vault-rule);
 }
+
+/* ── Responsive: tablet + phone ───────────────────────────────── */
+@media (max-width: 860px) {
+  main { border-left: none; border-right: none; }
+}
+@media (max-width: 560px) {
+  main::before { background:
+    radial-gradient(circle at 100% -10%, rgba(196,154,86,0.08), transparent 55%); }
+}
