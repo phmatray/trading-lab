@@ -79,6 +79,7 @@
 .verb-tail[data-verb="acquire"] { color: var(--verb-color-acquire); font-size: 64px; }
 
 @media (max-width: 720px) {
+    .call { padding: 22px 20px 24px; }
     .verb-drop, .verb-tail { font-size: 64px; margin-right: 14px; }
     .verb-drop[data-verb="acquire"],
     .verb-tail[data-verb="acquire"] { font-size: 48px; }

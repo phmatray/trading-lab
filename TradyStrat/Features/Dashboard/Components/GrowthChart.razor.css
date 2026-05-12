@@ -338,3 +338,17 @@
 }
 ::deep .gc-tooltip .row.behind span:last-child { color: var(--vault-red); }
 ::deep .gc-tooltip .row.ahead  span:last-child { color: var(--vault-green); }
+
+@media (max-width: 720px) {
+  .chart-wrap { padding: 18px 20px 26px; }
+  .chart { height: 280px; }
+  .chart-text .goal-label { font-size: 12px; }
+  .chart-text .y-label, .chart-text .x-axis { font-size: 10px; }
+  .navi-presets { font-size: 9px; }
+  .navi-presets button { padding: 4px 8px; }
+  .navi-track { height: 30px; }
+  .navi-bg { height: 30px; }
+}
+@media (max-width: 480px) {
+  .chart-text .y-label { display: none; }  /* overlaps the line at this width; hero restates today's figure */
+}

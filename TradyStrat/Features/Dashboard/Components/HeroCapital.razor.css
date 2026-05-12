@@ -180,3 +180,10 @@
     color: rgba(236,230,214,0.62);
     margin-top: 14px;
 }
+
+@media (max-width: 720px) {
+  .hero { padding: 24px 20px 22px; }
+  .amount { font-size: clamp(44px, 13vw, 64px); }
+  .progress { gap: 10px; }
+  .pace-line-row { gap: 6px 12px; }
+}
