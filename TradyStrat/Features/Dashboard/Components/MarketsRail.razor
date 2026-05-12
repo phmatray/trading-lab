@@ -3,7 +3,7 @@
 @if (Snapshot.Markets.Count > 0)
 {
     <div class="markets-rail">
-        <div class="rail-label"><span class="section-roman">IV.</span>Polymarket · @Snapshot.Markets.Count markets</div>
+        <h2 class="rail-label section-heading"><span class="section-roman">IV.</span>Polymarket · @Snapshot.Markets.Count markets</h2>
         <div class="market-tiles">
             @foreach (var m in Snapshot.Markets)
             {

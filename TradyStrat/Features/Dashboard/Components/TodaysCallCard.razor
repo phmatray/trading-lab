@@ -1,12 +1,12 @@
 @using TradyStrat.Common.Domain
 <div class="call">
-    <div class="label">
+    <h2 class="label section-heading">
         <span class="section-roman">III.</span>
         <span>@(Historical ? $"Call for {Today.ToString("d MMMM", FrFr)}" : $"Today's call · {Today.ToString("d MMMM", FrFr)}")@if (!Historical && !string.IsNullOrEmpty(CallAsOfRelative))
         {
             <span class="freshness"> · @CallAsOfRelative</span>
         }</span>
-    </div>
+    </h2>
 
     @if (Sug is null)
     {

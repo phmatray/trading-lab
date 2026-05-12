@@ -2,14 +2,7 @@
     padding: 24px 56px 32px;
     border-bottom: 1px solid var(--vault-rule);
 }
-.lbl {
-    font-family: var(--font-mono);
-    font-size: 11px; font-weight: 500;
-    letter-spacing: var(--tracking-xs);
-    text-transform: uppercase; color: var(--vault-gold);
-    margin-bottom: 18px;
-    display: flex; align-items: baseline;
-}
+.lbl { margin: 0 0 18px; }
 
 /* The SVG uses preserveAspectRatio="none" which non-uniformly scales any
    <text> inside it (text gets stretched ~1.58x vertically at our 360px height

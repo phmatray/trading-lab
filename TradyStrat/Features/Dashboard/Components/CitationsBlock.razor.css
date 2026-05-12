@@ -13,15 +13,7 @@
     justify-content: space-between;
     margin-bottom: 18px;
 }
-.cit-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--vault-gold);
-    display: inline-flex;
-    align-items: baseline;
-}
+.cit-label { margin: 0; }
 .cit-count {
     font-family: var(--font-mono);
     font-size: 10px;

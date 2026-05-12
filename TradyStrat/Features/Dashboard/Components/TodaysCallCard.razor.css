@@ -2,7 +2,7 @@
     padding: 24px 48px 26px;
     border-bottom: 1px solid var(--vault-rule);
 }
-.label { margin-bottom: 12px; display: flex; align-items: baseline; }
+.label { margin: 0 0 12px; }
 .freshness {
     color: var(--ink-4);
     font-size: 11px;
