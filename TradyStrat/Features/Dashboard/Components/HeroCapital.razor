@@ -72,6 +72,10 @@
 
             @* Current-position tick at exact "today" mark *@
             <span class="tick now" style="--l:@Fmt(CurrentPct)%" title="today"></span>
+            @if (PlanPct >= 0m)
+            {
+                <span class="tick plan" style="--l:@Fmt(PlanPct)%" title="plan target today"></span>
+            }
         </div>
         <div class="pct num">@NumberFormat.Pct(Pct)</div>
     </div>

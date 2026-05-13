@@ -188,6 +188,26 @@
     border-bottom: 1px solid rgba(196,154,86,0.18);
 }
 
+.tick.plan {
+    position: absolute;
+    left: var(--l);
+    top: -4px; bottom: -4px;
+    width: 1px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 5px rgba(196,154,86,0.6);
+    opacity: 0.85;
+    transition: left 600ms ease-out;
+}
+.tick.plan::after {
+    /* tiny caret above the bar so the two ticks are distinguishable */
+    content: "";
+    position: absolute;
+    left: -2px; top: -5px;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 4px solid var(--vault-gold);
+}
+
 @media (max-width: 720px) {
   .hero { padding: 24px 20px 22px; }
   .amount { font-size: clamp(44px, 13vw, 64px); }

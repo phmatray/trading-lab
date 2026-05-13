@@ -26,6 +26,13 @@ public partial class HeroCapital : ComponentBase
     private decimal UnrealizedAbsPct => Clamp01(Math.Abs(Snap.UnrealizedPnLEur) / Goal100 * 100m);
     private decimal CurrentPct    => Clamp01(Snap.CurrentValueEur / Goal100 * 100m);
 
+    // Where the required-CAGR plan says you should be today, as % of goal.
+    // Returns -1 when not applicable (no live pace) ⇒ caller skips rendering.
+    private decimal PlanPct =>
+        GoalPace.Mode == GoalPaceMode.Active
+            ? Clamp01((Snap.CurrentValueEur - GoalPace.VsPlanEur) / Goal100 * 100m)
+            : -1m;
+
     // When unrealized < 0, principal segment must NOT extend past current —
     // the "loss" hashed segment fills the gap from current back to cost.
     private decimal PrincipalShownPct =>
