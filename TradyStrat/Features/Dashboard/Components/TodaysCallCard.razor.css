@@ -122,3 +122,36 @@
     font-weight: 400;
 }
 .cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }
+
+/* 3-bullet TL;DR above the verb-drop rationale. Sits as a block above the
+   paragraph; the .verb-drop float starts inside .reasons so it doesn't
+   interact with this list. */
+.tldr {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+.tldr li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--ink-3);
+    padding-left: 14px;
+    position: relative;
+}
+.tldr li::before {
+    content: "·";
+    position: absolute;
+    left: 2px;
+    color: var(--vault-gold);
+}
+.tldr-k {
+    color: var(--ink-2);
+    letter-spacing: 0.06em;
+}
+.tldr-k em {
+    color: var(--vault-gold);
+    font-style: normal;
+}

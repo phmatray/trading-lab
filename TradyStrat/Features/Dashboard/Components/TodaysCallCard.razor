@@ -19,6 +19,16 @@
             <div class="backfill-pill">@_backfillLabel</div>
         }
 
+        @if (Sug.Citations is { Count: > 0 })
+        {
+            <ul class="tldr">
+                @foreach (var c in Sug.Citations.Take(3))
+                {
+                    <li><span class="tldr-k">@c.Indicator <em>@c.Ticker</em></span> @c.Claim</li>
+                }
+            </ul>
+        }
+
         <p class="reasons">
             <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail" data-verb="@VerbStem">.</span> @Sug.Rationale
         </p>
