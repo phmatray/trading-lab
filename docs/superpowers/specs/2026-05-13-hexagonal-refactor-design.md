@@ -61,40 +61,62 @@ Strict reference rules — enforced by csproj `<ProjectReference>` graph:
 
 Pure types — entities, value objects, enums. Everything in `TradyStrat/Common/Domain/` today moves here unchanged except namespace:
 
-- `Suggestion`, `SuggestionAction`, `SuggestionActionDisplay`, `Citation`, `MarketCitation`, `Zone`, `GoalConfig`, `Trade`, `TradeSide`, `Instrument`, `InstrumentKind`, `PortfolioSnapshot`, `PredictionMarket`, `Unit` (the `UseCaseBase` input sentinel — stays in Application since it's about the use-case shape, but its companion types live here).
-- The custom exceptions in `TradyStrat/Common/Exceptions/` move here too — they're part of the domain vocabulary (`AnthropicCallFailedException` stays in Application; pure-domain ones like `FxRateUnavailableException` move).
+- `Suggestion`, `SuggestionAction`, `SuggestionActionDisplay`, `Citation`, `MarketCitation`, `Zone`, `GoalConfig`, `Trade`, `TradeSide`, `Instrument`, `InstrumentKind`, `PortfolioSnapshot`, `PredictionMarket`.
+- The pure-domain exceptions in `TradyStrat/Common/Exceptions/`: `FxRateUnavailableException`, `PolymarketUnavailableException`, etc. — they're part of the domain vocabulary.
+- `AnthropicCallFailedException` is **renamed to `AiCallFailedException`** and moves to **Application** (it's the abstract failure mode of the AI port). Vendor-named failures stay in Infrastructure; the Application port surfaces only the abstract type.
 
-NuGet dependencies in Domain: **none beyond the BCL**. No EF, no Json, no AI abstractions.
+NuGet dependencies in Domain: **none beyond the BCL** (which includes `System.Text.Json` — Domain may use it for derived properties like `Suggestion.Citations` that deserializes `CitationsJson`).
 
 ### 3.2 Application (TradyStrat.Application)
 
-Use cases + ports. All `UseCases/` folders move here:
+Use cases + the ports they consume. Application services are NOT pure compute — they orchestrate the domain by calling ports. The hexagonal rule is that Application **owns the port interfaces** and never imports an adapter package directly.
 
-- `GetTodaysSuggestionUseCase`, `GetAllTodaysSuggestionsUseCase`, `ForceRefetchSuggestionUseCase`, `BackfillSuggestionsUseCase`, `LoadDashboardUseCase`, `ListInstrumentsUseCase`, `UpdateSettingUseCase`, etc.
+**Use cases** (`UseCaseBase<TInput, TOutput>` subclasses) — all `UseCases/` folders move here:
+
+- `GetTodaysSuggestionUseCase`, `GetAllTodaysSuggestionsUseCase`, `ForceRefetchSuggestionUseCase`, `BackfillSuggestionsUseCase`, `LoadDashboardUseCase`, `ListInstrumentsUseCase`, `UpdateSettingUseCase`, `ProbeInstrumentUseCase`, etc.
 - `UseCaseBase<TInput, TOutput>` and `Unit` (the input sentinel).
-- All **ports** (interfaces the Application owns and consumes): `IAiClient`, `IAiSnapshotService`, `IRepositoryBase<>`, `IRepositoryBase<>` Specifications (Ardalis types are referenced; the *specification classes themselves* move here too), `IPredictionMarketProvider`, `ISettingsReader`, `IClock`, `IndicatorEngine` (currently a class — kept as a class but moved here since it has no external deps).
-- The pure domain-service types that orchestrate but don't talk to adapters: `FxConverter`, `PortfolioService`, `AiSnapshotService` (the *service*, not the Anthropic adapter), `SuggestionGate`.
-- `JsonOpts` stays here — it's a serialization policy used at the boundary by use cases.
 
-NuGet dependencies in Application: `Ardalis.Specification` (interfaces only), `Microsoft.Extensions.AI.Abstractions` (the `IChatClient` interface — Application defines the port `IAiClient` that wraps it), `Microsoft.Extensions.Logging.Abstractions`. **No** `Microsoft.Extensions.AI` (concrete), **no** EF Core, **no** `Anthropic.SDK`, **no** HTTP clients.
+**Ports owned by Application** (interfaces — the *contracts* the application demands from the outside):
+
+- `IAiClient` — Application's abstract AI port. Wraps the concrete `IChatClient` (which itself stays an M.E.AI.Abstractions detail).
+- `IAiSnapshotService` — snapshot construction port.
+- `Ardalis.Specification.IReadRepositoryBase<T>` and `IRepositoryBase<T>` — generic data-access ports (the interfaces; EF-backed impls live in Infrastructure). All concrete `Spec` classes in `Specifications/` folders move here too — Specifications are domain queries.
+- `IPredictionMarketProvider` — Polymarket fetch port.
+- `IFxRateProvider` — live FX-rate fetch port (HTTP).
+- `IPriceFeed` — live price-bar fetch port (HTTP).
+- `ISettingsReader` — settings-read port.
+- `IClock` — time port.
+
+**Application services** (concrete classes that consume the ports above and produce domain results):
+
+- `IndicatorEngine` — consumes `IReadRepositoryBase<PriceBar>` + `ZoneClassifier` + `IIndicatorHistoryProviderFactory`. Pure once its data dependencies are injected. Stays in Application.
+- `FxConverter` — consumes `IReadRepositoryBase<FxRate>`. EUR↔ccy conversion against stored rates. Stays in Application.
+- `PortfolioService` — consumes `IReadRepositoryBase<Trade>`. Stays in Application.
+- `AiSnapshotService` — consumes `IndicatorEngine`, `FxConverter`, `PortfolioService`, several repos, `IPredictionMarketProvider`, `IClock`. Stays in Application.
+- `DailyFxCache`, `DailyPriceCache` — consume their respective live providers and write into the repos. These are application-level *coordinators* (cache-and-persist policy), not adapters. Stay in Application.
+- `SuggestionGate`, `ZoneClassifier`, `IIndicatorHistoryProviderFactory` — pure helpers, stay in Application.
+- `JsonOpts` — serialization policy used at the use-case boundary.
+
+NuGet dependencies in Application: `Ardalis.Specification` (interfaces only — no `.EntityFrameworkCore`), `Microsoft.Extensions.AI.Abstractions`, `Microsoft.Extensions.Logging.Abstractions`, `Atypical.TechnicalAnalysis.*` (used by `IndicatorEngine` — pure compute library, no I/O). **No** `Microsoft.Extensions.AI` (concrete), **no** `Ardalis.Specification.EntityFrameworkCore`, **no** `Microsoft.EntityFrameworkCore.*`, **no** `Anthropic.SDK`, **no** `HttpClient` factory.
 
 ### 3.3 Infrastructure (TradyStrat.Infrastructure)
 
-Driven adapters — everything that talks to the outside world.
+Driven adapters — everything that talks to the outside world. Each adapter implements a port owned by Application.
 
 - `AppDbContext` and all EF configurations + migrations.
-- `Ardalis.Specification.EntityFrameworkCore` repository implementations.
-- `SuggestionService` (the Anthropic adapter — implements `IAiClient`).
-- `PolymarketGammaProvider` (implements `IPredictionMarketProvider`).
-- FX adapter implementation (the `FxConverter` *port* stays in Application; the HTTP client lives here).
-- `SettingsReader` implementation (port `ISettingsReader` in Application).
-- `SystemClock` implementation of `IClock`.
+- `Ardalis.Specification.EntityFrameworkCore` repository implementations — registered as `IReadRepositoryBase<T>` / `IRepositoryBase<T>` for every aggregate.
+- `SuggestionService` — Anthropic adapter implementing `IAiClient`. (Will be refactored to a thin orchestrator with stacked `IChatClient` decorators in the successor spec.)
+- `PolymarketGammaProvider` — HTTP adapter implementing `IPredictionMarketProvider`.
+- `YahooFxProvider` — HTTP adapter implementing `IFxRateProvider`.
+- `YahooPriceFeed` — HTTP adapter implementing `IPriceFeed`.
+- `PriceFeedHostedService` — background fetch loop; lives in Infrastructure because it owns the polling schedule and EF write path.
+- `SettingsReader` — DB-backed adapter implementing `ISettingsReader`.
+- `SystemClock` — adapter implementing `IClock`.
 - Serilog wiring (today in `LoggingModule.cs`).
 - HTTP resilience wiring (`Microsoft.Extensions.Http.Resilience`).
+- The vendor-specific `AnthropicCallFailedException` — thrown by `SuggestionService`, caught and rewrapped as the Application-level `AiCallFailedException` at the port boundary.
 
-NuGet dependencies in Infrastructure: EF Core, `Microsoft.Extensions.AI` (concrete), `Anthropic.SDK`, `Microsoft.Extensions.Http.Resilience`, `Serilog.*`, `Atypical.TechnicalAnalysis.*` (the technical-analysis library is used by `IndicatorEngine`, but the engine itself is in Application — the library reference moves to Infrastructure only if the engine talks to live price feeds; today it doesn't, so the library reference stays in Application).
-
-> **Note on IndicatorEngine:** Today it computes purely from injected price data and configuration — no I/O. It belongs in Application. If a future change makes it call live price feeds, an `IPriceFeed` port is introduced and the impl moves to Infrastructure.
+NuGet dependencies in Infrastructure: `Microsoft.EntityFrameworkCore.Sqlite`, `Microsoft.EntityFrameworkCore.Design`, `Ardalis.Specification.EntityFrameworkCore`, `Microsoft.Extensions.AI` (concrete), `Anthropic.SDK`, `Microsoft.Extensions.Http.Resilience`, `Serilog.*`. **No** `Atypical.TechnicalAnalysis.*` — that's a pure-compute library used by the Application-side `IndicatorEngine`.
 
 ### 3.4 TradyStrat (Blazor)
 
@@ -102,21 +124,59 @@ Razor pages, components, layout, `Program.cs`. Loses everything else.
 
 - `Features/<Feature>/*.razor` and `*.razor.cs` files stay.
 - `Features/Settings/Components/*.razor` files stay.
-- `Modules/*.cs` files are deleted (replaced by feature modules in Application + Infrastructure — see §4).
-- `Program.cs` becomes ~10 lines: build `WebApplication`, call `AppManager.Start(args, services, config, typeof(SomeApplicationModuleMarker).Assembly, typeof(SomeInfrastructureModuleMarker).Assembly)`, configure pipeline.
+- `Modules/*.cs` files are deleted (replaced by feature modules in Application + Infrastructure — see §5).
+- `Program.cs` shrinks to a small composition root using TheAppManager v3 (see §4):
+
+  ```csharp
+  using TheAppManager.Startup;
+  using TradyStrat.Application; // assembly marker
+  using TradyStrat.Infrastructure; // assembly marker
+
+  AppManager.Start(args, modules => modules
+      .AddFromAssemblyOf<ApplicationAssemblyMarker>()
+      .AddFromAssemblyOf<InfrastructureAssemblyMarker>());
+  ```
+
+  The `Application` and `Infrastructure` projects each ship a `public sealed class <Layer>AssemblyMarker;` empty type so module-discovery scans the correct assemblies without requiring callers to name a specific module class.
 
 ### 3.5 TradyStrat.Cli
 
 New project. Initial content in this refactor: skeleton only.
 
-- `Program.cs` builds an `IHostBuilder`, then calls `AppManager.Start(builder.Services, builder.Configuration, modules => modules.AddFromAssemblyOf<AiSuggestionApplicationModule>().AddFromAssemblyOf<AiSuggestionInfrastructureModule>())` (using the new neutral overload from §4.2). It then builds the host and hands `host.Services` to a `Spectre.Console.Cli.CommandApp` via a custom `ITypeRegistrar` that wraps the host's `IServiceProvider`.
-- Commands folder exists but contains only a placeholder `HelloCommand` to prove the wiring (this is removed in the successor spec when `ReplayCommand` lands).
+```csharp
+// TradyStrat.Cli/Program.cs
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Spectre.Console.Cli;
+using TheAppManager.Startup;
+using TradyStrat.Application;
+using TradyStrat.Infrastructure;
+using TradyStrat.Cli;
+using TradyStrat.Cli.Commands;
+
+var builder = Host.CreateApplicationBuilder(args);
+
+// New v3 host-neutral entry point — see §4.2
+AppManager.ConfigureServices(builder.Services, builder.Configuration, modules => modules
+    .AddFromAssemblyOf<ApplicationAssemblyMarker>()
+    .AddFromAssemblyOf<InfrastructureAssemblyMarker>());
+
+using var host = builder.Build();
+
+var app = new CommandApp(new HostTypeRegistrar(host.Services));
+app.Configure(c => c.AddCommand<HelloCommand>("hello"));
+return await app.RunAsync(args);
+```
+
+- `HostTypeRegistrar` is a small `Spectre.Console.Cli.ITypeRegistrar` adapter (12-line class) that wraps `host.Services` and forwards `Resolve` calls. It exists for both the skeleton and the successor's `ReplayCommand`.
+- Commands folder exists but contains only `HelloCommand` to prove wiring; removed in the successor spec when `ReplayCommand` lands.
 
 NuGet dependencies in Cli: `Spectre.Console`, `Spectre.Console.Cli`, `Microsoft.Extensions.Hosting`.
 
 ## 4. TheAppManager v3.0.0
 
-Hard-break release. The library code lives in a separate repo (the user owns it).
+Hard-break release. The library code lives in a separate repo (user-owned). Both API changes below build on the existing module-discovery surface (`AppModuleCollection`, `AddFromAssemblyOf<T>()`, `AddFromAssembly(Assembly)`) — those are unchanged.
 
 ### 4.1 New module signature
 
@@ -124,32 +184,46 @@ Hard-break release. The library code lives in a separate repo (the user owns it)
 public interface IAppModule
 {
     void ConfigureServices(IServiceCollection services, IConfiguration config);
+    // Default no-op middleware/endpoint hooks remain available for web-only modules.
+    void ConfigureMiddleware(WebApplication app) { }
+    void ConfigureEndpoints(IEndpointRouteBuilder endpoints) { }
 }
 ```
 
-The `WebApplicationBuilder` overload is removed entirely. No `[Obsolete]` shim.
+`ConfigureServices` no longer takes `WebApplicationBuilder` — only `IServiceCollection` + `IConfiguration`, which both the web host and a generic host can provide. `ConfigureMiddleware` and `ConfigureEndpoints` still take web-host types and are simply unused by non-web hosts. No `[Obsolete]` shim.
 
-### 4.2 New entry-point overload
+### 4.2 New entry-point shape
 
 ```csharp
 public static class AppManager
 {
-    // Existing web overload, re-implemented on top of the neutral one
-    public static void Start(string[] args, Action<ModuleDiscoveryBuilder>? configure = null) { ... }
-
-    // New host-neutral overload — used by CLI, callable from any IHostBuilder consumer
+    // Web overload — unchanged shape, signature delegates to ConfigureServices below.
     public static void Start(
+        string[] args,
+        Action<AppModuleCollection> configureModules,
+        Action<WebApplicationBuilder>? configureBuilder = null);
+
+    public static Task StartAsync(
+        string[] args,
+        Action<AppModuleCollection> configureModules,
+        Action<WebApplicationBuilder>? configureBuilder = null);
+
+    // NEW: host-neutral composition root, callable from any non-web host (CLI, worker).
+    // Does NOT build or run anything — just composes services into the supplied collection.
+    public static void ConfigureServices(
         IServiceCollection services,
         IConfiguration config,
-        Action<ModuleDiscoveryBuilder>? configure = null) { ... }
+        Action<AppModuleCollection> configureModules);
 }
 ```
 
-The web overload internally builds a `WebApplicationBuilder`, then forwards `builder.Services` and `builder.Configuration` to the neutral one. Both overloads share the same module discovery (assembly scan for `IAppModule` implementors).
+The web `Start` overload internally constructs a `WebApplicationBuilder`, then calls `ConfigureServices(builder.Services, builder.Configuration, configureModules)`, then invokes any registered `ConfigureMiddleware` / `ConfigureEndpoints` hooks on the built `WebApplication`, then `app.Run()`. The CLI uses `ConfigureServices` directly against a `HostApplicationBuilder` (see §3.5).
+
+Both call sites share one module-discovery pipeline. The `AppModuleCollection` API (`Add`, `AddIf`, `AddFromAssemblyOf<T>`, `AddFromAssembly`, `Replace`) is unchanged from v2.
 
 ### 4.3 Consumer migration
 
-The only consumer in this repo is TradyStrat. The TheAppManager bump and the TradyStrat refactor land in the same PR boundary — TheAppManager v3.0.0 is published from its own repo first, then TradyStrat upgrades. If the user has other consumers, they're migrated in the same window.
+The only consumer in this repo is TradyStrat. TheAppManager v3.0.0 is published from its own repo first, then TradyStrat upgrades inside this refactor's PR. The user owns all other consumers and bumps them in the same window.
 
 ## 5. Module organisation per feature
 
@@ -171,7 +245,9 @@ Each feature in TradyStrat splits its registration across two modules — one in
 | `SettingsModule` | `SettingsApplicationModule` (use cases) + `SettingsInfrastructureModule` (`SettingsReader` impl, seeder) |
 | `TradesModule` | `TradesApplicationModule` (use cases) — Trades has no infrastructure of its own beyond the shared DbContext |
 
-Each module is one file with one `ConfigureServices` method. Both driving adapters discover modules from both assemblies via `AppManager.Start(..., typeof(AiSuggestionApplicationModule).Assembly, typeof(AiSuggestionInfrastructureModule).Assembly)`.
+Each module is one file with one `ConfigureServices(IServiceCollection, IConfiguration)` method. Both driving adapters discover modules from both assemblies via `modules.AddFromAssemblyOf<ApplicationAssemblyMarker>().AddFromAssemblyOf<InfrastructureAssemblyMarker>()` inside the `configureModules` callback.
+
+> **PriceFeedModule split:** the current single module both registers the live HTTP feed (`IPriceFeed → YahooPriceFeed`) and starts the `PriceFeedHostedService` background loop. After split: `PriceFeedInfrastructureModule` registers both. The CLI does not need the background loop running (replay reads stored bars), so `PriceFeedInfrastructureModule` is decomposed into two — `PriceFeedAdapterInfrastructureModule` (HTTP client registration, always loaded) and `PriceFeedBackgroundInfrastructureModule` (hosted-service registration, loaded only by the Blazor host). The CLI's discovery callback opts out of the background module via `.Remove<PriceFeedBackgroundInfrastructureModule>()` or by selective assembly loading.
 
 ## 6. Test project split
 
@@ -181,8 +257,8 @@ The current `TradyStrat.Tests` project is dissolved. Each existing test file mov
 |---|---|---|
 | `TradyStrat.Domain.Tests` | `EntityDerivedPropertiesTests`, `SuggestionActionDisplayTests`, `ExceptionHierarchyTests`, value-object tests. | Domain only. |
 | `TradyStrat.Application.Tests` | All `UseCases/*Tests`, `Specifications/*Tests`, `AiSnapshot/*Tests`, `Settings/UseCases/*Tests`, `Common/Domain` use-case tests, `CallDiff/*Tests`, `Citations/*Tests`. Uses `StubAiClient`, `FakeChatClient`, `FakeSettingsReader`, in-memory EF where the test is really about use-case orchestration. | Application + Domain. |
-| `TradyStrat.Infrastructure.Tests` | `MultiTickerAiPhase2MigrationTests`, `MigrationBackwardCompatTests`, `PolymarketGammaProviderTests`, `SettingsReaderTests`, `SettingsSeederTests`, `SettingEntryRoundtripTests`, `SettingsRegistryTests`, `SuggestionBackfillCoordinatorTests` (it hits a real DbContext today). | Infrastructure + Application + Domain. |
-| `TradyStrat.E2E.Tests` | `ModuleSmokeTests` and any future `WebApplicationFactory<Program>`-driven tests. | TradyStrat (Blazor) + everything else. |
+| `TradyStrat.Infrastructure.Tests` | `MultiTickerAiPhase2MigrationTests`, `MigrationBackwardCompatTests`, `PolymarketGammaProviderTests`, `SettingsReaderTests`, `SettingsSeederTests`, `SettingEntryRoundtripTests`, `SettingsRegistryTests`, `SuggestionBackfillCoordinatorTests` (real DbContext), `SuggestionService` decorator tests (added in the successor spec). | Infrastructure + Application + Domain. |
+| `TradyStrat.E2E.Tests` | `ModuleSmokeTests`, any `SmokeTests.cs` at the current `TradyStrat.Tests/` root, and any future `WebApplicationFactory<Program>`-driven tests. | TradyStrat (Blazor) + everything else. |
 
 Test fixtures (`FakeChatClient`, `StubAiClient`, `StubSnapshotFactory`, `FakeSettingsReader`) move with their primary consumers. If a fixture is used across two test projects, it lives in the lower-layer one and is referenced.
 
