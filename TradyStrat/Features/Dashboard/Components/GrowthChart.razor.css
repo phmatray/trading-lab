@@ -220,11 +220,12 @@
     background: rgba(196,154,86,0.06);
 }
 .navi-presets button.active {
-    color: var(--vault-gold);
-    background: rgba(196,154,86,0.10);
-    border-color: rgba(196,154,86,0.45);
+    color: #1B1710;
+    background: var(--vault-gold);
+    border-color: var(--vault-gold);
+    box-shadow: 0 0 10px rgba(196,154,86,0.4);
 }
-.navi-presets button.active + button { border-left-color: rgba(196,154,86,0.45); }
+.navi-presets button.active + button { border-left-color: var(--vault-gold); }
 
 .navi-track {
     position: relative;
