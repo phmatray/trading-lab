@@ -36,17 +36,29 @@
 .side.buy  { color: var(--vault-green); background: rgba(122,182,142,0.10); }
 .side.sell { color: var(--vault-red);   background: rgba(214,120,120,0.10); }
 
-.row-actions { text-align: right; white-space: nowrap; }
-.link { color: var(--ink-2); text-decoration: underline;
-        text-decoration-color: var(--vault-rule);
-        text-underline-offset: 3px;
-        font-family: var(--font-mono); font-size: 11px;
-        letter-spacing: 0.06em;
-        padding: 2px 6px;
-        transition: color 150ms ease, text-decoration-color 150ms ease; }
-.link:hover { color: var(--vault-ivory); text-decoration-color: var(--vault-gold); }
-.link.danger { color: var(--vault-red); font-size: 16px; padding: 0 8px; line-height: 1; }
-.link.danger:hover { color: #E89898; }
+.row-actions { white-space: nowrap; text-align: right; }
+.icon-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-size: 13px;
+    transition: color 140ms, border-color 140ms, background-color 140ms;
+}
+.icon-btn:hover {
+    color: var(--vault-gold);
+    border-color: var(--vault-rule);
+    background: rgba(236,230,214,0.03);
+}
+.icon-btn.danger:hover {
+    color: var(--vault-red);
+    border-color: rgba(214,120,120,0.4);
+}
+.t td.invested { color: var(--ink-3); }
 .err { color: var(--vault-red); margin-top: 12px; font-size: 13px; }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7);

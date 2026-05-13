@@ -17,9 +17,9 @@
     </div>
 
     <table class="t">
-        <thead><tr><th>Ticker</th><th>Date</th><th>Side</th><th>Qty</th><th>Price</th><th>Fees</th><th>Note</th><th></th></tr></thead>
+        <thead><tr><th>Ticker</th><th>Date</th><th>Side</th><th>Qty</th><th>Price</th><th>Fees</th><th class="num">Invested</th><th>Note</th><th></th></tr></thead>
         <tbody>
-        @foreach (var t in _trades)
+        @foreach (var (t, cum) in _rows)
         {
             <tr>
                 <td class="ticker">@TickerFor(t.InstrumentId)</td>
@@ -28,10 +28,11 @@
                 <td class="num">@NumberFormat.Qty(t.Quantity)</td>
                 <td class="num">@NumberFormat.Price(t.PricePerShare, "€")</td>
                 <td class="num">@NumberFormat.Price(t.FeesEur, "€")</td>
+                <td class="num invested">@NumberFormat.Eur(cum)</td>
                 <td class="note">@t.Note</td>
                 <td class="row-actions">
-                    <button class="link" @onclick="() => StartEdit(t)">edit</button>
-                    <button class="link danger" @onclick="() => DeleteAsync(t)" title="Delete trade">×</button>
+                    <button class="icon-btn" @onclick="() => StartEdit(t)" title="Edit trade" aria-label="Edit trade">✎</button>
+                    <button class="icon-btn danger" @onclick="() => _pendingDelete = t" title="Delete trade" aria-label="Delete trade">🗑</button>
                 </td>
             </tr>
         }
@@ -61,6 +62,20 @@
             {
                 <p class="err">@_importError</p>
             }
+        </div>
+    </div>
+}
+
+@if (_pendingDelete is { } pd)
+{
+    <div class="modal" @onclick="() => _pendingDelete = null">
+        <div class="modal-body" @onclick:stopPropagation="true">
+            <h3>Delete trade?</h3>
+            <p>@pd.Side @NumberFormat.Qty(pd.Quantity) @TickerFor(pd.InstrumentId) on @pd.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) — this can't be undone.</p>
+            <div class="modal-actions">
+                <button class="btn" @onclick="async () => { await DeleteAsync(pd); _pendingDelete = null; }">Delete</button>
+                <button class="btn ghost" @onclick="() => _pendingDelete = null">Cancel</button>
+            </div>
         </div>
     </div>
 }

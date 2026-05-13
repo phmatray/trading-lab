@@ -25,11 +25,13 @@ public partial class TradesPage : ComponentBase
     private string _focusTicker = "";
 
     private List<Trade> _trades = new();
+    private List<(Trade Trade, decimal CumulativeEur)> _rows = new();
     private Dictionary<int, string> _instrumentTickers = new();
     private int _count;
     private bool _showAdd;
     private bool _showImport;
     private Trade? _editing;
+    private Trade? _pendingDelete;
     private string _csvText = "";
     private string? _importError;
 
@@ -44,6 +46,13 @@ public partial class TradesPage : ComponentBase
         var list = await Repo.ListAsync(new AllTradesSpec(), CancellationToken.None);
         _trades = list.ToList();
         _count = _trades.Count;
+
+        var running = 0m;
+        _rows = _trades.Select(t =>
+        {
+            running += t.IsBuy ? t.NetEur : -t.NetEur;
+            return (t, running);
+        }).ToList();
 
         var instruments = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
         _instrumentTickers = instruments.ToDictionary(i => i.Id, i => i.Ticker);
