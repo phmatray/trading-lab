@@ -114,7 +114,7 @@ Driven adapters — everything that talks to the outside world. Each adapter imp
 - `SystemClock` — adapter implementing `IClock`.
 - Serilog wiring (today in `LoggingModule.cs`).
 - HTTP resilience wiring (`Microsoft.Extensions.Http.Resilience`).
-- The vendor-specific `AnthropicCallFailedException` — thrown by `SuggestionService`, caught and rewrapped as the Application-level `AiCallFailedException` at the port boundary.
+- The vendor-specific `AnthropicCallFailedException` — thrown by `SuggestionService`. **Inherits from** the Application-level `AiCallFailedException` (see §3.2) so Application catch sites use the abstract type and never import `Anthropic.SDK`. No try/catch rewrap needed — CLR substitutability handles the boundary.
 
 NuGet dependencies in Infrastructure: `Microsoft.EntityFrameworkCore.Sqlite`, `Microsoft.EntityFrameworkCore.Design`, `Ardalis.Specification.EntityFrameworkCore`, `Microsoft.Extensions.AI` (concrete), `Anthropic.SDK`, `Microsoft.Extensions.Http.Resilience`, `Serilog.*`. **No** `Atypical.TechnicalAnalysis.*` — that's a pure-compute library used by the Application-side `IndicatorEngine`.
 

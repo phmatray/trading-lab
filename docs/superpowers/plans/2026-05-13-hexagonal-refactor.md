@@ -12,6 +12,8 @@
 
 **Out of scope:** AI suggestion improvements (separate spec, ships after this merges). DB schema changes. Behaviour changes of any kind.
 
+> **`sed` portability:** every `sed -i ''` invocation below is BSD/macOS syntax. On GNU sed (Linux CI, devcontainers, etc.) the empty-string argument is illegal; use `sed -i` (no quotes) instead. Define a one-shot alias at the top of your shell session to stay portable: `sedi() { sed -i.bak "$@" && find . -name '*.bak' -delete; }` and substitute `sedi` for `sed -i ''` everywhere below. The plan keeps the BSD form throughout for readability — translate as needed.
+
 ---
 
 ## File structure — what moves where
@@ -55,7 +57,7 @@ NuGet: `Ardalis.Specification`, `Microsoft.Extensions.AI.Abstractions`, `Microso
   - `Features/Fx/DailyFxCache.cs`
   - `Features/Indicators/IndicatorEngine.cs` (and entire `Indicators/` subtree — Bollinger, History, Ichimoku, MovingAverage, Rsi, Zones folders. All pure-compute except for the bar repo dep.)
   - `Features/Portfolio/PortfolioService.cs`, `GrowthSeriesBuilder.cs`
-  - `Features/PredictionMarkets/PolymarketFilter.cs`, `PolymarketNormalization.cs`, `PolymarketRelevance.cs` (pure logic — providers go to Infra)
+  - `Features/PredictionMarkets/PolymarketFilter.cs`, `PolymarketRelevance.cs` (pure logic at the feature root). `PolymarketNormalizer.cs` lives under `Providers/` and is adapter-internal — it stays with the HTTP provider in Infrastructure (see §3.3).
   - `Features/PriceFeed/DailyPriceCache.cs`
   - `Features/PriceFeed/Specifications/*.cs`
   - `Features/Settings/Config/SettingDescriptor.cs`, `SettingsKeys.cs`, `SettingsModels.cs`, `SettingsRegistry.cs`, `SettingsService.cs`
@@ -82,8 +84,8 @@ NuGet: `Microsoft.EntityFrameworkCore.Sqlite`, `Microsoft.EntityFrameworkCore.De
 - `Features/PriceFeed/Providers/YahooPriceFeed.cs` + `YahooParser.cs` — HTTP adapter implementing `IPriceFeed`.
 - `Features/PriceFeed/PriceFeedHostedService.cs` — background loop, Blazor-host-only.
 - `Features/PredictionMarkets/Providers/PolymarketGammaProvider.cs` — HTTP adapter.
-- `Features/Settings/Config/SettingsReader.cs`, `SettingsSeeder.cs` — DB-backed adapter implementing `ISettingsReader`.
-- `Features/Settings/Providers/YahooMetadataParser.cs` — HTTP-fed parser.
+- `Features/Settings/Config/SettingsReader.cs` — DB-backed adapter implementing `ISettingsReader`.
+- `Features/Settings/Config/SettingsSeederHostedService.cs` — startup seeder; uses `AppDbContext` directly to seed default settings rows.
 - `Common/Time/SystemClock.cs` — clock impl.
 - `Data/SqlitePathResolver.cs` if it lives in TradyStrat (verify location).
 - Per-feature Infrastructure modules (see Phase 5).
@@ -165,16 +167,21 @@ public interface IAppModule
 
 The breaking change: `ConfigureServices(WebApplicationBuilder)` → `ConfigureServices(IServiceCollection, IConfiguration)`. Default no-op bodies on all three methods so consumers can implement just one.
 
-### Task 0.2: Add host-neutral `ConfigureServices` entry point
+### Task 0.2: Add host-neutral `ConfigureServices` entry point — single-composition design
+
+The v3 entry points all share one `AppModuleCollection` instance per call. `configureModules` is invoked **exactly once**; the resulting collection is the single source of truth for both DI registration and (where applicable) middleware/endpoint wiring. Re-invoking the user callback would diverge state if the user uses `AddIf`, `Replace`, or non-idempotent registrations.
 
 **Files:**
 - Modify: `src/TheAppManager/Startup/AppManager.cs`
 
-- [ ] **Step 1: Add the new static method alongside the existing `Start`/`StartAsync` web overloads**
+- [ ] **Step 1: Add the host-neutral overload that composes a collection and returns it for further use**
 
 ```csharp
-// New overload — host-neutral. Does NOT build or run anything.
-public static void ConfigureServices(
+// New host-neutral overload — composes the modules into the supplied services and
+// returns the composed AppModuleCollection so the web overload (and any future
+// non-web host needing middleware-equivalent hooks) can reuse the same instance.
+// Does NOT build or run anything.
+public static AppModuleCollection ConfigureServices(
     IServiceCollection services,
     IConfiguration config,
     Action<AppModuleCollection> configureModules)
@@ -190,10 +197,11 @@ public static void ConfigureServices(
     {
         module.ConfigureServices(services, config);
     }
+    return collection;
 }
 ```
 
-- [ ] **Step 2: Rewrite the web `Start`/`StartAsync` overloads to call the new method internally**
+- [ ] **Step 2: Rewrite the web `Start`/`StartAsync` overloads to reuse the same collection**
 
 ```csharp
 public static void Start(
@@ -204,25 +212,89 @@ public static void Start(
     var builder = WebApplication.CreateBuilder(args);
     configureBuilder?.Invoke(builder);
 
-    ConfigureServices(builder.Services, builder.Configuration, configureModules);
+    // Compose once, hold onto the same collection for the middleware/endpoint passes.
+    var modules = ConfigureServices(builder.Services, builder.Configuration, configureModules);
 
     var app = builder.Build();
 
-    var collection = new AppModuleCollection();
-    configureModules(collection);
-    foreach (var module in collection.GetModules())
-    {
+    foreach (var module in modules.GetModules())
         module.ConfigureMiddleware(app);
-        app.UseEndpoints(eb => module.ConfigureEndpoints(eb));
-    }
+
+    app.MapWhen(_ => true, branch =>
+    {
+        // Endpoints are registered on the app's endpoint route builder.
+    });
+
+    // Endpoint registration uses app directly (WebApplication implements IEndpointRouteBuilder).
+    foreach (var module in modules.GetModules())
+        module.ConfigureEndpoints(app);
 
     app.Run();
 }
+
+public static async Task StartAsync(
+    string[] args,
+    Action<AppModuleCollection> configureModules,
+    Action<WebApplicationBuilder>? configureBuilder = null)
+{
+    var builder = WebApplication.CreateBuilder(args);
+    configureBuilder?.Invoke(builder);
+    var modules = ConfigureServices(builder.Services, builder.Configuration, configureModules);
+    var app = builder.Build();
+    foreach (var module in modules.GetModules()) module.ConfigureMiddleware(app);
+    foreach (var module in modules.GetModules()) module.ConfigureEndpoints(app);
+    await app.RunAsync();
+}
 ```
 
-(`StartAsync` mirrors `Start` but calls `app.RunAsync()`. Both methods iterate the module collection twice — once via `ConfigureServices` for DI, once after build for middleware/endpoints — to keep the public callback API single-pass for users.)
+The user's `configureModules` callback runs **once**; the same `AppModuleCollection` drives services + middleware + endpoints. `AddIf` / `Replace` semantics are now stable.
 
-### Task 0.3: Bump version + publish
+### Task 0.3: Add `AddFromAssemblyOf<T>` predicate overload for selective discovery
+
+**Files:**
+- Modify: `src/TheAppManager/Modules/AppModuleCollection.cs`
+
+The CLI (Phase 7) and any future host that wants to skip background modules needs to exclude specific types during assembly scanning. Add a predicate overload.
+
+- [ ] **Step 1: Add the predicate overload**
+
+```csharp
+public AppModuleCollection AddFromAssemblyOf<TMarker>(Func<Type, bool> predicate)
+    => AddFromAssembly(typeof(TMarker).Assembly, predicate);
+
+public AppModuleCollection AddFromAssembly(Assembly assembly, Func<Type, bool> predicate)
+{
+    ArgumentNullException.ThrowIfNull(assembly);
+    ArgumentNullException.ThrowIfNull(predicate);
+
+    foreach (var module in ModuleDiscovery.DiscoverModules(assembly))
+    {
+        if (predicate(module.GetType()))
+            Add(module);
+    }
+    return this;
+}
+```
+
+The existing parameterless `AddFromAssemblyOf<T>()` / `AddFromAssembly(Assembly)` overloads are kept unchanged — they're shorthand for `predicate = _ => true`.
+
+- [ ] **Step 2: Verify with a quick unit test in TheAppManager's test project**
+
+Skim the existing test fixtures; add one:
+
+```csharp
+[Fact]
+public void AddFromAssemblyOf_with_predicate_skips_matching_types()
+{
+    var c = new AppModuleCollection();
+    c.AddFromAssemblyOf<TestModuleA>(t => t != typeof(TestModuleB));
+    c.GetModules().Should().ContainSingle(m => m is TestModuleA);
+}
+```
+
+Run TheAppManager tests; verify the new test passes.
+
+### Task 0.4: Bump version + publish
 
 **Files:**
 - Modify: `src/TheAppManager/TheAppManager.csproj` — `<Version>3.0.0</Version>` (and any nuspec metadata).
@@ -487,10 +559,12 @@ git commit -m "build: scaffold TradyStrat.Infrastructure project skeleton"
 Add (use the latest 0.49.x for Spectre, 10.0.7 for Hosting at time of writing — verify against current latest on NuGet):
 
 ```xml
-<PackageVersion Include="Spectre.Console" Version="0.49.1" />
-<PackageVersion Include="Spectre.Console.Cli" Version="0.49.1" />
+<PackageVersion Include="Spectre.Console" Version="0.51.1" />
+<PackageVersion Include="Spectre.Console.Cli" Version="0.51.1" />
 <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
 ```
+
+(`0.51.1` is the latest installed locally as of 2026-05-13; check `~/.nuget/packages/spectre.console/` for newer versions on NuGet before pinning.)
 
 - [ ] **Step 3: Add a temporary `Program.cs` placeholder so the project compiles**
 
@@ -1038,25 +1112,24 @@ git add -A
 git commit -m "refactor(application): move PriceFeed port + DailyPriceCache + use cases to TradyStrat.Application"
 ```
 
-### Task 3.8: Move feature folder — PredictionMarkets (split similarly)
+### Task 3.8: Move feature folder — PredictionMarkets (split)
+
+**Verified actual structure** of `TradyStrat/Features/PredictionMarkets/`:
+- Root: `IPredictionMarketProvider.cs`, `MarketCitation.cs`, `MarketSnapshot.cs`, `PolymarketFilter.cs`, `PolymarketRelevance.cs`, `PredictionMarket.cs`
+- `Providers/`: `PolymarketGammaProvider.cs`, `PolymarketNormalizer.cs` (note: **Normalizer**, not Normalization — adapter-internal helper called by `PolymarketGammaProvider`)
 
 **Files:**
-- Move to Application: `IPredictionMarketProvider.cs`, `PolymarketFilter.cs`, `PolymarketNormalization.cs`, `PolymarketRelevance.cs`, any record types in the root
-- Stay (Infrastructure in Phase 4): `Providers/PolymarketGammaProvider.cs`
+- Move to Application: every `*.cs` at the PredictionMarkets root (the port + records + pure logic).
+- Stay (Infrastructure in Phase 4): the entire `Providers/` folder — both `PolymarketGammaProvider.cs` AND `PolymarketNormalizer.cs` (the normalizer is adapter-internal, not pure logic).
 
-- [ ] **Step 1: Move the Application-side files**
+- [ ] **Step 1: Move the Application-side files (root-level only — do NOT touch `Providers/`)**
 
 ```bash
-mkdir -p TradyStrat.Application/PredictionMarkets/Providers
-# Move everything in PredictionMarkets EXCEPT Providers/PolymarketGammaProvider.cs
-find TradyStrat/Features/PredictionMarkets -maxdepth 1 -name "*.cs" -exec git mv {} TradyStrat.Application/PredictionMarkets/ \;
-# Provider port moves; concrete provider stays
-[ -f TradyStrat/Features/PredictionMarkets/Providers/IPredictionMarketProvider.cs ] && \
-  git mv TradyStrat/Features/PredictionMarkets/Providers/IPredictionMarketProvider.cs TradyStrat.Application/PredictionMarkets/Providers/
-# If IPredictionMarketProvider lives directly under PredictionMarkets root (not Providers/), the find above already moved it.
+mkdir -p TradyStrat.Application/PredictionMarkets
+git mv TradyStrat/Features/PredictionMarkets/*.cs TradyStrat.Application/PredictionMarkets/
 ```
 
-> **Verify file locations first** with `ls TradyStrat/Features/PredictionMarkets/`; the actual structure may put the port at the root rather than under `Providers/`.
+The shell glob `*.cs` matches only files at the immediate root, leaving `Providers/PolymarketGammaProvider.cs` and `Providers/PolymarketNormalizer.cs` behind for Phase 4.
 
 - [ ] **Step 2: Rename namespaces**
 
@@ -1167,28 +1240,33 @@ Razor components stay in TradyStrat (Blazor presentation layer)."
 
 ### Task 3.11: Move feature folder — Settings (Application-side)
 
-**Files:**
-- Move to Application: `Settings/Config/*` (except `SettingsReader.cs`, `SettingsSeeder.cs` — those are DB-backed → Infrastructure), `Settings/Specifications/*`, `Settings/UseCases/*`
-- Stay in TradyStrat: `Settings/Components/*.razor*`, `Settings/SettingsPage.razor*`
-- Stay in TradyStrat (Infrastructure in Phase 4): `Settings/Config/SettingsReader.cs`, `Settings/Config/SettingsSeeder.cs`, `Settings/Providers/YahooMetadataParser.cs`
+**Verified actual structure** of `TradyStrat/Features/Settings/Config/`:
+- Port interfaces: `ISettingsReader.cs`, `ISettingsService.cs`
+- Records/registry: `SettingDescriptor.cs`, `SettingsKeys.cs`, `SettingsModels.cs`, `SettingsRegistry.cs`
+- Concrete services: `SettingsService.cs` (pure-domain, uses repo via port), `SettingsReader.cs` (DB-backed adapter), `SettingsSeederHostedService.cs` (background seeder using DbContext)
 
-- [ ] **Step 1: Move Application-side files (the port stays in Config; the impl stays for now)**
+There is **no** `SettingsSeeder.cs` (the original plan mistakenly named the seeder). There is **no** `Settings/Providers/` directory and **no** `YahooMetadataParser.cs` anywhere in the source.
+
+**Files:**
+- Move to Application: `Config/ISettingsReader.cs`, `Config/ISettingsService.cs`, `Config/SettingDescriptor.cs`, `Config/SettingsKeys.cs`, `Config/SettingsModels.cs`, `Config/SettingsRegistry.cs`, `Config/SettingsService.cs`, `Specifications/*.cs`, `UseCases/*.cs`.
+- Stay (Infrastructure in Phase 4): `Config/SettingsReader.cs` (port impl), `Config/SettingsSeederHostedService.cs` (writes to DbContext on startup).
+- Stay in TradyStrat: `Components/*.razor*`, `SettingsPage.razor*`.
+
+- [ ] **Step 1: Move Application-side files**
 
 ```bash
 mkdir -p TradyStrat.Application/Settings/{Config,Specifications,UseCases}
 
-# Config: keep these, move them to Application
-for f in ISettingsReader.cs SettingDescriptor.cs SettingsKeys.cs SettingsModels.cs SettingsRegistry.cs SettingsService.cs; do
+for f in ISettingsReader.cs ISettingsService.cs SettingDescriptor.cs SettingsKeys.cs SettingsModels.cs SettingsRegistry.cs SettingsService.cs; do
   [ -f "TradyStrat/Features/Settings/Config/$f" ] && \
     git mv "TradyStrat/Features/Settings/Config/$f" TradyStrat.Application/Settings/Config/
 done
 
-# Specifications + use cases — entire folders move
 git mv TradyStrat/Features/Settings/Specifications/*.cs TradyStrat.Application/Settings/Specifications/
 git mv TradyStrat/Features/Settings/UseCases/*.cs TradyStrat.Application/Settings/UseCases/
 ```
 
-> If `ISettingsReader.cs` doesn't exist as its own file and instead lives inside `SettingsReader.cs` as an inner interface, **first extract it** before moving. Open `SettingsReader.cs`, copy the interface to a new `ISettingsReader.cs`, commit, then move just that new file.
+After this step, `TradyStrat/Features/Settings/Config/` contains exactly two files: `SettingsReader.cs` and `SettingsSeederHostedService.cs`. Both move to Infrastructure in Phase 4.
 
 - [ ] **Step 2: Rename namespaces**
 
@@ -1214,7 +1292,7 @@ Run: `dotnet build TradyStrat.Application/TradyStrat.Application.csproj`
 git add -A
 git commit -m "refactor(application): move Settings port + use cases + specs to TradyStrat.Application
 
-SettingsReader (DB-backed adapter) and YahooMetadataParser (HTTP-fed)
+SettingsReader (DB-backed adapter) and SettingsSeederHostedService
 stay in TradyStrat for now; move to Infrastructure in Phase 4."
 ```
 
@@ -1287,7 +1365,7 @@ Expected after Phase 3:
 - `TradyStrat/Features/Fx/Providers/YahooFxProvider.cs` (moves Phase 4)
 - `TradyStrat/Features/PriceFeed/Providers/YahooPriceFeed.cs`, `YahooParser.cs`, `PriceFeedHostedService.cs` (Phase 4)
 - `TradyStrat/Features/PredictionMarkets/Providers/PolymarketGammaProvider.cs` (Phase 4)
-- `TradyStrat/Features/Settings/Config/SettingsReader.cs`, `SettingsSeeder.cs`, `Providers/YahooMetadataParser.cs` (Phase 4)
+- `TradyStrat/Features/Settings/Config/SettingsReader.cs`, `SettingsSeederHostedService.cs` (Phase 4)
 - `TradyStrat/Data/AppDbContext.cs`, all `Data/Migrations/*.cs`, `Data/SqlitePathResolver.cs` (Phase 4)
 - `TradyStrat/Modules/*.cs` (Phase 5)
 - `TradyStrat/Program.cs` (Phase 6)
@@ -1514,13 +1592,19 @@ git add -A
 git commit -m "refactor(infrastructure): move SystemClock to TradyStrat.Infrastructure"
 ```
 
-### Task 4.5: Move HTTP adapters — YahooFxProvider, YahooPriceFeed, YahooParser, PolymarketGammaProvider, YahooMetadataParser
+### Task 4.5: Move HTTP adapters + DB-backed Settings impls + EfRepositoryShim
 
-**Files:**
-- Move: `TradyStrat/Features/Fx/Providers/YahooFxProvider.cs` → `TradyStrat.Infrastructure/Fx/Providers/YahooFxProvider.cs`
-- Move: `TradyStrat/Features/PriceFeed/Providers/YahooPriceFeed.cs`, `YahooParser.cs` → `TradyStrat.Infrastructure/PriceFeed/Providers/`
-- Move: `TradyStrat/Features/PredictionMarkets/Providers/PolymarketGammaProvider.cs` → `TradyStrat.Infrastructure/PredictionMarkets/Providers/`
-- Move: `TradyStrat/Features/Settings/Providers/YahooMetadataParser.cs` → `TradyStrat.Infrastructure/Settings/Providers/`
+**Files to move:**
+- `TradyStrat/Features/Fx/Providers/YahooFxProvider.cs` → `TradyStrat.Infrastructure/Fx/Providers/YahooFxProvider.cs`
+- `TradyStrat/Features/PriceFeed/Providers/YahooPriceFeed.cs`, `YahooParser.cs` → `TradyStrat.Infrastructure/PriceFeed/Providers/`
+- `TradyStrat/Features/PriceFeed/PriceFeedHostedService.cs` → `TradyStrat.Infrastructure/PriceFeed/`
+- `TradyStrat/Features/PredictionMarkets/Providers/PolymarketGammaProvider.cs` → `TradyStrat.Infrastructure/PredictionMarkets/Providers/`
+- `TradyStrat/Features/PredictionMarkets/Providers/PolymarketNormalizer.cs` → `TradyStrat.Infrastructure/PredictionMarkets/Providers/` (adapter-internal helper)
+- `TradyStrat/Features/Settings/Config/SettingsReader.cs` → `TradyStrat.Infrastructure/Settings/Config/`
+- `TradyStrat/Features/Settings/Config/SettingsSeederHostedService.cs` → `TradyStrat.Infrastructure/Settings/Config/`
+- `EfRepositoryShim<T>` (the internal generic Ardalis adapter currently defined at the bottom of `TradyStrat/Modules/DatabaseModule.cs`) → extract to `TradyStrat.Infrastructure/Data/EfRepositoryShim.cs` before deleting `DatabaseModule.cs` in Phase 5.
+
+There is **no** `YahooMetadataParser` in the source — earlier plan drafts named it incorrectly.
 
 - [ ] **Step 1: Move FX provider**
 
@@ -1570,19 +1654,39 @@ sed -i '' 's|namespace TradyStrat\.Features\.PredictionMarkets\.Providers;|names
 
 Add `using TradyStrat.Application.PredictionMarkets;` (or `...Providers;`, wherever `IPredictionMarketProvider` ended up).
 
-- [ ] **Step 5: Move SettingsReader, SettingsSeeder, YahooMetadataParser**
+- [ ] **Step 5: Move SettingsReader + SettingsSeederHostedService**
 
 ```bash
-mkdir -p TradyStrat.Infrastructure/Settings/{Config,Providers}
+mkdir -p TradyStrat.Infrastructure/Settings/Config
 git mv TradyStrat/Features/Settings/Config/SettingsReader.cs TradyStrat.Infrastructure/Settings/Config/
-git mv TradyStrat/Features/Settings/Config/SettingsSeeder.cs TradyStrat.Infrastructure/Settings/Config/
-git mv TradyStrat/Features/Settings/Providers/YahooMetadataParser.cs TradyStrat.Infrastructure/Settings/Providers/
+git mv TradyStrat/Features/Settings/Config/SettingsSeederHostedService.cs TradyStrat.Infrastructure/Settings/Config/
 
 find TradyStrat.Infrastructure/Settings -name "*.cs" -exec sed -i '' \
   's|namespace TradyStrat\.Features\.Settings|namespace TradyStrat.Infrastructure.Settings|g' {} +
 ```
 
-Add `using TradyStrat.Application.Settings.Config;` to `SettingsReader.cs` and `SettingsSeeder.cs`.
+Add `using TradyStrat.Application.Settings.Config;` to both moved files (they reference `ISettingsReader`, `ISettingsService`, `ISettingsRegistry`, `SettingDescriptor`, etc., which all moved to Application in Phase 3.11).
+
+- [ ] **Step 5b: Extract `EfRepositoryShim<T>` from `DatabaseModule.cs` into its own file in Infrastructure**
+
+The current `TradyStrat/Modules/DatabaseModule.cs` ends with:
+
+```csharp
+internal sealed class EfRepositoryShim<T>(AppDbContext db) : RepositoryBase<T>(db) where T : class { }
+```
+
+Before deleting `DatabaseModule.cs` in Phase 5, extract this class:
+
+```csharp
+// TradyStrat.Infrastructure/Data/EfRepositoryShim.cs
+using Ardalis.Specification.EntityFrameworkCore;
+
+namespace TradyStrat.Infrastructure.Data;
+
+internal sealed class EfRepositoryShim<T>(AppDbContext db) : RepositoryBase<T>(db) where T : class { }
+```
+
+The shim is used by `DatabaseInfrastructureModule` (Task 5.4) to register `IRepositoryBase<>` and `IReadRepositoryBase<>` against EF.
 
 - [ ] **Step 6: Verify Infrastructure builds**
 
@@ -1757,21 +1861,26 @@ git commit -m "refactor(infrastructure): add AiSuggestionInfrastructureModule (A
 
 Repeat the Task 5.2/5.3 pattern for each feature. Refer to the table in the spec (§5) for the full mapping. The list is reproduced here for convenience:
 
-| Feature | Application module | Infrastructure module |
-|---|---|---|
-| AiSuggestion | ✓ (Task 5.2) | ✓ (Task 5.3) |
-| Dashboard | `DashboardApplicationModule` (LoadDashboardUseCase, EntryNavigationService, etc.) | — |
-| Database | — | `DatabaseInfrastructureModule` (AppDbContext, Ardalis repo factories, IClock impl) |
-| Fx | `FxApplicationModule` (FxConverter, DailyFxCache) | `FxInfrastructureModule` (HttpClient<IFxRateProvider, YahooFxProvider>) |
-| Hosting / Logging | — | `HostingInfrastructureModule` (Serilog, resilience pipeline) |
-| Indicators | `IndicatorsApplicationModule` (IndicatorEngine, history providers, zone classifier) | — |
-| Portfolio | `PortfolioApplicationModule` (PortfolioService, GrowthSeriesBuilder) | — |
-| PredictionMarkets | `PredictionMarketsApplicationModule` (filter, normalization, relevance) | `PredictionMarketsInfrastructureModule` (HttpClient<IPredictionMarketProvider, PolymarketGammaProvider>) |
-| PriceFeed | `PriceFeedApplicationModule` (DailyPriceCache only; the `RefreshAllPricesUseCase` registration from the old `PricesUseCasesModule` folds in here) | `PriceFeedInfrastructureModule` (HttpClient<IPriceFeed, YahooPriceFeed>) + `PriceFeedBackgroundInfrastructureModule` (PriceFeedHostedService — registered separately so the CLI can skip it) |
-| Settings | `SettingsApplicationModule` (use cases, SettingsService, SettingsRegistry) | `SettingsInfrastructureModule` (SettingsReader as ISettingsReader, SettingsSeeder, YahooMetadataParser HTTP client) |
-| Trades | `TradesApplicationModule` (use cases, CsvImportService) | — |
+| Feature | Application module | Infrastructure module(s) | Where else |
+|---|---|---|---|
+| AiSuggestion | ✓ (Task 5.2) | ✓ (Task 5.3) | — |
+| Dashboard | `DashboardApplicationModule` — `services.AddScoped<LoadDashboardUseCase>()`, `services.AddScoped<IEntryNavigationService, EntryNavigationService>()` | — | — |
+| Database | — | `DatabaseInfrastructureModule` — resolves dbPath via `SqlitePathResolver`, registers `AppDbContext` with `UseSqlite`, registers open-generic `IRepositoryBase<>` and `IReadRepositoryBase<>` → `EfRepositoryShim<>`, registers `IClock` → `SystemClock`. Also implements `ConfigureMiddleware(WebApplication)` to call `Database.Migrate()` at startup (mirrors current `DatabaseModule.ConfigureMiddleware`). | — |
+| Fx | `FxApplicationModule` — `services.AddScoped<DailyFxCache>()`, `services.AddScoped<FxConverter>()` | `FxInfrastructureModule` — `services.AddHttpClient<IFxRateProvider, YahooFxProvider>(...)` with base URL `https://query1.finance.yahoo.com`, 15s timeout, `TradyStrat/1.0` UA, `.AddStandardResilienceHandler()` | — |
+| Logging | — | `LoggingInfrastructureModule` — full Serilog wiring from current `LoggingModule.cs` (file sink under `~/Library/Application Support/TradyStrat/logs`, console sink, daily rolling, 14-day retention) | — |
+| Indicators | `IndicatorsApplicationModule` — four `AddSingleton<IZoneRule, ...>` (Bollinger, Rsi, MovingAverage, Ichimoku), `AddScoped<ZoneClassifier>()`, four `AddScoped<IIndicatorHistoryProvider, ...>`, `AddScoped<IIndicatorHistoryProviderFactory, IndicatorHistoryProviderFactory>()`, `AddScoped<IndicatorEngine>()` | — | — |
+| Portfolio | `PortfolioApplicationModule` — `AddScoped<PortfolioService>()`, `AddScoped<GrowthSeriesBuilder>()` | — | — |
+| PredictionMarkets | — | `PredictionMarketsInfrastructureModule` — `AddHttpClient<IPredictionMarketProvider, PolymarketGammaProvider>(...)` with base URL `https://gamma-api.polymarket.com`, 10s timeout, UA, resilience | — |
+| PriceFeed | `PriceFeedApplicationModule` — `AddScoped<DailyPriceCache>()`, `AddScoped<RefreshAllPricesUseCase>()` (absorbed from the deleted `PricesUseCasesModule`) | `PriceFeedInfrastructureModule` — `AddHttpClient<IPriceFeed, YahooPriceFeed>(...)` only. AND `PriceFeedBackgroundInfrastructureModule` — `AddHostedService<PriceFeedHostedService>()` only (kept separate so the CLI can exclude it via the predicate overload from Task 0.3). | — |
+| Settings | `SettingsApplicationModule` — `AddSingleton<ISettingsRegistry, SettingsRegistry>()`, `AddScoped<ISettingsService, SettingsService>()`, plus all use cases: `AddScoped<UpdateSettingUseCase>()`, `AddScoped<UpdateGoalUseCase>()`, `AddScoped<ProbeInstrumentUseCase>()`, `AddScoped<AddInstrumentUseCase>()`, `AddScoped<ListInstrumentsUseCase>()` | `SettingsInfrastructureModule` — `AddScoped<ISettingsReader, SettingsReader>()`, `AddHostedService<SettingsSeederHostedService>()` | — |
+| Trades | `TradesApplicationModule` — `AddScoped<LogTradeUseCase>()`, `AddScoped<EditTradeUseCase>()`, `AddScoped<DeleteTradeUseCase>()`, `AddScoped<ImportTradesCsvUseCase>()` | — | — |
+| Blazor hosting | — | — | `BlazorHostingModule` in **TradyStrat** (Razor) — `AddRazorComponents().AddInteractiveServerComponents()`; `ConfigureMiddleware`: `UseStaticFiles()`, `UseAntiforgery()`; `ConfigureEndpoints`: `MapRazorComponents<App>().AddInteractiveServerRenderMode()`. Kestrel port pin moves to `Program.cs` via the `configureBuilder` callback (web-host-specific, can't sit in a host-neutral module). |
 
-> **Note on `PricesUseCasesModule`:** the old module is a one-line wrapper that registers `RefreshAllPricesUseCase`. Fold this single registration into `PriceFeedApplicationModule` rather than create a `PricesApplicationModule` — same feature, no value in a separate class. (The spec table contains a `PricesApplicationModule` row, but it has only one registration that naturally belongs with the rest of the PriceFeed feature; consolidate.)
+> **`PolymarketFilter` / `PolymarketRelevance`:** these are pure-logic static helpers used by both `PolymarketGammaProvider` (Infrastructure) and `LoadDashboardUseCase` (Application). They moved to Application in Task 3.8 — Infrastructure references them via the Application project reference. No separate DI registration is needed (they are `static class`es).
+
+> **`PolymarketNormalizer`:** moved to **Infrastructure** in Task 4.5 (adapter-internal, used only by `PolymarketGammaProvider`). No DI registration needed.
+
+> **Kestrel pinning:** the previous `HostingModule.cs` called `builder.WebHost.ConfigureKestrel(opt => opt.ListenLocalhost(5180))`. The v3 `IAppModule.ConfigureServices(IServiceCollection, IConfiguration)` cannot reach `WebApplicationBuilder.WebHost`, so this configuration **moves to `Program.cs`** via the v3 `configureBuilder` callback (see Task 6.1).
 
 For each row above (skip rows marked ✓ — they're done):
 
@@ -1827,6 +1936,64 @@ E.g.: `git commit -m "refactor(modules): add Dashboard application module"`.
 
 > **`DatabaseInfrastructureModule`:** owns `services.AddDbContext<AppDbContext>(...)`, the SQLite connection string resolution via `SqlitePathResolver`, the Ardalis `IRepositoryBase<T>` / `IReadRepositoryBase<T>` open-generic registrations, AND the `IClock` → `SystemClock` registration. The "database" module name is a misnomer — really "platform infrastructure" — but matches the existing convention.
 
+### Task 5.4b: Create `BlazorHostingModule` in the Blazor project
+
+**Files:**
+- Create: `TradyStrat/BlazorHostingModule.cs`
+
+This module is the Blazor presentation-layer's IAppModule. It lives in the **TradyStrat** project (not Application or Infrastructure) because Razor components and middleware are intrinsically Blazor concerns. The CLI does not load this module (no Razor in a CLI).
+
+- [ ] **Step 1: Create the module**
+
+```csharp
+// TradyStrat/BlazorHostingModule.cs
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TheAppManager.Modules;
+using TradyStrat.Features.Shell;
+
+namespace TradyStrat;
+
+public sealed class BlazorHostingModule : IAppModule
+{
+    public void ConfigureServices(IServiceCollection services, IConfiguration config)
+    {
+        services.AddRazorComponents().AddInteractiveServerComponents();
+    }
+
+    public void ConfigureMiddleware(WebApplication app)
+    {
+        app.UseStaticFiles();
+        app.UseAntiforgery();
+    }
+
+    public void ConfigureEndpoints(IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+    }
+}
+```
+
+The `App` type is the existing top-level Razor component in `TradyStrat/Features/Shell/`. It's already exposed via `using TradyStrat.Features.Shell;`.
+
+- [ ] **Step 2: Build TradyStrat**
+
+Run: `dotnet build TradyStrat/TradyStrat.csproj`
+
+Expected: succeeds (TheAppManager v3 signature, AddRazorComponents call OK on `IServiceCollection`).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add TradyStrat/BlazorHostingModule.cs
+git commit -m "refactor(blazor): add BlazorHostingModule (Razor components + middleware + endpoints)
+
+Stays in TradyStrat — Blazor presentation concerns don't belong in
+Application or Infrastructure. The CLI does not load this module."
+```
+
 ### Task 5.5: Delete the old `TradyStrat/Modules/*.cs` files
 
 **Files:**
@@ -1872,9 +2039,16 @@ using TheAppManager.Startup;
 using TradyStrat.Application;
 using TradyStrat.Infrastructure;
 
-AppManager.Start(args, modules => modules
-    .AddFromAssemblyOf<ApplicationAssemblyMarker>()
-    .AddFromAssemblyOf<InfrastructureAssemblyMarker>());
+AppManager.Start(args,
+    modules => modules
+        .AddFromAssemblyOf<ApplicationAssemblyMarker>()
+        .AddFromAssemblyOf<InfrastructureAssemblyMarker>()
+        .Add<TradyStrat.BlazorHostingModule>(),
+    builder =>
+    {
+        // Web-host-specific configuration that v3 IAppModule cannot reach.
+        builder.WebHost.ConfigureKestrel(opt => opt.ListenLocalhost(5180));
+    });
 
 namespace TradyStrat
 {
@@ -1882,7 +2056,9 @@ namespace TradyStrat
 }
 ```
 
-The `Program` partial-class declaration is preserved so `WebApplicationFactory<Program>` in `E2E.Tests` continues to work.
+`BlazorHostingModule` is added explicitly because it lives in the TradyStrat assembly itself (not Application or Infrastructure), so the assembly-scan calls don't pick it up by accident.
+
+The `Program` partial-class declaration is preserved so `WebApplicationFactory<Program>` in `E2E.Tests` continues to work. Make it `public partial class Program` to allow `internal`-default top-level statements to be referenced from the test project (top-level `Program` is implicitly `internal`; the partial declaration must match — both should be `public` for the test factory).
 
 - [ ] **Step 2: Build TradyStrat**
 
@@ -1894,7 +2070,7 @@ Expected: build succeeds.
 
 Run: `dotnet run --project TradyStrat &`
 
-Wait ~5 seconds. Visit `http://localhost:5000` (or whatever port appsettings specifies) — the dashboard renders. Stop with `kill %1`.
+Wait ~5 seconds. Visit `http://localhost:5180` (the Kestrel port pinned in `Program.cs` via `configureBuilder`) — the dashboard renders. Stop with `kill %1`.
 
 If the app fails to start, the cause is typically a missing registration — `Required service for type X has not been registered`. Open the failing module's old equivalent in git history (`git show HEAD~N:TradyStrat/Modules/<Name>Module.cs`) and confirm every `services.Add...` line has a counterpart in the new modules.
 
@@ -1960,35 +2136,45 @@ Infrastructure project reference."
 
 ## Phase 7 — Wire `TradyStrat.Cli` with HelloCommand
 
-### Task 7.1: Implement `HostTypeRegistrar`
+### Task 7.1: Implement `HostTypeRegistrar` and `HostTypeResolver`
 
 **Files:**
 - Create: `TradyStrat.Cli/HostTypeRegistrar.cs`
 
-- [ ] **Step 1: Write the registrar**
+**Design:** the CLI's host owns the lifetime — we let `IHost` build the provider so `IHostedService`s start correctly, `IHostLifetime` is wired, and Serilog/logging are available. Spectre's registrar interface lets us register additional services (Spectre adds its own command types via `Register*`). We add those to the host's `IServiceCollection` **before** `builder.Build()` runs, then hand Spectre a resolver wrapping `host.Services` (a true Adapter — no second `BuildServiceProvider`).
+
+The lifecycle: (1) configure services via TheAppManager v3, (2) construct `HostTypeRegistrar(builder.Services)` and pass it to `CommandApp`, (3) Spectre calls `Register*` synchronously inside `app.Configure(...)` to register its command types into the still-mutable collection, (4) call `builder.Build()` to materialize `IHost`, (5) hand `host.Services` to the registrar via `BindHost(host)` before Spectre asks for the resolver via `Build()`.
+
+- [ ] **Step 1: Write the registrar + resolver**
 
 ```csharp
 // TradyStrat.Cli/HostTypeRegistrar.cs
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 
 namespace TradyStrat.Cli;
 
 /// <summary>
-/// Adapts an existing IServiceProvider to Spectre.Console.Cli's ITypeRegistrar
-/// interface so commands resolve through the same DI container as the host.
-/// Registrations made via the registrar's Register* methods are added to the
-/// underlying IServiceCollection BEFORE the host is built (Spectre calls
-/// these during app.Configure(...)).
+/// Spectre.Console.Cli registrar that adds Spectre's command/settings types to the
+/// host's IServiceCollection *before* the host is built, then resolves via the
+/// host's built IServiceProvider. Two-phase: (1) collect registrations; (2) bind
+/// to the built IHost so resolution sees the same provider that started hosted
+/// services and configured logging.
 /// </summary>
 internal sealed class HostTypeRegistrar(IServiceCollection services) : ITypeRegistrar
 {
-    private IServiceProvider? _provider;
+    private IHost? _host;
+
+    /// <summary>Called after builder.Build() to provide the resolver's backing provider.</summary>
+    public void BindHost(IHost host) => _host = host;
 
     public ITypeResolver Build()
     {
-        _provider = services.BuildServiceProvider();
-        return new HostTypeResolver(_provider);
+        if (_host is null)
+            throw new InvalidOperationException(
+                "HostTypeRegistrar.BindHost(host) must be called after builder.Build() and before CommandApp.Run.");
+        return new HostTypeResolver(_host.Services);
     }
 
     public void Register(Type service, Type implementation) =>
@@ -2000,19 +2186,16 @@ internal sealed class HostTypeRegistrar(IServiceCollection services) : ITypeRegi
     public void RegisterLazy(Type service, Func<object> func) =>
         services.AddSingleton(service, _ => func());
 
-    private sealed class HostTypeResolver(IServiceProvider provider) : ITypeResolver, IDisposable
+    private sealed class HostTypeResolver(IServiceProvider provider) : ITypeResolver
     {
         public object? Resolve(Type? type) => type is null ? null : provider.GetService(type);
-
-        public void Dispose()
-        {
-            if (provider is IDisposable d) d.Dispose();
-        }
     }
 }
 ```
 
-> The registrar takes the still-mutable `IServiceCollection` so Spectre can add its own command types before `BuildServiceProvider()` runs. The CLI's `Program.cs` calls `AppManager.ConfigureServices(services, config, ...)` first, then passes the same collection to `new HostTypeRegistrar(services)`, then `app.Configure(c => c.AddCommand<HelloCommand>("hello"))` registers commands via the registrar. The provider is built when Spectre invokes `Build()`.
+Notes:
+- The resolver does **not** implement `IDisposable` — the host owns the provider, and disposing it would tear down `IHost` prematurely. `await host.RunAsync()` or `await using var host = ...` controls disposal.
+- `BindHost` enforces the ordering invariant: a fresh registrar can't be `Build()`-ed before the host is materialized.
 
 - [ ] **Step 2: Build the CLI project**
 
@@ -2067,10 +2250,9 @@ git commit -m "feat(cli): add HelloCommand placeholder to prove Spectre wiring"
 
 ```csharp
 // TradyStrat.Cli/Program.cs
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
+using TheAppManager.Modules;
 using TheAppManager.Startup;
 using TradyStrat.Application;
 using TradyStrat.Cli;
@@ -2079,10 +2261,15 @@ using TradyStrat.Infrastructure;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Compose modules into the host's service collection. The CLI excludes
+// PriceFeedBackgroundInfrastructureModule (background hosted service that
+// polls Yahoo for prices) — replay reads stored bars, doesn't need it.
 AppManager.ConfigureServices(builder.Services, builder.Configuration, modules => modules
     .AddFromAssemblyOf<ApplicationAssemblyMarker>()
-    .AddFromAssemblyOf<InfrastructureAssemblyMarker>());
+    .AddFromAssemblyOf<InfrastructureAssemblyMarker>(t =>
+        t.Name != "PriceFeedBackgroundInfrastructureModule"));
 
+// Construct Spectre registrar; it adds its own command types into builder.Services.
 var registrar = new HostTypeRegistrar(builder.Services);
 var app = new CommandApp(registrar);
 app.Configure(c =>
@@ -2090,8 +2277,25 @@ app.Configure(c =>
     c.AddCommand<HelloCommand>("hello").WithDescription("Verifies the CLI is wired.");
 });
 
-return await app.RunAsync(args);
+// Build the host AFTER Spectre has added its registrations. The built host's
+// IServiceProvider is what Spectre resolves commands from.
+using var host = builder.Build();
+registrar.BindHost(host);
+
+// IHostedService startup / shutdown is handled by host.RunAsync — but for a one-shot
+// CLI command we explicitly start, run the command, then stop.
+await host.StartAsync();
+try
+{
+    return await app.RunAsync(args);
+}
+finally
+{
+    await host.StopAsync();
+}
 ```
+
+The startup/shutdown bracketing ensures any `IHostedService`s registered by the CLI's selected modules get a chance to initialize before the command runs (and dispose cleanly afterward). For the placeholder `hello` command there are no hosted services, but the pattern is right for `ReplayCommand` (successor spec) which expects EF migrations to have been applied.
 
 - [ ] **Step 2: Build the CLI**
 
@@ -2278,7 +2482,8 @@ Full list (preserve the folder names for ease of mapping):
 - `Fx/TestRepo.cs` → Application.Tests
 - `Indicators/**` → Application.Tests
 - `Portfolio/*Tests.cs` → Application.Tests
-- `PredictionMarkets/Polymarket*Tests.cs` (filter, normalization, relevance) → Application.Tests
+- `PredictionMarkets/PolymarketFilterTests.cs`, `PolymarketRelevanceTests.cs` → Application.Tests (their SUTs `PolymarketFilter` / `PolymarketRelevance` are pure Application logic)
+- `PredictionMarkets/PolymarketNormalizationTests.cs` → **Infrastructure.Tests** (the test's SUT is `PolymarketNormalizer` from `Providers/`, which lives in Infrastructure)
 - `PredictionMarkets/Providers/PolymarketGammaProviderTests.cs` → **Infrastructure.Tests**
 - `PriceFeed/DailyPriceCacheTests.cs` → Application.Tests
 - `PriceFeed/PriceFeedHostedServiceTests.cs` → **Infrastructure.Tests**
@@ -2292,7 +2497,7 @@ Full list (preserve the folder names for ease of mapping):
 - `Settings/Config/SettingsSeederTests.cs` → **Infrastructure.Tests**
 - `Settings/Config/SettingsServiceTests.cs` → Application.Tests
 - `Settings/FakeSettingsReader.cs` → Application.Tests
-- `Settings/Providers/YahooMetadataParserTests.cs` → **Infrastructure.Tests**
+- `Settings/Providers/YahooMetadataParserTests.cs` → **Infrastructure.Tests** (despite its name + folder, this test exercises `YahooParser.ParseMetadata(...)` from `PriceFeed/Providers/` — the SUT is the price-feed parser. Keep the file at `Infrastructure.Tests/Settings/Providers/` to preserve fixture-path resolution, OR move to `PriceFeed/Providers/`; either works, but if moving, update the `Path.Combine("Settings", "Providers", "Fixtures", ...)` calls inside the test.)
 - `Settings/Specifications/InstrumentSpecTests.cs` → Application.Tests
 - `Settings/UseCases/*.cs` → Application.Tests
 - `Specifications/InMemoryDb.cs` → Application.Tests
@@ -2314,7 +2519,19 @@ mkdir -p TradyStrat.Application.Tests/AiSuggestion/{CallDiff,Snapshot,UseCases}
 git mv TradyStrat.Tests/AiSuggestion/CallDiff/CallDiffBuilderTests.cs TradyStrat.Application.Tests/AiSuggestion/CallDiff/
 git mv TradyStrat.Tests/AiSuggestion/FakeChatClient.cs TradyStrat.Application.Tests/AiSuggestion/
 git mv TradyStrat.Tests/AiSuggestion/Snapshot/AiSnapshotServiceTests.cs TradyStrat.Application.Tests/AiSuggestion/Snapshot/
-git mv TradyStrat.Tests/AiSuggestion/UseCases/*.cs TradyStrat.Application.Tests/AiSuggestion/UseCases/
+
+# Move ONLY the use-case tests + StubSnapshotFactory (Application-side fixture).
+# StubAiClient stays put for now — it's used by both Application and Infrastructure
+# tests, so it moves to Application.Tests in this step and Infrastructure.Tests
+# references it as a linked file in Task 8.4 (an Application.Tests <Compile> ItemGroup
+# with Link is added, since cross-test-project source-sharing is the standard pattern).
+git mv TradyStrat.Tests/AiSuggestion/UseCases/StubSnapshotFactory.cs TradyStrat.Application.Tests/AiSuggestion/UseCases/
+git mv TradyStrat.Tests/AiSuggestion/UseCases/StubAiClient.cs TradyStrat.Application.Tests/AiSuggestion/UseCases/
+for f in BackfillSuggestionsUseCaseTests.cs ForceRefetchSuggestionUseCaseTests.cs \
+         GetAllTodaysSuggestionsUseCaseTests.cs GetTodaysSuggestionUseCaseTests.cs; do
+  [ -f "TradyStrat.Tests/AiSuggestion/UseCases/$f" ] && \
+    git mv "TradyStrat.Tests/AiSuggestion/UseCases/$f" TradyStrat.Application.Tests/AiSuggestion/UseCases/
+done
 
 # Common
 mkdir -p TradyStrat.Application.Tests/{Time,UseCases,Formatting}
@@ -2346,8 +2563,8 @@ git mv TradyStrat.Tests/Portfolio/*.cs TradyStrat.Application.Tests/Portfolio/
 # PredictionMarkets (Application-side)
 mkdir -p TradyStrat.Application.Tests/PredictionMarkets
 git mv TradyStrat.Tests/PredictionMarkets/PolymarketFilterTests.cs TradyStrat.Application.Tests/PredictionMarkets/
-git mv TradyStrat.Tests/PredictionMarkets/PolymarketNormalizationTests.cs TradyStrat.Application.Tests/PredictionMarkets/
 git mv TradyStrat.Tests/PredictionMarkets/PolymarketRelevanceTests.cs TradyStrat.Application.Tests/PredictionMarkets/
+# PolymarketNormalizationTests tests the Normalizer in Providers/ (Infrastructure) — moved in Task 8.4 instead.
 
 # PriceFeed (Application-side)
 mkdir -p TradyStrat.Application.Tests/PriceFeed/Providers
@@ -2433,8 +2650,14 @@ mkdir -p TradyStrat.Infrastructure.Tests/{AiSuggestion,Data,Fx/Providers,Predict
 git mv TradyStrat.Tests/AiSuggestion/Backfill/SuggestionBackfillCoordinatorTests.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
 git mv TradyStrat.Tests/AiSuggestion/Citations/SuggestionServiceCitationTests.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
 git mv TradyStrat.Tests/AiSuggestion/SuggestionServiceTests.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
-git mv TradyStrat.Tests/AiSuggestion/UseCases/StubAiClient.cs TradyStrat.Infrastructure.Tests/AiSuggestion/ 2>/dev/null \
-  || cp TradyStrat.Application.Tests/AiSuggestion/UseCases/StubAiClient.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
+
+# StubAiClient is shared between Application.Tests and Infrastructure.Tests.
+# Don't duplicate the source — link it from Application.Tests via the csproj.
+# Add this to TradyStrat.Infrastructure.Tests.csproj inside an <ItemGroup>:
+#     <Compile Include="..\TradyStrat.Application.Tests\AiSuggestion\UseCases\StubAiClient.cs"
+#              Link="AiSuggestion\StubAiClient.cs" />
+# Edit the csproj now if SuggestionServiceTests / SuggestionBackfillCoordinatorTests
+# reference StubAiClient (they likely do — verify with grep before continuing).
 
 git mv TradyStrat.Tests/Common/Time/SystemClockTests.cs TradyStrat.Infrastructure.Tests/Time/
 
@@ -2442,6 +2665,7 @@ git mv TradyStrat.Tests/Data/*.cs TradyStrat.Infrastructure.Tests/Data/
 
 git mv TradyStrat.Tests/Fx/Providers/YahooFxProviderTests.cs TradyStrat.Infrastructure.Tests/Fx/Providers/
 
+git mv TradyStrat.Tests/PredictionMarkets/PolymarketNormalizationTests.cs TradyStrat.Infrastructure.Tests/PredictionMarkets/Providers/
 git mv TradyStrat.Tests/PredictionMarkets/Providers/PolymarketGammaProviderTests.cs TradyStrat.Infrastructure.Tests/PredictionMarkets/Providers/
 
 git mv TradyStrat.Tests/PriceFeed/PriceFeedHostedServiceTests.cs TradyStrat.Infrastructure.Tests/PriceFeed/
@@ -2596,11 +2820,13 @@ Expected: every test in every project passes. Count matches (or exceeds, if any 
 
 - [ ] **Step 1: Run the Blazor app and verify the dashboard renders**
 
+The Kestrel pin from `HostingModule.cs` moves to `Program.cs` (Task 6.1) but keeps the same port: `5180`. If the smoke fails on this port, check that `Program.cs`'s `builder.WebHost.ConfigureKestrel(opt => opt.ListenLocalhost(5180))` is present.
+
 Run:
 ```bash
 dotnet run --project TradyStrat &
 sleep 8
-curl -s http://localhost:5000 | head -40
+curl -s http://localhost:5180 | head -40
 kill %1
 ```
 
