@@ -2,25 +2,54 @@
 
 @if (Snapshot.Markets.Count > 0)
 {
+    var g = Group();
     <div class="markets-rail">
         <h2 class="rail-label section-heading"><span class="section-roman">IV.</span>Polymarket · @Snapshot.Markets.Count markets</h2>
-        <div class="market-tiles">
-            @foreach (var m in Snapshot.Markets)
-            {
-                var citation = _bySlug.GetValueOrDefault(m.Slug);
-                <div class="tile @(citation is not null ? "cited" : "")">
-                    <div class="prob">@m.Probability.ToString("P0", FrFr)</div>
-                    <div class="question">@m.Question</div>
-                    <div class="meta">
-                        @m.EndDate.ToString("d MMM yyyy", FrFr) ·
-                        vol $@m.VolumeUsd.ToString("N0", FrFr)
+
+        @if (g.Cited.Count > 0)
+        {
+            <div class="market-tiles">
+                @foreach (var m in g.Cited)
+                {
+                    <div class="tile cited">
+                        <div class="prob">@m.Probability.ToString("P0", FrFr)</div>
+                        <div class="question">@m.Question</div>
+                        <div class="meta">@m.EndDate.ToString("d MMM yyyy", FrFr) · vol $@m.VolumeUsd.ToString("N0", FrFr)</div>
+                        <div class="claim">★ @_bySlug[m.Slug].Claim</div>
                     </div>
-                    @if (citation is not null)
+                }
+            </div>
+        }
+
+        @if (g.Ladder.Count > 0)
+        {
+            <div class="ladder">
+                <span class="ladder-label">Fed rate cuts, 2026</span>
+                <div class="ladder-row">
+                    @foreach (var i in VisibleBucketIndices(g.Ladder))
                     {
-                        <div class="claim">★ @citation.Claim</div>
+                        var b = g.Ladder[i];
+                        <span class="ladder-bucket @(b.Probability >= 0.30m ? "lead" : "")">
+                            <span class="lb-n">@(b.OrMore ? $"{b.Cuts}+" : b.Cuts.ToString())</span>
+                            <span class="lb-p">@b.Probability.ToString("P0", FrFr)</span>
+                        </span>
                     }
                 </div>
-            }
-        </div>
+            </div>
+        }
+
+        @if (g.Other.Count > 0)
+        {
+            <div class="market-tiles other">
+                @foreach (var m in g.Other)
+                {
+                    <div class="tile">
+                        <div class="prob">@m.Probability.ToString("P0", FrFr)</div>
+                        <div class="question">@m.Question</div>
+                        <div class="meta">@m.EndDate.ToString("d MMM yyyy", FrFr) · vol $@m.VolumeUsd.ToString("N0", FrFr)</div>
+                    </div>
+                }
+            </div>
+        }
     </div>
 }
