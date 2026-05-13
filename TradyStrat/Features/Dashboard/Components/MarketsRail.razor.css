@@ -91,7 +91,10 @@
 .ladder + .market-tiles.other,
 .market-tiles + .market-tiles.other { margin-top: 16px; }
 
-.ladder { padding: 12px 0; border-top: 1px dotted rgba(196,154,86,0.18); }
+/* The ladder's separator is only meaningful when it follows another band —
+   if it's the first child it'd render as a floating line under the heading. */
+.ladder { padding: 12px 0; }
+.market-tiles + .ladder { border-top: 1px dotted rgba(196,154,86,0.18); }
 .ladder-label {
     font-family: var(--font-mono);
     font-size: 9px;
