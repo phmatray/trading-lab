@@ -63,7 +63,7 @@ Pure types — entities, value objects, enums. Everything in `TradyStrat/Common/
 
 - `Suggestion`, `SuggestionAction`, `SuggestionActionDisplay`, `Citation`, `MarketCitation`, `Zone`, `GoalConfig`, `Trade`, `TradeSide`, `Instrument`, `InstrumentKind`, `PortfolioSnapshot`, `PredictionMarket`.
 - The pure-domain exceptions in `TradyStrat/Common/Exceptions/`: `FxRateUnavailableException`, `PolymarketUnavailableException`, etc. — they're part of the domain vocabulary.
-- `AnthropicCallFailedException` is **renamed to `AiCallFailedException`** and moves to **Application** (it's the abstract failure mode of the AI port). Vendor-named failures stay in Infrastructure; the Application port surfaces only the abstract type.
+- A new abstract `AiCallFailedException : TradyStratException` is created in **Application** as the failure-mode at the `IAiClient` port boundary. The existing `AnthropicCallFailedException` stays in Infrastructure (renamed only by namespace) and is **re-parented** to inherit from the new `AiCallFailedException` — which itself inherits from `TradyStratException` so the existing `SuggestionBackfillCoordinator` `catch (TradyStratException)` and `ExceptionHierarchyTests` continue to pass unchanged.
 
 NuGet dependencies in Domain: **none beyond the BCL** (which includes `System.Text.Json` — Domain may use it for derived properties like `Suggestion.Citations` that deserializes `CitationsJson`).
 

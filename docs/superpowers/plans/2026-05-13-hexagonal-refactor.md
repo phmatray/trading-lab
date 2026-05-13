@@ -220,12 +220,8 @@ public static void Start(
     foreach (var module in modules.GetModules())
         module.ConfigureMiddleware(app);
 
-    app.MapWhen(_ => true, branch =>
-    {
-        // Endpoints are registered on the app's endpoint route builder.
-    });
-
-    // Endpoint registration uses app directly (WebApplication implements IEndpointRouteBuilder).
+    // WebApplication implements IEndpointRouteBuilder, so modules' ConfigureEndpoints
+    // calls can target it directly. No MapWhen indirection needed.
     foreach (var module in modules.GetModules())
         module.ConfigureEndpoints(app);
 
@@ -1504,25 +1500,49 @@ sed -i '' 's|namespace TradyStrat\.Common\.Exceptions;|namespace TradyStrat.Infr
 
 ```csharp
 // TradyStrat.Application/Exceptions/AiCallFailedException.cs
+using TradyStrat.Domain.Exceptions;
+
 namespace TradyStrat.Application.Exceptions;
 
 /// <summary>
 /// Abstract failure mode at the IAiClient port boundary. Infrastructure
-/// adapters (Anthropic, future Gemini, …) wrap their vendor-specific
-/// exceptions in this type so Application code never imports vendor packages.
+/// adapters (Anthropic, future Gemini, …) raise vendor-specific subclasses
+/// of this type so Application catch sites use one abstract name and never
+/// import vendor packages.
 /// </summary>
-public sealed class AiCallFailedException : Exception
+public class AiCallFailedException : TradyStratException
 {
     public AiCallFailedException(string message) : base(message) { }
     public AiCallFailedException(string message, Exception inner) : base(message, inner) { }
 }
 ```
 
+> **Why inherit from `TradyStratException` (not `Exception`):** the current `AnthropicCallFailedException` is `: TradyStratException`, and `SuggestionBackfillCoordinator.cs:123` catches `TradyStratException` to halt the backfill chain. If `AiCallFailedException` were `: Exception`, then `AnthropicCallFailedException` (re-parented in Step 3) would no longer be a `TradyStratException`, and the coordinator would silently stop handling AI failures during backfill — a behaviour-breaking change. Keeping the new abstraction inside the existing domain-exception hierarchy preserves every existing catch site. `ExceptionHierarchyTests` continues to pass; the test gains a new assertion that `AiCallFailedException` is itself `ShouldBeAssignableTo<TradyStratException>()`.
+
+> Note the class is **not `sealed`**: `AnthropicCallFailedException` inherits from it in Step 3.
+
 - [ ] **Step 3: Make `AnthropicCallFailedException` inherit from `AiCallFailedException`**
 
-Open `TradyStrat.Infrastructure/Exceptions/AnthropicCallFailedException.cs` and change its base type from whatever it currently extends (likely `Exception` or `TradyStratException`) to `AiCallFailedException`. Add the `using TradyStrat.Application.Exceptions;` import.
+The current source (`TradyStrat/Common/Exceptions/AnthropicCallFailedException.cs:3`) is:
 
-This means Infrastructure throws the vendor type; Application catches the abstract type via standard inheritance — no try/catch rewrap needed.
+```csharp
+public sealed class AnthropicCallFailedException(string message, Exception? inner = null)
+    : TradyStratException(message, inner);
+```
+
+After the move to Infrastructure, it becomes:
+
+```csharp
+// TradyStrat.Infrastructure/Exceptions/AnthropicCallFailedException.cs
+using TradyStrat.Application.Exceptions;
+
+namespace TradyStrat.Infrastructure.Exceptions;
+
+public sealed class AnthropicCallFailedException(string message, Exception? inner = null)
+    : AiCallFailedException(message, inner!);
+```
+
+`AiCallFailedException` itself inherits from `TradyStratException` (Step 2), so the existing transitive hierarchy `AnthropicCallFailedException → TradyStratException → Exception` is preserved — just with `AiCallFailedException` slotted in between. `SuggestionBackfillCoordinator.cs:123`'s `catch (TradyStratException)` still matches. CLR substitutability handles the Application/Infrastructure boundary without a try/catch rewrap.
 
 - [ ] **Step 4: Update callers in Application that catch the old name**
 
@@ -2258,16 +2278,18 @@ using TradyStrat.Application;
 using TradyStrat.Cli;
 using TradyStrat.Cli.Commands;
 using TradyStrat.Infrastructure;
+using TradyStrat.Infrastructure.PriceFeed; // for typeof(PriceFeedBackgroundInfrastructureModule)
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Compose modules into the host's service collection. The CLI excludes
 // PriceFeedBackgroundInfrastructureModule (background hosted service that
 // polls Yahoo for prices) — replay reads stored bars, doesn't need it.
+// typeof() is used (not string name) so the compiler catches renames.
 AppManager.ConfigureServices(builder.Services, builder.Configuration, modules => modules
     .AddFromAssemblyOf<ApplicationAssemblyMarker>()
     .AddFromAssemblyOf<InfrastructureAssemblyMarker>(t =>
-        t.Name != "PriceFeedBackgroundInfrastructureModule"));
+        t != typeof(PriceFeedBackgroundInfrastructureModule)));
 
 // Construct Spectre registrar; it adds its own command types into builder.Services.
 var registrar = new HostTypeRegistrar(builder.Services);
@@ -2401,6 +2423,84 @@ git add -A
 git commit -m "build: scaffold four test projects (Domain.Tests, Application.Tests, Infrastructure.Tests, E2E.Tests)"
 ```
 
+### Task 8.1b: Add `TradyStrat.TestKit` shared-fixtures project
+
+`StubAiClient` is used by both Application.Tests (use-case tests) and Infrastructure.Tests (decorator + integration tests). Linking the same source into two test assemblies produces two CLR types with the same fully-qualified name — referenced together from E2E.Tests, this yields CS0433 (ambiguous reference). The clean alternative is one shared assembly that both test projects reference.
+
+**Files:**
+- Create: `TradyStrat.TestKit/TradyStrat.TestKit.csproj`
+- Create: `TradyStrat.TestKit/AiSuggestion/StubAiClient.cs`
+
+- [ ] **Step 1: Create the TestKit csproj**
+
+```xml
+<!-- TradyStrat.TestKit/TradyStrat.TestKit.csproj -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TradyStrat.TestKit</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+  </ItemGroup>
+</Project>
+```
+
+It references Application + Domain (the layers `StubAiClient` needs). Not Infrastructure — fixtures must remain layer-agnostic so any test project can pull them in.
+
+- [ ] **Step 2: Move `StubAiClient.cs` from the old test project to TestKit**
+
+```bash
+mkdir -p TradyStrat.TestKit/AiSuggestion
+git mv TradyStrat.Tests/AiSuggestion/UseCases/StubAiClient.cs TradyStrat.TestKit/AiSuggestion/
+sed -i '' 's|namespace TradyStrat\.Tests\.AiSuggestion\.UseCases;|namespace TradyStrat.TestKit.AiSuggestion;|g' TradyStrat.TestKit/AiSuggestion/StubAiClient.cs
+sed -i '' 's|using TradyStrat\.Features\.AiSuggestion;|using TradyStrat.Application.AiSuggestion;|g' TradyStrat.TestKit/AiSuggestion/StubAiClient.cs
+sed -i '' 's|using TradyStrat\.Common\.Domain;|using TradyStrat.Domain;|g' TradyStrat.TestKit/AiSuggestion/StubAiClient.cs
+```
+
+Open the file and verify the `using` block: only `TradyStrat.Domain`, `TradyStrat.Application.AiSuggestion`, BCL types. No Infrastructure imports.
+
+- [ ] **Step 3: Add `TestKit` to the solution + ProjectReference from Application.Tests and Infrastructure.Tests**
+
+In `TradyStrat.slnx`:
+
+```xml
+<Project Path="TradyStrat.TestKit/TradyStrat.TestKit.csproj" />
+```
+
+In `TradyStrat.Application.Tests/TradyStrat.Application.Tests.csproj`:
+
+```xml
+<ProjectReference Include="..\TradyStrat.TestKit\TradyStrat.TestKit.csproj" />
+```
+
+In `TradyStrat.Infrastructure.Tests/TradyStrat.Infrastructure.Tests.csproj`:
+
+```xml
+<ProjectReference Include="..\TradyStrat.TestKit\TradyStrat.TestKit.csproj" />
+```
+
+Test code in either project that previously did `using TradyStrat.Tests.AiSuggestion.UseCases;` now uses `using TradyStrat.TestKit.AiSuggestion;`. Bulk-fix is in Task 8.3 Step 3 / Task 8.4 Step 3.
+
+- [ ] **Step 4: Build + commit**
+
+```bash
+dotnet build TradyStrat.TestKit/TradyStrat.TestKit.csproj
+```
+
+Expected: succeeds (StubAiClient depends only on Application + Domain).
+
+```bash
+git add TradyStrat.TestKit/ TradyStrat.slnx TradyStrat.Application.Tests/ TradyStrat.Infrastructure.Tests/
+git commit -m "test: add TradyStrat.TestKit shared-fixtures project
+
+StubAiClient is consumed by both Application.Tests and
+Infrastructure.Tests. Hosting it in a separate assembly avoids the
+duplicate-type-identity issue that a cross-project <Compile Link>
+would create when E2E.Tests references both downstream test projects."
+```
+
 ### Task 8.2: Move Domain tests
 
 **Files:**
@@ -2520,13 +2620,12 @@ git mv TradyStrat.Tests/AiSuggestion/CallDiff/CallDiffBuilderTests.cs TradyStrat
 git mv TradyStrat.Tests/AiSuggestion/FakeChatClient.cs TradyStrat.Application.Tests/AiSuggestion/
 git mv TradyStrat.Tests/AiSuggestion/Snapshot/AiSnapshotServiceTests.cs TradyStrat.Application.Tests/AiSuggestion/Snapshot/
 
-# Move ONLY the use-case tests + StubSnapshotFactory (Application-side fixture).
-# StubAiClient stays put for now — it's used by both Application and Infrastructure
-# tests, so it moves to Application.Tests in this step and Infrastructure.Tests
-# references it as a linked file in Task 8.4 (an Application.Tests <Compile> ItemGroup
-# with Link is added, since cross-test-project source-sharing is the standard pattern).
+# Move use-case tests and Application-only fixtures (StubSnapshotFactory).
+# StubAiClient is shared between Application.Tests and Infrastructure.Tests —
+# it's moved into a separate shared project (TradyStrat.TestKit) in Task 8.2b
+# to avoid duplicate-type-identity issues when both test assemblies are
+# referenced from E2E.Tests.
 git mv TradyStrat.Tests/AiSuggestion/UseCases/StubSnapshotFactory.cs TradyStrat.Application.Tests/AiSuggestion/UseCases/
-git mv TradyStrat.Tests/AiSuggestion/UseCases/StubAiClient.cs TradyStrat.Application.Tests/AiSuggestion/UseCases/
 for f in BackfillSuggestionsUseCaseTests.cs ForceRefetchSuggestionUseCaseTests.cs \
          GetAllTodaysSuggestionsUseCaseTests.cs GetTodaysSuggestionUseCaseTests.cs; do
   [ -f "TradyStrat.Tests/AiSuggestion/UseCases/$f" ] && \
@@ -2603,14 +2702,15 @@ find TradyStrat.Application.Tests -name "*.cs" -exec sed -i '' \
 - [ ] **Step 3: Update `using` directives**
 
 ```bash
-grep -rl "using TradyStrat\.Common\.\|using TradyStrat\.Features\." TradyStrat.Application.Tests --include="*.cs" | \
+grep -rl "using TradyStrat\." TradyStrat.Application.Tests --include="*.cs" | \
   xargs sed -i '' \
     -e 's|using TradyStrat\.Common\.Domain|using TradyStrat.Domain|g' \
     -e 's|using TradyStrat\.Common\.Exceptions|using TradyStrat.Domain.Exceptions|g' \
     -e 's|using TradyStrat\.Common\.Time|using TradyStrat.Application.Time|g' \
     -e 's|using TradyStrat\.Common\.Formatting|using TradyStrat.Application.Formatting|g' \
     -e 's|using TradyStrat\.Common\.UseCases|using TradyStrat.Application.UseCases|g' \
-    -e 's|using TradyStrat\.Features\.|using TradyStrat.Application.|g'
+    -e 's|using TradyStrat\.Features\.|using TradyStrat.Application.|g' \
+    -e 's|using TradyStrat\.Tests\.AiSuggestion\.UseCases|using TradyStrat.TestKit.AiSuggestion|g'
 ```
 
 `SystemClock` references in test fixtures (likely just one or two) need a manual touch to `using TradyStrat.Infrastructure.Time;` — Application.Tests already references Infrastructure transitively but you need the `using`. Grep:
@@ -2651,13 +2751,11 @@ git mv TradyStrat.Tests/AiSuggestion/Backfill/SuggestionBackfillCoordinatorTests
 git mv TradyStrat.Tests/AiSuggestion/Citations/SuggestionServiceCitationTests.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
 git mv TradyStrat.Tests/AiSuggestion/SuggestionServiceTests.cs TradyStrat.Infrastructure.Tests/AiSuggestion/
 
-# StubAiClient is shared between Application.Tests and Infrastructure.Tests.
-# Don't duplicate the source — link it from Application.Tests via the csproj.
-# Add this to TradyStrat.Infrastructure.Tests.csproj inside an <ItemGroup>:
-#     <Compile Include="..\TradyStrat.Application.Tests\AiSuggestion\UseCases\StubAiClient.cs"
-#              Link="AiSuggestion\StubAiClient.cs" />
-# Edit the csproj now if SuggestionServiceTests / SuggestionBackfillCoordinatorTests
-# reference StubAiClient (they likely do — verify with grep before continuing).
+# StubAiClient is in TradyStrat.TestKit (Task 8.1b). Infrastructure.Tests
+# references TestKit via <ProjectReference>; tests that previously used
+# `using TradyStrat.Tests.AiSuggestion.UseCases;` now use
+# `using TradyStrat.TestKit.AiSuggestion;` — caught by the Task 8.4 Step 3
+# sed pass that retargets all old TradyStrat.Tests.* test-fixture namespaces.
 
 git mv TradyStrat.Tests/Common/Time/SystemClockTests.cs TradyStrat.Infrastructure.Tests/Time/
 
@@ -2696,7 +2794,8 @@ grep -rl "using TradyStrat\." TradyStrat.Infrastructure.Tests --include="*.cs" |
     -e 's|using TradyStrat\.Common\.Exceptions|using TradyStrat.Domain.Exceptions|g' \
     -e 's|using TradyStrat\.Common\.Time|using TradyStrat.Infrastructure.Time|g' \
     -e 's|using TradyStrat\.Common\.UseCases|using TradyStrat.Application.UseCases|g' \
-    -e 's|using TradyStrat\.Data|using TradyStrat.Infrastructure.Data|g'
+    -e 's|using TradyStrat\.Data|using TradyStrat.Infrastructure.Data|g' \
+    -e 's|using TradyStrat\.Tests\.AiSuggestion\.UseCases|using TradyStrat.TestKit.AiSuggestion|g'
 ```
 
 For `using TradyStrat.Features.<feature>;`, expand carefully because the resulting namespace splits across Application and Infrastructure depending on what the test references. Run:
