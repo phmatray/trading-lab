@@ -181,6 +181,13 @@
     margin-top: 14px;
 }
 
+.pace-line-row.pace-line-top {
+    margin-top: 18px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(196,154,86,0.18);
+    border-bottom: 1px solid rgba(196,154,86,0.18);
+}
+
 @media (max-width: 720px) {
   .hero { padding: 24px 20px 22px; }
   .amount { font-size: clamp(44px, 13vw, 64px); }
