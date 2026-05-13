@@ -1,17 +1,23 @@
 // Toggles `.visible` (and `aria-hidden`) on [data-sticky-cap] once the
 // dashboard hero (.hero-row) has scrolled fully above the fold. Clicking the
-// bar scrolls smoothly to top. Idempotent — calling observeHero() again after
-// a Blazor re-render disconnects the prior observer and re-attaches.
+// bar scrolls smoothly to top. Idempotent — calling observeHero() again when
+// already observing the same elements is a no-op (so Blazor re-renders that
+// re-invoke it don't tear down a working observer mid-flight and lose track
+// of pending transitions).
 let observer = null;
 let clickHandler = null;
 let observedBar = null;
+let observedHero = null;
 
 export function observeHero() {
-    disconnect();
-
     const bar = document.querySelector('[data-sticky-cap]');
     const hero = document.querySelector('.hero-row');
     if (!bar || !hero) return;
+
+    // If we're already observing this exact pair, leave the working observer alone.
+    if (observer && observedBar === bar && observedHero === hero) return;
+
+    disconnect();
 
     observer = new IntersectionObserver(
         (entries) => {
@@ -31,6 +37,7 @@ export function observeHero() {
     };
     bar.addEventListener('click', clickHandler);
     observedBar = bar;
+    observedHero = hero;
 }
 
 export function disconnect() {
@@ -43,4 +50,5 @@ export function disconnect() {
     }
     clickHandler = null;
     observedBar = null;
+    observedHero = null;
 }
