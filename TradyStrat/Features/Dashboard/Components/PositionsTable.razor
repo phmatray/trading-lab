@@ -32,13 +32,16 @@
                         </td>
                     </tr>
                 }
-                <tr class="total">
-                    <td>Total</td>
-                    <td></td>
-                    <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur))</td>
-                    <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur))</td>
-                    <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(TotalUnreal)</td>
-                </tr>
+                @if (Rows.Count > 1)
+                {
+                    <tr class="total">
+                        <td>Total</td>
+                        <td></td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur))</td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur))</td>
+                        <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(TotalUnreal)</td>
+                    </tr>
+                }
             </tbody>
         </table>
     }
