@@ -1,0 +1,11 @@
+@using TradyStrat.Common.Formatting
+
+<a class="sticky-cap" href="#" data-sticky-cap title="Back to top">
+    <span class="sc-brand">Tradystrat</span>
+    <span class="sc-cap"><span class="sc-euro">€</span>@NumberFormat.EurBody(CurrentValueEur)</span>
+    <span class="sc-pct">@NumberFormat.Pct(ProgressPct) of @NumberFormat.Eur(TargetEur)</span>
+    @if (Action is { } a)
+    {
+        <span class="sc-verb sc-verb-@Stem">@Verb</span>
+    }
+</a>
