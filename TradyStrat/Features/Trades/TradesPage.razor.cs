@@ -122,5 +122,6 @@ public partial class TradesPage : ComponentBase
         _showImport = false;
         _editing = null;
         _importError = null;
+        _pendingDelete = null;
     }
 }
