@@ -16,7 +16,8 @@
                    aria-disabled="@(PrevTradingDay is null)"
                    title="Previous trading day">‹</a>
 
-                <label class="ribbon-date" for="masthead-entry-date">
+                <label class="ribbon-date" for="masthead-entry-date"
+                       title="Pick a date — time-travel the dashboard to that trading day">
                     <span>@FormatDate(Today)</span>
                     <input type="date"
                            id="masthead-entry-date"
@@ -33,7 +34,7 @@
                    aria-disabled="@(NextTradingDay is null)"
                    title="Next trading day">›</a>
 
-                <span class="ribbon-meta">entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+                <span class="ribbon-meta">journal entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
                 {
                     <span class="freshness"> · @PriceAsOfRelative</span>
                 }</span>
@@ -45,7 +46,7 @@
         }
         else
         {
-            <div class="meta">@FormatDate(Today) · entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
+            <div class="meta">@FormatDate(Today) · journal entry @EntryNumber.ToString("D4", CultureInfo.InvariantCulture)@if (!string.IsNullOrEmpty(PriceAsOfRelative))
             {
                 <span class="freshness"> · prices @PriceAsOfRelative</span>
             }</div>
