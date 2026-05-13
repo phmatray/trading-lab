@@ -44,10 +44,16 @@
         @if (!Historical)
         {
             <div class="actions">
-                <button class="cta" disabled="@(Sug.Action != SuggestionAction.Acquire)"
+                <button class="cta"
+                        disabled="@(Sug.Action != SuggestionAction.Acquire)"
+                        title="@(Sug.Action == SuggestionAction.Acquire ? "Log the suggested acquisition" : $"Disabled — today's call is \"{Verb}\", not an acquisition")"
                         @onclick="OnLogTrade">Log trade</button>
                 <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
             </div>
+            @if (Sug.Action != SuggestionAction.Acquire)
+            {
+                <p class="actions-hint">Logging is enabled only when the call is an acquisition.</p>
+            }
         }
     }
 </div>
