@@ -26,6 +26,10 @@ else if (_error is not null)
 else
 {
     var vm = _vm!;
+    <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur"
+                      TargetEur="vm.Goal.TargetEur"
+                      ProgressPct="vm.Portfolio.ProgressPct"
+                      Action="vm.TodaysCall?.Action" />
     <div class="dash-stage">
         <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
                        PriceAsOfRelative="@vm.PriceAsOfRelative"

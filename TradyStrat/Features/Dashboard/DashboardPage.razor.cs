@@ -32,6 +32,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     private bool _showRerunConfirm;
 
     private IJSObjectReference? _keysModule;
+    private IJSObjectReference? _stickyModule;
     private DotNetObjectReference<DashboardPage>? _selfRef;
 
     protected override async Task OnParametersSetAsync()
@@ -80,6 +81,13 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
                 "import", "./js/dashboard-keys.js");
             _selfRef = DotNetObjectReference.Create(this);
             await _keysModule.InvokeVoidAsync("attach", _selfRef);
+        }
+
+        if (_vm is not null)
+        {
+            _stickyModule ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./js/sticky-bar.js");
+            await _stickyModule.InvokeVoidAsync("observeHero");
         }
     }
 
@@ -161,6 +169,13 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        if (_stickyModule is not null)
+        {
+            try { await _stickyModule.InvokeVoidAsync("disconnect"); }
+            catch (JSDisconnectedException) { /* circuit gone — module already torn down */ }
+            await _stickyModule.DisposeAsync();
+        }
+
         try
         {
             if (_keysModule is not null)
