@@ -19,6 +19,12 @@ export function observeHero() {
 
     disconnect();
 
+    // Observe the hero against the full viewport (default root). Show the
+    // bar when the hero is no longer intersecting AND its top edge has gone
+    // above the viewport — i.e. the user has scrolled fully past it. Default
+    // viewport root is more reliable across browsers than a zero-height
+    // root strip via `rootMargin: '0px 0px -100% 0px'`, which can miss
+    // subsequent threshold crossings on some Chrome builds.
     observer = new IntersectionObserver(
         (entries) => {
             for (const e of entries) {
@@ -27,7 +33,7 @@ export function observeHero() {
                 bar.setAttribute('aria-hidden', show ? 'false' : 'true');
             }
         },
-        { rootMargin: '0px 0px -100% 0px', threshold: 0 }
+        { threshold: 0 }
     );
     observer.observe(hero);
 
