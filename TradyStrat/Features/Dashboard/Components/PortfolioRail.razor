@@ -12,12 +12,12 @@
     @foreach (var t in Tickers)
     {
         <div class="cell">
-            <div class="tk">@t.Ticker</div>
+            <div class="tk">@t.Ticker <span class="tk-kind @(IsHeld(t) ? "" : "watch")">@(IsHeld(t) ? "held" : "watch")</span></div>
             <div class="val">
                 <span class="num">@FormatPrimary(t)</span>
                 @if (t.DeltaPct is { } dp)
                 {
-                    <span class="delta @(dp >= 0 ? "" : "dn") num">@FormatDelta(dp)</span>
+                    <span class="delta @(dp >= 0 ? "" : "dn") num" title="change today">@(dp >= 0 ? "↑" : "↓") @FormatDelta(dp)</span>
                 }
             </div>
             @if (t.PriceEur is { } eur && t.Currency != "EUR")

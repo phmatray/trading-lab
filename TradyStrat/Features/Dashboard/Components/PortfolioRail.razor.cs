@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Common.Domain;
 using TradyStrat.Common.Formatting;
@@ -10,7 +9,12 @@ public partial class PortfolioRail : ComponentBase
     [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<TickerView> Tickers { get; set; } = null!;
 
-    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+    private HashSet<string>? _heldTickers;
+
+    protected override void OnParametersSet()
+        => _heldTickers = Snap.Positions.Select(p => p.Ticker).ToHashSet();
+
+    private bool IsHeld(TickerView t) => _heldTickers!.Contains(t.Ticker);
 
     private static string PnL(decimal pnl, decimal value)
     {
@@ -27,8 +31,9 @@ public partial class PortfolioRail : ComponentBase
         _     => NumberFormat.Price(t.Price, ""),
     };
 
-    private static string FormatDelta(decimal pct)
-        => $"{(pct >= 0 ? "+" : "")}{pct.ToString("F1", FrFr)}%";
+    // Day-move chip displays an absolute-value percent; the ↑ / ↓ glyph in
+    // the markup conveys direction and the .delta.dn class conveys colour.
+    private static string FormatDelta(decimal pct) => NumberFormat.Pct(Math.Abs(pct));
 
     private static string TruncateRationale(string rationale, int maxChars)
     {
