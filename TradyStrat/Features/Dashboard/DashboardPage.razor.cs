@@ -171,9 +171,15 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     {
         if (_stickyModule is not null)
         {
-            try { await _stickyModule.InvokeVoidAsync("disconnect"); }
-            catch (JSDisconnectedException) { /* circuit gone — module already torn down */ }
-            await _stickyModule.DisposeAsync();
+            try
+            {
+                await _stickyModule.InvokeVoidAsync("disconnect");
+                await _stickyModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit gone — module already torn down.
+            }
         }
 
         try
