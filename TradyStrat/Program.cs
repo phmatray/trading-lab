@@ -1,10 +1,17 @@
 using TheAppManager.Startup;
-using TradyStrat.Modules;
+using TradyStrat.Application;
+using TradyStrat.Infrastructure;
 
-// Discover modules from the TradyStrat assembly explicitly so module discovery
-// works under WebApplicationFactory<Program>, where Assembly.GetEntryAssembly()
-// returns the test runner rather than this app.
-AppManager.Start(args, modules => modules.AddFromAssemblyOf<DatabaseModule>());
+AppManager.Start(args,
+    modules => modules
+        .AddFromAssemblyOf<ApplicationAssemblyMarker>()
+        .AddFromAssemblyOf<InfrastructureAssemblyMarker>()
+        .Add<TradyStrat.BlazorHostingModule>(),
+    builder =>
+    {
+        // Web-host-specific configuration: v3 IAppModule can't reach WebApplicationBuilder.WebHost.
+        builder.WebHost.ConfigureKestrel(opt => opt.ListenLocalhost(5180));
+    });
 
 namespace TradyStrat
 {

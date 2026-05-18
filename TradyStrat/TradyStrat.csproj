@@ -7,17 +7,16 @@
     <NoWarn>$(NoWarn);CA1716</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="TheAppManager" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-    <PackageReference Include="Ardalis.Specification" />
-    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
-    <PackageReference Include="Atypical.TechnicalAnalysis.Common" />
-    <PackageReference Include="Atypical.TechnicalAnalysis.Functions" />
-    <PackageReference Include="Microsoft.Extensions.AI" />
-    <PackageReference Include="Anthropic.SDK" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
-    <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Serilog.Sinks.File" />
+    <!-- Vendored TheAppManager v3 during the hexagonal refactor; swaps back to
+         <PackageReference Include="TheAppManager" /> once v3.0.0 is published. -->
+    <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+    <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
+    <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />
   </ItemGroup>
+  <!--
+    All EF / Anthropic / Ardalis / Atypical / Serilog / Resilience package refs
+    moved to TradyStrat.Infrastructure (or Application). Available here transitively
+    via the ProjectReferences above.
+  -->
 </Project>

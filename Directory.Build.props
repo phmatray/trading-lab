@@ -10,8 +10,10 @@
       NU1903 — transitive dependency contains known vulnerability: suppressed proactively.
       Note: current scan shows no vulnerable packages. If NU1903 warning no longer appears,
       remove this suppression at next review.
+      CA1716 — VB-keyword parameter/method names (e.g. `to`, `For`, `Get`, `base`). We don't target VB.
     -->
     <WarningsNotAsErrors>CS1591;NU1903</WarningsNotAsErrors>
+    <NoWarn>$(NoWarn);CA1716</NoWarn>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
   </PropertyGroup>

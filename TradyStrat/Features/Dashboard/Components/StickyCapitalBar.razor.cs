@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

@@ -12,6 +12,15 @@
   <Folder Name="/Solution Items/.config/">
     <File Path=".config/dotnet-tools.json" />
   </Folder>
-  <Project Path="TradyStrat.Tests/TradyStrat.Tests.csproj" />
+  <Project Path="TradyStrat.Hosting/TradyStrat.Hosting.csproj" />
+  <Project Path="TradyStrat.Domain/TradyStrat.Domain.csproj" />
+  <Project Path="TradyStrat.Application/TradyStrat.Application.csproj" />
+  <Project Path="TradyStrat.Infrastructure/TradyStrat.Infrastructure.csproj" />
+  <Project Path="TradyStrat.Cli/TradyStrat.Cli.csproj" />
+  <Project Path="TradyStrat.TestKit/TradyStrat.TestKit.csproj" />
+  <Project Path="TradyStrat.Domain.Tests/TradyStrat.Domain.Tests.csproj" />
+  <Project Path="TradyStrat.Application.Tests/TradyStrat.Application.Tests.csproj" />
+  <Project Path="TradyStrat.Infrastructure.Tests/TradyStrat.Infrastructure.Tests.csproj" />
+  <Project Path="TradyStrat.E2E.Tests/TradyStrat.E2E.Tests.csproj" />
   <Project Path="TradyStrat/TradyStrat.csproj" />
 </Solution>

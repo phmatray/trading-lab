@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TradyStrat.Application</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Mirror the Web SDK's implicit logging using so files moved from the
+         Web project keep compiling without per-file edits. -->
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+    <!-- Vendored TheAppManager v3 (swap back to <PackageReference Include="TheAppManager" />
+         once v3 publishes to NuGet). -->
+    <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Atypical.TechnicalAnalysis.Common" />
+    <PackageReference Include="Atypical.TechnicalAnalysis.Functions" />
+  </ItemGroup>
+</Project>

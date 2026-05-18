@@ -1,7 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Common.Domain;
+using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

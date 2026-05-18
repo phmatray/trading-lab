@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.Settings.Components;
 

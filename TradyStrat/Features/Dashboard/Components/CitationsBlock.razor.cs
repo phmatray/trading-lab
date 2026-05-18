@@ -1,8 +1,8 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Features.AiSuggestion.CallDiff;
-using TradyStrat.Features.Indicators;
-using TradyStrat.Common.Domain;
+using TradyStrat.Application.AiSuggestion.CallDiff;
+using TradyStrat.Application.Indicators;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

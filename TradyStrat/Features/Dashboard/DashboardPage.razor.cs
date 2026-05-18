@@ -1,14 +1,15 @@
+using TradyStrat.Infrastructure.PriceFeed.UseCases;
+using TradyStrat.Application.Dashboard;
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
-using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Features.Dashboard.Navigation;
-using TradyStrat.Features.Dashboard.UseCases;
-using TradyStrat.Features.PriceFeed.UseCases;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Application.Dashboard.UseCases;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.Dashboard;
 
@@ -116,7 +117,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     {
         if (_vm?.IsHistorical == true) return;
         _busy = true;
-        try   { await RefreshPrices.ExecuteAsync(Common.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
+        try   { await RefreshPrices.ExecuteAsync(Application.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
         finally { _busy = false; }
     }
 
@@ -136,7 +137,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
             var ct = CancellationToken.None;
             var focusTicker = _vm?.FocusTicker
                 ?? await Settings.FocusTickerAsync(ct);
-            var instruments = await ListInstruments.ExecuteAsync(Common.UseCases.Unit.Value, ct);
+            var instruments = await ListInstruments.ExecuteAsync(Application.UseCases.Unit.Value, ct);
             var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
                 ?? throw new InvalidOperationException(
                     $"Focus ticker '{focusTicker}' is not in the Instruments table.");

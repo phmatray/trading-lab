@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TradyStrat.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>
