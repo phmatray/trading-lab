@@ -80,7 +80,7 @@ public class LoadDashboardUseCaseTests
         const int focusId = 1;
         var snapStub = new StubSnapshotFactory(new AiSnapshot(
             Target, focusId, GoalConfig.Default(DateTime.UtcNow),
-            new([],0,0,0,0,0,0,0), [], [], 1.08m, [], "h"));
+            new([],0,0,0,0,0,0,0), [], [], 1.08m, [], [], "h", "h", "h"));
         var aiStub = new StubAiClient(new Suggestion {
             Id = 0, InstrumentId = focusId, ForDate = Target,
             Action = SuggestionAction.Hold,

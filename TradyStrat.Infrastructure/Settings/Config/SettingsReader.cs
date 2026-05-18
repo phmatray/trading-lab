@@ -4,8 +4,9 @@ namespace TradyStrat.Infrastructure.Settings.Config;
 public sealed class SettingsReader(ISettingsService settings) : ISettingsReader
 {
     public async Task<AnthropicSettings> AnthropicAsync(CancellationToken ct) => new(
-        Model:     await settings.GetAsync<string>(SettingsKeys.AnthropicModel, ct),
-        MaxTokens: await settings.GetAsync<int>(SettingsKeys.AnthropicMaxTokens, ct));
+        Model:          await settings.GetAsync<string>(SettingsKeys.AnthropicModel, ct),
+        MaxTokens:      await settings.GetAsync<int>(SettingsKeys.AnthropicMaxTokens, ct),
+        ThinkingBudget: await settings.GetAsync<int>(SettingsKeys.AnthropicThinkingBudget, ct));
 
     public async Task<PolymarketSettings> PolymarketAsync(CancellationToken ct) => new(
         SearchQueries:  await settings.GetAsync<string[]>(SettingsKeys.PolymarketSearchQueries, ct),

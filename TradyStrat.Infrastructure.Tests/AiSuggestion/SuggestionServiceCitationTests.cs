@@ -25,6 +25,9 @@ public class SuggestionServiceCitationTests
         RecentTrades: [],
         UsdPerEur: 1.08m,
         Markets: markets,
+        RecentSuggestions: [],
+        EnvelopeHash: "h",
+        PromptVersionHash: "h",
         PromptHash: "h");
 
     private static PredictionMarket M(string slug) =>
@@ -83,7 +86,7 @@ public class SuggestionServiceCitationTests
     private sealed class StubSettingsReader(string model, int maxTokens) : ISettingsReader
     {
         public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct)
-            => Task.FromResult(new AnthropicSettings(model, maxTokens));
+            => Task.FromResult(new AnthropicSettings(model, maxTokens, 8192));
         public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();

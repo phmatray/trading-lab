@@ -177,7 +177,7 @@ public class SuggestionBackfillCoordinatorTests
         public Task<AiSnapshot> CreateAsync(int instrumentId, DateOnly asOf, CancellationToken ct) =>
             Task.FromResult(new AiSnapshot(
                 asOf, instrumentId, GoalConfig.Default(DateTime.UtcNow),
-                new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0), [], [], 1m, [], "test"));
+                new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0), [], [], 1m, [], [], "test", "test", "test"));
     }
 
     private sealed class RecordingAi(Func<DateOnly, Task<Suggestion>>? handler) : IAiClient

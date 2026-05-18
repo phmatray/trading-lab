@@ -11,12 +11,19 @@ public partial class AnthropicSettingsForm : ComponentBase
     [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
-    private static readonly string[] Keys = [SettingsKeys.AnthropicModel, SettingsKeys.AnthropicMaxTokens];
+    private static readonly string[] Keys =
+    [
+        SettingsKeys.AnthropicModel,
+        SettingsKeys.AnthropicMaxTokens,
+        SettingsKeys.AnthropicThinkingBudget,
+    ];
 
     private string _model = "";
     private int _maxTokens = 1500;
+    private int _thinkingBudget = 8192;
     private string _initialModel = "";
     private int _initialMaxTokens = 1500;
+    private int _initialThinkingBudget = 8192;
     private string? _msg;
     private bool _isError;
     private bool _busy;
@@ -27,6 +34,7 @@ public partial class AnthropicSettingsForm : ComponentBase
         var ai = await Settings.AnthropicAsync(CancellationToken.None);
         _model = _initialModel = ai.Model;
         _maxTokens = _initialMaxTokens = ai.MaxTokens;
+        _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget;
         _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 
@@ -52,6 +60,12 @@ public partial class AnthropicSettingsForm : ComponentBase
             {
                 await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicMaxTokens, _maxTokens.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
                 _initialMaxTokens = _maxTokens;
+                changed++;
+            }
+            if (_thinkingBudget != _initialThinkingBudget)
+            {
+                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicThinkingBudget, _thinkingBudget.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
+                _initialThinkingBudget = _thinkingBudget;
                 changed++;
             }
             if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);

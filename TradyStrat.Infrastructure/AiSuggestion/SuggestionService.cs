@@ -70,7 +70,10 @@ public sealed partial class SuggestionService(
                     Rationale    = rationale,
                     CitationsJson = JsonSerializer.Serialize(citationList, JsonOpts.Strict),
                     MarketSnapshotJson = marketJson,
-                    PromptHash   = snapshot.PromptHash,
+                    PromptHash        = snapshot.PromptHash,
+                    EnvelopeHash      = snapshot.EnvelopeHash,
+                    PromptVersionHash = snapshot.PromptVersionHash,
+                    // ThinkingText set after the response is read; see below.
                     CreatedAt    = clock.UtcNow(),
                 };
                 return "ok";
@@ -86,15 +89,44 @@ public sealed partial class SuggestionService(
             MaxOutputTokens = ai.MaxTokens,
         };
 
+        // Envelope: stable across instruments on the same day; flagged for the
+        // cache decorator. Spec §5.1.
+        var envelopeJson = JsonSerializer.Serialize(new
+        {
+            today = snapshot.Today,
+            goal = snapshot.Goal,
+            portfolio = snapshot.Portfolio,
+            tickers = snapshot.Tickers,
+            recent_trades = snapshot.RecentTrades,
+            usd_per_eur = snapshot.UsdPerEur,
+            markets = snapshot.Markets,
+        }, JsonOpts.Strict);
+
+        var focusJson = JsonSerializer.Serialize(new
+        {
+            instrument_id = snapshot.InstrumentId,
+            recent_suggestions = snapshot.RecentSuggestions,
+        }, JsonOpts.Strict);
+
+        var envelope = new TextContent(envelopeJson)
+        {
+            AdditionalProperties = new AdditionalPropertiesDictionary
+            {
+                [CacheControlChatClient.CacheBreakpointKey] = true,
+            },
+        };
+        var focus = new TextContent(focusJson);
+
         var messages = new List<ChatMessage>
         {
             new(ChatRole.System, SystemPrompt),
-            new(ChatRole.User,   JsonSerializer.Serialize(snapshot, JsonOpts.Strict)),
+            new(ChatRole.User,   [envelope, focus]),
         };
 
+        ChatResponse response;
         try
         {
-            await chat.GetResponseAsync(messages, options, ct);
+            response = await chat.GetResponseAsync(messages, options, ct);
         }
         catch (AnthropicCallFailedException) { throw; }
         catch (Exception ex)
@@ -103,9 +135,19 @@ public sealed partial class SuggestionService(
             throw new AnthropicCallFailedException("Anthropic call failed.", ex);
         }
 
-        return captured
-            ?? throw new AnthropicCallFailedException(
-                "Model did not invoke submit_suggestion.");
+        if (captured is null)
+            throw new AnthropicCallFailedException("Model did not invoke submit_suggestion.");
+
+        // Read harvested thinking text mirrored by ThinkingHarvestChatClient.
+        if (response.AdditionalProperties is { } props
+            && props.TryGetValue(ThinkingHarvestChatClient.ThinkingTextKey, out var t)
+            && t is string s
+            && !string.IsNullOrEmpty(s))
+        {
+            captured = captured with { ThinkingText = s };
+        }
+
+        return captured;
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Anthropic call failed")]

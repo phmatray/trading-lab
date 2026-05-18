@@ -4,6 +4,7 @@ public static class SettingsKeys
 {
     public const string AnthropicModel           = "anthropic.model";
     public const string AnthropicMaxTokens       = "anthropic.maxTokens";
+    public const string AnthropicThinkingBudget  = "anthropic.thinkingBudget";
     public const string PolymarketSearchQueries  = "polymarket.searchQueries";
     public const string PolymarketMaxMarkets     = "polymarket.maxMarkets";
     public const string PolymarketMinVolumeUsd   = "polymarket.minVolumeUsd";

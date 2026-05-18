@@ -31,6 +31,9 @@ public class BackfillSuggestionsUseCaseTests
                 RecentTrades: [],
                 UsdPerEur: 1m,
                 Markets: [],
+                RecentSuggestions: [],
+                EnvelopeHash: "test",
+                PromptVersionHash: "test",
                 PromptHash: "test"));
         }
     }

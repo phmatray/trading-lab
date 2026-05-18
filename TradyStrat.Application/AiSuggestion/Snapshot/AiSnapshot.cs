@@ -26,4 +26,7 @@ public sealed record AiSnapshot(
     IReadOnlyList<TradeRecent> RecentTrades,
     decimal? UsdPerEur,
     IReadOnlyList<PredictionMarket> Markets,
+    IReadOnlyList<PastSuggestionRow> RecentSuggestions,
+    string EnvelopeHash,
+    string PromptVersionHash,
     string PromptHash);

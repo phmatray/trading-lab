@@ -24,6 +24,9 @@ public sealed record Suggestion
     public required string CitationsJson { get; init; }
     public string? MarketSnapshotJson { get; init; }
     public required string PromptHash { get; init; }
+    public string? ThinkingText { get; init; }
+    public string? EnvelopeHash { get; init; }
+    public string? PromptVersionHash { get; init; }
     public required DateTime CreatedAt { get; init; }
 
     public decimal? OrderValueEur =>
