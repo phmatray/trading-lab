@@ -21,7 +21,7 @@ public sealed class AiSuggestionApplicationModule : IAppModule
         services.AddScoped<ISnapshotSectionProvider, RecentTradesSection>();
         services.AddScoped<ISnapshotSectionProvider, MarketsSection>();
         services.AddScoped<ISnapshotSectionProvider, UsdPerEurSection>();
-        // RecentSuggestionsSection registered in Phase 4.
+        services.AddScoped<ISnapshotSectionProvider, RecentSuggestionsSection>();
         services.AddScoped<GetTodaysSuggestionUseCase>();
         services.AddScoped<GetAllTodaysSuggestionsUseCase>();
         services.AddScoped<ForceRefetchSuggestionUseCase>();
