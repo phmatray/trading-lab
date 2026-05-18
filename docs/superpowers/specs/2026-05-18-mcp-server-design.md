@@ -249,13 +249,10 @@ Returns:
     // ...
   ],
   "indicators": {  // present iff withIndicators=true, arrays aligned to bars[]
-    "rsi":       [null, null, ..., 48.2],
-    "sma20":     [null, ..., 23.4],
-    "sma50":     [null, ..., 22.1],
-    "sma200":    [null, ..., 20.6],
-    "bbUpper":   [...], "bbMid": [...], "bbLower": [...],
-    "ichimokuTenkan": [...], "ichimokuKijun": [...],
-    "ichimokuSpanA":  [...], "ichimokuSpanB": [...]
+    "rsi":          [null, null, ..., 48.2],
+    "bollingerMid": [null, ..., 23.1],
+    "sma200":       [null, ..., 20.6],
+    "ichimoku":     [null, ..., 22.4]
   }
 }
 ```
@@ -263,6 +260,8 @@ Returns:
 **Hard cap: 365 bars per call.** A request whose `[from, to]` window resolves to more than 365 days → `ArgumentException("Date range exceeds 365-day maximum. Narrow the window or make multiple calls.")`. Protects Claude's context budget; the per-instrument bar history in DB is ~2 years.
 
 `null` entries in the indicator arrays mean the indicator's lookback window wasn't satisfied yet (e.g., RSI is `null` for the first 14 bars).
+
+**Indicator surface — current limitations.** The spec originally promised eleven indicator arrays. Implementation reality (Phase 3.4) discovered that `IIndicatorEngine.HistoryFor` only exposes a coarse `IndicatorKind` enum (`Rsi`, `Bollinger`, `Ichimoku`, `Sma50`, `Sma200` — no `Sma20`, no granular Bollinger upper/lower, no granular Ichimoku components). The current `BollingerHistoryProvider` returns only midline values per bar; `IchimokuHistoryProvider` returns a close-price proxy as a placeholder. Surfacing the full eleven-field shape would require extending the indicator engine (new `IndicatorKind` values + new history providers) — a meaningful scope addition that belongs in its own spec. For v1 we ship the four available arrays (`rsi`, `bollingerMid`, `sma200`, `ichimoku`) and document the gap. `Sma50` is structurally available via `IndicatorKind.Sma50` but its history provider isn't registered today; once wired up, adding `sma50` is a one-line change.
 
 ### 4.5 `get_portfolio`
 
