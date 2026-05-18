@@ -59,6 +59,31 @@ docker run --rm -it \
 
 Visit http://127.0.0.1:5180.
 
+## MCP server (read-only, personal)
+
+A read-only Model Context Protocol server is available as a subcommand of `TradyStrat.Cli`:
+
+```bash
+dotnet run --project TradyStrat.Cli -- mcp
+```
+
+This exposes six question-oriented tools (`list_instruments`, `get_dashboard`, `query_suggestions`, `query_prices`, `get_portfolio`, `get_replay_report`) over stdio for Claude Desktop or Claude Code. See [`docs/superpowers/specs/2026-05-18-mcp-server-design.md`](docs/superpowers/specs/2026-05-18-mcp-server-design.md) for the full design and reference-architecture conventions.
+
+The server is read-only and personal: no writes, no auth, stdio-only, single-user.
+
+To wire it up in Claude Desktop, add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```jsonc
+{
+  "mcpServers": {
+    "tradystrat": {
+      "command": "dotnet",
+      "args": ["run", "--project", "/absolute/path/to/TradyStrat.Cli", "--", "mcp"]
+    }
+  }
+}
+```
+
 ## Tests
 
 ```bash
