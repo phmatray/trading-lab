@@ -12,6 +12,7 @@
   <Folder Name="/Solution Items/.config/">
     <File Path=".config/dotnet-tools.json" />
   </Folder>
+  <Project Path="TradyStrat.Hosting/TradyStrat.Hosting.csproj" />
   <Project Path="TradyStrat.Tests/TradyStrat.Tests.csproj" />
   <Project Path="TradyStrat/TradyStrat.csproj" />
 </Solution>

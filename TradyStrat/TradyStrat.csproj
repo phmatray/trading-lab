@@ -7,7 +7,11 @@
     <NoWarn>$(NoWarn);CA1716</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="TheAppManager" />
+    <!-- Vendored TheAppManager v3 during the hexagonal refactor; swaps back to
+         <PackageReference Include="TheAppManager" /> once v3.0.0 is published. -->
+    <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Ardalis.Specification" />

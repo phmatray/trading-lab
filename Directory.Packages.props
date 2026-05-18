@@ -3,8 +3,10 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Web / DI -->
-    <PackageVersion Include="TheAppManager" Version="2.0.0" />
+    <!-- Web / DI: TheAppManager is vendored as TradyStrat.Hosting/ during the
+         hexagonal refactor. Once v3.0.0 is published to NuGet, the vendored
+         project gets deleted and this line is restored as
+         <PackageVersion Include="TheAppManager" Version="3.0.0" />. -->
     <!-- Data -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
