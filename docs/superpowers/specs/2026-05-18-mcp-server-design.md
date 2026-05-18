@@ -32,7 +32,7 @@ The MCP server is **personal, local, single-user, read-only**. Same security sta
 | Stdio hygiene | **All `ILogger` output to stderr, globally for the CLI.** One-line `Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace)` in `Program.cs`. The `mcp` path never writes to stdout outside the MCP protocol. |
 | `AnsiConsole` discipline | **No `AnsiConsole.*` calls anywhere under `Mcp/`.** Code review check: a grep for `AnsiConsole` in that folder must return empty. |
 | Error model | **Centralized in an `McpExceptionTranslationFilter` (Decorator).** `TradyStratException` → `McpException` translation lives in one filter applied to every tool, **not** in per-tool `try/catch`. Input-shape `ArgumentException`s are translated to `McpException` by the same filter. Unexpected exceptions propagate; SDK reports generic error and the filter logs the stack to stderr. |
-| Filter pipeline | **Three filters via `WithIncomingFilter`:** `McpLoggingFilter` (outermost — request log + duration + outcome), `McpTimeoutFilter` (30s default per tool call), `McpExceptionTranslationFilter` (innermost — converts thrown exceptions to MCP errors). |
+| Filter pipeline | **Three call-tool filters via `WithRequestFilters(rb => rb.AddCallToolFilter(...))`:** `McpLoggingFilter` (outermost — request log + duration + outcome), `McpTimeoutFilter` (30s default per tool call), `McpExceptionTranslationFilter` (innermost — converts thrown exceptions to MCP `CallToolResult { IsError = true }`). Using the tool-specific filter (not the broader message filter) means listing tools and unrelated MCP traffic skip the pipeline. |
 | Input validation | **Per-tool guard block at method entry**, raised as `ArgumentException`. The error-translation filter then converts these to `McpException` with the original message. Ticker existence, `from <= to`, `limit` ∈ `[1, 100]`, `query_prices` window ≤ 365 days. |
 | JSON serialization | **`JsonSerializerOptions` registered explicitly** and passed to every `.WithTools<T>(jsonSerializerOptions: opts)` call. Options: `PropertyNamingPolicy = JsonNamingPolicy.CamelCase`, `JsonStringEnumConverter`, custom `DateOnlyConverter` (ISO `YYYY-MM-DD`). |
 | DTO-vs-Domain policy | **Always introduce an MCP DTO; never reuse Domain / Application types directly on the wire.** Reason: the MCP contract must stay stable across Application-layer refactors. The single exception is `ReplayReport`, which is already shaped for external consumption and is reused as-is. |
@@ -363,9 +363,10 @@ public sealed class McpCliModule : IAppModule
             .AddMcpServer()
             .WithStdioServerTransport()
             // Filters: outermost first. Logging wraps timeout wraps translation.
-            .WithIncomingFilter(McpLoggingFilter.Handle)
-            .WithIncomingFilter(McpTimeoutFilter.Handle)
-            .WithIncomingFilter(McpExceptionTranslationFilter.Handle)
+            .WithRequestFilters(rb => rb
+                .AddCallToolFilter(McpLoggingFilter.Handle)
+                .AddCallToolFilter(McpTimeoutFilter.Handle)
+                .AddCallToolFilter(McpExceptionTranslationFilter.Handle))
             // Tools: each pass receives the shared JsonSerializerOptions.
             .WithTools<InstrumentTool>(jsonSerializerOptions: jsonOptions)
             .WithTools<DashboardTool>(jsonSerializerOptions: jsonOptions)
@@ -377,7 +378,7 @@ public sealed class McpCliModule : IAppModule
 }
 ```
 
-**Filter ordering note.** `WithIncomingFilter` is middleware-style: first registered = outermost wrapper. So a tool call flows:
+**Filter ordering note.** `WithRequestFilters(...AddCallToolFilter(...))` is middleware-style: first registered = outermost wrapper. So a tool call flows:
 
 ```
 JSON-RPC → Logging → Timeout → ExceptionTranslation → tool method → DTO → JSON-RPC
@@ -405,7 +406,7 @@ No other changes to the outer host.
 
 ### 5.4 Filter pipeline (Decorator)
 
-The three filters in `Mcp/Filters/` form a Decorator chain around every tool invocation. This is the same pattern the project already uses for `IChatClient` decorators (per README §17). Each filter has a static `Handle` method matching the SDK's `WithIncomingFilter` signature.
+The three filters in `Mcp/Filters/` form a Decorator chain around every tool invocation. This is the same pattern the project already uses for `IChatClient` decorators (per README §17). Each filter has a static `Handle` method matching the SDK's `WithRequestFilters(...AddCallToolFilter(...))` signature.
 
 **`McpLoggingFilter` (outermost).** Wraps every call with a structured log scope: tool name, sanitized input shape (parameter names + types, never values), start time. On completion logs `Information` with duration + outcome (`ok` / `mcp_error` / `cancelled` / `unexpected`). On exception, logs `Warning` (`McpException`) or `Error` (anything else). This is the spec's observability story.
 
