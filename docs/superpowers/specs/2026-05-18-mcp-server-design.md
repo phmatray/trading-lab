@@ -25,6 +25,7 @@ The MCP server is **personal, local, single-user, read-only**. Same security sta
 | SDK | **`ModelContextProtocol` (official C# SDK, Microsoft).** NuGet packages: `ModelContextProtocol` and the already-present `Microsoft.Extensions.Hosting`. |
 | Tool surface shape | **Question-oriented**, not 1:1 over use cases. Six tools shaped around real questions, each backed by one or more existing use cases plus a thin DTO mapper. |
 | Tool count | **Six.** `list_instruments`, `get_dashboard`, `query_suggestions`, `query_prices`, `get_portfolio`, `get_replay_report`. |
+| Tool naming convention | **MCP tool names are `snake_case`.** C# method names follow .NET convention (`PascalCase`); each `[McpServerTool]` carries an explicit name attribute to publish the snake_case form. Reason: snake_case is the MCP-ecosystem convention, and we don't want the C# casing to leak to Claude. |
 | Tool registration | **Explicit `.WithTools<T>()` per class**, not `WithToolsFromAssembly()`. Future tool classes are not auto-published. |
 | Hosting model | **Inner host inside `McpCommand.ExecuteAsync`.** Fresh `Host.CreateApplicationBuilder`, re-composes the same modules the outer CLI uses (minus `PriceFeedBackgroundInfrastructureModule`), registers MCP services, `await innerHost.RunAsync(ct)` blocks until stdin EOF. |
 | Stdio hygiene | **All `ILogger` output to stderr, globally for the CLI.** One-line `Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace)` in `Program.cs`. The `mcp` path never writes to stdout outside the MCP protocol. |
@@ -84,11 +85,13 @@ TradyStrat.Cli.Tests/             NEW csproj
 
 All tool classes are `[McpServerToolType]`. All methods are `async`. All return JSON-serializable DTOs whose shape is fixed by this spec (the SDK's auto-serializer is the wire layer).
 
+**On the C# signatures below:** the spec uses an illustrative `Tool(Name = "...")` attribute form to show the snake_case MCP name. The actual SDK attribute spelling (e.g. `[McpServerTool(Name = "...")]` vs an alternate property) is an implementation detail confirmed at code time — the contract here is that **each tool method publishes the exact snake_case name shown**, regardless of which attribute property the SDK uses.
+
 ### 4.1 `list_instruments`
 
 ```csharp
-[McpServerTool, Description("List all instruments TradyStrat tracks.")]
-public async Task<InstrumentListResponse> List_instruments(CancellationToken ct);
+[McpServerTool(Name = "list_instruments"), Description("List all instruments TradyStrat tracks.")]
+public async Task<InstrumentListResponse> ListInstruments(CancellationToken ct);
 ```
 
 Returns:
@@ -110,9 +113,10 @@ Backed by `ListInstrumentsUseCase` plus a `role` field derived from `Tickers:Foc
 ### 4.2 `get_dashboard`
 
 ```csharp
-[McpServerTool, Description("Snapshot of an instrument: price, indicators, zone, today's AI suggestion, position.")]
-public async Task<DashboardSnapshot> Get_dashboard(
-    string? instrument = null,   // default: focus ticker (CON3.L)
+[McpServerTool(Name = "get_dashboard"),
+ Description("Snapshot of an instrument: price, indicators, zone, today's AI suggestion, position.")]
+public async Task<DashboardSnapshot> GetDashboard(
+    string? instrument = null,   // default: focus ticker from Tickers:Focus config
     string? asOf = null,         // default: today UTC; ISO YYYY-MM-DD
     CancellationToken ct = default);
 ```
@@ -151,9 +155,10 @@ Backed by `LoadDashboardUseCase` plus a flat-projection mapper. `suggestion` is 
 ### 4.3 `query_suggestions`
 
 ```csharp
-[McpServerTool, Description("Past AI suggestions for an instrument with action, conviction, and outcome.")]
-public async Task<SuggestionPage> Query_suggestions(
-    string? instrument = null,    // default: focus ticker
+[McpServerTool(Name = "query_suggestions"),
+ Description("Past AI suggestions for an instrument with action, conviction, and outcome.")]
+public async Task<SuggestionPage> QuerySuggestions(
+    string? instrument = null,    // default: focus ticker from Tickers:Focus config
     string? from = null,          // ISO date; default: to.AddDays(-90)
     string? to = null,            // ISO date; default: today
     string? action = null,        // "Acquire" | "Trim" | "Hold" | "Wait"; default: all
@@ -183,14 +188,17 @@ Returns newest-first:
 ### 4.4 `query_prices`
 
 ```csharp
-[McpServerTool, Description("Daily OHLCV bars for an instrument, optionally with indicator series.")]
-public async Task<PriceSeries> Query_prices(
-    string instrument,
+[McpServerTool(Name = "query_prices"),
+ Description("Daily OHLCV bars for an instrument, optionally with indicator series.")]
+public async Task<PriceSeries> QueryPrices(
+    string instrument,            // required — see note below
     string? from = null,          // ISO date; default: to.AddDays(-90)
     string? to = null,            // ISO date; default: today
     bool withIndicators = false,
     CancellationToken ct = default);
 ```
+
+**Why `instrument` is required here** (and not in `get_dashboard` / `query_suggestions`): bar history is large and the cap is 365 bars per call. Defaulting silently to the focus ticker risks Claude pulling a giant series when it actually wanted a context ticker. Forcing the argument is a small friction that prevents that class of confusion.
 
 Returns:
 ```jsonc
@@ -219,8 +227,9 @@ Returns:
 ### 4.5 `get_portfolio`
 
 ```csharp
-[McpServerTool, Description("Current portfolio: per-ticker lots, aggregate value, progress toward goal.")]
-public async Task<PortfolioSnapshot> Get_portfolio(
+[McpServerTool(Name = "get_portfolio"),
+ Description("Current portfolio: per-ticker lots, aggregate value, progress toward goal.")]
+public async Task<PortfolioSnapshot> GetPortfolio(
     string? asOf = null,          // ISO date; default: today
     CancellationToken ct = default);
 ```
@@ -254,8 +263,9 @@ Backed by `PortfolioService` (FIFO lot accounting already exists). `trades` is t
 ### 4.6 `get_replay_report`
 
 ```csharp
-[McpServerTool, Description("Re-run the AI prompt against historical snapshots in dry-run mode and return hit-rate / forward-return stats.")]
-public async Task<ReplayReport> Get_replay_report(
+[McpServerTool(Name = "get_replay_report"),
+ Description("Re-run the AI prompt against historical snapshots in dry-run mode and return hit-rate / forward-return stats.")]
+public async Task<ReplayReport> GetReplayReport(
     string instrument,
     string from,                  // ISO date, inclusive
     string to,                    // ISO date, inclusive
@@ -333,8 +343,9 @@ public sealed class PriceTool(
 {
     private const int MaxBars = 365;
 
-    [McpServerTool, Description("Daily OHLCV bars for an instrument, optionally with indicator series.")]
-    public async Task<PriceSeries> Query_prices(
+    [McpServerTool(Name = "query_prices"),
+     Description("Daily OHLCV bars for an instrument, optionally with indicator series.")]
+    public async Task<PriceSeries> QueryPrices(
         string instrument, string? from = null, string? to = null,
         bool withIndicators = false, CancellationToken ct = default)
     {
@@ -395,6 +406,8 @@ Validation rules per tool (failing → `ArgumentException`):
 - `get_replay_report.from` and `to`: both required (no defaults).
 
 Pre-condition validation explicitly does **not** live in the use cases — the use cases assume valid inputs because Razor pages validate before calling. The MCP boundary is a new edge; it owns its own validation.
+
+**Validation order in tool methods:** (1) resolve defaults (e.g., `from ← to.AddDays(-90)` when null), (2) parse strings to typed values (`DateOnly.Parse`), (3) run guards. Parse failures throw `ArgumentException` directly with the original input echoed back, e.g. `"Invalid date 'tomorrow' — use ISO YYYY-MM-DD."`. After defaults are applied, the `from <= to` guard always holds for the implicit case, so the only way to trip it is an explicit user-supplied inversion.
 
 ## 8. Testing
 
