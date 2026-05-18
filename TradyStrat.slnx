@@ -18,6 +18,7 @@
   <Project Path="TradyStrat.Infrastructure/TradyStrat.Infrastructure.csproj" />
   <Project Path="TradyStrat.Cli/TradyStrat.Cli.csproj" />
   <Project Path="TradyStrat.TestKit/TradyStrat.TestKit.csproj" />
+  <Project Path="TradyStrat.Cli.Tests/TradyStrat.Cli.Tests.csproj" />
   <Project Path="TradyStrat.Domain.Tests/TradyStrat.Domain.Tests.csproj" />
   <Project Path="TradyStrat.Application.Tests/TradyStrat.Application.Tests.csproj" />
   <Project Path="TradyStrat.Infrastructure.Tests/TradyStrat.Infrastructure.Tests.csproj" />
