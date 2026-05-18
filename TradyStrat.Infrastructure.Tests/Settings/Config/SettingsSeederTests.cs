@@ -39,7 +39,7 @@ public class SettingsSeederTests
         rows[SettingsKeys.PolymarketMinVolumeUsd].ShouldBe("50000");
         rows[SettingsKeys.PolymarketMaxHorizonDays].ShouldBe("365");
         rows[SettingsKeys.TickersFocus].ShouldBe("CON3.L");
-        rows.Count.ShouldBe(7);
+        rows.Count.ShouldBe(8);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class SettingsSeederTests
         await BuildSeeder(db).StartAsync(ct);
         await BuildSeeder(db).StartAsync(ct);   // run twice
 
-        db.Settings.Count().ShouldBe(7);
+        db.Settings.Count().ShouldBe(8);
         db.Settings.Single(e => e.Key == SettingsKeys.TickersFocus).Value.ShouldBe("COIN");   // preserved
     }
 }

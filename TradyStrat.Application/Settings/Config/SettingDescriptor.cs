@@ -60,6 +60,14 @@ public sealed class SettingsRegistry : ISettingsRegistry
             },
             new()
             {
+                Key = SettingsKeys.AnthropicThinkingBudget,
+                DefaultRaw = "8192",
+                Parse = s => int.Parse(s, CultureInfo.InvariantCulture),
+                Validate = v => RequireRange((int)v, 1024, 16_000, "Thinking budget"),
+                Format = v => ((int)v).ToString(CultureInfo.InvariantCulture),
+            },
+            new()
+            {
                 Key = SettingsKeys.PolymarketSearchQueries,
                 DefaultRaw = """["bitcoin","ethereum","coinbase","fed"]""",
                 Parse = s => JsonSerializer.Deserialize<string[]>(s)
