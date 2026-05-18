@@ -23,7 +23,8 @@ var registrar = new HostTypeRegistrar();
 var app = new CommandApp(registrar);
 app.Configure(c =>
 {
-    c.AddCommand<HelloCommand>("hello").WithDescription("Verifies the CLI is wired.");
+    c.AddCommand<ReplayCommand>("replay")
+     .WithDescription("Replay the AI prompt against historical snapshots and score the results.");
 });
 
 // Build the host. The registrar's two-provider design means Spectre's command
