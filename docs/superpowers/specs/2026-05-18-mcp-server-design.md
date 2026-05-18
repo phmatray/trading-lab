@@ -182,8 +182,8 @@ Returns (representative shape; exact fields fixed in `DashboardDtos.cs`):
     "envelopeHash": "a3b1c0e2", "promptVersionHash": "9d4f7e10"
   },
   "position": {
-    "qty": 312, "avgCostUsd": 18.42, "marketValueUsd": 7528.56,
-    "marketValueEur": 6962.43, "unrealizedPnlUsd": 1779.12, "unrealizedPnlEur": 1645.40
+    "qty": 312, "costBasisEur": 5740.20,
+    "marketValueEur": 6962.43, "unrealizedPnlEur": 1222.23, "realizedPnlEur": 0
   }
 }
 ```
@@ -276,22 +276,27 @@ public async Task<PortfolioSnapshot> GetPortfolio(
 Returns:
 ```jsonc
 {
-  "asOfDate": "2026-05-18", "fxRate": 0.9248,
+  "asOfDate": "2026-05-18",
   "aggregate": {
-    "totalValueEur": 18742.10, "goalEur": 1000000.00,
-    "distanceToGoalEur": 981257.90, "progressPct": 1.87
+    "totalValueEur": 18742.10,
+    "costBasisEur": 15820.45,
+    "unrealizedPnlEur": 2921.65,
+    "realizedPnlEur": 0,
+    "goalEur": 1000000.00,
+    "distanceToGoalEur": 981257.90,
+    "progressPct": 1.87
   },
   "positions": [
     {
-      "ticker": "CON3.L", "qty": 312, "avgCostUsd": 18.42,
-      "marketValueUsd": 7528.56, "marketValueEur": 6962.43,
-      "realizedPnlUsd": 220.00, "unrealizedPnlUsd": 1779.12,
-      "realizedPnlEur": 203.45, "unrealizedPnlEur": 1645.40
+      "ticker": "CON3.L", "currency": "USD", "qty": 312,
+      "costBasisEur": 5740.20, "marketValueEur": 6962.43,
+      "unrealizedPnlEur": 1222.23, "realizedPnlEur": 0
     }
     // ... one per ticker held
   ],
   "trades": [
-    { "date": "2026-05-12", "ticker": "CON3.L", "side": "Buy", "qty": 50, "priceUsd": 23.10 },
+    { "date": "2026-05-12", "ticker": "CON3.L", "side": "Buy", "qty": 50,
+      "pricePerShareEur": 21.36, "feesEur": 1.50 }
     // ... newest-first, capped at 500
   ],
   "tradesTruncated": false
@@ -299,6 +304,8 @@ Returns:
 ```
 
 Backed by `PortfolioService.SnapshotAsync(DateOnly asOf, IReadOnlyDictionary<int, (decimal, string, string)> priceByInstrument, decimal goalEur, CancellationToken)` plus the `PortfolioMapper` Strategy. `trades` is newest-first and **capped at 500 rows**, with a `tradesTruncated` flag set true when the cap fires. Today's ledger is small (manual entry only), but a reference architecture should bound every list output up front rather than ship an unbounded field that a future user will trip over.
+
+**Currency surface — EUR only for positions and aggregates.** The spec originally promised dual-currency (USD + EUR) on every per-position figure. Implementation reality (Phase 4): `TradyStrat.Domain.PositionRow` is EUR-only — costs, market values, and P&L are computed in EUR by `PortfolioService` (using FX at snapshot time). Surfacing USD would require either re-routing through `FxConverter` in the mapper or extending `PortfolioService` to return both — meaningful scope beyond v1. The `lastClose` field in `get_dashboard` keeps both currencies because price bars are natively in USD; everywhere else we ship EUR-only and document the asymmetry. `currency` is preserved per position so Claude knows what the underlying instrument trades in.
 
 ### 4.6 `get_replay_report`
 

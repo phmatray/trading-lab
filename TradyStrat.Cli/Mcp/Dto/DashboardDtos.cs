@@ -30,6 +30,8 @@ public sealed record SuggestionBrief(
     string Reasoning, string? EnvelopeHash, string? PromptVersionHash);
 
 public sealed record PositionBrief(
-    int Qty, decimal AvgCostEur,
-    decimal MarketValueEur, decimal MarketValueUsd,
-    decimal UnrealizedPnlEur, decimal UnrealizedPnlUsd);
+    decimal Qty,
+    decimal CostBasisEur,
+    decimal MarketValueEur,
+    decimal UnrealizedPnlEur,
+    decimal RealizedPnlEur);
