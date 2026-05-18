@@ -1,3 +1,4 @@
+using TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
@@ -50,10 +51,16 @@ public class AiSnapshotServiceTests
         var provider = new StubPredictionMarketProvider(
             predictionMarkets ?? [],
             shouldThrow: predictionMarketsThrow);
-        return new AiSnapshotService(engine, portfolio, fx,
-            new TestRepo<GoalConfig>(db), new TestRepo<Trade>(db),
-            listInstruments, provider,
-            NullLogger<AiSnapshotService>.Instance, clock);
+        ISnapshotSectionProvider[] sections =
+        [
+            new GoalSection(new TestRepo<GoalConfig>(db), clock),
+            new TickersSection(engine, fx, listInstruments),
+            new PortfolioSection(portfolio, listInstruments),
+            new RecentTradesSection(new TestRepo<Trade>(db)),
+            new MarketsSection(provider, NullLogger<MarketsSection>.Instance),
+            new UsdPerEurSection(fx),
+        ];
+        return new AiSnapshotService(sections);
     }
 
     private sealed class StubPredictionMarketProvider(

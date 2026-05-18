@@ -25,6 +25,9 @@ public class SuggestionServiceCitationTests
         RecentTrades: [],
         UsdPerEur: 1.08m,
         Markets: markets,
+        RecentSuggestions: [],
+        EnvelopeHash: "h",
+        PromptVersionHash: "h",
         PromptHash: "h");
 
     private static PredictionMarket M(string slug) =>

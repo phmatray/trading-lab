@@ -123,7 +123,7 @@ public class GetAllTodaysSuggestionsUseCaseTests
                 asOf, instrumentId,
                 GoalConfig.Default(DateTime.UtcNow),
                 new PortfolioSnapshot([], 0, 0, 0, 0, 0, 0, 0),
-                [], [], 1m, [], "h"));
+                [], [], 1m, [], [], "h", "h", "h"));
         }
 
         public Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)

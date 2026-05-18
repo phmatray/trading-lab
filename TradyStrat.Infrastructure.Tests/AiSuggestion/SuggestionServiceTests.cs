@@ -25,6 +25,9 @@ public class SuggestionServiceTests
         RecentTrades: [],
         UsdPerEur: 1.08m,
         Markets: [],
+        RecentSuggestions: [],
+        EnvelopeHash: "hashvalue",
+        PromptVersionHash: "hashvalue",
         PromptHash: "hashvalue");
 
     [Fact]
