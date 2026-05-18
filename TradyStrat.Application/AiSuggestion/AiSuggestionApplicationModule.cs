@@ -14,6 +14,7 @@ public sealed class AiSuggestionApplicationModule : IAppModule
     public void ConfigureServices(IServiceCollection services, IConfiguration config)
     {
         services.AddSingleton<ICorrectnessRule>(_ => new FixedThresholdCorrectness(2.0m));
+        services.AddScoped<ForwardReturnCalculator>();
         services.AddScoped<IAiSnapshotService, AiSnapshotService>();
         services.AddScoped<ISnapshotSectionProvider, GoalSection>();
         services.AddScoped<ISnapshotSectionProvider, TickersSection>();
@@ -27,6 +28,7 @@ public sealed class AiSuggestionApplicationModule : IAppModule
         services.AddScoped<ForceRefetchSuggestionUseCase>();
         services.AddScoped<BackfillSuggestionsUseCase>();
         services.AddScoped<ReplaySuggestionsUseCase>();
+        services.AddScoped<QuerySuggestionsUseCase>();
         services.AddSingleton<ISuggestionBackfillCoordinator>(sp =>
             new SuggestionBackfillCoordinator(
                 sp.GetRequiredService<IServiceScopeFactory>(),

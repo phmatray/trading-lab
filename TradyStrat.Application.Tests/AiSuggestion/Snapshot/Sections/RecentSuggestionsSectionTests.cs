@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
+using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 using TradyStrat.Application.Fx;
@@ -138,14 +139,15 @@ public class RecentSuggestionsSectionTests
 
     private static RecentSuggestionsSection NewSection(AppDbContext db)
     {
-        var listInstr = new ListInstrumentsUseCase(new TestRepo<Instrument>(db), NullLogger<ListInstrumentsUseCase>.Instance);
-        var fx        = new FxConverter(new TestRepo<FxRate>(db));
-        var rule      = new FixedThresholdCorrectness(2.0m);
+        var listInstr      = new ListInstrumentsUseCase(new TestRepo<Instrument>(db), NullLogger<ListInstrumentsUseCase>.Instance);
+        var fx             = new FxConverter(new TestRepo<FxRate>(db));
+        var rule           = new FixedThresholdCorrectness(2.0m);
+        var fwdCalculator  = new ForwardReturnCalculator(new TestRepo<PriceBar>(db), new TestRepo<Instrument>(db));
         return new RecentSuggestionsSection(
             new TestRepo<Suggestion>(db),
             new TestRepo<PriceBar>(db),
             new TestRepo<Trade>(db),
-            listInstr, fx, rule);
+            listInstr, fx, rule, fwdCalculator);
     }
 
     private static Suggestion MkSuggestion(int instrId, DateOnly date, SuggestionAction action, int conviction, string rationale = "rationale")

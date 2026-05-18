@@ -22,7 +22,8 @@ public sealed class RecentSuggestionsSection(
     IReadRepositoryBase<Trade> tradeRepo,
     ListInstrumentsUseCase listInstruments,
     FxConverter fx,
-    ICorrectnessRule correctness) : ISnapshotSectionProvider
+    ICorrectnessRule correctness,
+    ForwardReturnCalculator forwardReturn) : ISnapshotSectionProvider
 {
     private const int LookbackCount = 30;
     private const int ForwardBars   = 5;
@@ -50,11 +51,10 @@ public sealed class RecentSuggestionsSection(
                 new PriceBarsSinceSpec(ticker, s.ForDate), ct);
 
             if (bars.Count < 1) continue;                       // closeAt missing — skip
-            // PriceBarsSinceSpec is >= s.ForDate; take the first ForwardBars+1 bars.
-            var window = bars.Take(ForwardBars + 1).ToArray();
-            var closeAt = window[0].Close;
 
-            if (window.Length < ForwardBars + 1)
+            var fwdPct = await forwardReturn.ComputeAsync(ticker, s.ForDate, ct);
+
+            if (fwdPct is null)
             {
                 // Forward window incomplete — emit context-only row.
                 builder.RecentSuggestions.Add(BuildRow(s, fwdReturnPct: 0m, wasCorrect: false,
@@ -62,12 +62,13 @@ public sealed class RecentSuggestionsSection(
                 continue;
             }
 
+            // PriceBarsSinceSpec is >= s.ForDate; take the first ForwardBars+1 bars.
+            var window = bars.Take(ForwardBars + 1).ToArray();
             var fwdBar = window[ForwardBars];
-            var fwdReturnPct = closeAt == 0m ? 0m : (fwdBar.Close - closeAt) / closeAt * 100m;
-            var wasCorrect = correctness.Evaluate(s.Action, fwdReturnPct);
+            var wasCorrect = correctness.Evaluate(s.Action, fwdPct.Value);
             var netFlowEur = await ComputeNetFlowEurAsync(instrumentId, s.ForDate, fwdBar.Date, currency, ct);
 
-            builder.RecentSuggestions.Add(BuildRow(s, fwdReturnPct, wasCorrect,
+            builder.RecentSuggestions.Add(BuildRow(s, fwdPct.Value, wasCorrect,
                 isComplete: true, netFlowEur));
         }
     }
