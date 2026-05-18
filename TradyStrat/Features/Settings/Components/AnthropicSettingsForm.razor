@@ -11,6 +11,10 @@
             <span class="lbl">Max tokens</span>
             <input type="number" min="1" max="100000" step="1" @bind="_maxTokens" @bind:after="OnChanged" />
         </label>
+        <label class="field">
+            <span class="lbl">Thinking budget (tokens)</span>
+            <input type="number" min="1024" max="16000" step="64" @bind="_thinkingBudget" @bind:after="OnChanged" />
+        </label>
     </div>
     <div class="actions">
         <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
