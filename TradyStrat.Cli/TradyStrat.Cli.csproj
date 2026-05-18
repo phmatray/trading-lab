@@ -3,6 +3,9 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>TradyStrat.Cli</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Share the Blazor host's user-secrets store so Anthropic:ApiKey resolves
+         for both hosts without duplicating the secret. -->
+    <UserSecretsId>tradystrat-local</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="Microsoft.Extensions.Logging" />
@@ -13,6 +16,11 @@
     <!-- Vendored TheAppManager v3 (swap back to <PackageReference Include="TheAppManager" />
          once v3 publishes to NuGet). -->
     <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Spectre.Console" />
