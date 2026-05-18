@@ -9,6 +9,10 @@ using TradyStrat.Infrastructure.PriceFeed; // for typeof(PriceFeedBackgroundInfr
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Route all host-level logging to stderr so stdout stays clean for any
+// commands that write structured output (e.g. the mcp command's JSON-RPC stream).
+builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
+
 // Compose modules into the host's service collection. The CLI excludes
 // PriceFeedBackgroundInfrastructureModule (background hosted service that
 // polls Yahoo for prices) — a one-shot CLI command shouldn't start it.
@@ -25,6 +29,8 @@ app.Configure(c =>
 {
     c.AddCommand<ReplayCommand>("replay")
      .WithDescription("Replay the AI prompt against historical snapshots and score the results.");
+    c.AddCommand<McpCommand>("mcp")
+     .WithDescription("Run the read-only TradyStrat MCP server over stdio.");
 });
 
 // Build the host. The registrar's two-provider design means Spectre's command
