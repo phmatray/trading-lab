@@ -11,6 +11,9 @@
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="TradyStrat.Cli.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
     <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />
     <!-- Vendored TheAppManager v3 (swap back to <PackageReference Include="TheAppManager" />
