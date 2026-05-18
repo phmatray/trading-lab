@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TradyStrat.Domain.Tests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+</Project>
