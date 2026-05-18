@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Exceptions;
+namespace TradyStrat.Domain.Exceptions;
 
 public sealed class CsvImportException(string message, int? lineNumber = null)
     : TradyStratException(lineNumber.HasValue ? $"line {lineNumber}: {message}" : message)
