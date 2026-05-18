@@ -9,7 +9,7 @@ using TradyStrat.Cli.Mcp.Mapping;
 namespace TradyStrat.Cli.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class InstrumentTool(
+internal sealed class InstrumentTool(
     ListInstrumentsUseCase listInstruments,
     IConfiguration config)
 {
