@@ -25,5 +25,6 @@ public sealed class IndicatorsApplicationModule : IAppModule
         services.AddScoped<IIndicatorHistoryProvider, Sma200HistoryProvider>();
         services.AddScoped<IIndicatorHistoryProviderFactory, IndicatorHistoryProviderFactory>();
         services.AddScoped<IndicatorEngine>();
+        services.AddScoped<IIndicatorEngine>(sp => sp.GetRequiredService<IndicatorEngine>());
     }
 }

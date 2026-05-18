@@ -7,7 +7,7 @@ using TradyStrat.Domain;
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 
 public sealed class TickersSection(
-    IndicatorEngine indicators,
+    IIndicatorEngine indicators,
     FxConverter fx,
     ListInstrumentsUseCase listInstruments) : ISnapshotSectionProvider
 {

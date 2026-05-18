@@ -22,7 +22,7 @@ using TradyStrat.Application.Trades.Specifications;
 namespace TradyStrat.Application.Dashboard.UseCases;
 
 public sealed class LoadDashboardUseCase(
-    IndicatorEngine indicators,
+    IIndicatorEngine indicators,
     PortfolioService portfolio,
     GrowthSeriesBuilder growth,
     FxConverter fx,

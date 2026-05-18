@@ -10,7 +10,7 @@ namespace TradyStrat.Application.Indicators;
 public sealed class IndicatorEngine(
     IReadRepositoryBase<PriceBar> bars,
     ZoneClassifier classifier,
-    IIndicatorHistoryProviderFactory historyFactory)
+    IIndicatorHistoryProviderFactory historyFactory) : IIndicatorEngine
 {
     public async Task<IndicatorReading> ComputeFor(string ticker, CancellationToken ct)
     {
