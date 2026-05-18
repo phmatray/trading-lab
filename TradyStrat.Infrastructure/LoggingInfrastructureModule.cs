@@ -1,12 +1,15 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using TheAppManager.Modules;
 
-namespace TradyStrat.Modules;
+namespace TradyStrat.Infrastructure;
 
-public sealed class LoggingModule : IAppModule
+public sealed class LoggingInfrastructureModule : IAppModule
 {
-    public void ConfigureServices(WebApplicationBuilder builder)
+    public void ConfigureServices(IServiceCollection services, IConfiguration config)
     {
         var logDir = Environment.GetEnvironmentVariable("LOG_DIR")
             ?? Path.Combine(
@@ -25,7 +28,10 @@ public sealed class LoggingModule : IAppModule
             .CreateLogger();
 #pragma warning restore CA1305
 
-        builder.Logging.ClearProviders();
-        builder.Logging.AddSerilog(logger, dispose: true);
+        services.AddLogging(b =>
+        {
+            b.ClearProviders();
+            b.AddSerilog(logger, dispose: true);
+        });
     }
 }
