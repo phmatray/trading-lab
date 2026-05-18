@@ -84,7 +84,14 @@ public sealed partial class SuggestionService(
         var options = new ChatOptions
         {
             Tools           = [submit],
-            ToolMode        = ChatToolMode.RequireSpecific(ToolName),
+            // Cannot force a specific tool when extended thinking is enabled —
+            // Anthropic rejects the combination ("Thinking may not be enabled
+            // when tool_choice forces tool use."). The system prompt's
+            // "Always invoke the submit_suggestion tool exactly once." line
+            // is the contract that compels the call. If the model ever doesn't,
+            // AskAsync throws AnthropicCallFailedException ("Model did not
+            // invoke submit_suggestion") — same as before.
+            ToolMode        = ChatToolMode.Auto,
             ModelId         = ai.Model,
             MaxOutputTokens = ai.MaxTokens,
         };
