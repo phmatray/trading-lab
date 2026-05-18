@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Time;
+namespace TradyStrat.Domain;
 
 public interface IClock
 {
