@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using TradyStrat.Domain;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Settings.Specifications;
 
 namespace TradyStrat.Features.Settings.UseCases;

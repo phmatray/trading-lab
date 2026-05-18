@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Data;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;

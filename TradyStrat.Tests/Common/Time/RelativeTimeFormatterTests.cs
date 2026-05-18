@@ -1,4 +1,4 @@
-using TradyStrat.Common.Time;
+using TradyStrat.Application.Time;
 using Shouldly;
 using TradyStrat.Domain;
 using Xunit;

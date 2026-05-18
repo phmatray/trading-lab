@@ -1,8 +1,8 @@
-using TradyStrat.Common.Time;
+using TradyStrat.Application.Time;
 using System.Text.Json;
 using Ardalis.Specification;
 using TradyStrat.Domain;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.AiSuggestion;        // JsonOpts
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;

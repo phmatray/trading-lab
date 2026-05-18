@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using TradyStrat.Domain.Exceptions;
 
-namespace TradyStrat.Common.UseCases;
+namespace TradyStrat.Application.UseCases;
 
 public abstract class UseCaseBase<TInput, TOutput>(ILogger logger)
     : IUseCase<TInput, TOutput>

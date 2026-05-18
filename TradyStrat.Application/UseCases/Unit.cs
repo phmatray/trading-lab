@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.UseCases;
+namespace TradyStrat.Application.UseCases;
 
 public readonly record struct Unit
 {

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Snapshot;

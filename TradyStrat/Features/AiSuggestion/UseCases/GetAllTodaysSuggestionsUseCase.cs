@@ -1,6 +1,6 @@
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Settings.UseCases;
 
 namespace TradyStrat.Features.AiSuggestion.UseCases;

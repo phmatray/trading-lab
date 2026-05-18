@@ -1,5 +1,5 @@
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Settings.UseCases;
 

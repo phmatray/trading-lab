@@ -1,7 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 

@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using TradyStrat.Domain;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 
 namespace TradyStrat.Features.AiSuggestion.UseCases;

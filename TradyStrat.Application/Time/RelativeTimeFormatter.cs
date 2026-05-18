@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace TradyStrat.Common.Time;
+namespace TradyStrat.Application.Time;
 
 public static class RelativeTimeFormatter
 {

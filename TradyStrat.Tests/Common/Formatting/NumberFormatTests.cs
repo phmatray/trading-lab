@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Common.Formatting;
+using TradyStrat.Application.Formatting;
 using Xunit;
 
 namespace TradyStrat.Tests.Common.Formatting;

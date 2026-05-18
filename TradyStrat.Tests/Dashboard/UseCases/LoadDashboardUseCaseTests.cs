@@ -3,7 +3,7 @@ using System.Text.Json;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Indicators.History;
 using Shouldly;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.Dashboard.UseCases;
 using TradyStrat.Features.AiSuggestion.Backfill;

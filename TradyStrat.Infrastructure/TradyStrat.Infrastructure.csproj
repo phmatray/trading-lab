@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>TradyStrat.Infrastructure</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
     <!-- Vendored TheAppManager v3 (swap back to <PackageReference Include="TheAppManager" />

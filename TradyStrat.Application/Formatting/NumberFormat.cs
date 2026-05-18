@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace TradyStrat.Common.Formatting;
+namespace TradyStrat.Application.Formatting;
 
 /// <summary>Single source of truth for displaying money, quantities and percentages.
 /// Uses an explicit NumberFormatInfo (NO-BREAK SPACE group separator, comma decimal)

@@ -2,7 +2,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>TradyStrat.Cli</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
     <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />

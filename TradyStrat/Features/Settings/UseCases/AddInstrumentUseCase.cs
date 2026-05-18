@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.PriceFeed;
 using TradyStrat.Features.Settings.Specifications;

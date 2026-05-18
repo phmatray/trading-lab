@@ -116,7 +116,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     {
         if (_vm?.IsHistorical == true) return;
         _busy = true;
-        try   { await RefreshPrices.ExecuteAsync(Common.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
+        try   { await RefreshPrices.ExecuteAsync(Application.UseCases.Unit.Value, CancellationToken.None); await ReloadAsync(); }
         finally { _busy = false; }
     }
 
@@ -136,7 +136,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
             var ct = CancellationToken.None;
             var focusTicker = _vm?.FocusTicker
                 ?? await Settings.FocusTickerAsync(ct);
-            var instruments = await ListInstruments.ExecuteAsync(Common.UseCases.Unit.Value, ct);
+            var instruments = await ListInstruments.ExecuteAsync(Application.UseCases.Unit.Value, ct);
             var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
                 ?? throw new InvalidOperationException(
                     $"Focus ticker '{focusTicker}' is not in the Instruments table.");

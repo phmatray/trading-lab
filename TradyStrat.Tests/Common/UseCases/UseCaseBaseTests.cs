@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Domain.Exceptions;
 using Xunit;
 

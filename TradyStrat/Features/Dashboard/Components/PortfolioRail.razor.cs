@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain;
-using TradyStrat.Common.Formatting;
+using TradyStrat.Application.Formatting;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

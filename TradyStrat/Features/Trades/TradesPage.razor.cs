@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Common.UseCases;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.UseCases;
