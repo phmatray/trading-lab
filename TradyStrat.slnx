@@ -13,6 +13,10 @@
     <File Path=".config/dotnet-tools.json" />
   </Folder>
   <Project Path="TradyStrat.Hosting/TradyStrat.Hosting.csproj" />
+  <Project Path="TradyStrat.Domain/TradyStrat.Domain.csproj" />
+  <Project Path="TradyStrat.Application/TradyStrat.Application.csproj" />
+  <Project Path="TradyStrat.Infrastructure/TradyStrat.Infrastructure.csproj" />
+  <Project Path="TradyStrat.Cli/TradyStrat.Cli.csproj" />
   <Project Path="TradyStrat.Tests/TradyStrat.Tests.csproj" />
   <Project Path="TradyStrat/TradyStrat.csproj" />
 </Solution>
