@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Features.Trades;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using Xunit;
 
 namespace TradyStrat.Tests.Trades;

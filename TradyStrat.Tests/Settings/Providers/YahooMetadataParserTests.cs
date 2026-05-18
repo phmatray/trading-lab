@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Shouldly;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.PriceFeed.Providers;
 using Xunit;
 

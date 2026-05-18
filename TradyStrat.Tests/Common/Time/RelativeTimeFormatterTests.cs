@@ -1,5 +1,6 @@
-using Shouldly;
 using TradyStrat.Common.Time;
+using Shouldly;
+using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Tests.Common.Time;

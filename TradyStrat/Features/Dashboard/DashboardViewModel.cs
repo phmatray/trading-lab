@@ -2,7 +2,7 @@ using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.CallDiff;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.PredictionMarkets;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard;
 

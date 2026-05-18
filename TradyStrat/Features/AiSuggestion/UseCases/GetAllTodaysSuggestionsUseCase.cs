@@ -1,5 +1,5 @@
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Settings.UseCases;
 
@@ -8,7 +8,7 @@ namespace TradyStrat.Features.AiSuggestion.UseCases;
 /// <summary>
 /// Saga (swallow-and-continue): aggregates per-Held-instrument AI calls into
 /// one batch. Each per-ticker call is an independent unit of work; a failing
-/// call (typed <see cref="TradyStrat.Common.Exceptions.TradyStratException"/>)
+/// call (typed <see cref="TradyStrat.Domain.Exceptions.TradyStratException"/>)
 /// is logged at Warning and excluded from the result, but does NOT abort the
 /// remaining calls.
 ///

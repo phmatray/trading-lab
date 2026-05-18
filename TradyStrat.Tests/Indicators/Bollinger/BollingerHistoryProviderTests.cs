@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.Indicators.Bollinger;
 using Xunit;
 

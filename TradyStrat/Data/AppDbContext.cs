@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Data;
 

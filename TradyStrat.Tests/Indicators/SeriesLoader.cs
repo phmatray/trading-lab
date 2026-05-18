@@ -1,5 +1,5 @@
 using System.Globalization;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Tests.Indicators;
 

@@ -2,9 +2,8 @@ using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Data;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Features.Settings.UseCases;
 

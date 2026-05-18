@@ -13,7 +13,7 @@ using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
 using TradyStrat.Features.Portfolio;
 using TradyStrat.Features.Settings.UseCases;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.Indicators.Bollinger;
 using TradyStrat.Features.Indicators.Ichimoku;
 using TradyStrat.Features.Indicators.MovingAverage;

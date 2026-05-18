@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.PredictionMarkets;
 
 namespace TradyStrat.Features.AiSuggestion.Snapshot;

@@ -1,4 +1,4 @@
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Settings.UseCases;

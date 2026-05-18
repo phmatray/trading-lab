@@ -1,8 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shouldly;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
 using TradyStrat.Data;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Tests.Common.Time;     // FakeClock

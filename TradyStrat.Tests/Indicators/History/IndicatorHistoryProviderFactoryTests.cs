@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Features.Indicators.History;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.Indicators.Bollinger;
 using TradyStrat.Features.Indicators.Ichimoku;
 using TradyStrat.Features.Indicators.MovingAverage;

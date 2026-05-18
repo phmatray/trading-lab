@@ -2,9 +2,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Ardalis.Specification;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Fx;
 using TradyStrat.Features.Indicators;
@@ -92,7 +91,7 @@ public sealed class AiSnapshotService(
             var oneUsdInEur = await fx.ToEurAsync(1m, "USD", asOf, ct);
             if (oneUsdInEur != 0m) usdPerEur = 1m / oneUsdInEur;
         }
-        catch (Common.Exceptions.FxRateUnavailableException)
+        catch (Domain.Exceptions.FxRateUnavailableException)
         {
             // Tolerant — snapshot can be built without the FX rate present.
         }

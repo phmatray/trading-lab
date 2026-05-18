@@ -3,7 +3,7 @@ using TradyStrat.Tests.PriceFeed.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.PriceFeed;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Common.Time;
 using Xunit;

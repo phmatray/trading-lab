@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Features.AiSuggestion.CallDiff;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Tests.AiSuggestion.CallDiff;

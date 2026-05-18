@@ -1,3 +1,4 @@
+using TradyStrat.Common.Exceptions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.AiSuggestion.UseCases;
@@ -5,8 +6,8 @@ using TradyStrat.Data;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.Snapshot;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Settings;       // FakeSettingsReader
 using TradyStrat.Tests.Specifications;

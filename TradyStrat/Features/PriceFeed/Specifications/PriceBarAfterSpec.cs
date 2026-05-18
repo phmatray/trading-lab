@@ -1,5 +1,5 @@
 using Ardalis.Specification;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.PriceFeed.Specifications;
 

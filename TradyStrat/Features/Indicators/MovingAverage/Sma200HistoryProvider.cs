@@ -1,7 +1,7 @@
 using TechnicalAnalysis.Common;
 using TradyStrat.Features.Indicators.History;
 using TechnicalAnalysis.Functions;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Indicators.MovingAverage;
 

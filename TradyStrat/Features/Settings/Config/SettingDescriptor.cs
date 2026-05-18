@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Features.Settings.Config;
 

@@ -1,3 +1,4 @@
+using TradyStrat.Domain;
 namespace TradyStrat.Common.Time;
 
 public sealed class SystemClock : IClock

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Data;
 using TradyStrat.Features.Settings.UseCases;

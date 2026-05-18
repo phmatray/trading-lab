@@ -1,4 +1,4 @@
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.Indicators.Zones;
 
 namespace TradyStrat.Features.Indicators.MovingAverage;

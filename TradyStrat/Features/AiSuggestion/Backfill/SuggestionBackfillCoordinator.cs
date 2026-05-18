@@ -1,6 +1,6 @@
 using Ardalis.Specification;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.AiSuggestion.Specifications;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.Settings.Config;

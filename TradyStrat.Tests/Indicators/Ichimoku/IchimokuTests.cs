@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Ichimoku;

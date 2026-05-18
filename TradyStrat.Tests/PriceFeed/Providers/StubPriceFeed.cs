@@ -1,5 +1,5 @@
 using TradyStrat.Features.PriceFeed.Providers;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Tests.PriceFeed.Providers;
 

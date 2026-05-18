@@ -1,10 +1,11 @@
+using TradyStrat.Common.Exceptions;
 using Microsoft.Extensions.AI;
 using TheAppManager.Modules;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Backfill;
 using TradyStrat.Features.AiSuggestion.Snapshot;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Modules;
 

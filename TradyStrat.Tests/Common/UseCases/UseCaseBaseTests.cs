@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Common.UseCases;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 using Xunit;
 
 namespace TradyStrat.Tests.Common.UseCases;

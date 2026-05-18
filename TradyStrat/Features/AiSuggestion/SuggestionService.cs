@@ -1,11 +1,11 @@
+using TradyStrat.Common.Exceptions;
 using System.Text.Json;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.Settings.Config;
 using Microsoft.Extensions.AI;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Features.AiSuggestion;
 

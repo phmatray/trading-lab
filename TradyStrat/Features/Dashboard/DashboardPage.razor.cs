@@ -1,8 +1,8 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain;
 using TradyStrat.Features.AiSuggestion.UseCases;
 using TradyStrat.Features.Dashboard.Navigation;
 using TradyStrat.Features.Dashboard.UseCases;

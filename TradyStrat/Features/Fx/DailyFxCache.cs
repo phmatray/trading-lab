@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
 using TradyStrat.Data;
 using TradyStrat.Features.Fx.Providers;
 

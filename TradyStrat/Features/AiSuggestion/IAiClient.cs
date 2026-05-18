@@ -1,4 +1,4 @@
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 
 namespace TradyStrat.Features.AiSuggestion;

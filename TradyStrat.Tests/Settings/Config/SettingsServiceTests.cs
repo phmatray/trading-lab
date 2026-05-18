@@ -1,6 +1,6 @@
 using System.Globalization;
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Data;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Tests.Common.Time;     // FakeClock

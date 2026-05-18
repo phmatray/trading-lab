@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Features.Portfolio;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using Xunit;

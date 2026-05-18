@@ -2,7 +2,7 @@ using Shouldly;
 using TradyStrat.Features.Indicators.Zones;
 using TradyStrat.Features.Indicators.History;
 using TradyStrat.Features.Indicators;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.Indicators.Rsi;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;

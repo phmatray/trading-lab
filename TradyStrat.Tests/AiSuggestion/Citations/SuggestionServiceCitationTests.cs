@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Features.AiSuggestion.Snapshot;
 using TradyStrat.Features.PredictionMarkets;

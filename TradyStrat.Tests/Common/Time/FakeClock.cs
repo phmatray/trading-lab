@@ -1,4 +1,4 @@
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Tests.Common.Time;
 

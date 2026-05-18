@@ -1,7 +1,6 @@
 using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
 using TradyStrat.Data;
 
 namespace TradyStrat.Features.Settings.Config;

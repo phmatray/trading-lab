@@ -1,6 +1,6 @@
 using Ardalis.Specification;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.Specifications;

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.Fx.Providers;
 using TradyStrat.Features.PriceFeed.Providers;
 using TradyStrat.Features.Settings.UseCases;

@@ -1,10 +1,11 @@
+using TradyStrat.Common.Time;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TheAppManager.Modules;
 using TradyStrat.Data;
 using TradyStrat.Data.Sqlite;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Modules;
 

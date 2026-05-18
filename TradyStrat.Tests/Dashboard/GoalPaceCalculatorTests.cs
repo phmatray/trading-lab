@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Features.Dashboard;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Tests.Dashboard;

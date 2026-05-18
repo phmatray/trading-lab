@@ -1,6 +1,7 @@
+using TradyStrat.Common.Exceptions;
 using Xunit;
 using Shouldly;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Tests.Common.Exceptions;
 

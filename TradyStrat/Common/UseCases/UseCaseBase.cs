@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Common.UseCases;
 

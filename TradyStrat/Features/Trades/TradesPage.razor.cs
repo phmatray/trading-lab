@@ -4,9 +4,8 @@ using TradyStrat.Common.UseCases;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
 using TradyStrat.Features.Trades.UseCases;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Trades;

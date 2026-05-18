@@ -1,6 +1,6 @@
 using System.Net;
 using Shouldly;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.PredictionMarkets;
 using TradyStrat.Features.PredictionMarkets.Providers;
 using TradyStrat.Features.Settings.Config;

@@ -2,9 +2,8 @@ using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Features.Settings.Config;
 using TradyStrat.Features.Settings.UseCases;
-using TradyStrat.Common.Domain;
-using TradyStrat.Common.Exceptions;
-using TradyStrat.Common.Time;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
 using TradyStrat.Features.Trades.Specifications;
 
 namespace TradyStrat.Features.Settings;

@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Data;
 using Xunit;
 

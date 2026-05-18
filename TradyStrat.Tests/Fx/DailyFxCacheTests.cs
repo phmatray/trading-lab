@@ -3,7 +3,7 @@ using TradyStrat.Tests.Fx.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Features.Fx;
-using TradyStrat.Common.Domain;
+using TradyStrat.Domain;
 using TradyStrat.Tests.Specifications;
 using TradyStrat.Tests.Common.Time;
 using Xunit;
