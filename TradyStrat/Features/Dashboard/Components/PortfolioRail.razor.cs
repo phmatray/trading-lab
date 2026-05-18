@@ -1,3 +1,4 @@
+using TradyStrat.Application.Dashboard;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain;
 using TradyStrat.Application.Formatting;

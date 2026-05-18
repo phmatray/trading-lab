@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Features.Dashboard.Navigation;
+using TradyStrat.Application.Dashboard.Navigation;
 using Xunit;
 
 namespace TradyStrat.Tests.Dashboard.Navigation;

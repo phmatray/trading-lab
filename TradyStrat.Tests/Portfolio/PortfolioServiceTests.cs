@@ -1,5 +1,6 @@
+using TradyStrat.Infrastructure.Data;
 using Shouldly;
-using TradyStrat.Features.Portfolio;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
@@ -19,7 +20,7 @@ public class PortfolioServiceTests
     private static Trade Sell(int day, decimal qty, decimal price, decimal fees = 0m) =>
         Buy(day, qty, price, fees) with { Side = TradeSide.Sell };
 
-    private static PortfolioService NewService(TradyStrat.Data.AppDbContext db)
+    private static PortfolioService NewService(TradyStrat.Infrastructure.Data.AppDbContext db)
         => new(new TestRepo<Trade>(db));
 
     private static Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>

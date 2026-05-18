@@ -1,6 +1,7 @@
+using TradyStrat.Application.Settings.Config;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Domain;
-using TradyStrat.Data;
+using TradyStrat.Infrastructure.Data;
 
 namespace TradyStrat.Features.Settings.Config;
 

@@ -1,3 +1,4 @@
+using TradyStrat.Application.Trades;
 using Shouldly;
 using TradyStrat.Features.Trades;
 using TradyStrat.Domain;

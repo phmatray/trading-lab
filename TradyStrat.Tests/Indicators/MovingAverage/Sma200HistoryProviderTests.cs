@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.MovingAverage;
+using TradyStrat.Application.Indicators.MovingAverage;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.MovingAverage;

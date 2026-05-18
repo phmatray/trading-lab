@@ -1,4 +1,4 @@
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.Settings.Config;
 
 namespace TradyStrat.Tests.Settings;
 

@@ -1,7 +1,10 @@
+using TradyStrat.Infrastructure.Fx;
+using TradyStrat.Infrastructure.PriceFeed;
+using TradyStrat.Application.PriceFeed;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Features.Fx;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Application.Fx;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.PriceFeed;
 

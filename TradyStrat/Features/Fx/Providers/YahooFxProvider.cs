@@ -1,3 +1,4 @@
+using TradyStrat.Application.Fx.Providers;
 using System.Text.Json;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;

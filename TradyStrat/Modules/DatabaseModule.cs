@@ -3,8 +3,8 @@ using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TheAppManager.Modules;
-using TradyStrat.Data;
-using TradyStrat.Data.Sqlite;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Infrastructure.Data.Sqlite;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Modules;

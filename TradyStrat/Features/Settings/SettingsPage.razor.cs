@@ -1,10 +1,11 @@
+using TradyStrat.Infrastructure.Settings.UseCases;
+using TradyStrat.Application.Settings.UseCases;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Features.Trades.Specifications;
+using TradyStrat.Application.Trades.Specifications;
 
 namespace TradyStrat.Features.Settings;
 

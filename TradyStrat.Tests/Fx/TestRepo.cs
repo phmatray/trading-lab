@@ -1,5 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using TradyStrat.Data;
+using TradyStrat.Infrastructure.Data;
 
 namespace TradyStrat.Tests.Fx;
 

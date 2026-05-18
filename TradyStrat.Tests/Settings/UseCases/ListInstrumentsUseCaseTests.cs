@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Data;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Tests.Fx;          // TestRepo<T>
 using Xunit;
 

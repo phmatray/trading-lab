@@ -9,14 +9,14 @@ public class MovingAverageTests
     public void Returns_null_when_period_exceeds_series_length()
     {
         var bars = SeriesLoader.LoadCloses().Take(40).ToList();
-        Features.Indicators.MovingAverage.MovingAverage.LatestFor(bars, period: 50).ShouldBeNull();
+        Application.Indicators.MovingAverage.MovingAverage.LatestFor(bars, period: 50).ShouldBeNull();
     }
 
     [Fact]
     public void Sma50_close_to_average_of_last_50_closes()
     {
         var bars = SeriesLoader.LoadCloses();
-        var sma  = Features.Indicators.MovingAverage.MovingAverage.LatestFor(bars, 50);
+        var sma  = Application.Indicators.MovingAverage.MovingAverage.LatestFor(bars, 50);
         var manual = bars.TakeLast(50).Average(b => b.Close);
 
         sma.ShouldNotBeNull();

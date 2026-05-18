@@ -1,7 +1,8 @@
+using TradyStrat.Application.PredictionMarkets;
 using System.Text.Json;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.Settings.Config;
 
 namespace TradyStrat.Features.PredictionMarkets.Providers;
 

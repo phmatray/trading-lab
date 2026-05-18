@@ -1,5 +1,6 @@
+using TradyStrat.Infrastructure.Trades.UseCases;
 using TheAppManager.Modules;
-using TradyStrat.Features.Trades.UseCases;
+using TradyStrat.Application.Trades.UseCases;
 
 namespace TradyStrat.Modules;
 

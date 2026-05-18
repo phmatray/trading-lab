@@ -1,9 +1,9 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Bollinger;
-using TradyStrat.Features.Indicators.Ichimoku;
-using TradyStrat.Features.Indicators.MovingAverage;
-using TradyStrat.Features.Indicators.Rsi;
+using TradyStrat.Application.Indicators.Bollinger;
+using TradyStrat.Application.Indicators.Ichimoku;
+using TradyStrat.Application.Indicators.MovingAverage;
+using TradyStrat.Application.Indicators.Rsi;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Zones;

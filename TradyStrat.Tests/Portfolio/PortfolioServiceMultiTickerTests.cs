@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Portfolio;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Tests.Fx;             // TestRepo<T>
 using TradyStrat.Tests.Specifications; // InMemoryDb
 using Xunit;

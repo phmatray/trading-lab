@@ -1,9 +1,9 @@
 using System.Net;
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Features.PredictionMarkets;
+using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Features.PredictionMarkets.Providers;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.Settings.Config;
 using TradyStrat.Tests.Common.Time;
 using Xunit;
 

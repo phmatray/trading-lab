@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Data.Sqlite;
+using TradyStrat.Infrastructure.Data.Sqlite;
 using Xunit;
 
 namespace TradyStrat.Tests.Data;

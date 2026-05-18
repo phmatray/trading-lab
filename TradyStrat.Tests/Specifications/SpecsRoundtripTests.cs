@@ -2,10 +2,10 @@ using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Fx.Specifications;
-using TradyStrat.Features.PriceFeed.Specifications;
-using TradyStrat.Features.AiSuggestion.Specifications;
-using TradyStrat.Features.Trades.Specifications;
+using TradyStrat.Application.Fx.Specifications;
+using TradyStrat.Application.PriceFeed.Specifications;
+using TradyStrat.Application.AiSuggestion.Specifications;
+using TradyStrat.Application.Trades.Specifications;
 using Xunit;
 
 namespace TradyStrat.Tests.Specifications;

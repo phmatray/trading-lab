@@ -1,12 +1,13 @@
+using TradyStrat.Features.AiSuggestion;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Features.AiSuggestion.Snapshot;
-using TradyStrat.Features.PredictionMarkets;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Application.AiSuggestion.Snapshot;
+using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Application.Settings.Config;
 using TradyStrat.Tests.AiSuggestion;          // FakeChatClient
 using TradyStrat.Tests.Common.Time;
 using Xunit;

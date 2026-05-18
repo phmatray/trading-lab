@@ -1,26 +1,27 @@
+using TradyStrat.Infrastructure.Data;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
-using TradyStrat.Features.Indicators.Zones;
-using TradyStrat.Features.Indicators.History;
+using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Application.Indicators.History;
 using Shouldly;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Features.Dashboard.UseCases;
-using TradyStrat.Features.AiSuggestion.Backfill;
-using TradyStrat.Features.AiSuggestion.Snapshot;
-using TradyStrat.Features.Dashboard.Navigation;
-using TradyStrat.Features.Fx;
-using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Portfolio;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.Dashboard.UseCases;
+using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Application.AiSuggestion.Snapshot;
+using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Application.Fx;
+using TradyStrat.Application.Indicators;
+using TradyStrat.Application.Portfolio;
+using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Bollinger;
-using TradyStrat.Features.Indicators.Ichimoku;
-using TradyStrat.Features.Indicators.MovingAverage;
-using TradyStrat.Features.Indicators.Rsi;
-using TradyStrat.Features.AiSuggestion.CallDiff;
-using TradyStrat.Features.AiSuggestion;        // JsonOpts
-using TradyStrat.Features.PredictionMarkets;
+using TradyStrat.Application.Indicators.Bollinger;
+using TradyStrat.Application.Indicators.Ichimoku;
+using TradyStrat.Application.Indicators.MovingAverage;
+using TradyStrat.Application.Indicators.Rsi;
+using TradyStrat.Application.AiSuggestion.CallDiff;
+using TradyStrat.Application.AiSuggestion;        // JsonOpts
+using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Indicators;        // SeriesLoader
 using TradyStrat.Tests.Settings;          // FakeSettingsReader
@@ -64,7 +65,7 @@ public class LoadDashboardUseCaseTests
     }
 
     private static (LoadDashboardUseCase uc, NullCoordinator coord, FakeNav nav)
-        BuildSut(TradyStrat.Data.AppDbContext db)
+        BuildSut(TradyStrat.Infrastructure.Data.AppDbContext db)
     {
         var classifier = new ZoneClassifier(new IZoneRule[] {
             new BollingerZoneRule(), new RsiZoneRule(),
@@ -118,7 +119,7 @@ public class LoadDashboardUseCaseTests
         return (uc, coord, nav);
     }
 
-    private static async Task SeedBaseAsync(TradyStrat.Data.AppDbContext db, CancellationToken ct,
+    private static async Task SeedBaseAsync(TradyStrat.Infrastructure.Data.AppDbContext db, CancellationToken ct,
         Suggestion? seedSuggestion = null)
     {
         // Phase 1 dashboard: focus is configured as CON3.L; the use case enumerates

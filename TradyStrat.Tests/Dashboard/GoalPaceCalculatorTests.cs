@@ -1,3 +1,4 @@
+using TradyStrat.Application.Dashboard;
 using Shouldly;
 using TradyStrat.Features.Dashboard;
 using TradyStrat.Domain;

@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Features.Portfolio;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;

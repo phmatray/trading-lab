@@ -1,5 +1,5 @@
 using TheAppManager.Modules;
-using TradyStrat.Features.PriceFeed.UseCases;
+using TradyStrat.Infrastructure.PriceFeed.UseCases;
 
 namespace TradyStrat.Modules;
 

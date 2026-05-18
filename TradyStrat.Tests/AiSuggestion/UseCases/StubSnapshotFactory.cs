@@ -1,4 +1,4 @@
-using TradyStrat.Features.AiSuggestion.Snapshot;
+using TradyStrat.Application.AiSuggestion.Snapshot;
 
 namespace TradyStrat.Tests.AiSuggestion.UseCases;
 

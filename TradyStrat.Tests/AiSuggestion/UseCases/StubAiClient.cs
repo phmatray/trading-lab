@@ -1,5 +1,5 @@
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Features.AiSuggestion.Snapshot;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Tests.AiSuggestion.UseCases;

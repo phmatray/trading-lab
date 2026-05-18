@@ -1,6 +1,9 @@
-using TheAppManager.Modules;
 using TradyStrat.Features.PriceFeed.Providers;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Features.PriceFeed;
+using TheAppManager.Modules;
+using TradyStrat.Application.PriceFeed.Providers;
+using TradyStrat.Application.PriceFeed;
 
 namespace TradyStrat.Modules;
 

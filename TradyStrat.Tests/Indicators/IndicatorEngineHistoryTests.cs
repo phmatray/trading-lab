@@ -1,9 +1,9 @@
 using Shouldly;
-using TradyStrat.Features.Indicators.Zones;
-using TradyStrat.Features.Indicators.History;
-using TradyStrat.Features.Indicators;
+using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Application.Indicators.History;
+using TradyStrat.Application.Indicators;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Rsi;
+using TradyStrat.Application.Indicators.Rsi;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;
 using Xunit;

@@ -1,6 +1,8 @@
-using TheAppManager.Modules;
+using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Features.Fx.Providers;
-using TradyStrat.Features.Fx;
+using TheAppManager.Modules;
+using TradyStrat.Application.Fx.Providers;
+using TradyStrat.Application.Fx;
 
 namespace TradyStrat.Modules;
 

@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Rsi;
+using TradyStrat.Application.Indicators.Rsi;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Rsi;

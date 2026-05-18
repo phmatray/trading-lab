@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.Settings.Config;
 using Xunit;
 
 namespace TradyStrat.Tests.Settings.Config;

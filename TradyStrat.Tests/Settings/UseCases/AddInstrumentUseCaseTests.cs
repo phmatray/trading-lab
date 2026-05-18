@@ -1,14 +1,17 @@
+using TradyStrat.Infrastructure.Fx;
+using TradyStrat.Infrastructure.PriceFeed;
+using TradyStrat.Infrastructure.Settings.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Data;
-using TradyStrat.Features.Fx;
-using TradyStrat.Features.Fx.Providers;
-using TradyStrat.Features.PriceFeed;
-using TradyStrat.Features.PriceFeed.Providers;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Application.Fx;
+using TradyStrat.Application.Fx.Providers;
+using TradyStrat.Application.PriceFeed;
+using TradyStrat.Application.PriceFeed.Providers;
+using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Tests.Fx;                  // TestRepo<T>
 using TradyStrat.Tests.Specifications;       // InMemoryDb.Create()
 using Xunit;

@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Ichimoku;
+using TradyStrat.Application.Indicators.Ichimoku;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Ichimoku;

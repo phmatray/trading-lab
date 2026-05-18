@@ -1,14 +1,15 @@
+using TradyStrat.Infrastructure.PriceFeed.UseCases;
+using TradyStrat.Application.Dashboard;
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
-using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Features.Dashboard.Navigation;
-using TradyStrat.Features.Dashboard.UseCases;
-using TradyStrat.Features.PriceFeed.UseCases;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Application.Dashboard.UseCases;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.Dashboard;
 

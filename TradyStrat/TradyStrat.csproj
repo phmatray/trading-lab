@@ -12,6 +12,7 @@
     <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
     <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
     <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
+    <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />

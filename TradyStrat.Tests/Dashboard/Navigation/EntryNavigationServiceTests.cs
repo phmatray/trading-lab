@@ -1,7 +1,8 @@
+using TradyStrat.Infrastructure.Data;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Features.Dashboard.Navigation;
+using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Tests.Fx;            // shared TestRepo<T>
 using TradyStrat.Tests.Settings;      // FakeSettingsReader
 using TradyStrat.Tests.Specifications; // InMemoryDb
@@ -26,7 +27,7 @@ public class EntryNavigationServiceTests
     };
 
     private static async Task<EntryNavigationService> SeedAsync(
-        TradyStrat.Data.AppDbContext db, params DateOnly[] dates)
+        TradyStrat.Infrastructure.Data.AppDbContext db, params DateOnly[] dates)
     {
         foreach (var d in dates) db.PriceBars.Add(Bar(d));
         await db.SaveChangesAsync();

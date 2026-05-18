@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Features.Indicators.Bollinger;
+using TradyStrat.Application.Indicators.Bollinger;
 using Xunit;
 
 namespace TradyStrat.Tests.Indicators.Bollinger;

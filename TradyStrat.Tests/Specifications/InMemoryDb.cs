@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Data;
+using TradyStrat.Infrastructure.Data;
 
 namespace TradyStrat.Tests.Specifications;
 

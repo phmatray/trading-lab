@@ -2,8 +2,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.Settings.Components;
 

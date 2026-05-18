@@ -1,13 +1,14 @@
+using TradyStrat.Features.AiSuggestion;
 using TradyStrat.Common.Exceptions;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Features.AiSuggestion.Snapshot;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Application.Settings.Config;
 using TradyStrat.Tests.Common.Time;
 using Xunit;
 

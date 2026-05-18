@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Data;
+using TradyStrat.Infrastructure.Data;
 using Xunit;
 
 namespace TradyStrat.Tests.Data;

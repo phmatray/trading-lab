@@ -1,11 +1,11 @@
 using TheAppManager.Modules;
-using TradyStrat.Features.Indicators.Zones;
-using TradyStrat.Features.Indicators.History;
-using TradyStrat.Features.Indicators;
-using TradyStrat.Features.Indicators.Bollinger;
-using TradyStrat.Features.Indicators.Ichimoku;
-using TradyStrat.Features.Indicators.MovingAverage;
-using TradyStrat.Features.Indicators.Rsi;
+using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Application.Indicators.History;
+using TradyStrat.Application.Indicators;
+using TradyStrat.Application.Indicators.Bollinger;
+using TradyStrat.Application.Indicators.Ichimoku;
+using TradyStrat.Application.Indicators.MovingAverage;
+using TradyStrat.Application.Indicators.Rsi;
 
 namespace TradyStrat.Modules;
 

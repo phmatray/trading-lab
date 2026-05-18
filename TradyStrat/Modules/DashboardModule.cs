@@ -1,6 +1,6 @@
 using TheAppManager.Modules;
-using TradyStrat.Features.Dashboard.Navigation;
-using TradyStrat.Features.Dashboard.UseCases;
+using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Application.Dashboard.UseCases;
 
 namespace TradyStrat.Modules;
 

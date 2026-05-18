@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Features.AiSuggestion.UseCases;
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Features.AiSuggestion.Snapshot;
+using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain;
 using TradyStrat.Tests.Fx;
 using TradyStrat.Tests.Specifications;

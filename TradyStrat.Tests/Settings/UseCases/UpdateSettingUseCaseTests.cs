@@ -1,10 +1,11 @@
+using TradyStrat.Infrastructure.Settings.Config;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Data;
-using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Tests.Common.Time;     // FakeClock
 using TradyStrat.Tests.Fx;              // TestRepo<T>
 using TradyStrat.Tests.Specifications;   // InMemoryDb

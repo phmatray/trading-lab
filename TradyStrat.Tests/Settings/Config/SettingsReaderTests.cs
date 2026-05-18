@@ -1,7 +1,9 @@
+using TradyStrat.Features.Settings.Config;
+using TradyStrat.Infrastructure.Settings.Config;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Data;
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Application.Settings.Config;
 using TradyStrat.Tests.Common.Time;     // FakeClock
 using TradyStrat.Tests.Fx;              // TestRepo<T>
 using TradyStrat.Tests.Specifications;   // InMemoryDb

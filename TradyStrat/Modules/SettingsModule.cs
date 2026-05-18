@@ -1,6 +1,9 @@
-using TheAppManager.Modules;
+using TradyStrat.Infrastructure.Settings.Config;
 using TradyStrat.Features.Settings.Config;
-using TradyStrat.Features.Settings.UseCases;
+using TradyStrat.Infrastructure.Settings.UseCases;
+using TheAppManager.Modules;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Modules;
 
