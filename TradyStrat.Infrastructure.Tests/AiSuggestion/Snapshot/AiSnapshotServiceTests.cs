@@ -203,7 +203,11 @@ public class AiSnapshotServiceTests
         // was added to the payload (previously "2EB10B0275AD1282").
         // Class renamed at Task 5 of the multi-ticker AI plan (SnapshotFactory ->
         // AiSnapshotService); the hash MUST stay identical across that rename.
-        const string ExpectedHash = "895EED53A280A470";
+        // Hash updated 2026-05-18 (AI improvements Phase 6, spec §5.3): PromptHash
+        // now covers the envelope + focus shapes (instead of the legacy single-payload)
+        // — the byte-identity invariant explicitly applied to Phase 1→2 only.
+        // Previously "895EED53A280A470".
+        const string ExpectedHash = "6F5EC2CCD8118262";
 
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
@@ -215,8 +219,10 @@ public class AiSnapshotServiceTests
             db.PriceBars.Add(new PriceBar { Id=0, Ticker=t, Date=asOf,
                 Open=100, High=100, Low=100, Close=100, Volume=1 });
         db.FxRates.Add(new FxRate { Id=0, Base="EUR", Quote="USD", Date=asOf,
-            Rate = 1.08m, FetchedAt = DateTime.UtcNow });
-        db.Goals.Add(GoalConfig.Default(DateTime.UtcNow));
+            Rate = 1.08m, FetchedAt = new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc) });
+        // Pin GoalConfig.UpdatedAt so the hash is deterministic (PromptHash now includes
+        // the goal under spec §5.3, so any DateTime.UtcNow here drifts the hash per run).
+        db.Goals.Add(GoalConfig.Default(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc)));
         await db.SaveChangesAsync(ct);
 
         var focusId = (await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct)).Id;

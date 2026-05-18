@@ -18,6 +18,8 @@ namespace TradyStrat.Application.AiSuggestion.Snapshot;
 /// </summary>
 public sealed class SnapshotBuilder
 {
+    private static readonly string[] FocusShapeKeys = ["instrument_id", "recent_suggestions"];
+
     public GoalConfig? Goal { get; set; }
     public PortfolioSnapshot? Portfolio { get; set; }
     public List<TickerContext> Tickers { get; } = [];
@@ -36,18 +38,44 @@ public sealed class SnapshotBuilder
         var markets         = Markets;
         var pastSuggestions = RecentSuggestions.ToArray();
 
-        // Legacy hash payload — preserved exactly so the AiSnapshotServiceTests
-        // sentinel "895EED53A280A470" stays stable through the Phase-3 refactor.
-        // Phase 6 will replace this single hash with three independent hashes.
-        var payload = new { today, snap = Portfolio, tickers, recent, markets };
-        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Strict));
-        var hash  = Convert.ToHexString(SHA256.HashData(bytes))[..16];
+        // Envelope = stable across instruments on the same day. Spec §5.1.
+        var envelope = new
+        {
+            today,
+            goal = Goal,
+            portfolio = Portfolio,
+            tickers,
+            recent_trades = recent,
+            usd_per_eur = UsdPerEur,
+            markets,
+        };
+
+        // Focus = per-instrument, includes the history block.
+        var focus = new
+        {
+            instrument_id = instrumentId,
+            recent_suggestions = pastSuggestions,
+        };
+
+        var envelopeHash = Hash(envelope);
+        var promptHash   = Hash(new { envelope, focus });
+
+        // PromptVersionHash covers the prompt-template surface, not the data values.
+        // Phase 1 includes only the focus shape's keys; a follow-up should pull in
+        // system_prompt + tool_def signature once SuggestionService exposes those.
+        var promptVersionHash = Hash(new { focus_shape_keys = FocusShapeKeys });
 
         return new AiSnapshot(
             today, instrumentId, Goal, Portfolio, tickers, recent,
             UsdPerEur, markets, pastSuggestions,
-            EnvelopeHash:      hash,
-            PromptVersionHash: hash,
-            PromptHash:        hash);
+            EnvelopeHash:      envelopeHash,
+            PromptVersionHash: promptVersionHash,
+            PromptHash:        promptHash);
+    }
+
+    private static string Hash(object payload)
+    {
+        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, JsonOpts.Strict));
+        return Convert.ToHexString(SHA256.HashData(bytes))[..16];
     }
 }
