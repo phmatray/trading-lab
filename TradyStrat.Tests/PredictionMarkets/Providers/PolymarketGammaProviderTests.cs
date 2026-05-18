@@ -2,7 +2,7 @@ using System.Net;
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.PredictionMarkets;
-using TradyStrat.Features.PredictionMarkets.Providers;
+using TradyStrat.Infrastructure.PredictionMarkets.Providers;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Tests.Common.Time;
 using Xunit;

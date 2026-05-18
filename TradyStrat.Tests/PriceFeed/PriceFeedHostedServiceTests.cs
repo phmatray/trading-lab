@@ -1,6 +1,5 @@
-using TradyStrat.Features.PriceFeed;
-using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
+using TradyStrat.Infrastructure.Fx;
 using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

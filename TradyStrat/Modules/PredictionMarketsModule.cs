@@ -1,6 +1,6 @@
 using TheAppManager.Modules;
 using TradyStrat.Application.PredictionMarkets;
-using TradyStrat.Features.PredictionMarkets.Providers;
+using TradyStrat.Infrastructure.PredictionMarkets.Providers;
 
 namespace TradyStrat.Modules;
 

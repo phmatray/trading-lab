@@ -1,4 +1,4 @@
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Infrastructure.Exceptions;
 using Xunit;
 using Shouldly;
 using TradyStrat.Domain.Exceptions;

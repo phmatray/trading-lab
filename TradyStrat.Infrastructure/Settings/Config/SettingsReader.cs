@@ -1,5 +1,5 @@
 using TradyStrat.Application.Settings.Config;
-namespace TradyStrat.Features.Settings.Config;
+namespace TradyStrat.Infrastructure.Settings.Config;
 
 public sealed class SettingsReader(ISettingsService settings) : ISettingsReader
 {

@@ -1,22 +1,20 @@
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Infrastructure.AiSuggestion;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Infrastructure.Exceptions;
 using Microsoft.Extensions.AI;
 using TheAppManager.Modules;
 using TradyStrat.Application.AiSuggestion.UseCases;
-using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Modules;
-
 public sealed class AiSuggestionModule : IAppModule
 {
     public void ConfigureServices(WebApplicationBuilder builder)
     {
         var apiKey = builder.Configuration["Anthropic:ApiKey"]
             ?? throw new AnthropicConfigurationException("Anthropic:ApiKey is not configured.");
-
         // MessagesEndpoint directly implements IChatClient in Anthropic.SDK 5.10.
         // No AsChatClient() adapter is needed — .AsBuilder() is the M.E.AI extension
         // on IChatClient itself. Model is set per-call via ChatOptions.ModelId from ISettingsReader.
@@ -26,7 +24,6 @@ public sealed class AiSuggestionModule : IAppModule
                 .AsBuilder()
                 .UseFunctionInvocation()
                 .Build());
-
         builder.Services.AddScoped<IAiSnapshotService, AiSnapshotService>();
         builder.Services.AddScoped<IAiClient, SuggestionService>();
         builder.Services.AddScoped<GetTodaysSuggestionUseCase>();

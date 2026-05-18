@@ -1,6 +1,6 @@
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Infrastructure.Exceptions;
 using System.Text.Json;
 using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Application.Settings.Config;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.AI;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 
-namespace TradyStrat.Features.AiSuggestion;
+namespace TradyStrat.Infrastructure.AiSuggestion;
 
 public sealed partial class SuggestionService(
     IChatClient chat, IClock clock, ILogger<SuggestionService> log, ISettingsReader settings) : IAiClient

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Application.PriceFeed;
@@ -6,7 +8,7 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Settings.UseCases;
 
-namespace TradyStrat.Features.PriceFeed;
+namespace TradyStrat.Infrastructure.PriceFeed;
 
 public sealed partial class PriceFeedHostedService(
     IServiceProvider services,

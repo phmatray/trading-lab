@@ -18,6 +18,7 @@
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.AI" />
     <PackageReference Include="Anthropic.SDK" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Serilog.AspNetCore" />

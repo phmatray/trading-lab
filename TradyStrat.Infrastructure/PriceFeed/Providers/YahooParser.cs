@@ -2,7 +2,7 @@ using System.Text.Json;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 
-namespace TradyStrat.Features.PriceFeed.Providers;
+namespace TradyStrat.Infrastructure.PriceFeed.Providers;
 
 public static class YahooParser
 {

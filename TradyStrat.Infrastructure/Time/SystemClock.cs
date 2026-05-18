@@ -1,5 +1,5 @@
 using TradyStrat.Domain;
-namespace TradyStrat.Common.Time;
+namespace TradyStrat.Infrastructure.Time;
 
 public sealed class SystemClock : IClock
 {

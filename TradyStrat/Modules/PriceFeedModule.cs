@@ -1,12 +1,10 @@
-using TradyStrat.Features.PriceFeed.Providers;
-using TradyStrat.Infrastructure.PriceFeed;
-using TradyStrat.Features.PriceFeed;
-using TheAppManager.Modules;
+using TradyStrat.Infrastructure.PriceFeed.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Application.PriceFeed;
+using TheAppManager.Modules;
 
 namespace TradyStrat.Modules;
-
 public sealed class PriceFeedModule : IAppModule
 {
     public void ConfigureServices(WebApplicationBuilder builder)
@@ -18,7 +16,6 @@ public sealed class PriceFeedModule : IAppModule
             c.Timeout = TimeSpan.FromSeconds(15);
             c.DefaultRequestHeaders.UserAgent.ParseAdd("TradyStrat/1.0");
         }).AddStandardResilienceHandler();
-
         builder.Services.AddScoped<DailyPriceCache>();
         builder.Services.AddHostedService<PriceFeedHostedService>();
     }

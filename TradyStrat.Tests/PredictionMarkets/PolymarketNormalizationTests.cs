@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Shouldly;
-using TradyStrat.Features.PredictionMarkets.Providers;
+using TradyStrat.Infrastructure.PredictionMarkets.Providers;
 using Xunit;
 
 namespace TradyStrat.Tests.PredictionMarkets;

@@ -1,4 +1,4 @@
-using TradyStrat.Features.Fx.Providers;
+using TradyStrat.Infrastructure.Fx.Providers;
 using TradyStrat.Application.Fx.Providers;
 using System.Net;
 using Shouldly;

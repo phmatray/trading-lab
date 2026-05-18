@@ -1,4 +1,4 @@
-using TradyStrat.Features.PriceFeed.Providers;
+using TradyStrat.Infrastructure.PriceFeed.Providers;
 using System.Net;
 using TradyStrat.Application.PriceFeed.Providers;
 using Shouldly;

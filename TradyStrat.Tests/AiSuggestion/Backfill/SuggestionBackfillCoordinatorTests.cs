@@ -1,4 +1,4 @@
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Infrastructure.Exceptions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.AiSuggestion.UseCases;

@@ -1,4 +1,4 @@
-using TradyStrat.Features.Settings.Config;
+using TradyStrat.Infrastructure.Settings.Config;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shouldly;

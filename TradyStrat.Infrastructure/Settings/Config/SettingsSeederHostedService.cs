@@ -1,9 +1,11 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using TradyStrat.Application.Settings.Config;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Domain;
 using TradyStrat.Infrastructure.Data;
 
-namespace TradyStrat.Features.Settings.Config;
+namespace TradyStrat.Infrastructure.Settings.Config;
 
 /// <summary>
 /// On host start (i.e. after DatabaseModule has applied migrations), back-fills any

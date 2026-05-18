@@ -1,11 +1,10 @@
+using TradyStrat.Infrastructure.Fx.Providers;
 using TradyStrat.Infrastructure.Fx;
-using TradyStrat.Features.Fx.Providers;
-using TheAppManager.Modules;
 using TradyStrat.Application.Fx.Providers;
+using TheAppManager.Modules;
 using TradyStrat.Application.Fx;
 
 namespace TradyStrat.Modules;
-
 public sealed class FxModule : IAppModule
 {
     public void ConfigureServices(WebApplicationBuilder builder)
@@ -17,7 +16,6 @@ public sealed class FxModule : IAppModule
             c.Timeout = TimeSpan.FromSeconds(15);
             c.DefaultRequestHeaders.UserAgent.ParseAdd("TradyStrat/1.0");
         }).AddStandardResilienceHandler();
-
         builder.Services.AddScoped<DailyFxCache>();
         builder.Services.AddScoped<FxConverter>();
     }

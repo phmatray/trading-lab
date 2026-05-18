@@ -1,4 +1,4 @@
-using TradyStrat.Common.Time;
+using TradyStrat.Infrastructure.Time;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

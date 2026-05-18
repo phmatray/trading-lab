@@ -4,7 +4,7 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
 using TradyStrat.Application.Settings.Config;
 
-namespace TradyStrat.Features.PredictionMarkets.Providers;
+namespace TradyStrat.Infrastructure.PredictionMarkets.Providers;
 
 public sealed class PolymarketGammaProvider(
     HttpClient http,

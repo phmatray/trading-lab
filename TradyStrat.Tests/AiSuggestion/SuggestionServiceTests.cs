@@ -1,5 +1,5 @@
-using TradyStrat.Features.AiSuggestion;
-using TradyStrat.Common.Exceptions;
+using TradyStrat.Infrastructure.AiSuggestion;
+using TradyStrat.Infrastructure.Exceptions;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging.Abstractions;

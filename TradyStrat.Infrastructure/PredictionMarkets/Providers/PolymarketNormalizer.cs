@@ -2,7 +2,7 @@ using TradyStrat.Application.PredictionMarkets;
 using System.Globalization;
 using System.Text.Json;
 
-namespace TradyStrat.Features.PredictionMarkets.Providers;
+namespace TradyStrat.Infrastructure.PredictionMarkets.Providers;
 
 public static class PolymarketNormalizer
 {
