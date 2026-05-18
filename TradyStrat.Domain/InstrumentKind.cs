@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Domain;
+namespace TradyStrat.Domain;
 
 public enum InstrumentKind
 {

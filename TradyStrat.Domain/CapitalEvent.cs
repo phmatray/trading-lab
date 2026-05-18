@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Domain;
+namespace TradyStrat.Domain;
 
 /// <summary>
 /// An editorial annotation on the growth chart — a trade or AI signal worth

@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Domain;
+namespace TradyStrat.Domain;
 
 /// <summary>One row of the key/value Settings table. Key is the EF primary key.</summary>
 public sealed record SettingEntry

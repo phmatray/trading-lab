@@ -1,4 +1,4 @@
-namespace TradyStrat.Common.Domain;
+namespace TradyStrat.Domain;
 
 /// <summary>Single source of truth for how a SuggestionAction is presented:
 /// the display verb ("Hold") and the lowercase CSS stem ("hold") used by

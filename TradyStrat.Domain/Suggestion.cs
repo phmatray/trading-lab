@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TradyStrat.Common.Domain;
+namespace TradyStrat.Domain;
 
 public sealed record Suggestion
 {
