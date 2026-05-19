@@ -23,7 +23,11 @@ public sealed class LoggingInfrastructureModule : IAppModule
         var logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-            .WriteTo.Console()
+            // Route all console output to stderr so stdout stays clean for the
+            // MCP server's JSON-RPC stream. Harmless for the Blazor app and the
+            // replay CLI command (which uses AnsiConsole directly for its
+            // user-facing output).
+            .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
             .WriteTo.File(path, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14)
             .CreateLogger();
 #pragma warning restore CA1305

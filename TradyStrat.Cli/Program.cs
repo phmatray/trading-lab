@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 using TheAppManager.Startup;
@@ -7,7 +8,21 @@ using TradyStrat.Cli.Commands;
 using TradyStrat.Infrastructure;
 using TradyStrat.Infrastructure.PriceFeed; // for typeof(PriceFeedBackgroundInfrastructureModule)
 
-var builder = Host.CreateApplicationBuilder(args);
+// Pin ContentRootPath to AppContext.BaseDirectory so appsettings.json (copied
+// next to the executable) loads regardless of the shell's working directory.
+// Without this, launching the CLI from outside TradyStrat.Cli/ — e.g. from
+// Claude Desktop, which spawns processes with $HOME as cwd — fails because
+// Directory.GetCurrentDirectory() doesn't contain the config.
+var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory
+});
+
+// Load user-secrets unconditionally (generic hosts default to Production
+// where user-secrets are normally skipped). The CLI is local-only by design
+// and Anthropic:ApiKey is stored as a user-secret per the README.
+builder.Configuration.AddUserSecrets<CliAssemblyMarker>(optional: true);
 
 // Route all host-level logging to stderr so stdout stays clean for any
 // commands that write structured output (e.g. the mcp command's JSON-RPC stream).

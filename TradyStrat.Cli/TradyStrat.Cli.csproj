@@ -30,5 +30,6 @@
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
   </ItemGroup>
 </Project>

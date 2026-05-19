@@ -23,6 +23,8 @@ logs/
 
 # Claude Code harness state (worktrees, etc.)
 .claude/
+.claire/
+.worktrees/
 
 # Debug/inspection artefacts
 .dashboard-*.png
