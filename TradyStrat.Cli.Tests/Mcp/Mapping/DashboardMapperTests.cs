@@ -53,7 +53,10 @@ public class DashboardMapperTests
             Shares: 50m,
             AvgCostEur: 90m);
 
+        var callState = todaysCall is null ? null : new SuggestionState.Ready(todaysCall);
+
         var tickerView = new TickerView(
+            InstrumentId: 1,
             Ticker: FocusTicker,
             Currency: "USD",
             Price: 120m,
@@ -61,7 +64,7 @@ public class DashboardMapperTests
             DeltaPct: 1.5m,
             Zone: Zone.Accumulate,
             Spark: [98m, 99m, 100m],
-            TodaysCall: todaysCall);
+            CallState: callState);
 
         var goal = new GoalConfig
         {
@@ -76,7 +79,7 @@ public class DashboardMapperTests
             EntryNumber: 4,
             Portfolio: snap,
             Goal: goal,
-            TodaysCall: todaysCall,
+            FocusCallState: callState,
             Tickers: [tickerView],
             Positions: [position],
             FocusTicker: FocusTicker,

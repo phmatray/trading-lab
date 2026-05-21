@@ -6,9 +6,9 @@ using TradyStrat.Application.Indicators.History;
 using Shouldly;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.Dashboard;
 using TradyStrat.Application.Dashboard.UseCases;
 using TradyStrat.Application.AiSuggestion.Backfill;
-using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Indicators;
@@ -76,21 +76,6 @@ public class LoadDashboardUseCaseTests
         var fx         = new FxConverter(new TestRepo<FxRate>(db));
         var clock      = new FakeClock(new DateTime(2026,5,6,0,0,0,DateTimeKind.Utc));
 
-        // SeedBaseAsync seeds CON3.L as Id=1 (deterministic via fixed Id assignment).
-        const int focusId = 1;
-        var snapStub = new StubSnapshotFactory(new AiSnapshot(
-            Target, focusId, GoalConfig.Default(DateTime.UtcNow),
-            new([],0,0,0,0,0,0,0), [], [], 1.08m, [], [], "h", "h", "h"));
-        var aiStub = new StubAiClient(new Suggestion {
-            Id = 0, InstrumentId = focusId, ForDate = Target,
-            Action = SuggestionAction.Hold,
-            Conviction = 3, Rationale = "from-ai", CitationsJson = "[]",
-            PromptHash = "h", CreatedAt = DateTime.UtcNow });
-        var todays = new GetTodaysSuggestionUseCase(
-            new TestRepo<Suggestion>(db), snapStub, aiStub, clock,
-            new TestRepo<Instrument>(db),
-            NullLogger<GetTodaysSuggestionUseCase>.Instance);
-
         var coord = new NullCoordinator();
         var nav   = new FakeNav();
 
@@ -98,9 +83,10 @@ public class LoadDashboardUseCaseTests
             new TestRepo<Instrument>(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
 
-        var getAllTodays = new GetAllTodaysSuggestionsUseCase(
-            todays, listInstruments,
-            NullLogger<GetAllTodaysSuggestionsUseCase>.Instance);
+        var buildFocusSlice = new BuildFocusDerivedSliceUseCase(
+            new TestRepo<Suggestion>(db),
+            indicators,
+            NullLogger<BuildFocusDerivedSliceUseCase>.Instance);
 
         var uc = new LoadDashboardUseCase(
             indicators, portfolio, growth, fx,
@@ -111,7 +97,7 @@ public class LoadDashboardUseCaseTests
             new TestRepo<FxRate>(db),
             listInstruments,
             new FakeSettingsReader(),
-            getAllTodays,
+            buildFocusSlice,
             coord,
             nav,
             NullLogger<LoadDashboardUseCase>.Instance);
@@ -170,8 +156,8 @@ public class LoadDashboardUseCaseTests
         vm.Tickers.Count.ShouldBe(3);
         vm.Growth.Count.ShouldBeGreaterThan(0);
         vm.Goal.TargetEur.ShouldBe(1_000_000m);
-        vm.TodaysCall.ShouldNotBeNull();
-        vm.TodaysCall.Rationale.ShouldBe("stable");
+        // Live mode no longer eagerly reads the suggestion — the page streams it in.
+        vm.FocusCallState.ShouldBeOfType<SuggestionState.Pending>();
         vm.IsHistorical.ShouldBeFalse();
         vm.PrevTradingDay.ShouldBe(new DateOnly(2026, 5, 5));
         vm.NextTradingDay.ShouldBeNull();
@@ -210,9 +196,8 @@ public class LoadDashboardUseCaseTests
         var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: true), ct);
 
         vm.IsHistorical.ShouldBeTrue();
-        vm.TodaysCall.ShouldNotBeNull();
-        // Came from the suggestionRepo, not the StubAiClient (which would have set "from-ai").
-        vm.TodaysCall.Rationale.ShouldBe("from-db");
+        var ready = vm.FocusCallState.ShouldBeOfType<SuggestionState.Ready>();
+        ready.Suggestion.Rationale.ShouldBe("from-db");
         coord.EnsureBackfilledCalls.ShouldBe(0);
     }
 
@@ -226,7 +211,7 @@ public class LoadDashboardUseCaseTests
         var (uc, _, _) = BuildSut(db);
         var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: true), ct);
 
-        vm.TodaysCall.ShouldBeNull();
+        vm.FocusCallState.ShouldBeNull();
         vm.CallDiff.ShouldBe(CallDiff.None);
     }
 
@@ -283,21 +268,22 @@ public class LoadDashboardUseCaseTests
     }
 
     [Fact]
-    public async Task Tickers_have_TodaysCall_for_Held_only()
+    public async Task Live_tickers_have_Pending_CallState_for_Held_and_null_for_Watchlist()
     {
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
-        // Seed without a stored Suggestion — live mode will hit the StubAiClient
-        // through the Saga aggregator, populating TodaysCall for the Held instrument.
+        // Seed without a stored Suggestion — live mode no longer reads the AI here.
+        // Each Held ticker initializes Pending; Watchlist initializes null. The page
+        // streams Pending → Ready/Failed via StreamTodaysSuggestionsUseCase.
         await SeedBaseAsync(db, ct, seedSuggestion: null);
 
         var (uc, _, _) = BuildSut(db);
         var vm = await uc.ExecuteAsync(new LoadDashboardInput(Target, IsHistorical: false), ct);
 
         // SeedBaseAsync seeds: CON3.L (Held), COIN (Watchlist), BTC-USD (Watchlist).
-        vm.Tickers.Single(t => t.Ticker == "CON3.L").TodaysCall.ShouldNotBeNull();
-        vm.Tickers.Single(t => t.Ticker == "COIN").TodaysCall.ShouldBeNull();
-        vm.Tickers.Single(t => t.Ticker == "BTC-USD").TodaysCall.ShouldBeNull();
+        vm.Tickers.Single(t => t.Ticker == "CON3.L").CallState.ShouldBeOfType<SuggestionState.Pending>();
+        vm.Tickers.Single(t => t.Ticker == "COIN").CallState.ShouldBeNull();
+        vm.Tickers.Single(t => t.Ticker == "BTC-USD").CallState.ShouldBeNull();
     }
 
     [Fact]

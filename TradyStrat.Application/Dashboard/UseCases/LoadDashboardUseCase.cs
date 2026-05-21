@@ -1,19 +1,14 @@
 using TradyStrat.Application.Time;
-using System.Text.Json;
 using Ardalis.Specification;
 using TradyStrat.Domain;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Application.AiSuggestion;        // JsonOpts
 using TradyStrat.Application.AiSuggestion.Backfill;
-using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.AiSuggestion.Specifications;
-using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Fx.Specifications;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
@@ -33,7 +28,7 @@ public sealed class LoadDashboardUseCase(
     IReadRepositoryBase<FxRate> fxRepo,
     ListInstrumentsUseCase listInstruments,
     ISettingsReader settings,
-    GetAllTodaysSuggestionsUseCase getAllTodaysSuggestions,
+    BuildFocusDerivedSliceUseCase buildFocusSlice,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
     ILogger<LoadDashboardUseCase> log)
@@ -57,32 +52,22 @@ public sealed class LoadDashboardUseCase(
             .ThenBy(i => i.Ticker, StringComparer.Ordinal)
             .ToList();
 
-        // Today's-call batch — read-only in historical mode, no AI invocation.
-        // Computed before the per-ticker loop so each TickerView can pull its
-        // own call from the batch (priceMap is still built by the loop
-        // downstream). Focus-instrument resolution is intentionally deferred
-        // until after the per-ticker loop so an empty-Instruments DB hits the
-        // indicator path first (which throws TradyStratException, surfaced as
-        // the "Could not load dashboard" fallback) rather than escaping with
-        // an uncaught InvalidOperationException.
-        IReadOnlyList<Suggestion> allTodays;
+        // Historical mode reads existing suggestion rows; live mode does NOT call
+        // the AI from this use case (the page streams Pending → Ready per ticker).
+        IReadOnlyList<Suggestion> historicalRows = Array.Empty<Suggestion>();
+        Dictionary<int, SuggestionState?> historicalStates = new();
         if (input.IsHistorical)
         {
-            // Historical mode — read-only across all held instruments.
             var heldIds = ordered.Where(i => i.Kind == InstrumentKind.Held).Select(i => i.Id).ToList();
-            var historicalRows = new List<Suggestion>();
+            var rows = new List<Suggestion>();
             foreach (var id in heldIds)
             {
                 var row = await suggestionRepo.FirstOrDefaultAsync(
                     new SuggestionForDateSpec(target, id), ct);
-                if (row is not null) historicalRows.Add(row);
+                if (row is not null) rows.Add(row);
+                historicalStates[id] = row is null ? null : new SuggestionState.Ready(row);
             }
-            allTodays = historicalRows;
-        }
-        else
-        {
-            // Live mode — Saga aggregator fans out per held instrument.
-            allTodays = await getAllTodaysSuggestions.ExecuteAsync(Unit.Value, ct);
+            historicalRows = rows;
         }
 
         // Iterate Held + Watchlist for zone analysis. Held instruments contribute
@@ -100,13 +85,30 @@ public sealed class LoadDashboardUseCase(
             var deltaPct = await ComputeDeltaPctAsync(inst.Ticker, target, ct);
             var spark    = await ComputeSparkAsync(inst.Ticker, target, ct);
 
-            // Held tickers surface their own call; Watchlist stays null.
-            var todaysCall = inst.Kind == InstrumentKind.Held
-                ? allTodays.FirstOrDefault(s => s.InstrumentId == inst.Id)
-                : null;
+            SuggestionState? callState;
+            if (inst.Kind != InstrumentKind.Held)
+            {
+                callState = null;                                            // watchlist
+            }
+            else if (input.IsHistorical)
+            {
+                callState = historicalStates[inst.Id];                       // Ready or null
+            }
+            else
+            {
+                callState = new SuggestionState.Pending();                   // live skeleton
+            }
 
             tickers.Add(new TickerView(
-                inst.Ticker, inst.Currency, reading.Price, eur, deltaPct, reading.Zone, spark, todaysCall));
+                InstrumentId: inst.Id,
+                Ticker:       inst.Ticker,
+                Currency:     inst.Currency,
+                Price:        reading.Price,
+                PriceEur:     eur,
+                DeltaPct:     deltaPct,
+                Zone:         reading.Zone,
+                Spark:        spark,
+                CallState:    callState));
 
             if (inst.Kind == InstrumentKind.Held && eur is { } e)
                 priceMap[inst.Id] = (e, inst.Ticker, inst.Currency);
@@ -124,59 +126,30 @@ public sealed class LoadDashboardUseCase(
             growthSeries = pinned;
         }
 
-        // Resolve the focus instrument id once — needed for the focus's TodaysCall
-        // pick from the batch and for the prior-suggestion lookup below.
+        // Resolve the focus instrument. Live mode initializes Pending; historical
+        // mode looks up the row (if any) and computes the focus-derived slice.
         var focusInstrument = ordered.SingleOrDefault(i => i.Ticker == focusTicker)
             ?? throw new InvalidOperationException(
                 $"Focus ticker '{focusTicker}' is not in the Instruments table.");
 
-        var todays = allTodays.SingleOrDefault(s => s.InstrumentId == focusInstrument.Id);
-
-        // Prediction-market snapshot — Empty by default; deserialize if column present.
-        var marketSnap = MarketSnapshot.Empty;
-        if (todays?.MarketSnapshotJson is { Length: > 0 } marketJson)
+        SuggestionState? focusState;
+        FocusDerivedSlice focusDerived;
+        if (input.IsHistorical)
         {
-            try
-            {
-                marketSnap = JsonSerializer.Deserialize<MarketSnapshot>(marketJson, JsonOpts.Strict)
-                             ?? MarketSnapshot.Empty;
-            }
-            catch (JsonException ex)
-            {
-                LoadDashboardLog.MarketSnapshotMalformed(log, ex);
-                // marketSnap stays Empty — rail will be absent for this entry.
-            }
+            var focusRow = historicalRows.SingleOrDefault(s => s.InstrumentId == focusInstrument.Id);
+            focusState = focusRow is null ? null : new SuggestionState.Ready(focusRow);
+            focusDerived = focusRow is null
+                ? FocusDerivedSlice.Empty
+                : await buildFocusSlice.BuildAsync(focusRow, target, ct);
+        }
+        else
+        {
+            focusState = new SuggestionState.Pending();
+            focusDerived = FocusDerivedSlice.Empty;
         }
 
         var entryNum  = await tradeRepo.CountAsync(new TradesAsOfSpec(target), ct);
         var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(focusTicker), ct);
-
-        // Prior suggestion + call diff. Skip when today's call is null (historical-empty).
-        Suggestion? prior = null;
-        var callDiff = CallDiff.None;
-        if (todays is not null)
-        {
-            prior = await suggestionRepo.FirstOrDefaultAsync(
-                new PriorSuggestionSpec(target, focusInstrument.Id), ct);
-            callDiff = new CallDiffBuilder()
-                .WithToday(todays)
-                .WithPrior(prior)
-                .Build();
-        }
-
-        // Indicator histories per citation.
-        var histories = new Dictionary<(string Ticker, IndicatorKind Kind), IndicatorSeries>();
-        if (todays is not null)
-        {
-            foreach (var c in todays.Citations)
-            {
-                var kind = IndicatorKindParser.From(c.Indicator);
-                if (kind is null) continue;
-                var key = (c.Ticker, kind.Value);
-                if (histories.ContainsKey(key)) continue;
-                histories[key] = await indicators.HistoryFor(c.Ticker, kind.Value, SparklineWindow, target, ct);
-            }
-        }
 
         // Goal pace.
         var firstTrade = await tradeRepo.FirstOrDefaultAsync(new EarliestTradeSpec(), ct);
@@ -192,23 +165,9 @@ public sealed class LoadDashboardUseCase(
         var priceAsOf = latestBar is { } lb
             ? RelativeTimeFormatter.Format(lb.Date.ToDateTime(TimeOnly.MinValue), nowUtc)
             : "";
-        var callAsOf = todays is null ? "" : RelativeTimeFormatter.Format(todays.CreatedAt, nowUtc);
         var fxAsOf   = fxLatest is { } fxr
             ? RelativeTimeFormatter.Format(fxr.FetchedAt, nowUtc)
             : "";
-
-        // Backfill chain — live mode only.
-        if (!input.IsHistorical && prior is { ForDate: var lastDate } && target.AddDays(-1) > lastDate)
-        {
-            _ = backfillCoord
-                .EnsureBackfilledAsync(lastDate, target.AddDays(-1), CancellationToken.None)
-                .ContinueWith(
-                    t => LoadDashboardLog.BackfillCrashed(log, t.Exception),
-                    CancellationToken.None,
-                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default);
-        }
-        var backfillStatus = backfillCoord.Status;
 
         // Navigation fields.
         var earliest = await nav.EarliestAsync(ct);
@@ -221,19 +180,21 @@ public sealed class LoadDashboardUseCase(
             EntryNumber: entryNum,
             Portfolio: snap,
             Goal: goal,
-            TodaysCall: todays,
+            FocusCallState: focusState,
             Tickers: tickers,
             Positions: snap.Positions,
             FocusTicker: focusTicker,
             Growth: growthSeries,
             LatestPriceDate: latestBar?.Date,
             GoalPace: goalPace,
-            CallDiff: callDiff,
-            BackfillStatus: backfillStatus,
+            CallDiff: focusDerived.CallDiff,
+            BackfillStatus: backfillCoord.Status,
             PriceAsOfRelative: priceAsOf,
-            CallAsOfRelative: callAsOf,
+            CallAsOfRelative: focusState is SuggestionState.Ready r
+                ? RelativeTimeFormatter.Format(r.Suggestion.CreatedAt, nowUtc)
+                : "",
             FxAsOfRelative: fxAsOf,
-            IndicatorHistories: histories,
+            IndicatorHistories: focusDerived.IndicatorHistories,
             CapitalEvents: SeedCapitalEvents(),
             IsHistorical: input.IsHistorical,
             EarliestTradingDay: earliest,
@@ -241,7 +202,7 @@ public sealed class LoadDashboardUseCase(
             PrevTradingDay: prev,
             NextTradingDay: next)
         {
-            MarketSnapshot = marketSnap,
+            MarketSnapshot = focusDerived.MarketSnapshot,
         };
     }
 
@@ -294,7 +255,4 @@ internal static partial class LoadDashboardLog
 {
     [LoggerMessage(Level = LogLevel.Error, Message = "Backfill chain crashed unobserved")]
     public static partial void BackfillCrashed(ILogger logger, Exception? ex);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "MarketSnapshotJson malformed; rail will not render")]
-    public static partial void MarketSnapshotMalformed(ILogger logger, Exception ex);
 }

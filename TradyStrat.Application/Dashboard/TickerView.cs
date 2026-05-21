@@ -3,6 +3,7 @@ using TradyStrat.Domain;
 namespace TradyStrat.Application.Dashboard;
 
 public sealed record TickerView(
+    int InstrumentId,
     string Ticker,
     string Currency,
     decimal Price,
@@ -10,4 +11,4 @@ public sealed record TickerView(
     decimal? DeltaPct,
     Zone Zone,
     IReadOnlyList<decimal> Spark,
-    Suggestion? TodaysCall);    // NEW (Phase 2) — non-null for Held with successful call
+    SuggestionState? CallState);   // null = no AI expected (watchlist or historical-missing)
