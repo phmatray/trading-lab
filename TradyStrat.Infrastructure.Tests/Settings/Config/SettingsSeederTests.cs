@@ -34,12 +34,13 @@ public class SettingsSeederTests
         var rows = db.Settings.ToDictionary(e => e.Key, e => e.Value);
         rows[SettingsKeys.AnthropicModel].ShouldBe("claude-opus-4-7");
         rows[SettingsKeys.AnthropicMaxTokens].ShouldBe("1500");
+        rows[SettingsKeys.AnthropicMaxParallelSuggestions].ShouldBe("3");
         rows[SettingsKeys.PolymarketSearchQueries].ShouldBe("""["bitcoin","ethereum","coinbase","fed"]""");
         rows[SettingsKeys.PolymarketMaxMarkets].ShouldBe("8");
         rows[SettingsKeys.PolymarketMinVolumeUsd].ShouldBe("50000");
         rows[SettingsKeys.PolymarketMaxHorizonDays].ShouldBe("365");
         rows[SettingsKeys.TickersFocus].ShouldBe("CON3.L");
-        rows.Count.ShouldBe(8);
+        rows.Count.ShouldBe(9);
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class SettingsSeederTests
         await BuildSeeder(db).StartAsync(ct);
         await BuildSeeder(db).StartAsync(ct);   // run twice
 
-        db.Settings.Count().ShouldBe(8);
+        db.Settings.Count().ShouldBe(9);
         db.Settings.Single(e => e.Key == SettingsKeys.TickersFocus).Value.ShouldBe("COIN");   // preserved
     }
 }
