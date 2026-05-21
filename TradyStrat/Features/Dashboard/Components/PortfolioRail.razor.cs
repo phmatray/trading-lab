@@ -10,12 +10,23 @@ public partial class PortfolioRail : ComponentBase
     [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
     [Parameter, EditorRequired] public IReadOnlyList<TickerView> Tickers { get; set; } = null!;
 
+    /// <summary>
+    /// Live per-instrument suggestion state from the page's stream consumer.
+    /// Falls back to <see cref="TickerView.CallState"/> when an instrument
+    /// isn't keyed yet (defensive — the page should pass a complete dict).
+    /// </summary>
+    [Parameter] public IReadOnlyDictionary<int, SuggestionState?> CallStates { get; set; }
+        = new Dictionary<int, SuggestionState?>();
+
     private HashSet<string>? _heldTickers;
 
     protected override void OnParametersSet()
         => _heldTickers = Snap.Positions.Select(p => p.Ticker).ToHashSet();
 
     private bool IsHeld(TickerView t) => _heldTickers!.Contains(t.Ticker);
+
+    private SuggestionState? StateFor(TickerView t)
+        => CallStates.TryGetValue(t.InstrumentId, out var s) ? s : t.CallState;
 
     private static string PnL(decimal pnl, decimal value)
     {

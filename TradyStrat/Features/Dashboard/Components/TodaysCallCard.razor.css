@@ -165,3 +165,76 @@
     text-transform: uppercase;
     color: var(--ink-4);
 }
+
+/* ── Skeleton (Pending) ─────────────────────────────────────────────
+   Shimmer placeholder sized to match the Ready card so the state flip
+   doesn't reflow the surrounding hero row. Line widths approximate the
+   visual mass of the corresponding Ready elements (verb-drop verdict,
+   conviction chip, multi-line rationale, citation row). */
+.call-card--skeleton {
+    padding: 4px 0 0;
+}
+.call-card--skeleton .skeleton-line {
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    background: linear-gradient(90deg,
+        rgba(236,230,214,0.06) 0%,
+        rgba(236,230,214,0.14) 50%,
+        rgba(236,230,214,0.06) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+}
+.call-card--skeleton .skeleton-action     { width: 30%; height: 1.75rem; }
+.call-card--skeleton .skeleton-conviction { width: 20%; height: 1rem; }
+.call-card--skeleton .skeleton-rationale  { width: 90%; height: 2.5rem; }
+.call-card--skeleton .skeleton-citation   { width: 60%; height: 0.85rem; }
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Error (Failed) ─────────────────────────────────────────────────
+   Compact alert row keyed off the project's vault palette so the band
+   reads as "deliberately quiet" rather than alarm-bell red. */
+.call-card--error {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-top: 8px;
+    color: var(--verb-color-trim, #b85);
+    background: rgba(176, 80, 60, 0.08);
+    border: 1px solid rgba(176, 80, 60, 0.35);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+.call-card--error .error-icon {
+    font-weight: 700;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.call-card--error .error-msg { flex: 1; }
+.call-card--error .retry {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 150ms, color 150ms;
+}
+.call-card--error .retry:hover {
+    border-color: var(--vault-gold);
+    color: var(--vault-gold);
+}

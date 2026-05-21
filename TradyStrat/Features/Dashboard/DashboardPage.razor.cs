@@ -189,6 +189,27 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
         // Stub — see VaultMasthead nav for /trades.
     }
 
+    /// <summary>
+    /// User-driven retry from the failed TodaysCallCard. Flips the focus state
+    /// back to Pending (so the skeleton reappears immediately) and restarts the
+    /// stream, which will re-attempt the AI call via GetTodaysSuggestionUseCase.
+    /// </summary>
+    private async Task OnRetryFocus()
+    {
+        if (_vm is null) return;
+        var focus = _vm.Tickers.FirstOrDefault(t => t.Ticker == _vm.FocusTicker);
+        if (focus is null) return;
+
+        _focusState = new SuggestionState.Pending();
+        _tickerStates[focus.InstrumentId] = new SuggestionState.Pending();
+        await InvokeAsync(StateHasChanged);
+
+        _streamCts?.Cancel();
+        _streamCts?.Dispose();
+        _streamCts = new CancellationTokenSource();
+        _ = ConsumeStreamAsync(_streamCts.Token);
+    }
+
     // Strip exchange suffixes so the call card reads "100 sh CON3" instead of
     // "100 sh CON3.L". Cheap, deterministic, and keeps the suggestion line
     // visually aligned with the prior single-ticker design.

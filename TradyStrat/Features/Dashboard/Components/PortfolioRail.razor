@@ -1,3 +1,4 @@
+@using TradyStrat.Application.Dashboard
 @using TradyStrat.Application.Formatting
 <header class="rail-head">
     <h2 class="rail-label section-heading"><span class="section-roman">VII.</span>Holdings</h2>
@@ -28,8 +29,26 @@
             {
                 <div class="cell-spark">@((MarkupString)Sparkline.Render(t.Spark, 140, 28))</div>
             }
-            @if (t.TodaysCall is { } call)
+            @{
+                var st = StateFor(t);
+            }
+            @if (st is SuggestionState.Pending)
             {
+                <div class="rail-call rail-call--pending" title="AI call in flight">
+                    <span class="call-pending-dot" aria-hidden="true">•</span>
+                    <span class="rationale">Awaiting AI…</span>
+                </div>
+            }
+            else if (st is SuggestionState.Failed)
+            {
+                <div class="rail-call rail-call--failed" title="AI call failed">
+                    <span class="call-failed-mark" aria-hidden="true">!</span>
+                    <span class="rationale">AI call failed</span>
+                </div>
+            }
+            else if (st is SuggestionState.Ready ready)
+            {
+                var call = ready.Suggestion;
                 <div class="rail-call">
                     <span class="action @(call.Action.ToString().ToLowerInvariant())">@call.Action</span>
                     <span class="rationale">@TruncateRationale(call.Rationale, 80)</span>

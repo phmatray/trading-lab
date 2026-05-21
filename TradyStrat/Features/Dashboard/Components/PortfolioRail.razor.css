@@ -106,6 +106,39 @@
     line-clamp: 2;
 }
 
+/* Pending: dimmed dot + quiet "Awaiting AI…" while the per-ticker call
+   is in flight. Uses the same row height as the Ready chip so the cell
+   doesn't reflow when the state flips. */
+.rail-call--pending .call-pending-dot {
+    color: var(--ink-4);
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    animation: rail-call-pulse 1.4s ease-in-out infinite;
+}
+.rail-call--pending .rationale { color: var(--ink-4); font-style: italic; }
+@keyframes rail-call-pulse {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 1; }
+}
+
+.rail-call--failed .call-failed-mark {
+    color: var(--verb-color-trim, #b85);
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 10px;
+}
+.rail-call--failed .rationale { color: var(--verb-color-trim, #b85); }
+
 .tk-kind {
     margin-left: 8px;
     font-family: var(--font-mono);
