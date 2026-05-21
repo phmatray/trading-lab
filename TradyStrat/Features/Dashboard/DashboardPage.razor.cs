@@ -1,6 +1,7 @@
 using TradyStrat.Infrastructure.PriceFeed.UseCases;
 using TradyStrat.Application.Dashboard;
 using System.Globalization;
+using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
@@ -8,6 +9,7 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Dashboard.UseCases;
@@ -25,6 +27,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     [Inject] private StreamTodaysSuggestionsUseCase StreamSuggestions { get; set; } = default!;
     [Inject] private BuildFocusDerivedSliceUseCase BuildFocusSlice { get; set; } = default!;
     [Inject] private ISuggestionBackfillCoordinator BackfillCoord { get; set; } = default!;
+    [Inject] private IReadRepositoryBase<Suggestion> SuggestionRepo { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
@@ -190,11 +193,13 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     }
 
     /// <summary>
-    /// User-driven retry from the failed TodaysCallCard. Flips the focus state
-    /// back to Pending (so the skeleton reappears immediately) and restarts the
-    /// stream, which will re-attempt the AI call via GetTodaysSuggestionUseCase.
+    /// User-driven retry from the failed TodaysCallCard. Despite being wired to
+    /// the focus card, this restarts the entire stream — every held ticker still
+    /// in <c>Pending</c> is re-enumerated and re-attempted, not just the focus.
+    /// The focus state is flipped back to Pending so the skeleton reappears
+    /// immediately while the AI call is re-issued via GetTodaysSuggestionUseCase.
     /// </summary>
-    private async Task OnRetryFocus()
+    private async Task OnRetryStream()
     {
         if (_vm is null) return;
         var focus = _vm.Tickers.FirstOrDefault(t => t.Ticker == _vm.FocusTicker);
@@ -264,7 +269,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
                     if (newState is SuggestionState.Ready ready)
                     {
                         _focusDerived = await BuildFocusSlice.BuildAsync(ready.Suggestion, _vm.Today, ct);
-                        KickBackfillChain(ready.Suggestion);
+                        await KickBackfillChain(ready.Suggestion);
                     }
                 }
 
@@ -277,17 +282,21 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
         }
     }
 
-    private void KickBackfillChain(Suggestion focus)
+    private async Task KickBackfillChain(Suggestion focus)
     {
         if (_vm is null || _vm.IsHistorical) return;
-
-        // Replicates the prior LoadDashboardUseCase backfill kickoff. We only have
-        // the focus suggestion here; the chain reads its own bounds from the DB.
         var today = _vm.Today;
-        var prevTarget = today.AddDays(-1);
+
+        // Replicates the original LoadDashboardUseCase guard: read the prior
+        // suggestion and skip when none exists or when the gap is < 1 day.
+        var prior = await SuggestionRepo.FirstOrDefaultAsync(
+            new PriorSuggestionSpec(today, focus.InstrumentId), CancellationToken.None);
+
+        if (prior is not { ForDate: var lastDate } || today.AddDays(-1) <= lastDate)
+            return;
 
         _ = BackfillCoord
-            .EnsureBackfilledAsync(prevTarget.AddDays(-1), prevTarget, CancellationToken.None)
+            .EnsureBackfilledAsync(lastDate, today.AddDays(-1), CancellationToken.None)
             .ContinueWith(
                 t => DashboardPageLog.BackfillCrashed(Log, t.Exception),
                 CancellationToken.None,

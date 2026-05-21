@@ -53,7 +53,7 @@ else
                             Historical="vm.IsHistorical"
                             FocusLabel="@FocusLabelFor(vm.FocusTicker)"
                             OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested"
-                            OnRetry="OnRetryFocus" />
+                            OnRetry="OnRetryStream" />
         </div>
         <MarketsRail Snapshot="_focusDerived.MarketSnapshot" />
         @if (focusSug is not null)

@@ -35,7 +35,12 @@ public sealed partial class StreamTodaysSuggestionsUseCase(
             SingleReader = true,
             SingleWriter = false,
         });
-        using var sem = new SemaphoreSlim(maxParallel, maxParallel);
+        // Intentionally not `using`: workers can still be in their finally block
+        // (sem.Release) when the iterator is cancelled and unwinds. Disposing here
+        // would race with those releases and surface ObjectDisposedException as a
+        // misleading Failed event. GC reclaim of an undisposed SemaphoreSlim is
+        // safe — Dispose only frees the lazily-allocated AvailableWaitHandle.
+        var sem = new SemaphoreSlim(maxParallel, maxParallel);
 
         var workers = heldInstrumentIds
             .Select(id => RunWorkerAsync(id, sem, chan.Writer, ct))
