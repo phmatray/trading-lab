@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Dashboard.UseCases;
@@ -19,6 +21,9 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     [Inject] private ForceRefetchSuggestionUseCase ForceRefetch { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
     [Inject] private RefreshAllPricesUseCase RefreshPrices { get; set; } = default!;
+    [Inject] private StreamTodaysSuggestionsUseCase StreamSuggestions { get; set; } = default!;
+    [Inject] private BuildFocusDerivedSliceUseCase BuildFocusSlice { get; set; } = default!;
+    [Inject] private ISuggestionBackfillCoordinator BackfillCoord { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
@@ -31,6 +36,12 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     private string? _error;
     private bool _busy;
     private bool _showRerunConfirm;
+
+    // Live-mode mutable state mutated by the stream consumer in Phase 9.
+    private SuggestionState? _focusState;
+    private Dictionary<int, SuggestionState?> _tickerStates = new();
+    private FocusDerivedSlice _focusDerived = FocusDerivedSlice.Empty;
+    private CancellationTokenSource? _streamCts;
 
     private IJSObjectReference? _keysModule;
     private IJSObjectReference? _stickyModule;
@@ -65,6 +76,15 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
 
             _vm = await LoadDashboard.ExecuteAsync(
                 new LoadDashboardInput(target, isHistorical), ct);
+
+            // Mirror the skeleton's state into mutable page fields. The stream consumer
+            // (Phase 9) mutates these per arrival.
+            _focusState = _vm.FocusCallState;
+            _tickerStates.Clear();
+            foreach (var t in _vm.Tickers)
+                _tickerStates[t.InstrumentId] = t.CallState;
+            _focusDerived = new FocusDerivedSlice(_vm.CallDiff, _vm.IndicatorHistories, _vm.MarketSnapshot);
+
             _error = null;
         }
         catch (TradyStratException ex)
