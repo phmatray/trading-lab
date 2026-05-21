@@ -9,6 +9,9 @@
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="TradyStrat.Application.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
     <!-- Vendored TheAppManager v3 (swap back to <PackageReference Include="TheAppManager" />
          once v3 publishes to NuGet). -->

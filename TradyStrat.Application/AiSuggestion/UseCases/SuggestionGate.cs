@@ -1,19 +1,27 @@
+using System.Collections.Concurrent;
+
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
 /// <summary>
-/// Process-wide mutex serializing today's-suggestion writes.
+/// Per-(date, instrumentId) mutex serializing today's-suggestion writes.
 ///
-/// Two concurrent dashboard loads (or a dashboard load racing a Re-run AI
-/// click) both pass the "row doesn't exist" check, both call the AI, then
-/// both try to INSERT with the same ForDate — the second hits the
-/// UQ(ForDate) constraint. The gate forces the second request to wait
-/// until the first finishes, then re-check; if the first already
-/// inserted, the second returns that row instead of calling the AI again.
+/// The UQ(ForDate, InstrumentId) constraint means two concurrent inserts
+/// for the same (date, instrument) pair race. The gate forces the second
+/// writer to wait, then re-check; if the first inserted, the second sees
+/// the existing row instead of calling the AI a second time.
 ///
-/// Static because the use cases are scoped per request, but we need a
-/// shared lock across all scopes.
+/// Different (date, instrument) keys do not block each other — that's the
+/// whole point of partitioning: the dashboard fans out per held instrument
+/// and we want those calls to run truly in parallel.
+///
+/// Static because use cases are scoped per request, but the lock must be
+/// shared across all scopes. Entries are not reclaimed; growth is bounded
+/// by (held instruments) × (days), which is negligible for a single-user app.
 /// </summary>
 internal static class SuggestionGate
 {
-    public static readonly SemaphoreSlim Instance = new(1, 1);
+    private static readonly ConcurrentDictionary<(DateOnly Date, int InstrumentId), SemaphoreSlim> Gates = new();
+
+    public static SemaphoreSlim For(DateOnly date, int instrumentId)
+        => Gates.GetOrAdd((date, instrumentId), _ => new SemaphoreSlim(1, 1));
 }
