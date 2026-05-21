@@ -15,6 +15,12 @@
             <span class="lbl">Thinking budget (tokens)</span>
             <input type="number" min="1024" max="16000" step="64" @bind="_thinkingBudget" @bind:after="OnChanged" />
         </label>
+        <label class="field">
+            <span class="lbl">Max parallel AI calls</span>
+            <input type="number" min="1" max="10" step="1"
+                   @bind="_maxParallel" @bind:after="OnChanged"
+                   title="How many Anthropic calls can run at once. Higher = faster dashboard, but Anthropic may rate-limit shared keys above 3." />
+        </label>
     </div>
     <div class="actions">
         <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>

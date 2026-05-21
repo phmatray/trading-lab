@@ -16,14 +16,17 @@ public partial class AnthropicSettingsForm : ComponentBase
         SettingsKeys.AnthropicModel,
         SettingsKeys.AnthropicMaxTokens,
         SettingsKeys.AnthropicThinkingBudget,
+        SettingsKeys.AnthropicMaxParallelSuggestions,
     ];
 
     private string _model = "";
     private int _maxTokens = 1500;
     private int _thinkingBudget = 8192;
+    private int _maxParallel = 3;
     private string _initialModel = "";
     private int _initialMaxTokens = 1500;
     private int _initialThinkingBudget = 8192;
+    private int _initialMaxParallel = 3;
     private string? _msg;
     private bool _isError;
     private bool _busy;
@@ -35,6 +38,7 @@ public partial class AnthropicSettingsForm : ComponentBase
         _model = _initialModel = ai.Model;
         _maxTokens = _initialMaxTokens = ai.MaxTokens;
         _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget;
+        _maxParallel = _initialMaxParallel = ai.MaxParallelSuggestions;
         _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 
@@ -66,6 +70,13 @@ public partial class AnthropicSettingsForm : ComponentBase
             {
                 await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicThinkingBudget, _thinkingBudget.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
                 _initialThinkingBudget = _thinkingBudget;
+                changed++;
+            }
+            if (_maxParallel != _initialMaxParallel)
+            {
+                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicMaxParallelSuggestions,
+                    _maxParallel.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
+                _initialMaxParallel = _maxParallel;
                 changed++;
             }
             if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
