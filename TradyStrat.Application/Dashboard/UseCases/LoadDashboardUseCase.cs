@@ -251,8 +251,3 @@ public sealed class LoadDashboardUseCase(
     ];
 }
 
-internal static partial class LoadDashboardLog
-{
-    [LoggerMessage(Level = LogLevel.Error, Message = "Backfill chain crashed unobserved")]
-    public static partial void BackfillCrashed(ILogger logger, Exception? ex);
-}
