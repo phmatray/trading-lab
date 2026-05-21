@@ -7,11 +7,8 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Infrastructure.Data;
-using TradyStrat.Application.Fx;
 using TradyStrat.Application.Fx.Providers;
-using TradyStrat.Application.PriceFeed;
 using TradyStrat.Application.PriceFeed.Providers;
-using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.TestKit;                  // TestRepo<T>
 using TradyStrat.TestKit.Specifications;       // InMemoryDb.Create()
 using Xunit;

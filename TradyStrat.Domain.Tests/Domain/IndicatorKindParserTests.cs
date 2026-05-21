@@ -1,5 +1,4 @@
 using Shouldly;
-using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.Domain;

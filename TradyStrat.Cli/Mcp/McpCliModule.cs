@@ -9,7 +9,6 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Cli.Mcp.Filters;
 using TradyStrat.Cli.Mcp.Serialization;
 using TradyStrat.Cli.Mcp.Tools;
-using TradyStrat.Domain;
 
 namespace TradyStrat.Cli.Mcp;
 

@@ -5,7 +5,6 @@ using ModelContextProtocol.Server;
 using Shouldly;
 using TheAppManager.Startup;
 using TradyStrat.Application;
-using TradyStrat.Cli;
 using TradyStrat.Infrastructure;
 using TradyStrat.Infrastructure.PriceFeed;
 using Xunit;

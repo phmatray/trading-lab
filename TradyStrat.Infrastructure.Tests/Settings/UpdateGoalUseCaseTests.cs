@@ -2,7 +2,6 @@ using TradyStrat.Infrastructure.Settings.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.TestKit;             // TestRepo<T>
 using TradyStrat.TestKit.Specifications; // InMemoryDb

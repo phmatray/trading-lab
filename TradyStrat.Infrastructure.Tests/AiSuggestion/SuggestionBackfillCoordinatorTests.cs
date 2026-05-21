@@ -7,7 +7,6 @@ using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Settings;       // FakeSettingsReader
 using TradyStrat.TestKit.Specifications;

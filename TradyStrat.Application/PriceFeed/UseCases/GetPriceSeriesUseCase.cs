@@ -1,5 +1,4 @@
 using Ardalis.Specification;
-using Microsoft.Extensions.Logging;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.UseCases;

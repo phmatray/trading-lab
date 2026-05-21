@@ -119,7 +119,7 @@ public class RecentSuggestionsSectionTests
     {
         await using var db = InMemoryDb.Create();
         SeedInstrument(db, Instr, Ticker);
-        var rationale = "The EMA20 just crossed EMA50 from below on rising volume; conviction holds despite Polymarket softness.";
+        const string rationale = "The EMA20 just crossed EMA50 from below on rising volume; conviction holds despite Polymarket softness.";
         db.Suggestions.Add(MkSuggestion(Instr, AsOf.AddDays(-10), SuggestionAction.Acquire, 7, rationale));
         SeedExactBars(db, Ticker, AsOf.AddDays(-10), [100m, 100m, 100m, 100m, 100m, 100m]);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);

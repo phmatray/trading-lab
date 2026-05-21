@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Spectre.Console.Cli;
 using TheAppManager.Startup;
 using TradyStrat.Application;
-using TradyStrat.Cli;
 using TradyStrat.Infrastructure;
 using TradyStrat.Infrastructure.PriceFeed;
 

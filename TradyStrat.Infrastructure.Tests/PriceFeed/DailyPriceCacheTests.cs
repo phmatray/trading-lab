@@ -1,10 +1,8 @@
-using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.TestKit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.PriceFeed;
 using TradyStrat.Domain;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;

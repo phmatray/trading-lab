@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;

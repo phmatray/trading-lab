@@ -1,12 +1,9 @@
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
 using Ardalis.Specification;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Application.Fx;
-using TradyStrat.Application.PriceFeed;
 using TradyStrat.Application.Settings.Specifications;
 
 namespace TradyStrat.Infrastructure.Settings.UseCases;

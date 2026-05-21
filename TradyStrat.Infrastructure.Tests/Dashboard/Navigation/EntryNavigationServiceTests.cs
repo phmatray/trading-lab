@@ -1,4 +1,3 @@
-using TradyStrat.Infrastructure.Data;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;

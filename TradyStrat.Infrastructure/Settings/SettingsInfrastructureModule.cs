@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using TheAppManager.Modules;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Infrastructure.Settings.Config;

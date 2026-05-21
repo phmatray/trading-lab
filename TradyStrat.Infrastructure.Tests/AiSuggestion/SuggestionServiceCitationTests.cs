@@ -8,7 +8,7 @@ using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Application.Settings.Config;
-using TradyStrat.TestKit.AiSuggestion;          // FakeChatClient
+// FakeChatClient
 using TradyStrat.TestKit.Time;
 using Xunit;
 

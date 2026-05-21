@@ -1,5 +1,3 @@
-using TradyStrat.Infrastructure.Fx;
-using TradyStrat.Infrastructure.PriceFeed;
 using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.UseCases;

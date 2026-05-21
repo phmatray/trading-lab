@@ -1,4 +1,3 @@
-using TradyStrat.TestKit.AiSuggestion;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.AiSuggestion.UseCases;

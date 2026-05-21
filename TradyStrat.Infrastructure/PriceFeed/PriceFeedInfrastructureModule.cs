@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http.Resilience;
 using TheAppManager.Modules;
 using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Infrastructure.PriceFeed.Providers;

@@ -1,6 +1,5 @@
 using TradyStrat.Infrastructure.Time;
 using Shouldly;
-using TradyStrat.Domain;
 using Xunit;
 
 namespace TradyStrat.Infrastructure.Tests.Time;

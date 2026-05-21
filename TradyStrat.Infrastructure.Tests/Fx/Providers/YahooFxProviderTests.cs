@@ -1,5 +1,4 @@
 using TradyStrat.Infrastructure.Fx.Providers;
-using TradyStrat.Application.Fx.Providers;
 using System.Net;
 using Shouldly;
 using TradyStrat.Infrastructure.Tests.PriceFeed;

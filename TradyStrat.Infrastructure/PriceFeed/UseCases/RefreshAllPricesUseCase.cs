@@ -1,7 +1,5 @@
 using TradyStrat.Infrastructure.Fx;
-using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Application.Fx;
 using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Infrastructure.PriceFeed.UseCases;

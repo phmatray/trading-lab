@@ -3,7 +3,6 @@ using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Dashboard;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
 using Xunit;

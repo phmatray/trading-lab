@@ -1,10 +1,8 @@
-using TradyStrat.Infrastructure.Data;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using TradyStrat.Application.Indicators.Zones;
 using TradyStrat.Application.Indicators.History;
 using Shouldly;
-using TradyStrat.Application.UseCases;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.UseCases;
 using TradyStrat.Application.AiSuggestion.Backfill;

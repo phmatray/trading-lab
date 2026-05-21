@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.UseCases;

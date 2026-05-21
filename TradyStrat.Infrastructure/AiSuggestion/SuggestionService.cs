@@ -6,7 +6,6 @@ using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Application.Settings.Config;
 using Microsoft.Extensions.AI;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Infrastructure.AiSuggestion;
 
