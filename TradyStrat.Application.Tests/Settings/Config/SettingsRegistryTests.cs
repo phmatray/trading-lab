@@ -10,6 +10,7 @@ public class SettingsRegistryTests
     private static readonly string[] ExpectedKeys =
     [
         "anthropic.model", "anthropic.maxTokens", "anthropic.thinkingBudget",
+        "anthropic.maxParallelSuggestions",
         "polymarket.searchQueries", "polymarket.maxMarkets",
         "polymarket.minVolumeUsd", "polymarket.maxHorizonDays",
         "tickers.focus",

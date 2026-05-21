@@ -11,7 +11,7 @@ public sealed record DashboardViewModel(
     int EntryNumber,
     PortfolioSnapshot Portfolio,
     GoalConfig Goal,
-    Suggestion? TodaysCall,
+    SuggestionState? FocusCallState,
     IReadOnlyList<TickerView> Tickers,
     IReadOnlyList<PositionRow> Positions,
     string FocusTicker,

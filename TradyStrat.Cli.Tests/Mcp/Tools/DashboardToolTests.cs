@@ -108,6 +108,7 @@ public sealed class DashboardToolTests
             AvgCostEur: 100m);
 
         var tickerView = new TickerView(
+            InstrumentId: 1,
             Ticker: focusTicker,
             Currency: "GBP",
             Price: 110m,
@@ -115,7 +116,7 @@ public sealed class DashboardToolTests
             DeltaPct: 0.5m,
             Zone: Zone.Accumulate,
             Spark: [100m, 105m, 110m],
-            TodaysCall: null);
+            CallState: null);
 
         var goal = new GoalConfig
         {
@@ -130,7 +131,7 @@ public sealed class DashboardToolTests
             EntryNumber: 1,
             Portfolio: snap,
             Goal: goal,
-            TodaysCall: null,
+            FocusCallState: null,
             Tickers: [tickerView],
             Positions: [position],
             FocusTicker: focusTicker,

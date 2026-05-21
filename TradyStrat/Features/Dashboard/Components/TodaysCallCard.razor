@@ -1,3 +1,4 @@
+@using TradyStrat.Application.Dashboard
 @using TradyStrat.Domain
 <div class="call">
     <h2 class="label section-heading">
@@ -8,12 +9,31 @@
         }</span>
     </h2>
 
-    @if (Sug is null)
+    @if (State is null)
     {
         <p class="reasons empty">No AI call recorded for @Today.ToString("d MMMM yyyy", FrFr).</p>
     }
-    else
+    else if (State is SuggestionState.Pending)
     {
+        <div class="call-card--skeleton" aria-busy="true" aria-label="Loading AI suggestion">
+            <div class="skeleton-line skeleton-action"></div>
+            <div class="skeleton-line skeleton-conviction"></div>
+            <div class="skeleton-line skeleton-rationale"></div>
+            <div class="skeleton-line skeleton-citation"></div>
+        </div>
+    }
+    else if (State is SuggestionState.Failed f)
+    {
+        <div class="call-card--error" role="alert">
+            <span class="error-icon" aria-hidden="true">!</span>
+            <span class="error-msg">AI call failed: @Truncate(f.Reason, 80)</span>
+            <button class="btn btn-sm retry" @onclick="OnRetry">Retry</button>
+        </div>
+    }
+    else if (State is SuggestionState.Ready ready)
+    {
+        var Sug = ready.Suggestion;
+
         @if (_backfillLabel is not null)
         {
             <div class="backfill-pill">@_backfillLabel</div>

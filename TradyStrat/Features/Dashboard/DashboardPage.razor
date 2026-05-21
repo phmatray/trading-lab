@@ -1,5 +1,6 @@
 @page "/"
 @rendermode InteractiveServer
+@using TradyStrat.Application.Dashboard
 @using TradyStrat.Features.Dashboard.Components
 
 @if (_vm is null && _error is null)
@@ -26,10 +27,11 @@ else if (_error is not null)
 else
 {
     var vm = _vm!;
+    var focusSug = _focusState is SuggestionState.Ready fr ? fr.Suggestion : null;
     <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur"
                       TargetEur="vm.Goal.TargetEur"
                       ProgressPct="vm.Portfolio.ProgressPct"
-                      Action="vm.TodaysCall?.Action" />
+                      Action="focusSug?.Action" />
     <div class="dash-stage">
         <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
                        PriceAsOfRelative="@vm.PriceAsOfRelative"
@@ -45,22 +47,23 @@ else
         <div class="hero-row">
             <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
                          GoalPace="vm.GoalPace" />
-            <TodaysCallCard Sug="vm.TodaysCall" Today="vm.Today"
+            <TodaysCallCard State="_focusState" Today="vm.Today"
                             CallAsOfRelative="@vm.CallAsOfRelative"
                             BackfillStatus="vm.BackfillStatus"
                             Historical="vm.IsHistorical"
                             FocusLabel="@FocusLabelFor(vm.FocusTicker)"
-                            OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested" />
+                            OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested"
+                            OnRetry="OnRetryStream" />
         </div>
-        <MarketsRail Snapshot="vm.MarketSnapshot" />
-        @if (vm.TodaysCall is not null)
+        <MarketsRail Snapshot="_focusDerived.MarketSnapshot" />
+        @if (focusSug is not null)
         {
-            <CitationsBlock Sug="vm.TodaysCall" Today="vm.Today"
-                            CallDiff="vm.CallDiff"
-                            IndicatorHistories="vm.IndicatorHistories" />
+            <CitationsBlock Sug="focusSug" Today="vm.Today"
+                            CallDiff="_focusDerived.CallDiff"
+                            IndicatorHistories="_focusDerived.IndicatorHistories" />
         }
         <PositionsTable Rows="vm.Positions" />
-        <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" />
+        <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" CallStates="_tickerStates" />
     </div>
     <RefreshFab Busy="_busy" Historical="vm.IsHistorical" OnClick="OnRefreshClicked" />
 

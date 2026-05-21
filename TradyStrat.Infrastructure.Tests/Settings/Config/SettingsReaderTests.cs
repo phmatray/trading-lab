@@ -31,11 +31,13 @@ public class SettingsReaderTests
         await svc.SetAsync(SettingsKeys.AnthropicModel, "claude-sonnet-4-6", ct);
         await svc.SetAsync(SettingsKeys.AnthropicMaxTokens, "4096", ct);
         await svc.SetAsync(SettingsKeys.AnthropicThinkingBudget, "12000", ct);
+        await svc.SetAsync(SettingsKeys.AnthropicMaxParallelSuggestions, "5", ct);
 
         var ai = await reader.AnthropicAsync(ct);
         ai.Model.ShouldBe("claude-sonnet-4-6");
         ai.MaxTokens.ShouldBe(4096);
         ai.ThinkingBudget.ShouldBe(12000);
+        ai.MaxParallelSuggestions.ShouldBe(5);
     }
 
     [Fact]

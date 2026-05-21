@@ -49,13 +49,16 @@ internal static class DashboardMapper
                 SenkouB: reading.Ichimoku?.SenkouB,
                 Chikou: reading.Ichimoku?.Chikou));
 
-        var suggestion = vm.TodaysCall is null ? null : new SuggestionBrief(
-            Date: vm.TodaysCall.ForDate,
-            Action: vm.TodaysCall.Action.ToString(),
-            Conviction: vm.TodaysCall.Conviction,
-            Reasoning: vm.TodaysCall.Rationale,
-            EnvelopeHash: Truncate(vm.TodaysCall.EnvelopeHash),
-            PromptVersionHash: Truncate(vm.TodaysCall.PromptVersionHash));
+        // Surface a suggestion only when the focus is in the Ready state. Pending
+        // and Failed states do not have an underlying Suggestion row to map.
+        var focusSuggestion = vm.FocusCallState is SuggestionState.Ready ready ? ready.Suggestion : null;
+        var suggestion = focusSuggestion is null ? null : new SuggestionBrief(
+            Date: focusSuggestion.ForDate,
+            Action: focusSuggestion.Action.ToString(),
+            Conviction: focusSuggestion.Conviction,
+            Reasoning: focusSuggestion.Rationale,
+            EnvelopeHash: Truncate(focusSuggestion.EnvelopeHash),
+            PromptVersionHash: Truncate(focusSuggestion.PromptVersionHash));
 
         var position = BuildPosition(vm);
 

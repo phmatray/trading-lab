@@ -1,19 +1,21 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Application.Dashboard;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;
 
 public partial class TodaysCallCard : ComponentBase, IDisposable
 {
-    [Parameter] public Suggestion? Sug { get; set; }
+    [Parameter] public SuggestionState? State { get; set; }
     [Parameter] public DateOnly Today { get; set; }
     [Parameter] public string CallAsOfRelative { get; set; } = "";
     [Parameter] public bool Historical { get; set; }
     [Parameter] public string FocusLabel { get; set; } = "CON3";
     [Parameter] public EventCallback OnLogTrade { get; set; }
     [Parameter] public EventCallback OnRerun { get; set; }
+    [Parameter] public EventCallback OnRetry { get; set; }
 
     [Parameter, EditorRequired] public BackfillStatus BackfillStatus { get; set; } = BackfillStatus.Idle.Instance;
 
@@ -25,9 +27,14 @@ public partial class TodaysCallCard : ComponentBase, IDisposable
     private string? _backfillLabel;
     private bool _disposed;
 
-    private string Verb => SuggestionActionDisplay.Verb(Sug?.Action);
+    private Suggestion? ReadySug => State is SuggestionState.Ready r ? r.Suggestion : null;
 
-    private string VerbStem => SuggestionActionDisplay.Stem(Sug?.Action);
+    private string Verb => SuggestionActionDisplay.Verb(ReadySug?.Action);
+
+    private string VerbStem => SuggestionActionDisplay.Stem(ReadySug?.Action);
+
+    private static string Truncate(string s, int max)
+        => s.Length <= max ? s : s.AsSpan(0, max - 1).ToString() + "…";
 
     protected override void OnInitialized()
     {

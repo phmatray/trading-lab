@@ -30,7 +30,8 @@ public sealed class ForceRefetchSuggestionUseCase(
         // ForceRefetch — otherwise two concurrent rerun clicks both pass
         // the existence check, then both try to INSERT and the second hits
         // the UQ(ForDate, InstrumentId) constraint.
-        await SuggestionGate.Instance.WaitAsync(ct);
+        var gate = SuggestionGate.For(today, instrument.Id);
+        await gate.WaitAsync(ct);
         try
         {
             var existing = await repo.FirstOrDefaultAsync(
@@ -44,7 +45,7 @@ public sealed class ForceRefetchSuggestionUseCase(
         }
         finally
         {
-            SuggestionGate.Instance.Release();
+            gate.Release();
         }
     }
 }
