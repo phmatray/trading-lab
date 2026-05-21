@@ -25,6 +25,7 @@ public sealed class AiSuggestionApplicationModule : IAppModule
         services.AddScoped<ISnapshotSectionProvider, RecentSuggestionsSection>();
         services.AddScoped<GetTodaysSuggestionUseCase>();
         services.AddScoped<GetAllTodaysSuggestionsUseCase>();
+        services.AddScoped<StreamTodaysSuggestionsUseCase>();
         services.AddScoped<ForceRefetchSuggestionUseCase>();
         services.AddScoped<BackfillSuggestionsUseCase>();
         services.AddScoped<ReplaySuggestionsUseCase>();
