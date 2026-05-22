@@ -112,6 +112,25 @@ public sealed class Portfolio
         return BuildSnapshot(tempPortfolio._positions, instrumentById, priceByInstrument, goalTarget);
     }
 
+    /// <summary>
+    /// Post-migration rehydration: for each Position that has trades but no
+    /// open lots, replay the trades through Position.Record to derive lots
+    /// and realized P&L. Returns true if any position needed rehydration.
+    /// </summary>
+    public bool RehydrateLots()
+    {
+        var any = false;
+        foreach (var pos in _positions)
+        {
+            if (pos.Trades.Count == 0 || pos.OpenLots.Count > 0) continue;
+            var ordered = pos.Trades.OrderBy(t => t.ExecutedOn).ToList();
+            pos.ClearAllForReplay();
+            foreach (var t in ordered) pos.Record(t);
+            any = true;
+        }
+        return any;
+    }
+
     public IReadOnlyList<GrowthPoint> GrowthSeries(
         IReadOnlyDictionary<InstrumentId, IReadOnlyList<PriceBar>> barsByInstrument)
     {
