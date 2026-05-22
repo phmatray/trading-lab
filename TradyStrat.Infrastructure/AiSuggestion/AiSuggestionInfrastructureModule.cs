@@ -35,9 +35,6 @@ public sealed class AiSuggestionInfrastructureModule : IAppModule
                 .Build());
 
         services.AddScoped<ISuggestionRepository, EfSuggestionRepository>();
-
-        // SuggestionService .bak'd during Phase 3 Suggestion-AR rewrite;
-        // restored once it consumes the AiResponse DTO + new Suggestion AR.
-        // services.AddScoped<IAiClient, SuggestionService>();
+        services.AddScoped<IAiClient, SuggestionService>();
     }
 }
