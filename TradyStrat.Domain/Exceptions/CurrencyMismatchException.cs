@@ -1,3 +1,4 @@
 namespace TradyStrat.Domain.Exceptions;
 
-public sealed class CurrencyMismatchException(string message) : TradyStratException(message);
+public sealed class CurrencyMismatchException(string message, Exception? inner = null)
+    : TradyStratException(message, inner);
