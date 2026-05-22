@@ -11,9 +11,9 @@ public class LotTests
     public void CostBasis_is_quantity_times_unit_cost()
     {
         var lot = new global::TradyStrat.Domain.Portfolio.Lot(
-            OpenedOn: new DateOnly(2026, 1, 1),
-            Quantity: Quantity.Of(10m),
-            UnitCost: Money.Of(4.20m, Currency.Eur));
+            openedOn: new DateOnly(2026, 1, 1),
+            quantity: Quantity.Of(10m),
+            unitCost: Money.Of(4.20m, Currency.Eur));
 
         lot.CostBasis.ShouldBe(Money.Of(42.00m, Currency.Eur));
     }
@@ -22,9 +22,9 @@ public class LotTests
     public void WithQuantity_returns_new_lot_with_updated_quantity()
     {
         var lot = new global::TradyStrat.Domain.Portfolio.Lot(
-            OpenedOn: new DateOnly(2026, 1, 1),
-            Quantity: Quantity.Of(10m),
-            UnitCost: Money.Of(4m, Currency.Eur));
+            openedOn: new DateOnly(2026, 1, 1),
+            quantity: Quantity.Of(10m),
+            unitCost: Money.Of(4m, Currency.Eur));
 
         var trimmed = lot.WithQuantity(Quantity.Of(7m));
 

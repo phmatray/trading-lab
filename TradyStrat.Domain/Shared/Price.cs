@@ -2,9 +2,11 @@ namespace TradyStrat.Domain.Shared;
 
 public sealed record Price
 {
-    public Money    PerUnit  { get; }
+    public Money    PerUnit  { get; private set; } = Money.Zero(Currency.Eur);
     public Currency Currency => PerUnit.Currency;
     public bool     IsEmpty  => PerUnit.IsEmpty;
+
+    private Price() { }   // EF (Price wraps Money — owned, can't be ctor-bound)
 
     private Price(Money perUnit) => PerUnit = perUnit;
 
