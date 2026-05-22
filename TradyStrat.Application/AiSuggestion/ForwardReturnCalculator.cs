@@ -1,5 +1,7 @@
 using Ardalis.Specification;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.PriceFeed.Specifications;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.AiSuggestion;

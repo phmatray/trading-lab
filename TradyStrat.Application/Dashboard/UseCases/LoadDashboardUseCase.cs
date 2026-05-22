@@ -1,5 +1,7 @@
 using TradyStrat.Application.Time;
+using TradyStrat.Domain.Suggestions;
 using Ardalis.Specification;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Shared;

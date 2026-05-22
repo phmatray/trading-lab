@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using TradyStrat.Domain.Suggestions;
 using Ardalis.Specification;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.AiSuggestion.Specifications;

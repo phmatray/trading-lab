@@ -1,5 +1,7 @@
 using System.Globalization;
+using TradyStrat.Domain.Suggestions;
 using System.Text;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.AiSuggestion.CallDiff;

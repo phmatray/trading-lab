@@ -1,5 +1,7 @@
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Settings.UseCases;
 
