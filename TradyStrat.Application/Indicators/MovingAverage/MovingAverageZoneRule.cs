@@ -9,10 +9,12 @@ public sealed class MovingAverageZoneRule : IZoneRule
 
     public ZoneVote? Apply(decimal price, IndicatorBundle r)
     {
-        if (r.Sma50 is not { } s50 || r.Sma200 is not { } s200) return null;
+        // Sma50/200 use 0m as the not-computed sentinel (zero is never a valid
+        // price-derived SMA in this app's universe).
+        if (r.Sma50 == 0m || r.Sma200 == 0m) return null;
 
-        if (price < s200) return new(Zone.Accumulate, $"Below 200-SMA ({s200:F2})");
-        if (price > s50)  return new(Zone.Distribute, $"Above 50-SMA ({s50:F2})");
+        if (price < r.Sma200) return new(Zone.Accumulate, $"Below 200-SMA ({r.Sma200:F2})");
+        if (price > r.Sma50)  return new(Zone.Distribute, $"Above 50-SMA ({r.Sma50:F2})");
         return new(Zone.Hold, "Between 50/200-SMA");
     }
 }

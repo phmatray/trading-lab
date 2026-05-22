@@ -152,7 +152,7 @@ public sealed class Portfolio
         var points = new List<GrowthPoint>(allBarDates.Count + 1)
         {
             // Synthetic leading zero: one day before first trade.
-            new(firstTradeDate.AddDays(-1), 0m),
+            new(firstTradeDate.AddDays(-1), Money.Zero(Currency.Eur), Percentage.Empty),
         };
 
         var sharesByInstrument = new Dictionary<InstrumentId, decimal>();

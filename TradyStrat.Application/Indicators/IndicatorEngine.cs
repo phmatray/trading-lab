@@ -3,6 +3,7 @@ using TradyStrat.Application.Indicators.Zones;
 using TradyStrat.Application.Indicators.History;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 using TradyStrat.Application.PriceFeed.Specifications;
 
 namespace TradyStrat.Application.Indicators;
@@ -44,12 +45,13 @@ public sealed class IndicatorEngine(
             throw new IndicatorComputationException($"No price bars for {ticker}");
 
         var price  = series[^1].Close;
+        var rawRsi = Rsi.Rsi.LatestFor(series);
         var bundle = new IndicatorBundle(
-            Bollinger.Bollinger.LatestFor(series),
-            Rsi.Rsi.LatestFor(series),
-            MovingAverage.MovingAverage.LatestFor(series, 50),
-            MovingAverage.MovingAverage.LatestFor(series, 200),
-            Ichimoku.Ichimoku.LatestFor(series));
+            Bollinger.Bollinger.LatestFor(series)            ?? BollingerReading.Empty,
+            rawRsi is { } r ? Percentage.Of(r) : Percentage.Empty,
+            MovingAverage.MovingAverage.LatestFor(series, 50)  ?? 0m,
+            MovingAverage.MovingAverage.LatestFor(series, 200) ?? 0m,
+            Ichimoku.Ichimoku.LatestFor(series)              ?? IchimokuReading.Empty);
 
         var (zone, reasons) = classifier.Classify(price, bundle);
         return new IndicatorReading(ticker, price,
