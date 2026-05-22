@@ -1,4 +1,5 @@
 using TradyStrat.Application.Fx;
+using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;

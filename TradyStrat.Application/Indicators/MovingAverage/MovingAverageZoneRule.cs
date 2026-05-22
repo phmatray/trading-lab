@@ -1,5 +1,5 @@
 using TradyStrat.Domain;
-using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Domain.Indicators.Services;
 
 namespace TradyStrat.Application.Indicators.MovingAverage;
 

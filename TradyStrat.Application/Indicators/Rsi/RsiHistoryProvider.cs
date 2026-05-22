@@ -1,5 +1,6 @@
 using TechnicalAnalysis.Common;
-using TradyStrat.Application.Indicators.History;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.Indicators.Services;
 using TechnicalAnalysis.Functions;
 using TradyStrat.Domain;
 

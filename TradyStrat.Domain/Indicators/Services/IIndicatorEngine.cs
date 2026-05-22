@@ -1,6 +1,7 @@
 using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators;
 
-namespace TradyStrat.Application.Indicators;
+namespace TradyStrat.Domain.Indicators.Services;
 
 public interface IIndicatorEngine
 {

@@ -1,6 +1,6 @@
 using TradyStrat.Domain;
 
-namespace TradyStrat.Application.PriceFeed;
+namespace TradyStrat.Domain.PriceFeed;
 
 public interface IPriceBarReadRepository
 {

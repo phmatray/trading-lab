@@ -1,6 +1,6 @@
 using TradyStrat.Domain;
 
-namespace TradyStrat.Application.Indicators.History;
+namespace TradyStrat.Domain.Indicators.Services;
 
 public interface IIndicatorHistoryProviderFactory
 {

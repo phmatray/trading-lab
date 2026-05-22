@@ -1,4 +1,6 @@
 using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Domain.Indicators;
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Application.Indicators.History;

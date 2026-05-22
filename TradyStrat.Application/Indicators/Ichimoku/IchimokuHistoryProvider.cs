@@ -1,5 +1,6 @@
 using TradyStrat.Domain;
-using TradyStrat.Application.Indicators.History;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.Indicators.Services;
 
 namespace TradyStrat.Application.Indicators.Ichimoku;
 

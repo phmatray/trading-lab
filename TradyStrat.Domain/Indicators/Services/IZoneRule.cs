@@ -1,6 +1,6 @@
 using TradyStrat.Domain;
 
-namespace TradyStrat.Application.Indicators.Zones;
+namespace TradyStrat.Domain.Indicators.Services;
 
 public interface IZoneRule
 {

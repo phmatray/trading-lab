@@ -1,4 +1,5 @@
 using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Domain.Indicators;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Domain.Suggestions;

@@ -1,4 +1,4 @@
-namespace TradyStrat.Application.Indicators;
+namespace TradyStrat.Domain.Indicators;
 
 public sealed record IndicatorSeries(
     IReadOnlyList<decimal> Values,

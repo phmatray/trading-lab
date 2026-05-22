@@ -1,5 +1,5 @@
 using TradyStrat.Domain;
 
-namespace TradyStrat.Application.Indicators.Zones;
+namespace TradyStrat.Domain.Indicators.Services;
 
 public sealed record ZoneVote(Zone Vote, string Reason);
