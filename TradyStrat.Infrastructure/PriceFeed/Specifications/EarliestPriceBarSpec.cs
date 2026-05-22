@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Domain;
 
-namespace TradyStrat.Application.PriceFeed.Specifications;
+namespace TradyStrat.Infrastructure.PriceFeed.Specifications;
 
 public sealed class EarliestPriceBarSpec : Specification<PriceBar>
 {
