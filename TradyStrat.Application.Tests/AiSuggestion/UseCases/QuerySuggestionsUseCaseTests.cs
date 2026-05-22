@@ -8,6 +8,7 @@ using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
 using TradyStrat.Infrastructure.AiSuggestion;
 using TradyStrat.Infrastructure.Data;
+using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
@@ -92,7 +93,7 @@ public class QuerySuggestionsUseCaseTests
 
     private static QuerySuggestionsUseCase BuildUseCase(AppDbContext db)
     {
-        var fwdCalculator = new ForwardReturnCalculator(new TestRepo<PriceBar>(db), new TestRepo<Instrument>(db));
+        var fwdCalculator = new ForwardReturnCalculator(new TestRepo<PriceBar>(db), new EfInstrumentRepository(db));
         var correctness   = new FixedThresholdCorrectness(2.0m);
         return new QuerySuggestionsUseCase(
             new EfSuggestionRepository(db),
@@ -117,17 +118,15 @@ public class QuerySuggestionsUseCaseTests
             createdAt:    DateTime.UtcNow);
 
     private static void SeedInstrument(AppDbContext db, int id, string ticker)
-        => db.Instruments.Add(new Instrument
-        {
-            Id         = id,
-            Ticker     = ticker,
-            Name       = ticker,
-            Currency   = "EUR",
-            Exchange   = "X",
-            TimezoneId = "Etc/UTC",
-            Kind       = InstrumentKind.Held,
-            AddedAt    = DateTime.UtcNow,
-        });
+        => db.Instruments.Add(Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Eur,
+            exchange:   Exchange.Of("X"),
+            timezoneId: TimezoneId.Of("Etc/UTC"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow));
 
     private static void SeedExactBars(AppDbContext db, string ticker, DateOnly from, decimal[] closes)
     {

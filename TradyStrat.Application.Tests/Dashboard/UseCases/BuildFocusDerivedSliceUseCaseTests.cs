@@ -92,17 +92,15 @@ public class BuildFocusDerivedSliceUseCaseTests
             new StubIndicatorEngine());
 
     private static void SeedInstrument(AppDbContext db, int id, string ticker)
-        => db.Instruments.Add(new Instrument
-        {
-            Id         = id,
-            Ticker     = ticker,
-            Name       = ticker,
-            Currency   = "USD",
-            Exchange   = "TST",
-            TimezoneId = "Etc/UTC",
-            Kind       = InstrumentKind.Held,
-            AddedAt    = DateTime.UtcNow,
-        });
+        => db.Instruments.Add(Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("TST"),
+            timezoneId: TimezoneId.Of("Etc/UTC"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow));
 
     private static Suggestion MkSuggestion(
         int instrumentId,

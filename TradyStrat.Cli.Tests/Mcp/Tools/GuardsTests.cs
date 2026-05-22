@@ -3,7 +3,8 @@ using Shouldly;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Cli.Mcp.Tools;
 using TradyStrat.Domain;
-using TradyStrat.TestKit;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
 
@@ -15,17 +16,16 @@ public sealed class GuardsTests
     // Helpers
     // ---------------------------------------------------------------------------
 
-    private static Instrument MakeInstrument(int id, string ticker) => new()
-    {
-        Id = id,
-        Ticker = ticker,
-        Name = ticker,
-        Currency = "USD",
-        Exchange = "TEST",
-        TimezoneId = "America/New_York",
-        Kind = InstrumentKind.Watchlist,
-        AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument MakeInstrument(int id, string ticker)
+        => Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("TEST"),
+            timezoneId: TimezoneId.Of("America/New_York"),
+            kind:       InstrumentKind.Watchlist,
+            addedAt:    DateTime.UtcNow);
 
     private static async Task<Guards> BuildGuardsAsync(params Instrument[] instruments)
     {
@@ -33,7 +33,7 @@ public sealed class GuardsTests
         db.Instruments.AddRange(instruments);
         await db.SaveChangesAsync();
 
-        var repo = new TestRepo<Instrument>(db);
+        var repo = new EfInstrumentRepository(db);
         var useCase = new ListInstrumentsUseCase(repo, NullLogger<ListInstrumentsUseCase>.Instance);
         return new Guards(useCase);
     }

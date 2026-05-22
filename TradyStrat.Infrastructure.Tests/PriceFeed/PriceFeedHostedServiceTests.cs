@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
@@ -33,7 +34,7 @@ public class PriceFeedHostedServiceTests
             return Task.FromResult<IReadOnlyList<PriceBar>>([]);
         }
 
-        public Task<InstrumentMetadata> GetInstrumentMetadataAsync(string ticker, CancellationToken ct)
+        public Task<Instrument> ProbeAsync(string ticker, CancellationToken ct)
             => throw new NotImplementedException();
     }
 
@@ -61,6 +62,8 @@ public class PriceFeedHostedServiceTests
         sc.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase(dbName));
         sc.AddScoped(typeof(IRepositoryBase<>),     typeof(TestRepo<>));
         sc.AddScoped(typeof(IReadRepositoryBase<>), typeof(TestRepo<>));
+        sc.AddScoped<TradyStrat.Application.Settings.IInstrumentRepository,
+                     TradyStrat.Infrastructure.Settings.EfInstrumentRepository>();
         sc.AddSingleton<IClock>(new FakeClock(new DateTime(2026, 5, 7, 12, 0, 0, DateTimeKind.Utc)));
         sc.AddSingleton<IPriceFeed>(feed);
         sc.AddSingleton<IFxRateProvider>(fxp);
@@ -91,10 +94,14 @@ public class PriceFeedHostedServiceTests
         fxp.WarmedPairs.ShouldBe(ExpectedFxPairs);
     }
 
-    private static Instrument Inst(string ticker, string currency) => new()
-    {
-        Id = 0, Ticker = ticker, Name = ticker, Currency = currency,
-        Exchange = "X", TimezoneId = "Etc/UTC", Kind = InstrumentKind.Held,
-        AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument Inst(string ticker, string currency)
+        => Instrument.Existing(
+            id:         new InstrumentId(0),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Parse(currency),
+            exchange:   Exchange.Of("X"),
+            timezoneId: TimezoneId.Of("Etc/UTC"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 }

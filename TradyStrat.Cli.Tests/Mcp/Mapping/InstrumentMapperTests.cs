@@ -2,23 +2,22 @@ using Shouldly;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Cli.Tests.Mcp.Mapping;
 
 public class InstrumentMapperTests
 {
-    private static Instrument MakeInstrument(string ticker) => new()
-    {
-        Id = 1,
-        Ticker = ticker,
-        Name = $"{ticker} Corp",
-        Currency = "USD",
-        Exchange = "LSE",
-        TimezoneId = "Europe/London",
-        Kind = InstrumentKind.Held,
-        AddedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-    };
+    private static Instrument MakeInstrument(string ticker) => Instrument.Existing(
+        id:         new InstrumentId(1),
+        ticker:     ticker,
+        name:       $"{ticker} Corp",
+        currency:   Currency.Usd,
+        exchange:   Exchange.Of("LSE"),
+        timezoneId: TimezoneId.Of("Europe/London"),
+        kind:       InstrumentKind.Held,
+        addedAt:    new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 
     [Fact]
     public void Maps_focus_ticker_with_role_Focus()

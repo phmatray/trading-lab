@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Domain;
-using TradyStrat.Application.UseCases;
-using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Settings.UseCases;
-using TradyStrat.TestKit;          // TestRepo<T>
+using TradyStrat.Application.UseCases;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Infrastructure.Settings;
+using TradyStrat.TestKit.Specifications;
 using Xunit;
 
 namespace TradyStrat.Infrastructure.Tests.Settings.UseCases;
@@ -18,8 +18,7 @@ public class ListInstrumentsUseCaseTests
     [Fact]
     public async Task Returns_instruments_sorted_by_ticker()
     {
-        await using var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+        await using var db = InMemoryDb.Create();
 
         db.Instruments.Add(Make("CON3.L"));
         db.Instruments.Add(Make("BTC-USD"));
@@ -27,7 +26,7 @@ public class ListInstrumentsUseCaseTests
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new ListInstrumentsUseCase(
-            new TestRepo<Instrument>(db),
+            new EfInstrumentRepository(db),
             NullLogger<ListInstrumentsUseCase>.Instance);
 
         var list = await sut.ExecuteAsync(Unit.Value, TestContext.Current.CancellationToken);
@@ -35,10 +34,14 @@ public class ListInstrumentsUseCaseTests
         list.Select(i => i.Ticker).ShouldBe(ExpectedTickersSorted);
     }
 
-    private static Instrument Make(string ticker) => new()
-    {
-        Id = 0, Ticker = ticker, Name = ticker, Currency = "USD",
-        Exchange = "NMS", TimezoneId = "America/New_York",
-        Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument Make(string ticker)
+        => Instrument.Existing(
+            id:         new InstrumentId(0),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("NMS"),
+            timezoneId: TimezoneId.Of("America/New_York"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 }

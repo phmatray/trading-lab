@@ -20,9 +20,9 @@ public class YahooMetadataParserTests
 
         meta.Ticker.ShouldBe("ETHE.PA");
         meta.Name.ShouldBe("WisdomTree Physical Ethereum");
-        meta.Currency.ShouldBe("EUR");
-        meta.Exchange.ShouldBe("Euronext Paris");
-        meta.TimezoneId.ShouldBe("Europe/Paris");
+        meta.Currency.Code.ShouldBe("EUR");
+        meta.Exchange.Code.ShouldBe("Euronext Paris");
+        meta.Timezone.Value.ShouldBe("Europe/Paris");
     }
 
     [Fact]
