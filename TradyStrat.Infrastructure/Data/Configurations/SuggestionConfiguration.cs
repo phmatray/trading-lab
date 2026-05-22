@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TradyStrat.Domain;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 
@@ -78,11 +77,6 @@ public sealed class SuggestionConfiguration : IEntityTypeConfiguration<Suggestio
         builder.Navigation(s => s.Citations).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.Property<string>("CitationsJson").HasMaxLength(8000).HasDefaultValue("[]");
-
-        builder.HasOne<Instrument>()
-               .WithMany()
-               .HasForeignKey(s => s.InstrumentId)
-               .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(s => s.InstrumentId);
         builder.HasIndex(s => new { s.ForDate, s.InstrumentId }).IsUnique();
