@@ -1,5 +1,5 @@
-using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Snapshot;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
@@ -14,19 +14,19 @@ public sealed class GetTodaysSuggestionUseCase(
     IAiSnapshotService snapshotService,
     IAiClient ai,
     IClock clock,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     ILogger<GetTodaysSuggestionUseCase> log)
     : UseCaseBase<GetTodaysSuggestionInput, Suggestion>(log)
 {
     protected override async Task<Suggestion> ExecuteCore(
         GetTodaysSuggestionInput input, CancellationToken ct)
     {
-        var instrument = await instruments.GetByIdAsync(input.InstrumentId, ct)
+        var iid = new InstrumentId(input.InstrumentId);
+        var instrument = await instruments.GetAsync(iid, ct)
             ?? throw new InstrumentNotFoundException(
                 $"Instrument id {input.InstrumentId} not registered.");
 
         var today = clock.TodayInExchangeTzFor(instrument.Ticker);
-        var iid = new InstrumentId(instrument.Id);
 
         // Fast path: row already there, no gate needed.
         var existing = await suggestions.GetForAsync(iid, today, ct);
@@ -36,11 +36,11 @@ public sealed class GetTodaysSuggestionUseCase(
         // then re-check inside the gate (a peer may have inserted while we
         // waited). The gate is process-wide; inter-request races (two browser
         // tabs, refresh during a re-run) are its primary value.
-        var gate = SuggestionGatePlumbing.For(today, instrument.Id);
+        var gate = SuggestionGatePlumbing.For(today, input.InstrumentId);
         await gate.WaitAsync(ct);
         try
         {
-            var snap = await snapshotService.CreateAsync(instrument.Id, today, ct);
+            var snap = await snapshotService.CreateAsync(input.InstrumentId, today, ct);
             var candidateFp = PromptFingerprint.Of(
                 snap.PromptHash, snap.EnvelopeHash, snap.PromptVersionHash);
 

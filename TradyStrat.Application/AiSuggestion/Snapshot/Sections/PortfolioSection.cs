@@ -18,7 +18,7 @@ public sealed class PortfolioSection(
             throw new InvalidOperationException("GoalSection must run before PortfolioSection");
 
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
-        var instrumentById = instruments.ToDictionary(i => new InstrumentId(i.Id), i => i);
+        var instrumentById = instruments.ToDictionary(i => i.Id, i => i);
 
         // Build per-instrument price map from the tickers TickersSection already populated.
         var priceMap = new Dictionary<InstrumentId, Price>();
@@ -26,8 +26,7 @@ public sealed class PortfolioSection(
         {
             var ctx = builder.Tickers.SingleOrDefault(t => t.Ticker == inst.Ticker);
             var priceEur = ctx?.PriceEur ?? ctx?.PriceNative ?? 0m;
-            priceMap[new InstrumentId(inst.Id)] =
-                Price.Of(Money.Of(priceEur, Currency.Eur));
+            priceMap[inst.Id] = Price.Of(Money.Of(priceEur, Currency.Eur));
         }
 
         var portfolio = await portfolios.GetAsync(ct);

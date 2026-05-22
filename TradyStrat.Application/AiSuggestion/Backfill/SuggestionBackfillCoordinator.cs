@@ -1,9 +1,7 @@
-using Ardalis.Specification;
 using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.AiSuggestion.UseCases;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.Config;
-using TradyStrat.Application.Settings.Specifications;
-using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Shared;
 
@@ -30,7 +28,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
 
     private sealed record Resolved(
         ISuggestionRepository Suggestions,
-        IReadRepositoryBase<Instrument> Instruments,
+        IInstrumentRepository Instruments,
         BackfillSuggestionsUseCase Backfill,
         ISettingsReader Settings,
         IDisposable? Scope);
@@ -45,7 +43,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
             var sp = scope.ServiceProvider;
             return new Resolved(
                 sp.GetRequiredService<ISuggestionRepository>(),
-                sp.GetRequiredService<IReadRepositoryBase<Instrument>>(),
+                sp.GetRequiredService<IInstrumentRepository>(),
                 sp.GetRequiredService<BackfillSuggestionsUseCase>(),
                 sp.GetRequiredService<ISettingsReader>(),
                 scope);
@@ -72,14 +70,13 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         try
         {
             var focusTicker = await resolved.Settings.FocusTickerAsync(ct);
-            var focus = await resolved.Instruments.FirstOrDefaultAsync(
-                new InstrumentByTickerSpec(focusTicker), ct)
+            var focus = await resolved.Instruments.FindByTickerAsync(focusTicker, ct)
                 ?? throw new InvalidOperationException(
                     $"Focus instrument '{focusTicker}' is not registered.");
 
             var firstNeeded = fromExclusive.AddDays(1);
             var existing = await resolved.Suggestions.ListForAsync(
-                new InstrumentId(focus.Id),
+                focus.Id,
                 new DateRange(firstNeeded, toInclusive),
                 ct);
             var existingDates = existing.Select(s => s.ForDate).ToHashSet();
@@ -103,7 +100,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
                 try
                 {
                     await resolved.Backfill.ExecuteAsync(
-                        new BackfillSuggestionsInput(date, focus.Id), ct);
+                        new BackfillSuggestionsInput(date, focus.Id.Value), ct);
                     lastOk = date;
                 }
                 catch (OperationCanceledException)

@@ -4,6 +4,7 @@ using ModelContextProtocol.Server;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.PriceFeed.Specifications;
+using TradyStrat.Application.Settings;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
@@ -15,7 +16,7 @@ namespace TradyStrat.Cli.Mcp.Tools;
 [McpServerToolType]
 internal sealed class PortfolioTool(
     IPortfolioRepository portfolios,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     IReadRepositoryBase<PriceBar> bars,
     IReadRepositoryBase<FxRate> fxRates,
     IReadRepositoryBase<GoalConfig> goalRepo,
@@ -31,7 +32,7 @@ internal sealed class PortfolioTool(
             from: asOf, to: asOf, defaultBack: 0, clockToday: clock.TodayLocal());
 
         var allInstruments = await instruments.ListAsync(ct);
-        var instrumentById = allInstruments.ToDictionary(i => new InstrumentId(i.Id), i => i);
+        var instrumentById = allInstruments.ToDictionary(i => i.Id, i => i);
         var fx = new FxConverter(fxRates);
 
         var priceByInstrument = new Dictionary<InstrumentId, Price>();
@@ -41,11 +42,11 @@ internal sealed class PortfolioTool(
             if (priceBars.Count == 0) continue;
 
             var latestClose = priceBars[^1].Close;
-            decimal priceEur = string.Equals(inst.Currency, "EUR", StringComparison.OrdinalIgnoreCase)
+            decimal priceEur = inst.Currency == Currency.Eur
                 ? latestClose
-                : await fx.ToEurAsync(latestClose, inst.Currency, target, ct);
+                : await fx.ToEurAsync(latestClose, inst.Currency.Code, target, ct);
 
-            priceByInstrument[new InstrumentId(inst.Id)] =
+            priceByInstrument[inst.Id] =
                 Price.Of(Money.Of(priceEur, Currency.Eur));
         }
 
@@ -61,7 +62,7 @@ internal sealed class PortfolioTool(
             .SelectMany(p => p.Trades.Select(t => (Trade: t, InstrumentId: p.InstrumentId.Value)))
             .OrderByDescending(x => x.Trade.ExecutedOn)
             .ToList();
-        var tickerByInstrumentId = allInstruments.ToDictionary(i => i.Id, i => i.Ticker);
+        var tickerByInstrumentId = allInstruments.ToDictionary(i => i.Id.Value, i => i.Ticker);
 
         return PortfolioMapper.ToSnapshot(domainSnapshot, allTrades, tickerByInstrumentId, goalEur, target);
     }

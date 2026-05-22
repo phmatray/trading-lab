@@ -42,10 +42,10 @@ public sealed class RecentSuggestionsSection(
         var ordered = raw.OrderBy(s => s.ForDate).ToArray();   // chronological for the JSON
 
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
-        var instrument = instruments.SingleOrDefault(i => i.Id == instrumentId);
+        var instrument = instruments.SingleOrDefault(i => i.Id == iid);
         if (instrument is null) return;
         var ticker = instrument.Ticker;
-        var currency = instrument.Currency;
+        var currency = instrument.Currency.Code;
 
         var portfolio = await portfolios.GetAsync(ct);
 

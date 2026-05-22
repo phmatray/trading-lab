@@ -2,7 +2,7 @@ using TradyStrat.Application.Fx;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 
@@ -19,25 +19,26 @@ public sealed class TickersSection(
 
     public async Task ContributeAsync(SnapshotBuilder builder, int instrumentId, DateOnly asOf, CancellationToken ct)
     {
+        var iid = new InstrumentId(instrumentId);
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
-        var primary = instruments.SingleOrDefault(i => i.Id == instrumentId)
+        var primary = instruments.SingleOrDefault(i => i.Id == iid)
             ?? throw new InvalidOperationException(
                 $"Instrument id {instrumentId} is not in the Instruments table.");
 
         var watchlist = instruments
-            .Where(i => i.Kind == InstrumentKind.Watchlist)
+            .Where(i => i.Kind == TradyStrat.Domain.InstrumentKind.Watchlist)
             .OrderBy(i => Array.IndexOf(LegacyWatchlistOrder, i.Ticker) is var idx && idx < 0
                 ? int.MaxValue : idx)
             .ThenBy(i => i.Ticker);
-        var catalog = new[] { (primary.Ticker, primary.Currency) }
-            .Concat(watchlist.Select(i => (i.Ticker, i.Currency)))
+        var catalog = new[] { (primary.Ticker, primary.Currency.Code) }
+            .Concat(watchlist.Select(i => (i.Ticker, i.Currency.Code)))
             .ToArray();
 
         foreach (var (ticker, currency) in catalog)
         {
             var reading = await indicators.ComputeFor(ticker, asOf, ct);
             decimal? eur = null;
-            if (!string.Equals(currency, "EUR", StringComparison.OrdinalIgnoreCase))
+            if (currency != "EUR")
                 eur = await fx.ToEurAsync(reading.Price, currency, asOf, ct);
 
             builder.Tickers.Add(new TickerContext(

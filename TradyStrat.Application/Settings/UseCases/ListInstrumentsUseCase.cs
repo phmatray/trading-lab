@@ -1,16 +1,14 @@
-using Ardalis.Specification;
-using TradyStrat.Domain;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Application.Settings.Specifications;
+using TradyStrat.Domain;
 
 namespace TradyStrat.Application.Settings.UseCases;
 
 public sealed class ListInstrumentsUseCase(
-    IReadRepositoryBase<Instrument> repo,
+    IInstrumentRepository repo,
     ILogger<ListInstrumentsUseCase> log)
     : UseCaseBase<Unit, IReadOnlyList<Instrument>>(log)
 {
-    protected override async Task<IReadOnlyList<Instrument>> ExecuteCore(
+    protected override Task<IReadOnlyList<Instrument>> ExecuteCore(
         Unit input, CancellationToken ct)
-        => await repo.ListAsync(new AllInstrumentsSpec(), ct);
+        => repo.ListAsync(ct);
 }

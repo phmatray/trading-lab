@@ -1,9 +1,6 @@
-using Ardalis.Specification;
-using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Settings.Config;
-using TradyStrat.Application.Settings.Specifications;
+using TradyStrat.Application.UseCases;
+using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Application.Settings.UseCases;
 
@@ -11,7 +8,7 @@ public sealed record UpdateSettingInput(string Key, string RawValue);
 
 public sealed class UpdateSettingUseCase(
     ISettingsRegistry registry,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     ISettingsService settings,
     ILogger<UpdateSettingUseCase> log)
     : UseCaseBase<UpdateSettingInput, DateTime>(log)
@@ -29,12 +26,12 @@ public sealed class UpdateSettingUseCase(
         if (input.Key == SettingsKeys.TickersFocus)
         {
             var ticker = (string)parsed;
-            var known = await instruments.AnyAsync(new InstrumentByTickerSpec(ticker), ct);
+            var known = await instruments.FindByTickerAsync(ticker, ct) is not null;
             if (!known) throw new SettingValidationException($"No instrument with ticker '{ticker}'.");
         }
 
         var raw = descriptor.Format?.Invoke(parsed) ?? input.RawValue;
         await settings.SetAsync(input.Key, raw, ct);
-        return (await settings.LastUpdatedAsync([input.Key], ct))!.Value;   // never null right after SetAsync
+        return (await settings.LastUpdatedAsync([input.Key], ct))!.Value;
     }
 }
