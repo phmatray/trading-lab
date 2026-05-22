@@ -6,6 +6,7 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Cli.Mcp.Tools;
 

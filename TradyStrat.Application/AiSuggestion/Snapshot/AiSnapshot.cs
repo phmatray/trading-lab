@@ -1,7 +1,7 @@
 using TradyStrat.Domain.Portfolio;
 using System.Text.Json.Serialization;
 using TradyStrat.Domain;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot;
 

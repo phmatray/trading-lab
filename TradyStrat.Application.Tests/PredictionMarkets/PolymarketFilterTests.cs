@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using Shouldly;
 using TradyStrat.Application.PredictionMarkets;
 using Xunit;

@@ -1,4 +1,5 @@
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion;
 

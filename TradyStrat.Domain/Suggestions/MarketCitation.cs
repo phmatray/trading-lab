@@ -1,4 +1,4 @@
-namespace TradyStrat.Application.PredictionMarkets;
+namespace TradyStrat.Domain.Suggestions;
 
 public sealed record MarketCitation(
     string Slug,                         // FK back into MarketSnapshot.Markets

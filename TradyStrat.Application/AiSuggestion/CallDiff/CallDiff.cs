@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.AiSuggestion.CallDiff;

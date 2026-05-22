@@ -1,11 +1,11 @@
-using Microsoft.Extensions.DependencyInjection;
 using Ardalis.Specification;
-using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.AiSuggestion.Specifications;
+using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.Specifications;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Backfill;
 
@@ -29,24 +29,12 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
     private readonly ILogger<SuggestionBackfillCoordinator> _log;
 
     private sealed record Resolved(
-        IReadRepositoryBase<Suggestion> Suggestions,
+        ISuggestionRepository Suggestions,
         IReadRepositoryBase<Instrument> Instruments,
         BackfillSuggestionsUseCase Backfill,
         ISettingsReader Settings,
         IDisposable? Scope);
 
-    public SuggestionBackfillCoordinator(
-        IReadRepositoryBase<Suggestion> suggestions,
-        IReadRepositoryBase<Instrument> instruments,
-        BackfillSuggestionsUseCase backfillOne,
-        ISettingsReader settings,
-        ILogger<SuggestionBackfillCoordinator> log)
-    {
-        _resolveDeps = () => new Resolved(suggestions, instruments, backfillOne, settings, null);
-        _log = log;
-    }
-
-    [ActivatorUtilitiesConstructor]
     public SuggestionBackfillCoordinator(
         IServiceScopeFactory scopeFactory,
         ILogger<SuggestionBackfillCoordinator> log)
@@ -56,7 +44,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
             var scope = scopeFactory.CreateScope();
             var sp = scope.ServiceProvider;
             return new Resolved(
-                sp.GetRequiredService<IReadRepositoryBase<Suggestion>>(),
+                sp.GetRequiredService<ISuggestionRepository>(),
                 sp.GetRequiredService<IReadRepositoryBase<Instrument>>(),
                 sp.GetRequiredService<BackfillSuggestionsUseCase>(),
                 sp.GetRequiredService<ISettingsReader>(),
@@ -90,8 +78,10 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
                     $"Focus instrument '{focusTicker}' is not registered.");
 
             var firstNeeded = fromExclusive.AddDays(1);
-            var existing = await resolved.Suggestions.ListAsync(
-                new SuggestionsInRangeSpec(firstNeeded, toInclusive, focus.Id), ct);
+            var existing = await resolved.Suggestions.ListForAsync(
+                new InstrumentId(focus.Id),
+                new DateRange(firstNeeded, toInclusive),
+                ct);
             var existingDates = existing.Select(s => s.ForDate).ToHashSet();
 
             var missing = new List<DateOnly>();

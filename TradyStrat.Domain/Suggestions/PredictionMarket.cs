@@ -1,4 +1,4 @@
-namespace TradyStrat.Application.PredictionMarkets;
+namespace TradyStrat.Domain.Suggestions;
 
 public sealed record PredictionMarket(
     string Slug,

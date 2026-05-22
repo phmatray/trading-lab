@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.PredictionMarkets;
 using System.Text.Json;
 using TradyStrat.Domain.Exceptions;

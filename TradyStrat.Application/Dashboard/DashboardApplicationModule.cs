@@ -10,8 +10,8 @@ public sealed class DashboardApplicationModule : IAppModule
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration config)
     {
+        services.AddScoped<IEntryNavigationService, EntryNavigationService>();
         services.AddScoped<LoadDashboardUseCase>();
         services.AddScoped<BuildFocusDerivedSliceUseCase>();
-        services.AddScoped<IEntryNavigationService, EntryNavigationService>();
     }
 }

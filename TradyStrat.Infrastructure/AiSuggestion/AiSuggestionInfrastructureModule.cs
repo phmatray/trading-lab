@@ -34,6 +34,7 @@ public sealed class AiSuggestionInfrastructureModule : IAppModule
                 .UseFunctionInvocation()
                 .Build());
 
+        services.AddScoped<ISuggestionRepository, EfSuggestionRepository>();
         services.AddScoped<IAiClient, SuggestionService>();
     }
 }

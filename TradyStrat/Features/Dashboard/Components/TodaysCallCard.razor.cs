@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.AiSuggestion;

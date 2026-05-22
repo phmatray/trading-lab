@@ -1,9 +1,11 @@
 using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
+using TradyStrat.Domain.Suggestions.Services;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
@@ -18,8 +20,9 @@ public sealed class ReplaySuggestionsUseCase(
     IAiClient ai,
     IReadRepositoryBase<PriceBar> bars,
     IReadRepositoryBase<Instrument> instruments,
-    IRepositoryBase<Suggestion> suggestionRepo,
+    ISuggestionRepository suggestionRepo,
     ICorrectnessRule correctness,
+    IClock clock,
     ILogger<ReplaySuggestionsUseCase> log)
     : UseCaseBase<ReplaySuggestionsInput, ReplayReport>(log)
 {
@@ -30,6 +33,7 @@ public sealed class ReplaySuggestionsUseCase(
         var instrument = await instruments.GetByIdAsync(input.InstrumentId, ct)
             ?? throw new InvalidOperationException($"Instrument id {input.InstrumentId} not found.");
         var ticker = instrument.Ticker;
+        var iid = new InstrumentId(input.InstrumentId);
 
         var rows = new List<ReplayedSuggestion>();
         var versions = new HashSet<string>(StringComparer.Ordinal);
@@ -44,7 +48,8 @@ public sealed class ReplaySuggestionsUseCase(
             try { snapshot = await snapshots.CreateAsync(input.InstrumentId, date, ct); }
             catch { continue; }   // skip dates the snapshot service can't build
 
-            var suggestion = await ai.AskAsync(snapshot, ct);
+            var response = await ai.AskAsync(snapshot, ct);
+            var suggestion = SuggestionBuilder.FromAiResponse(response, snapshot, clock.UtcNow());
 
             // Score against the next 5 stored bars.
             var window = firstBar.Take(ForwardBars + 1).ToArray();
@@ -64,7 +69,7 @@ public sealed class ReplaySuggestionsUseCase(
             rows.Add(new ReplayedSuggestion(
                 ForDate: date,
                 Action: suggestion.Action,
-                Conviction: suggestion.Conviction,
+                Conviction: suggestion.Conviction.Value,
                 FwdReturnPct: fwdReturnPct,
                 WasCorrect: wasCorrect,
                 IsForwardWindowComplete: isComplete,
@@ -72,14 +77,12 @@ public sealed class ReplaySuggestionsUseCase(
 
             if (input.Persist)
             {
-                var existing = await suggestionRepo.FirstOrDefaultAsync(
-                    new SuggestionForDateSpec(date, input.InstrumentId), ct);
+                var existing = await suggestionRepo.GetForAsync(iid, date, ct);
                 if (existing is not null && !input.Force)
                     throw new InvalidOperationException(
                         $"Suggestion already exists for instrument {input.InstrumentId} on {date}. Pass --force to replace.");
-                if (existing is not null) await suggestionRepo.DeleteAsync(existing, ct);
+                if (existing is not null) await suggestionRepo.RemoveAsync(existing, ct);
                 await suggestionRepo.AddAsync(suggestion, ct);
-                await suggestionRepo.SaveChangesAsync(ct);
             }
         }
 

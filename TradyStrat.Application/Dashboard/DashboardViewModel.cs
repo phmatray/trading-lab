@@ -1,7 +1,7 @@
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 

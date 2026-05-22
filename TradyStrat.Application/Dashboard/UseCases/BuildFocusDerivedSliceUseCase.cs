@@ -1,25 +1,20 @@
-using System.Text.Json;
-using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.CallDiff;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.Dashboard.UseCases;
 
 /// <summary>
 /// Computes the focus-only derived slice from a single suggestion:
 /// CallDiff vs the immediately prior suggestion, citation-keyed indicator
-/// histories, and the deserialized market snapshot. Designed to be called
-/// after the focus suggestion arrives (i.e. after the dashboard skeleton
-/// has already rendered).
+/// histories, and the market snapshot. Designed to be called after the focus
+/// suggestion arrives (i.e. after the dashboard skeleton has already rendered).
 /// </summary>
-public sealed partial class BuildFocusDerivedSliceUseCase(
-    IReadRepositoryBase<Suggestion> suggestionRepo,
-    IIndicatorEngine indicators,
-    ILogger<BuildFocusDerivedSliceUseCase> log)
+public sealed class BuildFocusDerivedSliceUseCase(
+    ISuggestionRepository suggestions,
+    IIndicatorEngine indicators)
 {
     private const int SparklineWindow = 30;
 
@@ -29,8 +24,7 @@ public sealed partial class BuildFocusDerivedSliceUseCase(
         CancellationToken ct)
     {
         // 1. Prior + CallDiff
-        var prior = await suggestionRepo.FirstOrDefaultAsync(
-            new PriorSuggestionSpec(targetDate, focus.InstrumentId), ct);
+        var prior = await suggestions.PriorToAsync(focus.InstrumentId, targetDate, ct);
 
         var callDiff = new CallDiffBuilder()
             .WithToday(focus)
@@ -48,24 +42,7 @@ public sealed partial class BuildFocusDerivedSliceUseCase(
             histories[key] = await indicators.HistoryFor(c.Ticker, kind.Value, SparklineWindow, targetDate, ct);
         }
 
-        // 3. Market snapshot — JSON is best-effort; malformed → Empty + log.
-        var marketSnap = MarketSnapshot.Empty;
-        if (focus.MarketSnapshotJson is { Length: > 0 } marketJson)
-        {
-            try
-            {
-                marketSnap = JsonSerializer.Deserialize<MarketSnapshot>(marketJson, JsonOpts.Strict)
-                             ?? MarketSnapshot.Empty;
-            }
-            catch (JsonException ex)
-            {
-                LogMarketSnapshotMalformed(log, ex);
-            }
-        }
-
-        return new FocusDerivedSlice(callDiff, histories, marketSnap);
+        // 3. Market snapshot — VO field on the AR, no more JSON deserialization.
+        return new FocusDerivedSlice(callDiff, histories, focus.Snapshot);
     }
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "MarketSnapshotJson malformed; rail will not render")]
-    private static partial void LogMarketSnapshotMalformed(ILogger logger, Exception ex);
 }

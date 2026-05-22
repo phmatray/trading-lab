@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text;
-using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion.CallDiff;
 
@@ -29,7 +29,7 @@ public sealed class CallDiffBuilder
             .ToList();
 
         var actionChanged   = _today.Action != _prior.Action;
-        var convictionDelta = _today.Conviction - _prior.Conviction;
+        var convictionDelta = _today.Conviction.Value - _prior.Conviction.Value;
 
         return new CallDiff(
             ActionChanged: actionChanged,
@@ -54,9 +54,9 @@ public sealed class CallDiffBuilder
             ? string.Create(ic, $"{today.Action} unchanged.")
             : string.Create(ic, $"{prior.Action} → {today.Action}."));
 
-        var dc = today.Conviction - prior.Conviction;
+        var dc = today.Conviction.Value - prior.Conviction.Value;
         if (dc != 0)
-            sb.Append(string.Create(ic, $" Conviction {today.Conviction} ({(dc > 0 ? "+" : "")}{dc})."));
+            sb.Append(string.Create(ic, $" Conviction {today.Conviction.Value} ({(dc > 0 ? "+" : "")}{dc})."));
 
         var noteworthy = new List<string>();
         foreach (var ch in changed) noteworthy.Add(string.Create(ic, $"{ch.Key} {ch.PriorValue} → {ch.NewValue}"));

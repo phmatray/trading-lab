@@ -1,16 +1,15 @@
+using System.Text.Json;
+using Microsoft.Extensions.AI;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Infrastructure.Exceptions;
-using System.Text.Json;
-using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Application.Settings.Config;
-using Microsoft.Extensions.AI;
-using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
+using TradyStrat.Infrastructure.Exceptions;
 
 namespace TradyStrat.Infrastructure.AiSuggestion;
 
 public sealed partial class SuggestionService(
-    IChatClient chat, IClock clock, ILogger<SuggestionService> log, ISettingsReader settings) : IAiClient
+    IChatClient chat, ILogger<SuggestionService> log, ISettingsReader settings) : IAiClient
 {
     private const string ToolName = "submit_suggestion";
     private const string SystemPrompt = """
@@ -26,10 +25,10 @@ public sealed partial class SuggestionService(
         Cite a market only when you actually weighted it; not every market needs a citation.
         """;
 
-    public async Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)
+    public async Task<AiResponse> AskAsync(AiSnapshot snapshot, CancellationToken ct)
     {
         var ai = await settings.AnthropicAsync(ct);
-        Suggestion? captured = null;
+        AiResponse? captured = null;
 
         var submit = AIFunctionFactory.Create(
             (SuggestionAction action, decimal? quantity_hint, decimal? max_price_hint,
@@ -51,30 +50,19 @@ public sealed partial class SuggestionService(
                     .Select(g => g.First())
                     .ToList();
 
-                var marketJson = snapshot.Markets.Count == 0
-                    ? null
-                    : JsonSerializer.Serialize(
-                        new MarketSnapshot(snapshot.Markets, cleanedMarketCitations),
-                        JsonOpts.Strict);
+                var marketSnapshot = snapshot.Markets.Count == 0
+                    ? MarketSnapshot.Empty
+                    : new MarketSnapshot(snapshot.Markets, cleanedMarketCitations);
 
-                captured = new Suggestion
-                {
-                    Id           = 0,
-                    InstrumentId = snapshot.InstrumentId,        // NEW (Phase 2)
-                    ForDate      = snapshot.Today,
-                    Action       = action,
-                    QuantityHint = quantity_hint,
-                    MaxPriceHint = max_price_hint,
-                    Conviction   = conviction,
-                    Rationale    = rationale,
-                    CitationsJson = JsonSerializer.Serialize(citationList, JsonOpts.Strict),
-                    MarketSnapshotJson = marketJson,
-                    PromptHash        = snapshot.PromptHash,
-                    EnvelopeHash      = snapshot.EnvelopeHash,
-                    PromptVersionHash = snapshot.PromptVersionHash,
-                    // ThinkingText set after the response is read; see below.
-                    CreatedAt    = clock.UtcNow(),
-                };
+                captured = new AiResponse(
+                    Action:        action,
+                    QuantityHint:  quantity_hint,
+                    MaxPriceHint:  max_price_hint,
+                    Conviction:    conviction,
+                    Rationale:     rationale,
+                    Citations:     citationList,
+                    Snapshot:      marketSnapshot,
+                    ThinkingText:  "");
                 return "ok";
             },
             name: ToolName,
@@ -87,9 +75,7 @@ public sealed partial class SuggestionService(
             // Anthropic rejects the combination ("Thinking may not be enabled
             // when tool_choice forces tool use."). The system prompt's
             // "Always invoke the submit_suggestion tool exactly once." line
-            // is the contract that compels the call. If the model ever doesn't,
-            // AskAsync throws AnthropicCallFailedException ("Model did not
-            // invoke submit_suggestion") — same as before.
+            // is the contract that compels the call.
             ToolMode        = ChatToolMode.Auto,
             ModelId         = ai.Model,
             MaxOutputTokens = ai.MaxTokens,

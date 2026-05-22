@@ -1,14 +1,16 @@
 using Ardalis.Specification;
+using TradyStrat.Application.AiSuggestion.Snapshot;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.UseCases;
-using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Application.AiSuggestion.Specifications;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
+using DomainSuggestionGate = TradyStrat.Domain.Suggestions.Services.SuggestionGate;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
 public sealed class GetTodaysSuggestionUseCase(
-    IRepositoryBase<Suggestion> repo,
+    ISuggestionRepository suggestions,
     IAiSnapshotService snapshotService,
     IAiClient ai,
     IClock clock,
@@ -24,28 +26,32 @@ public sealed class GetTodaysSuggestionUseCase(
                 $"Instrument id {input.InstrumentId} not registered.");
 
         var today = clock.TodayInExchangeTzFor(instrument.Ticker);
+        var iid = new InstrumentId(instrument.Id);
 
         // Fast path: row already there, no gate needed.
-        var existing = await repo.FirstOrDefaultAsync(
-            new SuggestionForDateSpec(today, instrument.Id), ct);
+        var existing = await suggestions.GetForAsync(iid, today, ct);
         if (existing is not null) return existing;
 
-        // Slow path: serialize concurrent writers via the shared gate, then
-        // re-check inside the gate (a peer may have inserted while we waited).
-        // The gate is process-wide; with N held instruments, GetAll's sequential
-        // loop trivially serializes anyway, so the gate's value is for
-        // inter-request races (two browser tabs, refresh during a re-run).
-        var gate = SuggestionGate.For(today, instrument.Id);
+        // Slow path: serialize concurrent writers via the shared plumbing gate,
+        // then re-check inside the gate (a peer may have inserted while we
+        // waited). The gate is process-wide; inter-request races (two browser
+        // tabs, refresh during a re-run) are its primary value.
+        var gate = SuggestionGatePlumbing.For(today, instrument.Id);
         await gate.WaitAsync(ct);
         try
         {
-            existing = await repo.FirstOrDefaultAsync(
-                new SuggestionForDateSpec(today, instrument.Id), ct);
-            if (existing is not null) return existing;
+            var snap = await snapshotService.CreateAsync(instrument.Id, today, ct);
+            var candidateFp = PromptFingerprint.Of(
+                snap.PromptHash, snap.EnvelopeHash, snap.PromptVersionHash);
 
-            var snap  = await snapshotService.CreateAsync(instrument.Id, today, ct);
-            var fresh = await ai.AskAsync(snap, ct);
-            await repo.AddAsync(fresh, ct);
+            // Re-fetch after acquiring the gate; bind to the domain decision.
+            existing = await suggestions.GetForAsync(iid, today, ct);
+            var decision = DomainSuggestionGate.Decide(existing, candidateFp);
+            if (decision is GateDecision.Reuse reuse) return reuse.Existing;
+
+            var response = await ai.AskAsync(snap, ct);
+            var fresh = SuggestionBuilder.FromAiResponse(response, snap, clock.UtcNow());
+            await suggestions.AddAsync(fresh, ct);
             return fresh;
         }
         finally

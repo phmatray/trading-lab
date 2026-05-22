@@ -234,7 +234,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                     b.ToTable("Settings", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Domain.Suggestion", b =>
+            modelBuilder.Entity("TradyStrat.Domain.Suggestions.Suggestion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -244,17 +244,15 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CitationsJson")
-                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(8000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<int>("Conviction")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EnvelopeHash")
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("ForDate")
@@ -263,30 +261,20 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                     b.Property<int>("InstrumentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MarketSnapshotJson")
-                        .HasMaxLength(8000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("MaxPriceHint")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PromptHash")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PromptVersionHash")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("QuantityHint")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Rationale")
                         .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("MarketSnapshotJson");
+
                     b.Property<string>("ThinkingText")
+                        .IsRequired()
+                        .HasMaxLength(20000)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -342,7 +330,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("LotId");
 
-                                    b2.ToTable("PositionLots", (string)null);
+                                    b2.ToTable("PositionLots");
 
                                     b2.WithOwner()
                                         .HasForeignKey("LotId");
@@ -369,7 +357,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("LotId");
 
-                                    b2.ToTable("PositionLots", (string)null);
+                                    b2.ToTable("PositionLots");
 
                                     b2.WithOwner()
                                         .HasForeignKey("LotId");
@@ -403,7 +391,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("PositionId");
 
-                            b1.ToTable("Positions", (string)null);
+                            b1.ToTable("Positions");
 
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");
@@ -442,7 +430,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("TradeId");
 
-                            b1.ToTable("Trades", (string)null);
+                            b1.ToTable("Trades");
 
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
@@ -455,7 +443,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("TradeId");
 
-                            b1.ToTable("Trades", (string)null);
+                            b1.ToTable("Trades");
 
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
@@ -481,7 +469,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("PriceTradeId");
 
-                                    b2.ToTable("Trades", (string)null);
+                                    b2.ToTable("Trades");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PriceTradeId");
@@ -506,7 +494,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("TradeId");
 
-                            b1.ToTable("Trades", (string)null);
+                            b1.ToTable("Trades");
 
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
@@ -522,12 +510,151 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TradyStrat.Domain.Suggestion", b =>
+            modelBuilder.Entity("TradyStrat.Domain.Suggestions.Suggestion", b =>
                 {
-                    b.HasOne("TradyStrat.Domain.Instrument", null)
-                        .WithMany()
-                        .HasForeignKey("InstrumentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.OwnsMany("TradyStrat.Domain.Suggestions.Citation", "Citations", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Claim")
+                                .IsRequired()
+                                .HasMaxLength(2000)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Indicator")
+                                .IsRequired()
+                                .HasMaxLength(64)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("SuggestionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Ticker")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("SuggestionId");
+
+                            b1.ToTable("Citations", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("SuggestionId");
+                        });
+
+                    b.OwnsOne("TradyStrat.Domain.Suggestions.PromptFingerprint", "Fingerprint", b1 =>
+                        {
+                            b1.Property<int>("SuggestionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("EnvelopeHash")
+                                .IsRequired()
+                                .HasMaxLength(128)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("EnvelopeHash");
+
+                            b1.Property<string>("PromptHash")
+                                .IsRequired()
+                                .HasMaxLength(128)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("PromptHash");
+
+                            b1.Property<string>("PromptVersionHash")
+                                .IsRequired()
+                                .HasMaxLength(128)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("PromptVersionHash");
+
+                            b1.HasKey("SuggestionId");
+
+                            b1.ToTable("Suggestions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SuggestionId");
+                        });
+
+                    b.OwnsOne("TradyStrat.Domain.Shared.Price", "MaxPriceHint", b1 =>
+                        {
+                            b1.Property<int>("SuggestionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("SuggestionId");
+
+                            b1.ToTable("Suggestions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SuggestionId");
+
+                            b1.OwnsOne("TradyStrat.Domain.Shared.Money", "PerUnit", b2 =>
+                                {
+                                    b2.Property<int>("PriceSuggestionId")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<decimal>("Amount")
+                                        .HasColumnType("TEXT")
+                                        .HasColumnName("MaxPriceHint");
+
+                                    b2.Property<string>("Currency")
+                                        .IsRequired()
+                                        .HasMaxLength(3)
+                                        .HasColumnType("TEXT")
+                                        .HasColumnName("MaxPriceHintCurrency");
+
+                                    b2.Property<bool>("IsEmpty")
+                                        .HasColumnType("INTEGER")
+                                        .HasColumnName("MaxPriceHintIsEmpty");
+
+                                    b2.HasKey("PriceSuggestionId");
+
+                                    b2.ToTable("Suggestions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PriceSuggestionId");
+                                });
+
+                            b1.Navigation("PerUnit")
+                                .IsRequired();
+                        });
+
+                    b.OwnsOne("TradyStrat.Domain.Shared.Quantity", "QuantityHint", b1 =>
+                        {
+                            b1.Property<int>("SuggestionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<bool>("IsSpecified")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("QuantityHintIsSpecified");
+
+                            b1.Property<decimal>("Value")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("QuantityHint");
+
+                            b1.HasKey("SuggestionId");
+
+                            b1.ToTable("Suggestions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SuggestionId");
+                        });
+
+                    b.Navigation("Citations");
+
+                    b.Navigation("Fingerprint")
+                        .IsRequired();
+
+                    b.Navigation("MaxPriceHint")
+                        .IsRequired();
+
+                    b.Navigation("QuantityHint")
                         .IsRequired();
                 });
 

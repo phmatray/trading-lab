@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using System.ComponentModel;
 using Ardalis.Specification;
 using Spectre.Console;

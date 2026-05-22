@@ -1,11 +1,6 @@
-using TradyStrat.Application.Time;
 using Ardalis.Specification;
-using TradyStrat.Domain;
-using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
-using TradyStrat.Application.UseCases;
+using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Fx.Specifications;
@@ -14,6 +9,12 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Application.Time;
+using TradyStrat.Application.UseCases;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.Dashboard.UseCases;
 
@@ -23,7 +24,7 @@ public sealed class LoadDashboardUseCase(
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
     IReadRepositoryBase<PriceBar> priceRepo,
-    IReadRepositoryBase<Suggestion> suggestionRepo,
+    ISuggestionRepository suggestionRepo,
     IReadRepositoryBase<FxRate> fxRepo,
     ListInstrumentsUseCase listInstruments,
     ISettingsReader settings,
@@ -57,8 +58,7 @@ public sealed class LoadDashboardUseCase(
             var rows = new List<Suggestion>();
             foreach (var id in heldIds)
             {
-                var row = await suggestionRepo.FirstOrDefaultAsync(
-                    new SuggestionForDateSpec(target, id), ct);
+                var row = await suggestionRepo.GetForAsync(new InstrumentId(id), target, ct);
                 if (row is not null) rows.Add(row);
                 historicalStates[id] = row is null ? null : new SuggestionState.Ready(row);
             }
@@ -137,7 +137,8 @@ public sealed class LoadDashboardUseCase(
         FocusDerivedSlice focusDerived;
         if (input.IsHistorical)
         {
-            var focusRow = historicalRows.SingleOrDefault(s => s.InstrumentId == focusInstrument.Id);
+            var focusIid = new InstrumentId(focusInstrument.Id);
+            var focusRow = historicalRows.SingleOrDefault(s => s.InstrumentId == focusIid);
             focusState = focusRow is null ? null : new SuggestionState.Ready(focusRow);
             focusDerived = focusRow is null
                 ? FocusDerivedSlice.Empty

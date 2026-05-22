@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain;
+namespace TradyStrat.Domain.Suggestions.Services;
 
 /// <summary>
 /// Acquire iff fwd_return &gt; +threshold.

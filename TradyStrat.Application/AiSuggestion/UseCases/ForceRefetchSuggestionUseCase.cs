@@ -1,14 +1,15 @@
 using Ardalis.Specification;
+using TradyStrat.Application.AiSuggestion.Snapshot;
+using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.UseCases;
-using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Application.AiSuggestion.Specifications;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
 public sealed class ForceRefetchSuggestionUseCase(
-    IRepositoryBase<Suggestion> repo,
+    ISuggestionRepository suggestions,
     IAiSnapshotService snapshotService,
     IAiClient ai,
     IClock clock,
@@ -24,23 +25,23 @@ public sealed class ForceRefetchSuggestionUseCase(
                 $"Instrument id {input.InstrumentId} not registered.");
 
         var today = clock.TodayInExchangeTzFor(instrument.Ticker);
+        var iid = new InstrumentId(instrument.Id);
 
-        // Acquire the shared gate so the delete+insert pair runs as a single
-        // critical section against any concurrent GetTodaysSuggestion or
-        // ForceRefetch — otherwise two concurrent rerun clicks both pass
-        // the existence check, then both try to INSERT and the second hits
-        // the UQ(ForDate, InstrumentId) constraint.
-        var gate = SuggestionGate.For(today, instrument.Id);
+        // The delete+insert pair must run as a single critical section against
+        // any concurrent GetTodaysSuggestion or ForceRefetch — otherwise two
+        // concurrent rerun clicks both pass the existence check, then both try
+        // to INSERT and the second hits the UQ(ForDate, InstrumentId).
+        var gate = SuggestionGatePlumbing.For(today, instrument.Id);
         await gate.WaitAsync(ct);
         try
         {
-            var existing = await repo.FirstOrDefaultAsync(
-                new SuggestionForDateSpec(today, instrument.Id), ct);
-            if (existing is not null) await repo.DeleteAsync(existing, ct);
+            var existing = await suggestions.GetForAsync(iid, today, ct);
+            if (existing is not null) await suggestions.RemoveAsync(existing, ct);
 
-            var snap  = await snapshotService.CreateAsync(instrument.Id, today, ct);
-            var fresh = await ai.AskAsync(snap, ct);
-            await repo.AddAsync(fresh, ct);
+            var snap = await snapshotService.CreateAsync(instrument.Id, today, ct);
+            var response = await ai.AskAsync(snap, ct);
+            var fresh = SuggestionBuilder.FromAiResponse(response, snap, clock.UtcNow());
+            await suggestions.AddAsync(fresh, ct);
             return fresh;
         }
         finally

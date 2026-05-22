@@ -1,4 +1,4 @@
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 using System.Globalization;
 using System.Text.Json;
 

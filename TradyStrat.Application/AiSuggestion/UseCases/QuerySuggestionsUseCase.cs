@@ -1,12 +1,11 @@
-using Ardalis.Specification;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions.Services;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
 public sealed class QuerySuggestionsUseCase(
-    IReadRepositoryBase<Suggestion> suggestions,
+    ISuggestionRepository suggestions,
     ForwardReturnCalculator forwardReturn,
     ICorrectnessRule correctness,
     ILogger<QuerySuggestionsUseCase> logger)
@@ -14,8 +13,12 @@ public sealed class QuerySuggestionsUseCase(
 {
     protected override async Task<QuerySuggestionsOutput> ExecuteCore(QuerySuggestionsInput input, CancellationToken ct)
     {
-        var rows = await suggestions.ListAsync(
-            new SuggestionsQuerySpec(input.InstrumentId, input.From, input.To, input.Action, input.Limit), ct);
+        var rows = await suggestions.QueryAsync(
+            instrumentId: new InstrumentId(input.InstrumentId),
+            range:        new DateRange(input.From, input.To),
+            action:       input.Action,
+            take:         input.Limit,
+            ct:           ct);
 
         var items = new List<QueriedSuggestion>(rows.Count);
         foreach (var s in rows)
@@ -25,10 +28,10 @@ public sealed class QuerySuggestionsUseCase(
             items.Add(new QueriedSuggestion(
                 s.ForDate,
                 s.Action,
-                s.Conviction,
+                s.Conviction.Value,
                 s.Rationale,
-                s.EnvelopeHash,
-                s.PromptVersionHash,
+                s.Fingerprint.EnvelopeHash,
+                s.Fingerprint.PromptVersionHash,
                 fwd,
                 correct));
         }

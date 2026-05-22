@@ -1,6 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion;
 
@@ -22,7 +23,7 @@ public sealed class ForwardReturnCalculator(
     /// </summary>
     public async Task<decimal?> ComputeAsync(Suggestion suggestion, CancellationToken ct)
     {
-        var instrument = await instrumentRepo.GetByIdAsync(suggestion.InstrumentId, ct);
+        var instrument = await instrumentRepo.GetByIdAsync(suggestion.InstrumentId.Value, ct);
         if (instrument is null) return null;
 
         return await ComputeAsync(instrument.Ticker, suggestion.ForDate, ct);

@@ -2,6 +2,7 @@ using Shouldly;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 using Xunit;
 
 namespace TradyStrat.Cli.Tests.Mcp.Mapping;

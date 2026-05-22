@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

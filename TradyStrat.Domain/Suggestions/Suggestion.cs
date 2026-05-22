@@ -1,37 +1,84 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions.Services;
 
-namespace TradyStrat.Domain;
+namespace TradyStrat.Domain.Suggestions;
 
-public sealed record Suggestion
+public sealed class Suggestion
 {
-    // Citations are stored snake_case (matches the AI tool-call shape), so deserializing
-    // back to PascalCase records needs the same naming policy on the way out.
-    private static readonly JsonSerializerOptions CitationOpts = new()
+    public SuggestionId      Id            { get; private set; }
+    public InstrumentId      InstrumentId  { get; private set; }
+    public DateOnly          ForDate       { get; private set; }
+    public SuggestionAction  Action        { get; private set; }
+    public Quantity          QuantityHint  { get; private set; } = Quantity.None;
+    public Price             MaxPriceHint  { get; private set; } = Price.None(Currency.Eur);
+    public Conviction        Conviction    { get; private set; } = Conviction.Of(1);
+    public string            Rationale     { get; private set; } = "";
+    public MarketSnapshot    Snapshot      { get; private set; } = MarketSnapshot.Empty;
+    public PromptFingerprint Fingerprint   { get; private set; } = PromptFingerprint.Empty;
+    public string            ThinkingText  { get; private set; } = "";
+    public DateTime          CreatedAt     { get; private set; }
+
+    private readonly List<Citation> _citations = new();
+    public IReadOnlyList<Citation> Citations => _citations;
+
+    private Suggestion() { }   // EF
+
+    private Suggestion(
+        InstrumentId instrumentId, DateOnly forDate, SuggestionAction action,
+        Quantity quantityHint, Price maxPriceHint, Conviction conviction,
+        string rationale, IReadOnlyList<Citation> citations,
+        MarketSnapshot snapshot, PromptFingerprint fingerprint, string thinkingText,
+        DateTime createdAt)
     {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-    };
+        // Id is DB-assigned via ValueGeneratedOnAdd. SuggestionId.New() returns
+        // the zero sentinel — EF rewrites it on insert.
+        Id           = SuggestionId.New();
+        InstrumentId = instrumentId;
+        ForDate      = forDate;
+        Action       = action;
+        QuantityHint = quantityHint;
+        MaxPriceHint = maxPriceHint;
+        Conviction   = conviction;
+        Rationale    = rationale;
+        Snapshot     = snapshot;
+        Fingerprint  = fingerprint;
+        ThinkingText = thinkingText;
+        CreatedAt    = createdAt;
+        _citations.AddRange(citations);
+    }
 
-    public required int Id { get; init; }
-    public required int InstrumentId { get; init; }   // NEW (Phase 2)
-    public required DateOnly ForDate { get; init; }
-    public required SuggestionAction Action { get; init; }
-    public decimal? QuantityHint { get; init; }
-    public decimal? MaxPriceHint { get; init; }
-    public required int Conviction { get; init; }
-    public required string Rationale { get; init; }
-    public required string CitationsJson { get; init; }
-    public string? MarketSnapshotJson { get; init; }
-    public required string PromptHash { get; init; }
-    public string? ThinkingText { get; init; }
-    public string? EnvelopeHash { get; init; }
-    public string? PromptVersionHash { get; init; }
-    public required DateTime CreatedAt { get; init; }
+    public static Suggestion From(
+        InstrumentId instrumentId, DateOnly forDate, SuggestionAction action,
+        Quantity quantityHint, Price maxPriceHint, Conviction conviction,
+        string rationale, IReadOnlyList<Citation> citations,
+        MarketSnapshot snapshot, PromptFingerprint fingerprint, string thinkingText,
+        DateTime createdAt)
+    {
+        if (string.IsNullOrWhiteSpace(rationale))
+            throw new ArgumentException("Rationale is required.", nameof(rationale));
 
-    public decimal? OrderValueEur =>
-        QuantityHint is { } q && MaxPriceHint is { } p ? q * p : null;
+        return new Suggestion(
+            instrumentId, forDate, action, quantityHint, maxPriceHint, conviction,
+            rationale, citations ?? [], snapshot, fingerprint, thinkingText ?? "",
+            createdAt);
+    }
 
-    public IReadOnlyList<Citation> Citations =>
-        JsonSerializer.Deserialize<List<Citation>>(CitationsJson, CitationOpts) ?? [];
+    public Money OrderValue =>
+        QuantityHint.IsSpecified && !MaxPriceHint.IsEmpty
+            ? MaxPriceHint * QuantityHint
+            : Money.None(MaxPriceHint.Currency);
+
+    public Correctness WasCorrect(IReadOnlyList<PriceBar> forwardBars, ICorrectnessRule rule)
+    {
+        if (forwardBars.Count < 2)
+            return new Correctness(false, Money.Zero(Currency.Eur));
+
+        var start = forwardBars[0].Close;
+        var end   = forwardBars[^1].Close;
+        var pctReturn = start == 0m ? 0m : (end - start) / start * 100m;
+        var isCorrect = rule.Evaluate(Action, pctReturn);
+        var deltaPerShare = end - start;
+        return new Correctness(isCorrect, Money.Of(deltaPerShare, Currency.Eur));
+    }
+
 }

@@ -1,5 +1,3 @@
-using Ardalis.Specification;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.PriceFeed.Specifications;
@@ -8,6 +6,9 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
+using TradyStrat.Domain.Suggestions.Services;
+using Ardalis.Specification;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 
@@ -18,7 +19,7 @@ namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 /// is-forward-window-complete sentinel, and optional net trade cash flow in EUR.
 /// </summary>
 public sealed class RecentSuggestionsSection(
-    IReadRepositoryBase<Suggestion> suggestionRepo,
+    ISuggestionRepository suggestions,
     IReadRepositoryBase<PriceBar> barRepo,
     IPortfolioRepository portfolios,
     ListInstrumentsUseCase listInstruments,
@@ -34,8 +35,8 @@ public sealed class RecentSuggestionsSection(
 
     public async Task ContributeAsync(SnapshotBuilder builder, int instrumentId, DateOnly asOf, CancellationToken ct)
     {
-        var raw = await suggestionRepo.ListAsync(
-            new RecentSuggestionsForInstrumentSpec(instrumentId, asOf, LookbackCount), ct);
+        var iid = new InstrumentId(instrumentId);
+        var raw = await suggestions.RecentForAsync(iid, asOf, LookbackCount, ct);
         if (raw.Count == 0) return;
 
         var ordered = raw.OrderBy(s => s.ForDate).ToArray();   // chronological for the JSON
@@ -68,7 +69,7 @@ public sealed class RecentSuggestionsSection(
             var fwdBar = window[ForwardBars];
             var wasCorrect = correctness.Evaluate(s.Action, fwdPct.Value);
             var netFlowEur = await ComputeNetFlowEurAsync(
-                portfolio, new InstrumentId(instrumentId), s.ForDate, fwdBar.Date, currency, ct);
+                portfolio, iid, s.ForDate, fwdBar.Date, currency, ct);
 
             builder.RecentSuggestions.Add(BuildRow(s, fwdPct.Value, wasCorrect,
                 isComplete: true, netFlowEur));
@@ -105,7 +106,7 @@ public sealed class RecentSuggestionsSection(
         => new(
             Date:                    s.ForDate,
             Action:                  s.Action,
-            Conviction:              s.Conviction,
+            Conviction:              s.Conviction.Value,
             FwdReturnPct:            fwdReturnPct,
             WasCorrect:              wasCorrect,
             IsForwardWindowComplete: isComplete,

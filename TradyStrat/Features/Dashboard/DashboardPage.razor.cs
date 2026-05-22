@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.PriceFeed.UseCases;
 using TradyStrat.Application.Dashboard;
 using System.Globalization;
@@ -9,7 +10,6 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
-using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Dashboard.UseCases;
@@ -27,7 +27,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     [Inject] private StreamTodaysSuggestionsUseCase StreamSuggestions { get; set; } = default!;
     [Inject] private BuildFocusDerivedSliceUseCase BuildFocusSlice { get; set; } = default!;
     [Inject] private ISuggestionBackfillCoordinator BackfillCoord { get; set; } = default!;
-    [Inject] private IReadRepositoryBase<Suggestion> SuggestionRepo { get; set; } = default!;
+    [Inject] private ISuggestionRepository SuggestionRepo { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
@@ -289,8 +289,8 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
 
         // Replicates the original LoadDashboardUseCase guard: read the prior
         // suggestion and skip when none exists or when the gap is < 1 day.
-        var prior = await SuggestionRepo.FirstOrDefaultAsync(
-            new PriorSuggestionSpec(today, focus.InstrumentId), CancellationToken.None);
+        var prior = await SuggestionRepo.PriorToAsync(
+            focus.InstrumentId, today, CancellationToken.None);
 
         if (prior is not { ForDate: var lastDate } || today.AddDays(-1) <= lastDate)
             return;

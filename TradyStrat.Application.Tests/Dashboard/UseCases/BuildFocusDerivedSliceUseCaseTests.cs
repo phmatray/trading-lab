@@ -1,13 +1,13 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Dashboard;
 using TradyStrat.Application.Dashboard.UseCases;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
+using TradyStrat.Infrastructure.AiSuggestion;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
@@ -21,13 +21,6 @@ public class BuildFocusDerivedSliceUseCaseTests
     private const int InstrId = 1;
     private const string Ticker = "TST";
 
-    // Matches Suggestion.CitationOpts so Suggestion.Citations round-trips snake_case JSON.
-    private static readonly JsonSerializerOptions CitationOpts = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-    };
-
     [Fact]
     public async Task No_prior_returns_CallDiff_None_and_populated_others()
     {
@@ -35,7 +28,7 @@ public class BuildFocusDerivedSliceUseCaseTests
         SeedInstrument(db, InstrId, Ticker);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var focus = MkSuggestion(InstrId, Today, citations: Array.Empty<Citation>(), marketJson: null);
+        var focus = MkSuggestion(InstrId, Today, SuggestionAction.Hold);
 
         var sut = BuildSut(db);
         var slice = await sut.BuildAsync(focus, Today, TestContext.Current.CancellationToken);
@@ -52,11 +45,11 @@ public class BuildFocusDerivedSliceUseCaseTests
         SeedInstrument(db, InstrId, Ticker);
 
         var yesterday = Today.AddDays(-1);
-        var priorRow = MkSuggestion(InstrId, yesterday) with { Action = SuggestionAction.Acquire };
+        var priorRow = MkSuggestion(InstrId, yesterday, SuggestionAction.Acquire);
         db.Suggestions.Add(priorRow);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var focus = MkSuggestion(InstrId, Today) with { Action = SuggestionAction.Hold };
+        var focus = MkSuggestion(InstrId, Today, SuggestionAction.Hold);
 
         var sut = BuildSut(db);
         var slice = await sut.BuildAsync(focus, Today, TestContext.Current.CancellationToken);
@@ -75,18 +68,17 @@ public class BuildFocusDerivedSliceUseCaseTests
 
         var citations = new[]
         {
-            new Citation(Claim: "x", Indicator: "RSI", Ticker: Ticker, Value: ""),
-            new Citation(Claim: "y", Indicator: "RSI", Ticker: Ticker, Value: ""),     // duplicate — dedup expected
-            new Citation(Claim: "z", Indicator: "Bollinger", Ticker: Ticker, Value: ""),
-            new Citation(Claim: "?", Indicator: "NotAnIndicator", Ticker: Ticker, Value: ""), // unparseable — skipped
+            new Citation("x", "RSI", Ticker, ""),
+            new Citation("y", "RSI", Ticker, ""),               // duplicate — dedup expected
+            new Citation("z", "Bollinger", Ticker, ""),
+            new Citation("?", "NotAnIndicator", Ticker, ""),    // unparseable — skipped
         };
-        var focus = MkSuggestion(InstrId, Today, citations: citations);
+        var focus = MkSuggestion(InstrId, Today, SuggestionAction.Hold, citations);
 
         var engine = new RecordingIndicatorEngine();
         var sut = new BuildFocusDerivedSliceUseCase(
-            new TestRepo<Suggestion>(db),
-            engine,
-            NullLogger<BuildFocusDerivedSliceUseCase>.Instance);
+            new EfSuggestionRepository(db),
+            engine);
 
         var slice = await sut.BuildAsync(focus, Today, TestContext.Current.CancellationToken);
 
@@ -94,28 +86,10 @@ public class BuildFocusDerivedSliceUseCaseTests
         slice.IndicatorHistories.Count.ShouldBe(2);
     }
 
-    [Fact]
-    public async Task Malformed_market_json_returns_Empty_and_does_not_throw()
-    {
-        await using var db = InMemoryDb.Create();
-        SeedInstrument(db, InstrId, Ticker);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var focus = MkSuggestion(InstrId, Today, marketJson: "{not valid json");
-
-        var sut = BuildSut(db);
-        var slice = await sut.BuildAsync(focus, Today, TestContext.Current.CancellationToken);
-
-        slice.MarketSnapshot.ShouldBe(MarketSnapshot.Empty);
-    }
-
-    // ---------- Helpers ----------
-
     private static BuildFocusDerivedSliceUseCase BuildSut(AppDbContext db)
         => new(
-            new TestRepo<Suggestion>(db),
-            new StubIndicatorEngine(),
-            NullLogger<BuildFocusDerivedSliceUseCase>.Instance);
+            new EfSuggestionRepository(db),
+            new StubIndicatorEngine());
 
     private static void SeedInstrument(AppDbContext db, int id, string ticker)
         => db.Instruments.Add(new Instrument
@@ -133,26 +107,21 @@ public class BuildFocusDerivedSliceUseCaseTests
     private static Suggestion MkSuggestion(
         int instrumentId,
         DateOnly forDate,
-        IReadOnlyList<Citation>? citations = null,
-        string? marketJson = null)
-    {
-        var json = citations is { Count: > 0 }
-            ? JsonSerializer.Serialize(citations, CitationOpts)
-            : "[]";
-        return new Suggestion
-        {
-            Id = 0,
-            InstrumentId = instrumentId,
-            ForDate = forDate,
-            Action = SuggestionAction.Hold,
-            Conviction = 5,
-            Rationale = "t",
-            CitationsJson = json,
-            MarketSnapshotJson = marketJson,
-            PromptHash = "h",
-            CreatedAt = DateTime.UtcNow,
-        };
-    }
+        SuggestionAction action,
+        IReadOnlyList<Citation>? citations = null)
+        => Suggestion.From(
+            instrumentId: new InstrumentId(instrumentId),
+            forDate:      forDate,
+            action:       action,
+            quantityHint: Quantity.None,
+            maxPriceHint: Price.None(Currency.Eur),
+            conviction:   Conviction.Of(5),
+            rationale:    "t",
+            citations:    citations ?? [],
+            snapshot:     MarketSnapshot.Empty,
+            fingerprint:  PromptFingerprint.Of("h", "", ""),
+            thinkingText: "",
+            createdAt:    DateTime.UtcNow);
 
     private sealed class StubIndicatorEngine : IIndicatorEngine
     {

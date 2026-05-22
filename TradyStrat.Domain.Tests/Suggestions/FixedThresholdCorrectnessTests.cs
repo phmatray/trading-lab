@@ -1,7 +1,9 @@
+using TradyStrat.Domain.Suggestions;
+using TradyStrat.Domain.Suggestions.Services;
 using Shouldly;
 using Xunit;
 
-namespace TradyStrat.Domain.Tests.Domain;
+namespace TradyStrat.Domain.Tests.Suggestions;
 
 public class FixedThresholdCorrectnessTests
 {

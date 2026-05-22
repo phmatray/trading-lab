@@ -2,7 +2,7 @@ using TradyStrat.Domain.Portfolio;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot;
