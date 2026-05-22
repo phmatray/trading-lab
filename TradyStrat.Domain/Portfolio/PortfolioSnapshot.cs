@@ -1,14 +1,16 @@
-namespace TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+
+namespace TradyStrat.Domain.Portfolio;
 
 public sealed record PortfolioSnapshot(
     IReadOnlyList<PositionRow> Positions,
-    decimal CurrentValueEur,    // sum of Positions.MarketValueEur
-    decimal CostBasisEur,       // sum of Positions.CostBasisEur
-    decimal UnrealizedPnLEur,   // CurrentValueEur - CostBasisEur
-    decimal RealizedPnLEur,     // sum of per-ticker realized
-    decimal ProgressPct,        // CurrentValueEur / GoalEur * 100
-    // Legacy scalars retained for callers (HeroCapital, PortfolioRail, GrowthChart)
-    // until the dashboard view-model rewrite (Task 14) lands. Populated only when
-    // the snapshot has exactly one position; zero otherwise.
+    Money   CurrentValueEur,
+    Money   CostBasisEur,
+    Money   UnrealizedPnLEur,
+    Money   RealizedPnLEur,
+    decimal ProgressPct,
+    // Legacy scalars retained for HeroCapital/PortfolioRail/GrowthChart consumers.
+    // Populated only when there's exactly one position. Spec §13.1 — removed when
+    // the dashboard view-model rewrite lands.
     decimal Shares,
-    decimal AvgCostEur);
+    Money   AvgCostEur);

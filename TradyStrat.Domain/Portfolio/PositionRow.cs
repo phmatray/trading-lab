@@ -1,11 +1,13 @@
-namespace TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+
+namespace TradyStrat.Domain.Portfolio;
 
 public sealed record PositionRow(
-    int InstrumentId,
-    string Ticker,
-    string Currency,
-    decimal Quantity,
-    decimal CostBasisEur,
-    decimal MarketValueEur,
-    decimal UnrealizedPnLEur,
-    decimal RealizedPnLEur);
+    InstrumentId InstrumentId,
+    string       Ticker,        // resolved by caller from IInstrumentRepository
+    string       Currency,      // resolved by caller (instrument's native currency code)
+    Quantity     Quantity,
+    Money        CostBasisEur,
+    Money        MarketValueEur,
+    Money        UnrealizedPnLEur,
+    Money        RealizedPnLEur);
