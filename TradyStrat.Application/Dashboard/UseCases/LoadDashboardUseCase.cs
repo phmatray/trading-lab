@@ -125,7 +125,7 @@ public sealed class LoadDashboardUseCase(
         if (growthSeries.Count > 0)
         {
             var pinned = growthSeries.ToList();
-            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur.Amount);
+            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur, Percentage.Empty);
             growthSeries = pinned;
         }
 

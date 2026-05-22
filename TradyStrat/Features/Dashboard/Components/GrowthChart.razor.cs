@@ -57,14 +57,14 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
         DateOnly startDate = axisStart;
         foreach (var p in Points)
         {
-            if (p.ValueEur > 0m) { startCapital = p.ValueEur; startDate = p.Date; break; }
+            if (p.Value.Amount > 0m) { startCapital = p.Value.Amount; startDate = p.Date; break; }
         }
 
         return new
         {
             id              = _id,
             dates           = Points.Select(g => g.Date.ToString("o", CultureInfo.InvariantCulture)).ToArray(),
-            capital         = Points.Select(g => (double)g.ValueEur).ToArray(),
+            capital         = Points.Select(g => (double)g.Value.Amount).ToArray(),
             position        = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
             focusTickerEur  = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
             targetEur       = (double)Goal.TargetEur,

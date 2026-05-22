@@ -177,7 +177,7 @@ public sealed class Portfolio
                 var shares = sharesByInstrument.GetValueOrDefault(iid);
                 totalValue += shares * bar.Close;
             }
-            points.Add(new GrowthPoint(date, totalValue));
+            points.Add(new GrowthPoint(date, Money.Of(totalValue, Currency.Eur), Percentage.Empty));
         }
 
         return points;
