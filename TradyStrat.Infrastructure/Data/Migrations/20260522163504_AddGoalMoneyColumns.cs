@@ -58,7 +58,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                 type: "TEXT",
                 maxLength: 3,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: "EUR");
 
             migrationBuilder.AddColumn<bool>(
                 name: "TargetIsEmpty",
@@ -66,6 +66,9 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.Sql("UPDATE Goals SET TargetCurrency = 'EUR' WHERE TargetCurrency = '' OR TargetCurrency IS NULL;");
+            migrationBuilder.Sql("UPDATE Goals SET TargetDate = '0001-01-01' WHERE TargetDate IS NULL;");
         }
 
         /// <inheritdoc />
