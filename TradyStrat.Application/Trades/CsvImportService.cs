@@ -7,7 +7,8 @@ namespace TradyStrat.Application.Trades;
 
 public sealed record CsvTradeRow(
     DateOnly ExecutedOn, TradeSide Side,
-    decimal Quantity, decimal PricePerShare, decimal FeesEur, string? Note);
+    decimal Quantity, decimal PricePerShare, decimal FeesEur, string? Note,
+    string? Ticker = null);
 
 public static class CsvImportService
 {
@@ -26,6 +27,7 @@ public static class CsvImportService
             if (i < 0) throw new CsvImportException($"Missing required column '{name}'.");
             idx[name] = i;
         }
+        var tickerCol = Array.IndexOf(headers, "ticker");
 
         var rows = new List<CsvTradeRow>();
         var line = 1;
@@ -43,7 +45,14 @@ public static class CsvImportService
                 var qty   = decimal.Parse(cells[idx["qty"]],    CultureInfo.InvariantCulture);
                 var price = decimal.Parse(cells[idx["price"]],  CultureInfo.InvariantCulture);
                 var fees  = decimal.Parse(cells[idx["fees"]],   CultureInfo.InvariantCulture);
-                rows.Add(new CsvTradeRow(date, side, qty, price, fees, Note: null));
+                string? ticker = null;
+                if (tickerCol >= 0)
+                {
+                    ticker = cells[tickerCol];
+                    if (string.IsNullOrWhiteSpace(ticker))
+                        throw new CsvImportException("ticker column is present but value is empty.", line);
+                }
+                rows.Add(new CsvTradeRow(date, side, qty, price, fees, Note: null, Ticker: ticker));
             }
             catch (Exception ex) when (ex is FormatException or IndexOutOfRangeException)
             {

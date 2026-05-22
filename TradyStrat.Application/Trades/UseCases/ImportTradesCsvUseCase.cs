@@ -20,8 +20,8 @@ public sealed class ImportTradesCsvUseCase(
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
-    // CSV import currently targets the configured focus instrument; per-row Ticker
-    // column support is a follow-up.
+    // Rows with a `ticker` column are routed to the matching instrument; rows
+    // without one fall back to the configured focus instrument (back-compat).
     protected override async Task<ImportTradesCsvResult> ExecuteCore(
         ImportTradesCsvInput input, CancellationToken ct)
     {
@@ -33,13 +33,31 @@ public sealed class ImportTradesCsvUseCase(
         var rows = CsvImportService.Parse(new StringReader(input.CsvText));
         var now  = clock.UtcNow();
 
-        var drafts = rows.Select(r => new TradeDraft(
-            focus.Id,
-            r.ExecutedOn, r.Side,
-            Quantity.Of(r.Quantity),
-            Price.Of(Money.Of(r.PricePerShare, focus.Currency)),
-            Money.Of(r.FeesEur, Currency.Eur),
-            r.Note ?? "")).ToList();
+        var drafts = new List<TradeDraft>(rows.Count);
+        var resolved = new Dictionary<string, Instrument>(StringComparer.OrdinalIgnoreCase);
+        foreach (var r in rows)
+        {
+            var instrument = focus;
+            if (r.Ticker is not null && !string.Equals(r.Ticker, focus.Ticker, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!resolved.TryGetValue(r.Ticker, out var hit))
+                {
+                    hit = await instruments.FindByTickerAsync(r.Ticker, ct)
+                        ?? throw new CsvImportException(
+                            $"Instrument '{r.Ticker}' is not registered.");
+                    resolved[r.Ticker] = hit;
+                }
+                instrument = hit;
+            }
+
+            drafts.Add(new TradeDraft(
+                instrument.Id,
+                r.ExecutedOn, r.Side,
+                Quantity.Of(r.Quantity),
+                Price.Of(Money.Of(r.PricePerShare, instrument.Currency)),
+                Money.Of(r.FeesEur, Currency.Eur),
+                r.Note ?? ""));
+        }
 
         var portfolio = await portfolios.GetAsync(ct);
         var results = portfolio.ImportTrades(drafts, now);
