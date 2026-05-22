@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Infrastructure.AiSuggestion;
 using TradyStrat.Infrastructure.Data.Conventions;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 
@@ -21,6 +22,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         // correct.
         optionsBuilder.ConfigureWarnings(w =>
             w.Ignore(RelationalEventId.PendingModelChangesWarning));
+        optionsBuilder.AddInterceptors(new CitationsJsonDualWriteInterceptor());
     }
 
     public DbSet<PortfolioAr> Portfolios   => Set<PortfolioAr>();
