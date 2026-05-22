@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Features.Dashboard.Components;

@@ -1,4 +1,6 @@
-namespace TradyStrat.Domain;
+using TradyStrat.Domain;
+
+namespace TradyStrat.Application.Indicators;
 
 public static class IndicatorKindParser
 {

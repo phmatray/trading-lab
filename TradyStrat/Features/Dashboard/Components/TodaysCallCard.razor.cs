@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.Dashboard;
 using TradyStrat.Domain;

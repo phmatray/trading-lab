@@ -1,8 +1,11 @@
-namespace TradyStrat.Domain;
+using TradyStrat.Domain;
+
+namespace TradyStrat.Application.AiSuggestion;
 
 /// <summary>Single source of truth for how a SuggestionAction is presented:
-/// the display verb ("Hold") and the lowercase CSS stem ("hold") used by
-/// [data-verb] selectors and --verb-color-* tokens.</summary>
+/// the display verb ("Hold") and the lowercase stem ("hold"). Stem values
+/// are also keyed by Web CSS ([data-verb] selectors, --verb-color-* tokens)
+/// so they must stay stable.</summary>
 public static class SuggestionActionDisplay
 {
     public static string Verb(SuggestionAction? action) => action switch
