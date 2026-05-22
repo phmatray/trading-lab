@@ -36,18 +36,6 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         IDisposable? Scope);
 
     public SuggestionBackfillCoordinator(
-        ISuggestionRepository suggestions,
-        IReadRepositoryBase<Instrument> instruments,
-        BackfillSuggestionsUseCase backfillOne,
-        ISettingsReader settings,
-        ILogger<SuggestionBackfillCoordinator> log)
-    {
-        _resolveDeps = () => new Resolved(suggestions, instruments, backfillOne, settings, null);
-        _log = log;
-    }
-
-    [ActivatorUtilitiesConstructor]
-    public SuggestionBackfillCoordinator(
         IServiceScopeFactory scopeFactory,
         ILogger<SuggestionBackfillCoordinator> log)
     {
