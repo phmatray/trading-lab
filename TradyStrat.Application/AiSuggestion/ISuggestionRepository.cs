@@ -12,7 +12,11 @@ public interface ISuggestionRepository
     Task<Suggestion?> LatestForAsync(InstrumentId instrumentId, CancellationToken ct);
 
     Task<IReadOnlyList<Suggestion>> QueryAsync(
-        DateRange? range, SuggestionAction? action, int take, CancellationToken ct);
+        InstrumentId? instrumentId,
+        DateRange? range,
+        SuggestionAction? action,
+        int take,
+        CancellationToken ct);
 
     Task<Suggestion?> PriorToAsync(InstrumentId instrumentId, DateOnly before, CancellationToken ct);
 

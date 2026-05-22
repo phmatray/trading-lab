@@ -31,9 +31,14 @@ public sealed class EfSuggestionRepository(AppDbContext db) : ISuggestionReposit
             .FirstOrDefaultAsync(ct);
 
     public async Task<IReadOnlyList<Suggestion>> QueryAsync(
-        DateRange? range, SuggestionAction? action, int take, CancellationToken ct)
+        InstrumentId? instrumentId,
+        DateRange? range,
+        SuggestionAction? action,
+        int take,
+        CancellationToken ct)
     {
         var q = WithCitations();
+        if (instrumentId is { } iid) q = q.Where(s => s.InstrumentId == iid);
         if (range is { } r) q = q.Where(s => s.ForDate >= r.From && s.ForDate <= r.To);
         if (action is { } a) q = q.Where(s => s.Action == a);
         return await q.OrderByDescending(s => s.ForDate).Take(take).ToListAsync(ct);
