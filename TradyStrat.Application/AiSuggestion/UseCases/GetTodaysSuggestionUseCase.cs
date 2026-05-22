@@ -35,7 +35,7 @@ public sealed class GetTodaysSuggestionUseCase(
         // The gate is process-wide; with N held instruments, GetAll's sequential
         // loop trivially serializes anyway, so the gate's value is for
         // inter-request races (two browser tabs, refresh during a re-run).
-        var gate = SuggestionGate.For(today, instrument.Id);
+        var gate = SuggestionGatePlumbing.For(today, instrument.Id);
         await gate.WaitAsync(ct);
         try
         {
