@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Portfolio;
 using System.Text.Json.Serialization;
 using TradyStrat.Domain;
 using TradyStrat.Application.PredictionMarkets;

@@ -3,6 +3,7 @@ using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
 
 namespace TradyStrat.Application.Dashboard;
 

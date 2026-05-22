@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Portfolio;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;

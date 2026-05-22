@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Portfolio;
 using System.Globalization;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
