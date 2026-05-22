@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using System.Collections.Concurrent;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;

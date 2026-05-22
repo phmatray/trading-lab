@@ -1,7 +1,6 @@
 using TradyStrat.Domain;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion;
 

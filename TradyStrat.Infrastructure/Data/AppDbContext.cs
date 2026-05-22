@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using TradyStrat.Domain;

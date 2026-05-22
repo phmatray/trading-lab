@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.PriceFeed.UseCases;
 using TradyStrat.Application.Dashboard;
 using System.Globalization;

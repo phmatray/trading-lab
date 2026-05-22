@@ -2,10 +2,8 @@ using TradyStrat.Domain.Suggestions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
-using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.AiSuggestion.Snapshot.Sections;
-using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.AiSuggestion;
@@ -14,8 +12,10 @@ public sealed class AiSuggestionApplicationModule : IAppModule
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration config)
     {
+        // Phase 3 work-in-progress: use case registrations + RecentSuggestionsSection +
+        // SuggestionBackfillCoordinator + ForwardReturnCalculator are .bak'd while the
+        // Suggestion AR rewrite stabilizes. Restored once Tasks 14-18 land.
         services.AddSingleton<ICorrectnessRule>(_ => new FixedThresholdCorrectness(2.0m));
-        services.AddScoped<ForwardReturnCalculator>();
         services.AddScoped<IAiSnapshotService, AiSnapshotService>();
         services.AddScoped<ISnapshotSectionProvider, GoalSection>();
         services.AddScoped<ISnapshotSectionProvider, TickersSection>();
@@ -23,17 +23,5 @@ public sealed class AiSuggestionApplicationModule : IAppModule
         services.AddScoped<ISnapshotSectionProvider, RecentTradesSection>();
         services.AddScoped<ISnapshotSectionProvider, MarketsSection>();
         services.AddScoped<ISnapshotSectionProvider, UsdPerEurSection>();
-        services.AddScoped<ISnapshotSectionProvider, RecentSuggestionsSection>();
-        services.AddScoped<GetTodaysSuggestionUseCase>();
-        services.AddScoped<GetAllTodaysSuggestionsUseCase>();
-        services.AddScoped<StreamTodaysSuggestionsUseCase>();
-        services.AddScoped<ForceRefetchSuggestionUseCase>();
-        services.AddScoped<BackfillSuggestionsUseCase>();
-        services.AddScoped<ReplaySuggestionsUseCase>();
-        services.AddScoped<QuerySuggestionsUseCase>();
-        services.AddSingleton<ISuggestionBackfillCoordinator>(sp =>
-            new SuggestionBackfillCoordinator(
-                sp.GetRequiredService<IServiceScopeFactory>(),
-                sp.GetRequiredService<ILogger<SuggestionBackfillCoordinator>>()));
     }
 }
