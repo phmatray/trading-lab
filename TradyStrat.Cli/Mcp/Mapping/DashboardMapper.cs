@@ -78,11 +78,11 @@ internal static class DashboardMapper
         return row is null
             ? new PositionBrief(0m, 0m, 0m, 0m, 0m)
             : new PositionBrief(
-                Qty: row.Quantity,
-                CostBasisEur: row.CostBasisEur,
-                MarketValueEur: row.MarketValueEur,
-                UnrealizedPnlEur: row.UnrealizedPnLEur,
-                RealizedPnlEur: row.RealizedPnLEur);
+                Qty: row.Quantity.Value,
+                CostBasisEur: row.CostBasisEur.Amount,
+                MarketValueEur: row.MarketValueEur.Amount,
+                UnrealizedPnlEur: row.UnrealizedPnLEur.Amount,
+                RealizedPnlEur: row.RealizedPnLEur.Amount);
     }
 
     private static string? Truncate(string? h)

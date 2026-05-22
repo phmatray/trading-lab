@@ -1,17 +1,19 @@
 using TradyStrat.Infrastructure.Settings.UseCases;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.Trades.Specifications;
+using TradyStrat.Domain.Portfolio;
+using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 
 namespace TradyStrat.Features.Settings;
 
 public partial class SettingsPage : ComponentBase
 {
     [Inject] private IReadRepositoryBase<GoalConfig> GoalRepo { get; set; } = default!;
-    [Inject] private IReadRepositoryBase<Trade> TradeRepo { get; set; } = default!;
+    [Inject] private IPortfolioRepository Portfolios { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private UpdateGoalUseCase UpdateGoal { get; set; } = default!;
@@ -35,7 +37,8 @@ public partial class SettingsPage : ComponentBase
             _date   = existing.TargetDate?.ToDateTime(TimeOnly.MinValue);
             _lastUpdated = existing.UpdatedAt;
         }
-        _count = await TradeRepo.CountAsync(new AllTradesSpec(), CancellationToken.None);
+        var portfolio = await Portfolios.GetAsync(CancellationToken.None);
+        _count = portfolio.Positions.Sum(p => p.Trades.Count);
     }
 
     private void OnInputChanged()

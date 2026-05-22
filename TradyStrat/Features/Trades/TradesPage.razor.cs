@@ -1,4 +1,4 @@
-using TradyStrat.Infrastructure.Trades.UseCases;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Trades.UseCases;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
@@ -7,17 +7,17 @@ using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.Trades.Specifications;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Features.Trades;
 
 public partial class TradesPage : ComponentBase
 {
-    [Inject] private IReadRepositoryBase<Trade> Repo { get; set; } = default!;
+    [Inject] private IPortfolioRepository Portfolios { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
     [Inject] private LogTradeUseCase LogTrade { get; set; } = default!;
-    [Inject] private EditTradeUseCase EditTrade { get; set; } = default!;
     [Inject] private DeleteTradeUseCase DeleteTrade { get; set; } = default!;
     [Inject] private ImportTradesCsvUseCase ImportCsv { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
@@ -25,13 +25,14 @@ public partial class TradesPage : ComponentBase
     private string _focusTicker = "";
 
     private List<Trade> _trades = new();
-    private List<(Trade Trade, decimal CumulativeEur)> _rows = new();
+    // Cumulative net cash flow per row (in EUR) for the trade ledger UI.
+    private List<(Trade Trade, decimal CumulativeEur, int InstrumentId)> _rows = new();
     private Dictionary<int, string> _instrumentTickers = new();
     private int _count;
     private bool _showAdd;
     private bool _showImport;
-    private Trade? _editing;
     private Trade? _pendingDelete;
+    private int _pendingDeleteInstrumentId;
     private string _csvText = "";
     private string? _importError;
 
@@ -43,15 +44,24 @@ public partial class TradesPage : ComponentBase
 
     private async Task Reload()
     {
-        var list = await Repo.ListAsync(new AllTradesSpec(), CancellationToken.None);
-        _trades = list.ToList();
+        var portfolio = await Portfolios.GetAsync(CancellationToken.None);
+
+        // Flatten trades across positions, retaining the originating InstrumentId.
+        var flat = portfolio.Positions
+            .SelectMany(p => p.Trades.Select(t => (Trade: t, InstrumentId: p.InstrumentId.Value)))
+            .OrderBy(x => x.Trade.ExecutedOn)
+            .ThenBy(x => x.Trade.Id.Value)
+            .ToList();
+
+        _trades = flat.Select(x => x.Trade).ToList();
         _count = _trades.Count;
 
         var running = 0m;
-        _rows = _trades.Select(t =>
+        _rows = flat.Select(x =>
         {
-            running += t.IsBuy ? t.NetEur : -t.NetEur;
-            return (t, running);
+            var net = x.Trade.Net.Amount;
+            running += x.Trade.IsBuy ? net : -net;
+            return (x.Trade, running, x.InstrumentId);
         }).ToList();
 
         var instruments = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
@@ -63,7 +73,6 @@ public partial class TradesPage : ComponentBase
 
     private void OnAddClicked()
     {
-        _editing = null;
         _showAdd = true;
     }
 
@@ -74,31 +83,16 @@ public partial class TradesPage : ComponentBase
         _showImport = true;
     }
 
-    private void StartEdit(Trade t)
-    {
-        _editing = t;
-        _showAdd = true;
-    }
-
     private async Task HandleSubmit(LogTradeInput input)
     {
-        if (_editing is null)
-        {
-            await LogTrade.ExecuteAsync(input, CancellationToken.None);
-        }
-        else
-        {
-            await EditTrade.ExecuteAsync(new EditTradeInput(
-                _editing.Id, input.InstrumentId, input.ExecutedOn, input.Side,
-                input.Quantity, input.PricePerShare, input.FeesEur, input.Note), CancellationToken.None);
-        }
+        await LogTrade.ExecuteAsync(input, CancellationToken.None);
         CloseDialogs();
         await Reload();
     }
 
     private async Task DeleteAsync(Trade t)
     {
-        await DeleteTrade.ExecuteAsync(new DeleteTradeInput(t.Id), CancellationToken.None);
+        await DeleteTrade.ExecuteAsync(new DeleteTradeInput(t.Id.Value), CancellationToken.None);
         await Reload();
     }
 
@@ -120,7 +114,6 @@ public partial class TradesPage : ComponentBase
     {
         _showAdd = false;
         _showImport = false;
-        _editing = null;
         _importError = null;
         _pendingDelete = null;
     }

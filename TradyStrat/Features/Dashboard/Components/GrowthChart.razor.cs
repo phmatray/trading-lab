@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

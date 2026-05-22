@@ -25,11 +25,11 @@
                 {
                     <tr>
                         <td>@r.Ticker</td>
-                        <td class="num">@NumberFormat.Qty(r.Quantity)</td>
-                        <td class="num">@NumberFormat.Eur(r.CostBasisEur)</td>
-                        <td class="num">@NumberFormat.Eur(r.MarketValueEur)</td>
-                        <td class="num @(r.UnrealizedPnLEur >= 0 ? "pos" : "neg")">
-                            @NumberFormat.SignedEur(r.UnrealizedPnLEur)
+                        <td class="num">@NumberFormat.Qty(r.Quantity.Value)</td>
+                        <td class="num">@NumberFormat.Eur(r.CostBasisEur.Amount)</td>
+                        <td class="num">@NumberFormat.Eur(r.MarketValueEur.Amount)</td>
+                        <td class="num @(r.UnrealizedPnLEur.Amount >= 0 ? "pos" : "neg")">
+                            @NumberFormat.SignedEur(r.UnrealizedPnLEur.Amount)
                         </td>
                     </tr>
                 }
@@ -38,8 +38,8 @@
                     <tr class="total">
                         <td>Total</td>
                         <td></td>
-                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur))</td>
-                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur))</td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur.Amount))</td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur.Amount))</td>
                         <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(TotalUnreal)</td>
                     </tr>
                 }
@@ -50,5 +50,5 @@
 
 @code {
     [Parameter] public IReadOnlyList<PositionRow> Rows { get; set; } = [];
-    private decimal TotalUnreal => Rows.Sum(r => r.UnrealizedPnLEur);
+    private decimal TotalUnreal => Rows.Sum(r => r.UnrealizedPnLEur.Amount);
 }

@@ -20,20 +20,19 @@
     <table class="t">
         <thead><tr><th>Ticker</th><th>Date</th><th>Side</th><th>Qty</th><th>Price</th><th>Fees</th><th class="num">Invested</th><th>Note</th><th></th></tr></thead>
         <tbody>
-        @foreach (var (t, cum) in _rows)
+        @foreach (var (t, cum, iid) in _rows)
         {
             <tr>
-                <td class="ticker">@TickerFor(t.InstrumentId)</td>
+                <td class="ticker">@TickerFor(iid)</td>
                 <td class="num">@t.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</td>
                 <td><span class="side @(t.Side == TradeSide.Buy ? "buy" : "sell")">@t.Side</span></td>
-                <td class="num">@NumberFormat.Qty(t.Quantity)</td>
-                <td class="num">@NumberFormat.Price(t.PricePerShare, "€")</td>
-                <td class="num">@NumberFormat.Price(t.FeesEur, "€")</td>
+                <td class="num">@NumberFormat.Qty(t.Quantity.Value)</td>
+                <td class="num">@NumberFormat.Price(t.PricePerShare.PerUnit.Amount, "€")</td>
+                <td class="num">@NumberFormat.Price(t.Fees.Amount, "€")</td>
                 <td class="num invested">@NumberFormat.Eur(cum)</td>
                 <td class="note">@t.Note</td>
                 <td class="row-actions">
-                    <button class="icon-btn" @onclick="() => StartEdit(t)" title="Edit trade" aria-label="Edit trade">✎</button>
-                    <button class="icon-btn danger" @onclick="() => _pendingDelete = t" title="Delete trade" aria-label="Delete trade">🗑</button>
+                    <button class="icon-btn danger" @onclick="() => { _pendingDelete = t; _pendingDeleteInstrumentId = iid; }" title="Delete trade" aria-label="Delete trade">🗑</button>
                 </td>
             </tr>
         }
@@ -43,8 +42,7 @@
 
 @if (_showAdd)
 {
-    <AddTradeDialog Initial="_editing"
-                    OnCancel="CloseDialogs"
+    <AddTradeDialog OnCancel="CloseDialogs"
                     OnSubmit="HandleSubmit" />
 }
 
@@ -72,7 +70,7 @@
     <div class="modal" @onclick="() => _pendingDelete = null">
         <div class="modal-body" @onclick:stopPropagation="true">
             <h3>Delete trade?</h3>
-            <p>@pd.Side @NumberFormat.Qty(pd.Quantity) @TickerFor(pd.InstrumentId) on @pd.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) — this can't be undone.</p>
+            <p>@pd.Side @NumberFormat.Qty(pd.Quantity.Value) @TickerFor(_pendingDeleteInstrumentId) on @pd.ExecutedOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) — this can't be undone.</p>
             <div class="modal-actions">
                 <button class="btn" @onclick="async () => { await DeleteAsync(pd); _pendingDelete = null; }">Delete</button>
                 <button class="btn ghost" @onclick="() => _pendingDelete = null">Cancel</button>

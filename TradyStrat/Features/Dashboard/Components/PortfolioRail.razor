@@ -7,8 +7,8 @@
     <div class="cell">
         <div class="lbl">Position</div>
         <div class="val"><span class="num">@NumberFormat.Qty(Snap.Shares)</span> sh</div>
-        <div class="sub">avg @NumberFormat.Price(Snap.AvgCostEur, "€")
-                         · P&amp;L @PnL(Snap.UnrealizedPnLEur, Snap.CurrentValueEur)</div>
+        <div class="sub">avg @NumberFormat.Price(Snap.AvgCostEur.Amount, "€")
+                         · P&amp;L @PnL(Snap.UnrealizedPnLEur.Amount, Snap.CurrentValueEur.Amount)</div>
     </div>
     @foreach (var t in Tickers)
     {

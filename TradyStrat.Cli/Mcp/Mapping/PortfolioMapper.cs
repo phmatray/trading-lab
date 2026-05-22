@@ -1,6 +1,7 @@
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Domain;
-using DomainPortfolio = TradyStrat.Domain.PortfolioSnapshot;
+using TradyStrat.Domain.Portfolio;
+using DomainPortfolio = TradyStrat.Domain.Portfolio.PortfolioSnapshot;
 
 namespace TradyStrat.Cli.Mcp.Mapping;
 
@@ -10,43 +11,43 @@ internal static class PortfolioMapper
 
     public static PortfolioSnapshotDto ToSnapshot(
         DomainPortfolio src,
-        IReadOnlyList<Trade> ledger,
+        IReadOnlyList<(Trade Trade, int InstrumentId)> ledger,
         IReadOnlyDictionary<int, string> tickerByInstrumentId,
         decimal goalEur,
         DateOnly asOf)
     {
-        var ordered = ledger.OrderByDescending(t => t.ExecutedOn).ToList();
+        var ordered = ledger.OrderByDescending(x => x.Trade.ExecutedOn).ToList();
         var truncated = ordered.Count > TradeCap;
         var trades = (truncated ? ordered.Take(TradeCap) : ordered)
-            .Select(t => new TradeRow(
-                Date: t.ExecutedOn,
-                Ticker: tickerByInstrumentId.TryGetValue(t.InstrumentId, out var tk) ? tk : "(unknown)",
-                Side: t.Side.ToString(),
-                Qty: t.Quantity,
-                PricePerShareEur: t.PricePerShare,
-                FeesEur: t.FeesEur))
+            .Select(x => new TradeRow(
+                Date: x.Trade.ExecutedOn,
+                Ticker: tickerByInstrumentId.TryGetValue(x.InstrumentId, out var tk) ? tk : "(unknown)",
+                Side: x.Trade.Side.ToString(),
+                Qty: x.Trade.Quantity.Value,
+                PricePerShareEur: x.Trade.PricePerShare.PerUnit.Amount,
+                FeesEur: x.Trade.Fees.Amount))
             .ToList();
 
         var positions = src.Positions
             .Select(p => new PositionRowDto(
                 Ticker: p.Ticker,
                 Currency: p.Currency,
-                Qty: p.Quantity,
-                CostBasisEur: p.CostBasisEur,
-                MarketValueEur: p.MarketValueEur,
-                UnrealizedPnlEur: p.UnrealizedPnLEur,
-                RealizedPnlEur: p.RealizedPnLEur))
+                Qty: p.Quantity.Value,
+                CostBasisEur: p.CostBasisEur.Amount,
+                MarketValueEur: p.MarketValueEur.Amount,
+                UnrealizedPnlEur: p.UnrealizedPnLEur.Amount,
+                RealizedPnlEur: p.RealizedPnLEur.Amount))
             .ToList();
 
         return new PortfolioSnapshotDto(
             AsOfDate: asOf,
             Aggregate: new AggregateBlock(
-                TotalValueEur: src.CurrentValueEur,
-                CostBasisEur: src.CostBasisEur,
-                UnrealizedPnlEur: src.UnrealizedPnLEur,
-                RealizedPnlEur: src.RealizedPnLEur,
+                TotalValueEur: src.CurrentValueEur.Amount,
+                CostBasisEur: src.CostBasisEur.Amount,
+                UnrealizedPnlEur: src.UnrealizedPnLEur.Amount,
+                RealizedPnlEur: src.RealizedPnLEur.Amount,
                 GoalEur: goalEur,
-                DistanceToGoalEur: goalEur - src.CurrentValueEur,
+                DistanceToGoalEur: goalEur - src.CurrentValueEur.Amount,
                 ProgressPct: src.ProgressPct),
             Positions: positions,
             Trades: trades,

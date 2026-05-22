@@ -1,6 +1,6 @@
 <div class="modal" @onclick="() => OnCancel.InvokeAsync()">
     <div class="modal-body" @onclick:stopPropagation="true">
-        <h3>@(Initial is null ? "Add trade" : "Edit trade")</h3>
+        <h3>Add trade</h3>
         @if (_heldInstruments.Count == 0)
         {
             <p class="err">No Held instruments configured. Add one in Settings → Held first.</p>

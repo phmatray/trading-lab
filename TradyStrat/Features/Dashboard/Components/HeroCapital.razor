@@ -3,7 +3,7 @@
 <div class="hero">
     <h2 class="label section-heading"><span class="section-roman">II.</span>Capital under accumulation</h2>
     <div class="amount">
-        <span class="euro">€</span><span class="num">@NumberFormat.EurBody(Snap.CurrentValueEur)</span>
+        <span class="euro">€</span><span class="num">@NumberFormat.EurBody(Snap.CurrentValueEur.Amount)</span>
         <span class="of">— of €@NumberFormat.EurBody(Goal.TargetEur) —</span>
         @if (Goal.TargetDate is { } target)
         {
@@ -62,11 +62,11 @@
             @* Unrealized PnL segment — depends on sign:
                · gain: green, extends current beyond cost
                · loss: red hashed, drawn from current back up to cost (the gap) *@
-            @if (Snap.UnrealizedPnLEur > 0m)
+            @if (Snap.UnrealizedPnLEur.Amount > 0m)
             {
                 <span class="seg gain" style="--l:@Fmt(PrincipalShownPct + RealizedPct)%;--w:@Fmt(UnrealizedAbsPct)%"></span>
             }
-            else if (Snap.UnrealizedPnLEur < 0m)
+            else if (Snap.UnrealizedPnLEur.Amount < 0m)
             {
                 <span class="seg loss" style="--l:@Fmt(PrincipalShownPct + RealizedPct)%;--w:@Fmt(UnrealizedAbsPct)%"></span>
             }
@@ -86,16 +86,16 @@
             <dt><span class="swatch principal"></span> Own capital</dt>
             <dd class="num">€@NumberFormat.EurBody(CostBasisEur)</dd>
         </div>
-        @if (Snap.RealizedPnLEur != 0m)
+        @if (Snap.RealizedPnLEur.Amount != 0m)
         {
             <div>
                 <dt><span class="swatch realized"></span> Realized</dt>
-                <dd class="num @(Snap.RealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.RealizedPnLEur)</dd>
+                <dd class="num @(Snap.RealizedPnLEur.Amount >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.RealizedPnLEur.Amount)</dd>
             </div>
         }
         <div>
-            <dt><span class="swatch @(Snap.UnrealizedPnLEur >= 0 ? "gain" : "loss")"></span> Unrealized</dt>
-            <dd class="num @(Snap.UnrealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.UnrealizedPnLEur)</dd>
+            <dt><span class="swatch @(Snap.UnrealizedPnLEur.Amount >= 0 ? "gain" : "loss")"></span> Unrealized</dt>
+            <dd class="num @(Snap.UnrealizedPnLEur.Amount >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.UnrealizedPnLEur.Amount)</dd>
         </div>
     </dl>
 </div>

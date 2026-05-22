@@ -11,7 +11,6 @@ public partial class AddTradeDialog : ComponentBase
 {
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
 
-    [Parameter] public Trade? Initial { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback<LogTradeInput> OnSubmit { get; set; }
 
@@ -30,17 +29,7 @@ public partial class AddTradeDialog : ComponentBase
         var all = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
         _heldInstruments = all.Where(i => i.Kind == InstrumentKind.Held).ToList();
 
-        if (Initial is { } t)
-        {
-            _date  = t.ExecutedOn.ToDateTime(TimeOnly.MinValue);
-            _side  = t.Side.ToString();
-            _qty   = t.Quantity;
-            _price = t.PricePerShare;
-            _fees  = t.FeesEur;
-            _note  = t.Note;
-            _instrumentId = t.InstrumentId;
-        }
-        else if (_heldInstruments.Count == 1)
+        if (_heldInstruments.Count == 1)
         {
             _instrumentId = _heldInstruments[0].Id;
         }

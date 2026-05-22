@@ -29,7 +29,7 @@ else
 {
     var vm = _vm!;
     var focusSug = _focusState is SuggestionState.Ready fr ? fr.Suggestion : null;
-    <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur"
+    <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur.Amount"
                       TargetEur="vm.Goal.TargetEur"
                       ProgressPct="vm.Portfolio.ProgressPct"
                       Action="focusSug?.Action" />
