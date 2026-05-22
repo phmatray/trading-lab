@@ -233,16 +233,16 @@ public sealed class LoadDashboardUseCase(
 
     private static IReadOnlyList<CapitalEvent> SeedCapitalEvents() =>
     [
-        new(new DateOnly(2025, 12, 7), "i",
+        new(new DateOnly(2025, 12, 7), RomanNumeralId.Of("i"),
             "Initial position.",
             "CON3.L entry — UK construction sentiment turning, AI rationale cited macro-housing tailwind."),
-        new(new DateOnly(2026, 1, 21), "ii",
+        new(new DateOnly(2026, 1, 21), RomanNumeralId.Of("ii"),
             "Doubled the position.",
             "Post-budget signal lifted the focus ticker; conviction added on confirmation, not anticipation."),
-        new(new DateOnly(2026, 3, 12), "iii",
+        new(new DateOnly(2026, 3, 12), RomanNumeralId.Of("iii"),
             "Trimmed 30%.",
             "RSI 78, parabolic; reasoning explicitly flagged overbought and recommended partial exit."),
-        new(new DateOnly(2026, 4, 24), "iv",
+        new(new DateOnly(2026, 4, 24), RomanNumeralId.Of("iv"),
             "Re-entered after correction.",
             "Position rebuilt at lower cost basis; capital +18% YTD when written."),
     ];

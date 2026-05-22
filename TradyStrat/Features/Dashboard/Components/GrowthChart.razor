@@ -69,7 +69,7 @@
             @for (var i = 0; i < Events.Count; i++)
             {
                 var idx = i;
-                <span class="event-num" id="@($"{_id}-event-num-{idx}")">@Events[idx].RomanId</span>
+                <span class="event-num" id="@($"{_id}-event-num-{idx}")">@Events[idx].RomanId.Value</span>
             }
         </div>
     </div>

@@ -80,7 +80,7 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
             events          = Events.Select(e => new
             {
                 date    = e.Date.ToString("o", CultureInfo.InvariantCulture),
-                romanId = e.RomanId,
+                romanId = e.RomanId.Value,
             }).ToArray(),
         };
     }
