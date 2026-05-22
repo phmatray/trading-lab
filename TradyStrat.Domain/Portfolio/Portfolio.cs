@@ -82,4 +82,93 @@ public sealed class Portfolio
             throw;
         }
     }
+
+    public PortfolioSnapshot Snapshot(
+        IReadOnlyDictionary<InstrumentId, Instrument> instrumentById,
+        IReadOnlyDictionary<InstrumentId, Price>      priceByInstrument,
+        Money goalTarget)
+    {
+        return BuildSnapshot(_positions, instrumentById, priceByInstrument, goalTarget);
+    }
+
+    public PortfolioSnapshot SnapshotAsOf(
+        DateOnly asOf,
+        IReadOnlyDictionary<InstrumentId, Instrument> instrumentById,
+        IReadOnlyDictionary<InstrumentId, Price>      priceByInstrument,
+        Money goalTarget)
+    {
+        // Rebuild a temporary copy with only trades up to and including asOf.
+        var tempPortfolio = Empty(Id);
+        foreach (var pos in _positions)
+        {
+            var tradesInWindow = pos.Trades
+                .Where(t => t.ExecutedOn <= asOf)
+                .OrderBy(t => t.ExecutedOn);
+            foreach (var t in tradesInWindow)
+                tempPortfolio.RecordTrade(
+                    pos.InstrumentId, t.ExecutedOn, t.Side,
+                    t.Quantity, t.PricePerShare, t.Fees, t.Note, t.CreatedAt);
+        }
+        return BuildSnapshot(tempPortfolio._positions, instrumentById, priceByInstrument, goalTarget);
+    }
+
+    private static PortfolioSnapshot BuildSnapshot(
+        List<Position> positions,
+        IReadOnlyDictionary<InstrumentId, Instrument> instrumentById,
+        IReadOnlyDictionary<InstrumentId, Price>      priceByInstrument,
+        Money goalTarget)
+    {
+        var rows = new List<PositionRow>(positions.Count);
+
+        foreach (var pos in positions)
+        {
+            var hasInst  = instrumentById.TryGetValue(pos.InstrumentId, out var inst);
+            var hasPrice = priceByInstrument.TryGetValue(pos.InstrumentId, out var price);
+
+            var ticker   = hasInst  ? inst!.Ticker   : "?";
+            var currency = hasInst  ? inst!.Currency : "?";
+
+            var qty = pos.TotalQuantity;
+            var costBasis = pos.CostBasis;
+            var marketValue = hasPrice
+                ? (price! * qty)
+                : Money.Zero(Currency.Eur);
+            var unrealised = marketValue - costBasis;
+
+            rows.Add(new PositionRow(
+                InstrumentId: pos.InstrumentId,
+                Ticker:        ticker,
+                Currency:      currency,
+                Quantity:      qty,
+                CostBasisEur:  costBasis,
+                MarketValueEur: marketValue,
+                UnrealizedPnLEur: unrealised,
+                RealizedPnLEur:   pos.RealizedPnL));
+        }
+
+        var totalValue  = rows.Aggregate(Money.Zero(Currency.Eur), (a, r) => a + r.MarketValueEur);
+        var totalCost   = rows.Aggregate(Money.Zero(Currency.Eur), (a, r) => a + r.CostBasisEur);
+        var totalUnreal = totalValue - totalCost;
+        var totalReal   = rows.Aggregate(Money.Zero(Currency.Eur), (a, r) => a + r.RealizedPnLEur);
+
+        var pct = goalTarget.Amount == 0m
+            ? 0m
+            : totalValue.Amount / goalTarget.Amount * 100m;
+
+        // Legacy single-position scalars (spec §13.1)
+        var legacyShares = rows.Count == 1 ? rows[0].Quantity.Value : 0m;
+        var legacyAvgCost = (rows.Count == 1 && legacyShares > 0m)
+            ? Money.Of(rows[0].CostBasisEur.Amount / legacyShares, Currency.Eur)
+            : Money.Zero(Currency.Eur);
+
+        return new PortfolioSnapshot(
+            Positions:        rows,
+            CurrentValueEur:  totalValue,
+            CostBasisEur:     totalCost,
+            UnrealizedPnLEur: totalUnreal,
+            RealizedPnLEur:   totalReal,
+            ProgressPct:      pct,
+            Shares:           legacyShares,
+            AvgCostEur:       legacyAvgCost);
+    }
 }
