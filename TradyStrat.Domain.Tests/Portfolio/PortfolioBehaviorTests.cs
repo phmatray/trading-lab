@@ -1,0 +1,100 @@
+using Shouldly;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
+using Xunit;
+using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
+
+namespace TradyStrat.Domain.Tests.Portfolio;
+
+public class PortfolioBehaviorTests
+{
+    private static readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+
+    [Fact]
+    public void Empty_creates_a_singleton_portfolio()
+    {
+        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        p.Id.ShouldBe(PortfolioId.Singleton);
+        p.Positions.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void RecordTrade_creates_new_position_first_time()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var result = portfolio.RecordTrade(
+            new InstrumentId(7),
+            new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
+            Money.Zero(Currency.Eur), "", _now);
+
+        result.CreatedPosition.ShouldBeTrue();
+        portfolio.Positions.Count.ShouldBe(1);
+        portfolio.Positions[0].InstrumentId.ShouldBe(new InstrumentId(7));
+    }
+
+    [Fact]
+    public void RecordTrade_reuses_existing_position()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+        var second = portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 5), TradeSide.Buy,
+            Quantity.Of(5m), Price.Of(Money.Of(6m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+
+        second.CreatedPosition.ShouldBeFalse();
+        portfolio.Positions.Count.ShouldBe(1);
+        portfolio.Positions[0].Trades.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public void DeleteTrade_replays_remaining_trades_in_that_position()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var r1 = portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+        portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 5), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(5m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+        portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 8), TradeSide.Sell,
+            Quantity.Of(5m), Price.Of(Money.Of(6m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+
+        // After delete of the first buy, replay: only [Buy@5, Sell@6] of qty 5 each.
+        // remaining lot @ 5; sell of 5 @ 6 realizes 5*(6-5)=5.
+        portfolio.DeleteTrade(r1.TradeId);
+
+        var pos = portfolio.Positions[0];
+        pos.Trades.Count.ShouldBe(2);
+        pos.TotalQuantity.ShouldBe(Quantity.Of(5m));
+        pos.RealizedPnL.ShouldBe(Money.Of(5m, Currency.Eur));
+    }
+
+    [Fact]
+    public void DeleteTrade_unknown_id_throws()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        Should.Throw<TradeValidationException>(() =>
+            portfolio.DeleteTrade(new TradeId(999)));
+    }
+
+    [Fact]
+    public void ImportTrades_atomic_rolls_back_on_failure()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var good = new TradeDraft(
+            new InstrumentId(7), new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
+            Money.Zero(Currency.Eur), "");
+        // This sell would exceed open lots — should fail mid-batch.
+        var bad = new TradeDraft(
+            new InstrumentId(7), new DateOnly(2026, 1, 2), TradeSide.Sell,
+            Quantity.Of(20m), Price.Of(Money.Of(5m, Currency.Eur)),
+            Money.Zero(Currency.Eur), "");
+
+        Should.Throw<TradeValidationException>(() =>
+            portfolio.ImportTrades([good, bad], _now));
+
+        // Atomic: nothing applied.
+        portfolio.Positions.ShouldBeEmpty();
+    }
+}
