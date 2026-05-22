@@ -1,7 +1,9 @@
 using Shouldly;
+using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Domain;
 using Xunit;
 
-namespace TradyStrat.Domain.Tests.Domain;
+namespace TradyStrat.Application.Tests.AiSuggestion;
 
 public class SuggestionActionDisplayTests
 {
