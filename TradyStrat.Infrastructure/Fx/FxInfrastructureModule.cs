@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
+using TradyStrat.Application.Fx;
 using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Infrastructure.Fx.Providers;
 
@@ -18,5 +19,6 @@ public sealed class FxInfrastructureModule : IAppModule
         }).AddStandardResilienceHandler();
 
         services.AddScoped<DailyFxCache>();
+        services.AddScoped<IFxRateReadRepository, EfFxRateReadRepository>();
     }
 }
