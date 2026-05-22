@@ -4,7 +4,7 @@ using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain;
 
 namespace TradyStrat.Application.Dashboard.UseCases;

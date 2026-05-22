@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 namespace TradyStrat.Application.PredictionMarkets;
 
 public static class PolymarketFilter

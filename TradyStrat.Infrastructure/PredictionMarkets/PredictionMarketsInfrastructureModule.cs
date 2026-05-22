@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.PredictionMarkets;
 using TradyStrat.Infrastructure.PredictionMarkets.Providers;
 

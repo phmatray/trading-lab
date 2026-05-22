@@ -2,7 +2,7 @@ using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Infrastructure.Exceptions;
 using System.Text.Json;
-using TradyStrat.Application.PredictionMarkets;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.Settings.Config;
 using Microsoft.Extensions.AI;
 using TradyStrat.Domain;

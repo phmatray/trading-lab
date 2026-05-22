@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions;
 using System.Text.RegularExpressions;
 
 namespace TradyStrat.Application.PredictionMarkets;
