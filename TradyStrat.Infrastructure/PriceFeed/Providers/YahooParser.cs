@@ -1,6 +1,7 @@
 using System.Text.Json;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Infrastructure.PriceFeed.Providers;
 
@@ -67,7 +68,7 @@ public static class YahooParser
     private static decimal AsDecimal(JsonElement e)
         => e.ValueKind == JsonValueKind.Null ? 0m : (decimal)e.GetDouble();
 
-    public static InstrumentMetadata ParseMetadata(string ticker, JsonDocument doc)
+    public static Instrument ParseMetadata(string ticker, JsonDocument doc)
     {
         try
         {
@@ -87,19 +88,28 @@ public static class YahooParser
                     ?? throw new InstrumentMetadataIncompleteException(
                            $"Yahoo response for '{ticker}' has no longName or shortName.");
 
-            var currency = ReadString(first, "currency")
+            var currencyCode = ReadString(first, "currency")
                     ?? throw new InstrumentMetadataIncompleteException(
                            $"Yahoo response for '{ticker}' has no currency.");
 
-            var exchange = ReadString(first, "fullExchangeName")
+            var exchangeCode = ReadString(first, "fullExchangeName")
                     ?? throw new InstrumentMetadataIncompleteException(
                            $"Yahoo response for '{ticker}' has no fullExchangeName.");
 
-            var tz = ReadString(first, "exchangeTimezoneName")
+            var tzId = ReadString(first, "exchangeTimezoneName")
                     ?? throw new InstrumentMetadataIncompleteException(
                            $"Yahoo response for '{ticker}' has no exchangeTimezoneName.");
 
-            return new InstrumentMetadata(ticker, name, currency, exchange, tz);
+            // Kind defaults to Held; ProbeInstrumentUseCase re-stamps from input
+            // before the use case returns. The probe itself can't know whether
+            // the user intends Held or Watchlist.
+            return Instrument.Probed(
+                ticker:     ticker,
+                name:       name,
+                currency:   Currency.Parse(currencyCode),
+                exchange:   Exchange.Of(exchangeCode),
+                timezoneId: TimezoneId.Of(tzId),
+                kind:       InstrumentKind.Held);
         }
         catch (TradyStratException) { throw; }
         catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException

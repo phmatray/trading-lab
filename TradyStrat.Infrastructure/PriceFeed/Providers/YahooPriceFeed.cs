@@ -32,8 +32,7 @@ public sealed class YahooPriceFeed(HttpClient http) : IPriceFeed
         }
     }
 
-    public async Task<InstrumentMetadata> GetInstrumentMetadataAsync(
-        string ticker, CancellationToken ct)
+    public async Task<Instrument> ProbeAsync(string ticker, CancellationToken ct)
     {
         var url = $"/v7/finance/quote?symbols={Uri.EscapeDataString(ticker)}";
 
