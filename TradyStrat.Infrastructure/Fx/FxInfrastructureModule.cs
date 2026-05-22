@@ -20,5 +20,6 @@ public sealed class FxInfrastructureModule : IAppModule
 
         services.AddScoped<DailyFxCache>();
         services.AddScoped<IFxRateReadRepository, EfFxRateReadRepository>();
+        services.AddScoped<IFxRateWriter, EfFxRateWriter>();
     }
 }

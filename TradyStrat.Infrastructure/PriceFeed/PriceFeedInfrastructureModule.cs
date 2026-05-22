@@ -22,5 +22,6 @@ public sealed class PriceFeedInfrastructureModule : IAppModule
         services.AddScoped<DailyPriceCache>();
         services.AddScoped<RefreshAllPricesUseCase>();
         services.AddScoped<IPriceBarReadRepository, EfPriceBarReadRepository>();
+        services.AddScoped<IPriceFeedWriter, EfPriceFeedWriter>();
     }
 }
