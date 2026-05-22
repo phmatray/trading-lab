@@ -53,7 +53,10 @@ public sealed class Position
         var realizedBefore = _realizedPnL;
         // Assign a sequential ID within this position so the AR can identify
         // trades for DeleteTrade. EF preserves these IDs (ValueGeneratedNever).
-        trade.AssignId(new TradeId(_trades.Count + 1));
+        // During rehydration the trade already has a stable DB-assigned ID;
+        // preserve it (EF refuses to mutate a tracked entity's primary key).
+        if (trade.Id == TradeId.New())
+            trade.AssignId(new TradeId(_trades.Count + 1));
         _trades.Add(trade);
 
         if (trade.IsBuy)
