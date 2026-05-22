@@ -342,7 +342,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("LotId");
 
-                                    b2.ToTable("PositionLots");
+                                    b2.ToTable("PositionLots", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("LotId");
@@ -369,7 +369,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("LotId");
 
-                                    b2.ToTable("PositionLots");
+                                    b2.ToTable("PositionLots", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("LotId");
@@ -403,7 +403,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("PositionId");
 
-                            b1.ToTable("Positions");
+                            b1.ToTable("Positions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");
@@ -442,28 +442,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("TradeId");
 
-                            b1.ToTable("Trades");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TradeId");
-                        });
-
-                    b.OwnsOne("TradyStrat.Domain.Shared.Quantity", "Quantity", b1 =>
-                        {
-                            b1.Property<int>("TradeId")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<bool>("IsSpecified")
-                                .HasColumnType("INTEGER")
-                                .HasColumnName("QuantityIsSpecified");
-
-                            b1.Property<decimal>("Value")
-                                .HasColumnType("TEXT")
-                                .HasColumnName("Quantity");
-
-                            b1.HasKey("TradeId");
-
-                            b1.ToTable("Trades");
+                            b1.ToTable("Trades", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
@@ -476,7 +455,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.HasKey("TradeId");
 
-                            b1.ToTable("Trades");
+                            b1.ToTable("Trades", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
@@ -502,7 +481,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                                     b2.HasKey("PriceTradeId");
 
-                                    b2.ToTable("Trades");
+                                    b2.ToTable("Trades", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PriceTradeId");
@@ -510,6 +489,27 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                             b1.Navigation("PerUnit")
                                 .IsRequired();
+                        });
+
+                    b.OwnsOne("TradyStrat.Domain.Shared.Quantity", "Quantity", b1 =>
+                        {
+                            b1.Property<int>("TradeId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<bool>("IsSpecified")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("QuantityIsSpecified");
+
+                            b1.Property<decimal>("Value")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Quantity");
+
+                            b1.HasKey("TradeId");
+
+                            b1.ToTable("Trades", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("TradeId");
                         });
 
                     b.Navigation("Fees")
