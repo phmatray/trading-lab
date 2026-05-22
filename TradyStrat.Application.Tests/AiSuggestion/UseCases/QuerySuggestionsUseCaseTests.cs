@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.AiSuggestion;

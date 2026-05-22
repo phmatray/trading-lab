@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions.Services;
 using Shouldly;
 using Xunit;
 

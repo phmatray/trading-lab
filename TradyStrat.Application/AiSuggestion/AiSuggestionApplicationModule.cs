@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;

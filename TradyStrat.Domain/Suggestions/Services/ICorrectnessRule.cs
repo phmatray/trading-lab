@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain;
+namespace TradyStrat.Domain.Suggestions.Services;
 
 /// <summary>
 /// Pure-domain predicate: was this AI suggestion borne out by subsequent market behaviour?

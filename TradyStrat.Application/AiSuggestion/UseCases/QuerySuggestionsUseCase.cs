@@ -1,3 +1,4 @@
+using TradyStrat.Domain.Suggestions.Services;
 using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.UseCases;
