@@ -14,7 +14,7 @@ public sealed class EfFxRateReadRepository(AppDbContext db) : IFxRateReadReposit
 
     public async Task<IReadOnlyList<FxRate>> ListForPairAsync(string @base, string quote, CancellationToken ct)
         => await db.FxRates
-            .Where(r => r.Base == @base && r.Quote == quote)
+            .Where(r => r.Pair.Base.Code == @base && r.Pair.Quote.Code == quote)
             .OrderByDescending(r => r.Date)
             .ToListAsync(ct);
 }

@@ -39,15 +39,13 @@ public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
                 if (close[i].ValueKind == JsonValueKind.Null) continue;
                 var date = DateOnly.FromDateTime(
                     DateTimeOffset.FromUnixTimeSeconds(ts[i].GetInt64()).UtcDateTime);
-                rates.Add(new FxRate
-                {
-                    Id = 0,
-                    Date = date,
-                    Base = @base.ToUpperInvariant(),
-                    Quote = quote.ToUpperInvariant(),
-                    Rate = (decimal)close[i].GetDouble(),
-                    FetchedAt = fetchedAt,
-                });
+                rates.Add(new FxRate(
+                    date,
+                    TradyStrat.Domain.Shared.CurrencyPair.Of(
+                        TradyStrat.Domain.Shared.Currency.Parse(@base),
+                        TradyStrat.Domain.Shared.Currency.Parse(quote)),
+                    (decimal)close[i].GetDouble(),
+                    fetchedAt));
             }
             return rates;
         }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Infrastructure.Data.Configurations;
 
@@ -11,9 +12,19 @@ public sealed class FxRateConfiguration : IEntityTypeConfiguration<FxRate>
         builder.ToTable("FxRates");
         builder.HasKey(r => r.Id);
         builder.Property(r => r.Id).ValueGeneratedOnAdd();
-        builder.Property(r => r.Base).HasMaxLength(3).IsRequired();
-        builder.Property(r => r.Quote).HasMaxLength(3).IsRequired();
+        builder.Property(r => r.Date);
         builder.Property(r => r.Rate).HasColumnType("TEXT");
-        builder.HasIndex(r => new { r.Base, r.Quote, r.Date }).IsUnique();
+        builder.Property(r => r.FetchedAt);
+
+        // CurrencyPair owned VO → existing Base/Quote string columns.
+        builder.OwnsOne(r => r.Pair, p =>
+        {
+            p.Property(x => x.Base)
+             .HasConversion(c => c.Code, s => Currency.Parse(s))
+             .HasColumnName("Base").HasMaxLength(3);
+            p.Property(x => x.Quote)
+             .HasConversion(c => c.Code, s => Currency.Parse(s))
+             .HasColumnName("Quote").HasMaxLength(3);
+        });
     }
 }
