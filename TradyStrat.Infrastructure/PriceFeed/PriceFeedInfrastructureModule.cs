@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
+using TradyStrat.Application.PriceFeed;
 using TradyStrat.Application.PriceFeed.Providers;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Infrastructure.PriceFeed.Providers;
 using TradyStrat.Infrastructure.PriceFeed.UseCases;
 
@@ -20,5 +22,7 @@ public sealed class PriceFeedInfrastructureModule : IAppModule
 
         services.AddScoped<DailyPriceCache>();
         services.AddScoped<RefreshAllPricesUseCase>();
+        services.AddScoped<IPriceBarReadRepository, EfPriceBarReadRepository>();
+        services.AddScoped<IPriceFeedWriter, EfPriceFeedWriter>();
     }
 }

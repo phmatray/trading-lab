@@ -1,4 +1,5 @@
 using TradyStrat.Application.AiSuggestion.Backfill;
+using TradyStrat.Domain.Indicators;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Domain.Suggestions;
@@ -11,7 +12,7 @@ public sealed record DashboardViewModel(
     DateOnly Today,
     int EntryNumber,
     PortfolioSnapshot Portfolio,
-    GoalConfig Goal,
+    Goal Goal,
     SuggestionState? FocusCallState,
     IReadOnlyList<TickerView> Tickers,
     IReadOnlyList<PositionRow> Positions,

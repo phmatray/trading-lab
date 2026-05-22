@@ -1,10 +1,10 @@
 using Shouldly;
-using TradyStrat.Application.Indicators.Zones;
 using TradyStrat.Application.Indicators.History;
-using TradyStrat.Application.Indicators;
-using TradyStrat.Domain;
 using TradyStrat.Application.Indicators.Rsi;
-using TradyStrat.TestKit;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
 
@@ -29,7 +29,7 @@ public class IndicatorEngineHistoryTests
 
         var factory = new IndicatorHistoryProviderFactory([new RsiHistoryProvider()]);
         var engine = new IndicatorEngine(
-            new TestRepo<PriceBar>(db),
+            new EfPriceBarReadRepository(db),
             new ZoneClassifier([]),     // empty rule set fine for this test
             factory);
 

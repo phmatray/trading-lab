@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators;
 
 namespace TradyStrat.Features.Dashboard.Components;
 

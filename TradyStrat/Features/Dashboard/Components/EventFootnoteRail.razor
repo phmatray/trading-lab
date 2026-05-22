@@ -6,7 +6,7 @@
         @foreach (var e in Events)
         {
             <div class="footnote">
-                <div class="num">@e.RomanId</div>
+                <div class="num">@e.RomanId.Value</div>
                 <div class="when">@e.Date.ToString("MMM yyyy", CultureInfo.InvariantCulture)</div>
                 <div class="body"><em>@e.Headline</em> @e.Body</div>
             </div>

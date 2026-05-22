@@ -1,14 +1,12 @@
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
-using Ardalis.Specification;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 
@@ -20,7 +18,7 @@ namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 /// </summary>
 public sealed class RecentSuggestionsSection(
     ISuggestionRepository suggestions,
-    IReadRepositoryBase<PriceBar> barRepo,
+    IPriceBarReadRepository barRepo,
     IPortfolioRepository portfolios,
     ListInstrumentsUseCase listInstruments,
     FxConverter fx,
@@ -51,8 +49,7 @@ public sealed class RecentSuggestionsSection(
 
         foreach (var s in ordered)
         {
-            var bars = await barRepo.ListAsync(
-                new PriceBarsSinceSpec(ticker, s.ForDate), ct);
+            var bars = await barRepo.ListSinceAsync(ticker, s.ForDate, ct);
 
             if (bars.Count < 1) continue;
 

@@ -1,18 +1,17 @@
-using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Fx;
-using TradyStrat.Application.Fx.Specifications;
-using TradyStrat.Application.Indicators;
+using TradyStrat.Application.Goals;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 
@@ -22,10 +21,10 @@ public sealed class LoadDashboardUseCase(
     IIndicatorEngine indicators,
     IPortfolioRepository portfolios,
     FxConverter fx,
-    IReadRepositoryBase<GoalConfig> goalRepo,
-    IReadRepositoryBase<PriceBar> priceRepo,
+    IGoalRepository goalRepo,
+    IPriceBarReadRepository priceRepo,
     ISuggestionRepository suggestionRepo,
-    IReadRepositoryBase<FxRate> fxRepo,
+    IFxRateReadRepository fxRepo,
     ListInstrumentsUseCase listInstruments,
     ISettingsReader settings,
     BuildFocusDerivedSliceUseCase buildFocusSlice,
@@ -39,7 +38,7 @@ public sealed class LoadDashboardUseCase(
     protected override async Task<DashboardViewModel> ExecuteCore(LoadDashboardInput input, CancellationToken ct)
     {
         var target = input.TargetDate;
-        var goal   = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(DateTime.UtcNow);
+        var goal   = await goalRepo.GetAsync(ct);
 
         var focusTicker = await settings.FocusTickerAsync(ct);
 
@@ -110,10 +109,10 @@ public sealed class LoadDashboardUseCase(
         var portfolio = await portfolios.GetAsync(ct);
         var snap = portfolio.SnapshotAsOf(
             target, instrumentById, priceMap,
-            Money.Of(goal.TargetEur, Currency.Eur));
+            goal.Target);
 
         // GrowthSeries: build per-instrument bar dictionary for the focus instrument.
-        var focusBars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(focusTicker, target), ct);
+        var focusBars = await priceRepo.ListAsOfAsync(focusTicker, target, ct);
         var focusId   = ordered.SingleOrDefault(i => i.Ticker == focusTicker);
         var barsByInstrument = focusId is null
             ? new Dictionary<InstrumentId, IReadOnlyList<PriceBar>>()
@@ -125,7 +124,7 @@ public sealed class LoadDashboardUseCase(
         if (growthSeries.Count > 0)
         {
             var pinned = growthSeries.ToList();
-            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur.Amount);
+            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur, Percentage.Empty);
             growthSeries = pinned;
         }
 
@@ -157,7 +156,7 @@ public sealed class LoadDashboardUseCase(
         var entryNum  = asOfTrades.Count;
         var firstTrade = asOfTrades.OrderBy(t => t.ExecutedOn).FirstOrDefault();
 
-        var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(focusTicker), ct);
+        var latestBar = await priceRepo.LatestAsync(focusTicker, ct);
 
         var goalPace = GoalPaceCalculator.Compute(
             currentValueEur: snap.CurrentValueEur.Amount,
@@ -166,7 +165,7 @@ public sealed class LoadDashboardUseCase(
             firstTradeDate: firstTrade?.ExecutedOn);
 
         var nowUtc = DateTime.UtcNow;
-        var fxLatest = await fxRepo.FirstOrDefaultAsync(new LatestFxRateSpec("EUR", "USD", target), ct);
+        var fxLatest = await fxRepo.LatestAsync("EUR", "USD", target, ct);
         var priceAsOf = latestBar is { } lb
             ? RelativeTimeFormatter.Format(lb.Date.ToDateTime(TimeOnly.MinValue), nowUtc)
             : "";
@@ -212,7 +211,7 @@ public sealed class LoadDashboardUseCase(
 
     private async Task<decimal?> ComputeDeltaPctAsync(string ticker, DateOnly asOf, CancellationToken ct)
     {
-        var bars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(ticker, asOf), ct);
+        var bars = await priceRepo.ListAsOfAsync(ticker, asOf, ct);
         if (bars.Count < 2) return null;
         var prev = bars[^2].Close;
         var curr = bars[^1].Close;
@@ -222,7 +221,7 @@ public sealed class LoadDashboardUseCase(
 
     private async Task<IReadOnlyList<decimal>> ComputeSparkAsync(string ticker, DateOnly asOf, CancellationToken ct)
     {
-        var bars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(ticker, asOf), ct);
+        var bars = await priceRepo.ListAsOfAsync(ticker, asOf, ct);
         if (bars.Count == 0) return [];
         var window = Math.Min(bars.Count, SparklineWindow);
         var slice = new decimal[window];
@@ -233,16 +232,16 @@ public sealed class LoadDashboardUseCase(
 
     private static IReadOnlyList<CapitalEvent> SeedCapitalEvents() =>
     [
-        new(new DateOnly(2025, 12, 7), "i",
+        new(new DateOnly(2025, 12, 7), RomanNumeralId.Of("i"),
             "Initial position.",
             "CON3.L entry — UK construction sentiment turning, AI rationale cited macro-housing tailwind."),
-        new(new DateOnly(2026, 1, 21), "ii",
+        new(new DateOnly(2026, 1, 21), RomanNumeralId.Of("ii"),
             "Doubled the position.",
             "Post-budget signal lifted the focus ticker; conviction added on confirmation, not anticipation."),
-        new(new DateOnly(2026, 3, 12), "iii",
+        new(new DateOnly(2026, 3, 12), RomanNumeralId.Of("iii"),
             "Trimmed 30%.",
             "RSI 78, parabolic; reasoning explicitly flagged overbought and recommended partial exit."),
-        new(new DateOnly(2026, 4, 24), "iv",
+        new(new DateOnly(2026, 4, 24), RomanNumeralId.Of("iv"),
             "Re-entered after correction.",
             "Position rebuilt at lower cost basis; capital +18% YTD when written."),
     ];

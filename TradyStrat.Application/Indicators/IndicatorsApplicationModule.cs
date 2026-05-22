@@ -2,11 +2,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
 using TradyStrat.Application.Indicators.Bollinger;
-using TradyStrat.Application.Indicators.History;
 using TradyStrat.Application.Indicators.Ichimoku;
 using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
-using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Application.Indicators.History;
+using TradyStrat.Domain.Indicators.Services;
 
 namespace TradyStrat.Application.Indicators;
 

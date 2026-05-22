@@ -35,19 +35,23 @@ internal static class DashboardMapper
                 Sma: zone,
                 Ichimoku: zone));
 
+        // Map non-null domain VOs back to the nullable wire DTOs.
+        // IsEmpty / 0m sentinel → null in the MCP payload.
         var indicators = new IndicatorsBlock(
             Bollinger: new BollingerBlock(
-                Upper: reading.Bollinger?.Upper,
-                Mid: reading.Bollinger?.Middle,
-                Lower: reading.Bollinger?.Lower),
-            Rsi: new RsiBlock(Value: reading.Rsi),
-            Sma: new SmaBlock(Sma50: reading.Sma50, Sma200: reading.Sma200),
+                Upper: reading.Bollinger.IsEmpty ? null : reading.Bollinger.Upper,
+                Mid:   reading.Bollinger.IsEmpty ? null : reading.Bollinger.Middle,
+                Lower: reading.Bollinger.IsEmpty ? null : reading.Bollinger.Lower),
+            Rsi: new RsiBlock(Value: reading.Rsi.IsEmpty ? null : reading.Rsi.Value),
+            Sma: new SmaBlock(
+                Sma50:  reading.Sma50  == 0m ? null : reading.Sma50,
+                Sma200: reading.Sma200 == 0m ? null : reading.Sma200),
             Ichimoku: new IchimokuBlock(
-                Tenkan: reading.Ichimoku?.Tenkan,
-                Kijun: reading.Ichimoku?.Kijun,
-                SenkouA: reading.Ichimoku?.SenkouA,
-                SenkouB: reading.Ichimoku?.SenkouB,
-                Chikou: reading.Ichimoku?.Chikou));
+                Tenkan:  reading.Ichimoku.IsEmpty ? null : reading.Ichimoku.Tenkan,
+                Kijun:   reading.Ichimoku.IsEmpty ? null : reading.Ichimoku.Kijun,
+                SenkouA: reading.Ichimoku.IsEmpty ? null : reading.Ichimoku.SenkouA,
+                SenkouB: reading.Ichimoku.IsEmpty ? null : reading.Ichimoku.SenkouB,
+                Chikou:  reading.Ichimoku.IsEmpty ? null : reading.Ichimoku.Chikou));
 
         // Surface a suggestion only when the focus is in the Ready state. Pending
         // and Failed states do not have an underlying Suggestion row to map.

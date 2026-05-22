@@ -1,6 +1,6 @@
 using TradyStrat.Infrastructure.Settings.UseCases;
-using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
+using TradyStrat.Application.Goals;
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain;
@@ -12,7 +12,7 @@ namespace TradyStrat.Features.Settings;
 
 public partial class SettingsPage : ComponentBase
 {
-    [Inject] private IReadRepositoryBase<GoalConfig> GoalRepo { get; set; } = default!;
+    [Inject] private IGoalRepository GoalRepo { get; set; } = default!;
     [Inject] private IPortfolioRepository Portfolios { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private ISettingsReader Settings { get; set; } = default!;
@@ -30,13 +30,10 @@ public partial class SettingsPage : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         _focusTicker = await Settings.FocusTickerAsync(CancellationToken.None);
-        var existing = await GoalRepo.GetByIdAsync(1, CancellationToken.None);
-        if (existing is not null)
-        {
-            _target = existing.TargetEur;
-            _date   = existing.TargetDate?.ToDateTime(TimeOnly.MinValue);
-            _lastUpdated = existing.UpdatedAt;
-        }
+        var existing = await GoalRepo.GetAsync(CancellationToken.None);
+        _target = existing.Target.Amount;
+        _date   = existing.HasDeadline ? existing.TargetDate.ToDateTime(TimeOnly.MinValue) : null;
+        _lastUpdated = existing.UpdatedAt;
         var portfolio = await Portfolios.GetAsync(CancellationToken.None);
         _count = portfolio.Positions.Sum(p => p.Trades.Count);
     }

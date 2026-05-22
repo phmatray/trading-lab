@@ -8,6 +8,7 @@ using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
 using TradyStrat.Infrastructure.AiSuggestion;
 using TradyStrat.Infrastructure.Data;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
@@ -93,7 +94,7 @@ public class QuerySuggestionsUseCaseTests
 
     private static QuerySuggestionsUseCase BuildUseCase(AppDbContext db)
     {
-        var fwdCalculator = new ForwardReturnCalculator(new TestRepo<PriceBar>(db), new EfInstrumentRepository(db));
+        var fwdCalculator = new ForwardReturnCalculator(new EfPriceBarReadRepository(db), new EfInstrumentRepository(db));
         var correctness   = new FixedThresholdCorrectness(2.0m);
         return new QuerySuggestionsUseCase(
             new EfSuggestionRepository(db),

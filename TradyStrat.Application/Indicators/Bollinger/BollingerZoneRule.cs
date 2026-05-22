@@ -1,5 +1,5 @@
 using TradyStrat.Domain;
-using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Domain.Indicators.Services;
 
 namespace TradyStrat.Application.Indicators.Bollinger;
 
@@ -7,13 +7,14 @@ public sealed class BollingerZoneRule : IZoneRule
 {
     public string Name => "Bollinger";
 
-    public ZoneVote? Apply(decimal price, IndicatorBundle r) => r.Bollinger switch
+    public ZoneVote? Apply(decimal price, IndicatorBundle r)
     {
-        null => null,
-        var bb when price < bb.Lower => new(Zone.Accumulate,
-            $"Price {price:F2} below lower Bollinger ({bb.Lower:F2})"),
-        var bb when price > bb.Upper => new(Zone.Distribute,
-            $"Price above upper Bollinger ({bb.Upper:F2})"),
-        _ => new(Zone.Hold, "Inside Bollinger band"),
-    };
+        if (r.Bollinger.IsEmpty) return null;
+        var bb = r.Bollinger;
+        if (price < bb.Lower)
+            return new(Zone.Accumulate, $"Price {price:F2} below lower Bollinger ({bb.Lower:F2})");
+        if (price > bb.Upper)
+            return new(Zone.Distribute, $"Price above upper Bollinger ({bb.Upper:F2})");
+        return new(Zone.Hold, "Inside Bollinger band");
+    }
 }

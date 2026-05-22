@@ -4,6 +4,8 @@ using TradyStrat.Application.AiSuggestion.CallDiff;
 using TradyStrat.Application.Dashboard;
 using TradyStrat.Application.Dashboard.UseCases;
 using TradyStrat.Application.Indicators;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;

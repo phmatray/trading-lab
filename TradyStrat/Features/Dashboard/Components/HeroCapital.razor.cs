@@ -10,7 +10,7 @@ namespace TradyStrat.Features.Dashboard.Components;
 public partial class HeroCapital : ComponentBase
 {
     [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
-    [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
+    [Parameter, EditorRequired] public Goal Goal { get; set; } = null!;
     [Parameter, EditorRequired] public DateOnly Today { get; set; }
     [Parameter, EditorRequired] public GoalPaceVm GoalPace { get; set; } = null!;
 
@@ -20,7 +20,7 @@ public partial class HeroCapital : ComponentBase
 
     // Cost basis of currently-held lots = principal still in market.
     private decimal CostBasisEur => Snap.Shares * Snap.AvgCostEur.Amount;
-    private decimal Goal100 => Goal.TargetEur <= 0m ? 1m : Goal.TargetEur;
+    private decimal Goal100 => Goal.Target.Amount <= 0m ? 1m : Goal.Target.Amount;
 
     // All percentages are vs. goal so the bar adds up to ProgressPct.
     private decimal CostBasisPct  => Clamp01(CostBasisEur / Goal100 * 100m);

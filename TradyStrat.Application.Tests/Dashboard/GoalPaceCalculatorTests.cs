@@ -1,19 +1,38 @@
-using TradyStrat.Application.Dashboard;
 using Shouldly;
+using TradyStrat.Application.Dashboard;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Dashboard;
 
 public class GoalPaceCalculatorTests
 {
-    private static GoalConfig Goal(decimal target = 500_000m, DateOnly? targetDate = null) => new()
+    private sealed class StubClock(DateTime now) : IClock
     {
-        Id = 1,
-        TargetEur = target,
-        TargetDate = targetDate ?? new DateOnly(2027, 6, 30),
-        UpdatedAt = DateTime.UtcNow,
-    };
+        public DateTime UtcNow() => now;
+        public DateOnly TodayLocal() => DateOnly.FromDateTime(now);
+        public DateOnly TodayInExchangeTzFor(string ticker) => DateOnly.FromDateTime(now);
+    }
+
+    private static Goal Goal(decimal target = 500_000m, DateOnly? targetDate = null)
+    {
+        var deadline = targetDate ?? new DateOnly(2027, 6, 30);
+        // Use a far-past clock so the deadline-must-be-future check passes.
+        var clock = new StubClock(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var goal = global::TradyStrat.Domain.Goal.Initial(clock);
+        goal.RetargetAmount(Money.Of(target, Currency.Eur), clock);
+        goal.RescheduleDeadline(deadline, clock);
+        return goal;
+    }
+
+    private static Goal GoalWithoutDeadline(decimal target = 500_000m)
+    {
+        var clock = new StubClock(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var goal = global::TradyStrat.Domain.Goal.Initial(clock);
+        goal.RetargetAmount(Money.Of(target, Currency.Eur), clock);
+        return goal;
+    }
 
     [Fact]
     public void NotStarted_when_firstTradeDate_null()
@@ -31,12 +50,7 @@ public class GoalPaceCalculatorTests
     [Fact]
     public void NotStarted_when_no_target_date()
     {
-        var goalNoDate = new GoalConfig
-        {
-            Id = 1, TargetEur = 500_000m, TargetDate = null,
-            UpdatedAt = DateTime.UtcNow,
-        };
-        var vm = GoalPaceCalculator.Compute(30_000m, goalNoDate,
+        var vm = GoalPaceCalculator.Compute(30_000m, GoalWithoutDeadline(),
             new DateOnly(2026, 5, 7), new DateOnly(2026, 1, 1));
         vm.Mode.ShouldBe(GoalPaceMode.NotStarted);
     }
@@ -62,10 +76,6 @@ public class GoalPaceCalculatorTests
     [Fact]
     public void Active_computes_vsPlan_negative_when_behind()
     {
-        // first trade 2026-01-01, target 2027-06-30 → ~547 day plan.
-        // today 2026-05-07 → ~127 days elapsed.
-        // linear baseline = 500000 * (127 / 547) ≈ 116,000.
-        // current 30,000 → vsPlan ≈ -86,000.
         var vm = GoalPaceCalculator.Compute(
             currentValueEur: 30_000m,
             goal: Goal(target: 500_000m, targetDate: new DateOnly(2027, 6, 30)),

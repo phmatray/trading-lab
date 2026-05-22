@@ -44,10 +44,10 @@ public class PortfolioGrowthSeriesTests
 
         series.Count.ShouldBe(3);
         series[0].Date.ShouldBe(new DateOnly(2026, 1, 1)); // synthetic
-        series[0].ValueEur.ShouldBe(0m);
+        series[0].Value.Amount.ShouldBe(0m);
         series[1].Date.ShouldBe(new DateOnly(2026, 1, 2));
-        series[1].ValueEur.ShouldBe(50m);   // 10 shares × 5
+        series[1].Value.Amount.ShouldBe(50m);   // 10 shares × 5
         series[2].Date.ShouldBe(new DateOnly(2026, 1, 3));
-        series[2].ValueEur.ShouldBe(60m);   // 10 shares × 6
+        series[2].Value.Amount.ShouldBe(60m);   // 10 shares × 6
     }
 }

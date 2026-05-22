@@ -1,8 +1,7 @@
-using Ardalis.Specification;
-using TradyStrat.Application.Indicators;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Domain.PriceFeed;
 
 namespace TradyStrat.Application.PriceFeed.UseCases;
 
@@ -21,7 +20,7 @@ namespace TradyStrat.Application.PriceFeed.UseCases;
 /// provider; it is omitted from <see cref="IndicatorArrays"/>.
 /// </summary>
 public sealed class GetPriceSeriesUseCase(
-    IReadRepositoryBase<PriceBar> bars,
+    IPriceBarReadRepository bars,
     IIndicatorEngine indicators,
     ILogger<GetPriceSeriesUseCase> logger)
     : UseCaseBase<GetPriceSeriesInput, GetPriceSeriesOutput>(logger)
@@ -29,8 +28,7 @@ public sealed class GetPriceSeriesUseCase(
     protected override async Task<GetPriceSeriesOutput> ExecuteCore(
         GetPriceSeriesInput input, CancellationToken ct)
     {
-        var range = await bars.ListAsync(
-            new PriceBarsInRangeSpec(input.Ticker, input.From, input.To), ct);
+        var range = await bars.ListInRangeAsync(input.Ticker, input.From, input.To, ct);
 
         if (!input.WithIndicators || range.Count == 0)
             return new GetPriceSeriesOutput(range, Indicators: null);
@@ -38,8 +36,7 @@ public sealed class GetPriceSeriesUseCase(
         // Determine how many total bars exist for this ticker up to input.To.
         // We need at least this many values from HistoryFor so that the last
         // range.Count values align with our range bars.
-        var totalBars = await bars.ListAsync(
-            new PriceBarsAsOfSpec(input.Ticker, input.To), ct);
+        var totalBars = await bars.ListAsOfAsync(input.Ticker, input.To, ct);
         var totalN = totalBars.Count;
 
         var rsi         = await AlignedAsync(input.Ticker, IndicatorKind.Rsi,      totalN, input.To, range.Count, ct);

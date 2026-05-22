@@ -23,20 +23,10 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Base")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("TEXT");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("FetchedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Quote")
-                        .IsRequired()
-                        .HasMaxLength(3)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Rate")
@@ -44,22 +34,17 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Base", "Quote", "Date")
-                        .IsUnique();
-
                     b.ToTable("FxRates", (string)null);
                 });
 
-            modelBuilder.Entity("TradyStrat.Domain.GoalConfig", b =>
+            modelBuilder.Entity("TradyStrat.Domain.Goal", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly?>("TargetDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TargetEur")
-                        .HasColumnType("TEXT");
+                    b.Property<DateOnly>("TargetDate")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("TargetDate");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -101,10 +86,11 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TimezoneId")
+                    b.Property<string>("Timezone")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("TimezoneId");
 
                     b.HasKey("Id");
 
@@ -285,6 +271,70 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Suggestions", (string)null);
+                });
+
+            modelBuilder.Entity("TradyStrat.Domain.FxRate", b =>
+                {
+                    b.OwnsOne("TradyStrat.Domain.Shared.CurrencyPair", "Pair", b1 =>
+                        {
+                            b1.Property<int>("FxRateId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Base")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Base");
+
+                            b1.Property<string>("Quote")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Quote");
+
+                            b1.HasKey("FxRateId");
+
+                            b1.ToTable("FxRates");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FxRateId");
+                        });
+
+                    b.Navigation("Pair")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TradyStrat.Domain.Goal", b =>
+                {
+                    b.OwnsOne("TradyStrat.Domain.Shared.Money", "Target", b1 =>
+                        {
+                            b1.Property<int>("GoalId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("TargetEur");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("TEXT")
+                                .HasColumnName("TargetCurrency");
+
+                            b1.Property<bool>("IsEmpty")
+                                .HasColumnType("INTEGER")
+                                .HasColumnName("TargetIsEmpty");
+
+                            b1.HasKey("GoalId");
+
+                            b1.ToTable("Goals");
+
+                            b1.WithOwner()
+                                .HasForeignKey("GoalId");
+                        });
+
+                    b.Navigation("Target")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TradyStrat.Domain.Portfolio.Position", b =>

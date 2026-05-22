@@ -1,11 +1,22 @@
+using TradyStrat.Domain.Shared;
+
 namespace TradyStrat.Domain;
 
-public sealed record FxRate
+public sealed class FxRate
 {
-    public required int Id { get; init; }
-    public required DateOnly Date { get; init; }
-    public required string Base { get; init; }     // ISO 4217, e.g. "EUR"
-    public required string Quote { get; init; }    // ISO 4217, e.g. "USD"
-    public required decimal Rate { get; init; }    // Quote per 1 Base
-    public required DateTime FetchedAt { get; init; }
+    public int           Id        { get; private set; }
+    public DateOnly      Date      { get; private set; }
+    public CurrencyPair  Pair      { get; private set; } = CurrencyPair.Of(Currency.Eur, Currency.Usd);
+    public decimal       Rate      { get; private set; }    // Quote per 1 Base
+    public DateTime      FetchedAt { get; private set; }
+
+    private FxRate() { }   // EF
+
+    public FxRate(DateOnly date, CurrencyPair pair, decimal rate, DateTime fetchedAt)
+    {
+        Date = date;
+        Pair = pair;
+        Rate = rate;
+        FetchedAt = fetchedAt;
+    }
 }

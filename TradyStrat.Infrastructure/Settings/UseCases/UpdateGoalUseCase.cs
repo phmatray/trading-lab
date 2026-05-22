@@ -1,50 +1,26 @@
-using Ardalis.Specification;
-using Microsoft.EntityFrameworkCore;
+using TradyStrat.Application.Goals;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Infrastructure.Data;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Infrastructure.Settings.UseCases;
 
 public sealed record UpdateGoalInput(decimal TargetEur, DateOnly? TargetDate);
 
 public sealed class UpdateGoalUseCase(
-    IRepositoryBase<GoalConfig> repo, AppDbContext db, IClock clock,
+    IGoalRepository repo,
+    IClock clock,
     ILogger<UpdateGoalUseCase> log)
-    : UseCaseBase<UpdateGoalInput, GoalConfig>(log)
+    : UseCaseBase<UpdateGoalInput, Goal>(log)
 {
-    protected override async Task<GoalConfig> ExecuteCore(UpdateGoalInput input, CancellationToken ct)
+    protected override async Task<Goal> ExecuteCore(UpdateGoalInput input, CancellationToken ct)
     {
-        if (input.TargetEur <= 0m)
-            throw new TradeValidationException("Target must be positive.");
+        var goal = await repo.GetAsync(ct);
 
-        var existing = await repo.GetByIdAsync(1, ct);
-        var now = clock.UtcNow();
+        goal.RetargetAmount(Money.Of(input.TargetEur, Currency.Eur), clock);
+        goal.RescheduleDeadline(input.TargetDate ?? DateOnly.MinValue, clock);
 
-        if (existing is null)
-        {
-            var fresh = new GoalConfig
-            {
-                Id = 1,
-                TargetEur = input.TargetEur,
-                TargetDate = input.TargetDate,
-                UpdatedAt = now,
-            };
-            await repo.AddAsync(fresh, ct);
-            return fresh;
-        }
-
-        var updated = existing with
-        {
-            TargetEur = input.TargetEur,
-            TargetDate = input.TargetDate,
-            UpdatedAt = now,
-        };
-
-        // Detach the tracked instance so UpdateAsync can attach the updated copy without conflict.
-        db.Entry(existing).State = EntityState.Detached;
-        await repo.UpdateAsync(updated, ct);
-        return updated;
+        await repo.SaveAsync(goal, ct);
+        return goal;
     }
 }

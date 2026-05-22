@@ -4,9 +4,10 @@
     <h2 class="label section-heading"><span class="section-roman">II.</span>Capital under accumulation</h2>
     <div class="amount">
         <span class="euro">€</span><span class="num">@NumberFormat.EurBody(Snap.CurrentValueEur.Amount)</span>
-        <span class="of">— of €@NumberFormat.EurBody(Goal.TargetEur) —</span>
-        @if (Goal.TargetDate is { } target)
+        <span class="of">— of €@NumberFormat.EurBody(Goal.Target.Amount) —</span>
+        @if (Goal.HasDeadline)
         {
+            var target = Goal.TargetDate;
             <span class="by">by @target.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture)@(DaysLeft(target) is { } d ? $" · {d}" : "")</span>
         }
     </div>

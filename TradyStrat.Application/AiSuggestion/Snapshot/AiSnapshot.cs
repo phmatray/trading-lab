@@ -21,7 +21,7 @@ public sealed record AiSnapshot(
     // it via property access to set Suggestion.InstrumentId on the persisted
     // entity row. PromptHash already excludes it (see AiSnapshotService.HashPrompt).
     [property: JsonIgnore] int InstrumentId,         // NEW (Phase 2)
-    GoalConfig Goal,
+    Goal Goal,
     PortfolioSnapshot Portfolio,
     IReadOnlyList<TickerContext> Tickers,
     IReadOnlyList<TradeRecent> RecentTrades,

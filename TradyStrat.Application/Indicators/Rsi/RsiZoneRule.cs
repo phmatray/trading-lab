@@ -1,5 +1,5 @@
 using TradyStrat.Domain;
-using TradyStrat.Application.Indicators.Zones;
+using TradyStrat.Domain.Indicators.Services;
 
 namespace TradyStrat.Application.Indicators.Rsi;
 
@@ -7,11 +7,12 @@ public sealed class RsiZoneRule : IZoneRule
 {
     public string Name => "RSI";
 
-    public ZoneVote? Apply(decimal price, IndicatorBundle r) => r.Rsi switch
+    public ZoneVote? Apply(decimal price, IndicatorBundle r)
     {
-        null     => null,
-        < 30m    => new(Zone.Accumulate, $"RSI(14) {r.Rsi:F0}, oversold"),
-        > 70m    => new(Zone.Distribute, $"RSI(14) {r.Rsi:F0}, overbought"),
-        _        => new(Zone.Hold,        $"RSI(14) {r.Rsi:F0}, neutral"),
-    };
+        if (r.Rsi.IsEmpty) return null;
+        var v = r.Rsi.Value;
+        if (v < 30m) return new(Zone.Accumulate, $"RSI(14) {v:F0}, oversold");
+        if (v > 70m) return new(Zone.Distribute, $"RSI(14) {v:F0}, overbought");
+        return new(Zone.Hold, $"RSI(14) {v:F0}, neutral");
+    }
 }

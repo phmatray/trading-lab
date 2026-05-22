@@ -12,10 +12,11 @@ namespace TradyStrat.Tests.Fx;
 
 public class DailyFxCacheTests
 {
-    private static FxRate Rate(DateOnly d, decimal v) => new()
-    {
-        Id = 0, Base = "EUR", Quote = "USD", Date = d, Rate = v, FetchedAt = DateTime.UtcNow
-    };
+    private static FxRate Rate(DateOnly d, decimal v) => new(
+        d,
+        TradyStrat.Domain.Shared.CurrencyPair.Of(TradyStrat.Domain.Shared.Currency.Eur, TradyStrat.Domain.Shared.Currency.Usd),
+        v,
+        DateTime.UtcNow);
 
     [Fact]
     public async Task Skips_fetch_if_today_present()
