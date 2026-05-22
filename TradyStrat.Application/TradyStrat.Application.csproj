@@ -2,9 +2,6 @@
   <PropertyGroup>
     <RootNamespace>TradyStrat.Application</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- PortfolioService still consumes the obsolete legacy `Lot` until Task 14
-         takes it offline as .bak and Task 31 deletes it. Remove this NoWarn then. -->
-    <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <!-- Mirror the Web SDK's implicit logging using so files moved from the
