@@ -32,6 +32,6 @@ public sealed class PortfolioSection(
         var portfolio = await portfolios.GetAsync(ct);
         builder.Portfolio = portfolio.SnapshotAsOf(
             asOf, instrumentById, priceMap,
-            Money.Of(builder.Goal.TargetEur, Currency.Eur));
+            builder.Goal.Target);
     }
 }

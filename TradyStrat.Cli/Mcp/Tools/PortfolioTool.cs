@@ -1,14 +1,14 @@
 using System.ComponentModel;
-using Ardalis.Specification;
 using ModelContextProtocol.Server;
 using TradyStrat.Application.Fx;
+using TradyStrat.Application.Goals;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Cli.Mcp.Tools;
@@ -17,9 +17,9 @@ namespace TradyStrat.Cli.Mcp.Tools;
 internal sealed class PortfolioTool(
     IPortfolioRepository portfolios,
     IInstrumentRepository instruments,
-    IReadRepositoryBase<PriceBar> bars,
-    IReadRepositoryBase<FxRate> fxRates,
-    IReadRepositoryBase<GoalConfig> goalRepo,
+    IPriceBarReadRepository bars,
+    IFxRateReadRepository fxRates,
+    IGoalRepository goalRepo,
     IClock clock)
 {
     [McpServerTool(Name = "get_portfolio"),
@@ -38,7 +38,7 @@ internal sealed class PortfolioTool(
         var priceByInstrument = new Dictionary<InstrumentId, Price>();
         foreach (var inst in allInstruments.Where(i => i.Kind == InstrumentKind.Held))
         {
-            var priceBars = await bars.ListAsync(new PriceBarsAsOfSpec(inst.Ticker, target), ct);
+            var priceBars = await bars.ListAsOfAsync(inst.Ticker, target, ct);
             if (priceBars.Count == 0) continue;
 
             var latestClose = priceBars[^1].Close;
@@ -50,9 +50,9 @@ internal sealed class PortfolioTool(
                 Price.Of(Money.Of(priceEur, Currency.Eur));
         }
 
-        var goal = await goalRepo.GetByIdAsync(1, ct) ?? GoalConfig.Default(DateTime.UtcNow);
-        var goalEur = goal.TargetEur;
-        var goalTarget = Money.Of(goalEur, Currency.Eur);
+        var goal = await goalRepo.GetAsync(ct);
+        var goalTarget = goal.Target;
+        var goalEur = goalTarget.Amount;
 
         var portfolio = await portfolios.GetAsync(ct);
         var domainSnapshot = portfolio.SnapshotAsOf(target, instrumentById, priceByInstrument, goalTarget);

@@ -1,10 +1,11 @@
 using Shouldly;
-using TradyStrat.Application.Indicators.Zones;
-using TradyStrat.Domain;
 using TradyStrat.Application.Indicators.Bollinger;
 using TradyStrat.Application.Indicators.Ichimoku;
 using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Indicators.Zones;
@@ -22,8 +23,7 @@ public class ZoneClassifierTests
     [Fact]
     public void Returns_Hold_when_no_rules_apply()
     {
-        var (zone, reasons) = WithAll().Classify(0m,
-            new IndicatorBundle(null, null, null, null, null));
+        var (zone, reasons) = WithAll().Classify(0m, IndicatorBundle.Empty);
 
         zone.ShouldBe(Zone.Hold);
         reasons.ShouldBeEmpty();
@@ -33,8 +33,8 @@ public class ZoneClassifierTests
     public void Majority_vote_wins()
     {
         var bb  = new BollingerReading(5m, 4m, 3m, 1m);
-        var ich = new IchimokuReading(0,0,0,0,0, IchimokuSignal.BelowCloud);
-        var bundle = new IndicatorBundle(bb, Rsi: 25m, Sma50: 6m, Sma200: 7m, ich);
+        var ich = new IchimokuReading(0, 0, 0, 0, 0, IchimokuSignal.BelowCloud);
+        var bundle = new IndicatorBundle(bb, Percentage.Of(25m), Sma50: 6m, Sma200: 7m, ich);
 
         var (zone, reasons) = WithAll().Classify(2m, bundle);
 
@@ -47,10 +47,10 @@ public class ZoneClassifierTests
     {
         // 2 votes Accumulate (Bollinger below lower, RSI low), 2 votes Distribute (price above sma50, Ichimoku above)
         var bundle = new IndicatorBundle(
-            new BollingerReading(5m,4m,3m,1m),       // price 2 → Accumulate
-            Rsi: 25m,                                // → Accumulate
-            Sma50: 1m, Sma200: 0.5m,                 // price 2 above sma50 → Distribute
-            new IchimokuReading(0,0,0,0,0, IchimokuSignal.AboveCloud));  // → Distribute
+            new BollingerReading(5m, 4m, 3m, 1m),        // price 2 → Accumulate
+            Percentage.Of(25m),                          // → Accumulate
+            Sma50: 1m, Sma200: 0.5m,                     // price 2 above sma50 → Distribute
+            new IchimokuReading(0, 0, 0, 0, 0, IchimokuSignal.AboveCloud));  // → Distribute
 
         var (zone, _) = WithAll().Classify(2m, bundle);
 

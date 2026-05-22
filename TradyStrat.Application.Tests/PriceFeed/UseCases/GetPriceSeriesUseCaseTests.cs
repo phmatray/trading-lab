@@ -1,14 +1,16 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.Indicators;
-using TradyStrat.Application.Indicators.Bollinger;
 using TradyStrat.Application.Indicators.History;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Application.Indicators.Bollinger;
 using TradyStrat.Application.Indicators.Ichimoku;
 using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
-using TradyStrat.Application.Indicators.Zones;
 using TradyStrat.Application.PriceFeed.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
@@ -36,7 +38,7 @@ public class GetPriceSeriesUseCaseTests
     /// </summary>
     private static IndicatorEngine BuildIndicatorEngine(TradyStrat.Infrastructure.Data.AppDbContext db)
     {
-        var repo = new TestRepo<PriceBar>(db);
+        var repo = new EfPriceBarReadRepository(db);
         IEnumerable<IIndicatorHistoryProvider> providers =
         [
             new RsiHistoryProvider(),
@@ -51,7 +53,7 @@ public class GetPriceSeriesUseCaseTests
 
     private static GetPriceSeriesUseCase BuildUseCase(TradyStrat.Infrastructure.Data.AppDbContext db) =>
         new(
-            new TestRepo<PriceBar>(db),
+            new EfPriceBarReadRepository(db),
             BuildIndicatorEngine(db),
             NullLogger<GetPriceSeriesUseCase>.Instance);
 

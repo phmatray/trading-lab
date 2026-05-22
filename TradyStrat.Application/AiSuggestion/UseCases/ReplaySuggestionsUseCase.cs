@@ -1,9 +1,8 @@
-using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
@@ -19,7 +18,7 @@ namespace TradyStrat.Application.AiSuggestion.UseCases;
 public sealed class ReplaySuggestionsUseCase(
     IAiSnapshotService snapshots,
     IAiClient ai,
-    IReadRepositoryBase<PriceBar> bars,
+    IPriceBarReadRepository bars,
     IInstrumentRepository instruments,
     ISuggestionRepository suggestionRepo,
     ICorrectnessRule correctness,
@@ -42,7 +41,7 @@ public sealed class ReplaySuggestionsUseCase(
         for (var date = input.Since; date <= input.Until; date = date.AddDays(1))
         {
             // Only act on dates that have a price bar — skips weekends/holidays.
-            var firstBar = await bars.ListAsync(new PriceBarsSinceSpec(ticker, date), ct);
+            var firstBar = await bars.ListSinceAsync(ticker, date, ct);
             if (firstBar.Count == 0 || firstBar[0].Date != date) continue;
 
             AiSnapshot snapshot;

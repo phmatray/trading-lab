@@ -21,7 +21,7 @@ public sealed class SnapshotBuilder
 {
     private static readonly string[] FocusShapeKeys = ["instrument_id", "recent_suggestions"];
 
-    public GoalConfig? Goal { get; set; }
+    public Goal? Goal { get; set; }
     public PortfolioSnapshot? Portfolio { get; set; }
     public List<TickerContext> Tickers { get; } = [];
     public List<TradeRecent> RecentTrades { get; } = [];

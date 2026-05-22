@@ -12,7 +12,7 @@ public sealed record DashboardViewModel(
     DateOnly Today,
     int EntryNumber,
     PortfolioSnapshot Portfolio,
-    GoalConfig Goal,
+    Goal Goal,
     SuggestionState? FocusCallState,
     IReadOnlyList<TickerView> Tickers,
     IReadOnlyList<PositionRow> Positions,

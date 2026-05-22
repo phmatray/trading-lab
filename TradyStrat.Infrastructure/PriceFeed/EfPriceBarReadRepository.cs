@@ -1,7 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TradyStrat.Application.PriceFeed;
 using TradyStrat.Domain;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Infrastructure.PriceFeed.Specifications;
 

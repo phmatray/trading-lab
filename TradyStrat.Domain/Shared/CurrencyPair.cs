@@ -1,9 +1,11 @@
 namespace TradyStrat.Domain.Shared;
 
-public readonly record struct CurrencyPair
+public sealed record CurrencyPair
 {
-    public Currency Base  { get; }
-    public Currency Quote { get; }
+    public Currency Base  { get; private set; } = Currency.Eur;
+    public Currency Quote { get; private set; } = Currency.Usd;
+
+    private CurrencyPair() { }   // EF
 
     private CurrencyPair(Currency @base, Currency quote)
     {

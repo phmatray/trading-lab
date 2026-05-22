@@ -1,3 +1,3 @@
 namespace TradyStrat.Domain;
 
-public enum IchimokuSignal { AboveCloud = 1, InCloud = 2, BelowCloud = 3 }
+public enum IchimokuSignal { None = 0, AboveCloud = 1, InCloud = 2, BelowCloud = 3 }

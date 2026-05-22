@@ -2,6 +2,7 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit;            // shared TestRepo<T>
 using TradyStrat.TestKit.Settings;      // FakeSettingsReader
 using TradyStrat.TestKit.Specifications; // InMemoryDb
@@ -30,7 +31,7 @@ public class EntryNavigationServiceTests
     {
         foreach (var d in dates) db.PriceBars.Add(Bar(d));
         await db.SaveChangesAsync();
-        return new EntryNavigationService(new TestRepo<PriceBar>(db), new FakeSettingsReader());
+        return new EntryNavigationService(new EfPriceBarReadRepository(db), new FakeSettingsReader());
     }
 
     [Fact]

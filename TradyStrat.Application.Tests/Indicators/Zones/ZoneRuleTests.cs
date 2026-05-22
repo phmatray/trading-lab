@@ -1,9 +1,10 @@
 using Shouldly;
-using TradyStrat.Domain;
 using TradyStrat.Application.Indicators.Bollinger;
 using TradyStrat.Application.Indicators.Ichimoku;
 using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Indicators.Zones;
@@ -11,8 +12,13 @@ namespace TradyStrat.Application.Tests.Indicators.Zones;
 public class ZoneRuleTests
 {
     private static IndicatorBundle Bundle(BollingerReading? bb = null,
-        decimal? rsi = null, decimal? sma50 = null, decimal? sma200 = null,
-        IchimokuReading? ich = null) => new(bb, rsi, sma50, sma200, ich);
+        decimal? rsi = null, decimal sma50 = 0m, decimal sma200 = 0m,
+        IchimokuReading? ich = null) => new(
+            bb ?? BollingerReading.Empty,
+            rsi is { } r ? Percentage.Of(r) : Percentage.Empty,
+            sma50,
+            sma200,
+            ich ?? IchimokuReading.Empty);
 
     [Fact]
     public void Bollinger_below_lower_votes_Accumulate()

@@ -1,7 +1,5 @@
-using Ardalis.Specification;
-using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings;
-using TradyStrat.Domain;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion;
@@ -12,7 +10,7 @@ namespace TradyStrat.Application.AiSuggestion;
 /// (fewer than 5 bars exist after the suggestion date).
 /// </summary>
 public sealed class ForwardReturnCalculator(
-    IReadRepositoryBase<PriceBar> barRepo,
+    IPriceBarReadRepository barRepo,
     IInstrumentRepository instrumentRepo)
 {
     private const int ForwardBars = 5;
@@ -27,7 +25,7 @@ public sealed class ForwardReturnCalculator(
 
     public async Task<decimal?> ComputeAsync(string ticker, DateOnly forDate, CancellationToken ct)
     {
-        var bars = await barRepo.ListAsync(new PriceBarsSinceSpec(ticker, forDate), ct);
+        var bars = await barRepo.ListSinceAsync(ticker, forDate, ct);
         if (bars.Count < 1) return null;
 
         var window = bars.Take(ForwardBars + 1).ToArray();

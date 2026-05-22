@@ -11,7 +11,7 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
     [Parameter, EditorRequired] public IReadOnlyList<GrowthPoint> Points { get; set; } = null!;
-    [Parameter, EditorRequired] public GoalConfig Goal { get; set; } = null!;
+    [Parameter, EditorRequired] public Goal Goal { get; set; } = null!;
     [Parameter, EditorRequired] public PortfolioSnapshot Portfolio { get; set; } = null!;
     [Parameter] public decimal? FocusTickerEur { get; set; }
     [Parameter] public IReadOnlyList<CapitalEvent> Events { get; set; } = [];
@@ -29,7 +29,7 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
     private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
 
     private DateOnly? EndDate =>
-        Goal.TargetDate is { } d && Points.Count > 0 && d > Points[0].Date ? d : null;
+        Goal.HasDeadline && Points.Count > 0 && Goal.TargetDate > Points[0].Date ? Goal.TargetDate : null;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -67,16 +67,16 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
             capital         = Points.Select(g => (double)g.Value.Amount).ToArray(),
             position        = Points.Select(_ => (double)Portfolio.Shares).ToArray(),
             focusTickerEur  = Points.Select(_ => (double)(FocusTickerEur ?? 0m)).ToArray(),
-            targetEur       = (double)Goal.TargetEur,
-            targetDate      = Goal.TargetDate?.ToString("o", CultureInfo.InvariantCulture),
+            targetEur       = (double)Goal.Target.Amount,
+            targetDate      = Goal.HasDeadline ? Goal.TargetDate.ToString("o", CultureInfo.InvariantCulture) : null,
             axisStartDate   = axisStart.ToString("o", CultureInfo.InvariantCulture),
             axisEndDate     = axisEnd.ToString("o", CultureInfo.InvariantCulture),
             startCapitalEur = (double)startCapital,
             startDate       = startDate.ToString("o", CultureInfo.InvariantCulture),
             goalLabel       = BuildGoalLabel(),
-            yLabel75        = $"€{(Goal.TargetEur * 0.75m).ToString("N0", FrFr)}",
-            yLabel50        = $"€{(Goal.TargetEur * 0.50m).ToString("N0", FrFr)}",
-            yLabel25        = $"€{(Goal.TargetEur * 0.25m).ToString("N0", FrFr)}",
+            yLabel75        = $"€{(Goal.Target.Amount * 0.75m).ToString("N0", FrFr)}",
+            yLabel50        = $"€{(Goal.Target.Amount * 0.50m).ToString("N0", FrFr)}",
+            yLabel25        = $"€{(Goal.Target.Amount * 0.25m).ToString("N0", FrFr)}",
             events          = Events.Select(e => new
             {
                 date    = e.Date.ToString("o", CultureInfo.InvariantCulture),
@@ -85,9 +85,9 @@ public partial class GrowthChart : ComponentBase, IAsyncDisposable
         };
     }
 
-    private string BuildGoalLabel() => Goal.TargetDate is { } td
-        ? $"€{Goal.TargetEur.ToString("N0", FrFr)} by {td.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
-        : $"€{Goal.TargetEur.ToString("N0", FrFr)} — goal";
+    private string BuildGoalLabel() => Goal.HasDeadline
+        ? $"€{Goal.Target.Amount.ToString("N0", FrFr)} by {Goal.TargetDate.ToString("MMM yyyy", CultureInfo.InvariantCulture)} — goal"
+        : $"€{Goal.Target.Amount.ToString("N0", FrFr)} — goal";
 
     public async ValueTask DisposeAsync()
     {

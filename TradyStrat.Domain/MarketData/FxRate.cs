@@ -6,7 +6,7 @@ public sealed class FxRate
 {
     public int           Id        { get; private set; }
     public DateOnly      Date      { get; private set; }
-    public CurrencyPair  Pair      { get; private set; }
+    public CurrencyPair  Pair      { get; private set; } = CurrencyPair.Of(Currency.Eur, Currency.Usd);
     public decimal       Rate      { get; private set; }    // Quote per 1 Base
     public DateTime      FetchedAt { get; private set; }
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
 using TradyStrat.Application.PriceFeed;
 using TradyStrat.Application.PriceFeed.Providers;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Infrastructure.PriceFeed.Providers;
 using TradyStrat.Infrastructure.PriceFeed.UseCases;
 

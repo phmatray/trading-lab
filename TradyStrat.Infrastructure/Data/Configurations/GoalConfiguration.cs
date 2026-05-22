@@ -29,13 +29,10 @@ public sealed class GoalConfiguration : IEntityTypeConfiguration<Goal>
             m.Property(x => x.IsEmpty).HasColumnName("TargetIsEmpty");
         });
 
-        // TargetDate: was nullable DateOnly?, now non-nullable with DateOnly.MinValue
-        // as sentinel. Legacy NULL rows rehydrate as MinValue via the converter.
-        builder.Property(g => g.TargetDate)
-               .HasConversion(
-                   d => d == DateOnly.MinValue ? (DateOnly?)null : d,
-                   d => d ?? DateOnly.MinValue)
-               .HasColumnName("TargetDate");
+        // TargetDate: non-nullable with DateOnly.MinValue as "no deadline" sentinel.
+        // Stored directly to the existing TargetDate column. If the live DB has any
+        // NULL rows, a one-shot data migration in Task 17 backfills them to MinValue.
+        builder.Property(g => g.TargetDate).HasColumnName("TargetDate");
 
         builder.Property(g => g.UpdatedAt);
     }

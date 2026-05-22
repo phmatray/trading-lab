@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Fx.Providers;
 
@@ -15,8 +16,10 @@ public sealed partial class DailyFxCache(
     {
         // FX trades 24/5 in UTC; the existing pair-keyed timezone fallback to UTC is fine.
         var today = clock.TodayInExchangeTzFor($"{@base}{quote}");
+        var b = Currency.Parse(@base);
+        var q = Currency.Parse(quote);
         var latest = await db.FxRates
-            .Where(r => r.Base == @base && r.Quote == quote)
+            .Where(r => r.Pair.Base == b && r.Pair.Quote == q)
             .OrderByDescending(r => r.Date)
             .Select(r => (DateOnly?)r.Date)
             .FirstOrDefaultAsync(ct);
@@ -33,7 +36,7 @@ public sealed partial class DailyFxCache(
 
         var fetchedDates = rates.Select(r => r.Date).ToList();
         var existingDates = await db.FxRates
-            .Where(r => r.Base == @base && r.Quote == quote && fetchedDates.Contains(r.Date))
+            .Where(r => r.Pair.Base == b && r.Pair.Quote == q && fetchedDates.Contains(r.Date))
             .Select(r => r.Date)
             .ToListAsync(ct);
         var existingSet = existingDates.ToHashSet();

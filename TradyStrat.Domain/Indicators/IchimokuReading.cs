@@ -6,8 +6,8 @@ public sealed record IchimokuReading(
     decimal Chikou,
     IchimokuSignal Signal)
 {
-    // InCloud is the natural "no clear signal" default — used as the Empty
-    // sentinel when the price series is too short to compute the reading.
-    public static readonly IchimokuReading Empty = new(0m, 0m, 0m, 0m, 0m, IchimokuSignal.InCloud);
-    public bool IsEmpty => this == Empty;
+    // None signal is reserved for "no reading available" — distinguishes
+    // a real InCloud reading from a missing one.
+    public static readonly IchimokuReading Empty = new(0m, 0m, 0m, 0m, 0m, IchimokuSignal.None);
+    public bool IsEmpty => Signal == IchimokuSignal.None;
 }

@@ -30,7 +30,7 @@ else
     var vm = _vm!;
     var focusSug = _focusState is SuggestionState.Ready fr ? fr.Suggestion : null;
     <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur.Amount"
-                      TargetEur="vm.Goal.TargetEur"
+                      TargetEur="vm.Goal.Target.Amount"
                       ProgressPct="vm.Portfolio.ProgressPct"
                       Action="focusSug?.Action" />
     <div class="dash-stage">

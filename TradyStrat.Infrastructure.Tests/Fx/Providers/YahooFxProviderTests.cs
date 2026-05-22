@@ -22,8 +22,8 @@ public class YahooFxProviderTests
             TestContext.Current.CancellationToken);
 
         rates.Count.ShouldBe(2);
-        rates[0].Base.ShouldBe("EUR");
-        rates[0].Quote.ShouldBe("USD");
+        rates[0].Pair.Base.Code.ShouldBe("EUR");
+        rates[0].Pair.Quote.Code.ShouldBe("USD");
         rates[0].Rate.ShouldBe(1.0820m);
         rates[1].Rate.ShouldBe(1.0835m);
     }
