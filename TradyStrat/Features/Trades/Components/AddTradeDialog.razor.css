@@ -1,0 +1,24 @@
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+         display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-body { background: var(--vault-bg-2); border: 1px solid var(--vault-rule);
+              padding: 32px; max-width: 520px; width: 90%; }
+.modal-body h3 { font-family: var(--font-display); font-style: italic;
+                 font-size: 28px; margin-bottom: 16px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid label { display: flex; flex-direction: column; gap: 4px;
+              font-family: var(--font-mono); font-size: 10px;
+              letter-spacing: var(--tracking-xs); text-transform: uppercase;
+              color: var(--vault-gold); }
+.grid label.full { grid-column: 1 / -1; }
+.grid input, .grid select {
+    background: var(--vault-bg); color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule); padding: 8px;
+    font-family: var(--font-mono); font-size: 14px;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+.btn { padding: 10px 16px; background: var(--vault-gold);
+       color: #1B1710; font-family: var(--font-mono); font-size: 10px;
+       letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--vault-ivory);
+             border: 1px solid var(--vault-rule); font-weight: 400; }
+.err { color: var(--vault-red); margin-top: 10px; font-size: 13px; }

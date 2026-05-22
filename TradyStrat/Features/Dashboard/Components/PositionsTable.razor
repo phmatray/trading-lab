@@ -1,0 +1,54 @@
+@using TradyStrat.Domain.Portfolio
+@using TradyStrat.Domain
+@using TradyStrat.Application.Formatting
+
+<section class="positions">
+    <h2 class="section-heading"><span class="section-roman">VI.</span>Positions</h2>
+    @if (Rows.Count == 0)
+    {
+        <p class="empty">No positions yet — add an instrument in Settings to start tracking.</p>
+    }
+    else
+    {
+        <table class="positions-table">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th class="num">Qty</th>
+                    <th class="num">Cost basis</th>
+                    <th class="num">Mkt value</th>
+                    <th class="num">Unrealised PnL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Rows)
+                {
+                    <tr>
+                        <td>@r.Ticker</td>
+                        <td class="num">@NumberFormat.Qty(r.Quantity)</td>
+                        <td class="num">@NumberFormat.Eur(r.CostBasisEur)</td>
+                        <td class="num">@NumberFormat.Eur(r.MarketValueEur)</td>
+                        <td class="num @(r.UnrealizedPnLEur >= 0 ? "pos" : "neg")">
+                            @NumberFormat.SignedEur(r.UnrealizedPnLEur)
+                        </td>
+                    </tr>
+                }
+                @if (Rows.Count > 1)
+                {
+                    <tr class="total">
+                        <td>Total</td>
+                        <td></td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.CostBasisEur))</td>
+                        <td class="num">@NumberFormat.Eur(Rows.Sum(r => r.MarketValueEur))</td>
+                        <td class="num @(TotalUnreal >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(TotalUnreal)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    [Parameter] public IReadOnlyList<PositionRow> Rows { get; set; } = [];
+    private decimal TotalUnreal => Rows.Sum(r => r.UnrealizedPnLEur);
+}

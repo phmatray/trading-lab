@@ -1,0 +1,101 @@
+@using TradyStrat.Application.Dashboard
+@using TradyStrat.Application.Formatting
+<div class="hero">
+    <h2 class="label section-heading"><span class="section-roman">II.</span>Capital under accumulation</h2>
+    <div class="amount">
+        <span class="euro">€</span><span class="num">@NumberFormat.EurBody(Snap.CurrentValueEur)</span>
+        <span class="of">— of €@NumberFormat.EurBody(Goal.TargetEur) —</span>
+        @if (Goal.TargetDate is { } target)
+        {
+            <span class="by">by @target.ToString("dd · MM · yyyy", CultureInfo.InvariantCulture)@(DaysLeft(target) is { } d ? $" · {d}" : "")</span>
+        }
+    </div>
+
+    @if (GoalPace.Mode == GoalPaceMode.Active)
+    {
+        <div class="pace-line-row pace-line-top">
+            <div class="stat">
+                <span class="k">vs. plan</span>
+                <span class="v @(GoalPace.VsPlanEur < 0 ? "neg" : "pos")">
+                    @NumberFormat.SignedEur(GoalPace.VsPlanEur)
+                </span>
+            </div>
+            <span class="sep">·</span>
+            <div class="stat">
+                <span class="k">monthly</span>
+                <span class="v @(IsAlarmingMonthly ? "alarm" : "")"
+                      title="@(IsAlarmingMonthly ? "Above 15 %/mo — implausible without exceptional luck" : null)">
+                    @NumberFormat.Pct(GoalPace.MonthlyCompoundPct) / mo
+                </span>
+            </div>
+            <span class="sep">·</span>
+            <div class="stat">
+                <span class="k">CAGR</span>
+                <span class="v @(IsAlarmingCagr ? "alarm" : "")"
+                      title="@(IsAlarmingCagr ? "Above 250 % CAGR — implausible without exceptional luck" : null)">
+                    @GoalPace.ImpliedCagrPct.ToString("F0", FrFr) %
+                </span>
+            </div>
+        </div>
+    }
+    else if (GoalPace.Mode == GoalPaceMode.TargetReached)
+    {
+        <p class="pace-line italic">Target reached — keep going.</p>
+    }
+    else if (GoalPace.Mode == GoalPaceMode.GoalDatePassed)
+    {
+        <p class="pace-line italic">Goal date passed — @NumberFormat.SignedEur(GoalPace.VsPlanEur) over.</p>
+    }
+
+    <div class="progress">
+        <div class="bar" role="img" aria-label="@AriaSummary">
+            @* Principal segment — 0 → min(cost, current). The portion of progress
+               that is your own capital, irrespective of mark-to-market. *@
+            <span class="seg principal" style="--l:0%;--w:@Fmt(PrincipalShownPct)%"></span>
+
+            @* Realized PnL segment — adds on top of principal. Booked, no longer at risk. *@
+            @if (RealizedPct > 0m)
+            {
+                <span class="seg realized" style="--l:@Fmt(PrincipalShownPct)%;--w:@Fmt(RealizedPct)%"></span>
+            }
+
+            @* Unrealized PnL segment — depends on sign:
+               · gain: green, extends current beyond cost
+               · loss: red hashed, drawn from current back up to cost (the gap) *@
+            @if (Snap.UnrealizedPnLEur > 0m)
+            {
+                <span class="seg gain" style="--l:@Fmt(PrincipalShownPct + RealizedPct)%;--w:@Fmt(UnrealizedAbsPct)%"></span>
+            }
+            else if (Snap.UnrealizedPnLEur < 0m)
+            {
+                <span class="seg loss" style="--l:@Fmt(PrincipalShownPct + RealizedPct)%;--w:@Fmt(UnrealizedAbsPct)%"></span>
+            }
+
+            @* Current-position tick at exact "today" mark *@
+            <span class="tick now" style="--l:@Fmt(CurrentPct)%" title="today"></span>
+            @if (PlanPct >= 0m)
+            {
+                <span class="tick plan" style="--l:@Fmt(PlanPct)%" title="plan target today"></span>
+            }
+        </div>
+        <div class="pct num">@NumberFormat.Pct(Pct)</div>
+    </div>
+
+    <dl class="legend">
+        <div>
+            <dt><span class="swatch principal"></span> Own capital</dt>
+            <dd class="num">€@NumberFormat.EurBody(CostBasisEur)</dd>
+        </div>
+        @if (Snap.RealizedPnLEur != 0m)
+        {
+            <div>
+                <dt><span class="swatch realized"></span> Realized</dt>
+                <dd class="num @(Snap.RealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.RealizedPnLEur)</dd>
+            </div>
+        }
+        <div>
+            <dt><span class="swatch @(Snap.UnrealizedPnLEur >= 0 ? "gain" : "loss")"></span> Unrealized</dt>
+            <dd class="num @(Snap.UnrealizedPnLEur >= 0 ? "pos" : "neg")">@NumberFormat.SignedEur(Snap.UnrealizedPnLEur)</dd>
+        </div>
+    </dl>
+</div>

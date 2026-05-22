@@ -18,10 +18,11 @@ public sealed class AiSuggestionApplicationModule : IAppModule
         services.AddScoped<IAiSnapshotService, AiSnapshotService>();
         services.AddScoped<ISnapshotSectionProvider, GoalSection>();
         services.AddScoped<ISnapshotSectionProvider, TickersSection>();
-        // PortfolioSection, RecentTradesSection, RecentSuggestionsSection are
-        // .bak'd until Task 30 restores them against the Portfolio AR / VOs.
+        services.AddScoped<ISnapshotSectionProvider, PortfolioSection>();
+        services.AddScoped<ISnapshotSectionProvider, RecentTradesSection>();
         services.AddScoped<ISnapshotSectionProvider, MarketsSection>();
         services.AddScoped<ISnapshotSectionProvider, UsdPerEurSection>();
+        services.AddScoped<ISnapshotSectionProvider, RecentSuggestionsSection>();
         services.AddScoped<GetTodaysSuggestionUseCase>();
         services.AddScoped<GetAllTodaysSuggestionsUseCase>();
         services.AddScoped<StreamTodaysSuggestionsUseCase>();
