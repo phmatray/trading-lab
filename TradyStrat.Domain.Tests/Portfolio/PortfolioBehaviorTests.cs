@@ -97,4 +97,19 @@ public class PortfolioBehaviorTests
         // Atomic: nothing applied.
         portfolio.Positions.ShouldBeEmpty();
     }
+
+    [Fact]
+    public void TradeIds_are_unique_across_positions()
+    {
+        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        portfolio.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+        portfolio.RecordTrade(new InstrumentId(2), new DateOnly(2026, 1, 2), TradeSide.Buy,
+            Quantity.Of(5m), Price.Of(Money.Of(8m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+        portfolio.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 3), TradeSide.Buy,
+            Quantity.Of(3m), Price.Of(Money.Of(5m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
+
+        var allIds = portfolio.Positions.SelectMany(p => p.Trades).Select(t => t.Id.Value).ToList();
+        allIds.ShouldBe([1, 2, 3], ignoreOrder: true);
+    }
 }

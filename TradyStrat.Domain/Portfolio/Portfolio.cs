@@ -31,8 +31,20 @@ public sealed class Portfolio
             _positions.Add(position);
         }
 
+        // Portfolio-wide unique TradeId: Trade is keyed on Id alone in the DB,
+        // so per-position numbering would collide across positions.
+        trade.AssignId(new TradeId(NextTradeIdValue()));
         var realizedDelta = position.Record(trade);
         return new TradeRecorded(trade.Id, position.Id, created, realizedDelta);
+    }
+
+    private int NextTradeIdValue()
+    {
+        var max = 0;
+        foreach (var p in _positions)
+            foreach (var t in p.Trades)
+                if (t.Id.Value > max) max = t.Id.Value;
+        return max + 1;
     }
 
     public TradeDeleted DeleteTrade(TradeId tradeId)

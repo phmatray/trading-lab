@@ -41,13 +41,8 @@ public class ImportTradesCsvUseCaseTests
     }
 
     [Fact]
-    public async Task Rows_routed_to_same_instrument_via_ticker_column_work()
+    public async Task Rows_with_ticker_column_route_to_matching_instrument()
     {
-        // Multi-instrument dispatch is exercised at the parser + use-case level;
-        // saving multi-instrument trades is blocked by a pre-existing TradeId
-        // collision (Position.Record numbers sequentially per-position, but
-        // TradeConfiguration keys on Trade.Id alone). Single-ticker routing
-        // through the ticker column proves the dispatch logic itself works.
         var ct = TestContext.Current.CancellationToken;
         await using var db = InMemoryDb.Create();
         db.Instruments.Add(Existing("CON3.L"));
@@ -56,17 +51,19 @@ public class ImportTradesCsvUseCaseTests
 
         const string csv = """
             date,side,qty,price,fees,ticker
-            2026-05-01,buy,10,100,1,COIN
+            2026-05-01,buy,10,100,1,CON3.L
+            2026-05-02,buy,5,200,2,COIN
             """;
 
         var sut = Build(db);
         var result = await sut.ExecuteAsync(new ImportTradesCsvInput(csv), ct);
 
-        result.RowsImported.ShouldBe(1);
+        result.RowsImported.ShouldBe(2);
         var positions = await db.Set<Position>().ToListAsync(ct);
+        var con3 = await db.Instruments.SingleAsync(i => i.Ticker == "CON3.L", ct);
         var coin = await db.Instruments.SingleAsync(i => i.Ticker == "COIN", ct);
-        positions.Count.ShouldBe(1);
-        positions[0].InstrumentId.ShouldBe(coin.Id);
+        positions.Count.ShouldBe(2);
+        positions.Select(p => p.InstrumentId).ShouldBe([con3.Id, coin.Id], ignoreOrder: true);
     }
 
     [Fact]
