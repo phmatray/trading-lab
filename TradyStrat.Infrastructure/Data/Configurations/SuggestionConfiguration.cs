@@ -17,7 +17,7 @@ public sealed class SuggestionConfiguration : IEntityTypeConfiguration<Suggestio
     {
         builder.ToTable("Suggestions");
         builder.HasKey(s => s.Id);
-        builder.Property(s => s.Id).ValueGeneratedNever();
+        builder.Property(s => s.Id).ValueGeneratedOnAdd();
 
         builder.Property(s => s.InstrumentId);
         builder.Property(s => s.ForDate);

@@ -237,6 +237,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
             modelBuilder.Entity("TradyStrat.Domain.Suggestions.Suggestion", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Action")

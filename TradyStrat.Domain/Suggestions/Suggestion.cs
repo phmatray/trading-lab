@@ -30,6 +30,8 @@ public sealed class Suggestion
         MarketSnapshot snapshot, PromptFingerprint fingerprint, string thinkingText,
         DateTime createdAt)
     {
+        // Id is DB-assigned via ValueGeneratedOnAdd. SuggestionId.New() returns
+        // the zero sentinel — EF rewrites it on insert.
         Id           = SuggestionId.New();
         InstrumentId = instrumentId;
         ForDate      = forDate;
@@ -79,5 +81,4 @@ public sealed class Suggestion
         return new Correctness(isCorrect, Money.Of(deltaPerShare, Currency.Eur));
     }
 
-    internal void AssignId(SuggestionId id) => Id = id;
 }

@@ -175,8 +175,8 @@ namespace TradyStrat.Infrastructure.Data.Migrations
 
             // Backfill VO-shadow columns for existing rows:
             //   * MaxPriceHintCurrency: legacy hints were always EUR (project default).
-            //   * MaxPriceHintIsEmpty: rows with a stored non-null price are NOT empty.
-            //   * QuantityHintIsSpecified: rows with a stored non-null quantity are specified.
+            //   * MaxPriceHintIsEmpty: rows with a stored non-zero price are NOT empty.
+            //   * QuantityHintIsSpecified: rows with a stored non-zero quantity are specified.
             // The AlterColumn rebuild has already replaced legacy NULL with '0.0'; we
             // can no longer distinguish NULL-from-0 at this point, so we treat the
             // sentinel '0.0' as "absent". This matches how the AI tool returned hints

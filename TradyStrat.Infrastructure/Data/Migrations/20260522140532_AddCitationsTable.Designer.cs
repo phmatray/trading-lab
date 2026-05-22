@@ -11,7 +11,7 @@ using TradyStrat.Infrastructure.Data;
 namespace TradyStrat.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260522135902_AddCitationsTable")]
+    [Migration("20260522140532_AddCitationsTable")]
     partial class AddCitationsTable
     {
         /// <inheritdoc />
@@ -240,6 +240,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
             modelBuilder.Entity("TradyStrat.Domain.Suggestions.Suggestion", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Action")
