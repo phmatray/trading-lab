@@ -1,9 +1,13 @@
 using Ardalis.Specification;
+using TradyStrat.Application.Portfolio;
+using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings.Specifications;
+using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.Settings.Config;
-using TradyStrat.Application.Settings.Specifications;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.Trades.UseCases;
 
@@ -11,42 +15,40 @@ public sealed record ImportTradesCsvInput(string CsvText);
 public sealed record ImportTradesCsvResult(int RowsImported);
 
 public sealed class ImportTradesCsvUseCase(
-    IRepositoryBase<Trade> repo,
+    IPortfolioRepository portfolios,
     IReadRepositoryBase<Instrument> instruments,
     IClock clock,
     ISettingsReader settings,
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
-    // Phase 1 CSV import targets the configured focus instrument; the per-row
-    // Ticker column is a separate Phase 2 concern (multi-ticker CSVs).
+    // CSV import currently targets the configured focus instrument; per-row Ticker
+    // column support is a follow-up.
     protected override async Task<ImportTradesCsvResult> ExecuteCore(
         ImportTradesCsvInput input, CancellationToken ct)
     {
         var focusTicker = await settings.FocusTickerAsync(ct);
-
-        var rows = CsvImportService.Parse(new StringReader(input.CsvText));
-        var now  = clock.UtcNow();
-
         var focus = await instruments.FirstOrDefaultAsync(
             new InstrumentByTickerSpec(focusTicker), ct)
             ?? throw new CsvImportException(
                 $"Focus instrument '{focusTicker}' is not registered.");
 
-        var trades = rows.Select(r => new Trade
-        {
-            Id = 0,
-            InstrumentId  = focus.Id,
-            ExecutedOn    = r.ExecutedOn,
-            Side          = r.Side,
-            Quantity      = r.Quantity,
-            PricePerShare = r.PricePerShare,
-            FeesEur       = r.FeesEur,
-            Note          = r.Note,
-            CreatedAt     = now,
-        }).ToList();
+        var focusCurrency = Currency.Parse(focus.Currency);
+        var rows = CsvImportService.Parse(new StringReader(input.CsvText));
+        var now  = clock.UtcNow();
 
-        await repo.AddRangeAsync(trades, ct);
-        return new ImportTradesCsvResult(trades.Count);
+        var drafts = rows.Select(r => new TradeDraft(
+            new InstrumentId(focus.Id),
+            r.ExecutedOn, r.Side,
+            Quantity.Of(r.Quantity),
+            Price.Of(Money.Of(r.PricePerShare, focusCurrency)),
+            Money.Of(r.FeesEur, Currency.Eur),
+            r.Note ?? "")).ToList();
+
+        var portfolio = await portfolios.GetAsync(ct);
+        var results = portfolio.ImportTrades(drafts, now);
+        await portfolios.SaveAsync(portfolio, ct);
+
+        return new ImportTradesCsvResult(results.Count);
     }
 }

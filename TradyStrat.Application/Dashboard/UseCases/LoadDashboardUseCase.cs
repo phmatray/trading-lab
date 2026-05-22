@@ -1,6 +1,8 @@
 using TradyStrat.Application.Time;
 using Ardalis.Specification;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.Specifications;
@@ -12,17 +14,14 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
-using TradyStrat.Application.Trades.Specifications;
 
 namespace TradyStrat.Application.Dashboard.UseCases;
 
 public sealed class LoadDashboardUseCase(
     IIndicatorEngine indicators,
-    PortfolioService portfolio,
-    GrowthSeriesBuilder growth,
+    IPortfolioRepository portfolios,
     FxConverter fx,
     IReadRepositoryBase<GoalConfig> goalRepo,
-    IReadRepositoryBase<Trade> tradeRepo,
     IReadRepositoryBase<PriceBar> priceRepo,
     IReadRepositoryBase<Suggestion> suggestionRepo,
     IReadRepositoryBase<FxRate> fxRepo,
@@ -43,17 +42,13 @@ public sealed class LoadDashboardUseCase(
 
         var focusTicker = await settings.FocusTickerAsync(ct);
 
-        // Catalog order: focus first, then Held alphabetically (excluding focus),
-        // then Watchlist alphabetically. Stable ordering keeps zone-card layout
-        // predictable as new instruments are added.
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
         var ordered = instruments
             .OrderBy(i => i.Ticker == focusTicker ? 0 : i.Kind == InstrumentKind.Held ? 1 : 2)
             .ThenBy(i => i.Ticker, StringComparer.Ordinal)
             .ToList();
+        var instrumentById = ordered.ToDictionary(i => new InstrumentId(i.Id), i => i);
 
-        // Historical mode reads existing suggestion rows; live mode does NOT call
-        // the AI from this use case (the page streams Pending → Ready per ticker).
         IReadOnlyList<Suggestion> historicalRows = Array.Empty<Suggestion>();
         Dictionary<int, SuggestionState?> historicalStates = new();
         if (input.IsHistorical)
@@ -70,10 +65,8 @@ public sealed class LoadDashboardUseCase(
             historicalRows = rows;
         }
 
-        // Iterate Held + Watchlist for zone analysis. Held instruments contribute
-        // to the priceMap (used by PortfolioService.SnapshotAsync); Watchlist do not.
         var tickers = new List<TickerView>();
-        var priceMap = new Dictionary<int, (decimal PriceEur, string Ticker, string Currency)>();
+        var priceMap = new Dictionary<InstrumentId, Price>();
 
         foreach (var inst in ordered)
         {
@@ -88,15 +81,15 @@ public sealed class LoadDashboardUseCase(
             SuggestionState? callState;
             if (inst.Kind != InstrumentKind.Held)
             {
-                callState = null;                                            // watchlist
+                callState = null;
             }
             else if (input.IsHistorical)
             {
-                callState = historicalStates[inst.Id];                       // Ready or null
+                callState = historicalStates[inst.Id];
             }
             else
             {
-                callState = new SuggestionState.Pending();                   // live skeleton
+                callState = new SuggestionState.Pending();
             }
 
             tickers.Add(new TickerView(
@@ -111,23 +104,31 @@ public sealed class LoadDashboardUseCase(
                 CallState:    callState));
 
             if (inst.Kind == InstrumentKind.Held && eur is { } e)
-                priceMap[inst.Id] = (e, inst.Ticker, inst.Currency);
+                priceMap[new InstrumentId(inst.Id)] = Price.Of(Money.Of(e, Currency.Eur));
         }
 
-        var snap = await portfolio.SnapshotAsync(target, priceMap, goal.TargetEur, ct);
-        var growthSeries = await growth.BuildAsync(focusTicker, ct);
+        var portfolio = await portfolios.GetAsync(ct);
+        var snap = portfolio.SnapshotAsOf(
+            target, instrumentById, priceMap,
+            Money.Of(goal.TargetEur, Currency.Eur));
 
-        // Pin trailing growth point to the EUR-valued snapshot so chart and hero agree.
-        // (Historical mode: this still anchors at the latest stored bar; documented limitation.)
+        // GrowthSeries: build per-instrument bar dictionary for the focus instrument.
+        var focusBars = await priceRepo.ListAsync(new PriceBarsAsOfSpec(focusTicker, target), ct);
+        var focusId   = ordered.SingleOrDefault(i => i.Ticker == focusTicker);
+        var barsByInstrument = focusId is null
+            ? new Dictionary<InstrumentId, IReadOnlyList<PriceBar>>()
+            : new Dictionary<InstrumentId, IReadOnlyList<PriceBar>> {
+                [new InstrumentId(focusId.Id)] = focusBars,
+            };
+        var growthSeries = portfolio.GrowthSeries(barsByInstrument);
+
         if (growthSeries.Count > 0)
         {
             var pinned = growthSeries.ToList();
-            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur);
+            pinned[^1] = new GrowthPoint(target, snap.CurrentValueEur.Amount);
             growthSeries = pinned;
         }
 
-        // Resolve the focus instrument. Live mode initializes Pending; historical
-        // mode looks up the row (if any) and computes the focus-derived slice.
         var focusInstrument = ordered.SingleOrDefault(i => i.Ticker == focusTicker)
             ?? throw new InvalidOperationException(
                 $"Focus ticker '{focusTicker}' is not in the Instruments table.");
@@ -148,18 +149,22 @@ public sealed class LoadDashboardUseCase(
             focusDerived = FocusDerivedSlice.Empty;
         }
 
-        var entryNum  = await tradeRepo.CountAsync(new TradesAsOfSpec(target), ct);
+        // Trade-history reads now go through the Portfolio AR.
+        var asOfTrades = portfolio.Positions
+            .SelectMany(p => p.Trades)
+            .Where(t => t.ExecutedOn <= target)
+            .ToList();
+        var entryNum  = asOfTrades.Count;
+        var firstTrade = asOfTrades.OrderBy(t => t.ExecutedOn).FirstOrDefault();
+
         var latestBar = await priceRepo.FirstOrDefaultAsync(new LatestPriceBarSpec(focusTicker), ct);
 
-        // Goal pace.
-        var firstTrade = await tradeRepo.FirstOrDefaultAsync(new EarliestTradeSpec(), ct);
         var goalPace = GoalPaceCalculator.Compute(
-            currentValueEur: snap.CurrentValueEur,
+            currentValueEur: snap.CurrentValueEur.Amount,
             goal: goal,
             today: target,
             firstTradeDate: firstTrade?.ExecutedOn);
 
-        // Freshness pills.
         var nowUtc = DateTime.UtcNow;
         var fxLatest = await fxRepo.FirstOrDefaultAsync(new LatestFxRateSpec("EUR", "USD", target), ct);
         var priceAsOf = latestBar is { } lb
@@ -169,7 +174,6 @@ public sealed class LoadDashboardUseCase(
             ? RelativeTimeFormatter.Format(fxr.FetchedAt, nowUtc)
             : "";
 
-        // Navigation fields.
         var earliest = await nav.EarliestAsync(ct);
         var latest   = await nav.LatestAsync(ct);
         var prev     = await nav.PreviousAsync(target, ct);
@@ -227,13 +231,6 @@ public sealed class LoadDashboardUseCase(
         return slice;
     }
 
-    /// <summary>
-    /// Editorial event annotations plotted on the growth chart and elaborated
-    /// in the footnote rail beneath it. Hardcoded placeholder list — to be
-    /// replaced with a real persistence layer (or trade-derived inference)
-    /// once the design is locked. Dates align loosely with the seeded trade
-    /// history so the numerals visually anchor on the line during dev runs.
-    /// </summary>
     private static IReadOnlyList<CapitalEvent> SeedCapitalEvents() =>
     [
         new(new DateOnly(2025, 12, 7), "i",
@@ -250,4 +247,3 @@ public sealed class LoadDashboardUseCase(
             "Position rebuilt at lower cost basis; capital +18% YTD when written."),
     ];
 }
-

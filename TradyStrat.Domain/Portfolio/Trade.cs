@@ -48,4 +48,8 @@ public sealed class Trade
 
     public Money Gross => PricePerShare * Quantity;
     public Money Net   => Side == TradeSide.Buy ? Gross + Fees : Gross - Fees;
+
+    // Position assigns sequential IDs on Record so the AR can identify trades
+    // for DeleteTrade. EF mapping must use ValueGeneratedNever for TradeId.
+    internal void AssignId(TradeId id) => Id = id;
 }

@@ -2,6 +2,7 @@ using TradyStrat.Application.Dashboard;
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
 using TradyStrat.Application.Formatting;
 
 namespace TradyStrat.Features.Dashboard.Components;
@@ -18,26 +19,26 @@ public partial class HeroCapital : ComponentBase
     private decimal Pct => Snap.ProgressPct;
 
     // Cost basis of currently-held lots = principal still in market.
-    private decimal CostBasisEur => Snap.Shares * Snap.AvgCostEur;
+    private decimal CostBasisEur => Snap.Shares * Snap.AvgCostEur.Amount;
     private decimal Goal100 => Goal.TargetEur <= 0m ? 1m : Goal.TargetEur;
 
     // All percentages are vs. goal so the bar adds up to ProgressPct.
     private decimal CostBasisPct  => Clamp01(CostBasisEur / Goal100 * 100m);
-    private decimal RealizedPct   => Clamp01(Math.Max(0m, Snap.RealizedPnLEur) / Goal100 * 100m);
-    private decimal UnrealizedAbsPct => Clamp01(Math.Abs(Snap.UnrealizedPnLEur) / Goal100 * 100m);
-    private decimal CurrentPct    => Clamp01(Snap.CurrentValueEur / Goal100 * 100m);
+    private decimal RealizedPct   => Clamp01(Math.Max(0m, Snap.RealizedPnLEur.Amount) / Goal100 * 100m);
+    private decimal UnrealizedAbsPct => Clamp01(Math.Abs(Snap.UnrealizedPnLEur.Amount) / Goal100 * 100m);
+    private decimal CurrentPct    => Clamp01(Snap.CurrentValueEur.Amount / Goal100 * 100m);
 
     // Where the required-CAGR plan says you should be today, as % of goal.
     // Returns -1 when not applicable (no live pace) ⇒ caller skips rendering.
     private decimal PlanPct =>
         GoalPace.Mode == GoalPaceMode.Active
-            ? Clamp01((Snap.CurrentValueEur - GoalPace.VsPlanEur) / Goal100 * 100m)
+            ? Clamp01((Snap.CurrentValueEur.Amount - GoalPace.VsPlanEur) / Goal100 * 100m)
             : -1m;
 
     // When unrealized < 0, principal segment must NOT extend past current —
     // the "loss" hashed segment fills the gap from current back to cost.
     private decimal PrincipalShownPct =>
-        Snap.UnrealizedPnLEur < 0m
+        Snap.UnrealizedPnLEur.Amount < 0m
             ? Math.Max(0m, CostBasisPct - UnrealizedAbsPct)
             : CostBasisPct;
 
@@ -51,7 +52,7 @@ public partial class HeroCapital : ComponentBase
 
     private string AriaSummary =>
         $"Progress {NumberFormat.Pct(Pct)} — own capital {NumberFormat.Eur(CostBasisEur)}, " +
-        $"unrealized {NumberFormat.SignedEur(Snap.UnrealizedPnLEur)}, realized {NumberFormat.SignedEur(Snap.RealizedPnLEur)}";
+        $"unrealized {NumberFormat.SignedEur(Snap.UnrealizedPnLEur.Amount)}, realized {NumberFormat.SignedEur(Snap.RealizedPnLEur.Amount)}";
 
     private string? DaysLeft(DateOnly target)
     {

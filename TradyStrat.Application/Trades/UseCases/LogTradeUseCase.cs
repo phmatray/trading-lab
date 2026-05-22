@@ -1,7 +1,11 @@
 using Ardalis.Specification;
+using TradyStrat.Application.Portfolio;
+using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.Trades.UseCases;
 
@@ -10,29 +14,32 @@ public sealed record LogTradeInput(
     decimal Quantity, decimal PricePerShare, decimal FeesEur, string? Note);
 
 public sealed class LogTradeUseCase(
-    IRepositoryBase<Trade> repo, IClock clock,
+    IPortfolioRepository portfolios,
+    IReadRepositoryBase<Instrument> instruments,
+    IClock clock,
     ILogger<LogTradeUseCase> log)
-    : UseCaseBase<LogTradeInput, Trade>(log)
+    : UseCaseBase<LogTradeInput, TradeRecorded>(log)
 {
-    protected override async Task<Trade> ExecuteCore(LogTradeInput input, CancellationToken ct)
+    protected override async Task<TradeRecorded> ExecuteCore(LogTradeInput input, CancellationToken ct)
     {
-        if (input.Quantity <= 0m)       throw new TradeValidationException("Quantity must be positive.");
-        if (input.PricePerShare <= 0m)  throw new TradeValidationException("Price per share must be positive.");
-        if (input.FeesEur < 0m)         throw new TradeValidationException("Fees cannot be negative.");
+        var instrument = await instruments.GetByIdAsync(input.InstrumentId, ct)
+            ?? throw new InstrumentNotFoundException($"Instrument {input.InstrumentId} not found.");
+        var portfolio = await portfolios.GetAsync(ct);
 
-        var trade = new Trade
-        {
-            Id = 0,
-            InstrumentId  = input.InstrumentId,
-            ExecutedOn    = input.ExecutedOn,
-            Side          = input.Side,
-            Quantity      = input.Quantity,
-            PricePerShare = input.PricePerShare,
-            FeesEur       = input.FeesEur,
-            Note          = input.Note,
-            CreatedAt     = clock.UtcNow(),
-        };
-        await repo.AddAsync(trade, ct);
-        return trade;
+        var instrumentCurrency = Currency.Parse(instrument.Currency);
+
+        var quantity = Quantity.Of(input.Quantity);
+        var price    = Price.Of(Money.Of(input.PricePerShare, instrumentCurrency));
+        var fees     = Money.Of(input.FeesEur, Currency.Eur);
+
+        var result = portfolio.RecordTrade(
+            new InstrumentId(instrument.Id),
+            input.ExecutedOn, input.Side,
+            quantity, price, fees,
+            input.Note ?? "",
+            clock.UtcNow());
+
+        await portfolios.SaveAsync(portfolio, ct);
+        return result;
     }
 }

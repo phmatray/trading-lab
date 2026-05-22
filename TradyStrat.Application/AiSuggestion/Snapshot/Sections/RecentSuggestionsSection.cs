@@ -1,25 +1,26 @@
 using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Specifications;
 using TradyStrat.Application.Fx;
+using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.PriceFeed.Specifications;
 using TradyStrat.Application.Settings.UseCases;
-using TradyStrat.Application.Trades.Specifications;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 
 /// <summary>
-/// Closed-loop outcome-feedback section (spec §4.2).
-/// For each of the last 30 suggestions on this instrument, emits a row carrying
-/// the original action/conviction/rationale-headline plus computed forward-window
-/// fields: 5-bar forward return, was-correct (via <see cref="ICorrectnessRule"/>),
+/// Closed-loop outcome-feedback section. For each of the last 30 suggestions on
+/// this instrument, emits a row carrying the original action/conviction/rationale
+/// plus computed forward-window fields: 5-bar forward return, was-correct,
 /// is-forward-window-complete sentinel, and optional net trade cash flow in EUR.
 /// </summary>
 public sealed class RecentSuggestionsSection(
     IReadRepositoryBase<Suggestion> suggestionRepo,
     IReadRepositoryBase<PriceBar> barRepo,
-    IReadRepositoryBase<Trade> tradeRepo,
+    IPortfolioRepository portfolios,
     ListInstrumentsUseCase listInstruments,
     FxConverter fx,
     ICorrectnessRule correctness,
@@ -45,28 +46,29 @@ public sealed class RecentSuggestionsSection(
         var ticker = instrument.Ticker;
         var currency = instrument.Currency;
 
+        var portfolio = await portfolios.GetAsync(ct);
+
         foreach (var s in ordered)
         {
             var bars = await barRepo.ListAsync(
                 new PriceBarsSinceSpec(ticker, s.ForDate), ct);
 
-            if (bars.Count < 1) continue;                       // closeAt missing — skip
+            if (bars.Count < 1) continue;
 
             var fwdPct = await forwardReturn.ComputeAsync(ticker, s.ForDate, ct);
 
             if (fwdPct is null)
             {
-                // Forward window incomplete — emit context-only row.
                 builder.RecentSuggestions.Add(BuildRow(s, fwdReturnPct: 0m, wasCorrect: false,
                     isComplete: false, netFlowEur: null));
                 continue;
             }
 
-            // PriceBarsSinceSpec is >= s.ForDate; take the first ForwardBars+1 bars.
             var window = bars.Take(ForwardBars + 1).ToArray();
             var fwdBar = window[ForwardBars];
             var wasCorrect = correctness.Evaluate(s.Action, fwdPct.Value);
-            var netFlowEur = await ComputeNetFlowEurAsync(instrumentId, s.ForDate, fwdBar.Date, currency, ct);
+            var netFlowEur = await ComputeNetFlowEurAsync(
+                portfolio, new InstrumentId(instrumentId), s.ForDate, fwdBar.Date, currency, ct);
 
             builder.RecentSuggestions.Add(BuildRow(s, fwdPct.Value, wasCorrect,
                 isComplete: true, netFlowEur));
@@ -74,17 +76,22 @@ public sealed class RecentSuggestionsSection(
     }
 
     private async Task<decimal?> ComputeNetFlowEurAsync(
-        int instrumentId, DateOnly after, DateOnly through, string currency, CancellationToken ct)
+        global::TradyStrat.Domain.Portfolio.Portfolio portfolio,
+        InstrumentId instrumentId, DateOnly after, DateOnly through, string currency, CancellationToken ct)
     {
-        var trades = await tradeRepo.ListAsync(
-            new TradesOnInstrumentInWindowSpec(instrumentId, after, through), ct);
+        var position = portfolio.Positions.FirstOrDefault(p => p.InstrumentId == instrumentId);
+        if (position is null) return null;
+
+        var trades = position.Trades
+            .Where(t => t.ExecutedOn > after && t.ExecutedOn <= through)
+            .ToList();
         if (trades.Count == 0) return null;
 
         decimal sum = 0m;
         foreach (var t in trades)
         {
             var sign = t.Side == TradeSide.Buy ? -1m : 1m;
-            var notional = sign * t.Quantity * t.PricePerShare;
+            var notional = sign * t.Quantity.Value * t.PricePerShare.PerUnit.Amount;
             var notionalEur = string.Equals(currency, "EUR", StringComparison.OrdinalIgnoreCase)
                 ? notional
                 : await fx.ToEurAsync(notional, currency, t.ExecutedOn, ct);
