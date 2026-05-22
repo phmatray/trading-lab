@@ -196,8 +196,8 @@ public sealed class Portfolio
             var hasInst  = instrumentById.TryGetValue(pos.InstrumentId, out var inst);
             var hasPrice = priceByInstrument.TryGetValue(pos.InstrumentId, out var price);
 
-            var ticker   = hasInst  ? inst!.Ticker   : "?";
-            var currency = hasInst  ? inst!.Currency : "?";
+            var ticker   = hasInst  ? inst!.Ticker        : "?";
+            var currency = hasInst  ? inst!.Currency.Code : "?";
 
             var qty = pos.TotalQuantity;
             var costBasis = pos.CostBasis;
