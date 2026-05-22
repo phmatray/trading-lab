@@ -2,6 +2,7 @@
   <PropertyGroup>
     <RootNamespace>TradyStrat.Application</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <!-- Mirror the Web SDK's implicit logging using so files moved from the
