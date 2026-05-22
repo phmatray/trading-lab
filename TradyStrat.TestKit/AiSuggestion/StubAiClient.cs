@@ -1,12 +1,10 @@
-using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Domain;
 
 namespace TradyStrat.TestKit.AiSuggestion;
 
-public sealed class StubAiClient(Suggestion suggestion) : IAiClient
+public sealed class StubAiClient(AiResponse response) : IAiClient
 {
-    public Task<Suggestion> AskAsync(AiSnapshot snapshot, CancellationToken ct)
-        => Task.FromResult(suggestion);
+    public Task<AiResponse> AskAsync(AiSnapshot snapshot, CancellationToken ct)
+        => Task.FromResult(response);
 }

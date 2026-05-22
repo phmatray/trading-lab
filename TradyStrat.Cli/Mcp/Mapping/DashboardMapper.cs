@@ -55,10 +55,10 @@ internal static class DashboardMapper
         var suggestion = focusSuggestion is null ? null : new SuggestionBrief(
             Date: focusSuggestion.ForDate,
             Action: focusSuggestion.Action.ToString(),
-            Conviction: focusSuggestion.Conviction,
+            Conviction: focusSuggestion.Conviction.Value,
             Reasoning: focusSuggestion.Rationale,
-            EnvelopeHash: Truncate(focusSuggestion.EnvelopeHash),
-            PromptVersionHash: Truncate(focusSuggestion.PromptVersionHash));
+            EnvelopeHash: Truncate(focusSuggestion.Fingerprint.EnvelopeHash),
+            PromptVersionHash: Truncate(focusSuggestion.Fingerprint.PromptVersionHash));
 
         var position = BuildPosition(vm);
 

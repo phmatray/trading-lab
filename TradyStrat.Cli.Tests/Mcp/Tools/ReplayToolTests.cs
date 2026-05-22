@@ -5,6 +5,7 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Cli.Mcp.Tools;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Suggestions;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;

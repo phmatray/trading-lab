@@ -1,32 +1,30 @@
 using Shouldly;
 using TradyStrat.Application.AiSuggestion.CallDiff;
-using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.AiSuggestion.CallDiff;
 
 public class CallDiffBuilderTests
 {
-    private static readonly System.Text.Json.JsonSerializerOptions CitationOpts = new()
-    {
-        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower,
-        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter(
-            System.Text.Json.JsonNamingPolicy.SnakeCaseLower) },
-    };
-
     private static Suggestion Make(
         SuggestionAction action, int conviction, params (string Indicator, string Ticker, string Value)[] cits)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(
-            cits.Select(c => new Citation("", c.Indicator, c.Ticker, c.Value)).ToList(),
-            CitationOpts);
-        return new Suggestion
-        {
-            Id = 0, InstrumentId = 1, ForDate = new DateOnly(2026, 5, 7),
-            Action = action, Conviction = conviction,
-            Rationale = "", CitationsJson = json, PromptHash = "h",
-            CreatedAt = DateTime.UtcNow,
-        };
+        var citations = cits.Select(c => new Citation("", c.Indicator, c.Ticker, c.Value)).ToList();
+        return Suggestion.From(
+            instrumentId: new InstrumentId(1),
+            forDate:      new DateOnly(2026, 5, 7),
+            action:       action,
+            quantityHint: Quantity.None,
+            maxPriceHint: Price.None(Currency.Eur),
+            conviction:   Conviction.Of(conviction),
+            rationale:    "x",
+            citations:    citations,
+            snapshot:     MarketSnapshot.Empty,
+            fingerprint:  PromptFingerprint.Of("h", "", ""),
+            thinkingText: "",
+            createdAt:    DateTime.UtcNow);
     }
 
     [Fact]
