@@ -112,6 +112,58 @@ public sealed class Portfolio
         return BuildSnapshot(tempPortfolio._positions, instrumentById, priceByInstrument, goalTarget);
     }
 
+    public IReadOnlyList<GrowthPoint> GrowthSeries(
+        IReadOnlyDictionary<InstrumentId, IReadOnlyList<PriceBar>> barsByInstrument)
+    {
+        // Faithful port of legacy GrowthSeriesBuilder. Single-ticker today (extended
+        // to multi-instrument: per-bar value sums shares×close across instruments).
+        var allTrades = _positions.SelectMany(p => p.Trades.Select(t => (p.InstrumentId, t)))
+                                  .OrderBy(x => x.t.ExecutedOn)
+                                  .ToList();
+        if (allTrades.Count == 0) return [];
+
+        var allBarDates = barsByInstrument.Values
+            .SelectMany(bars => bars.Select(b => b.Date))
+            .Distinct()
+            .OrderBy(d => d)
+            .ToList();
+        if (allBarDates.Count == 0) return [];
+
+        var firstTradeDate = allTrades[0].t.ExecutedOn;
+        var points = new List<GrowthPoint>(allBarDates.Count + 1)
+        {
+            // Synthetic leading zero: one day before first trade.
+            new(firstTradeDate.AddDays(-1), 0m),
+        };
+
+        var sharesByInstrument = new Dictionary<InstrumentId, decimal>();
+        var tradesByDate = allTrades
+            .GroupBy(x => x.t.ExecutedOn)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var date in allBarDates)
+        {
+            if (tradesByDate.TryGetValue(date, out var todays))
+                foreach (var (iid, t) in todays)
+                {
+                    var delta = t.IsBuy ? t.Quantity.Value : -t.Quantity.Value;
+                    sharesByInstrument[iid] = sharesByInstrument.GetValueOrDefault(iid) + delta;
+                }
+
+            var totalValue = 0m;
+            foreach (var (iid, bars) in barsByInstrument)
+            {
+                var bar = bars.FirstOrDefault(b => b.Date == date);
+                if (bar is null) continue;
+                var shares = sharesByInstrument.GetValueOrDefault(iid);
+                totalValue += shares * bar.Close;
+            }
+            points.Add(new GrowthPoint(date, totalValue));
+        }
+
+        return points;
+    }
+
     private static PortfolioSnapshot BuildSnapshot(
         List<Position> positions,
         IReadOnlyDictionary<InstrumentId, Instrument> instrumentById,
