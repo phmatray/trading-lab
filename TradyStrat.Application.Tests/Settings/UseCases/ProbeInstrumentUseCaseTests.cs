@@ -1,27 +1,28 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 using Xunit;
 
-namespace TradyStrat.Infrastructure.Tests.Settings.UseCases;
+namespace TradyStrat.Application.Tests.Settings.UseCases;
 
 public class ProbeInstrumentUseCaseTests
 {
-    private sealed class FakePriceFeed(InstrumentMetadata? meta = null,
-                                       Exception? throwOnMeta = null) : IPriceFeed
+    private sealed class FakePriceFeed(Instrument? probed = null,
+                                       Exception? throwOnProbe = null) : IPriceFeed
     {
         public Task<IReadOnlyList<PriceBar>> FetchDailyAsync(
             string ticker, DateOnly from, DateOnly to, CancellationToken ct)
             => throw new NotImplementedException();
 
-        public Task<InstrumentMetadata> GetInstrumentMetadataAsync(string ticker, CancellationToken ct)
-            => throwOnMeta is null
-                ? Task.FromResult(meta!)
-                : Task.FromException<InstrumentMetadata>(throwOnMeta);
+        public Task<Instrument> ProbeAsync(string ticker, CancellationToken ct)
+            => throwOnProbe is null
+                ? Task.FromResult(probed!)
+                : Task.FromException<Instrument>(throwOnProbe);
     }
 
     private sealed class FakeFxProvider : IFxRateProvider
@@ -33,17 +34,26 @@ public class ProbeInstrumentUseCaseTests
     }
 
     [Fact]
-    public async Task Returns_metadata_for_eur_instrument()
+    public async Task Returns_probed_instrument_for_eur_instrument()
     {
-        var meta = new InstrumentMetadata(
-            "ETHE.PA", "WisdomTree Physical Ethereum", "EUR", "Euronext Paris", "Europe/Paris");
+        var probed = Instrument.Probed(
+            ticker:     "ETHE.PA",
+            name:       "WisdomTree Physical Ethereum",
+            currency:   Currency.Eur,
+            exchange:   Exchange.Of("Euronext Paris"),
+            timezoneId: TimezoneId.Of("Europe/Paris"),
+            kind:       InstrumentKind.Held);
         var sut = new ProbeInstrumentUseCase(
-            new FakePriceFeed(meta), new FakeFxProvider(),
+            new FakePriceFeed(probed), new FakeFxProvider(),
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
-        var result = await sut.ExecuteAsync(new ProbeInstrumentInput("ethe.pa"), TestContext.Current.CancellationToken);
+        var result = await sut.ExecuteAsync(
+            new ProbeInstrumentInput("ethe.pa", InstrumentKind.Held),
+            TestContext.Current.CancellationToken);
 
-        result.ShouldBe(meta);
+        result.Ticker.ShouldBe("ETHE.PA");
+        result.Currency.ShouldBe(Currency.Eur);
+        result.Kind.ShouldBe(InstrumentKind.Held);
     }
 
     [Fact]
@@ -54,18 +64,22 @@ public class ProbeInstrumentUseCaseTests
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
         await Should.ThrowAsync<InstrumentNotFoundException>(
-            () => sut.ExecuteAsync(new ProbeInstrumentInput("  "), TestContext.Current.CancellationToken));
+            () => sut.ExecuteAsync(
+                new ProbeInstrumentInput("  ", InstrumentKind.Held),
+                TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task Bubbles_provider_exception_unchanged()
     {
         var sut = new ProbeInstrumentUseCase(
-            new FakePriceFeed(throwOnMeta: new InstrumentNotFoundException("nope")),
+            new FakePriceFeed(throwOnProbe: new InstrumentNotFoundException("nope")),
             new FakeFxProvider(),
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
         await Should.ThrowAsync<InstrumentNotFoundException>(
-            () => sut.ExecuteAsync(new ProbeInstrumentInput("XYZ"), TestContext.Current.CancellationToken));
+            () => sut.ExecuteAsync(
+                new ProbeInstrumentInput("XYZ", InstrumentKind.Held),
+                TestContext.Current.CancellationToken));
     }
 }

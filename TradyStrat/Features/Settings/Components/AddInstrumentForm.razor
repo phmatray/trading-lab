@@ -26,11 +26,11 @@
             <dt>Found</dt>
             <dd>@meta.Name</dd>
             <dt>Currency</dt>
-            <dd>@meta.Currency</dd>
+            <dd>@meta.Currency.Code</dd>
             <dt>Exchange</dt>
-            <dd>@meta.Exchange</dd>
+            <dd>@meta.Exchange.Code</dd>
             <dt>Timezone</dt>
-            <dd>@meta.TimezoneId</dd>
+            <dd>@meta.Timezone.Value</dd>
         </dl>
         <div class="kind-pick">
             <label><input type="radio" name="kind"
@@ -60,7 +60,7 @@
     [Parameter] public EventCallback OnAdded { get; set; }
 
     private string _ticker = "";
-    private InstrumentMetadata? _probed;
+    private Instrument? _probed;
     private InstrumentKind _kind = InstrumentKind.Held;
     private bool _busy;
     private string? _err;
@@ -71,7 +71,8 @@
         _busy = true; _err = null; _ok = null;
         try
         {
-            _probed = await Probe.ExecuteAsync(new ProbeInstrumentInput(_ticker), CancellationToken.None);
+            _probed = await Probe.ExecuteAsync(
+                new ProbeInstrumentInput(_ticker, _kind), CancellationToken.None);
         }
         catch (TradyStratException ex) { _err = ex.Message; }
         finally { _busy = false; }
@@ -83,8 +84,14 @@
         _busy = true; _err = null; _ok = null;
         try
         {
+            // _probed already carries Kind from the probe — re-stamping happens
+            // upstream in ProbeInstrumentUseCase whenever the radio toggles.
+            var withKind = _probed.Kind == _kind
+                ? _probed
+                : await Probe.ExecuteAsync(
+                      new ProbeInstrumentInput(_ticker, _kind), CancellationToken.None);
             var inst = await Add.ExecuteAsync(
-                new AddInstrumentInput(_probed, _kind), CancellationToken.None);
+                new AddInstrumentInput(withKind), CancellationToken.None);
             _ok = $"Added {inst.Ticker} as {inst.Kind}.";
             Reset();
             await OnAdded.InvokeAsync();

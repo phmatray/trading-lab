@@ -23,6 +23,6 @@ internal sealed class ReplayTool(
         var inst = await guards.ResolveInstrumentOrThrow(instrument, ct);
         var (f, t) = Guards.ResolveDateRange(from, to, defaultBack: 0, clockToday: clock.TodayLocal());
         return await useCase.ExecuteAsync(
-            new ReplaySuggestionsInput(inst.Id, f, t, Persist: false, Force: false), ct);
+            new ReplaySuggestionsInput(inst.Id.Value, f, t, Persist: false, Force: false), ct);
     }
 }

@@ -65,7 +65,7 @@ public partial class TradesPage : ComponentBase
         }).ToList();
 
         var instruments = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
-        _instrumentTickers = instruments.ToDictionary(i => i.Id, i => i.Ticker);
+        _instrumentTickers = instruments.ToDictionary(i => i.Id.Value, i => i.Ticker);
     }
 
     private string TickerFor(int instrumentId) =>

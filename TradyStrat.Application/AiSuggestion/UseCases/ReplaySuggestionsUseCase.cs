@@ -1,6 +1,7 @@
 using Ardalis.Specification;
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.PriceFeed.Specifications;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Shared;
@@ -19,7 +20,7 @@ public sealed class ReplaySuggestionsUseCase(
     IAiSnapshotService snapshots,
     IAiClient ai,
     IReadRepositoryBase<PriceBar> bars,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     ISuggestionRepository suggestionRepo,
     ICorrectnessRule correctness,
     IClock clock,
@@ -30,7 +31,7 @@ public sealed class ReplaySuggestionsUseCase(
 
     protected override async Task<ReplayReport> ExecuteCore(ReplaySuggestionsInput input, CancellationToken ct)
     {
-        var instrument = await instruments.GetByIdAsync(input.InstrumentId, ct)
+        var instrument = await instruments.GetAsync(new InstrumentId(input.InstrumentId), ct)
             ?? throw new InvalidOperationException($"Instrument id {input.InstrumentId} not found.");
         var ticker = instrument.Ticker;
         var iid = new InstrumentId(input.InstrumentId);

@@ -1,5 +1,6 @@
 using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.TestKit;
 
@@ -16,6 +17,12 @@ public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars) : IPriceFeed
         return Task.FromResult(bars);
     }
 
-    public Task<InstrumentMetadata> GetInstrumentMetadataAsync(string ticker, CancellationToken ct)
-        => throw new NotImplementedException();
+    public Task<Instrument> ProbeAsync(string ticker, CancellationToken ct)
+        => Task.FromResult(Instrument.Probed(
+            ticker:     ticker,
+            name:       $"Stub {ticker}",
+            currency:   Currency.Eur,
+            exchange:   Exchange.Of("STUB"),
+            timezoneId: TimezoneId.Of("UTC"),
+            kind:       InstrumentKind.Held));
 }

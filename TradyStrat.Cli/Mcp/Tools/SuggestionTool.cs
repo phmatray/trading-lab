@@ -44,7 +44,7 @@ internal sealed class SuggestionTool(
         var (f, t) = Guards.ResolveDateRange(from, to, defaultBack: 90, clockToday: clock.TodayLocal());
 
         var output = await useCase.ExecuteAsync(
-            new QuerySuggestionsInput(inst.Id, f, t, parsedAction, limit), ct);
+            new QuerySuggestionsInput(inst.Id.Value, f, t, parsedAction, limit), ct);
         return SuggestionMapper.ToPage(output, ticker, f, t);
     }
 }

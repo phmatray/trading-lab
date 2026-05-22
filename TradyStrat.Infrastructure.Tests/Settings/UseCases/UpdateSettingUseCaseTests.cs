@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
+using TradyStrat.Infrastructure.Settings;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.TestKit.Time;     // FakeClock
@@ -15,12 +17,16 @@ namespace TradyStrat.Infrastructure.Tests.Settings.UseCases;
 
 public class UpdateSettingUseCaseTests
 {
-    private static Instrument MakeInstrument(string ticker) => new()
-    {
-        Id = 0, Ticker = ticker, Name = ticker, Currency = "USD",
-        Exchange = "LSE", TimezoneId = "Europe/London",
-        Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument MakeInstrument(string ticker)
+        => Instrument.Existing(
+            id:         new InstrumentId(0),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("LSE"),
+            timezoneId: TimezoneId.Of("Europe/London"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 
     private static async Task<(UpdateSettingUseCase uc, ISettingsService svc)> Build(AppDbContext db, params string[] tickers)
     {
@@ -29,7 +35,7 @@ public class UpdateSettingUseCaseTests
 
         var svc = new SettingsService(new TestRepo<SettingEntry>(db), new SettingsRegistry(), db,
             new FakeClock(new DateTime(2026, 5, 11, 12, 0, 0, DateTimeKind.Utc)));
-        var uc = new UpdateSettingUseCase(new SettingsRegistry(), new TestRepo<Instrument>(db), svc,
+        var uc = new UpdateSettingUseCase(new SettingsRegistry(), new EfInstrumentRepository(db), svc,
             NullLogger<UpdateSettingUseCase>.Instance);
         return (uc, svc);
     }

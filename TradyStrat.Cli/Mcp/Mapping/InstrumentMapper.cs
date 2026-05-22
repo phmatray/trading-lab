@@ -9,8 +9,8 @@ internal static class InstrumentMapper
         => new(
             Ticker: inst.Ticker,
             DisplayName: inst.Name,
-            Currency: inst.Currency,
-            Timezone: inst.TimezoneId,
+            Currency: inst.Currency.Code,
+            Timezone: inst.Timezone.Value,
             Role: inst.Ticker == focusTicker ? InstrumentRole.Focus : InstrumentRole.Context);
 
     public static InstrumentListResponse ToResponse(IEnumerable<Instrument> instruments, string focusTicker)

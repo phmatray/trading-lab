@@ -1,16 +1,17 @@
-using TradyStrat.Infrastructure.Fx;
-using TradyStrat.Infrastructure.PriceFeed;
-using TradyStrat.Infrastructure.Settings.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
-using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
-using TradyStrat.TestKit;                  // TestRepo<T>
-using TradyStrat.TestKit.Specifications;       // InMemoryDb.Create()
+using TradyStrat.Domain;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Infrastructure.Data;
+using TradyStrat.Infrastructure.Fx;
+using TradyStrat.Infrastructure.PriceFeed;
+using TradyStrat.Infrastructure.Settings;
+using TradyStrat.Infrastructure.Settings.UseCases;
+using TradyStrat.TestKit.Specifications;
 using Xunit;
 
 namespace TradyStrat.Infrastructure.Tests.Settings.UseCases;
@@ -31,8 +32,7 @@ public class AddInstrumentUseCaseTests
             => Task.FromException<IReadOnlyList<PriceBar>>(
                 new PriceFeedUnavailableException("simulated"));
 
-        public Task<InstrumentMetadata> GetInstrumentMetadataAsync(
-            string ticker, CancellationToken ct)
+        public Task<Instrument> ProbeAsync(string ticker, CancellationToken ct)
             => throw new NotImplementedException();
     }
 
@@ -44,8 +44,14 @@ public class AddInstrumentUseCaseTests
                 new FxRateUnavailableException("simulated"));
     }
 
-    private static InstrumentMetadata Probe(string ticker, string currency = "USD")
-        => new(ticker, ticker, currency, "NMS", "America/New_York");
+    private static Instrument Probe(string ticker, Currency? currency = null, InstrumentKind kind = InstrumentKind.Held)
+        => Instrument.Probed(
+            ticker:     ticker,
+            name:       ticker,
+            currency:   currency ?? Currency.Usd,
+            exchange:   Exchange.Of("NMS"),
+            timezoneId: TimezoneId.Of("America/New_York"),
+            kind:       kind);
 
     private static AddInstrumentUseCase NewSut(AppDbContext db)
     {
@@ -57,7 +63,7 @@ public class AddInstrumentUseCaseTests
             new ThrowingFxProvider(), db, clock,
             NullLogger<DailyFxCache>.Instance);
         return new AddInstrumentUseCase(
-            new TestRepo<Instrument>(db), price, fx, clock,
+            new EfInstrumentRepository(db), price, fx, clock,
             NullLogger<AddInstrumentUseCase>.Instance);
     }
 
@@ -68,7 +74,7 @@ public class AddInstrumentUseCaseTests
         var sut = NewSut(db);
 
         var inst = await sut.ExecuteAsync(
-            new AddInstrumentInput(Probe("ETHE.PA", "EUR"), InstrumentKind.Held),
+            new AddInstrumentInput(Probe("ETHE.PA", Currency.Eur)),
             TestContext.Current.CancellationToken);
 
         inst.Ticker.ShouldBe("ETHE.PA");
@@ -80,19 +86,22 @@ public class AddInstrumentUseCaseTests
     public async Task Throws_DuplicateInstrumentException_when_ticker_exists()
     {
         await using var db = InMemoryDb.Create();
-        db.Instruments.Add(new Instrument
-        {
-            Id = 0, Ticker = "CON3.L", Name = "x", Currency = "USD",
-            Exchange = "LSE", TimezoneId = "Europe/London",
-            Kind = InstrumentKind.Held, AddedAt = DateTime.UtcNow,
-        });
+        db.Instruments.Add(Instrument.Existing(
+            id:         new InstrumentId(1),
+            ticker:     "CON3.L",
+            name:       "x",
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("LSE"),
+            timezoneId: TimezoneId.Of("Europe/London"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow));
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = NewSut(db);
 
         await Should.ThrowAsync<DuplicateInstrumentException>(
             () => sut.ExecuteAsync(
-                new AddInstrumentInput(Probe("CON3.L"), InstrumentKind.Held),
+                new AddInstrumentInput(Probe("CON3.L")),
                 TestContext.Current.CancellationToken));
     }
 
@@ -105,7 +114,7 @@ public class AddInstrumentUseCaseTests
         var sut = NewSut(db);
 
         await sut.ExecuteAsync(
-            new AddInstrumentInput(Probe("XYZ", "USD"), InstrumentKind.Watchlist),
+            new AddInstrumentInput(Probe("XYZ", Currency.Usd, InstrumentKind.Watchlist)),
             TestContext.Current.CancellationToken);
 
         (await db.Instruments.CountAsync(
@@ -121,7 +130,7 @@ public class AddInstrumentUseCaseTests
         var sut = NewSut(db);
 
         await sut.ExecuteAsync(
-            new AddInstrumentInput(Probe("ETHE.PA", "EUR"), InstrumentKind.Held),
+            new AddInstrumentInput(Probe("ETHE.PA", Currency.Eur)),
             TestContext.Current.CancellationToken);
 
         (await db.Instruments.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(1);

@@ -31,7 +31,7 @@ public partial class AddTradeDialog : ComponentBase
 
         if (_heldInstruments.Count == 1)
         {
-            _instrumentId = _heldInstruments[0].Id;
+            _instrumentId = _heldInstruments[0].Id.Value;
         }
     }
 

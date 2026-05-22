@@ -1,6 +1,5 @@
-using Ardalis.Specification;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.Time;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
@@ -15,25 +14,23 @@ public sealed record LogTradeInput(
 
 public sealed class LogTradeUseCase(
     IPortfolioRepository portfolios,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     IClock clock,
     ILogger<LogTradeUseCase> log)
     : UseCaseBase<LogTradeInput, TradeRecorded>(log)
 {
     protected override async Task<TradeRecorded> ExecuteCore(LogTradeInput input, CancellationToken ct)
     {
-        var instrument = await instruments.GetByIdAsync(input.InstrumentId, ct)
+        var instrument = await instruments.GetAsync(new InstrumentId(input.InstrumentId), ct)
             ?? throw new InstrumentNotFoundException($"Instrument {input.InstrumentId} not found.");
         var portfolio = await portfolios.GetAsync(ct);
 
-        var instrumentCurrency = Currency.Parse(instrument.Currency);
-
         var quantity = Quantity.Of(input.Quantity);
-        var price    = Price.Of(Money.Of(input.PricePerShare, instrumentCurrency));
+        var price    = Price.Of(Money.Of(input.PricePerShare, instrument.Currency));
         var fees     = Money.Of(input.FeesEur, Currency.Eur);
 
         var result = portfolio.RecordTrade(
-            new InstrumentId(instrument.Id),
+            instrument.Id,
             input.ExecutedOn, input.Side,
             quantity, price, fees,
             input.Note ?? "",

@@ -1,8 +1,6 @@
-using Ardalis.Specification;
 using TradyStrat.Application.Portfolio;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.Config;
-using TradyStrat.Application.Settings.Specifications;
-using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
@@ -16,7 +14,7 @@ public sealed record ImportTradesCsvResult(int RowsImported);
 
 public sealed class ImportTradesCsvUseCase(
     IPortfolioRepository portfolios,
-    IReadRepositoryBase<Instrument> instruments,
+    IInstrumentRepository instruments,
     IClock clock,
     ISettingsReader settings,
     ILogger<ImportTradesCsvUseCase> log)
@@ -28,20 +26,18 @@ public sealed class ImportTradesCsvUseCase(
         ImportTradesCsvInput input, CancellationToken ct)
     {
         var focusTicker = await settings.FocusTickerAsync(ct);
-        var focus = await instruments.FirstOrDefaultAsync(
-            new InstrumentByTickerSpec(focusTicker), ct)
+        var focus = await instruments.FindByTickerAsync(focusTicker, ct)
             ?? throw new CsvImportException(
                 $"Focus instrument '{focusTicker}' is not registered.");
 
-        var focusCurrency = Currency.Parse(focus.Currency);
         var rows = CsvImportService.Parse(new StringReader(input.CsvText));
         var now  = clock.UtcNow();
 
         var drafts = rows.Select(r => new TradeDraft(
-            new InstrumentId(focus.Id),
+            focus.Id,
             r.ExecutedOn, r.Side,
             Quantity.Of(r.Quantity),
-            Price.Of(Money.Of(r.PricePerShare, focusCurrency)),
+            Price.Of(Money.Of(r.PricePerShare, focus.Currency)),
             Money.Of(r.FeesEur, Currency.Eur),
             r.Note ?? "")).ToList();
 

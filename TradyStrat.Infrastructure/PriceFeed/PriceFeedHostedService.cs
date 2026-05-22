@@ -24,8 +24,8 @@ public sealed partial class PriceFeedHostedService(
             await SafeWarmPriceAsync(price, inst.Ticker, cancellationToken);
 
         var quotes = instruments
-            .Where(i => !string.Equals(i.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
-            .Select(i => i.Currency.ToUpperInvariant())
+            .Where(i => i.Currency != TradyStrat.Domain.Shared.Currency.Eur)
+            .Select(i => i.Currency.Code)
             .Distinct();
 
         foreach (var quote in quotes)

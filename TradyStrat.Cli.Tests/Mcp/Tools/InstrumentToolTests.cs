@@ -5,7 +5,8 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Tools;
 using TradyStrat.Domain;
-using TradyStrat.TestKit;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
 
@@ -13,17 +14,16 @@ namespace TradyStrat.Cli.Tests.Mcp.Tools;
 
 public sealed class InstrumentToolTests
 {
-    private static Instrument MakeInstrument(int id, string ticker) => new()
-    {
-        Id = id,
-        Ticker = ticker,
-        Name = ticker,
-        Currency = "USD",
-        Exchange = "TEST",
-        TimezoneId = "Europe/London",
-        Kind = InstrumentKind.Held,
-        AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument MakeInstrument(int id, string ticker)
+        => Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Usd,
+            exchange:   Exchange.Of("TEST"),
+            timezoneId: TimezoneId.Of("Europe/London"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 
     private static async Task<InstrumentTool> BuildToolAsync(
         string focus,
@@ -34,7 +34,7 @@ public sealed class InstrumentToolTests
         db.Instruments.AddRange(instruments);
         await db.SaveChangesAsync(ct);
 
-        var repo = new TestRepo<Instrument>(db);
+        var repo = new EfInstrumentRepository(db);
         var useCase = new ListInstrumentsUseCase(repo, NullLogger<ListInstrumentsUseCase>.Instance);
 
         var config = new ConfigurationBuilder()

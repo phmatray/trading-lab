@@ -32,7 +32,7 @@ public sealed partial class GetAllTodaysSuggestionsUseCase(
             try
             {
                 var s = await singleTicker.ExecuteAsync(
-                    new GetTodaysSuggestionInput(inst.Id), ct);
+                    new GetTodaysSuggestionInput(inst.Id.Value), ct);
                 results.Add(s);
             }
             catch (TradyStratException ex)

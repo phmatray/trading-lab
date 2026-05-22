@@ -18,8 +18,8 @@ public sealed class RefreshAllPricesUseCase(
             await prices.EnsureFreshAsync(inst.Ticker, ct);
 
         var quotes = instruments
-            .Where(i => !string.Equals(i.Currency, "EUR", StringComparison.OrdinalIgnoreCase))
-            .Select(i => i.Currency.ToUpperInvariant())
+            .Where(i => i.Currency != TradyStrat.Domain.Shared.Currency.Eur)
+            .Select(i => i.Currency.Code)
             .Distinct();
 
         foreach (var quote in quotes)

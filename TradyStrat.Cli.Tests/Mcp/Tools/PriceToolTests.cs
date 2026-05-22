@@ -5,6 +5,8 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Cli.Mcp.Tools;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Shared;
+using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;
@@ -33,17 +35,16 @@ public sealed class PriceToolTests
 
     // ─── Fixture helpers ──────────────────────────────────────────────────────
 
-    private static Instrument MakeInstrument(int id, string ticker) => new()
-    {
-        Id = id,
-        Ticker = ticker,
-        Name = ticker,
-        Currency = "GBP",
-        Exchange = "LSE",
-        TimezoneId = "Europe/London",
-        Kind = InstrumentKind.Held,
-        AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument MakeInstrument(int id, string ticker)
+        => Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Gbp,
+            exchange:   Exchange.Of("LSE"),
+            timezoneId: TimezoneId.Of("Europe/London"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 
     private static PriceBar MakeBar(int id, string ticker, DateOnly date, decimal close = 100m) => new()
     {
@@ -68,7 +69,7 @@ public sealed class PriceToolTests
             db.Instruments.Add(MakeInstrument(i + 1, knownTickers[i]));
         await db.SaveChangesAsync(ct);
 
-        var repo = new TestRepo<Instrument>(db);
+        var repo = new EfInstrumentRepository(db);
         var listInstruments = new ListInstrumentsUseCase(repo, NullLogger<ListInstrumentsUseCase>.Instance);
         var guards = new Guards(listInstruments);
 

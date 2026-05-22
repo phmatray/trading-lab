@@ -174,7 +174,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
             var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
                 ?? throw new InvalidOperationException(
                     $"Focus ticker '{focusTicker}' is not in the Instruments table.");
-            await ForceRefetch.ExecuteAsync(new ForceRefetchSuggestionInput(focus.Id), ct);
+            await ForceRefetch.ExecuteAsync(new ForceRefetchSuggestionInput(focus.Id.Value), ct);
             await ReloadAsync();
 
             // Restart the stream — explicit cancel/restart so an in-flight stream from

@@ -48,17 +48,17 @@ public sealed class LoadDashboardUseCase(
             .OrderBy(i => i.Ticker == focusTicker ? 0 : i.Kind == InstrumentKind.Held ? 1 : 2)
             .ThenBy(i => i.Ticker, StringComparer.Ordinal)
             .ToList();
-        var instrumentById = ordered.ToDictionary(i => new InstrumentId(i.Id), i => i);
+        var instrumentById = ordered.ToDictionary(i => i.Id, i => i);
 
         IReadOnlyList<Suggestion> historicalRows = Array.Empty<Suggestion>();
-        Dictionary<int, SuggestionState?> historicalStates = new();
+        Dictionary<InstrumentId, SuggestionState?> historicalStates = new();
         if (input.IsHistorical)
         {
             var heldIds = ordered.Where(i => i.Kind == InstrumentKind.Held).Select(i => i.Id).ToList();
             var rows = new List<Suggestion>();
             foreach (var id in heldIds)
             {
-                var row = await suggestionRepo.GetForAsync(new InstrumentId(id), target, ct);
+                var row = await suggestionRepo.GetForAsync(id, target, ct);
                 if (row is not null) rows.Add(row);
                 historicalStates[id] = row is null ? null : new SuggestionState.Ready(row);
             }
@@ -71,9 +71,9 @@ public sealed class LoadDashboardUseCase(
         foreach (var inst in ordered)
         {
             var reading = await indicators.ComputeFor(inst.Ticker, target, ct);
-            decimal? eur = string.Equals(inst.Currency, "EUR", StringComparison.OrdinalIgnoreCase)
+            decimal? eur = inst.Currency == Currency.Eur
                 ? reading.Price
-                : await fx.ToEurAsync(reading.Price, inst.Currency, target, ct);
+                : await fx.ToEurAsync(reading.Price, inst.Currency.Code, target, ct);
 
             var deltaPct = await ComputeDeltaPctAsync(inst.Ticker, target, ct);
             var spark    = await ComputeSparkAsync(inst.Ticker, target, ct);
@@ -93,9 +93,9 @@ public sealed class LoadDashboardUseCase(
             }
 
             tickers.Add(new TickerView(
-                InstrumentId: inst.Id,
+                InstrumentId: inst.Id.Value,
                 Ticker:       inst.Ticker,
-                Currency:     inst.Currency,
+                Currency:     inst.Currency.Code,
                 Price:        reading.Price,
                 PriceEur:     eur,
                 DeltaPct:     deltaPct,
@@ -104,7 +104,7 @@ public sealed class LoadDashboardUseCase(
                 CallState:    callState));
 
             if (inst.Kind == InstrumentKind.Held && eur is { } e)
-                priceMap[new InstrumentId(inst.Id)] = Price.Of(Money.Of(e, Currency.Eur));
+                priceMap[inst.Id] = Price.Of(Money.Of(e, Currency.Eur));
         }
 
         var portfolio = await portfolios.GetAsync(ct);
@@ -118,7 +118,7 @@ public sealed class LoadDashboardUseCase(
         var barsByInstrument = focusId is null
             ? new Dictionary<InstrumentId, IReadOnlyList<PriceBar>>()
             : new Dictionary<InstrumentId, IReadOnlyList<PriceBar>> {
-                [new InstrumentId(focusId.Id)] = focusBars,
+                [focusId.Id] = focusBars,
             };
         var growthSeries = portfolio.GrowthSeries(barsByInstrument);
 
@@ -137,8 +137,7 @@ public sealed class LoadDashboardUseCase(
         FocusDerivedSlice focusDerived;
         if (input.IsHistorical)
         {
-            var focusIid = new InstrumentId(focusInstrument.Id);
-            var focusRow = historicalRows.SingleOrDefault(s => s.InstrumentId == focusIid);
+            var focusRow = historicalRows.SingleOrDefault(s => s.InstrumentId == focusInstrument.Id);
             focusState = focusRow is null ? null : new SuggestionState.Ready(focusRow);
             focusDerived = focusRow is null
                 ? FocusDerivedSlice.Empty

@@ -11,12 +11,16 @@ public class PortfolioSnapshotTests
 {
     private static readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
-    private static Instrument Inst(int id, string ticker, string currency) => new()
-    {
-        Id = id, Ticker = ticker, Name = ticker, Currency = currency,
-        Exchange = "X", TimezoneId = "UTC", Kind = InstrumentKind.Held,
-        AddedAt = DateTime.UtcNow,
-    };
+    private static Instrument Inst(int id, string ticker, string currency)
+        => Instrument.Existing(
+            id:         new InstrumentId(id),
+            ticker:     ticker,
+            name:       ticker,
+            currency:   Currency.Parse(currency),
+            exchange:   Exchange.Of("X"),
+            timezoneId: TimezoneId.Of("UTC"),
+            kind:       InstrumentKind.Held,
+            addedAt:    DateTime.UtcNow);
 
     [Fact]
     public void Empty_portfolio_snapshot_is_zero()

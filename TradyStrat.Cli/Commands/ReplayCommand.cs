@@ -1,17 +1,15 @@
 using TradyStrat.Domain.Suggestions;
 using System.ComponentModel;
-using Ardalis.Specification;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using TradyStrat.Application.AiSuggestion.UseCases;
-using TradyStrat.Application.Settings.Specifications;
-using TradyStrat.Domain;
+using TradyStrat.Application.Settings;
 
 namespace TradyStrat.Cli.Commands;
 
 internal sealed class ReplayCommand(
     ReplaySuggestionsUseCase useCase,
-    IReadRepositoryBase<Instrument> instruments) : AsyncCommand<ReplayCommand.Settings>
+    IInstrumentRepository instruments) : AsyncCommand<ReplayCommand.Settings>
 {
     public sealed class Settings : CommandSettings
     {
@@ -42,7 +40,7 @@ internal sealed class ReplayCommand(
             ? DateOnly.Parse(s, System.Globalization.CultureInfo.InvariantCulture)
             : until.AddDays(-90);
 
-        var inst = await instruments.FirstOrDefaultAsync(new InstrumentByTickerSpec(settings.Instrument), ct);
+        var inst = await instruments.FindByTickerAsync(settings.Instrument, ct);
         if (inst is null)
         {
             AnsiConsole.MarkupLine($"[red]Instrument not found:[/] {settings.Instrument}");
@@ -50,7 +48,7 @@ internal sealed class ReplayCommand(
         }
 
         var report = await useCase.ExecuteAsync(
-            new ReplaySuggestionsInput(inst.Id, since, until, settings.Persist, settings.Force), ct);
+            new ReplaySuggestionsInput(inst.Id.Value, since, until, settings.Persist, settings.Force), ct);
 
         Render(report, settings);
         return 0;
