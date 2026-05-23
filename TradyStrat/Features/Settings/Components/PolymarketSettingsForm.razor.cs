@@ -1,16 +1,19 @@
-using System.Globalization;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings.Polymarket;
 
 namespace TradyStrat.Features.Settings.Components;
 
 public partial class PolymarketSettingsForm : ComponentBase
 {
+    [Inject] private IPolymarketSettingsRepository PolymarketRepo { get; set; } = default!;
+    [Inject] private UpdatePolymarketSettingsUseCase UpdatePolymarket { get; set; } = default!;
+    // Kept solely for LastUpdatedAsync(Keys) — removed in Phase 6 Task 12 with ISettingsReader.
     [Inject] private ISettingsReader Settings { get; set; } = default!;
-    [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
     private static readonly string[] Keys =
     [
@@ -35,7 +38,7 @@ public partial class PolymarketSettingsForm : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        var p = await Settings.PolymarketAsync(CancellationToken.None);
+        var p = await PolymarketRepo.GetAsync(CancellationToken.None);
         _queriesText = string.Join(", ", p.SearchQueries.Values);
         _initialQueriesJson = JsonSerializer.Serialize(p.SearchQueries.Values.ToArray());
         _maxMarkets = _initialMaxMarkets = p.MaxMarkets.Value;
@@ -58,34 +61,36 @@ public partial class PolymarketSettingsForm : ComponentBase
         _busy = true; _msg = null; _isError = false;
         try
         {
-            var changed = 0;
-
             var queries = ParseQueries(_queriesText);
             var queriesJson = JsonSerializer.Serialize(queries);
-            if (queriesJson != _initialQueriesJson)
+
+            var hasChanges =
+                queriesJson != _initialQueriesJson
+                || _maxMarkets != _initialMaxMarkets
+                || _minVolumeUsd != _initialMinVolumeUsd
+                || _maxHorizonDays != _initialMaxHorizonDays;
+
+            if (!hasChanges)
             {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.PolymarketSearchQueries, queriesJson), CancellationToken.None);
-                _initialQueriesJson = queriesJson;
-                changed++;
-            }
-            if (_maxMarkets != _initialMaxMarkets)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.PolymarketMaxMarkets, _maxMarkets.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialMaxMarkets = _maxMarkets; changed++;
-            }
-            if (_minVolumeUsd != _initialMinVolumeUsd)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.PolymarketMinVolumeUsd, _minVolumeUsd.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialMinVolumeUsd = _minVolumeUsd; changed++;
-            }
-            if (_maxHorizonDays != _initialMaxHorizonDays)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.PolymarketMaxHorizonDays, _maxHorizonDays.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialMaxHorizonDays = _maxHorizonDays; changed++;
+                _msg = "No changes.";
+                return;
             }
 
-            if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
-            _msg = changed == 0 ? "No changes." : "Saved.";
+            var settings = new PolymarketSettings(
+                SearchQueries.Of(queries),
+                MaxMarkets.Of(_maxMarkets),
+                MinVolumeUsd.Of(_minVolumeUsd),
+                MaxHorizonDays.Of(_maxHorizonDays));
+
+            var ts = await UpdatePolymarket.ExecuteAsync(
+                new UpdatePolymarketSettingsInput(settings), CancellationToken.None);
+
+            _initialQueriesJson = queriesJson;
+            _initialMaxMarkets = _maxMarkets;
+            _initialMinVolumeUsd = _minVolumeUsd;
+            _initialMaxHorizonDays = _maxHorizonDays;
+            _lastUpdated = ts;
+            _msg = "Saved.";
         }
         catch (TradyStratException ex) { _msg = ex.Message; _isError = true; }
         catch (Exception) { _msg = "Save failed — see logs."; _isError = true; }

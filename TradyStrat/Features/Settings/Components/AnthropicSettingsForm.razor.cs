@@ -1,15 +1,18 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings.Anthropic;
 
 namespace TradyStrat.Features.Settings.Components;
 
 public partial class AnthropicSettingsForm : ComponentBase
 {
+    [Inject] private IAnthropicSettingsRepository AnthropicRepo { get; set; } = default!;
+    [Inject] private UpdateAnthropicSettingsUseCase UpdateAnthropic { get; set; } = default!;
+    // Kept solely for LastUpdatedAsync(Keys) — removed in Phase 6 Task 12 with ISettingsReader.
     [Inject] private ISettingsReader Settings { get; set; } = default!;
-    [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
     private static readonly string[] Keys =
     [
@@ -34,7 +37,7 @@ public partial class AnthropicSettingsForm : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        var ai = await Settings.AnthropicAsync(CancellationToken.None);
+        var ai = await AnthropicRepo.GetAsync(CancellationToken.None);
         _model = _initialModel = ai.Model.Value;
         _maxTokens = _initialMaxTokens = ai.MaxTokens.Value;
         _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget.Value;
@@ -53,34 +56,33 @@ public partial class AnthropicSettingsForm : ComponentBase
         _busy = true; _msg = null; _isError = false;
         try
         {
-            var changed = 0;
-            if (_model != _initialModel)
+            var hasChanges =
+                _model != _initialModel
+                || _maxTokens != _initialMaxTokens
+                || _thinkingBudget != _initialThinkingBudget
+                || _maxParallel != _initialMaxParallel;
+
+            if (!hasChanges)
             {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicModel, _model), CancellationToken.None);
-                _initialModel = _model;
-                changed++;
+                _msg = "No changes.";
+                return;
             }
-            if (_maxTokens != _initialMaxTokens)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicMaxTokens, _maxTokens.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialMaxTokens = _maxTokens;
-                changed++;
-            }
-            if (_thinkingBudget != _initialThinkingBudget)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicThinkingBudget, _thinkingBudget.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialThinkingBudget = _thinkingBudget;
-                changed++;
-            }
-            if (_maxParallel != _initialMaxParallel)
-            {
-                await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.AnthropicMaxParallelSuggestions,
-                    _maxParallel.ToString(CultureInfo.InvariantCulture)), CancellationToken.None);
-                _initialMaxParallel = _maxParallel;
-                changed++;
-            }
-            if (changed > 0) _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
-            _msg = changed == 0 ? "No changes." : "Saved.";
+
+            var settings = new AnthropicSettings(
+                AnthropicModel.Of(_model),
+                MaxTokens.Of(_maxTokens),
+                ThinkingBudget.Of(_thinkingBudget),
+                MaxParallelSuggestions.Of(_maxParallel));
+
+            var ts = await UpdateAnthropic.ExecuteAsync(
+                new UpdateAnthropicSettingsInput(settings), CancellationToken.None);
+
+            _initialModel = _model;
+            _initialMaxTokens = _maxTokens;
+            _initialThinkingBudget = _thinkingBudget;
+            _initialMaxParallel = _maxParallel;
+            _lastUpdated = ts;
+            _msg = "Saved.";
         }
         catch (TradyStratException ex) { _msg = ex.Message; _isError = true; }
         catch (Exception) { _msg = "Save failed — see logs."; _isError = true; }
