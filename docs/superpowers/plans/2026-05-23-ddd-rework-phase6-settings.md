@@ -272,14 +272,16 @@ public sealed record SearchQueries
 }
 ```
 
-`MaxMarkets.cs`:
+`MaxMarkets.cs` (private-ctor pattern — mirrors `Percentage.cs`):
 ```csharp
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Polymarket;
 
-public readonly record struct MaxMarkets(int Value)
+public readonly record struct MaxMarkets
 {
+    public int Value { get; }
+    private MaxMarkets(int value) => Value = value;
     public static MaxMarkets Of(int n)
     {
         if (n < 1)
@@ -289,14 +291,16 @@ public readonly record struct MaxMarkets(int Value)
 }
 ```
 
-`MinVolumeUsd.cs`:
+`MinVolumeUsd.cs` (private-ctor pattern):
 ```csharp
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Polymarket;
 
-public readonly record struct MinVolumeUsd(decimal Value)
+public readonly record struct MinVolumeUsd
 {
+    public decimal Value { get; }
+    private MinVolumeUsd(decimal value) => Value = value;
     public static MinVolumeUsd Of(decimal n)
     {
         if (n < 0m)
@@ -306,14 +310,16 @@ public readonly record struct MinVolumeUsd(decimal Value)
 }
 ```
 
-`MaxHorizonDays.cs`:
+`MaxHorizonDays.cs` (private-ctor pattern):
 ```csharp
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Polymarket;
 
-public readonly record struct MaxHorizonDays(int Value)
+public readonly record struct MaxHorizonDays
 {
+    public int Value { get; }
+    private MaxHorizonDays(int value) => Value = value;
     public static MaxHorizonDays Of(int n)
     {
         if (n < 1)
@@ -363,15 +369,17 @@ public class FocusTickerTests
 }
 ```
 
-- [ ] **Step 3.2: Implement**
+- [ ] **Step 3.2: Implement (private-ctor pattern)**
 
 ```csharp
 using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Tickers;
 
-public readonly record struct FocusTicker(string Value)
+public readonly record struct FocusTicker
 {
+    public string Value { get; }
+    private FocusTicker(string value) => Value = value;
     public static FocusTicker Of(string raw)
     {
         var t = (raw ?? "").Trim().ToUpperInvariant();
