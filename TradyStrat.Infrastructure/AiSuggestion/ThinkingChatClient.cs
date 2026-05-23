@@ -24,7 +24,7 @@ internal sealed class ThinkingChatClient(IChatClient inner, ISettingsReader sett
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
         var ai = await settings.AnthropicAsync(cancellationToken);
-        var effort = MapEffort(ai.ThinkingBudget);
+        var effort = MapEffort(ai.ThinkingBudget.Value);
         var withThinking = (options ?? new ChatOptions()).WithAdaptiveThinking(effort);
         return await base.GetResponseAsync(messages, withThinking, cancellationToken);
     }

@@ -20,8 +20,8 @@ public sealed class PolymarketGammaProvider(
     {
         var opts = await settings.PolymarketAsync(ct);
 
-        var perQuery = opts.SearchQueries
-            .Select(q => FetchQueryAsync(q, opts.MaxMarkets, ct))
+        var perQuery = opts.SearchQueries.Values
+            .Select(q => FetchQueryAsync(q, opts.MaxMarkets.Value, ct))
             .ToArray();
 
         IReadOnlyList<PredictionMarket>[] results;
@@ -37,7 +37,7 @@ public sealed class PolymarketGammaProvider(
 
         var merged = results.SelectMany(r => r);
         var today = DateOnly.FromDateTime(clock.UtcNow().Date);
-        return PolymarketFilter.Apply(merged, today, opts.MinVolumeUsd, opts.MaxHorizonDays, opts.MaxMarkets);
+        return PolymarketFilter.Apply(merged, today, opts.MinVolumeUsd.Value, opts.MaxHorizonDays.Value, opts.MaxMarkets.Value);
     }
 
     private async Task<IReadOnlyList<PredictionMarket>> FetchQueryAsync(string query, int maxMarkets, CancellationToken ct)

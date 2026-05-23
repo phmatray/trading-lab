@@ -1,4 +1,6 @@
 using TradyStrat.Application.Settings.Config;
+using TradyStrat.Domain.Settings.Anthropic;
+using TradyStrat.Domain.Settings.Polymarket;
 
 namespace TradyStrat.TestKit.Settings;
 

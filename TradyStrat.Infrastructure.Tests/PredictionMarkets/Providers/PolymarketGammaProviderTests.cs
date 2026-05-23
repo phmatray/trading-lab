@@ -3,6 +3,8 @@ using Shouldly;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Infrastructure.PredictionMarkets.Providers;
 using TradyStrat.Application.Settings.Config;
+using TradyStrat.Domain.Settings.Anthropic;
+using TradyStrat.Domain.Settings.Polymarket;
 using TradyStrat.TestKit.Time;
 using Xunit;
 
@@ -33,7 +35,11 @@ public class PolymarketGammaProviderTests
     {
         public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct)
-            => Task.FromResult(new PolymarketSettings(queries, maxMarkets, minVolumeUsd, maxHorizonDays));
+            => Task.FromResult(new PolymarketSettings(
+                SearchQueries.Of(queries),
+                MaxMarkets.Of(maxMarkets),
+                MinVolumeUsd.Of(minVolumeUsd),
+                MaxHorizonDays.Of(maxHorizonDays)));
         public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
     }

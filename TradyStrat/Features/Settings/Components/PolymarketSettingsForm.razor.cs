@@ -36,11 +36,11 @@ public partial class PolymarketSettingsForm : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         var p = await Settings.PolymarketAsync(CancellationToken.None);
-        _queriesText = string.Join(", ", p.SearchQueries);
-        _initialQueriesJson = JsonSerializer.Serialize(p.SearchQueries.ToArray());
-        _maxMarkets = _initialMaxMarkets = p.MaxMarkets;
-        _minVolumeUsd = _initialMinVolumeUsd = p.MinVolumeUsd;
-        _maxHorizonDays = _initialMaxHorizonDays = p.MaxHorizonDays;
+        _queriesText = string.Join(", ", p.SearchQueries.Values);
+        _initialQueriesJson = JsonSerializer.Serialize(p.SearchQueries.Values.ToArray());
+        _maxMarkets = _initialMaxMarkets = p.MaxMarkets.Value;
+        _minVolumeUsd = _initialMinVolumeUsd = p.MinVolumeUsd.Value;
+        _maxHorizonDays = _initialMaxHorizonDays = p.MaxHorizonDays.Value;
         _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 

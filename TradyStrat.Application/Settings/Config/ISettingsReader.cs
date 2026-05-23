@@ -1,3 +1,6 @@
+using TradyStrat.Domain.Settings.Anthropic;
+using TradyStrat.Domain.Settings.Polymarket;
+
 namespace TradyStrat.Application.Settings.Config;
 
 /// <summary>Typed facade over ISettingsService for the app's consumers (incl. the Settings-page forms).</summary>

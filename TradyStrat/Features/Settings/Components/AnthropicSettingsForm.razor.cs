@@ -35,10 +35,10 @@ public partial class AnthropicSettingsForm : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         var ai = await Settings.AnthropicAsync(CancellationToken.None);
-        _model = _initialModel = ai.Model;
-        _maxTokens = _initialMaxTokens = ai.MaxTokens;
-        _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget;
-        _maxParallel = _initialMaxParallel = ai.MaxParallelSuggestions;
+        _model = _initialModel = ai.Model.Value;
+        _maxTokens = _initialMaxTokens = ai.MaxTokens.Value;
+        _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget.Value;
+        _maxParallel = _initialMaxParallel = ai.MaxParallelSuggestions.Value;
         _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
     }
 

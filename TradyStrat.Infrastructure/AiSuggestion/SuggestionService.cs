@@ -77,8 +77,8 @@ public sealed partial class SuggestionService(
             // "Always invoke the submit_suggestion tool exactly once." line
             // is the contract that compels the call.
             ToolMode        = ChatToolMode.Auto,
-            ModelId         = ai.Model,
-            MaxOutputTokens = ai.MaxTokens,
+            ModelId         = ai.Model.Value,
+            MaxOutputTokens = ai.MaxTokens.Value,
         };
 
         // Envelope: stable across instruments on the same day; flagged for the

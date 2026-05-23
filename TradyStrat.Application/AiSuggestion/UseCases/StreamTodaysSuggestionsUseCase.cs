@@ -28,7 +28,7 @@ public sealed partial class StreamTodaysSuggestionsUseCase(
         if (heldInstrumentIds.Count == 0) yield break;
 
         var ai = await settings.AnthropicAsync(ct);
-        var maxParallel = Math.Max(1, ai.MaxParallelSuggestions);
+        var maxParallel = Math.Max(1, ai.MaxParallelSuggestions.Value);
 
         var chan = Channel.CreateUnbounded<SuggestionStreamEvent>(new UnboundedChannelOptions
         {

@@ -34,10 +34,10 @@ public class SettingsReaderTests
         await svc.SetAsync(SettingsKeys.AnthropicMaxParallelSuggestions, "5", ct);
 
         var ai = await reader.AnthropicAsync(ct);
-        ai.Model.ShouldBe("claude-sonnet-4-6");
-        ai.MaxTokens.ShouldBe(4096);
-        ai.ThinkingBudget.ShouldBe(12000);
-        ai.MaxParallelSuggestions.ShouldBe(5);
+        ai.Model.Value.ShouldBe("claude-sonnet-4-6");
+        ai.MaxTokens.Value.ShouldBe(4096);
+        ai.ThinkingBudget.Value.ShouldBe(12000);
+        ai.MaxParallelSuggestions.Value.ShouldBe(5);
     }
 
     [Fact]
@@ -53,10 +53,10 @@ public class SettingsReaderTests
         await svc.SetAsync(SettingsKeys.PolymarketMaxHorizonDays, "90", ct);
 
         var p = await reader.PolymarketAsync(ct);
-        p.SearchQueries.ShouldBe(ExpectedQueries);   // CA1861-extracted
-        p.MaxMarkets.ShouldBe(5);
-        p.MinVolumeUsd.ShouldBe(10000m);
-        p.MaxHorizonDays.ShouldBe(90);
+        p.SearchQueries.Values.ShouldBe(ExpectedQueries);   // CA1861-extracted
+        p.MaxMarkets.Value.ShouldBe(5);
+        p.MinVolumeUsd.Value.ShouldBe(10000m);
+        p.MaxHorizonDays.Value.ShouldBe(90);
     }
 
     [Fact]
