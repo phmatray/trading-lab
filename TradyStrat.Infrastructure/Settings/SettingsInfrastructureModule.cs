@@ -21,5 +21,6 @@ public sealed class SettingsInfrastructureModule : IAppModule
         services.AddScoped<AddInstrumentUseCase>();
         services.AddScoped<IInstrumentRepository, EfInstrumentRepository>();
         services.AddScoped<IGoalRepository, EfGoalRepository>();
+        services.AddScoped<IAnthropicSettingsRepository, EfAnthropicSettingsRepository>();
     }
 }
