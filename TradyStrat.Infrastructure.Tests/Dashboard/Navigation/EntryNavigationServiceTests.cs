@@ -1,10 +1,11 @@
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings.Tickers;
 using TradyStrat.Application.Dashboard.Navigation;
+using TradyStrat.Application.Settings;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit;            // shared TestRepo<T>
-using TradyStrat.TestKit.Settings;      // FakeSettingsReader
 using TradyStrat.TestKit.Specifications; // InMemoryDb
 using Xunit;
 
@@ -31,7 +32,16 @@ public class EntryNavigationServiceTests
     {
         foreach (var d in dates) db.PriceBars.Add(Bar(d));
         await db.SaveChangesAsync();
-        return new EntryNavigationService(new EfPriceBarReadRepository(db), new FakeSettingsReader());
+        return new EntryNavigationService(new EfPriceBarReadRepository(db), new StubFocusTickerRepo("CON3.L"));
+    }
+
+    private sealed class StubFocusTickerRepo(string ticker) : IFocusTickerRepository
+    {
+        public Task<FocusTicker> GetAsync(CancellationToken ct)
+            => Task.FromResult(FocusTicker.Of(ticker));
+
+        public Task SaveAsync(FocusTicker t, CancellationToken ct)
+            => throw new NotSupportedException();
     }
 
     [Fact]

@@ -2,7 +2,7 @@ using TradyStrat.Infrastructure.Settings.UseCases;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Goals;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
@@ -15,7 +15,7 @@ public partial class SettingsPage : ComponentBase
     [Inject] private IGoalRepository GoalRepo { get; set; } = default!;
     [Inject] private IPortfolioRepository Portfolios { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
+    [Inject] private IFocusTickerRepository FocusTickerRepo { get; set; } = default!;
     [Inject] private UpdateGoalUseCase UpdateGoal { get; set; } = default!;
 
     private string _focusTicker = "";
@@ -29,7 +29,7 @@ public partial class SettingsPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _focusTicker = await Settings.FocusTickerAsync(CancellationToken.None);
+        _focusTicker = (await FocusTickerRepo.GetAsync(CancellationToken.None)).Value;
         var existing = await GoalRepo.GetAsync(CancellationToken.None);
         _target = existing.Target.Amount;
         _date   = existing.HasDeadline ? existing.TargetDate.ToDateTime(TimeOnly.MinValue) : null;

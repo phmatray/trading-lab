@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
 
@@ -18,7 +18,7 @@ namespace TradyStrat.Application.AiSuggestion.UseCases;
 /// </summary>
 public sealed partial class StreamTodaysSuggestionsUseCase(
     GetTodaysSuggestionUseCase getOne,
-    ISettingsReader settings,
+    IAnthropicSettingsRepository anthropic,
     ILogger<StreamTodaysSuggestionsUseCase> log)
 {
     public async IAsyncEnumerable<SuggestionStreamEvent> StreamAsync(
@@ -27,7 +27,7 @@ public sealed partial class StreamTodaysSuggestionsUseCase(
     {
         if (heldInstrumentIds.Count == 0) yield break;
 
-        var ai = await settings.AnthropicAsync(ct);
+        var ai = await anthropic.GetAsync(ct);
         var maxParallel = Math.Max(1, ai.MaxParallelSuggestions.Value);
 
         var chan = Channel.CreateUnbounded<SuggestionStreamEvent>(new UnboundedChannelOptions
