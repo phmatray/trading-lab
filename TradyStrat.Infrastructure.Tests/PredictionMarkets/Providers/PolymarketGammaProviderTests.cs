@@ -2,7 +2,8 @@ using System.Net;
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Infrastructure.PredictionMarkets.Providers;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
+using TradyStrat.Domain.Settings.Polymarket;
 using TradyStrat.TestKit.Time;
 using Xunit;
 
@@ -28,18 +29,25 @@ public class PolymarketGammaProviderTests
         return (http, handler);
     }
 
-    private sealed class StubReader(int maxMarkets, decimal minVolumeUsd, int maxHorizonDays, params string[] queries)
-        : ISettingsReader
+    private sealed class StubPolymarketRepo(int maxMarkets, decimal minVolumeUsd, int maxHorizonDays, params string[] queries)
+        : IPolymarketSettingsRepository
     {
-        public Task<AnthropicSettings> AnthropicAsync(CancellationToken ct) => throw new NotSupportedException();
-        public Task<PolymarketSettings> PolymarketAsync(CancellationToken ct)
-            => Task.FromResult(new PolymarketSettings(queries, maxMarkets, minVolumeUsd, maxHorizonDays));
-        public Task<string> FocusTickerAsync(CancellationToken ct) => throw new NotSupportedException();
-        public Task<DateTime?> LastUpdatedAsync(IEnumerable<string> keys, CancellationToken ct) => throw new NotSupportedException();
+        public Task<PolymarketSettings> GetAsync(CancellationToken ct)
+            => Task.FromResult(new PolymarketSettings(
+                SearchQueries.Of(queries),
+                MaxMarkets.Of(maxMarkets),
+                MinVolumeUsd.Of(minVolumeUsd),
+                MaxHorizonDays.Of(maxHorizonDays)));
+
+        public Task SaveAsync(PolymarketSettings settings, CancellationToken ct)
+            => throw new NotSupportedException();
+
+        public Task<DateTime?> LastUpdatedAsync(CancellationToken ct)
+            => Task.FromResult<DateTime?>(null);
     }
 
-    private static StubReader Reader(int maxMarkets = 10)
-        => new StubReader(maxMarkets, 0m, 3650, "bitcoin");   // wide horizon so fixtures aren't filtered out
+    private static StubPolymarketRepo Reader(int maxMarkets = 10)
+        => new StubPolymarketRepo(maxMarkets, 0m, 3650, "bitcoin");   // wide horizon so fixtures aren't filtered out
 
     [Fact]
     public async Task Returns_normalized_filtered_list_on_success()
@@ -95,7 +103,7 @@ public class PolymarketGammaProviderTests
     [Fact]
     public async Task Issues_one_request_per_query_and_dedupes()
     {
-        var reader = new StubReader(10, 0m, 3650, "bitcoin", "crypto");
+        var reader = new StubPolymarketRepo(10, 0m, 3650, "bitcoin", "crypto");
 
         var requested = new List<string>();
         var (http, _) = BuildHttp(respond: req =>
@@ -120,7 +128,7 @@ public class PolymarketGammaProviderTests
     [Fact]
     public async Task One_query_failing_throws_and_discards_others()
     {
-        var reader = new StubReader(10, 0m, 3650, "bitcoin", "crypto");
+        var reader = new StubPolymarketRepo(10, 0m, 3650, "bitcoin", "crypto");
 
         var (http, _) = BuildHttp(respond: req =>
         {

@@ -1,6 +1,5 @@
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings;
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
@@ -16,7 +15,7 @@ public sealed class ImportTradesCsvUseCase(
     IPortfolioRepository portfolios,
     IInstrumentRepository instruments,
     IClock clock,
-    ISettingsReader settings,
+    IFocusTickerRepository focusTickerRepo,
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
@@ -25,7 +24,7 @@ public sealed class ImportTradesCsvUseCase(
     protected override async Task<ImportTradesCsvResult> ExecuteCore(
         ImportTradesCsvInput input, CancellationToken ct)
     {
-        var focusTicker = await settings.FocusTickerAsync(ct);
+        var focusTicker = (await focusTickerRepo.GetAsync(ct)).Value;
         var focus = await instruments.FindByTickerAsync(focusTicker, ct)
             ?? throw new CsvImportException(
                 $"Focus instrument '{focusTicker}' is not registered.");

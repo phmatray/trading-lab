@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Settings;
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Shared;
 
@@ -30,7 +29,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         ISuggestionRepository Suggestions,
         IInstrumentRepository Instruments,
         BackfillSuggestionsUseCase Backfill,
-        ISettingsReader Settings,
+        IFocusTickerRepository FocusTickerRepo,
         IDisposable? Scope);
 
     public SuggestionBackfillCoordinator(
@@ -45,7 +44,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
                 sp.GetRequiredService<ISuggestionRepository>(),
                 sp.GetRequiredService<IInstrumentRepository>(),
                 sp.GetRequiredService<BackfillSuggestionsUseCase>(),
-                sp.GetRequiredService<ISettingsReader>(),
+                sp.GetRequiredService<IFocusTickerRepository>(),
                 scope);
         };
         _log = log;
@@ -69,7 +68,7 @@ public sealed partial class SuggestionBackfillCoordinator : ISuggestionBackfillC
         var resolved = _resolveDeps();
         try
         {
-            var focusTicker = await resolved.Settings.FocusTickerAsync(ct);
+            var focusTicker = (await resolved.FocusTickerRepo.GetAsync(ct)).Value;
             var focus = await resolved.Instruments.FindByTickerAsync(focusTicker, ct)
                 ?? throw new InvalidOperationException(
                     $"Focus instrument '{focusTicker}' is not registered.");

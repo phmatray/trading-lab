@@ -3,13 +3,13 @@ using TradyStrat.Application.PredictionMarkets;
 using System.Text.Json;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 
 namespace TradyStrat.Infrastructure.PredictionMarkets.Providers;
 
 public sealed class PolymarketGammaProvider(
     HttpClient http,
-    ISettingsReader settings,
+    IPolymarketSettingsRepository polymarket,
     IClock clock) : IPredictionMarketProvider
 {
     // Gamma's tag-based market filter (`/markets?tag_slug=...`) is silently
@@ -18,10 +18,10 @@ public sealed class PolymarketGammaProvider(
     // filter; it returns events grouped above their constituent markets.
     public async Task<IReadOnlyList<PredictionMarket>> GetMarketsAsync(CancellationToken ct)
     {
-        var opts = await settings.PolymarketAsync(ct);
+        var opts = await polymarket.GetAsync(ct);
 
-        var perQuery = opts.SearchQueries
-            .Select(q => FetchQueryAsync(q, opts.MaxMarkets, ct))
+        var perQuery = opts.SearchQueries.Values
+            .Select(q => FetchQueryAsync(q, opts.MaxMarkets.Value, ct))
             .ToArray();
 
         IReadOnlyList<PredictionMarket>[] results;
@@ -37,7 +37,7 @@ public sealed class PolymarketGammaProvider(
 
         var merged = results.SelectMany(r => r);
         var today = DateOnly.FromDateTime(clock.UtcNow().Date);
-        return PolymarketFilter.Apply(merged, today, opts.MinVolumeUsd, opts.MaxHorizonDays, opts.MaxMarkets);
+        return PolymarketFilter.Apply(merged, today, opts.MinVolumeUsd.Value, opts.MaxHorizonDays.Value, opts.MaxMarkets.Value);
     }
 
     private async Task<IReadOnlyList<PredictionMarket>> FetchQueryAsync(string query, int maxMarkets, CancellationToken ct)

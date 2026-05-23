@@ -90,7 +90,7 @@ public class ImportTradesCsvUseCaseTests
         new EfPortfolioRepository(db),
         new EfInstrumentRepository(db),
         new FakeClock(DateTime.UtcNow),
-        new FakeSettingsReader(focusTicker: "CON3.L"),
+        new FakeFocusTickerRepository("CON3.L"),
         NullLogger<ImportTradesCsvUseCase>.Instance);
 
     private static Instrument Existing(string ticker)

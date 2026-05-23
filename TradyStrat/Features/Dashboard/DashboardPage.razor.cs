@@ -13,7 +13,7 @@ using TradyStrat.Application.AiSuggestion.Backfill;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Dashboard.UseCases;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
 
 namespace TradyStrat.Features.Dashboard;
@@ -30,7 +30,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
     [Inject] private ISuggestionRepository SuggestionRepo { get; set; } = default!;
     [Inject] private IEntryNavigationService Nav { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
+    [Inject] private IFocusTickerRepository FocusTickerRepo { get; set; } = default!;
     [Inject] private NavigationManager NavManager { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ILogger<DashboardPage> Log { get; set; } = default!;
@@ -68,7 +68,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
                     NavManager.NavigateTo(r.Url, replace: true);
                     return;
                 case ValidationResult.Live:
-                    target = Clock.TodayInExchangeTzFor(await Settings.FocusTickerAsync(ct));
+                    target = Clock.TodayInExchangeTzFor((await FocusTickerRepo.GetAsync(ct)).Value);
                     isHistorical = false;
                     break;
                 case ValidationResult.Historical h:
@@ -169,7 +169,7 @@ public partial class DashboardPage : ComponentBase, IAsyncDisposable
         {
             var ct = CancellationToken.None;
             var focusTicker = _vm?.FocusTicker
-                ?? await Settings.FocusTickerAsync(ct);
+                ?? (await FocusTickerRepo.GetAsync(ct)).Value;
             var instruments = await ListInstruments.ExecuteAsync(Application.UseCases.Unit.Value, ct);
             var focus = instruments.SingleOrDefault(i => i.Ticker == focusTicker)
                 ?? throw new InvalidOperationException(

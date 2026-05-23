@@ -3,7 +3,7 @@ using TradyStrat.Application.Trades.UseCases;
 using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.UseCases;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
@@ -16,7 +16,7 @@ public partial class TradesPage : ComponentBase
 {
     [Inject] private IPortfolioRepository Portfolios { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
+    [Inject] private IFocusTickerRepository FocusTickerRepo { get; set; } = default!;
     [Inject] private LogTradeUseCase LogTrade { get; set; } = default!;
     [Inject] private DeleteTradeUseCase DeleteTrade { get; set; } = default!;
     [Inject] private ImportTradesCsvUseCase ImportCsv { get; set; } = default!;
@@ -38,7 +38,7 @@ public partial class TradesPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _focusTicker = await Settings.FocusTickerAsync(CancellationToken.None);
+        _focusTicker = (await FocusTickerRepo.GetAsync(CancellationToken.None)).Value;
         await Reload();
     }
 

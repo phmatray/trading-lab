@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Components;
-using TradyStrat.Domain.Exceptions;
-using TradyStrat.Application.UseCases;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Application.UseCases;
+using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings.Tickers;
 
 namespace TradyStrat.Features.Settings.Components;
 
 public partial class FocusTickerForm : ComponentBase
 {
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
+    [Inject] private IFocusTickerRepository FocusRepo { get; set; } = default!;
+    [Inject] private UpdateFocusTickerUseCase UpdateFocus { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
-    [Inject] private UpdateSettingUseCase UpdateSetting { get; set; } = default!;
 
     private List<string> _tickers = new();
     private string _ticker = "";
@@ -24,10 +25,11 @@ public partial class FocusTickerForm : ComponentBase
     {
         var instruments = await ListInstruments.ExecuteAsync(Unit.Value, CancellationToken.None);
         _tickers = instruments.Select(i => i.Ticker).OrderBy(t => t, StringComparer.OrdinalIgnoreCase).ToList();
-        _ticker = _initialTicker = await Settings.FocusTickerAsync(CancellationToken.None);
+        var current = await FocusRepo.GetAsync(CancellationToken.None);
+        _ticker = _initialTicker = current.Value;
         // If the stored focus isn't among current instruments, show it anyway so the <select> has a value.
         if (!_tickers.Contains(_ticker) && !string.IsNullOrEmpty(_ticker)) _tickers.Insert(0, _ticker);
-        _lastUpdated = await Settings.LastUpdatedAsync([SettingsKeys.TickersFocus], CancellationToken.None);
+        _lastUpdated = await FocusRepo.LastUpdatedAsync(CancellationToken.None);
     }
 
     private void OnChanged()
@@ -41,14 +43,17 @@ public partial class FocusTickerForm : ComponentBase
         _busy = true; _msg = null; _isError = false;
         try
         {
-            if (_ticker != _initialTicker)
+            if (_ticker == _initialTicker)
             {
-                var ts = await UpdateSetting.ExecuteAsync(new UpdateSettingInput(SettingsKeys.TickersFocus, _ticker), CancellationToken.None);
-                _initialTicker = _ticker;
-                _lastUpdated = ts;
-                _msg = "Saved.";
+                _msg = "No changes.";
+                return;
             }
-            else { _msg = "No changes."; }
+
+            var ts = await UpdateFocus.ExecuteAsync(
+                new UpdateFocusTickerInput(FocusTicker.Of(_ticker)), CancellationToken.None);
+            _initialTicker = _ticker;
+            _lastUpdated = ts;
+            _msg = "Saved.";
         }
         catch (TradyStratException ex) { _msg = ex.Message; _isError = true; }
         catch (Exception) { _msg = "Save failed — see logs."; _isError = true; }

@@ -4,7 +4,7 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit;            // shared TestRepo<T>
-using TradyStrat.TestKit.Settings;      // FakeSettingsReader
+using TradyStrat.TestKit.Settings;   // FakeFocusTickerRepository
 using TradyStrat.TestKit.Specifications; // InMemoryDb
 using Xunit;
 
@@ -31,7 +31,7 @@ public class EntryNavigationServiceTests
     {
         foreach (var d in dates) db.PriceBars.Add(Bar(d));
         await db.SaveChangesAsync();
-        return new EntryNavigationService(new EfPriceBarReadRepository(db), new FakeSettingsReader());
+        return new EntryNavigationService(new EfPriceBarReadRepository(db), new FakeFocusTickerRepository("CON3.L"));
     }
 
     [Fact]

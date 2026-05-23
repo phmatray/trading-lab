@@ -1,7 +1,7 @@
 using Anthropic.SDK.Extensions;
 using Anthropic.SDK.Messaging;
 using Microsoft.Extensions.AI;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 
 namespace TradyStrat.Infrastructure.AiSuggestion;
 
@@ -17,14 +17,14 @@ namespace TradyStrat.Infrastructure.AiSuggestion;
 ///   &lt;= 10240 → High
 ///   else     → Max
 /// </summary>
-internal sealed class ThinkingChatClient(IChatClient inner, ISettingsReader settings)
+internal sealed class ThinkingChatClient(IChatClient inner, IAnthropicSettingsRepository anthropic)
     : DelegatingChatClient(inner)
 {
     public override async Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
-        var ai = await settings.AnthropicAsync(cancellationToken);
-        var effort = MapEffort(ai.ThinkingBudget);
+        var ai = await anthropic.GetAsync(cancellationToken);
+        var effort = MapEffort(ai.ThinkingBudget.Value);
         var withThinking = (options ?? new ChatOptions()).WithAdaptiveThinking(effort);
         return await base.GetResponseAsync(messages, withThinking, cancellationToken);
     }

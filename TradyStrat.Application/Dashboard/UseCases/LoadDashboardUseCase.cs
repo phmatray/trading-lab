@@ -4,7 +4,7 @@ using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Application.Fx;
 using TradyStrat.Application.Goals;
 using TradyStrat.Application.Portfolio;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
@@ -26,7 +26,7 @@ public sealed class LoadDashboardUseCase(
     ISuggestionRepository suggestionRepo,
     IFxRateReadRepository fxRepo,
     ListInstrumentsUseCase listInstruments,
-    ISettingsReader settings,
+    IFocusTickerRepository focusTickerRepo,
     BuildFocusDerivedSliceUseCase buildFocusSlice,
     ISuggestionBackfillCoordinator backfillCoord,
     IEntryNavigationService nav,
@@ -40,7 +40,7 @@ public sealed class LoadDashboardUseCase(
         var target = input.TargetDate;
         var goal   = await goalRepo.GetAsync(ct);
 
-        var focusTicker = await settings.FocusTickerAsync(ct);
+        var focusTicker = (await focusTickerRepo.GetAsync(ct)).Value;
 
         var instruments = await listInstruments.ExecuteAsync(Unit.Value, ct);
         var ordered = instruments

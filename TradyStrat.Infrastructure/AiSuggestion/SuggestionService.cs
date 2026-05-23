@@ -2,14 +2,14 @@ using System.Text.Json;
 using Microsoft.Extensions.AI;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.Snapshot;
-using TradyStrat.Application.Settings.Config;
+using TradyStrat.Application.Settings;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.Exceptions;
 
 namespace TradyStrat.Infrastructure.AiSuggestion;
 
 public sealed partial class SuggestionService(
-    IChatClient chat, ILogger<SuggestionService> log, ISettingsReader settings) : IAiClient
+    IChatClient chat, ILogger<SuggestionService> log, IAnthropicSettingsRepository anthropic) : IAiClient
 {
     private const string ToolName = "submit_suggestion";
     private const string SystemPrompt = """
@@ -27,7 +27,7 @@ public sealed partial class SuggestionService(
 
     public async Task<AiResponse> AskAsync(AiSnapshot snapshot, CancellationToken ct)
     {
-        var ai = await settings.AnthropicAsync(ct);
+        var ai = await anthropic.GetAsync(ct);
         AiResponse? captured = null;
 
         var submit = AIFunctionFactory.Create(
@@ -77,8 +77,8 @@ public sealed partial class SuggestionService(
             // "Always invoke the submit_suggestion tool exactly once." line
             // is the contract that compels the call.
             ToolMode        = ChatToolMode.Auto,
-            ModelId         = ai.Model,
-            MaxOutputTokens = ai.MaxTokens,
+            ModelId         = ai.Model.Value,
+            MaxOutputTokens = ai.MaxTokens.Value,
         };
 
         // Envelope: stable across instruments on the same day; flagged for the
