@@ -23,6 +23,13 @@ public sealed class EfAnthropicSettingsRepository(AppDbContext db, IClock clock)
             MaxParallelSuggestions.Of(int.Parse(rows[SettingsKeys.AnthropicMaxParallelSuggestions], CultureInfo.InvariantCulture)));
     }
 
+    public async Task<DateTime?> LastUpdatedAsync(CancellationToken ct)
+    {
+        return await db.Set<SettingEntry>()
+            .Where(s => s.Key.StartsWith("anthropic."))
+            .MaxAsync(s => (DateTime?)s.UpdatedAt, ct);
+    }
+
     public async Task SaveAsync(AnthropicSettings settings, CancellationToken ct)
     {
         var now = clock.UtcNow();
@@ -43,8 +50,7 @@ public sealed class EfAnthropicSettingsRepository(AppDbContext db, IClock clock)
         else
         {
             // SettingEntry is an immutable record (init-only props); detach the tracked
-            // instance and re-attach an updated copy via `with` — same pattern as
-            // SettingsService.SetAsync / UpdateGoalUseCase.
+            // instance and re-attach an updated copy via `with` — same pattern as UpdateGoalUseCase.
             db.Entry(existing).State = EntityState.Detached;
             db.Update(existing with { Value = value, UpdatedAt = now });
         }

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Settings;
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain.Exceptions;
@@ -13,8 +12,6 @@ public partial class FocusTickerForm : ComponentBase
     [Inject] private IFocusTickerRepository FocusRepo { get; set; } = default!;
     [Inject] private UpdateFocusTickerUseCase UpdateFocus { get; set; } = default!;
     [Inject] private ListInstrumentsUseCase ListInstruments { get; set; } = default!;
-    // Kept solely for LastUpdatedAsync — removed in Phase 6 Task 12 with ISettingsReader.
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
 
     private List<string> _tickers = new();
     private string _ticker = "";
@@ -32,7 +29,7 @@ public partial class FocusTickerForm : ComponentBase
         _ticker = _initialTicker = current.Value;
         // If the stored focus isn't among current instruments, show it anyway so the <select> has a value.
         if (!_tickers.Contains(_ticker) && !string.IsNullOrEmpty(_ticker)) _tickers.Insert(0, _ticker);
-        _lastUpdated = await Settings.LastUpdatedAsync([SettingsKeys.TickersFocus], CancellationToken.None);
+        _lastUpdated = await FocusRepo.LastUpdatedAsync(CancellationToken.None);
     }
 
     private void OnChanged()

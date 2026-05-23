@@ -24,6 +24,13 @@ public sealed class EfPolymarketSettingsRepository(AppDbContext db, IClock clock
             MaxHorizonDays.Of(int.Parse(rows[SettingsKeys.PolymarketMaxHorizonDays], CultureInfo.InvariantCulture)));
     }
 
+    public async Task<DateTime?> LastUpdatedAsync(CancellationToken ct)
+    {
+        return await db.Set<SettingEntry>()
+            .Where(s => s.Key.StartsWith("polymarket."))
+            .MaxAsync(s => (DateTime?)s.UpdatedAt, ct);
+    }
+
     public async Task SaveAsync(PolymarketSettings settings, CancellationToken ct)
     {
         var now = clock.UtcNow();
@@ -44,8 +51,7 @@ public sealed class EfPolymarketSettingsRepository(AppDbContext db, IClock clock
         else
         {
             // SettingEntry is an immutable record (init-only props); detach the tracked
-            // instance and re-attach an updated copy via `with` — same pattern as
-            // SettingsService.SetAsync / UpdateGoalUseCase.
+            // instance and re-attach an updated copy via `with` — same pattern as UpdateGoalUseCase.
             db.Entry(existing).State = EntityState.Detached;
             db.Update(existing with { Value = value, UpdatedAt = now });
         }

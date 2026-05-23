@@ -20,6 +20,12 @@ public sealed class EfFocusTickerRepository(
         return FocusTicker.Of(entry.Value);
     }
 
+    public async Task<DateTime?> LastUpdatedAsync(CancellationToken ct)
+    {
+        var entry = await db.Set<SettingEntry>().FindAsync([SettingsKeys.TickersFocus], ct);
+        return entry?.UpdatedAt;
+    }
+
     public async Task SaveAsync(FocusTicker ticker, CancellationToken ct)
     {
         // Cross-aggregate invariant: focus ticker must reference a known Instrument.

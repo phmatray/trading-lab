@@ -41,6 +41,9 @@ public class PolymarketGammaProviderTests
 
         public Task SaveAsync(PolymarketSettings settings, CancellationToken ct)
             => throw new NotSupportedException();
+
+        public Task<DateTime?> LastUpdatedAsync(CancellationToken ct)
+            => Task.FromResult<DateTime?>(null);
     }
 
     private static StubPolymarketRepo Reader(int maxMarkets = 10)

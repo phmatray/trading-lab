@@ -19,6 +19,11 @@ public sealed class FakePolymarketSettingsRepository(PolymarketSettings? setting
     public Task SaveAsync(PolymarketSettings settings, CancellationToken ct)
     {
         _state = settings;
+        _lastUpdated = DateTime.UtcNow;
         return Task.CompletedTask;
     }
+
+    private DateTime? _lastUpdated;
+
+    public Task<DateTime?> LastUpdatedAsync(CancellationToken ct) => Task.FromResult(_lastUpdated);
 }

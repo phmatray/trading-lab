@@ -9,4 +9,7 @@ public interface IFocusTickerRepository
     /// <summary>Throws <see cref="TradyStrat.Domain.Exceptions.SettingValidationException"/>
     /// if the ticker doesn't match any registered Instrument.</summary>
     Task SaveAsync(FocusTicker ticker, CancellationToken ct);
+
+    /// <summary>UpdatedAt of the focus-ticker row, or null if it doesn't exist. Used by the Settings form to show "last saved at".</summary>
+    Task<DateTime?> LastUpdatedAsync(CancellationToken ct);
 }

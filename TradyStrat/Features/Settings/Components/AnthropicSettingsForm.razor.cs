@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Settings;
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Settings.Anthropic;
@@ -11,16 +10,6 @@ public partial class AnthropicSettingsForm : ComponentBase
 {
     [Inject] private IAnthropicSettingsRepository AnthropicRepo { get; set; } = default!;
     [Inject] private UpdateAnthropicSettingsUseCase UpdateAnthropic { get; set; } = default!;
-    // Kept solely for LastUpdatedAsync(Keys) — removed in Phase 6 Task 12 with ISettingsReader.
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
-
-    private static readonly string[] Keys =
-    [
-        SettingsKeys.AnthropicModel,
-        SettingsKeys.AnthropicMaxTokens,
-        SettingsKeys.AnthropicThinkingBudget,
-        SettingsKeys.AnthropicMaxParallelSuggestions,
-    ];
 
     private string _model = "";
     private int _maxTokens = 1500;
@@ -42,7 +31,7 @@ public partial class AnthropicSettingsForm : ComponentBase
         _maxTokens = _initialMaxTokens = ai.MaxTokens.Value;
         _thinkingBudget = _initialThinkingBudget = ai.ThinkingBudget.Value;
         _maxParallel = _initialMaxParallel = ai.MaxParallelSuggestions.Value;
-        _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
+        _lastUpdated = await AnthropicRepo.LastUpdatedAsync(CancellationToken.None);
     }
 
     private void OnChanged()

@@ -16,6 +16,11 @@ public sealed class FakeFocusTickerRepository(string ticker = "CON3.L") : IFocus
     public Task SaveAsync(FocusTicker ticker, CancellationToken ct)
     {
         _state = ticker;
+        _lastUpdated = DateTime.UtcNow;
         return Task.CompletedTask;
     }
+
+    private DateTime? _lastUpdated;
+
+    public Task<DateTime?> LastUpdatedAsync(CancellationToken ct) => Task.FromResult(_lastUpdated);
 }

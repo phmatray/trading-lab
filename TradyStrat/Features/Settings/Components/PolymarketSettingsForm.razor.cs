@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Settings;
-using TradyStrat.Application.Settings.Config;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Settings.Polymarket;
@@ -12,14 +11,6 @@ public partial class PolymarketSettingsForm : ComponentBase
 {
     [Inject] private IPolymarketSettingsRepository PolymarketRepo { get; set; } = default!;
     [Inject] private UpdatePolymarketSettingsUseCase UpdatePolymarket { get; set; } = default!;
-    // Kept solely for LastUpdatedAsync(Keys) — removed in Phase 6 Task 12 with ISettingsReader.
-    [Inject] private ISettingsReader Settings { get; set; } = default!;
-
-    private static readonly string[] Keys =
-    [
-        SettingsKeys.PolymarketSearchQueries, SettingsKeys.PolymarketMaxMarkets,
-        SettingsKeys.PolymarketMinVolumeUsd, SettingsKeys.PolymarketMaxHorizonDays,
-    ];
 
     private string _queriesText = "";
     private int _maxMarkets = 8;
@@ -44,7 +35,7 @@ public partial class PolymarketSettingsForm : ComponentBase
         _maxMarkets = _initialMaxMarkets = p.MaxMarkets.Value;
         _minVolumeUsd = _initialMinVolumeUsd = p.MinVolumeUsd.Value;
         _maxHorizonDays = _initialMaxHorizonDays = p.MaxHorizonDays.Value;
-        _lastUpdated = await Settings.LastUpdatedAsync(Keys, CancellationToken.None);
+        _lastUpdated = await PolymarketRepo.LastUpdatedAsync(CancellationToken.None);
     }
 
     private void OnChanged()
