@@ -2,8 +2,12 @@ using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Anthropic;
 
-public readonly record struct MaxTokens(int Value)
+public readonly record struct MaxTokens
 {
+    public int Value { get; }
+
+    private MaxTokens(int value) => Value = value;
+
     public static MaxTokens Of(int n)
     {
         if (n < 1 || n > 100_000)

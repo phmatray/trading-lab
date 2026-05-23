@@ -2,8 +2,12 @@ using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Settings.Anthropic;
 
-public readonly record struct MaxParallelSuggestions(int Value)
+public readonly record struct MaxParallelSuggestions
 {
+    public int Value { get; }
+
+    private MaxParallelSuggestions(int value) => Value = value;
+
     public static MaxParallelSuggestions Of(int n)
     {
         if (n < 1 || n > 10)
