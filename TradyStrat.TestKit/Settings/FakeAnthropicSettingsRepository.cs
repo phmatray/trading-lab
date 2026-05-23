@@ -6,7 +6,7 @@ namespace TradyStrat.TestKit.Settings;
 /// <summary>
 /// Test double for <see cref="IAnthropicSettingsRepository"/>. Pass a typed
 /// AnthropicSettings record via the constructor; throws NotSupportedException
-/// if no value was supplied (matches the existing FakeSettingsReader discipline).
+/// if no value was supplied (forces tests to declare what they read).
 /// </summary>
 public sealed class FakeAnthropicSettingsRepository(AnthropicSettings? settings = null) : IAnthropicSettingsRepository
 {

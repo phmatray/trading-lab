@@ -6,7 +6,7 @@ namespace TradyStrat.TestKit.Settings;
 /// <summary>
 /// Test double for <see cref="IPolymarketSettingsRepository"/>. Pass a typed
 /// PolymarketSettings record via the constructor; throws NotSupportedException
-/// if no value was supplied (matches the existing FakeSettingsReader discipline).
+/// if no value was supplied (forces tests to declare what they read).
 /// </summary>
 public sealed class FakePolymarketSettingsRepository(PolymarketSettings? settings = null) : IPolymarketSettingsRepository
 {
