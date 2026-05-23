@@ -23,5 +23,6 @@ public sealed class SettingsInfrastructureModule : IAppModule
         services.AddScoped<IGoalRepository, EfGoalRepository>();
         services.AddScoped<IAnthropicSettingsRepository, EfAnthropicSettingsRepository>();
         services.AddScoped<IPolymarketSettingsRepository, EfPolymarketSettingsRepository>();
+        services.AddScoped<IFocusTickerRepository, EfFocusTickerRepository>();
     }
 }
