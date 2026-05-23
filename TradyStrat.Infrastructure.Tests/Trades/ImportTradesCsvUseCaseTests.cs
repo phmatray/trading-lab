@@ -1,15 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
-using TradyStrat.Application.Settings;
 using TradyStrat.Application.Trades.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Settings.Tickers;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Portfolio;
 using TradyStrat.Infrastructure.Settings;
+using TradyStrat.TestKit.Settings;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;
 using Xunit;
@@ -91,17 +90,8 @@ public class ImportTradesCsvUseCaseTests
         new EfPortfolioRepository(db),
         new EfInstrumentRepository(db),
         new FakeClock(DateTime.UtcNow),
-        new StubFocusTickerRepo("CON3.L"),
+        new FakeFocusTickerRepository("CON3.L"),
         NullLogger<ImportTradesCsvUseCase>.Instance);
-
-    private sealed class StubFocusTickerRepo(string ticker) : IFocusTickerRepository
-    {
-        public Task<FocusTicker> GetAsync(CancellationToken ct)
-            => Task.FromResult(FocusTicker.Of(ticker));
-
-        public Task SaveAsync(FocusTicker t, CancellationToken ct)
-            => throw new NotSupportedException();
-    }
 
     private static Instrument Existing(string ticker)
         => Instrument.Existing(
