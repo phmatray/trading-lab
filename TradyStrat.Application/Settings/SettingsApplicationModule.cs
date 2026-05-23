@@ -12,6 +12,9 @@ public sealed class SettingsApplicationModule : IAppModule
     {
         services.AddSingleton<ISettingsRegistry, SettingsRegistry>();
         services.AddScoped<UpdateSettingUseCase>();
+        services.AddScoped<UpdateAnthropicSettingsUseCase>();
+        services.AddScoped<UpdatePolymarketSettingsUseCase>();
+        services.AddScoped<UpdateFocusTickerUseCase>();
         services.AddScoped<ProbeInstrumentUseCase>();
         services.AddScoped<ListInstrumentsUseCase>();
     }
