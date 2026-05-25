@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Shared.Market;
 using TradyStrat.Domain.Suggestions;

@@ -1,6 +1,5 @@
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Suggestions.Events;
 using TradyStrat.Domain.Suggestions.Services;
