@@ -1,11 +1,12 @@
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions.Events;
 using TradyStrat.Domain.Suggestions.Services;
 
 namespace TradyStrat.Domain.Suggestions;
 
-public sealed class Suggestion
+public sealed class Suggestion : AggregateRoot<SuggestionId>
 {
-    public SuggestionId      Id            { get; private set; }
     public InstrumentId      InstrumentId  { get; private set; }
     public DateOnly          ForDate       { get; private set; }
     public SuggestionAction  Action        { get; private set; }
@@ -29,10 +30,9 @@ public sealed class Suggestion
         string rationale, IReadOnlyList<Citation> citations,
         MarketSnapshot snapshot, PromptFingerprint fingerprint, string thinkingText,
         DateTime createdAt)
+        : base(SuggestionId.New())
     {
-        // Id is DB-assigned via ValueGeneratedOnAdd. SuggestionId.New() returns
-        // the zero sentinel — EF rewrites it on insert.
-        Id           = SuggestionId.New();
+        // Id is DB-assigned via ValueGeneratedOnAdd; the zero sentinel is rewritten on insert.
         InstrumentId = instrumentId;
         ForDate      = forDate;
         Action       = action;
@@ -57,10 +57,12 @@ public sealed class Suggestion
         if (string.IsNullOrWhiteSpace(rationale))
             throw new ArgumentException("Rationale is required.", nameof(rationale));
 
-        return new Suggestion(
+        var s = new Suggestion(
             instrumentId, forDate, action, quantityHint, maxPriceHint, conviction,
             rationale, citations ?? [], snapshot, fingerprint, thinkingText ?? "",
             createdAt);
+        s.Raise(new SuggestionCreated(s.Id, instrumentId, forDate, action, createdAt));
+        return s;
     }
 
     public Money OrderValue =>
