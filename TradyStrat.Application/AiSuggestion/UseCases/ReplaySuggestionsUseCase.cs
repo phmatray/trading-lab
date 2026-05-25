@@ -3,6 +3,7 @@ using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.PriceFeed;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
@@ -22,6 +23,7 @@ public sealed class ReplaySuggestionsUseCase(
     IInstrumentRepository instruments,
     ISuggestionRepository suggestionRepo,
     ICorrectnessRule correctness,
+    IDomainEventDispatcher dispatcher,
     IClock clock,
     ILogger<ReplaySuggestionsUseCase> log)
     : UseCaseBase<ReplaySuggestionsInput, ReplayReport>(log)
@@ -82,7 +84,8 @@ public sealed class ReplaySuggestionsUseCase(
                     throw new InvalidOperationException(
                         $"Suggestion already exists for instrument {input.InstrumentId} on {date}. Pass --force to replace.");
                 if (existing is not null) await suggestionRepo.RemoveAsync(existing, ct);
-                await suggestionRepo.AddAsync(suggestion, ct);
+                var events = await suggestionRepo.AddAsync(suggestion, ct);
+                await dispatcher.DispatchAsync(events, ct);
             }
         }
 
