@@ -37,6 +37,8 @@ public class EfInstrumentRepositoryTests : IDisposable
 
     private AppDbContext NewContext() => new(_opts);
 
+    private static readonly DateTime _probedNow = new(2026, 5, 22, 0, 0, 0, DateTimeKind.Utc);
+
     private static Instrument Probed(string ticker = "TST")
     {
         var inst = Instrument.Probed(
@@ -45,8 +47,9 @@ public class EfInstrumentRepositoryTests : IDisposable
             currency:   Currency.Eur,
             exchange:   Exchange.Of("LSE"),
             timezoneId: TimezoneId.Of("Europe/London"),
-            kind:       InstrumentKind.Held);
-        inst.Confirm(new StubClock(new DateTime(2026, 5, 22, 0, 0, 0, DateTimeKind.Utc)));
+            kind:       InstrumentKind.Held,
+            now:        _probedNow);
+        inst.Confirm(new StubClock(_probedNow));
         return inst;
     }
 

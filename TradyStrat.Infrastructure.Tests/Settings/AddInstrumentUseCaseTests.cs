@@ -44,6 +44,8 @@ public class AddInstrumentUseCaseTests
                 new FxRateUnavailableException("simulated"));
     }
 
+    private static readonly DateTime _now = new(2026, 5, 7, 12, 0, 0, DateTimeKind.Utc);
+
     private static Instrument Probe(string ticker, Currency? currency = null, InstrumentKind kind = InstrumentKind.Held)
         => Instrument.Probed(
             ticker:     ticker,
@@ -51,7 +53,8 @@ public class AddInstrumentUseCaseTests
             currency:   currency ?? Currency.Usd,
             exchange:   Exchange.Of("NMS"),
             timezoneId: TimezoneId.Of("America/New_York"),
-            kind:       kind);
+            kind:       kind,
+            now:        _now);
 
     private static AddInstrumentUseCase NewSut(AppDbContext db)
     {

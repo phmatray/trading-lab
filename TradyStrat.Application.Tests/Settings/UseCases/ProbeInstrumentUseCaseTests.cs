@@ -12,6 +12,15 @@ namespace TradyStrat.Application.Tests.Settings.UseCases;
 
 public class ProbeInstrumentUseCaseTests
 {
+    private sealed class StubClock(DateTime now) : IClock
+    {
+        public DateTime UtcNow() => now;
+        public DateOnly TodayLocal() => DateOnly.FromDateTime(now);
+        public DateOnly TodayInExchangeTzFor(string ticker) => DateOnly.FromDateTime(now);
+    }
+
+    private static readonly StubClock _clock = new(new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc));
+
     private sealed class FakePriceFeed(Instrument? probed = null,
                                        Exception? throwOnProbe = null) : IPriceFeed
     {
@@ -46,9 +55,10 @@ public class ProbeInstrumentUseCaseTests
             currency:   Currency.Eur,
             exchange:   Exchange.Of("Euronext Paris"),
             timezoneId: TimezoneId.Of("Europe/Paris"),
-            kind:       InstrumentKind.Held);
+            kind:       InstrumentKind.Held,
+            now:        _clock.UtcNow());
         var sut = new ProbeInstrumentUseCase(
-            new FakePriceFeed(probed), new FakeFxProvider(),
+            new FakePriceFeed(probed), new FakeFxProvider(), _clock,
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
         var result = await sut.ExecuteAsync(
@@ -64,7 +74,7 @@ public class ProbeInstrumentUseCaseTests
     public async Task Throws_InstrumentNotFoundException_when_ticker_is_blank()
     {
         var sut = new ProbeInstrumentUseCase(
-            new FakePriceFeed(), new FakeFxProvider(),
+            new FakePriceFeed(), new FakeFxProvider(), _clock,
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
         await Should.ThrowAsync<InstrumentNotFoundException>(
@@ -78,7 +88,7 @@ public class ProbeInstrumentUseCaseTests
     {
         var sut = new ProbeInstrumentUseCase(
             new FakePriceFeed(throwOnProbe: new InstrumentNotFoundException("nope")),
-            new FakeFxProvider(),
+            new FakeFxProvider(), _clock,
             NullLogger<ProbeInstrumentUseCase>.Instance);
 
         await Should.ThrowAsync<InstrumentNotFoundException>(

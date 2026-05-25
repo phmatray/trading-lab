@@ -68,7 +68,7 @@ public static class YahooParser
     private static decimal AsDecimal(JsonElement e)
         => e.ValueKind == JsonValueKind.Null ? 0m : (decimal)e.GetDouble();
 
-    public static Instrument ParseMetadata(string ticker, JsonDocument doc)
+    public static Instrument ParseMetadata(string ticker, JsonDocument doc, DateTime now)
     {
         try
         {
@@ -109,7 +109,8 @@ public static class YahooParser
                 currency:   Currency.Parse(currencyCode),
                 exchange:   Exchange.Of(exchangeCode),
                 timezoneId: TimezoneId.Of(tzId),
-                kind:       InstrumentKind.Held);
+                kind:       InstrumentKind.Held,
+                now:        now);
         }
         catch (TradyStratException) { throw; }
         catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException

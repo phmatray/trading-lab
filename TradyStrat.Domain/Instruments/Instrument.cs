@@ -1,10 +1,11 @@
+using TradyStrat.Domain.Instruments.Events;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain;
 
-public sealed class Instrument
+public sealed class Instrument : AggregateRoot<InstrumentId>
 {
-    public InstrumentId   Id        { get; private set; }
     public string         Ticker    { get; private set; } = "";
     public string         Name      { get; private set; } = "";
     public Currency       Currency  { get; private set; } = Currency.Eur;
@@ -19,8 +20,8 @@ public sealed class Instrument
         InstrumentId id, string ticker, string name,
         Currency currency, Exchange exchange, TimezoneId timezone,
         InstrumentKind kind, DateTime addedAt)
+        : base(id)
     {
-        Id        = id;
         Ticker    = ticker;
         Name      = name;
         Currency  = currency;
@@ -33,55 +34,58 @@ public sealed class Instrument
     /// <summary>
     /// Candidate instrument returned from a probe (e.g. Yahoo metadata fetch)
     /// but not yet persisted. Id is the zero sentinel; AddedAt is default
-    /// until Confirm(clock) runs.
+    /// until Confirm(clock) runs. Raises InstrumentProbed.
     /// </summary>
     public static Instrument Probed(
         string ticker, string name,
         Currency currency, Exchange exchange, TimezoneId timezoneId,
-        InstrumentKind kind)
+        InstrumentKind kind,
+        DateTime now)
     {
         if (string.IsNullOrWhiteSpace(ticker))
             throw new ArgumentException("Ticker is required.", nameof(ticker));
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.", nameof(name));
 
-        return new Instrument(
+        var normalisedTicker = ticker.Trim().ToUpperInvariant();
+        var inst = new Instrument(
             id:       InstrumentId.New(),
-            ticker:   ticker.Trim().ToUpperInvariant(),
+            ticker:   normalisedTicker,
             name:     name.Trim(),
             currency: currency,
             exchange: exchange,
             timezone: timezoneId,
             kind:     kind,
             addedAt:  default);
+        inst.Raise(new InstrumentProbed(normalisedTicker, currency, exchange, now));
+        return inst;
     }
 
-    /// <summary>
-    /// Rehydration factory used by EF mapping to recreate the AR from
-    /// persisted state. Skips Confirm because AddedAt is already known.
-    /// </summary>
+    /// <summary>Rehydration factory used by EF mapping — does not raise.</summary>
     public static Instrument Existing(
         InstrumentId id, string ticker, string name,
         Currency currency, Exchange exchange, TimezoneId timezoneId,
         InstrumentKind kind, DateTime addedAt)
         => new(id, ticker, name, currency, exchange, timezoneId, kind, addedAt);
 
-    /// <summary>
-    /// Promote a Probed instrument to persistable by stamping AddedAt from the
-    /// clock. Throws if already confirmed.
-    /// </summary>
     public void Confirm(IClock clock)
     {
         if (AddedAt != default)
             throw new InvalidOperationException(
                 $"Instrument '{Ticker}' is already confirmed (AddedAt = {AddedAt:O}).");
-        AddedAt = clock.UtcNow();
+        var now = clock.UtcNow();
+        AddedAt = now;
+        Raise(new InstrumentConfirmed(Id, now));
     }
 
-    public void Rename(string newName)
+    public void Rename(string newName, IClock clock)
     {
         if (string.IsNullOrWhiteSpace(newName))
             throw new ArgumentException("Name must not be empty.", nameof(newName));
-        Name = newName.Trim();
+        var trimmed = newName.Trim();
+        if (trimmed == Name) return;
+        var oldName = Name;
+        Name = trimmed;
+        Raise(new InstrumentRenamed(Id, oldName, trimmed, clock.UtcNow()));
     }
 }

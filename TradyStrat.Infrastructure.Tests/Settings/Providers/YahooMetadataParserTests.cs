@@ -8,6 +8,8 @@ namespace TradyStrat.Infrastructure.Tests.Settings.Providers;
 
 public class YahooMetadataParserTests
 {
+    private static readonly DateTime _now = new(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc);
+
     private static JsonDocument Load(string fixture)
         => JsonDocument.Parse(File.ReadAllText(
             Path.Combine("Settings", "Providers", "Fixtures", fixture)));
@@ -16,7 +18,7 @@ public class YahooMetadataParserTests
     public void Parses_eur_etp_metadata()
     {
         using var doc = Load("yahoo-quote-eur-etp.json");
-        var meta = YahooParser.ParseMetadata("ETHE.PA", doc);
+        var meta = YahooParser.ParseMetadata("ETHE.PA", doc, _now);
 
         meta.Ticker.ShouldBe("ETHE.PA");
         meta.Name.ShouldBe("WisdomTree Physical Ethereum");
@@ -30,7 +32,7 @@ public class YahooMetadataParserTests
     {
         using var doc = Load("yahoo-quote-not-found.json");
         Should.Throw<InstrumentNotFoundException>(
-            () => YahooParser.ParseMetadata("XYZ", doc));
+            () => YahooParser.ParseMetadata("XYZ", doc, _now));
     }
 
     [Fact]
@@ -38,6 +40,6 @@ public class YahooMetadataParserTests
     {
         using var doc = Load("yahoo-quote-incomplete.json");
         Should.Throw<InstrumentMetadataIncompleteException>(
-            () => YahooParser.ParseMetadata("WEIRD", doc));
+            () => YahooParser.ParseMetadata("WEIRD", doc, _now));
     }
 }
