@@ -1,7 +1,6 @@
 using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Settings;
 using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Domain;
@@ -40,7 +39,7 @@ public sealed class Goal : AggregateRoot<GoalId>
     public void RetargetAmount(Money newTarget, IClock clock)
     {
         if (newTarget.IsEmpty || newTarget.Amount <= 0m)
-            throw new SettingValidationException(
+            throw new GoalValidationException(
                 $"Target must be positive (was {newTarget}).");
         var oldTarget = Target;
         Target = newTarget;
@@ -55,7 +54,7 @@ public sealed class Goal : AggregateRoot<GoalId>
         {
             var today = clock.TodayLocal();
             if (newDeadline < today)
-                throw new SettingValidationException(
+                throw new GoalValidationException(
                     $"Deadline must be today or later (was {newDeadline:O}, today is {today:O}).");
         }
         var oldDeadline = TargetDate;

@@ -2,7 +2,6 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
-using TradyStrat.Domain.Settings;
 using TradyStrat.Domain.Shared.Money;
 using Xunit;
 
@@ -46,7 +45,7 @@ public class GoalTests
     public void RetargetAmount_rejects_non_positive_target()
     {
         var goal = Goal.Initial(new FixedClock(_now));
-        Should.Throw<SettingValidationException>(
+        Should.Throw<GoalValidationException>(
             () => goal.RetargetAmount(Money.Of(0m, Currency.Eur), new FixedClock(_now)));
     }
 
@@ -81,7 +80,7 @@ public class GoalTests
         var goal = Goal.Initial(clock);
         var yesterday = DateOnly.FromDateTime(_now).AddDays(-1);
 
-        Should.Throw<SettingValidationException>(
+        Should.Throw<GoalValidationException>(
             () => goal.RescheduleDeadline(yesterday, clock));
     }
 
