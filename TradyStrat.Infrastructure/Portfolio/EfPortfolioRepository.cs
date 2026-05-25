@@ -18,7 +18,7 @@ public sealed class EfPortfolioRepository(AppDbContext db) : IPortfolioRepositor
 
         if (portfolio is null)
         {
-            portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+            portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
             db.Portfolios.Add(portfolio);
             await db.SaveChangesAsync(ct);
             return portfolio;

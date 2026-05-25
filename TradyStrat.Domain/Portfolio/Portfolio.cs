@@ -24,8 +24,8 @@ public sealed class Portfolio : AggregateRoot<PortfolioId>
         return p;
     }
 
-    /// <summary>Rehydration overload — does not raise. Use only for shapes that need a bare AR.</summary>
-    public static Portfolio Empty(PortfolioId id) => new(id);
+    /// <summary>Rehydration factory — does not raise. Used by EF reconstitution paths and snapshot replay.</summary>
+    public static Portfolio Existing(PortfolioId id) => new(id);
 
     public Events.TradeRecorded RecordTrade(
         InstrumentId instrumentId,
@@ -77,7 +77,7 @@ public sealed class Portfolio : AggregateRoot<PortfolioId>
         target.ClearAllForReplay();
         foreach (var t in remaining) target.Record(t);
 
-        var evt = new Events.TradeDeleted(target.Id, target.RealizedPnL - realizedBefore, now);
+        var evt = new Events.TradeDeleted(tradeId, target.Id, target.RealizedPnL - realizedBefore, now);
         Raise(evt);
         return evt;
     }

@@ -18,7 +18,7 @@ public class MoneyPriceQuantityRoundTripTests
     {
         await using var db = InMemoryDb.Create();
 
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         p.RecordTrade(
             instrumentId:   new InstrumentId(42),
             executedOn:     new DateOnly(2026, 1, 15),
@@ -63,7 +63,7 @@ public class MoneyPriceQuantityRoundTripTests
         //     Fees, and on the Position's RealizedPnL which starts at Zero)
         await using var db = InMemoryDb.Create();
 
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         p.RecordTrade(
             instrumentId:   new InstrumentId(42),
             executedOn:     new DateOnly(2026, 1, 15),
