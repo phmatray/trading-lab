@@ -8,7 +8,7 @@ public sealed class Price : ValueObject
     public Currency Currency => PerUnit.Currency;
     public bool     IsEmpty  => PerUnit.IsEmpty;
 
-    private Price() { }   // EF
+    private Price() { }   // EF (Price wraps Money — owned, can't be ctor-bound)
     private Price(Money perUnit) => PerUnit = perUnit;
 
     public static Price Of(Money perUnit)        => new(perUnit);
