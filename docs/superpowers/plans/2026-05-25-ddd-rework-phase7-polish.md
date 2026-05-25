@@ -233,12 +233,13 @@ Create `TradyStrat.Domain/SeedWork/DomainEvent.cs`:
 ```csharp
 namespace TradyStrat.Domain.SeedWork;
 
-public abstract record DomainEvent : IDomainEvent
+public abstract record DomainEvent(DateTime OccurredAt) : IDomainEvent
 {
-    public Guid     EventId    { get; init; } = Guid.NewGuid();
-    public DateTime OccurredAt { get; init; }
+    public Guid EventId { get; init; } = Guid.NewGuid();
 }
 ```
+
+**Why positional `OccurredAt` on the base:** concrete events inherit positionally — `record TradeRecorded(..., DateTime OccurredAt) : DomainEvent(OccurredAt);`. This keeps `OccurredAt` as a *single* property on the base class so interface dispatch (`((IDomainEvent)evt).OccurredAt`) returns the actual value. Do NOT re-declare `public DateTime OccurredAt { get; init; }` on concrete events — that creates a shadowing property and `default(DateTime)` reads through the base.
 
 - [ ] **Step 5: Create `Entity.cs`**
 
@@ -409,8 +410,7 @@ namespace TradyStrat.Domain.Tests.SeedWork;
 
 public class AggregateRootEventCollectionTests
 {
-    private sealed record FooHappened(DateTime OccurredAt) : DomainEvent
-    { public DateTime OccurredAt { get; init; } = OccurredAt; }
+    private sealed record FooHappened(DateTime OccurredAt) : DomainEvent(OccurredAt);
 
     private sealed class TestAr : AggregateRoot<InstrumentId>
     {
@@ -601,8 +601,7 @@ namespace TradyStrat.Domain.Tests.SeedWork;
 
 public class DomainEventTests
 {
-    private sealed record FooHappened(int X, DateTime OccurredAt) : DomainEvent
-    { public DateTime OccurredAt { get; init; } = OccurredAt; }
+    private sealed record FooHappened(int X, DateTime OccurredAt) : DomainEvent(OccurredAt);
 
     [Fact]
     public void EventId_is_assigned_a_fresh_guid()
@@ -985,8 +984,7 @@ using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Portfolio.Events;
 
-public sealed record PortfolioCreated(PortfolioId PortfolioId, DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+public sealed record PortfolioCreated(PortfolioId PortfolioId, DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Portfolio/Events/TradeRecorded.cs`:
@@ -1000,8 +998,7 @@ public sealed record TradeRecorded(
     TradeId    TradeId,
     PositionId PositionId,
     Money      RealizedDelta,
-    DateTime   OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime   OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Portfolio/Events/TradeDeleted.cs`:
@@ -1014,8 +1011,7 @@ namespace TradyStrat.Domain.Portfolio.Events;
 public sealed record TradeDeleted(
     PositionId PositionId,
     Money      RealizedDelta,
-    DateTime   OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime   OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Portfolio/Events/PositionOpened.cs`:
@@ -1028,8 +1024,7 @@ namespace TradyStrat.Domain.Portfolio.Events;
 public sealed record PositionOpened(
     PositionId   PositionId,
     InstrumentId InstrumentId,
-    DateTime     OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime     OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 - [ ] **Step 2: Delete the old result records**
@@ -1569,8 +1564,7 @@ public sealed record SuggestionCreated(
     InstrumentId     InstrumentId,
     DateOnly         ForDate,
     SuggestionAction Action,
-    DateTime         OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime         OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 - [ ] **Step 2: Update `Suggestion.cs` to inherit `AggregateRoot<SuggestionId>` and raise**
@@ -1733,8 +1727,7 @@ using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Goals.Events;
 
-public sealed record GoalCreated(GoalId GoalId, Money Target, DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+public sealed record GoalCreated(GoalId GoalId, Money Target, DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Goals/Events/GoalTargetChanged.cs`:
@@ -1748,8 +1741,7 @@ public sealed record GoalTargetChanged(
     GoalId   GoalId,
     Money    OldTarget,
     Money    NewTarget,
-    DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Goals/Events/GoalDeadlineRescheduled.cs`:
@@ -1763,8 +1755,7 @@ public sealed record GoalDeadlineRescheduled(
     GoalId   GoalId,
     DateOnly OldDeadline,
     DateOnly NewDeadline,
-    DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 - [ ] **Step 2: Rewrite `Goal.cs`**
@@ -1939,8 +1930,7 @@ public sealed record InstrumentProbed(
     string   Ticker,
     Currency Currency,
     Exchange Exchange,
-    DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Instruments/Events/InstrumentConfirmed.cs`:
@@ -1950,8 +1940,7 @@ using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Instruments.Events;
 
-public sealed record InstrumentConfirmed(InstrumentId InstrumentId, DateTime OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+public sealed record InstrumentConfirmed(InstrumentId InstrumentId, DateTime OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 Create `TradyStrat.Domain/Instruments/Events/InstrumentRenamed.cs`:
@@ -1965,8 +1954,7 @@ public sealed record InstrumentRenamed(
     InstrumentId InstrumentId,
     string       OldName,
     string       NewName,
-    DateTime     OccurredAt) : DomainEvent
-{ public DateTime OccurredAt { get; init; } = OccurredAt; }
+    DateTime     OccurredAt) : DomainEvent(OccurredAt);
 ```
 
 - [ ] **Step 2: Rewrite `Instrument.cs`**
@@ -2636,10 +2624,8 @@ namespace TradyStrat.Infrastructure.Tests.SeedWork;
 
 public class DomainEventDispatcherTests
 {
-    private sealed record EventA(DateTime OccurredAt) : DomainEvent
-    { public DateTime OccurredAt { get; init; } = OccurredAt; }
-    private sealed record EventB(DateTime OccurredAt) : DomainEvent
-    { public DateTime OccurredAt { get; init; } = OccurredAt; }
+    private sealed record EventA(DateTime OccurredAt) : DomainEvent(OccurredAt);
+    private sealed record EventB(DateTime OccurredAt) : DomainEvent(OccurredAt);
 
     private sealed class HandlerA : IDomainEventHandler<EventA>
     {
