@@ -3,7 +3,6 @@ using Shouldly;
 using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Goals;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;

@@ -1,6 +1,8 @@
 using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Settings.UseCases;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 
 namespace TradyStrat.Infrastructure.PriceFeed.UseCases;
 
@@ -18,7 +20,7 @@ public sealed class RefreshAllPricesUseCase(
             await prices.EnsureFreshAsync(inst.Ticker, ct);
 
         var quotes = instruments
-            .Where(i => i.Currency != TradyStrat.Domain.Shared.Currency.Eur)
+            .Where(i => i.Currency != Currency.Eur)
             .Select(i => i.Currency.Code)
             .Distinct();
 

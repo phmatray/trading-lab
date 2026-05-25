@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Infrastructure.Fx.Specifications;
 

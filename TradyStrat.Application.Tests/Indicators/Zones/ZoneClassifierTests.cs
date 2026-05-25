@@ -5,7 +5,7 @@ using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Indicators.Services;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Indicators.Zones;

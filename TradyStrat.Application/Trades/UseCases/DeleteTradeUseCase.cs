@@ -4,7 +4,6 @@ using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.Trades.UseCases;
 

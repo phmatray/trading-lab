@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.Portfolio;

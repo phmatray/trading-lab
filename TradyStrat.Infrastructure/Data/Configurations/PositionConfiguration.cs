@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Infrastructure.Data.Configurations;
 

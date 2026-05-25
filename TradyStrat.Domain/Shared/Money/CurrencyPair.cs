@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Shared.Money;
 
 public sealed record CurrencyPair
 {

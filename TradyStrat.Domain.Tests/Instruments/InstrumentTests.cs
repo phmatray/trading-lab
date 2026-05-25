@@ -2,7 +2,8 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Instruments.Events;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.Instruments;

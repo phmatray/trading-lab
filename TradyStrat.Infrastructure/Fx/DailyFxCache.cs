@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Fx.Providers;
 

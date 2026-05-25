@@ -1,6 +1,6 @@
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Domain.Portfolio;
 

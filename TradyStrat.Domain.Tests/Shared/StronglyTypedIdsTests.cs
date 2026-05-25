@@ -2,7 +2,6 @@ using Shouldly;
 using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.Shared;

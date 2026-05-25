@@ -2,7 +2,8 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 using Xunit;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 

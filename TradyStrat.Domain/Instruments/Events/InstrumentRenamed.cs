@@ -1,5 +1,4 @@
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Instruments.Events;
 

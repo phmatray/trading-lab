@@ -1,7 +1,7 @@
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Indicators;
 using TradyStrat.Domain.PriceFeed;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Domain.Indicators.Services;
 

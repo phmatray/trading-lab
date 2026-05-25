@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
 using Xunit;

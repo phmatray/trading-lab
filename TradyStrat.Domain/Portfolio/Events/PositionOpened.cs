@@ -1,6 +1,5 @@
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Portfolio.Events;
 

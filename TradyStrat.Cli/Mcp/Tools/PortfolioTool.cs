@@ -10,7 +10,8 @@ using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.PriceFeed;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 
 namespace TradyStrat.Cli.Mcp.Tools;
 

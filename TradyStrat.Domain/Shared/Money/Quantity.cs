@@ -1,6 +1,6 @@
 using TradyStrat.Domain.SeedWork;
 
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Shared.Money;
 
 public sealed class Quantity : ValueObject
 {

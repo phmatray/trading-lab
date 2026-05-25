@@ -1,7 +1,7 @@
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Shared.Money;
 
 public sealed class Money : ValueObject
 {

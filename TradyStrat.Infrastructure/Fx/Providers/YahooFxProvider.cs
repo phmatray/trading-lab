@@ -2,6 +2,7 @@ using TradyStrat.Application.Fx.Providers;
 using System.Text.Json;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Infrastructure.Fx.Providers;
 
@@ -41,9 +42,9 @@ public sealed class YahooFxProvider(HttpClient http) : IFxRateProvider
                     DateTimeOffset.FromUnixTimeSeconds(ts[i].GetInt64()).UtcDateTime);
                 rates.Add(new FxRate(
                     date,
-                    TradyStrat.Domain.Shared.CurrencyPair.Of(
-                        TradyStrat.Domain.Shared.Currency.Parse(@base),
-                        TradyStrat.Domain.Shared.Currency.Parse(quote)),
+                    CurrencyPair.Of(
+                        Currency.Parse(@base),
+                        Currency.Parse(quote)),
                     (decimal)close[i].GetDouble(),
                     fetchedAt));
             }

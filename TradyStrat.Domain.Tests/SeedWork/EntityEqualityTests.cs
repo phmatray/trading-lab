@@ -1,7 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.SeedWork;

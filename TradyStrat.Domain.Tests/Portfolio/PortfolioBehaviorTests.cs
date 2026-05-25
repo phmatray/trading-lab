@@ -3,7 +3,7 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using Xunit;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 

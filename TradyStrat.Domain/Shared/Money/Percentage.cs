@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Shared.Money;
 
 public readonly record struct Percentage
 {

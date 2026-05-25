@@ -6,6 +6,7 @@ using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Market;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;
 

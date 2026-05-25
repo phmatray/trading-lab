@@ -5,7 +5,8 @@ using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Settings.UseCases;

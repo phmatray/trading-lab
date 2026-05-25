@@ -9,6 +9,8 @@ using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.AiSuggestion;
 using TradyStrat.Infrastructure.Data;

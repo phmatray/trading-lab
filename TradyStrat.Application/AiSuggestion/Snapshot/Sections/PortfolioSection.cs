@@ -3,7 +3,8 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 

@@ -330,7 +330,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("PositionId");
 
-                            b1.OwnsOne("TradyStrat.Domain.Shared.Quantity", "Quantity", b2 =>
+                            b1.OwnsOne("TradyStrat.Domain.Shared.Money.Quantity", "Quantity", b2 =>
                                 {
                                     b2.Property<int>("LotId")
                                         .HasColumnType("INTEGER");
@@ -351,7 +351,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                                         .HasForeignKey("LotId");
                                 });
 
-                            b1.OwnsOne("TradyStrat.Domain.Shared.Money", "UnitCost", b2 =>
+                            b1.OwnsOne("TradyStrat.Domain.Shared.Money.Money", "UnitCost", b2 =>
                                 {
                                     b2.Property<int>("LotId")
                                         .HasColumnType("INTEGER");
@@ -385,7 +385,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsOne("TradyStrat.Domain.Shared.Money", "_realizedPnL", b1 =>
+                    b.OwnsOne("TradyStrat.Domain.Shared.Money.Money", "_realizedPnL", b1 =>
                         {
                             b1.Property<int>("PositionId")
                                 .HasColumnType("INTEGER");
@@ -424,7 +424,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("TradyStrat.Domain.Shared.Money", "Fees", b1 =>
+                    b.OwnsOne("TradyStrat.Domain.Shared.Money.Money", "Fees", b1 =>
                         {
                             b1.Property<int>("TradeId")
                                 .HasColumnType("INTEGER");
@@ -451,7 +451,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                                 .HasForeignKey("TradeId");
                         });
 
-                    b.OwnsOne("TradyStrat.Domain.Shared.Quantity", "Quantity", b1 =>
+                    b.OwnsOne("TradyStrat.Domain.Shared.Money.Quantity", "Quantity", b1 =>
                         {
                             b1.Property<int>("TradeId")
                                 .HasColumnType("INTEGER");
@@ -472,7 +472,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                                 .HasForeignKey("TradeId");
                         });
 
-                    b.OwnsOne("TradyStrat.Domain.Shared.Price", "PricePerShare", b1 =>
+                    b.OwnsOne("TradyStrat.Domain.Shared.Money.Price", "PricePerShare", b1 =>
                         {
                             b1.Property<int>("TradeId")
                                 .HasColumnType("INTEGER");
@@ -484,7 +484,7 @@ namespace TradyStrat.Infrastructure.Data.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("TradeId");
 
-                            b1.OwnsOne("TradyStrat.Domain.Shared.Money", "PerUnit", b2 =>
+                            b1.OwnsOne("TradyStrat.Domain.Shared.Money.Money", "PerUnit", b2 =>
                                 {
                                     b2.Property<int>("PriceTradeId")
                                         .HasColumnType("INTEGER");

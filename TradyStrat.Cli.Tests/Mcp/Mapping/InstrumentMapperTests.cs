@@ -3,7 +3,8 @@ using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Instruments;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 using Xunit;
 
 namespace TradyStrat.Cli.Tests.Mcp.Mapping;

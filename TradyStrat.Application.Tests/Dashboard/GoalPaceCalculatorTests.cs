@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Application.Dashboard;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using Xunit;
 
 namespace TradyStrat.Application.Tests.Dashboard;

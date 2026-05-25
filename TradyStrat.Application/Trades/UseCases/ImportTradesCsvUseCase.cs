@@ -6,7 +6,8 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
+using TradyStrat.Domain.Shared.Market;
 
 namespace TradyStrat.Application.Trades.UseCases;
 

@@ -1,4 +1,4 @@
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Domain.Suggestions;
 

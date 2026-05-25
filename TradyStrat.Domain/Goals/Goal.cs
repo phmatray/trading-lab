@@ -2,7 +2,7 @@ using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Domain;
 

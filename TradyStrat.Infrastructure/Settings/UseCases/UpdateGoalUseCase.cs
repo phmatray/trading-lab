@@ -2,7 +2,7 @@ using TradyStrat.Application.Goals;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Infrastructure.Settings.UseCases;
 

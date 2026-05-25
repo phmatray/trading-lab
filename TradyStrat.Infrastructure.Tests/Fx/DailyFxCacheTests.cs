@@ -7,6 +7,7 @@ using TradyStrat.Domain;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;
 using Xunit;
+using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Tests.Fx;
 
@@ -14,7 +15,7 @@ public class DailyFxCacheTests
 {
     private static FxRate Rate(DateOnly d, decimal v) => new(
         d,
-        TradyStrat.Domain.Shared.CurrencyPair.Of(TradyStrat.Domain.Shared.Currency.Eur, TradyStrat.Domain.Shared.Currency.Usd),
+        CurrencyPair.Of(Currency.Eur, Currency.Usd),
         v,
         DateTime.UtcNow);
 

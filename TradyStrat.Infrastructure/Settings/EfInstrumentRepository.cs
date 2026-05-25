@@ -4,7 +4,7 @@ using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Market;
 using TradyStrat.Infrastructure.Data;
 
 namespace TradyStrat.Infrastructure.Settings;

@@ -2,7 +2,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Fx;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Infrastructure.Fx.Specifications;
 

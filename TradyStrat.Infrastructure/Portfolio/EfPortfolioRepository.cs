@@ -3,7 +3,6 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.SeedWork;
-using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 

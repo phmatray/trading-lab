@@ -1,8 +1,8 @@
 using Shouldly;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Market;
 using Xunit;
 
-namespace TradyStrat.Domain.Tests.Shared;
+namespace TradyStrat.Domain.Tests.Shared.Market;
 
 public class TickerTests
 {

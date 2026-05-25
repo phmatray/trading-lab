@@ -1,5 +1,4 @@
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain;
 

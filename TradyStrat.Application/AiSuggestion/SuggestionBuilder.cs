@@ -1,6 +1,7 @@
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion;

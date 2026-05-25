@@ -8,7 +8,7 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Shared.Market;
 
 namespace TradyStrat.Features.Trades;
 
