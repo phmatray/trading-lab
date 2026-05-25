@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain.SeedWork;
@@ -11,6 +12,18 @@ public class DomainEventDispatcherTests
 {
     private sealed record EventA(DateTime OccurredAt) : DomainEvent(OccurredAt);
     private sealed record EventB(DateTime OccurredAt) : DomainEvent(OccurredAt);
+
+    /// <summary>Minimal in-memory logger for assertions; mirrors the pattern in McpLoggingFilterTests.</summary>
+    private sealed class RecordingLogger<T> : ILogger<T>
+    {
+        public sealed record Entry(LogLevel Level, string Message, Exception? Exception);
+        private readonly List<Entry> _entries = new();
+        public IReadOnlyList<Entry> Entries => _entries;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            => _entries.Add(new Entry(logLevel, formatter(state, exception), exception));
+    }
 
     private sealed class HandlerA : IDomainEventHandler<EventA>
     {
@@ -65,15 +78,46 @@ public class DomainEventDispatcherTests
     }
 
     [Fact]
-    public async Task Bubbles_handler_exceptions()
+    public async Task Bubbles_handler_exceptions_unwrapped()
     {
         var sp = BuildSp(sc => sc.AddSingleton<IDomainEventHandler<EventA>, HandlerAFails>());
         var d = Make(sp);
 
-        // The dispatcher uses reflection (method.Invoke), which wraps thrown exceptions
-        // in TargetInvocationException — assert on the base Exception type to be safe.
-        await Should.ThrowAsync<Exception>(() =>
+        // Reflection wraps synchronous handler throws in TargetInvocationException;
+        // the dispatcher unwraps them so callers see the actual handler exception.
+        var ex = await Should.ThrowAsync<InvalidOperationException>(() =>
             d.DispatchAsync([new EventA(DateTime.UtcNow)], TestContext.Current.CancellationToken));
+        ex.Message.ShouldBe("boom");
+    }
+
+    [Fact]
+    public async Task Logs_Error_when_handler_throws_with_event_metadata()
+    {
+        var logger = new RecordingLogger<DomainEventDispatcher>();
+        var sp = BuildSp(sc => sc.AddSingleton<IDomainEventHandler<EventA>, HandlerAFails>());
+        var d = new DomainEventDispatcher(sp, logger);
+        var evt = new EventA(DateTime.UtcNow);
+
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            d.DispatchAsync([evt], TestContext.Current.CancellationToken));
+
+        var error = logger.Entries.Where(e => e.Level == LogLevel.Error).ShouldHaveSingleItem();
+        error.Message.ShouldContain(nameof(EventA));
+        error.Message.ShouldContain(nameof(HandlerAFails));
+        error.Message.ShouldContain(evt.EventId.ToString());
+        error.Exception.ShouldBeOfType<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task Empty_event_list_is_a_noop_and_does_not_log()
+    {
+        var logger = new RecordingLogger<DomainEventDispatcher>();
+        var sp = BuildSp(_ => { });
+        var d = new DomainEventDispatcher(sp, logger);
+
+        await d.DispatchAsync([], TestContext.Current.CancellationToken);
+
+        logger.Entries.ShouldBeEmpty();
     }
 
     [Fact]
