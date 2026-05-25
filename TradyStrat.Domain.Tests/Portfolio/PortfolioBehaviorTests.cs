@@ -108,6 +108,27 @@ public class PortfolioBehaviorTests
     }
 
     [Fact]
+    public void ImportTrades_failure_clears_pending_domain_events()
+    {
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
+        var good = new TradeDraft(
+            new InstrumentId(7), new DateOnly(2026, 1, 1), TradeSide.Buy,
+            Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
+            Money.Zero(Currency.Eur), "");
+        var bad = new TradeDraft(
+            new InstrumentId(7), new DateOnly(2026, 1, 2), TradeSide.Sell,
+            Quantity.Of(20m), Price.Of(Money.Of(5m, Currency.Eur)),
+            Money.Zero(Currency.Eur), "");
+
+        Should.Throw<TradeValidationException>(() =>
+            portfolio.ImportTrades([good, bad], _now));
+
+        // A partially-applied batch must leave no orphan events. Guards the
+        // ClearDomainEvents() call in Portfolio.ImportTrades's catch block.
+        portfolio.DomainEvents.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void TradeIds_are_unique_across_positions()
     {
         var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
