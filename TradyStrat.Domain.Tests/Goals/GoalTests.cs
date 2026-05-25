@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.Shared;
 using Xunit;
 
@@ -81,5 +82,48 @@ public class GoalTests
 
         Should.Throw<SettingValidationException>(
             () => goal.RescheduleDeadline(yesterday, clock));
+    }
+
+    [Fact]
+    public void Initial_raises_GoalCreated()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+
+        var evt = g.DomainEvents.OfType<GoalCreated>().ShouldHaveSingleItem();
+        evt.GoalId.ShouldBe(GoalId.Singleton);
+        evt.Target.ShouldBe(Money.Of(1_000_000m, Currency.Eur));
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
+    }
+
+    [Fact]
+    public void RetargetAmount_raises_GoalTargetChanged_with_old_and_new()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+        g.DequeueDomainEvents();   // discard GoalCreated
+
+        g.RetargetAmount(Money.Of(2_000_000m, Currency.Eur), clock);
+
+        var evt = g.DomainEvents.OfType<GoalTargetChanged>().ShouldHaveSingleItem();
+        evt.OldTarget.ShouldBe(Money.Of(1_000_000m, Currency.Eur));
+        evt.NewTarget.ShouldBe(Money.Of(2_000_000m, Currency.Eur));
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
+    }
+
+    [Fact]
+    public void RescheduleDeadline_raises_GoalDeadlineRescheduled_with_old_and_new()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+        g.DequeueDomainEvents();
+
+        var newDate = new DateOnly(2030, 1, 1);
+        g.RescheduleDeadline(newDate, clock);
+
+        var evt = g.DomainEvents.OfType<GoalDeadlineRescheduled>().ShouldHaveSingleItem();
+        evt.OldDeadline.ShouldBe(DateOnly.MinValue);
+        evt.NewDeadline.ShouldBe(newDate);
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
     }
 }
