@@ -1,10 +1,10 @@
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Portfolio;
 
-public sealed class Position
+public sealed class Position : Entity<PositionId>
 {
-    public PositionId   Id           { get; private set; }
     public InstrumentId InstrumentId { get; private set; }
 
     private readonly List<Lot>   _openLots = new();
@@ -12,8 +12,8 @@ public sealed class Position
 
     private Money _realizedPnL = Money.Zero(Currency.Eur);
 
-    public IReadOnlyList<Lot>   OpenLots   => _openLots;
-    public IReadOnlyList<Trade> Trades     => _trades;
+    public IReadOnlyList<Lot>   OpenLots    => _openLots;
+    public IReadOnlyList<Trade> Trades      => _trades;
     public Money                RealizedPnL => _realizedPnL;
 
     public Quantity TotalQuantity
@@ -40,9 +40,8 @@ public sealed class Position
 
     private Position() { }   // EF
 
-    private Position(InstrumentId instrumentId)
+    private Position(InstrumentId instrumentId) : base(PositionId.New())
     {
-        Id           = PositionId.New();
         InstrumentId = instrumentId;
     }
 
@@ -51,17 +50,12 @@ public sealed class Position
     public Money Record(Trade trade)
     {
         var realizedBefore = _realizedPnL;
-        // Assign a sequential ID within this position so the AR can identify
-        // trades for DeleteTrade. EF preserves these IDs (ValueGeneratedNever).
-        // During rehydration the trade already has a stable DB-assigned ID;
-        // preserve it (EF refuses to mutate a tracked entity's primary key).
         if (trade.Id == TradeId.New())
             trade.AssignId(new TradeId(_trades.Count + 1));
         _trades.Add(trade);
 
         if (trade.IsBuy)
         {
-            // Fold fees into cost basis: unitCost = (gross + fees) / qty
             var grossPlusFees = trade.PricePerShare * trade.Quantity + trade.Fees;
             var unitCost = grossPlusFees / trade.Quantity.Value;
             _openLots.Add(new Lot(trade.ExecutedOn, trade.Quantity, unitCost));
@@ -79,9 +73,7 @@ public sealed class Position
             var head = _openLots[0];
             var consumed = Math.Min(head.Quantity.Value, remaining);
 
-            // P&L from the price delta on consumed shares
             var pricePnL = (trade.PricePerShare.PerUnit - head.UnitCost) * consumed;
-            // Pro-rata fee allocation on consumed shares
             var feeShare = trade.Fees * (consumed / totalSellQty);
             _realizedPnL = _realizedPnL + pricePnL - feeShare;
 

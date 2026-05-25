@@ -59,6 +59,6 @@ public class PortfolioInvariantsTests
     public void DeleteTrade_unknown_id_throws()
     {
         var p = PortfolioAr.Empty(PortfolioId.Singleton);
-        Should.Throw<TradeValidationException>(() => p.DeleteTrade(new TradeId(999)));
+        Should.Throw<TradeValidationException>(() => p.DeleteTrade(new TradeId(999), _now));
     }
 }

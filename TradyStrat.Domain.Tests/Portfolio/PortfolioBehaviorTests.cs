@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.Shared;
 using Xunit;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
@@ -23,13 +24,16 @@ public class PortfolioBehaviorTests
     public void RecordTrade_creates_new_position_first_time()
     {
         var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
-        var result = portfolio.RecordTrade(
+        portfolio.RecordTrade(
             new InstrumentId(7),
             new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
             Money.Zero(Currency.Eur), "", _now);
 
-        result.CreatedPosition.ShouldBeTrue();
+        // A PositionOpened event should have been raised for the new position.
+        portfolio.DomainEvents.OfType<PositionOpened>()
+            .Any(e => e.InstrumentId == new InstrumentId(7))
+            .ShouldBeTrue();
         portfolio.Positions.Count.ShouldBe(1);
         portfolio.Positions[0].InstrumentId.ShouldBe(new InstrumentId(7));
     }
@@ -40,10 +44,15 @@ public class PortfolioBehaviorTests
         var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
         portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
-        var second = portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 5), TradeSide.Buy,
+
+        // Drain events from first trade so we can isolate the second trade's events.
+        portfolio.DequeueDomainEvents();
+
+        portfolio.RecordTrade(new InstrumentId(7), new DateOnly(2026, 1, 5), TradeSide.Buy,
             Quantity.Of(5m), Price.Of(Money.Of(6m, Currency.Eur)), Money.Zero(Currency.Eur), "", _now);
 
-        second.CreatedPosition.ShouldBeFalse();
+        // No PositionOpened for the second trade on the same instrument.
+        portfolio.DomainEvents.OfType<PositionOpened>().ShouldBeEmpty();
         portfolio.Positions.Count.ShouldBe(1);
         portfolio.Positions[0].Trades.Count.ShouldBe(2);
     }
@@ -61,7 +70,7 @@ public class PortfolioBehaviorTests
 
         // After delete of the first buy, replay: only [Buy@5, Sell@6] of qty 5 each.
         // remaining lot @ 5; sell of 5 @ 6 realizes 5*(6-5)=5.
-        portfolio.DeleteTrade(r1.TradeId);
+        portfolio.DeleteTrade(r1.TradeId, _now);
 
         var pos = portfolio.Positions[0];
         pos.Trades.Count.ShouldBe(2);
@@ -74,7 +83,7 @@ public class PortfolioBehaviorTests
     {
         var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
         Should.Throw<TradeValidationException>(() =>
-            portfolio.DeleteTrade(new TradeId(999)));
+            portfolio.DeleteTrade(new TradeId(999), _now));
     }
 
     [Fact]
