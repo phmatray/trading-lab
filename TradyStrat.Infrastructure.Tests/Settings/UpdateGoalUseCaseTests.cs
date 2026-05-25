@@ -20,7 +20,7 @@ public class UpdateGoalUseCaseTests
         var ct = TestContext.Current.CancellationToken;
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
 
-        var uc = new UpdateGoalUseCase(new EfGoalRepository(db, clock), clock,
+        var uc = new UpdateGoalUseCase(new EfGoalRepository(db, clock, NullDomainEventDispatcher.Instance), clock,
             NullDomainEventDispatcher.Instance,
             NullLogger<UpdateGoalUseCase>.Instance);
 
@@ -37,7 +37,7 @@ public class UpdateGoalUseCaseTests
         await using var db = InMemoryDb.Create();
         var ct = TestContext.Current.CancellationToken;
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
-        var repo = new EfGoalRepository(db, clock);
+        var repo = new EfGoalRepository(db, clock, NullDomainEventDispatcher.Instance);
         var uc = new UpdateGoalUseCase(repo, clock, NullDomainEventDispatcher.Instance, NullLogger<UpdateGoalUseCase>.Instance);
 
         await uc.ExecuteAsync(new UpdateGoalInput(1_000_000m, new(2030, 1, 1)), ct);

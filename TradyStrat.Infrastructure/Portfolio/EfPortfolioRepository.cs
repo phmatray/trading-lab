@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Portfolio;
+using TradyStrat.Domain;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
@@ -8,7 +9,10 @@ using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
 
 namespace TradyStrat.Infrastructure.Portfolio;
 
-public sealed class EfPortfolioRepository(AppDbContext db) : IPortfolioRepository
+public sealed class EfPortfolioRepository(
+    AppDbContext db,
+    IClock clock,
+    IDomainEventDispatcher dispatcher) : IPortfolioRepository
 {
     public async Task<PortfolioAr> GetAsync(CancellationToken ct)
     {
@@ -19,9 +23,13 @@ public sealed class EfPortfolioRepository(AppDbContext db) : IPortfolioRepositor
 
         if (portfolio is null)
         {
-            portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
+            // First-ever read: bootstrap the singleton AR. Empty(id, now) raises
+            // PortfolioCreated; we persist, then dispatch through the standard
+            // pipeline so any future handler observes the first-install event.
+            portfolio = PortfolioAr.Empty(PortfolioId.Singleton, clock.UtcNow());
             db.Portfolios.Add(portfolio);
             await db.SaveChangesAsync(ct);
+            await dispatcher.DispatchAsync(portfolio.DequeueDomainEvents(), ct);
             return portfolio;
         }
 

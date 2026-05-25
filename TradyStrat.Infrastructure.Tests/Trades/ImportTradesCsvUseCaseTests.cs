@@ -87,13 +87,17 @@ public class ImportTradesCsvUseCaseTests
         ex.Message.ShouldContain("UNKNOWN");
     }
 
-    private static ImportTradesCsvUseCase Build(Infrastructure.Data.AppDbContext db) => new(
-        new EfPortfolioRepository(db),
-        new EfInstrumentRepository(db),
-        new FakeClock(DateTime.UtcNow),
-        new FakeFocusTickerRepository("CON3.L"),
-        NullDomainEventDispatcher.Instance,
-        NullLogger<ImportTradesCsvUseCase>.Instance);
+    private static ImportTradesCsvUseCase Build(Infrastructure.Data.AppDbContext db)
+    {
+        var clock = new FakeClock(DateTime.UtcNow);
+        return new(
+            new EfPortfolioRepository(db, clock, NullDomainEventDispatcher.Instance),
+            new EfInstrumentRepository(db),
+            clock,
+            new FakeFocusTickerRepository("CON3.L"),
+            NullDomainEventDispatcher.Instance,
+            NullLogger<ImportTradesCsvUseCase>.Instance);
+    }
 
     private static Instrument Existing(string ticker)
         => Instrument.Existing(
