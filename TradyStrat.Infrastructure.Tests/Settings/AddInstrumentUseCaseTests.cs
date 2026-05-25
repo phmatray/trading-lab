@@ -11,6 +11,7 @@ using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.Infrastructure.Settings;
 using TradyStrat.Infrastructure.Settings.UseCases;
+using TradyStrat.TestKit.SeedWork;
 using TradyStrat.TestKit.Specifications;
 using Xunit;
 
@@ -67,6 +68,7 @@ public class AddInstrumentUseCaseTests
             NullLogger<DailyFxCache>.Instance);
         return new AddInstrumentUseCase(
             new EfInstrumentRepository(db), price, fx, clock,
+            NullDomainEventDispatcher.Instance,
             NullLogger<AddInstrumentUseCase>.Instance);
     }
 

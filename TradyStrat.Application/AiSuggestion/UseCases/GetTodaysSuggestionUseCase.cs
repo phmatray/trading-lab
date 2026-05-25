@@ -3,6 +3,7 @@ using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using DomainSuggestionGate = TradyStrat.Domain.Suggestions.Services.SuggestionGate;
@@ -15,6 +16,7 @@ public sealed class GetTodaysSuggestionUseCase(
     IAiClient ai,
     IClock clock,
     IInstrumentRepository instruments,
+    IDomainEventDispatcher dispatcher,
     ILogger<GetTodaysSuggestionUseCase> log)
     : UseCaseBase<GetTodaysSuggestionInput, Suggestion>(log)
 {
@@ -51,7 +53,8 @@ public sealed class GetTodaysSuggestionUseCase(
 
             var response = await ai.AskAsync(snap, ct);
             var fresh = SuggestionBuilder.FromAiResponse(response, snap, clock.UtcNow());
-            await suggestions.AddAsync(fresh, ct);
+            var events = await suggestions.AddAsync(fresh, ct);
+            await dispatcher.DispatchAsync(events, ct);
             return fresh;
         }
         finally

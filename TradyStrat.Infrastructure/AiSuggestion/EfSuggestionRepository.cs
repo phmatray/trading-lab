@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.Data;
@@ -60,10 +61,11 @@ public sealed class EfSuggestionRepository(AppDbContext db) : ISuggestionReposit
             .Take(count)
             .ToListAsync(ct);
 
-    public async Task AddAsync(Suggestion suggestion, CancellationToken ct)
+    public async Task<IReadOnlyList<IDomainEvent>> AddAsync(Suggestion suggestion, CancellationToken ct)
     {
         db.Suggestions.Add(suggestion);
         await db.SaveChangesAsync(ct);
+        return suggestion.DequeueDomainEvents();
     }
 
     public async Task RemoveAsync(Suggestion suggestion, CancellationToken ct)

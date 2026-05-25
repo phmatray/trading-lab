@@ -1,6 +1,7 @@
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Infrastructure.Fx;
 using TradyStrat.Infrastructure.PriceFeed;
 
@@ -13,6 +14,7 @@ public sealed partial class AddInstrumentUseCase(
     DailyPriceCache priceCache,
     DailyFxCache fxCache,
     IClock clock,
+    IDomainEventDispatcher dispatcher,
     ILogger<AddInstrumentUseCase> log)
     : UseCaseBase<AddInstrumentInput, Instrument>(log)
 {
@@ -23,7 +25,8 @@ public sealed partial class AddInstrumentUseCase(
         instrument.Confirm(clock);
 
         // Repository enforces ticker uniqueness — throws DuplicateInstrumentException.
-        await repo.AddAsync(instrument, ct);
+        var events = await repo.AddAsync(instrument, ct);
+        await dispatcher.DispatchAsync(events, ct);
 
         // Best-effort warm. Failures are logged and swallowed — cache self-heals next startup.
         try { await priceCache.EnsureFreshAsync(instrument.Ticker, ct); }

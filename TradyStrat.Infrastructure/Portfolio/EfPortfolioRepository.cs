@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 using PortfolioAr = global::TradyStrat.Domain.Portfolio.Portfolio;
@@ -32,8 +33,9 @@ public sealed class EfPortfolioRepository(AppDbContext db) : IPortfolioRepositor
         return portfolio;
     }
 
-    public async Task SaveAsync(PortfolioAr portfolio, CancellationToken ct)
+    public async Task<IReadOnlyList<IDomainEvent>> SaveAsync(PortfolioAr portfolio, CancellationToken ct)
     {
         await db.SaveChangesAsync(ct);
+        return portfolio.DequeueDomainEvents();
     }
 }

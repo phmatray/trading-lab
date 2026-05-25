@@ -5,6 +5,7 @@ using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.Trades.UseCases;
@@ -17,6 +18,7 @@ public sealed class LogTradeUseCase(
     IPortfolioRepository portfolios,
     IInstrumentRepository instruments,
     IClock clock,
+    IDomainEventDispatcher dispatcher,
     ILogger<LogTradeUseCase> log)
     : UseCaseBase<LogTradeInput, TradeRecorded>(log)
 {
@@ -37,7 +39,8 @@ public sealed class LogTradeUseCase(
             input.Note ?? "",
             clock.UtcNow());
 
-        await portfolios.SaveAsync(portfolio, ct);
+        var events = await portfolios.SaveAsync(portfolio, ct);
+        await dispatcher.DispatchAsync(events, ct);
         return result;
     }
 }

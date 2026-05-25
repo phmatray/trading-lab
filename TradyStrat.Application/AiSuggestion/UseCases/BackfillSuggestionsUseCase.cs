@@ -1,6 +1,7 @@
 using TradyStrat.Application.AiSuggestion.Snapshot;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Suggestions;
 
 namespace TradyStrat.Application.AiSuggestion.UseCases;
@@ -10,6 +11,7 @@ public sealed class BackfillSuggestionsUseCase(
     IAiSnapshotService snapshotService,
     IAiClient ai,
     IClock clock,
+    IDomainEventDispatcher dispatcher,
     ILogger<BackfillSuggestionsUseCase> log)
     : UseCaseBase<BackfillSuggestionsInput, Suggestion>(log)
 {
@@ -19,7 +21,8 @@ public sealed class BackfillSuggestionsUseCase(
         var snapshot = await snapshotService.CreateAsync(input.InstrumentId, input.Date, ct);
         var response = await ai.AskAsync(snapshot, ct);
         var suggestion = SuggestionBuilder.FromAiResponse(response, snapshot, clock.UtcNow());
-        await suggestions.AddAsync(suggestion, ct);
+        var events = await suggestions.AddAsync(suggestion, ct);
+        await dispatcher.DispatchAsync(events, ct);
         return suggestion;
     }
 }

@@ -1,6 +1,7 @@
 using TradyStrat.Application.Goals;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Infrastructure.Settings.UseCases;
@@ -10,6 +11,7 @@ public sealed record UpdateGoalInput(decimal TargetEur, DateOnly? TargetDate);
 public sealed class UpdateGoalUseCase(
     IGoalRepository repo,
     IClock clock,
+    IDomainEventDispatcher dispatcher,
     ILogger<UpdateGoalUseCase> log)
     : UseCaseBase<UpdateGoalInput, Goal>(log)
 {
@@ -20,7 +22,8 @@ public sealed class UpdateGoalUseCase(
         goal.RetargetAmount(Money.Of(input.TargetEur, Currency.Eur), clock);
         goal.RescheduleDeadline(input.TargetDate ?? DateOnly.MinValue, clock);
 
-        await repo.SaveAsync(goal, ct);
+        var events = await repo.SaveAsync(goal, ct);
+        await dispatcher.DispatchAsync(events, ct);
         return goal;
     }
 }
