@@ -1,8 +1,8 @@
 using Shouldly;
-using TradyStrat.Domain.Shared;
+using TradyStrat.Domain.Suggestions;
 using Xunit;
 
-namespace TradyStrat.Domain.Tests.Shared;
+namespace TradyStrat.Domain.Tests.Suggestions;
 
 public class ConvictionTests
 {

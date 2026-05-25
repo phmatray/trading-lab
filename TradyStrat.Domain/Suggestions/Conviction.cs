@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Suggestions;
 
 public readonly record struct Conviction
 {
