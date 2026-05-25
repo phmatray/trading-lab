@@ -28,7 +28,7 @@ public sealed class ProbeInstrumentUseCase(
         // FX-pair sanity check — surface unsupported currencies before commit.
         if (probed.Currency != Currency.Eur)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateOnly.FromDateTime(clock.UtcNow());
             try
             {
                 _ = await fx.FetchAsync(
