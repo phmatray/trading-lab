@@ -1,7 +1,6 @@
 namespace TradyStrat.Domain.SeedWork;
 
-public abstract record DomainEvent : IDomainEvent
+public abstract record DomainEvent(DateTime OccurredAt) : IDomainEvent
 {
-    public Guid     EventId    { get; init; } = Guid.NewGuid();
-    public DateTime OccurredAt { get; init; }
+    public Guid EventId { get; init; } = Guid.NewGuid();
 }

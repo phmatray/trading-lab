@@ -7,8 +7,7 @@ namespace TradyStrat.Domain.Tests.SeedWork;
 
 public class AggregateRootEventCollectionTests
 {
-    private sealed record FooHappened(DateTime OccurredAt) : DomainEvent
-    { public new DateTime OccurredAt { get; init; } = OccurredAt; }
+    private sealed record FooHappened(DateTime OccurredAt) : DomainEvent(OccurredAt);
 
     private sealed class TestAr : AggregateRoot<InstrumentId>
     {
