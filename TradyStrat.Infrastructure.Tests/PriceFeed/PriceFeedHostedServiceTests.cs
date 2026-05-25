@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 using TradyStrat.Application.Fx.Providers;

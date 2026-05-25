@@ -7,6 +7,7 @@ using TradyStrat.Application.Indicators;
 using TradyStrat.Domain.Indicators;
 using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Infrastructure.AiSuggestion;

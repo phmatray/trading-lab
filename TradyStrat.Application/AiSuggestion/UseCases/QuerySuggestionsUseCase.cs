@@ -1,4 +1,5 @@
 using TradyStrat.Application.UseCases;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions.Services;
 

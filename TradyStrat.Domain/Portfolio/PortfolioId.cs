@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Portfolio;
 
 public readonly record struct PortfolioId(int Value)
 {

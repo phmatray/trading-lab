@@ -5,6 +5,7 @@ using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Tools;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Settings;
 using TradyStrat.TestKit.Specifications;

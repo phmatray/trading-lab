@@ -10,6 +10,7 @@ using TradyStrat.Application.Time;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Indicators.Services;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;

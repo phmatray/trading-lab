@@ -7,6 +7,7 @@ using TradyStrat.Application.Settings;
 using TradyStrat.Cli.Mcp.Dto;
 using TradyStrat.Cli.Mcp.Mapping;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;

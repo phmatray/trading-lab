@@ -2,6 +2,7 @@ using TradyStrat.Application.Fx;
 using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.Shared;

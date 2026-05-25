@@ -1,4 +1,5 @@
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 

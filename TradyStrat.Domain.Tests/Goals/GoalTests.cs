@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.Shared;
 using Xunit;

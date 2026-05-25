@@ -2,6 +2,7 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;

@@ -1,5 +1,6 @@
 using Shouldly;
 using TradyStrat.Application.AiSuggestion.CallDiff;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using Xunit;

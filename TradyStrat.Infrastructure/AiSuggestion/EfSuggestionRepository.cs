@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.AiSuggestion;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;

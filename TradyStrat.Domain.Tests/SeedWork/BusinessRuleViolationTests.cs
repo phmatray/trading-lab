@@ -1,5 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using Xunit;

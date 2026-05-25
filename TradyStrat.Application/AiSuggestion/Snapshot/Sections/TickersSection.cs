@@ -3,6 +3,7 @@ using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Application.Indicators;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;

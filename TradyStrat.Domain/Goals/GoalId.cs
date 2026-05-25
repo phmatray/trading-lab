@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Goals;
 
 public readonly record struct GoalId(int Value)
 {

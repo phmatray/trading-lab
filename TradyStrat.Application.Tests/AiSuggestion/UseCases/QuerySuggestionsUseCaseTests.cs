@@ -3,6 +3,7 @@ using Shouldly;
 using TradyStrat.Application.AiSuggestion;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Domain.Suggestions.Services;

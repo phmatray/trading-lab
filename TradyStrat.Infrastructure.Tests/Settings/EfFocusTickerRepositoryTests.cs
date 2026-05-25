@@ -2,6 +2,7 @@ using Shouldly;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Settings.Tickers;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Settings;

@@ -1,5 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Instruments.Events;
 using TradyStrat.Domain.Shared;
 using Xunit;

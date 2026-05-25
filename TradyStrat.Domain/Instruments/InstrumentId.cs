@@ -1,4 +1,4 @@
-namespace TradyStrat.Domain.Shared;
+namespace TradyStrat.Domain.Instruments;
 
 public readonly record struct InstrumentId(int Value)
 {

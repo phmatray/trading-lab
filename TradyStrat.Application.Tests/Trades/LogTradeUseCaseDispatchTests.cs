@@ -6,6 +6,7 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.Trades.UseCases;
 using TradyStrat.Domain;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.SeedWork;

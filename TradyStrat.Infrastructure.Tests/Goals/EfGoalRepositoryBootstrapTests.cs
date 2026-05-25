@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
+using TradyStrat.Domain.Goals;
 using TradyStrat.Domain.Goals.Events;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
