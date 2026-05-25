@@ -1,13 +1,15 @@
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Domain.Shared;
 
-public sealed record Money
+public sealed class Money : ValueObject
 {
-    public decimal Amount   { get; }
+    public decimal  Amount   { get; }
     public Currency Currency { get; }
-    public bool IsEmpty     { get; }
+    public bool     IsEmpty  { get; }
 
+    private Money() { }   // EF
     private Money(decimal amount, Currency currency, bool isEmpty)
     {
         Amount = amount;
@@ -67,6 +69,13 @@ public sealed record Money
         RequireMatchingCurrency(a, b, "divide");
         if (b.Amount == 0m) throw new DivideByZeroException();
         return a.Amount / b.Amount;
+    }
+
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Amount;
+        yield return Currency;
+        yield return IsEmpty;
     }
 
     public override string ToString() => IsEmpty ? $"None({Currency})" : $"{Amount} {Currency}";

@@ -5,7 +5,7 @@ using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Infrastructure.PriceFeed.Providers;
 
-public sealed class YahooPriceFeed(HttpClient http) : IPriceFeed
+public sealed class YahooPriceFeed(HttpClient http, IClock clock) : IPriceFeed
 {
     public async Task<IReadOnlyList<PriceBar>> FetchDailyAsync(
         string ticker, DateOnly from, DateOnly to, CancellationToken ct)
@@ -48,7 +48,7 @@ public sealed class YahooPriceFeed(HttpClient http) : IPriceFeed
 
             await using var stream = await resp.Content.ReadAsStreamAsync(ct);
             using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
-            return YahooParser.ParseMetadata(ticker, doc);
+            return YahooParser.ParseMetadata(ticker, doc, clock.UtcNow());
         }
         catch (TradyStratException) { throw; }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)

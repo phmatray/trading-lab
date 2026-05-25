@@ -1,6 +1,7 @@
 using Shouldly;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Domain.Suggestions;
+using TradyStrat.Domain.Suggestions.Events;
 using Xunit;
 
 namespace TradyStrat.Domain.Tests.Suggestions;
@@ -113,5 +114,30 @@ public class SuggestionFactoryTests
 
         s.Citations.Count.ShouldBe(2);
         s.Citations[0].Claim.ShouldBe("c1");
+    }
+
+    [Fact]
+    public void From_raises_SuggestionCreated()
+    {
+        var createdAt = new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc);
+        var s = Suggestion.From(
+            instrumentId:   new InstrumentId(7),
+            forDate:        new DateOnly(2026, 5, 25),
+            action:         SuggestionAction.Acquire,
+            quantityHint:   Quantity.None,
+            maxPriceHint:   Price.None(Currency.Eur),
+            conviction:     Conviction.Of(3),
+            rationale:      "test",
+            citations:      [],
+            snapshot:       MarketSnapshot.Empty,
+            fingerprint:    PromptFingerprint.Of("h", "", ""),
+            thinkingText:   "",
+            createdAt:      createdAt);
+
+        var evt = s.DomainEvents.OfType<SuggestionCreated>().ShouldHaveSingleItem();
+        evt.InstrumentId.ShouldBe(new InstrumentId(7));
+        evt.ForDate.ShouldBe(new DateOnly(2026, 5, 25));
+        evt.Action.ShouldBe(SuggestionAction.Acquire);
+        evt.OccurredAt.ShouldBe(createdAt);
     }
 }

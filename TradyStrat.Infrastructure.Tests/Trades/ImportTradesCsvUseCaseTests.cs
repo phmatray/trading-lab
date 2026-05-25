@@ -8,6 +8,7 @@ using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Portfolio;
 using TradyStrat.Infrastructure.Settings;
+using TradyStrat.TestKit.SeedWork;
 using TradyStrat.TestKit.Settings;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;
@@ -91,6 +92,7 @@ public class ImportTradesCsvUseCaseTests
         new EfInstrumentRepository(db),
         new FakeClock(DateTime.UtcNow),
         new FakeFocusTickerRepository("CON3.L"),
+        NullDomainEventDispatcher.Instance,
         NullLogger<ImportTradesCsvUseCase>.Instance);
 
     private static Instrument Existing(string ticker)

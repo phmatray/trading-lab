@@ -4,6 +4,8 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.Portfolio.Events;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.Trades.UseCases;
@@ -16,6 +18,7 @@ public sealed class ImportTradesCsvUseCase(
     IInstrumentRepository instruments,
     IClock clock,
     IFocusTickerRepository focusTickerRepo,
+    IDomainEventDispatcher dispatcher,
     ILogger<ImportTradesCsvUseCase> log)
     : UseCaseBase<ImportTradesCsvInput, ImportTradesCsvResult>(log)
 {
@@ -60,7 +63,8 @@ public sealed class ImportTradesCsvUseCase(
 
         var portfolio = await portfolios.GetAsync(ct);
         var results = portfolio.ImportTrades(drafts, now);
-        await portfolios.SaveAsync(portfolio, ct);
+        var events = await portfolios.SaveAsync(portfolio, ct);
+        await dispatcher.DispatchAsync(events, ct);
 
         return new ImportTradesCsvResult(results.Count);
     }

@@ -4,6 +4,7 @@ using Shouldly;
 using TradyStrat.Domain;
 using TradyStrat.Infrastructure.Goals;
 using TradyStrat.Infrastructure.Settings.UseCases;
+using TradyStrat.TestKit.SeedWork;
 using TradyStrat.TestKit.Specifications;
 using TradyStrat.TestKit.Time;
 using Xunit;
@@ -20,6 +21,7 @@ public class UpdateGoalUseCaseTests
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
 
         var uc = new UpdateGoalUseCase(new EfGoalRepository(db, clock), clock,
+            NullDomainEventDispatcher.Instance,
             NullLogger<UpdateGoalUseCase>.Instance);
 
         var goal = await uc.ExecuteAsync(new UpdateGoalInput(
@@ -36,7 +38,7 @@ public class UpdateGoalUseCaseTests
         var ct = TestContext.Current.CancellationToken;
         var clock = new FakeClock(new DateTime(2026, 5, 6, 0, 0, 0, DateTimeKind.Utc));
         var repo = new EfGoalRepository(db, clock);
-        var uc = new UpdateGoalUseCase(repo, clock, NullLogger<UpdateGoalUseCase>.Instance);
+        var uc = new UpdateGoalUseCase(repo, clock, NullDomainEventDispatcher.Instance, NullLogger<UpdateGoalUseCase>.Instance);
 
         await uc.ExecuteAsync(new UpdateGoalInput(1_000_000m, new(2030, 1, 1)), ct);
         // Force a read between saves to mimic the page+circuit reading the goal.

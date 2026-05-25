@@ -1,6 +1,7 @@
 using TradyStrat.Infrastructure.PriceFeed.Providers;
 using System.Net;
 using Shouldly;
+using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
 using Xunit;
 
@@ -8,6 +9,8 @@ namespace TradyStrat.Infrastructure.Tests.PriceFeed.Providers;
 
 public class YahooPriceFeedTests
 {
+    private static readonly IClock _clock = new StubClock(new DateTime(2026, 5, 25, 0, 0, 0, DateTimeKind.Utc));
+
     private static HttpClient ClientReturning(HttpStatusCode code, string body)
     {
         var handler = new StubHttpHandler(_ =>
@@ -28,7 +31,7 @@ public class YahooPriceFeedTests
             };
         });
         var http = new HttpClient(handler) { BaseAddress = new Uri("https://query1.finance.yahoo.com") };
-        var feed = new YahooPriceFeed(http);
+        var feed = new YahooPriceFeed(http, _clock);
 
         var ct = TestContext.Current.CancellationToken;
         var bars = await feed.FetchDailyAsync("CON3.DE", new(2024,4,30), new(2024,5,2), ct);
@@ -41,7 +44,7 @@ public class YahooPriceFeedTests
     [Fact]
     public async Task Throws_PriceFeedUnavailableException_on_5xx()
     {
-        var feed = new YahooPriceFeed(ClientReturning(HttpStatusCode.InternalServerError, ""));
+        var feed = new YahooPriceFeed(ClientReturning(HttpStatusCode.InternalServerError, ""), _clock);
 
         await Should.ThrowAsync<PriceFeedUnavailableException>(() =>
             feed.FetchDailyAsync("X", new(2024,1,1), new(2024,1,2),
@@ -51,10 +54,17 @@ public class YahooPriceFeedTests
     [Fact]
     public async Task Throws_PriceFeedUnavailableException_on_invalid_json()
     {
-        var feed = new YahooPriceFeed(ClientReturning(HttpStatusCode.OK, "not json"));
+        var feed = new YahooPriceFeed(ClientReturning(HttpStatusCode.OK, "not json"), _clock);
 
         await Should.ThrowAsync<PriceFeedUnavailableException>(() =>
             feed.FetchDailyAsync("X", new(2024,1,1), new(2024,1,2),
                 TestContext.Current.CancellationToken));
+    }
+
+    private sealed class StubClock(DateTime now) : IClock
+    {
+        public DateTime UtcNow() => now;
+        public DateOnly TodayLocal() => DateOnly.FromDateTime(now);
+        public DateOnly TodayInExchangeTzFor(string ticker) => DateOnly.FromDateTime(now);
     }
 }

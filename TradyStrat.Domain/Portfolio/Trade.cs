@@ -1,11 +1,11 @@
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Portfolio;
 
-public sealed class Trade
+public sealed class Trade : Entity<TradeId>
 {
-    public TradeId   Id            { get; private set; }
     public DateOnly  ExecutedOn    { get; private set; }
     public TradeSide Side          { get; private set; }
     public Quantity  Quantity      { get; private set; } = Quantity.None;
@@ -19,8 +19,8 @@ public sealed class Trade
     private Trade(
         DateOnly executedOn, TradeSide side, Quantity quantity,
         Price pricePerShare, Money fees, string note, DateTime now)
+        : base(TradeId.New())
     {
-        Id            = TradeId.New();
         ExecutedOn    = executedOn;
         Side          = side;
         Quantity      = quantity;
@@ -49,7 +49,5 @@ public sealed class Trade
     public Money Gross => PricePerShare * Quantity;
     public Money Net   => Side == TradeSide.Buy ? Gross + Fees : Gross - Fees;
 
-    // Position assigns sequential IDs on Record so the AR can identify trades
-    // for DeleteTrade. EF mapping must use ValueGeneratedNever for TradeId.
     internal void AssignId(TradeId id) => Id = id;
 }

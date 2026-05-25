@@ -1,10 +1,13 @@
+using TradyStrat.Domain.SeedWork;
+
 namespace TradyStrat.Domain.Shared;
 
-public sealed record Quantity
+public sealed class Quantity : ValueObject
 {
-    public decimal Value      { get; }
+    public decimal Value       { get; }
     public bool    IsSpecified { get; }
 
+    private Quantity() { }   // EF
     private Quantity(decimal value, bool isSpecified) { Value = value; IsSpecified = isSpecified; }
 
     public static Quantity Of(decimal value)
@@ -28,5 +31,12 @@ public sealed record Quantity
         return Of(a.Value - b.Value);
     }
 
-    public override string ToString() => IsSpecified ? Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "None";
+    protected override IEnumerable<object?> GetEqualityComponents()
+    {
+        yield return Value;
+        yield return IsSpecified;
+    }
+
+    public override string ToString()
+        => IsSpecified ? Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "None";
 }

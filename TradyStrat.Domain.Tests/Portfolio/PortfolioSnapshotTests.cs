@@ -25,7 +25,7 @@ public class PortfolioSnapshotTests
     [Fact]
     public void Empty_portfolio_snapshot_is_zero()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var instruments = new Dictionary<InstrumentId, Instrument>();
         var prices      = new Dictionary<InstrumentId, Price>();
 
@@ -42,7 +42,7 @@ public class PortfolioSnapshotTests
     [Fact]
     public void Single_buy_snapshot_includes_fees_in_avg_cost()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var iid = new InstrumentId(1);
         portfolio.RecordTrade(iid, new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
@@ -67,7 +67,7 @@ public class PortfolioSnapshotTests
     [Fact]
     public void Multi_position_snapshot_sums_across_positions()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var a = new InstrumentId(1); var b = new InstrumentId(2);
         portfolio.RecordTrade(a, new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
@@ -99,7 +99,7 @@ public class PortfolioSnapshotTests
     [Fact]
     public void Snapshot_progress_pct_uses_goal_target()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var iid = new InstrumentId(1);
         portfolio.RecordTrade(iid, new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(100m), Price.Of(Money.Of(10m, Currency.Eur)),
@@ -117,7 +117,7 @@ public class PortfolioSnapshotTests
     [Fact]
     public void SnapshotAsOf_excludes_trades_after_date()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var iid = new InstrumentId(1);
         portfolio.RecordTrade(iid, new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),

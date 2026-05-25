@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Settings;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 using TradyStrat.Infrastructure.Data;
 
@@ -21,7 +22,7 @@ public sealed class EfInstrumentRepository(AppDbContext db) : IInstrumentReposit
     public async Task<IReadOnlyList<Instrument>> ListAsync(CancellationToken ct)
         => await db.Instruments.OrderBy(i => i.Ticker).ToListAsync(ct);
 
-    public async Task AddAsync(Instrument instrument, CancellationToken ct)
+    public async Task<IReadOnlyList<IDomainEvent>> AddAsync(Instrument instrument, CancellationToken ct)
     {
         var dup = await FindByTickerAsync(instrument.Ticker, ct);
         if (dup is not null)
@@ -30,5 +31,6 @@ public sealed class EfInstrumentRepository(AppDbContext db) : IInstrumentReposit
 
         db.Instruments.Add(instrument);
         await db.SaveChangesAsync(ct);
+        return instrument.DequeueDomainEvents();
     }
 }

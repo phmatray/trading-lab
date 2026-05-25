@@ -1,22 +1,33 @@
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Portfolio.Events;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Domain.Portfolio;
 
-public sealed class Portfolio
+public sealed class Portfolio : AggregateRoot<PortfolioId>
 {
-    public PortfolioId Id { get; private set; }
-
     private readonly List<Position> _positions = new();
     public IReadOnlyList<Position> Positions => _positions;
 
     private Portfolio() { }   // EF
+    private Portfolio(PortfolioId id) : base(id) { }
 
-    private Portfolio(PortfolioId id) { Id = id; }
+    /// <summary>
+    /// Creates an empty portfolio AR. The <paramref name="now"/> parameter
+    /// stamps the PortfolioCreated event — pass clock.UtcNow() at call sites.
+    /// </summary>
+    public static Portfolio Empty(PortfolioId id, DateTime now)
+    {
+        var p = new Portfolio(id);
+        p.Raise(new PortfolioCreated(id, now));
+        return p;
+    }
 
-    public static Portfolio Empty(PortfolioId id) => new(id);
+    /// <summary>Rehydration factory — does not raise. Used by EF reconstitution paths and snapshot replay.</summary>
+    public static Portfolio Existing(PortfolioId id) => new(id);
 
-    public TradeRecorded RecordTrade(
+    public Events.TradeRecorded RecordTrade(
         InstrumentId instrumentId,
         DateOnly executedOn, TradeSide side,
         Quantity quantity, Price pricePerShare, Money fees, string note, DateTime now)
@@ -31,11 +42,15 @@ public sealed class Portfolio
             _positions.Add(position);
         }
 
-        // Portfolio-wide unique TradeId: Trade is keyed on Id alone in the DB,
-        // so per-position numbering would collide across positions.
         trade.AssignId(new TradeId(NextTradeIdValue()));
         var realizedDelta = position.Record(trade);
-        return new TradeRecorded(trade.Id, position.Id, created, realizedDelta);
+
+        if (created)
+            Raise(new PositionOpened(position.Id, instrumentId, now));
+
+        var evt = new Events.TradeRecorded(trade.Id, position.Id, realizedDelta, now);
+        Raise(evt);
+        return evt;
     }
 
     private int NextTradeIdValue()
@@ -47,7 +62,7 @@ public sealed class Portfolio
         return max + 1;
     }
 
-    public TradeDeleted DeleteTrade(TradeId tradeId)
+    public Events.TradeDeleted DeleteTrade(TradeId tradeId, DateTime now)
     {
         Position? target = null;
         foreach (var p in _positions)
@@ -62,10 +77,12 @@ public sealed class Portfolio
         target.ClearAllForReplay();
         foreach (var t in remaining) target.Record(t);
 
-        return new TradeDeleted(target.Id, target.RealizedPnL - realizedBefore);
+        var evt = new Events.TradeDeleted(tradeId, target.Id, target.RealizedPnL - realizedBefore, now);
+        Raise(evt);
+        return evt;
     }
 
-    public IReadOnlyList<TradeRecorded> ImportTrades(
+    public IReadOnlyList<Events.TradeRecorded> ImportTrades(
         IReadOnlyList<TradeDraft> drafts, DateTime now)
     {
         var savedPositions = _positions.ToList();
@@ -74,7 +91,7 @@ public sealed class Portfolio
                   trades: p.Trades.ToList(),
                   realized: p.RealizedPnL));
 
-        var results = new List<TradeRecorded>(drafts.Count);
+        var results = new List<Events.TradeRecorded>(drafts.Count);
         try
         {
             foreach (var d in drafts)
@@ -91,6 +108,7 @@ public sealed class Portfolio
                 var (lots, trades, realized) = saved[p];
                 p.RestoreState(lots, trades, realized);
             }
+            ClearDomainEvents();   // discard events from the failed batch
             throw;
         }
     }
@@ -99,9 +117,7 @@ public sealed class Portfolio
         IReadOnlyDictionary<InstrumentId, Instrument> instrumentById,
         IReadOnlyDictionary<InstrumentId, Price>      priceByInstrument,
         Money goalTarget)
-    {
-        return BuildSnapshot(_positions, instrumentById, priceByInstrument, goalTarget);
-    }
+        => BuildSnapshot(_positions, instrumentById, priceByInstrument, goalTarget);
 
     public PortfolioSnapshot SnapshotAsOf(
         DateOnly asOf,
@@ -109,8 +125,7 @@ public sealed class Portfolio
         IReadOnlyDictionary<InstrumentId, Price>      priceByInstrument,
         Money goalTarget)
     {
-        // Rebuild a temporary copy with only trades up to and including asOf.
-        var tempPortfolio = Empty(Id);
+        var tempPortfolio = new Portfolio(Id);   // rehydration shape — no event
         foreach (var pos in _positions)
         {
             var tradesInWindow = pos.Trades
@@ -121,14 +136,10 @@ public sealed class Portfolio
                     pos.InstrumentId, t.ExecutedOn, t.Side,
                     t.Quantity, t.PricePerShare, t.Fees, t.Note, t.CreatedAt);
         }
+        tempPortfolio.ClearDomainEvents();   // discard events from snapshot replay
         return BuildSnapshot(tempPortfolio._positions, instrumentById, priceByInstrument, goalTarget);
     }
 
-    /// <summary>
-    /// Post-migration rehydration: for each Position that has trades but no
-    /// open lots, replay the trades through Position.Record to derive lots
-    /// and realized P&L. Returns true if any position needed rehydration.
-    /// </summary>
     public bool RehydrateLots()
     {
         var any = false;
@@ -146,8 +157,6 @@ public sealed class Portfolio
     public IReadOnlyList<GrowthPoint> GrowthSeries(
         IReadOnlyDictionary<InstrumentId, IReadOnlyList<PriceBar>> barsByInstrument)
     {
-        // Faithful port of legacy GrowthSeriesBuilder. Single-ticker today (extended
-        // to multi-instrument: per-bar value sums shares×close across instruments).
         var allTrades = _positions.SelectMany(p => p.Trades.Select(t => (p.InstrumentId, t)))
                                   .OrderBy(x => x.t.ExecutedOn)
                                   .ToList();
@@ -163,7 +172,6 @@ public sealed class Portfolio
         var firstTradeDate = allTrades[0].t.ExecutedOn;
         var points = new List<GrowthPoint>(allBarDates.Count + 1)
         {
-            // Synthetic leading zero: one day before first trade.
             new(firstTradeDate.AddDays(-1), Money.Zero(Currency.Eur), Percentage.Empty),
         };
 
@@ -238,7 +246,6 @@ public sealed class Portfolio
             ? 0m
             : totalValue.Amount / goalTarget.Amount * 100m;
 
-        // Legacy single-position scalars (spec §13.1)
         var legacyShares = rows.Count == 1 ? rows[0].Quantity.Value : 0m;
         var legacyAvgCost = (rows.Count == 1 && legacyShares > 0m)
             ? Money.Of(rows[0].CostBasisEur.Amount / legacyShares, Currency.Eur)

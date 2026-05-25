@@ -4,8 +4,10 @@ using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.TestKit;
 
-public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars) : IPriceFeed
+public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars, IClock? clock = null) : IPriceFeed
 {
+    private static readonly DateTime _defaultNow = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     public int CallCount { get; private set; }
     public List<(DateOnly From, DateOnly To)> Ranges { get; } = new();
 
@@ -24,5 +26,6 @@ public sealed class StubPriceFeed(IReadOnlyList<PriceBar> bars) : IPriceFeed
             currency:   Currency.Eur,
             exchange:   Exchange.Of("STUB"),
             timezoneId: TimezoneId.Of("UTC"),
-            kind:       InstrumentKind.Held));
+            kind:       InstrumentKind.Held,
+            now:        clock?.UtcNow() ?? _defaultNow));
 }

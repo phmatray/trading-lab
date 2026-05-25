@@ -14,7 +14,7 @@ public class PortfolioInvariantsTests
     [Fact]
     public void RecordTrade_with_zero_quantity_throws_at_factory()
     {
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         Should.Throw<TradeValidationException>(() =>
             p.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 1), TradeSide.Buy,
                 Quantity.Of(0m), Price.Of(Money.Of(4m, Currency.Eur)),
@@ -24,7 +24,7 @@ public class PortfolioInvariantsTests
     [Fact]
     public void RecordTrade_with_None_quantity_throws()
     {
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         Should.Throw<TradeValidationException>(() =>
             p.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 1), TradeSide.Buy,
                 Quantity.None, Price.Of(Money.Of(4m, Currency.Eur)),
@@ -34,7 +34,7 @@ public class PortfolioInvariantsTests
     [Fact]
     public void RecordTrade_with_empty_price_throws()
     {
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         Should.Throw<TradeValidationException>(() =>
             p.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 1), TradeSide.Buy,
                 Quantity.Of(10m), Price.None(Currency.Eur),
@@ -44,7 +44,7 @@ public class PortfolioInvariantsTests
     [Fact]
     public void Sell_exceeding_open_lots_throws_per_position()
     {
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
         p.RecordTrade(new InstrumentId(1), new DateOnly(2026, 1, 1), TradeSide.Buy,
             Quantity.Of(5m), Price.Of(Money.Of(4m, Currency.Eur)),
             Money.Zero(Currency.Eur), "", _now);
@@ -58,7 +58,7 @@ public class PortfolioInvariantsTests
     [Fact]
     public void DeleteTrade_unknown_id_throws()
     {
-        var p = PortfolioAr.Empty(PortfolioId.Singleton);
-        Should.Throw<TradeValidationException>(() => p.DeleteTrade(new TradeId(999)));
+        var p = PortfolioAr.Existing(PortfolioId.Singleton);
+        Should.Throw<TradeValidationException>(() => p.DeleteTrade(new TradeId(999), _now));
     }
 }

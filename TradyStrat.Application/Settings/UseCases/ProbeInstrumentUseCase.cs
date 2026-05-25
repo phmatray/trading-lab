@@ -12,6 +12,7 @@ public sealed record ProbeInstrumentInput(string Ticker, InstrumentKind Kind);
 public sealed class ProbeInstrumentUseCase(
     IPriceFeed priceFeed,
     IFxRateProvider fx,
+    IClock clock,
     ILogger<ProbeInstrumentUseCase> log)
     : UseCaseBase<ProbeInstrumentInput, Instrument>(log)
 {
@@ -27,7 +28,7 @@ public sealed class ProbeInstrumentUseCase(
         // FX-pair sanity check — surface unsupported currencies before commit.
         if (probed.Currency != Currency.Eur)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateOnly.FromDateTime(clock.UtcNow());
             try
             {
                 _ = await fx.FetchAsync(
@@ -49,7 +50,8 @@ public sealed class ProbeInstrumentUseCase(
                 currency:   probed.Currency,
                 exchange:   probed.Exchange,
                 timezoneId: probed.Timezone,
-                kind:       input.Kind);
+                kind:       input.Kind,
+                now:        clock.UtcNow());
 
         return probed;
     }

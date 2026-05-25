@@ -5,7 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TheAppManager.Modules;
 using TradyStrat.Domain;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Infrastructure.Data.Sqlite;
+using TradyStrat.Infrastructure.SeedWork;
 using TradyStrat.Infrastructure.Time;
 
 namespace TradyStrat.Infrastructure.Data;
@@ -24,6 +26,7 @@ public sealed class DatabaseInfrastructureModule : IAppModule
         services.AddScoped(typeof(IRepositoryBase<>),     typeof(EfRepositoryShim<>));
         services.AddScoped(typeof(IReadRepositoryBase<>), typeof(EfRepositoryShim<>));
         services.AddSingleton<IClock, SystemClock>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
     }
 
     public void ConfigureMiddleware(WebApplication app)

@@ -14,7 +14,7 @@ public class PortfolioGrowthSeriesTests
     [Fact]
     public void Empty_portfolio_returns_empty_series()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var series = portfolio.GrowthSeries(
             new Dictionary<InstrumentId, IReadOnlyList<PriceBar>>());
         series.ShouldBeEmpty();
@@ -23,7 +23,7 @@ public class PortfolioGrowthSeriesTests
     [Fact]
     public void Prepends_synthetic_zero_day_then_accumulates_per_bar()
     {
-        var portfolio = PortfolioAr.Empty(PortfolioId.Singleton);
+        var portfolio = PortfolioAr.Existing(PortfolioId.Singleton);
         var iid = new InstrumentId(1);
         portfolio.RecordTrade(iid, new DateOnly(2026, 1, 2), TradeSide.Buy,
             Quantity.Of(10m), Price.Of(Money.Of(4m, Currency.Eur)),
