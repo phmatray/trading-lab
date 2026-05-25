@@ -1,5 +1,5 @@
 using TradyStrat.Application.Settings;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 using TradyStrat.Domain.PriceFeed;
 
 namespace TradyStrat.Application.Dashboard.Navigation;

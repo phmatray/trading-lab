@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Settings;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared.Market;

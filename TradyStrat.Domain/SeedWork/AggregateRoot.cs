@@ -1,5 +1,3 @@
-using TradyStrat.Domain.Exceptions;
-
 namespace TradyStrat.Domain.SeedWork;
 
 public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct

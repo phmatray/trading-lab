@@ -1,7 +1,7 @@
 using Shouldly;
 using TradyStrat.Application.Fx;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Infrastructure.Fx;
 using TradyStrat.TestKit.Specifications;

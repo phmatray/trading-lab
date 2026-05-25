@@ -1,5 +1,5 @@
 using Shouldly;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings;
 using TradyStrat.Domain.Settings.Tickers;
 using Xunit;
 

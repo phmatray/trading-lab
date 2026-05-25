@@ -1,5 +1,3 @@
-using TradyStrat.Domain.Exceptions;
-
 namespace TradyStrat.Domain.Settings.Polymarket;
 
 public readonly record struct MaxHorizonDays

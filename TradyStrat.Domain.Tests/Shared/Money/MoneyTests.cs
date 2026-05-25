@@ -1,5 +1,4 @@
 using Shouldly;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Shared.Money;
 using Xunit;
 using MoneyVo = global::TradyStrat.Domain.Shared.Money.Money;

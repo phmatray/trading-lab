@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Application.UseCases;

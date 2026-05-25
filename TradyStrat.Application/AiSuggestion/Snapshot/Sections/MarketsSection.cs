@@ -1,6 +1,5 @@
 using TradyStrat.Domain.Suggestions;
 using TradyStrat.Application.PredictionMarkets;
-using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 

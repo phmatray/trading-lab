@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using TradyStrat.Application.Trades.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Shared.Money;

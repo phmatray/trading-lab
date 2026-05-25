@@ -1,5 +1,5 @@
 using TradyStrat.Application.Fx;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 
 namespace TradyStrat.Application.AiSuggestion.Snapshot.Sections;
 

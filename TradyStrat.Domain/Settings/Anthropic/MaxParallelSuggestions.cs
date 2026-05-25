@@ -1,5 +1,3 @@
-using TradyStrat.Domain.Exceptions;
-
 namespace TradyStrat.Domain.Settings.Anthropic;
 
 public readonly record struct MaxParallelSuggestions

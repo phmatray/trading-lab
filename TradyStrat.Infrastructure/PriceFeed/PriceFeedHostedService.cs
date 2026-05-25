@@ -1,7 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TradyStrat.Infrastructure.Fx;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain.Shared.Money;

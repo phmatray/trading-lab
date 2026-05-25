@@ -6,7 +6,6 @@ using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain;
 using TradyStrat.Application.AiSuggestion;

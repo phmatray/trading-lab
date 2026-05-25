@@ -6,7 +6,6 @@ using TradyStrat.Application.UseCases;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Shared.Market;
 

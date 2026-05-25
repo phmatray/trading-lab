@@ -4,7 +4,7 @@ using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Shared.Market;
 using Xunit;

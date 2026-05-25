@@ -2,7 +2,8 @@ using TradyStrat.Application.Fx.Providers;
 using TradyStrat.Application.PriceFeed.Providers;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Instruments;
+using TradyStrat.Domain.MarketData;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Shared.Market;
 

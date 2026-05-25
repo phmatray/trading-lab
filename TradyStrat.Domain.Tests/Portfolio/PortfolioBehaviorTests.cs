@@ -1,5 +1,4 @@
 using Shouldly;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;

@@ -1,4 +1,3 @@
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.SeedWork;

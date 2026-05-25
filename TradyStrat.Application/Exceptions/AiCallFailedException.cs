@@ -1,4 +1,3 @@
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Application.Exceptions;

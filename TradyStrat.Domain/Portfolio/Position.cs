@@ -68,7 +68,7 @@ public sealed class Position : Entity<PositionId>
         while (remaining > 0m)
         {
             if (_openLots.Count == 0)
-                throw new Exceptions.TradeValidationException(
+                throw new TradeValidationException(
                     $"Sell on {trade.ExecutedOn} for instrument {InstrumentId} exceeds open lots.");
 
             var head = _openLots[0];

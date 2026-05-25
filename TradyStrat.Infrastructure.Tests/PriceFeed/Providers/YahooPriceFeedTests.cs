@@ -2,7 +2,7 @@ using TradyStrat.Infrastructure.PriceFeed.Providers;
 using System.Net;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.PriceFeed;
 using Xunit;
 
 namespace TradyStrat.Infrastructure.Tests.PriceFeed.Providers;

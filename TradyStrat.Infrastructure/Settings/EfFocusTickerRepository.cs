@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.Config;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Settings;
 using TradyStrat.Domain.Settings.Tickers;
 using TradyStrat.Infrastructure.Data;
 

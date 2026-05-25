@@ -1,7 +1,6 @@
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Suggestions;
 

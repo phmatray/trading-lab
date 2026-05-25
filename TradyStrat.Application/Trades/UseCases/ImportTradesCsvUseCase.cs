@@ -2,7 +2,6 @@ using TradyStrat.Application.Portfolio;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
 using TradyStrat.Domain.Portfolio.Events;
 using TradyStrat.Domain.SeedWork;

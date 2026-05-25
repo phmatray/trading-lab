@@ -1,7 +1,10 @@
 using TradyStrat.Infrastructure.Exceptions;
 using Xunit;
 using Shouldly;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Indicators;
+using TradyStrat.Domain.MarketData;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Domain.PriceFeed;
 using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Infrastructure.Tests.Exceptions;

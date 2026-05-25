@@ -1,4 +1,4 @@
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 
 namespace TradyStrat.Application.Fx;
 

@@ -3,7 +3,7 @@ using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using Shouldly;
 using TradyStrat.Cli.Mcp.Filters;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Portfolio;
 using Xunit;
 
 namespace TradyStrat.Cli.Tests.Mcp.Filters;

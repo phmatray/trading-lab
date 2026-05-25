@@ -1,6 +1,6 @@
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 using TradyStrat.Application.Dashboard.Navigation;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit;            // shared TestRepo<T>

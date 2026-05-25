@@ -1,7 +1,6 @@
 using TechnicalAnalysis.Common;
 using TechnicalAnalysis.Functions;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
 
 namespace TradyStrat.Domain.Indicators;
 

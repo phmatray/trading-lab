@@ -1,5 +1,3 @@
-using TradyStrat.Domain.Exceptions;
-
 namespace TradyStrat.Domain.Settings.Tickers;
 
 public readonly record struct FocusTicker

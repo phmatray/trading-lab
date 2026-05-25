@@ -5,7 +5,7 @@ using TradyStrat.Application.Indicators.Ichimoku;
 using TradyStrat.Application.Indicators.MovingAverage;
 using TradyStrat.Application.Indicators.Rsi;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Indicators;
 using TradyStrat.Domain.Indicators.Services;
 using TradyStrat.Infrastructure.PriceFeed;
 using TradyStrat.TestKit.Indicators;

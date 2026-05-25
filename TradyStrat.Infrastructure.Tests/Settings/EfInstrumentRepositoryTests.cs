@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.Instruments;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Shared.Market;
 using TradyStrat.Infrastructure.Data;

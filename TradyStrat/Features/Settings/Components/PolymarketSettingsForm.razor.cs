@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Settings.Polymarket;
 

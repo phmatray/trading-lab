@@ -1,6 +1,5 @@
 using Shouldly;
 using TradyStrat.Application.Trades;
-using TradyStrat.Domain.Exceptions;
 using TradyStrat.Domain.Portfolio;
 using Xunit;
 

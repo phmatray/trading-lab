@@ -1,7 +1,7 @@
 using TradyStrat.Application.Fx.Providers;
 using System.Text.Json;
 using TradyStrat.Domain;
-using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.MarketData;
 using TradyStrat.Domain.Shared.Money;
 
 namespace TradyStrat.Infrastructure.Fx.Providers;
