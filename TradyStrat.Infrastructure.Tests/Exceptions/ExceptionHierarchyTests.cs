@@ -2,6 +2,7 @@ using TradyStrat.Infrastructure.Exceptions;
 using Xunit;
 using Shouldly;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Infrastructure.Tests.Exceptions;
 

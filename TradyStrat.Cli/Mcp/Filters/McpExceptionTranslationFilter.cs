@@ -2,6 +2,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 
 namespace TradyStrat.Cli.Mcp.Filters;
 

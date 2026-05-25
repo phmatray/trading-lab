@@ -1,6 +1,4 @@
-using TradyStrat.Domain.SeedWork;
-
-namespace TradyStrat.Domain.Exceptions;
+namespace TradyStrat.Domain.SeedWork;
 
 public sealed class BusinessRuleViolationException(IBusinessRule rule)
     : TradyStratException(rule.Message)

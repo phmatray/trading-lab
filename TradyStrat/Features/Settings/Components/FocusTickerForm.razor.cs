@@ -3,6 +3,7 @@ using TradyStrat.Application.Settings;
 using TradyStrat.Application.Settings.UseCases;
 using TradyStrat.Application.UseCases;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Settings.Tickers;
 
 namespace TradyStrat.Features.Settings.Components;

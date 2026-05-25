@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TradyStrat.Application.AiSuggestion.UseCases;
 using TradyStrat.Application.Settings;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared;
 
 namespace TradyStrat.Application.AiSuggestion.Backfill;

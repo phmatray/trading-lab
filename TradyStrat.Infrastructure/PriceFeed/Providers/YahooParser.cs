@@ -1,6 +1,7 @@
 using System.Text.Json;
 using TradyStrat.Domain;
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
 using TradyStrat.Domain.Shared.Money;
 using TradyStrat.Domain.Shared.Market;
 

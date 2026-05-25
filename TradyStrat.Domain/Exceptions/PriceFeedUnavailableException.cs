@@ -1,3 +1,5 @@
+using TradyStrat.Domain.SeedWork;
+
 namespace TradyStrat.Domain.Exceptions;
 
 public sealed class PriceFeedUnavailableException(string message, Exception? inner = null)

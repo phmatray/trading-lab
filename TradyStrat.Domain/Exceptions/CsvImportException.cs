@@ -1,3 +1,5 @@
+using TradyStrat.Domain.SeedWork;
+
 namespace TradyStrat.Domain.Exceptions;
 
 public sealed class CsvImportException(string message, int? lineNumber = null)

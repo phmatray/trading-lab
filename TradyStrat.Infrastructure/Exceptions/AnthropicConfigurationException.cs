@@ -1,4 +1,6 @@
 using TradyStrat.Domain.Exceptions;
+using TradyStrat.Domain.SeedWork;
+
 namespace TradyStrat.Infrastructure.Exceptions;
 
 public sealed class AnthropicConfigurationException(string message)
