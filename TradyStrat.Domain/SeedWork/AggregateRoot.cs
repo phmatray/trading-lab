@@ -26,5 +26,11 @@ public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
         return snapshot;
     }
 
+    /// <summary>
+    /// Discards all collected events without dispatching. Intended ONLY for
+    /// the multi-step rollback path in <c>Portfolio.ImportTrades</c> — where a
+    /// failed batch must leave no orphan events on the AR. No other caller
+    /// should invoke this.
+    /// </summary>
     internal void ClearDomainEvents() => _events.Clear();
 }
