@@ -3,7 +3,7 @@ using TradingSignal.Core;
 
 namespace TradingSignal.Data.Validation;
 
-public static class MarketDataValidator
+public static partial class MarketDataValidator
 {
     // Throws on hard violations (non-monotonic, duplicate timestamps).
     // Logs a warning on soft violations (gaps > 1 interval).
@@ -23,12 +23,13 @@ public static class MarketDataValidator
                 throw new InvalidOperationException($"Non-monotonic candle stream at index {i}: {curr:o} after {prev:o}");
 
             var delta = curr - prev;
-            if (delta > maxGap)
+            if (delta > maxGap && logger is not null)
             {
-                logger?.LogWarning(
-                    "Gap detected between {Prev} and {Curr}: {Delta} (interval {Interval})",
-                    prev, curr, delta, interval);
+                LogGapDetected(logger, prev, curr, delta, interval);
             }
         }
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Warning, Message = "Gap detected between {Prev} and {Curr}: {Delta} (interval {Interval})")]
+    private static partial void LogGapDetected(ILogger logger, DateTime prev, DateTime curr, TimeSpan delta, TimeSpan interval);
 }

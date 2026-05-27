@@ -8,7 +8,7 @@ using TradingSignal.Data.Validation;
 
 namespace TradingSignal.Data;
 
-public sealed class BinanceMarketDataSource(
+public sealed partial class BinanceMarketDataSource(
     IKlineFetcher fetcher,
     ICandleCache cache,
     ILogger<BinanceMarketDataSource>? logger = null,
@@ -27,8 +27,7 @@ public sealed class BinanceMarketDataSource(
         var cached = await cache.TryReadAsync(symbol, interval, startUtc, endUtc, ct).ConfigureAwait(false);
         if (cached is not null)
         {
-            _logger.LogInformation("Cache hit for {Symbol} {Interval} {Start}..{End} ({Count} candles)",
-                symbol, interval, startUtc, endUtc, cached.Count);
+            LogCacheHit(_logger, symbol, interval, startUtc, endUtc, cached.Count);
             return cached;
         }
 
@@ -54,7 +53,7 @@ public sealed class BinanceMarketDataSource(
 
             if (page.Count == 0)
             {
-                _logger.LogInformation("Empty page at {Cursor} — stopping pagination", cursor);
+                LogEmptyPage(_logger, cursor);
                 break;
             }
 
@@ -68,7 +67,7 @@ public sealed class BinanceMarketDataSource(
             if (lastTime <= cursor - interval)
             {
                 // Defensive: server returned data older than our cursor — bail rather than loop.
-                _logger.LogWarning("Pagination not advancing (cursor={Cursor}, lastTime={Last}) — stopping", cursor, lastTime);
+                LogPaginationStalled(_logger, cursor, lastTime);
                 break;
             }
 
@@ -78,8 +77,19 @@ public sealed class BinanceMarketDataSource(
                 await Task.Delay(_interPageDelay, ct).ConfigureAwait(false);
         }
 
-        _logger.LogInformation("Fetched {Count} candles for {Symbol} {Interval} across {Pages} pages",
-            result.Count, symbol, interval, pages);
+        LogFetched(_logger, result.Count, symbol, interval, pages);
         return result;
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Cache hit for {Symbol} {Interval} {Start}..{End} ({Count} candles)")]
+    private static partial void LogCacheHit(ILogger logger, string symbol, TimeSpan interval, DateTime start, DateTime end, int count);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Empty page at {Cursor} — stopping pagination")]
+    private static partial void LogEmptyPage(ILogger logger, DateTime cursor);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Pagination not advancing (cursor={Cursor}, lastTime={Last}) — stopping")]
+    private static partial void LogPaginationStalled(ILogger logger, DateTime cursor, DateTime last);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Fetched {Count} candles for {Symbol} {Interval} across {Pages} pages")]
+    private static partial void LogFetched(ILogger logger, int count, string symbol, TimeSpan interval, int pages);
 }

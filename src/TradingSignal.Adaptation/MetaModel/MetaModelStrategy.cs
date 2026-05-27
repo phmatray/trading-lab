@@ -10,7 +10,7 @@ namespace TradingSignal.Adaptation.MetaModel;
 // Spec §9.2: LbfgsLogisticRegression that predicts P(signal is profitable net of
 // fees) from indicator features + one-hot LLM action + LLM confidence. Trained
 // on adaptation-window predictions; gates by P ≥ 0.5 at test time.
-public sealed class MetaModelStrategy(
+public sealed partial class MetaModelStrategy(
     IFeatureEngine featureEngine,
     ISignalGenerator signalGenerator,
     ILogger<MetaModelStrategy>? logger = null)
@@ -38,16 +38,14 @@ public sealed class MetaModelStrategy(
             .ConfigureAwait(false);
 
         TrainOnSamples(samples);
-        _logger.LogInformation(
-            "Segment {Segment}: meta-model trained on {N} samples, in-sample acc={Acc:F3}",
-            context.Segment, samples.Count, _lastTrainAccuracy);
+        LogTrained(_logger, context.Segment, samples.Count, _lastTrainAccuracy);
     }
 
     internal void TrainOnSamples(IReadOnlyList<AdaptationSample> samples)
     {
         if (samples.Count < 20)
         {
-            _logger.LogWarning("Skipping meta-model fit: only {N} adaptation samples (need ≥20)", samples.Count);
+            LogSkippingFit(_logger, samples.Count);
             _predictionEngine = null;
             return;
         }
@@ -127,4 +125,10 @@ public sealed class MetaModelStrategy(
             LlmConfidence = (float)signal.Confidence,
         };
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Segment {Segment}: meta-model trained on {N} samples, in-sample acc={Acc:F3}")]
+    private static partial void LogTrained(ILogger logger, int segment, int n, double acc);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "Skipping meta-model fit: only {N} adaptation samples (need ≥20)")]
+    private static partial void LogSkippingFit(ILogger logger, int n);
 }

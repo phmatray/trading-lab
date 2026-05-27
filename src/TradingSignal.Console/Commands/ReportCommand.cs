@@ -4,7 +4,7 @@ using TradingSignal.ConsoleApp.Reports;
 
 namespace TradingSignal.ConsoleApp.Commands;
 
-public sealed class ReportCommand(
+public sealed partial class ReportCommand(
     AppConfig config,
     ILogger<ReportCommand> logger)
 {
@@ -12,7 +12,7 @@ public sealed class ReportCommand(
     {
         if (!File.Exists(config.Output.ReportPath))
         {
-            logger.LogError("No report at {Path} — run `run` first", config.Output.ReportPath);
+            LogMissingReport(logger, config.Output.ReportPath);
             return 2;
         }
 
@@ -20,4 +20,7 @@ public sealed class ReportCommand(
         ReportPrinter.Print(report, Console.Out);
         return 0;
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = "No report at {Path} — run `run` first")]
+    private static partial void LogMissingReport(ILogger logger, string path);
 }

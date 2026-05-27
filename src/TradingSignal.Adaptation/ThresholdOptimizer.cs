@@ -11,7 +11,7 @@ namespace TradingSignal.Adaptation;
 // Sharpe net of fees. Pick the τ that maximises Sharpe. Apply that τ at test
 // time. Reports the chosen τ per segment via the Label so report-time can show
 // drift over segments.
-public sealed class ThresholdOptimizer(
+public sealed partial class ThresholdOptimizer(
     IFeatureEngine featureEngine,
     ISignalGenerator signalGenerator,
     ILogger<ThresholdOptimizer>? logger = null)
@@ -40,10 +40,11 @@ public sealed class ThresholdOptimizer(
             .ConfigureAwait(false);
 
         _selectedThreshold = PickBestThreshold(samples, context.PeriodsPerYear);
-        _logger.LogInformation(
-            "Segment {Segment}: τ* = {Threshold:F2} from {N} adaptation samples",
-            context.Segment, _selectedThreshold, samples.Count);
+        LogSelectedThreshold(_logger, context.Segment, _selectedThreshold, samples.Count);
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Segment {Segment}: τ* = {Threshold:F2} from {N} adaptation samples")]
+    private static partial void LogSelectedThreshold(ILogger logger, int segment, double threshold, int n);
 
     public FinalDecision Apply(RawSignal raw, FeatureSet features)
     {

@@ -7,7 +7,7 @@ using TradingSignal.Evaluation;
 
 namespace TradingSignal.Backtest;
 
-public sealed class WalkForwardOrchestrator(
+public sealed partial class WalkForwardOrchestrator(
     IFeatureEngine featureEngine,
     ISignalGenerator signalGenerator,
     IAdaptationStrategy adaptation,
@@ -48,12 +48,13 @@ public sealed class WalkForwardOrchestrator(
             segmentIndex++;
         }
 
-        _logger.LogInformation(
-            "Walk-forward complete: {Segments} segments, {Predictions} predictions",
-            segments.Count, segments.Sum(s => s.PredictionCount));
+        LogWalkForwardComplete(_logger, segments.Count, segments.Sum(s => s.PredictionCount));
 
         return new BacktestResult(symbol, adaptation.Label, segments);
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Walk-forward complete: {Segments} segments, {Predictions} predictions")]
+    private static partial void LogWalkForwardComplete(ILogger logger, int segments, int predictions);
 
     private async Task<SegmentResult> RunSegmentAsync(
         int segment,

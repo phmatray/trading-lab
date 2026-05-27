@@ -10,7 +10,7 @@ using TradingSignal.Evaluation.Metrics;
 
 namespace TradingSignal.ConsoleApp.Commands;
 
-public sealed class RunCommand(
+public sealed partial class RunCommand(
     IMarketDataSource marketData,
     IFeatureEngine featureEngine,
     ISignalGenerator signalGenerator,
@@ -27,11 +27,11 @@ public sealed class RunCommand(
 
         IReadOnlyList<Candle> candles = await marketData.GetCandlesAsync(
             config.Market.Symbol, interval, startUtc, endUtc, ct).ConfigureAwait(false);
-        logger.LogInformation("Loaded {Count} candles for backtest", candles.Count);
+        LogLoadedCandles(logger, candles.Count);
 
         if (candles.Count < featureEngine.WarmupPeriods + 10)
         {
-            logger.LogError("Not enough candles to run a backtest");
+            LogNotEnoughCandles(logger);
             return 2;
         }
 
@@ -72,7 +72,7 @@ public sealed class RunCommand(
 
         RunReport report = BuildReport(candles, options, runs, buyHold);
         await ReportWriter.WriteAsync(report, config.Output.ReportPath, ct).ConfigureAwait(false);
-        logger.LogInformation("Wrote report to {Path}", config.Output.ReportPath);
+        LogWroteReport(logger, config.Output.ReportPath);
 
         ReportPrinter.Print(report, Console.Out);
         return 0;
@@ -84,7 +84,7 @@ public sealed class RunCommand(
         BacktestOptions options,
         CancellationToken ct)
     {
-        logger.LogInformation("Running strategy: {Label}", strategy.Label);
+        LogRunningStrategy(logger, strategy.Label);
         WalkForwardOrchestrator orchestrator = new(
             featureEngine, signalGenerator, strategy, predictionStore, options,
             loggerFactory.CreateLogger<WalkForwardOrchestrator>());
@@ -158,4 +158,16 @@ public sealed class RunCommand(
             MaxDrawdownPct: aggReturns.MaxDrawdownPct,
             Segments: segReports);
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Loaded {Count} candles for backtest")]
+    private static partial void LogLoadedCandles(ILogger logger, int count);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "Not enough candles to run a backtest")]
+    private static partial void LogNotEnoughCandles(ILogger logger);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Wrote report to {Path}")]
+    private static partial void LogWroteReport(ILogger logger, string path);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Running strategy: {Label}")]
+    private static partial void LogRunningStrategy(ILogger logger, string label);
 }
