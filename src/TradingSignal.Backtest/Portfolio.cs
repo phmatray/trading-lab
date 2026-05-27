@@ -11,10 +11,13 @@ public sealed class Portfolio
     private readonly double _feeRate;
     private readonly bool _enableShort;
 
+    private readonly List<double> _equityCurve = new();
+    private readonly List<double> _perBarReturns = new();
+
     public double Cash { get; private set; } = 1d;
     public double Position { get; private set; }
-    public List<double> EquityCurve { get; } = new();
-    public List<double> PerBarReturns { get; } = new();
+    public IReadOnlyList<double> EquityCurve => _equityCurve;
+    public IReadOnlyList<double> PerBarReturns => _perBarReturns;
     public int TradeCount { get; private set; }
 
     private double _previousEquity = 1d;
@@ -56,9 +59,9 @@ public sealed class Portfolio
 
         double mark = (double)markPrice;
         double equity = Cash + Position * mark;
-        EquityCurve.Add(equity);
+        _equityCurve.Add(equity);
         double r = _previousEquity == 0d ? 0d : (equity - _previousEquity) / _previousEquity;
-        PerBarReturns.Add(r);
+        _perBarReturns.Add(r);
         _previousEquity = equity;
     }
 

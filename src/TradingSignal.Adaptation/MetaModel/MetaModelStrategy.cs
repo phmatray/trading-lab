@@ -67,14 +67,14 @@ public sealed partial class MetaModelStrategy(
             nameof(MetaTrainingRow.LlmConfidence),
         };
 
-        IEstimator<ITransformer> pipeline = _ml.Transforms
+        var pipeline = _ml.Transforms
             .Concatenate("Features", featureColumns)
             .Append(_ml.Transforms.NormalizeMinMax("Features"))
             .Append(_ml.BinaryClassification.Trainers.LbfgsLogisticRegression(
                 labelColumnName: nameof(MetaTrainingRow.Label),
                 featureColumnName: "Features"));
 
-        ITransformer model = pipeline.Fit(data);
+        var model = pipeline.Fit(data);
         IDataView scored = model.Transform(data);
         BinaryClassificationMetrics metrics = _ml.BinaryClassification.EvaluateNonCalibrated(scored,
             labelColumnName: nameof(MetaTrainingRow.Label));

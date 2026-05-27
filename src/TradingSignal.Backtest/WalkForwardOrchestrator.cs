@@ -48,7 +48,12 @@ public sealed partial class WalkForwardOrchestrator(
             segmentIndex++;
         }
 
-        LogWalkForwardComplete(_logger, segments.Count, segments.Sum(s => s.PredictionCount));
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            int totalPredictions = 0;
+            for (int i = 0; i < segments.Count; i++) totalPredictions += segments[i].PredictionCount;
+            LogWalkForwardComplete(_logger, segments.Count, totalPredictions);
+        }
 
         return new BacktestResult(symbol, adaptation.Label, segments);
     }

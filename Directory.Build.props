@@ -8,6 +8,14 @@
     <WarningsNotAsErrors></WarningsNotAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>All</AnalysisMode>
+    <!--
+      CA1062: redundant when <Nullable>enable</Nullable> is on — the compiler
+              already enforces non-null parameters at API boundaries.
+      CA2007: irrelevant in app code that never runs under a SyncContext
+              (Console host). Useful for libraries; not this codebase.
+    -->
+    <NoWarn>$(NoWarn);CA1062;CA2007</NoWarn>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 </Project>

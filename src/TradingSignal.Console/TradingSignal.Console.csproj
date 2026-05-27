@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>TradingSignal.ConsoleApp</RootNamespace>
     <AssemblyName>TradingSignal.Console</AssemblyName>
+    <!-- CA1515: executable has no external API surface; public-vs-internal is noise here. -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />

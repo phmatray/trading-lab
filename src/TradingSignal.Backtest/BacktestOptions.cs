@@ -9,7 +9,7 @@ public sealed record BacktestOptions
     public int CandlesPerDay { get; init; } = 24;       // 1h interval default
     public int PeriodsPerYear { get; init; } = 24 * 365;
     public double FeeBps { get; init; } = 10d;
-    public bool EnableShort { get; init; } = false;
+    public bool EnableShort { get; init; }
 
     public int AdaptationCandles => AdaptationDays * CandlesPerDay;
     public int TestCandles => TestDays * CandlesPerDay;

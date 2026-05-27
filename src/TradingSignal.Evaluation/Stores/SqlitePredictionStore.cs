@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json;
 using Dapper;
@@ -177,6 +178,8 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 
+    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
+        Justification = "Instantiated reflectively by Dapper's QueryAsync<JoinedRow>.")]
     private sealed class JoinedRow
     {
         public string Id { get; set; } = "";

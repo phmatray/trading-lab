@@ -15,7 +15,7 @@ public static class OutcomeComputer
         int horizonCandles,
         double feeBps)
     {
-        if (horizonCandles < 1) throw new ArgumentOutOfRangeException(nameof(horizonCandles));
+        ArgumentOutOfRangeException.ThrowIfLessThan(horizonCandles, 1);
         var entryIndex = decisionIndex + 1;
         var exitIndex = decisionIndex + horizonCandles;
         if (entryIndex >= candles.Count || exitIndex >= candles.Count)

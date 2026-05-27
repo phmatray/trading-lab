@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,8 @@ namespace TradingSignal.ConsoleApp;
 
 internal static class Program
 {
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types",
+        Justification = "Top-level process boundary: any uncaught exception must be logged and returned as exit code, not propagated.")]
     public static async Task<int> Main(string[] args)
     {
         string command = args.Length > 0 ? args[0].ToLowerInvariant() : "help";
@@ -43,7 +46,7 @@ internal static class Program
         }
         catch (OperationCanceledException)
         {
-            Console.Error.WriteLine("cancelled");
+            await Console.Error.WriteLineAsync("cancelled").ConfigureAwait(false);
             return 130;
         }
         catch (Exception ex)

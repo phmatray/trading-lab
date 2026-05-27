@@ -4,10 +4,12 @@ namespace TradingSignal.Evaluation.Metrics;
 
 public static class BuyAndHoldMetrics
 {
+    private static readonly double[] FlatEquity = { 1d };
+
     public static ReturnSeriesMetrics Compute(IReadOnlyList<Candle> candles, int periodsPerYear, double feeBps)
     {
         if (candles.Count < 2)
-            return new ReturnSeriesMetrics(0, 0d, 0d, 0d, new[] { 1d });
+            return new ReturnSeriesMetrics(0, 0d, 0d, 0d, FlatEquity);
 
         var returns = new double[candles.Count - 1];
         for (var i = 1; i < candles.Count; i++)

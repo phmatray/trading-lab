@@ -9,10 +9,12 @@ public sealed record ReturnSeriesMetrics(
 
 public static class ReturnMetrics
 {
+    private static readonly double[] FlatEquity = { 1d };
+
     public static ReturnSeriesMetrics Compute(IReadOnlyList<double> returns, int periodsPerYear)
     {
         if (returns.Count == 0)
-            return new ReturnSeriesMetrics(0, 0d, 0d, 0d, new[] { 1d });
+            return new ReturnSeriesMetrics(0, 0d, 0d, 0d, FlatEquity);
 
         var equity = new double[returns.Count + 1];
         equity[0] = 1d;
