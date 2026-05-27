@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />
+    <ProjectReference Include="..\TradingSignal.Data\TradingSignal.Data.csproj" />
+    <ProjectReference Include="..\TradingSignal.Indicators\TradingSignal.Indicators.csproj" />
+    <ProjectReference Include="..\TradingSignal.Llm\TradingSignal.Llm.csproj" />
+    <ProjectReference Include="..\TradingSignal.Evaluation\TradingSignal.Evaluation.csproj" />
+    <ProjectReference Include="..\TradingSignal.Adaptation\TradingSignal.Adaptation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+</Project>

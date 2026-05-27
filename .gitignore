@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+*.user
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Runtime artifacts
+runs/
+data-cache/
+
+# OS
+Thumbs.db
+.DS_Store
