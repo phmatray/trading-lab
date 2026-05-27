@@ -1,5 +1,4 @@
 using Shouldly;
-using TradingSignal.Indicators;
 
 namespace TradingSignal.Indicators.Tests;
 

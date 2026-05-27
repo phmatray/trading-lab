@@ -1,5 +1,4 @@
 using Shouldly;
-using TradingSignal.Adaptation;
 using TradingSignal.Adaptation.MetaModel;
 using TradingSignal.Core;
 using TradingSignal.Core.Abstractions;

@@ -1,5 +1,4 @@
 using Shouldly;
-using TradingSignal.Adaptation;
 using TradingSignal.Core;
 
 namespace TradingSignal.Adaptation.Tests;

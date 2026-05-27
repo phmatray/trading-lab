@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using TradingSignal.Adaptation;
-using TradingSignal.Adaptation.MetaModel;
 using TradingSignal.Backtest;
 using TradingSignal.ConsoleApp.Configuration;
 using TradingSignal.ConsoleApp.Reports;

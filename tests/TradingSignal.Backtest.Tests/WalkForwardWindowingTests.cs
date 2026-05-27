@@ -1,6 +1,5 @@
 using Shouldly;
 using TradingSignal.Adaptation;
-using TradingSignal.Backtest;
 using TradingSignal.Core;
 using TradingSignal.Core.Abstractions;
 using TradingSignal.Indicators;
