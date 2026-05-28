@@ -108,7 +108,7 @@ When switching `ModelFamily` to `"reasoning"`, bump these two values to give the
 - `MaxOutputTokens`: from 256 to **2048** (a single reasoning response averages ~1000 tokens).
 - `TimeoutSeconds`: from 60 to **120** (per-call latency runs 1–25 s at `medium` effort and skews higher at `high`).
 
-The chain-of-thought trace is persisted to a new `reasoning` column on both `predictions.db` and `llm-cache.db`. Pre-existing DBs are migrated automatically on first open (an idempotent `ALTER TABLE`), so you can switch between families without wiping `runs/`.
+The chain-of-thought trace is persisted to a new `reasoning` column on both `predictions.db` and `llm-cache.db`. Pre-existing DBs are migrated automatically on first open (an idempotent `ALTER TABLE`), so you can switch between families without wiping `runs/`. **Note:** the cache key format also changed in this version (it now includes `ReasoningEffort` and the strategy-specific system prompt), so existing `llm-cache.db` entries from a prior version will miss on the first post-upgrade run — re-runs will repopulate the cache automatically; no user action required.
 
 ## Tests
 

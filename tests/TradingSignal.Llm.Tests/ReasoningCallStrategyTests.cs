@@ -169,4 +169,18 @@ public sealed class ReasoningCallStrategyTests
         body.TryGetProperty("response_format", out _).ShouldBeFalse();
         body.GetProperty("messages").GetArrayLength().ShouldBe(2);
     }
+
+    [Fact]
+    public async Task Malformed_Response_Shape_Degrades_To_ParseFailure()
+    {
+        var (sut, handler) = Build();
+        // Empty choices array — provoke IndexOutOfRangeException on choices[0]
+        handler.EnqueueRawJson("""{"choices":[]}""");
+        handler.EnqueueRawJson("""{"choices":[]}""");
+
+        LlmCallOutcome outcome = await sut.GenerateAsync(Sys, User, TestContext.Current.CancellationToken);
+
+        outcome.Signal.Action.ShouldBe(TradeAction.Hold);
+        outcome.Signal.Reason.ShouldBe("parse_failure");
+    }
 }

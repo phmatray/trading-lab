@@ -115,6 +115,11 @@ internal sealed partial class ReasoningCallStrategy : ILlmCallStrategy
             LogMalformed(_logger, ex);
             return (null, null);
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LogUnexpectedResponse(_logger, ex);
+            return (null, null);
+        }
     }
 
     private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max] + "...";
@@ -133,4 +138,7 @@ internal sealed partial class ReasoningCallStrategy : ILlmCallStrategy
 
     [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "Reasoning LLM returned malformed JSON")]
     private static partial void LogMalformed(ILogger logger, Exception ex);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Reasoning LLM unexpected response shape")]
+    private static partial void LogUnexpectedResponse(ILogger logger, Exception ex);
 }
