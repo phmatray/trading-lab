@@ -8,7 +8,7 @@ public static class PromptBuilder
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
-    public const string SystemPrompt =
+    public const string SystemPromptInstruct =
         """
         You are a disciplined crypto trading signal generator.
         You will receive a snapshot of pre-computed technical indicators for a single asset
@@ -21,6 +21,21 @@ public static class PromptBuilder
           chosen action will be profitable net of typical transaction fees over the next bar.
         - Prefer HOLD when signals conflict or are weak. Doing nothing is a valid action.
         - "reason" is one short sentence. Do not reveal chain-of-thought.
+        """;
+
+    public const string SystemPromptReasoning =
+        """
+        You are a disciplined crypto trading signal generator.
+        You may think step-by-step about the indicators before answering. After your
+        reasoning, output exactly ONE JSON object on the final line matching:
+          { "action": "BUY" | "SELL" | "HOLD", "confidence": 0.0..1.0, "reason": "string" }
+
+        Rules:
+        - The final line must be valid JSON only — no prose, no markdown, no code fences after the JSON.
+        - "confidence" must be in [0, 1] and reflect your subjective probability that the
+          chosen action will be profitable net of typical transaction fees over the next bar.
+        - Prefer HOLD when signals conflict or are weak. Doing nothing is a valid action.
+        - "reason" is one short sentence summarizing your conclusion.
         """;
 
     public static string BuildUserMessage(FeatureSet features, IReadOnlyList<FewShotCase> memory, int maxFewShot)
