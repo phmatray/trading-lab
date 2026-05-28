@@ -100,8 +100,16 @@ internal static class Program
                 services.AddSingleton<ILlmResponseCache>(sp =>
                     new SqliteLlmResponseCache(sp.GetRequiredService<AppConfig>().Output.LlmCachePath));
                 services.AddSingleton(sp => LmStudioChatClientFactory.Create(sp.GetRequiredService<LmStudioOptions>()));
+                // Temporary: wire InstructCallStrategy directly here. Task 11 will replace
+                // this with services.AddLlmCallStrategy(...) once the public extension method
+                // exists (added in Task 10).
+                services.AddSingleton<TradingSignal.Llm.Abstractions.ILlmCallStrategy>(sp =>
+                    new TradingSignal.Llm.Strategies.InstructCallStrategy(
+                        sp.GetRequiredService<Microsoft.Extensions.AI.IChatClient>(),
+                        sp.GetRequiredService<LmStudioOptions>(),
+                        sp.GetService<ILogger<TradingSignal.Llm.Strategies.InstructCallStrategy>>()));
                 services.AddSingleton<ISignalGenerator>(sp => new LlmSignalGenerator(
-                    sp.GetRequiredService<Microsoft.Extensions.AI.IChatClient>(),
+                    sp.GetRequiredService<TradingSignal.Llm.Abstractions.ILlmCallStrategy>(),
                     sp.GetRequiredService<LmStudioOptions>(),
                     sp.GetRequiredService<ILlmResponseCache>(),
                     sp.GetService<ILogger<LlmSignalGenerator>>()));

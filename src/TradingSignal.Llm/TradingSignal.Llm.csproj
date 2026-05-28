@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="TradingSignal.Llm.Tests" />
+    <!-- Temporary: Console wires InstructCallStrategy directly until Task 11
+         introduces the public AddLlmCallStrategy extension method. -->
+    <InternalsVisibleTo Include="TradingSignal.Console" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />

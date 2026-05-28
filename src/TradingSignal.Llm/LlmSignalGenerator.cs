@@ -1,19 +1,17 @@
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using TradingSignal.Core;
 using TradingSignal.Core.Abstractions;
+using TradingSignal.Llm.Abstractions;
 using TradingSignal.Llm.Caching;
-using TradingSignal.Llm.Parsing;
 using TradingSignal.Llm.Prompts;
-using TradingSignal.Llm.Schemas;
 
 namespace TradingSignal.Llm;
 
 public sealed partial class LlmSignalGenerator(
-    IChatClient chatClient,
+    ILlmCallStrategy strategy,
     LmStudioOptions options,
     ILlmResponseCache cache,
     ILogger<LlmSignalGenerator>? logger = null)
@@ -24,91 +22,31 @@ public sealed partial class LlmSignalGenerator(
     public async Task<RawSignal> GenerateAsync(
         FeatureSet features, IReadOnlyList<FewShotCase> memory, CancellationToken ct)
     {
-        var userMessage = PromptBuilder.BuildUserMessage(features, memory, options.MaxFewShot);
-        var cacheKey = ComputeCacheKey(options.ModelId, PromptBuilder.SystemPromptInstruct, userMessage);
+        string systemPrompt = strategy.SystemPrompt;
+        string userMessage = PromptBuilder.BuildUserMessage(features, memory, options.MaxFewShot);
+        string cacheKey = ComputeCacheKey(options.ModelId, options.ReasoningEffort, systemPrompt, userMessage);
 
-        var cached = await cache.TryGetAsync(cacheKey, ct).ConfigureAwait(false);
+        RawSignal? cached = await cache.TryGetAsync(cacheKey, ct).ConfigureAwait(false);
         if (cached is not null)
         {
             LogCacheHit(_logger, features.AsOfUtc, features.Symbol);
             return cached;
         }
 
-        // First attempt: structured JSON-schema output.
-        var signal = await TryOnceAsync(userMessage, useSchema: true, stricterReminder: false, ct).ConfigureAwait(false);
-
-        // Spec §6.4: on parse failure, retry once with a stricter reminder.
-        // Also drop the schema constraint so a host that rejected it can succeed.
-        if (signal is null)
-        {
-            signal = await TryOnceAsync(userMessage, useSchema: false, stricterReminder: true, ct).ConfigureAwait(false);
-        }
-
-        var final = signal ?? new RawSignal(TradeAction.Hold, 0d, "parse_failure");
+        LlmCallOutcome outcome = await strategy.GenerateAsync(systemPrompt, userMessage, ct).ConfigureAwait(false);
+        RawSignal final = outcome.Signal with { Reasoning = outcome.ReasoningContent };
         await cache.SetAsync(cacheKey, final, ct).ConfigureAwait(false);
         return final;
     }
 
-    private async Task<RawSignal?> TryOnceAsync(
-        string userMessage, bool useSchema, bool stricterReminder, CancellationToken ct)
+    private static string ComputeCacheKey(
+        string modelId, string reasoningEffort, string systemPrompt, string userMessage)
     {
-        var messages = new List<ChatMessage>
-        {
-            new(ChatRole.System, PromptBuilder.SystemPromptInstruct),
-            new(ChatRole.User, userMessage),
-        };
-        if (stricterReminder)
-        {
-            messages.Add(new ChatMessage(ChatRole.User,
-                "Return ONLY valid JSON matching the schema. No prose, no markdown."));
-        }
-
-        var chatOptions = new ChatOptions
-        {
-            Temperature = 0.2f,
-            MaxOutputTokens = options.MaxOutputTokens,
-            ResponseFormat = useSchema
-                ? ChatResponseFormat.ForJsonSchema(
-                    SignalResponseSchema.Element,
-                    SignalResponseSchema.SchemaName,
-                    SignalResponseSchema.SchemaDescription)
-                : null,
-        };
-
-        try
-        {
-            var response = await chatClient.GetResponseAsync(messages, chatOptions, ct).ConfigureAwait(false);
-            var text = response.Text ?? string.Empty;
-            if (SignalResponseParser.TryParse(text, out var parsed)) return parsed;
-
-            if (_logger.IsEnabled(LogLevel.Warning))
-                LogParseFailure(_logger, useSchema, Truncate(text, 400));
-            return null;
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // Boundary handler: any LLM transport/parsing failure must not crash
-            // the walk-forward loop. Cancellation propagates so the host can stop.
-            LogCallFailed(_logger, useSchema, ex);
-            return null;
-        }
+        byte[] payload = Encoding.UTF8.GetBytes($"{modelId} {reasoningEffort} {systemPrompt} {userMessage}");
+        byte[] hash = SHA256.HashData(payload);
+        return Convert.ToHexStringLower(hash);
     }
-
-    private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max] + "...";
 
     [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "LLM cache hit for {AsOf} {Symbol}")]
     private static partial void LogCacheHit(ILogger logger, DateTime asOf, string symbol);
-
-    [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "LLM parse failure (schema={UseSchema}). Body: {Body}")]
-    private static partial void LogParseFailure(ILogger logger, bool useSchema, string body);
-
-    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "LLM call failed (schema={UseSchema})")]
-    private static partial void LogCallFailed(ILogger logger, bool useSchema, Exception ex);
-
-    private static string ComputeCacheKey(string modelId, string systemPrompt, string userMessage)
-    {
-        var payload = Encoding.UTF8.GetBytes($"{modelId} {systemPrompt} {userMessage}");
-        var hash = SHA256.HashData(payload);
-        return Convert.ToHexStringLower(hash);
-    }
 }

@@ -14,118 +14,94 @@ public sealed class LlmSignalGeneratorTests
         Ema20: 64_500, Ema50: 64_000, Atr14: 800,
         Return1: 0.002, Return5: 0.01, VolatilityPct: 1.4);
 
-    private static LmStudioOptions Options() => new() { ModelId = "test-model", MaxFewShot = 0, MaxOutputTokens = 128 };
+    private static LmStudioOptions Options() => new()
+    {
+        ModelId = "test-model",
+        MaxFewShot = 0,
+        MaxOutputTokens = 128,
+        ReasoningEffort = "medium",
+    };
 
     [Fact]
-    public async Task Returns_Cached_Signal_Without_Calling_Llm()
+    public async Task Returns_Cached_Signal_Without_Calling_Strategy()
     {
-        FakeChatClient chat = new();
+        FakeLlmCallStrategy strategy = new();
+        strategy.EnqueueSignal(TradeAction.Buy, 0.71, "primer");
         InMemoryLlmCache cache = new();
-        LlmSignalGenerator sut = new(chat, Options(), cache);
+        LlmSignalGenerator sut = new(strategy, Options(), cache);
 
-        // Prime cache
-        string first = """{"action":"BUY","confidence":0.71,"reason":"primer"}""";
-        chat.EnqueueText(first);
         RawSignal primed = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-        chat.CallCount.ShouldBe(1);
+        strategy.CallCount.ShouldBe(1);
         cache.Store.Count.ShouldBe(1);
 
-        // Second call same features → cache hit
         RawSignal second = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-        chat.CallCount.ShouldBe(1); // unchanged
+        strategy.CallCount.ShouldBe(1);
         second.ShouldBe(primed);
-    }
-
-    [Fact]
-    public async Task Parses_Successful_Response()
-    {
-        FakeChatClient chat = new();
-        chat.EnqueueText("""{"action":"SELL","confidence":0.62,"reason":"overbought"}""");
-        LlmSignalGenerator sut = new(chat, Options(), new InMemoryLlmCache());
-
-        RawSignal signal = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-
-        signal.Action.ShouldBe(TradeAction.Sell);
-        signal.Confidence.ShouldBe(0.62);
-        chat.CallCount.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task Retries_Once_When_First_Response_Is_Garbage()
-    {
-        FakeChatClient chat = new();
-        chat.EnqueueText("definitely not json");
-        chat.EnqueueText("""{"action":"BUY","confidence":0.55,"reason":"retry win"}""");
-        LlmSignalGenerator sut = new(chat, Options(), new InMemoryLlmCache());
-
-        RawSignal signal = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-
-        signal.Action.ShouldBe(TradeAction.Buy);
-        signal.Reason.ShouldBe("retry win");
-        chat.CallCount.ShouldBe(2);
-    }
-
-    [Fact]
-    public async Task Degrades_To_Hold_When_Both_Attempts_Fail()
-    {
-        FakeChatClient chat = new();
-        chat.EnqueueText("garbage one");
-        chat.EnqueueText("garbage two");
-        InMemoryLlmCache cache = new();
-        LlmSignalGenerator sut = new(chat, Options(), cache);
-
-        RawSignal signal = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-
-        signal.Action.ShouldBe(TradeAction.Hold);
-        signal.Confidence.ShouldBe(0d);
-        signal.Reason.ShouldBe("parse_failure");
-        chat.CallCount.ShouldBe(2);
-        cache.Store.Count.ShouldBe(1); // even the failure result is cached so we don't retry forever
-    }
-
-    [Fact]
-    public async Task Degrades_To_Hold_When_Llm_Throws_On_Both_Attempts()
-    {
-        FakeChatClient chat = new();
-        chat.EnqueueError(new HttpRequestException("boom"));
-        chat.EnqueueError(new HttpRequestException("boom again"));
-        LlmSignalGenerator sut = new(chat, Options(), new InMemoryLlmCache());
-
-        RawSignal signal = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
-
-        signal.Action.ShouldBe(TradeAction.Hold);
-        signal.Reason.ShouldBe("parse_failure");
     }
 
     [Fact]
     public async Task Different_Features_Produce_Different_Cache_Keys()
     {
-        FakeChatClient chat = new();
-        chat.EnqueueText("""{"action":"BUY","confidence":0.5,"reason":"a"}""");
-        chat.EnqueueText("""{"action":"SELL","confidence":0.5,"reason":"b"}""");
+        FakeLlmCallStrategy strategy = new();
+        strategy.EnqueueSignal(TradeAction.Buy, 0.5, "a");
+        strategy.EnqueueSignal(TradeAction.Sell, 0.5, "b");
 
         InMemoryLlmCache cache = new();
-        LlmSignalGenerator sut = new(chat, Options(), cache);
+        LlmSignalGenerator sut = new(strategy, Options(), cache);
 
         await sut.GenerateAsync(Features("BTCUSDT"), Array.Empty<FewShotCase>(), CancellationToken.None);
         await sut.GenerateAsync(Features("ETHUSDT"), Array.Empty<FewShotCase>(), CancellationToken.None);
 
         cache.Store.Count.ShouldBe(2);
-        chat.CallCount.ShouldBe(2);
+        strategy.CallCount.ShouldBe(2);
     }
 
     [Fact]
-    public async Task Structured_Output_Used_On_First_Attempt_Only()
+    public async Task Propagates_Reasoning_Into_RawSignal_And_Cache()
     {
-        FakeChatClient chat = new();
-        chat.EnqueueText("garbage");
-        chat.EnqueueText("""{"action":"HOLD","confidence":0.3,"reason":"calm"}""");
-        LlmSignalGenerator sut = new(chat, Options(), new InMemoryLlmCache());
+        FakeLlmCallStrategy strategy = new();
+        strategy.EnqueueSignal(TradeAction.Buy, 0.6, "short", reasoning: "long thinking trace");
+        InMemoryLlmCache cache = new();
+        LlmSignalGenerator sut = new(strategy, Options(), cache);
 
-        await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
+        RawSignal signal = await sut.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
 
-        chat.ReceivedOptions.Count.ShouldBe(2);
-        chat.ReceivedOptions[0]!.ResponseFormat.ShouldNotBeNull(); // schema-constrained
-        chat.ReceivedOptions[1]!.ResponseFormat.ShouldBeNull();    // fallback
+        signal.Reasoning.ShouldBe("long thinking trace");
+        cache.Store.Values.Single().Reasoning.ShouldBe("long thinking trace");
+    }
+
+    [Fact]
+    public async Task System_Prompt_Of_Strategy_Affects_Cache_Key()
+    {
+        FakeLlmCallStrategy strategyA = new() { SystemPrompt = "prompt A" };
+        FakeLlmCallStrategy strategyB = new() { SystemPrompt = "prompt B" };
+        strategyA.EnqueueSignal(TradeAction.Buy, 0.5, "x");
+        strategyB.EnqueueSignal(TradeAction.Sell, 0.5, "y");
+
+        InMemoryLlmCache cache = new();
+        LlmSignalGenerator a = new(strategyA, Options(), cache);
+        LlmSignalGenerator b = new(strategyB, Options(), cache);
+
+        await a.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
+        await b.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
+
+        cache.Store.Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Reasoning_Effort_Affects_Cache_Key()
+    {
+        FakeLlmCallStrategy strategy = new();
+        strategy.EnqueueSignal(TradeAction.Buy, 0.5, "x");
+        strategy.EnqueueSignal(TradeAction.Sell, 0.5, "y");
+
+        InMemoryLlmCache cache = new();
+        LlmSignalGenerator a = new(strategy, new LmStudioOptions { ModelId = "m", MaxFewShot = 0, ReasoningEffort = "low" }, cache);
+        LlmSignalGenerator b = new(strategy, new LmStudioOptions { ModelId = "m", MaxFewShot = 0, ReasoningEffort = "high" }, cache);
+
+        await a.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
+        await b.GenerateAsync(Features(), Array.Empty<FewShotCase>(), CancellationToken.None);
+
+        cache.Store.Count.ShouldBe(2);
     }
 }
