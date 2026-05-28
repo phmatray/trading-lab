@@ -53,6 +53,7 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                     action INTEGER NOT NULL,
                     confidence REAL NOT NULL,
                     reason TEXT NOT NULL,
+                    reasoning TEXT NULL,
                     features_json TEXT NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS ix_predictions_segment ON predictions(segment);
@@ -65,6 +66,14 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                     FOREIGN KEY(prediction_id) REFERENCES predictions(id)
                 );
                 """).ConfigureAwait(false);
+
+            // Idempotent migration for pre-existing DBs.
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE predictions ADD COLUMN reasoning TEXT NULL").ConfigureAwait(false);
+            }
+            catch (SqliteException) { /* column already exists — expected on fresh DBs */ }
+
             _initialized = true;
         }
         finally
@@ -79,8 +88,8 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
         await conn.ExecuteAsync(
             """
             INSERT OR REPLACE INTO predictions
-              (id, as_of_utc, symbol, segment, action, confidence, reason, features_json)
-            VALUES (@Id, @AsOf, @Symbol, @Segment, @Action, @Confidence, @Reason, @Features);
+              (id, as_of_utc, symbol, segment, action, confidence, reason, reasoning, features_json)
+            VALUES (@Id, @AsOf, @Symbol, @Segment, @Action, @Confidence, @Reason, @Reasoning, @Features);
             """,
             new
             {
@@ -91,6 +100,7 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                 Action = (int)prediction.Signal.Action,
                 prediction.Signal.Confidence,
                 prediction.Signal.Reason,
+                prediction.Signal.Reasoning,
                 Features = JsonSerializer.Serialize(prediction.Features, FeaturesJson),
             }).ConfigureAwait(false);
     }
@@ -127,6 +137,7 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                    p.action AS Action,
                    p.confidence AS Confidence,
                    p.reason AS Reason,
+                   p.reasoning AS Reasoning,
                    p.features_json AS FeaturesJson,
                    o.entry_price AS EntryPrice,
                    o.exit_price AS ExitPrice,
@@ -151,7 +162,7 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal),
                 Symbol: r.Symbol,
                 Features: features,
-                Signal: new RawSignal((TradeAction)r.Action, r.Confidence, r.Reason),
+                Signal: new RawSignal((TradeAction)r.Action, r.Confidence, r.Reason, r.Reasoning),
                 WalkForwardSegment: r.Segment);
 
             Outcome? outcome = null;
@@ -189,6 +200,7 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
         public int Action { get; set; }
         public double Confidence { get; set; }
         public string Reason { get; set; } = "";
+        public string? Reasoning { get; set; }
         public string FeaturesJson { get; set; } = "";
         public double? EntryPrice { get; set; }
         public double? ExitPrice { get; set; }
