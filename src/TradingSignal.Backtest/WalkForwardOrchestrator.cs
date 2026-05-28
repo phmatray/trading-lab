@@ -104,7 +104,7 @@ public sealed partial class WalkForwardOrchestrator(
             decimal markPrice = candles[i + 1].Close;
             portfolio.Execute(decision.Action, executionPrice, markPrice);
 
-            RawSignal recordedSignal = new(decision.Action, raw.Confidence, raw.Reason);
+            RawSignal recordedSignal = new(decision.Action, raw.Confidence, raw.Reason, raw.Reasoning);
             Prediction prediction = new(
                 Id: Guid.NewGuid(),
                 AsOfUtc: features.AsOfUtc,
