@@ -76,18 +76,18 @@ internal static class Program
                 configuration.Bind(appConfig);
                 services.AddSingleton(appConfig);
 
-                services.AddSingleton<LmStudioOptions>(sp =>
+                // Eagerly materialize LmStudioOptions so ModelFamily is known at registration time.
+                LmStudioOptions lmOptions = new()
                 {
-                    LmStudioConfig src = sp.GetRequiredService<AppConfig>().LmStudio;
-                    return new LmStudioOptions
-                    {
-                        Endpoint = src.Endpoint,
-                        ModelId = src.ModelId,
-                        TimeoutSeconds = src.TimeoutSeconds,
-                        MaxFewShot = src.MaxFewShot,
-                        MaxOutputTokens = src.MaxOutputTokens,
-                    };
-                });
+                    Endpoint = appConfig.LmStudio.Endpoint,
+                    ModelId = appConfig.LmStudio.ModelId,
+                    TimeoutSeconds = appConfig.LmStudio.TimeoutSeconds,
+                    MaxFewShot = appConfig.LmStudio.MaxFewShot,
+                    MaxOutputTokens = appConfig.LmStudio.MaxOutputTokens,
+                    ModelFamily = appConfig.LmStudio.ModelFamily,
+                    ReasoningEffort = appConfig.LmStudio.ReasoningEffort,
+                };
+                services.AddSingleton(lmOptions);
 
                 services.AddSingleton<ICandleCache>(sp =>
                     new CsvCandleCache(sp.GetRequiredService<AppConfig>().Output.DataCacheDir));
@@ -99,20 +99,16 @@ internal static class Program
 
                 services.AddSingleton<ILlmResponseCache>(sp =>
                     new SqliteLlmResponseCache(sp.GetRequiredService<AppConfig>().Output.LlmCachePath));
-                services.AddSingleton(sp => LmStudioChatClientFactory.Create(sp.GetRequiredService<LmStudioOptions>()));
-                // Temporary: wire InstructCallStrategy directly here. Task 11 will replace
-                // this with services.AddLlmCallStrategy(...) once the public extension method
-                // exists (added in Task 10).
-                services.AddSingleton<TradingSignal.Llm.Abstractions.ILlmCallStrategy>(sp =>
-                    new TradingSignal.Llm.Strategies.InstructCallStrategy(
-                        sp.GetRequiredService<Microsoft.Extensions.AI.IChatClient>(),
-                        sp.GetRequiredService<LmStudioOptions>(),
-                        sp.GetService<ILogger<TradingSignal.Llm.Strategies.InstructCallStrategy>>()));
-                services.AddSingleton<ISignalGenerator>(sp => new LlmSignalGenerator(
-                    sp.GetRequiredService<TradingSignal.Llm.Abstractions.ILlmCallStrategy>(),
-                    sp.GetRequiredService<LmStudioOptions>(),
-                    sp.GetRequiredService<ILlmResponseCache>(),
-                    sp.GetService<ILogger<LlmSignalGenerator>>()));
+
+                // IChatClient is only needed for the instruct path; skip allocating it under reasoning.
+                if (string.Equals(lmOptions.ModelFamily, "instruct", StringComparison.OrdinalIgnoreCase))
+                {
+                    services.AddSingleton(_ => LmStudioChatClientFactory.Create(lmOptions));
+                }
+
+                services.AddLlmCallStrategy(lmOptions, startupLogger: null);
+
+                services.AddSingleton<ISignalGenerator, LlmSignalGenerator>();
 
                 services.AddSingleton<IFeatureEngine>(sp => new FeatureEngine(sp.GetRequiredService<AppConfig>().Market.Symbol));
                 services.AddSingleton<IPredictionStore>(sp =>
