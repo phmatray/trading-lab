@@ -81,5 +81,30 @@ public static class PromptBuilder
         sb.Append("  return1: ").AppendLine(f.Return1.ToString("F6", Inv));
         sb.Append("  return5: ").AppendLine(f.Return5.ToString("F6", Inv));
         sb.Append("  volatility_pct: ").AppendLine(f.VolatilityPct.ToString("F6", Inv));
+        // Pre-computed derived features. The reasoning model was observed to misorder
+        // numerically close EMAs when comparing them inline ("price > EMA20 > EMA50" when
+        // actually EMA20 < EMA50). Surfacing the comparisons as categorical strings removes
+        // that arithmetic load from the prompt and prevents the model from acting on a
+        // wrong premise.
+        sb.Append("  ema_cross: ").AppendLine(EmaCross(f));
+        sb.Append("  price_vs_emas: ").AppendLine(PriceVsEmas(f));
+    }
+
+    internal static string EmaCross(FeatureSet f) =>
+        f.Ema20 > f.Ema50 ? "bullish (EMA20 > EMA50)" :
+        f.Ema20 < f.Ema50 ? "bearish (EMA20 < EMA50)" :
+        "neutral (EMA20 == EMA50)";
+
+    internal static string PriceVsEmas(FeatureSet f)
+    {
+        bool aboveEma20 = (double)f.Close > f.Ema20;
+        bool aboveEma50 = (double)f.Close > f.Ema50;
+        return (aboveEma20, aboveEma50) switch
+        {
+            (true,  true)  => "price above both",
+            (false, false) => "price below both",
+            (true,  false) => "price above EMA20, below EMA50",
+            (false, true)  => "price below EMA20, above EMA50",
+        };
     }
 }
