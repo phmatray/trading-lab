@@ -11,4 +11,8 @@ public sealed class LmStudioOptions
     public int MaxFewShot { get; set; } = 3;
 
     public int MaxOutputTokens { get; set; } = 256;
+
+    public string ModelFamily { get; set; } = "instruct";
+
+    public string ReasoningEffort { get; set; } = "medium";
 }
