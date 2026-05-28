@@ -15,3 +15,6 @@ data-cache/
 # OS
 Thumbs.db
 .DS_Store
+
+# Git worktrees
+.worktrees/
