@@ -119,4 +119,77 @@ public sealed class SqlitePredictionStoreTests : IDisposable
         rows.Count.ShouldBe(1);
         rows[0].Prediction.Features.ShouldBe(rich);
     }
+
+    [Fact]
+    public async Task Round_Trips_Prediction_With_Reasoning()
+    {
+        string dbPath = Path.Combine(Path.GetTempPath(), $"tsig-pred-{Guid.NewGuid():N}.db");
+        try
+        {
+            await using SqlitePredictionStore sut = new(dbPath);
+            Prediction p = MakePredictionWithReasoning(reasoning: "long thinking trace");
+
+            await sut.SavePredictionAsync(p, TestContext.Current.CancellationToken);
+            IReadOnlyList<(Prediction Prediction, Outcome? Outcome)> got = await sut.GetSegmentAsync(p.WalkForwardSegment, TestContext.Current.CancellationToken);
+
+            got.Count.ShouldBe(1);
+            got[0].Prediction.Signal.Reasoning.ShouldBe("long thinking trace");
+        }
+        finally { CleanupDb(dbPath); }
+    }
+
+    [Fact]
+    public async Task Migrates_PreExisting_Predictions_Db_Without_Reasoning_Column()
+    {
+        string dbPath = Path.Combine(Path.GetTempPath(), $"tsig-pred-{Guid.NewGuid():N}.db");
+        try
+        {
+            await using (SqliteConnection conn = new($"Data Source={dbPath}"))
+            {
+                await conn.OpenAsync(TestContext.Current.CancellationToken);
+                await using SqliteCommand cmd = conn.CreateCommand();
+                cmd.CommandText = """
+                    CREATE TABLE predictions (
+                        id TEXT PRIMARY KEY,
+                        as_of_utc TEXT NOT NULL,
+                        symbol TEXT NOT NULL,
+                        segment INTEGER NOT NULL,
+                        action INTEGER NOT NULL,
+                        confidence REAL NOT NULL,
+                        reason TEXT NOT NULL,
+                        features_json TEXT NOT NULL
+                    );
+                    """;
+                await cmd.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+            }
+            SqliteConnection.ClearAllPools();
+
+            await using SqlitePredictionStore sut = new(dbPath);
+            Prediction p = MakePredictionWithReasoning(reasoning: "trace");
+            await sut.SavePredictionAsync(p, TestContext.Current.CancellationToken);
+            IReadOnlyList<(Prediction Prediction, Outcome? Outcome)> got = await sut.GetSegmentAsync(p.WalkForwardSegment, TestContext.Current.CancellationToken);
+
+            got[0].Prediction.Signal.Reasoning.ShouldBe("trace");
+        }
+        finally { CleanupDb(dbPath); }
+    }
+
+    private static Prediction MakePredictionWithReasoning(string? reasoning)
+    {
+        FeatureSet features = new(
+            AsOfUtc: new DateTime(2026, 5, 1, 12, 0, 0, DateTimeKind.Utc),
+            Symbol: "BTCUSDT",
+            Close: 65_000m,
+            Rsi14: 55, MacdLine: 12, MacdSignal: 10, MacdHistogram: 2,
+            Ema20: 64_500, Ema50: 64_000, Atr14: 800,
+            Return1: 0.002, Return5: 0.01, VolatilityPct: 1.4);
+        RawSignal signal = new(TradeAction.Buy, 0.7, "short", reasoning);
+        return new Prediction(Guid.NewGuid(), features.AsOfUtc, features.Symbol, features, signal, WalkForwardSegment: 0);
+    }
+
+    private static void CleanupDb(string dbPath)
+    {
+        SqliteConnection.ClearAllPools();
+        if (File.Exists(dbPath)) File.Delete(dbPath);
+    }
 }
