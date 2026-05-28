@@ -90,7 +90,9 @@ Console depends only on Core + Backtest.
 
 `src/TradingSignal.Console/appsettings.json` (copied to output on build) controls:
 
-- `LmStudio` — endpoint, model id, max few-shot, max output tokens
+- `LmStudio` — endpoint, model id, timeouts, max few-shot, max output tokens. Two extra knobs control which call strategy is used:
+  - `ModelFamily`: `"instruct"` (default — Gemma, Qwen2.5-instruct, etc.) or `"reasoning"` (Qwen3 thinking models like `qwen/qwen3.6-35b-a3b`).
+  - `ReasoningEffort`: `"none" | "low" | "medium" | "high"` (default `"medium"`). Only honored by the reasoning strategy. Included in the cache key, so changing the knob between runs automatically invalidates stale entries.
 - `Market` — symbol, interval (`1h`, `30m`, `1d`, ...), history days
 - `Fees` — taker bps
 - `WalkForward` — adaptation/test/step days, evaluation horizon (candles)
@@ -98,6 +100,15 @@ Console depends only on Core + Backtest.
 - `Output` — paths for `data-cache/`, `predictions.db`, `llm-cache.db`, `report.json`
 
 Environment overrides via `TSIG_` prefix (e.g. `TSIG_LmStudio__ModelId=...`).
+
+### Reasoning models
+
+When switching `ModelFamily` to `"reasoning"`, bump these two values to give the model room to think:
+
+- `MaxOutputTokens`: from 256 to **2048** (a single reasoning response averages ~1000 tokens).
+- `TimeoutSeconds`: from 60 to **120** (per-call latency runs 1–25 s at `medium` effort and skews higher at `high`).
+
+The chain-of-thought trace is persisted to a new `reasoning` column on both `predictions.db` and `llm-cache.db`. Pre-existing DBs are migrated automatically on first open (an idempotent `ALTER TABLE`), so you can switch between families without wiping `runs/`.
 
 ## Tests
 
