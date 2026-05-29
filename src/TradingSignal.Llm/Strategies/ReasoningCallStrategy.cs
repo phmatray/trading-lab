@@ -92,6 +92,13 @@ internal sealed partial class ReasoningCallStrategy : ILlmCallStrategy
             if (SignalResponseParser.TryParse(content, out RawSignal parsed))
                 return (parsed, trace);
 
+            // qwen3.6 routinely returns an empty/incomplete `content` and emits the JSON
+            // answer inside the reasoning channel instead. Recover it before giving up —
+            // this avoids both the wasted stricter retry and a spurious parse_failure.
+            if (!string.IsNullOrEmpty(trace)
+                && SignalResponseParser.TryParseFromReasoning(trace, out RawSignal fromTrace))
+                return (fromTrace, trace);
+
             if (_logger.IsEnabled(LogLevel.Warning))
                 LogParseFailure(_logger, stricter, Truncate(content, 400));
             return (null, trace);

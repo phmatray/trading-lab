@@ -76,9 +76,30 @@ public sealed partial class MetaModelStrategy(
 
         var model = pipeline.Fit(data);
         IDataView scored = model.Transform(data);
-        BinaryClassificationMetrics metrics = _ml.BinaryClassification.EvaluateNonCalibrated(scored,
-            labelColumnName: nameof(MetaTrainingRow.Label));
-        _lastTrainAccuracy = metrics.Accuracy;
+
+        // EvaluateNonCalibrated eagerly computes AUC, which is undefined when the
+        // adaptation window is single-class — e.g. a HOLD-heavy / unprofitable segment
+        // where no sample's Label is true. Guard it so a degenerate window degrades
+        // gracefully (compute in-sample accuracy directly) instead of throwing and
+        // aborting the entire walk-forward run.
+        bool hasPositive = false, hasNegative = false;
+        foreach (MetaTrainingRow row in rows)
+        {
+            if (row.Label) hasPositive = true;
+            else hasNegative = true;
+        }
+
+        if (hasPositive && hasNegative)
+        {
+            BinaryClassificationMetrics metrics = _ml.BinaryClassification.EvaluateNonCalibrated(scored,
+                labelColumnName: nameof(MetaTrainingRow.Label));
+            _lastTrainAccuracy = metrics.Accuracy;
+        }
+        else
+        {
+            _lastTrainAccuracy = InSampleAccuracy(scored);
+            LogSingleClassFit(_logger, rows.Count);
+        }
 
         _predictionEngine = _ml.Model.CreatePredictionEngine<MetaTrainingRow, MetaPredictionRow>(model);
     }
@@ -99,6 +120,21 @@ public sealed partial class MetaModelStrategy(
             return new FinalDecision(TradeAction.Hold, pProfit);
 
         return new FinalDecision(raw.Action, pProfit);
+    }
+
+    // In-sample accuracy computed directly from PredictedLabel vs Label — used when the
+    // window is single-class and the AUC-bearing metric bundle would throw. Matches what
+    // BinaryClassificationMetrics.Accuracy reports in the two-class case.
+    private static double InSampleAccuracy(IDataView scored)
+    {
+        bool[] predicted = scored.GetColumn<bool>("PredictedLabel").ToArray();
+        bool[] actual = scored.GetColumn<bool>(nameof(MetaTrainingRow.Label)).ToArray();
+        if (predicted.Length == 0) return 0d;
+
+        int correct = 0;
+        for (int i = 0; i < predicted.Length && i < actual.Length; i++)
+            if (predicted[i] == actual[i]) correct++;
+        return (double)correct / predicted.Length;
     }
 
     private static MetaTrainingRow BuildRow(AdaptationSample s)
@@ -131,4 +167,7 @@ public sealed partial class MetaModelStrategy(
 
     [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "Skipping meta-model fit: only {N} adaptation samples (need ≥20)")]
     private static partial void LogSkippingFit(ILogger logger, int n);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Single-class adaptation window ({N} samples, no profitable example): AUC undefined, using in-sample accuracy")]
+    private static partial void LogSingleClassFit(ILogger logger, int n);
 }

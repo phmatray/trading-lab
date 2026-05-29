@@ -18,6 +18,26 @@ public sealed class SignalResponseParserTests
     }
 
     [Fact]
+    public void TryParseFromReasoning_Recovers_Last_Valid_Object_Amid_Prose_And_Drafts()
+    {
+        string trace =
+            "Let me think. Draft: {\"action\":\"BUY\",\"confidence\":0.4,\"reason\":\"early\"} " +
+            "Actually reconsider. {\"action\":\"HOLD\",\"confidence\":0.6,\"reason\":\"final\"} " +
+            "Self-correction: make sure JSON is on the final line, with no";
+
+        SignalResponseParser.TryParseFromReasoning(trace, out RawSignal? s).ShouldBeTrue();
+        s.Action.ShouldBe(TradeAction.Hold);
+        s.Confidence.ShouldBe(0.6);
+        s.Reason.ShouldBe("final");
+    }
+
+    [Fact]
+    public void TryParseFromReasoning_Returns_False_When_No_Json()
+    {
+        SignalResponseParser.TryParseFromReasoning("thought but did not answer", out _).ShouldBeFalse();
+    }
+
+    [Fact]
     public void Strips_Markdown_Fences()
     {
         string raw = """
