@@ -13,10 +13,11 @@ public sealed partial class WalkForwardOrchestrator(
     IAdaptationStrategy adaptation,
     IPredictionStore? store,
     BacktestOptions options,
-    ILogger<WalkForwardOrchestrator>? logger = null)
+    ILogger<WalkForwardOrchestrator>? logger = null,
+    string runId = "")
 {
     private readonly ILogger<WalkForwardOrchestrator> _logger = logger ?? NullLogger<WalkForwardOrchestrator>.Instance;
-    private static readonly IReadOnlyList<FewShotCase> EmptyMemory = Array.Empty<FewShotCase>();
+    private readonly string _runId = runId ?? "";
 
     public async Task<BacktestResult> RunAsync(
         IReadOnlyList<Candle> candles,
@@ -80,6 +81,11 @@ public sealed partial class WalkForwardOrchestrator(
             EvaluationHorizonCandles: options.EvaluationHorizonCandles,
             PeriodsPerYear: options.PeriodsPerYear);
 
+        // Publish the few-shot cap so AdaptationDatasetBuilder (invoked inside the
+        // strategy's FitAsync) builds its training memory with the SAME causal,
+        // rolling scheme we use in the test loop below — keeping train and test on
+        // one signal distribution. 0 => empty memory (parity with the old behaviour).
+        FewShotMemorySettings.MaxFewShot = options.MaxFewShot;
         await adaptation.FitAsync(context, ct).ConfigureAwait(false);
         // Snapshot diagnostics immediately after fit — strategy state mutates on the
         // next segment's fit, so the per-segment record needs a copy now.
@@ -92,12 +98,20 @@ public sealed partial class WalkForwardOrchestrator(
 
         int firstDecisionIndex = Math.Max(testStart, featureEngine.WarmupPeriods);
 
+        // Rolling, causal few-shot memory: at decision i it only ever surfaces cases
+        // for bars j with j + horizon <= i (outcome already observable). Spanning the
+        // full candle list lets the test window inherit adaptation-window cases, which
+        // are all in the past relative to the first test decision.
+        RollingFewShotMemory fewShotMemory = new(
+            candles, featureEngine, options.EvaluationHorizonCandles, options.FeeBps, options.MaxFewShot);
+
         for (int i = firstDecisionIndex; i < testEnd; i++)
         {
             // We need candles[i+1] for execution AND candles[i+H] for outcome. The loop
             // bound + the requiredCount check at the top guarantee both exist.
             FeatureSet features = featureEngine.Compute(candles, i);
-            RawSignal raw = await signalGenerator.GenerateAsync(features, EmptyMemory, ct).ConfigureAwait(false);
+            IReadOnlyList<FewShotCase> memory = fewShotMemory.MemoryFor(i);
+            RawSignal raw = await signalGenerator.GenerateAsync(features, memory, ct).ConfigureAwait(false);
             FinalDecision decision = adaptation.Apply(raw, features);
 
             decimal executionPrice = candles[i + 1].Open;
@@ -120,7 +134,7 @@ public sealed partial class WalkForwardOrchestrator(
 
             if (store is not null)
             {
-                await store.SavePredictionAsync(prediction, ct).ConfigureAwait(false);
+                await store.SavePredictionAsync(prediction, _runId, adaptation.Label, ct).ConfigureAwait(false);
                 await store.SaveOutcomeAsync(outcome, ct).ConfigureAwait(false);
             }
         }

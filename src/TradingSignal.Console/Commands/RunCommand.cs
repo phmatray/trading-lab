@@ -44,26 +44,46 @@ public sealed partial class RunCommand(
             PeriodsPerYear = IntervalParser.CandlesPerDay(interval) * 365,
             FeeBps = config.Fees.TakerBps,
             EnableShort = false,
+            MaxFewShot = config.LmStudio.MaxFewShot,
         };
+
+        // One run_id per ExecuteAsync invocation, shared across all strategies so the
+        // three strategy slices of this run join on the same run, distinguished only
+        // by their strategy label.
+        string runId = Guid.NewGuid().ToString("N");
+        if (predictionStore is not null)
+        {
+            RunMetadata runMetadata = new(
+                RunId: runId,
+                StartedUtc: DateTime.UtcNow,
+                Symbol: config.Market.Symbol,
+                Interval: config.Market.Interval,
+                HistoryDays: config.Market.HistoryDays,
+                ModelId: config.LmStudio.ModelId,
+                ModelFamily: config.LmStudio.ModelFamily,
+                GitSha: TryReadGitSha(),
+                Notes: null);
+            await predictionStore.SaveRunAsync(runMetadata, ct).ConfigureAwait(false);
+        }
 
         List<(IAdaptationStrategy Strategy, BacktestResult Result)> runs = new();
 
         IAdaptationStrategy llmOnly = new NullAdaptation();
-        BacktestResult llmOnlyResult = await Run(llmOnly, candles, options, ct);
+        BacktestResult llmOnlyResult = await Run(llmOnly, candles, options, runId, ct);
         runs.Add((llmOnly, llmOnlyResult));
 
         if (config.Adaptation.EnableThreshold)
         {
             IAdaptationStrategy thresholdOnly = new ThresholdOptimizer(featureEngine, signalGenerator,
                 loggerFactory.CreateLogger<ThresholdOptimizer>());
-            BacktestResult thresholdResult = await Run(thresholdOnly, candles, options, ct);
+            BacktestResult thresholdResult = await Run(thresholdOnly, candles, options, runId, ct);
             runs.Add((thresholdOnly, thresholdResult));
         }
 
         if (config.Adaptation.EnableMetaModel)
         {
             IAdaptationStrategy composite = new CompositeStrategy(featureEngine, signalGenerator);
-            BacktestResult compositeResult = await Run(composite, candles, options, ct);
+            BacktestResult compositeResult = await Run(composite, candles, options, runId, ct);
             runs.Add((composite, compositeResult));
         }
 
@@ -81,13 +101,45 @@ public sealed partial class RunCommand(
         IAdaptationStrategy strategy,
         IReadOnlyList<Candle> candles,
         BacktestOptions options,
+        string runId,
         CancellationToken ct)
     {
         LogRunningStrategy(logger, strategy.Label);
         WalkForwardOrchestrator orchestrator = new(
             featureEngine, signalGenerator, strategy, predictionStore, options,
-            loggerFactory.CreateLogger<WalkForwardOrchestrator>());
+            loggerFactory.CreateLogger<WalkForwardOrchestrator>(), runId);
         return await orchestrator.RunAsync(candles, config.Market.Symbol, ct).ConfigureAwait(false);
+    }
+
+    // Best-effort code-revision stamp for the run. Returns null on any failure
+    // (no git, detached worktree, process error) — a missing SHA never aborts a run.
+    private static string? TryReadGitSha()
+    {
+        try
+        {
+            using System.Diagnostics.Process? proc = System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo("git", "rev-parse HEAD")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                });
+            if (proc is null) return null;
+            string sha = proc.StandardOutput.ReadToEnd().Trim();
+            proc.WaitForExit(2000);
+            return proc.ExitCode == 0 && sha.Length > 0 ? sha : null;
+        }
+        catch (Exception ex) when (
+            ex is System.ComponentModel.Win32Exception
+                or InvalidOperationException
+                or System.IO.IOException
+                or System.Security.SecurityException
+                or UnauthorizedAccessException)
+        {
+            // git missing / not on PATH / spawn failure — SHA is best-effort.
+            return null;
+        }
     }
 
     private RunReport BuildReport(

@@ -65,6 +65,17 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                     direction_correct INTEGER NOT NULL,
                     FOREIGN KEY(prediction_id) REFERENCES predictions(id)
                 );
+                CREATE TABLE IF NOT EXISTS runs (
+                    run_id       TEXT PRIMARY KEY,
+                    started_utc  TEXT NOT NULL,
+                    symbol       TEXT NOT NULL,
+                    interval     TEXT NOT NULL,
+                    history_days INTEGER NOT NULL,
+                    model_id     TEXT NOT NULL,
+                    model_family TEXT NOT NULL,
+                    git_sha      TEXT NULL,
+                    notes        TEXT NULL
+                );
                 """).ConfigureAwait(false);
 
             // Idempotent migration for pre-existing DBs.
@@ -74,6 +85,26 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
             }
             catch (SqliteException) { /* column already exists — expected on fresh DBs */ }
 
+            // Idempotent migration: run_id / strategy. Legacy rows default to ''
+            // (treated as "legacy/unlabelled" by readers).
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE predictions ADD COLUMN run_id TEXT NOT NULL DEFAULT ''").ConfigureAwait(false);
+            }
+            catch (SqliteException) { /* column already exists — expected on fresh DBs */ }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE predictions ADD COLUMN strategy TEXT NOT NULL DEFAULT ''").ConfigureAwait(false);
+            }
+            catch (SqliteException) { /* column already exists — expected on fresh DBs */ }
+
+            // Composite index for run/strategy/segment slicing. Created after the
+            // ALTERs so the columns exist on migrated DBs.
+            await conn.ExecuteAsync(
+                "CREATE INDEX IF NOT EXISTS ix_predictions_run ON predictions(run_id, strategy, segment)")
+                .ConfigureAwait(false);
+
             _initialized = true;
         }
         finally
@@ -82,14 +113,14 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
         }
     }
 
-    public async Task SavePredictionAsync(Prediction prediction, CancellationToken ct)
+    public async Task SavePredictionAsync(Prediction prediction, string runId, string strategy, CancellationToken ct)
     {
         await using var conn = await OpenAsync(ct).ConfigureAwait(false);
         await conn.ExecuteAsync(
             """
             INSERT OR REPLACE INTO predictions
-              (id, as_of_utc, symbol, segment, action, confidence, reason, reasoning, features_json)
-            VALUES (@Id, @AsOf, @Symbol, @Segment, @Action, @Confidence, @Reason, @Reasoning, @Features);
+              (id, as_of_utc, symbol, segment, action, confidence, reason, reasoning, features_json, run_id, strategy)
+            VALUES (@Id, @AsOf, @Symbol, @Segment, @Action, @Confidence, @Reason, @Reasoning, @Features, @RunId, @Strategy);
             """,
             new
             {
@@ -102,6 +133,31 @@ public sealed class SqlitePredictionStore : IPredictionStore, IAsyncDisposable
                 prediction.Signal.Reason,
                 prediction.Signal.Reasoning,
                 Features = JsonSerializer.Serialize(prediction.Features, FeaturesJson),
+                RunId = runId ?? "",
+                Strategy = strategy ?? "",
+            }).ConfigureAwait(false);
+    }
+
+    public async Task SaveRunAsync(RunMetadata run, CancellationToken ct)
+    {
+        await using var conn = await OpenAsync(ct).ConfigureAwait(false);
+        await conn.ExecuteAsync(
+            """
+            INSERT OR REPLACE INTO runs
+              (run_id, started_utc, symbol, interval, history_days, model_id, model_family, git_sha, notes)
+            VALUES (@RunId, @StartedUtc, @Symbol, @Interval, @HistoryDays, @ModelId, @ModelFamily, @GitSha, @Notes);
+            """,
+            new
+            {
+                run.RunId,
+                StartedUtc = run.StartedUtc.ToString("o", CultureInfo.InvariantCulture),
+                run.Symbol,
+                run.Interval,
+                run.HistoryDays,
+                run.ModelId,
+                run.ModelFamily,
+                run.GitSha,
+                run.Notes,
             }).ConfigureAwait(false);
     }
 
