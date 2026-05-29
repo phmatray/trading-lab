@@ -36,6 +36,23 @@ public static class PromptBuilder
           chosen action will be profitable net of typical transaction fees over the next bar.
         - Prefer HOLD when signals conflict or are weak. Doing nothing is a valid action.
         - "reason" is one short sentence summarizing your conclusion.
+
+        Hard precedence rules — do not override these with rationalizations:
+        - If `ema_cross` is bearish, do NOT emit BUY unless `rsi14` < 30 (oversold reversal
+          setup). A bearish EMA cross is a structural signal; MACD momentum or "price above
+          both EMAs" alone is not enough to reverse it. The reverse holds: if `ema_cross` is
+          bullish, do NOT emit SELL unless `rsi14` > 70.
+        - If `adx14` < 20, the market is ranging — do NOT chase trend-following signals
+          (cap any BUY/SELL confidence at 0.55).
+        - If `volume_ratio` < 0.7, the move lacks conviction — downgrade BUY/SELL toward
+          HOLD or cap confidence at 0.6.
+
+        Fee/horizon context:
+        - The horizon is ONE bar (1 hour at default config). Round-trip transaction cost is
+          ~20 bps (10 bps taker fee × 2 sides).
+        - A BUY or SELL is only profitable if the expected next-bar move in your direction
+          exceeds ~0.4% net of slippage. If the indicators don't support a >0.4% expected
+          move, prefer HOLD even if direction looks right.
         """;
 
     public static string BuildUserMessage(FeatureSet features, IReadOnlyList<FewShotCase> memory, int maxFewShot)
@@ -88,6 +105,8 @@ public static class PromptBuilder
         // wrong premise.
         sb.Append("  ema_cross: ").AppendLine(EmaCross(f));
         sb.Append("  price_vs_emas: ").AppendLine(PriceVsEmas(f));
+        sb.Append("  adx14: ").AppendLine(f.Adx14.ToString("F2", Inv));
+        sb.Append("  volume_ratio: ").AppendLine(f.VolumeRatio.ToString("F3", Inv));
     }
 
     internal static string EmaCross(FeatureSet f) =>

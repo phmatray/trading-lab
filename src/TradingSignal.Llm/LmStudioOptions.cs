@@ -10,7 +10,7 @@ public sealed class LmStudioOptions
 
     public int MaxFewShot { get; set; } = 3;
 
-    public int MaxOutputTokens { get; set; } = 256;
+    public int MaxOutputTokens { get; set; } = 4096;
 
     public string ModelFamily { get; set; } = "instruct";
 

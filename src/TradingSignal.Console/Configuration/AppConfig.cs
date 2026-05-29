@@ -16,7 +16,7 @@ public sealed class LmStudioConfig
     public string ModelId { get; set; } = "qwen2.5-14b-instruct";
     public int TimeoutSeconds { get; set; } = 60;
     public int MaxFewShot { get; set; } = 3;
-    public int MaxOutputTokens { get; set; } = 256;
+    public int MaxOutputTokens { get; set; } = 4096;
     public string ModelFamily { get; set; } = "instruct";
     public string ReasoningEffort { get; set; } = "medium";
 }

@@ -49,4 +49,54 @@ public sealed class PromptBuilderTests
         message.ShouldContain("ema_cross: bearish (EMA20 < EMA50)");
         message.ShouldContain("price_vs_emas: price above both");
     }
+
+    [Fact]
+    public void BuildUserMessage_Includes_Adx14_And_VolumeRatio_Lines()
+    {
+        FeatureSet f = Make(close: 100m, ema20: 99, ema50: 98) with { Adx14 = 27.5, VolumeRatio = 1.875 };
+        string message = PromptBuilder.BuildUserMessage(f, Array.Empty<FewShotCase>(), maxFewShot: 0);
+
+        message.ShouldContain("adx14: 27.50");
+        message.ShouldContain("volume_ratio: 1.875");
+    }
+
+    // --- System prompt: the new hard-precedence rules and fee/horizon context must be present ---
+
+    [Fact]
+    public void SystemPromptReasoning_Includes_Ema_Cross_Precedence_Rule()
+    {
+        PromptBuilder.SystemPromptReasoning.ShouldContain("ema_cross` is bearish");
+        PromptBuilder.SystemPromptReasoning.ShouldContain("do NOT emit BUY unless `rsi14` < 30");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Includes_Adx_Ranging_Rule()
+    {
+        PromptBuilder.SystemPromptReasoning.ShouldContain("adx14` < 20");
+        PromptBuilder.SystemPromptReasoning.ShouldContain("cap any BUY/SELL confidence at 0.55");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Includes_Volume_Conviction_Rule()
+    {
+        PromptBuilder.SystemPromptReasoning.ShouldContain("volume_ratio` < 0.7");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Includes_Fee_Horizon_Context()
+    {
+        PromptBuilder.SystemPromptReasoning.ShouldContain("20 bps");
+        PromptBuilder.SystemPromptReasoning.ShouldContain("0.4%");
+    }
+
+    [Fact]
+    public void SystemPromptInstruct_Is_Unchanged_By_New_Rules()
+    {
+        // The instruct path (Gemma / Qwen2.5-instruct) should not see the new precedence
+        // rules — those are deliberately reasoning-strategy only, where the model has the
+        // tokens to apply them.
+        PromptBuilder.SystemPromptInstruct.ShouldNotContain("ema_cross");
+        PromptBuilder.SystemPromptInstruct.ShouldNotContain("adx14");
+        PromptBuilder.SystemPromptInstruct.ShouldNotContain("volume_ratio");
+    }
 }
