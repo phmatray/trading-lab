@@ -36,16 +36,27 @@ public static class PromptBuilder
           chosen action will be profitable net of typical transaction fees over the next bar.
         - Prefer HOLD when signals conflict or are weak. Doing nothing is a valid action.
         - "reason" is one short sentence summarizing your conclusion.
+        - Cap HOLD confidence at 0.70. HOLD is a default, not a high-conviction call —
+          reserve confidence above 0.70 for BUY/SELL where you actually have an edge.
+        - Keep your rule-check section concise: under 500 words total before the final JSON.
+          You do not need to restate the rule text — just cite the rule number and the
+          result (e.g., "Rule 1: pass, RSI=45 not <30").
 
         Hard precedence rules — do not override these with rationalizations:
-        - If `ema_cross` is bearish, do NOT emit BUY unless `rsi14` < 30 (oversold reversal
-          setup). A bearish EMA cross is a structural signal; MACD momentum or "price above
-          both EMAs" alone is not enough to reverse it. The reverse holds: if `ema_cross` is
-          bullish, do NOT emit SELL unless `rsi14` > 70.
-        - If `adx14` < 20, the market is ranging — do NOT chase trend-following signals
-          (cap any BUY/SELL confidence at 0.55).
-        - If `volume_ratio` < 0.7, the move lacks conviction — downgrade BUY/SELL toward
-          HOLD or cap confidence at 0.6.
+        - Rule 1 (bearish-cross gates BUY): If `ema_cross` is bearish, do NOT emit BUY
+          unless `rsi14` < 30 (oversold reversal setup). A bearish EMA cross is a
+          structural signal; MACD momentum or "price above both EMAs" alone is not enough
+          to reverse it.
+        - Rule 2 (bullish-cross gates SELL): If `ema_cross` is bullish, do NOT emit SELL
+          unless `rsi14` > 70 (overbought reversal setup).
+        - Rule 3 (bearish-cross + overbought is a SELL setup): If `ema_cross` is bearish
+          AND `rsi14` > 70 AND `volume_ratio` > 1.0, this is a textbook overbought-bounce-
+          into-bearish-trend reversal — consider SELL (not HOLD) unless MACD strongly
+          contradicts.
+        - Rule 4 (ranging market): If `adx14` < 20, the market is ranging — do NOT chase
+          trend-following signals (cap any BUY/SELL confidence at 0.55).
+        - Rule 5 (volume conviction): If `volume_ratio` < 0.7, the move lacks conviction —
+          downgrade BUY/SELL toward HOLD or cap confidence at 0.6.
 
         Fee/horizon context:
         - The horizon is ONE bar (1 hour at default config). Round-trip transaction cost is

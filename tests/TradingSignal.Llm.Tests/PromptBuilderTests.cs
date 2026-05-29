@@ -65,8 +65,12 @@ public sealed class PromptBuilderTests
     [Fact]
     public void SystemPromptReasoning_Includes_Ema_Cross_Precedence_Rule()
     {
-        PromptBuilder.SystemPromptReasoning.ShouldContain("ema_cross` is bearish");
-        PromptBuilder.SystemPromptReasoning.ShouldContain("do NOT emit BUY unless `rsi14` < 30");
+        // The bearish-cross BUY gate. Phrase the assertion to be tolerant of soft line
+        // breaks in the prompt body.
+        string prompt = PromptBuilder.SystemPromptReasoning;
+        prompt.ShouldContain("ema_cross` is bearish");
+        prompt.ShouldContain("do NOT emit BUY");
+        prompt.ShouldContain("rsi14` < 30");
     }
 
     [Fact]
@@ -87,6 +91,32 @@ public sealed class PromptBuilderTests
     {
         PromptBuilder.SystemPromptReasoning.ShouldContain("20 bps");
         PromptBuilder.SystemPromptReasoning.ShouldContain("0.4%");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Includes_Bearish_Cross_Plus_Overbought_Sell_Trigger()
+    {
+        // Catches the T20 missed-SELL case: bearish cross + RSI>70 + high volume should
+        // be a SELL candidate, not HOLD by default. Line-break-tolerant assertions.
+        string prompt = PromptBuilder.SystemPromptReasoning;
+        prompt.ShouldContain("Rule 3");
+        prompt.ShouldContain("`rsi14` > 70");
+        prompt.ShouldContain("`volume_ratio` > 1.0");
+        prompt.ShouldContain("consider SELL");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Caps_Hold_Confidence_At_0_70()
+    {
+        PromptBuilder.SystemPromptReasoning.ShouldContain("Cap HOLD confidence at 0.70");
+    }
+
+    [Fact]
+    public void SystemPromptReasoning_Asks_For_Concise_Rule_Section()
+    {
+        // Trace-compression directive to keep the model from burning the 4096-token budget
+        // on verbose rule restatement.
+        PromptBuilder.SystemPromptReasoning.ShouldContain("under 500 words");
     }
 
     [Fact]
