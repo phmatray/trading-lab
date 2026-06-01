@@ -167,8 +167,11 @@ def evaluate_row(row):
 
     is_trade = action in TRADE_ACTIONS
 
-    # HOLD-cap breach
-    if action == "HOLD" and conf is not None and conf > 0.70:
+    # HOLD-cap breach — only meaningful for RAW LLM output. Adaptation overlays
+    # (labels starting with "+") relabel BUY/SELL -> HOLD while keeping the pre-gate
+    # signal confidence, so a high-confidence HOLD there is expected, not a violation.
+    strat = row.get("strategy") or ""
+    if action == "HOLD" and conf is not None and conf > 0.70 and not strat.startswith("+"):
         fired.append("hold_cap")
 
     # Rule 1: bearish cross but BUY while RSI not deeply oversold
