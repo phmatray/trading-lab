@@ -76,6 +76,26 @@ public sealed class MetaModelStrategyTests
     }
 
     [Fact]
+    public void Single_Class_Window_Trains_Without_Throwing()
+    {
+        // A HOLD-heavy / unprofitable adaptation window yields an all-negative label set.
+        // AUC is undefined with no positive class; training must degrade gracefully rather
+        // than throw and abort the whole walk-forward run (regression: smoke 2026-05-29).
+        List<AdaptationSample> samples = Enumerable.Range(0, 30)
+            .Select(_ => Synthetic.Sample(0.6, TradeAction.Buy, -0.01))
+            .ToList();
+
+        MetaModelStrategy sut = new(new StubFeatureEngine(), new StubGenerator());
+
+        Should.NotThrow(() => sut.TrainOnSamples(samples));
+        sut.LastTrainAccuracy.ShouldBeInRange(0d, 1d);
+
+        // Model is active; an all-unprofitable window can only gate toward HOLD.
+        FinalDecision d = sut.Apply(new RawSignal(TradeAction.Buy, 0.7, "x"), Synthetic.Features());
+        d.Action.ShouldBeOneOf(TradeAction.Buy, TradeAction.Hold);
+    }
+
+    [Fact]
     public void Hold_Is_Always_Passed_Through_Unchanged()
     {
         MetaModelStrategy sut = new(new StubFeatureEngine(), new StubGenerator());

@@ -38,9 +38,9 @@ public static class PromptBuilder
         - "reason" is one short sentence summarizing your conclusion.
         - Cap HOLD confidence at 0.70. HOLD is a default, not a high-conviction call —
           reserve confidence above 0.70 for BUY/SELL where you actually have an edge.
-        - Keep your rule-check section concise: under 500 words total before the final JSON.
-          You do not need to restate the rule text — just cite the rule number and the
-          result (e.g., "Rule 1: pass, RSI=45 not <30").
+        - Be terse: keep your rule-check section under 300 words total before the final JSON.
+          Do NOT restate the rule text and do NOT narrate — cite the rule number and the
+          result only (e.g., "Rule 1: pass, RSI=45 not <30").
 
         Hard precedence rules — do not override these with rationalizations:
         - Rule 1 (bearish-cross gates BUY): If `ema_cross` is bearish, do NOT emit BUY

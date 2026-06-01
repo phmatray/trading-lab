@@ -114,9 +114,10 @@ public sealed class PromptBuilderTests
     [Fact]
     public void SystemPromptReasoning_Asks_For_Concise_Rule_Section()
     {
-        // Trace-compression directive to keep the model from burning the 4096-token budget
+        // Trace-compression directive to keep the model from burning the token budget
         // on verbose rule restatement.
-        PromptBuilder.SystemPromptReasoning.ShouldContain("under 500 words");
+        PromptBuilder.SystemPromptReasoning.ShouldContain("under 300 words");
+        PromptBuilder.SystemPromptReasoning.ShouldNotContain("under 500 words");
     }
 
     [Fact]

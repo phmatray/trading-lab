@@ -101,6 +101,27 @@ public sealed class ReasoningCallStrategyTests
     }
 
     [Fact]
+    public async Task Recovers_Signal_From_Reasoning_When_Content_Empty()
+    {
+        // qwen3.6 frequently leaves `content` empty and emits the JSON (often a draft
+        // followed by self-correction) inside the reasoning channel. Recover the LAST
+        // valid object from the trace on the first call — no stricter retry needed.
+        // Regression: smoke 2026-05-29 saw 52% empty-content parse failures.
+        var (sut, handler) = Build();
+        handler.EnqueueJson(OkBody(content: "", reasoning:
+            "Rule check... draft {\"action\":\"BUY\",\"confidence\":0.3,\"reason\":\"early\"} " +
+            "reconsider {\"action\":\"HOLD\",\"confidence\":0.65,\"reason\":\"low volume\"} " +
+            "Self-correction: ensure JSON is on the final line, with no"));
+
+        LlmCallOutcome outcome = await sut.GenerateAsync(Sys, User, CancellationToken.None);
+
+        outcome.Signal.Action.ShouldBe(TradeAction.Hold);
+        outcome.Signal.Confidence.ShouldBe(0.65);
+        outcome.Signal.Reason.ShouldBe("low volume");
+        handler.ReceivedRequests.Count.ShouldBe(1);
+    }
+
+    [Fact]
     public async Task Empty_Content_With_Non_Empty_Reasoning_Returns_ParseFailure_With_Trace_Preserved()
     {
         var (sut, handler) = Build();
