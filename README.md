@@ -9,6 +9,11 @@ backtest** with two stacked adaptation mechanisms:
 
 The LLM weights are frozen — all "learning" happens in the layers around it.
 
+> **⚠️ Project status: concluded (paused).** A rigorous 2-year walk-forward backtest found the
+> LLM-on-technical-indicators approach has **no demonstrable directional edge** (47.3% accuracy at
+> N=497, uncalibrated confidence). See **[docs/RESULTS-AND-FINDINGS.md](docs/RESULTS-AND-FINDINGS.md)**
+> for the full results, the supporting literature, and where a real edge would more plausibly be found.
+
 > This is a **simulation / recommendation** tool. It never places real orders and uses only
 > public market data (Binance klines, no API key). A favorable walk-forward result is necessary
 > but not sufficient to risk real capital — forward paper-trading would be the next gate.
