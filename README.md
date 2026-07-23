@@ -41,6 +41,17 @@ Personal Blazor Server dashboard tracking accumulation of **CON3.L** (Leverage S
 > **Visual reference:** [`docs/superpowers/specs/2026-05-06-tradystrat-vault-mockup.html`](docs/superpowers/specs/2026-05-06-tradystrat-vault-mockup.html)
 > **Implementation plan:** [`docs/superpowers/plans/2026-05-06-tradystrat-dashboard.md`](docs/superpowers/plans/2026-05-06-tradystrat-dashboard.md)
 
+## Features
+
+- **The Vault dashboard**: A Blazor Server page (masthead, hero capital, growth chart, positions table, markets rail) showing live progress toward the €1,000,000 goal for CON3.L, with COIN and BTC-USD as context tickers.
+- **Daily price & FX feed**: `PriceFeedHostedService` warms ~2 years of daily bars per ticker from Yahoo Finance plus EUR/USD FX at startup, served through `DailyPriceCache`/`DailyFxCache` decorators.
+- **Technical-analysis zones**: Bollinger Bands, RSI, SMA200 and Ichimoku indicators, each an `IZoneRule` strategy composed by `ZoneClassifier` into a single zone verdict.
+- **AI-generated daily suggestion**: `AiSnapshotService` builds a snapshot (goal, markets, portfolio, recent trades/suggestions) and calls Claude via `IChatClient` for a cited buy/hold/sell call, with day-over-day call diffing (`CallDiffBuilder`).
+- **Trade ledger & portfolio tracking**: Manual trade entry plus bulk CSV import (`CsvImportService`), with FIFO lot accounting driving the daily growth series toward the goal.
+- **Relevant prediction-market context**: `PolymarketRelevance`/`PolymarketFilter` surface only Polymarket questions tied to BTC/ETH price targets, Coinbase corporate events, ETF approvals or Fed rate decisions.
+- **Suggestion backfill & replay**: `SuggestionBackfillCoordinator` fills in missed days and `ReplaySuggestionsUseCase` replays/reports past suggestion runs for auditing.
+- **Read-only MCP server**: `TradyStrat.Cli mcp` exposes six stdio tools (`list_instruments`, `get_dashboard`, `query_suggestions`, `query_prices`, `get_portfolio`, `get_replay_report`) for Claude Desktop/Code.
+
 ## Quick start (local)
 
 Requirements:
