@@ -15,6 +15,28 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingStrat)](https://github.com/phmatray/TradingStrat/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [🏗️ Architecture Overview](#-architecture-overview)
+- [🎯 Key Features](#-key-features)
+- [🚀 Quick Start](#-quick-start)
+- [🧭 New User Workflow](#-new-user-workflow)
+- [📁 Project Structure](#-project-structure)
+- [🧪 Testing](#-testing)
+- [🏛️ Architectural Principles](#-architectural-principles)
+- [🔧 Development](#-development)
+- [📊 Performance Metrics](#-performance-metrics)
+- [🔍 Technical Details](#-technical-details)
+- [📚 Migration from Monolith](#-migration-from-monolith)
+- [🤝 Contributing](#-contributing)
+- [📝 License](#-license)
+- [🎓 Learning Resources](#-learning-resources)
+
+<!-- portfolio-toc:end -->
+
+
 
 A sophisticated trading strategy backtesting and analysis system built with **Hexagonal Architecture** (Ports & Adapters pattern), featuring ML-powered predictions, comprehensive technical indicators, and full dependency injection.
 
