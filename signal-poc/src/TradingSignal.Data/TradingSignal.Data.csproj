@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Binance.Net" Version="12.13.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,25 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/TradingSignal.Adaptation/TradingSignal.Adaptation.csproj" />
+    <Project Path="src/TradingSignal.Backtest/TradingSignal.Backtest.csproj" />
+    <Project Path="src/TradingSignal.Console/TradingSignal.Console.csproj" />
+    <Project Path="src/TradingSignal.Core/TradingSignal.Core.csproj" />
+    <Project Path="src/TradingSignal.Data/TradingSignal.Data.csproj" />
+    <Project Path="src/TradingSignal.Evaluation/TradingSignal.Evaluation.csproj" />
+    <Project Path="src/TradingSignal.Indicators/TradingSignal.Indicators.csproj" />
+    <Project Path="src/TradingSignal.Llm/TradingSignal.Llm.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TradingSignal.Adaptation.Tests/TradingSignal.Adaptation.Tests.csproj" />
+    <Project Path="tests/TradingSignal.Backtest.Tests/TradingSignal.Backtest.Tests.csproj" />
+    <Project Path="tests/TradingSignal.Data.Tests/TradingSignal.Data.Tests.csproj" />
+    <Project Path="tests/TradingSignal.Evaluation.Tests/TradingSignal.Evaluation.Tests.csproj" />
+    <Project Path="tests/TradingSignal.Indicators.Tests/TradingSignal.Indicators.Tests.csproj" />
+    <Project Path="tests/TradingSignal.Llm.Tests/TradingSignal.Llm.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,16 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <!--
+      Test-project relaxations on top of the solution-wide analyzer set:
+        CA1707: tests follow the xUnit `Method_Should_Behavior` underscore convention.
+        CA1861: inline arrays in `[InlineData]` / asserts are clearer than hoisted fields.
+        CA2000: ownership of disposables in test fixtures is governed by xUnit lifecycle.
+        CA1031: test setup/teardown commonly swallows broad exceptions to keep tests independent.
+        CA1812: test fixtures, JSON DTOs, and `[Theory]` data classes are reflectively instantiated.
+        CA1859: tests are not perf-critical; prefer interface types for readability.
+        CA5394: System.Random in synthetic test fixtures is intentional, not a security signal.
+    -->
+    <NoWarn>$(NoWarn);CA1707;CA1861;CA2000;CA1031;CA1812;CA1859;CA5394</NoWarn>
+  </PropertyGroup>
+</Project>

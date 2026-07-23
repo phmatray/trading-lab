@@ -1,0 +1,232 @@
+![TradingSignalPoc banner](.github/banner.png)
+
+# TradingSignalPoc
+
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - TradingSignalPoc](https://img.shields.io/static/v1?label=phmatray&message=TradingSignalPoc&color=blue&logo=github)](https://github.com/phmatray/TradingSignalPoc)
+![Top language](https://img.shields.io/github/languages/top/phmatray/TradingSignalPoc)
+[![Stars](https://img.shields.io/github/stars/phmatray/TradingSignalPoc?style=social)](https://github.com/phmatray/TradingSignalPoc/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/TradingSignalPoc?style=social)](https://github.com/phmatray/TradingSignalPoc/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/commits)
+<!-- portfolio-badges:end -->
+
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Non-negotiable principles](#non-negotiable-principles)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [What the report shows](#what-the-report-shows)
+- [Solution layout](#solution-layout)
+- [Configuration](#configuration)
+- [Tests](#tests)
+- [Out of scope (not built)](#out-of-scope-not-built)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [License](#license)
+
+<!-- portfolio-toc:end -->
+
+<!-- portfolio-features:start -->
+
+## Features
+
+- **BUY/SELL/HOLD signals** — generates trading signals for a single crypto asset from OHLC candles
+- **Binance market data** — fetches klines via a pluggable `IMarketDataSource` with CSV caching
+- **Feature engineering** — a `FeatureEngine` turns raw candles into indicator feature sets
+- **LLM call strategy** — pluggable `ILlmCallStrategy` with few-shot memory and a response cache
+- **Deterministic gate** — a fixed-threshold gate and deterministic signal generator for reproducible runs
+- **Backtesting** — backtest options and buy-and-hold metrics to evaluate a strategy
+- **Clean architecture** — abstractions/interfaces throughout (`src/`), with a matching test suite
+
+<!-- portfolio-features:end -->
+
+
+
+
+A .NET 10 proof-of-concept that generates BUY/SELL/HOLD signals for a single crypto asset
+using a locally-hosted LLM (LM Studio), and validates those signals through a **walk-forward
+backtest** with two stacked adaptation mechanisms:
+
+1. A confidence-threshold filter (τ* picked per segment on the adaptation window).
+2. An ML.NET `LbfgsLogisticRegression` meta-model that predicts P(signal is profitable net of fees).
+
+The LLM weights are frozen — all "learning" happens in the layers around it.
+
+> **⚠️ Project status: concluded (paused).** A rigorous 2-year walk-forward backtest found the
+> LLM-on-technical-indicators approach has **no demonstrable directional edge** (47.3% accuracy at
+> N=497, uncalibrated confidence). See **[docs/RESULTS-AND-FINDINGS.md](docs/RESULTS-AND-FINDINGS.md)**
+> for the full results, the supporting literature, and where a real edge would more plausibly be found.
+
+> This is a **simulation / recommendation** tool. It never places real orders and uses only
+> public market data (Binance klines, no API key). A favorable walk-forward result is necessary
+> but not sufficient to risk real capital — forward paper-trading would be the next gate.
+
+## Non-negotiable principles
+
+1. **No look-ahead bias.** At candle `i`, the system only sees `candles[0..i]`. Two regression
+   tests guard this: a feature-level invariant in `Indicators.Tests` and an orchestrator-level
+   test in `Backtest.Tests` (whole-list + per-index truncation variants).
+2. **Adaptation and evaluation use disjoint data.** Walk-forward windows are configured so each
+   segment's test window is OOS to its fit window.
+3. **Transaction costs are always applied.** Default 10 bps taker fee.
+4. **Predictions are logged before outcomes are known.** Two-phase write to SQLite.
+5. **The baseline to beat is buy-and-hold over the identical period.** Always reported.
+
+## Prerequisites
+
+- .NET 10 SDK (the build targets `net10.0`; spec originally said `net8.0` but `Directory.Build.props` was updated)
+- [LM Studio](https://lmstudio.ai/) running locally on `http://localhost:1234/v1` with a 14B-class
+  instruct model loaded (default expected: `qwen2.5-14b-instruct`, configurable in `appsettings.json`)
+
+## Quick start
+
+```bash
+# 1. Cache 2 years of BTCUSDT 1h data (idempotent — second run is a cache hit)
+dotnet run --project src/TradingSignal.Console -- ingest
+
+# 2. Run the full walk-forward backtest against LM Studio
+#    (Long-running — 17k candles × multiple strategies. The LLM response cache makes
+#    re-runs fast.)
+dotnet run --project src/TradingSignal.Console -- run
+
+# 3. Reprint the latest report
+dotnet run --project src/TradingSignal.Console -- report
+```
+
+Reports land in `./runs/report.json`; the prediction store in `./runs/predictions.db`;
+the LLM response cache in `./runs/llm-cache.db`; market data in `./data-cache/`.
+
+## What the report shows
+
+```
+strategy                          trades   accuracy     brier    sharpe     max DD     cum ret
+------------------------------------------------------------------------------------------
+buy-and-hold                           -          -         -    +0.420     -25.31%   +120.50%
+llm-only                              98     54.10%     0.241   +0.180     -32.10%     +5.20%
++threshold(τ*=0.65)                   42     58.30%     0.205   +0.310     -18.42%    +12.71%
++threshold+meta(τ*=0.65)              28     62.00%     0.189   +0.450     -11.20%    +18.34%
+```
+
+Each strategy is also broken out per walk-forward segment with the chosen τ\* and in-sample
+meta-model accuracy, so you can see how those drift over time.
+
+## Solution layout
+
+```
+src/
+  TradingSignal.Core            domain models + abstractions (no deps)
+  TradingSignal.Data            Binance ingestion + disk cache + validation
+  TradingSignal.Indicators      Skender wrapper → FeatureSet (slice-before-compute)
+  TradingSignal.Llm             LM Studio chat client + JSON-schema structured output + parser + cache
+  TradingSignal.Evaluation      prediction store + outcome computer + metrics
+  TradingSignal.Adaptation      threshold optimizer + ML.NET meta-model + composite
+  TradingSignal.Backtest        walk-forward orchestrator + long/flat portfolio sim
+  TradingSignal.Console         CLI: ingest / run / report
+tests/
+  TradingSignal.Indicators.Tests
+  TradingSignal.Data.Tests
+  TradingSignal.Llm.Tests
+  TradingSignal.Evaluation.Tests
+  TradingSignal.Backtest.Tests
+  TradingSignal.Adaptation.Tests
+```
+
+Dependencies flow Core → everything; Backtest depends on Data/Indicators/Llm/Evaluation/Adaptation;
+Console depends only on Core + Backtest.
+
+## Configuration
+
+`src/TradingSignal.Console/appsettings.json` (copied to output on build) controls:
+
+- `LmStudio` — endpoint, model id, timeouts, max few-shot, max output tokens. Two extra knobs control which call strategy is used:
+  - `ModelFamily`: `"instruct"` (default — Gemma, Qwen2.5-instruct, etc.) or `"reasoning"` (Qwen3 thinking models like `qwen/qwen3.6-35b-a3b`).
+  - `ReasoningEffort`: `"none" | "low" | "medium" | "high"` (default `"medium"`). Only honored by the reasoning strategy. Included in the cache key, so changing the knob between runs automatically invalidates stale entries.
+- `Market` — symbol, interval (`1h`, `30m`, `1d`, ...), history days
+- `Fees` — taker bps
+- `WalkForward` — adaptation/test/step days, evaluation horizon (candles)
+- `Adaptation` — toggle threshold and meta-model layers independently
+- `Output` — paths for `data-cache/`, `predictions.db`, `llm-cache.db`, `report.json`
+
+Environment overrides via `TSIG_` prefix (e.g. `TSIG_LmStudio__ModelId=...`).
+
+### Reasoning models
+
+When switching `ModelFamily` to `"reasoning"`, bump these two values to give the model room to think:
+
+- `MaxOutputTokens`: from 256 to **2048** (a single reasoning response averages ~1000 tokens).
+- `TimeoutSeconds`: from 60 to **120** (per-call latency runs 1–25 s at `medium` effort and skews higher at `high`).
+
+The chain-of-thought trace is persisted to a new `reasoning` column on both `predictions.db` and `llm-cache.db`. Pre-existing DBs are migrated automatically on first open (an idempotent `ALTER TABLE`), so you can switch between families without wiping `runs/`. **Note:** the cache key format also changed in this version (it now includes `ReasoningEffort` and the strategy-specific system prompt), so existing `llm-cache.db` entries from a prior version will miss on the first post-upgrade run — re-runs will repopulate the cache automatically; no user action required.
+
+## Tests
+
+```bash
+dotnet test TradingSignalPoc.slnx
+```
+
+85 tests total. The two highest-value tests are the look-ahead regression guards:
+
+- `LookAheadInvariantTests.Compute_At_Index_Is_Identical_Whether_Future_Candles_Are_Present_Or_Truncated`
+  — `FeatureEngine.Compute` must return the same `FeatureSet` whether the candle list ends at
+  `i` or extends past it.
+- `LookAheadRegressionTests.First_Segment_Decisions_Identical_With_Or_Without_Future_Candles`
+  and `Per_Index_Truncation_Yields_Same_Decisions_As_Full_Candle_List` — the orchestrator
+  itself never reads beyond the decision index.
+
+If either ever fails, the backtest's verdict is invalid.
+
+## Out of scope (not built)
+
+- Reinforcement learning, LLM fine-tuning, or weight training of any kind.
+- Live or paper order execution against an exchange.
+- Multi-asset portfolios, leverage, derivatives.
+- Web UI / dashboard — the JSON report is enough for charting later.
+
+---
+
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **C#**
+- Microsoft.Extensions.Logging.Abstractions
+- Microsoft.ML
+- Microsoft.Extensions.Configuration.Json
+- Microsoft.Extensions.Hosting
+- Serilog.Extensions.Hosting
+- Serilog.Settings.Configuration
+- Serilog.Sinks.Console
+- Binance.Net
+
+<!-- portfolio-techstack:end -->
+
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/TradingSignalPoc/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
+<!-- portfolio-sections:start -->
+
+## Contributing
+
+Contributions are welcome. Open an issue first to discuss any significant change.
+
+1. Fork the repository and create your branch (`git checkout -b feat/my-feature`)
+2. Commit your changes (`git commit -m 'feat: ...'`)
+3. Push the branch and open a Pull Request
+
+## License
+
+No license has been declared for this repository yet. Until one is added, default copyright applies — see [choosealicense.com](https://choosealicense.com/) if you intend to open it up.
+
+<!-- portfolio-sections:end -->

@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Skender.Stock.Indicators" Version="2.7.1" />
+  </ItemGroup>
+</Project>
