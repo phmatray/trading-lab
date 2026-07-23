@@ -192,6 +192,14 @@ If either ever fails, the backtest's verdict is invalid.
 
 <!-- portfolio-techstack:end -->
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/TradingSignalPoc/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 <!-- portfolio-sections:start -->
 
 ## Contributing
