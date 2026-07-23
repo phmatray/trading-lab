@@ -1,3 +1,5 @@
+![TradingViewBlazorApp banner](.github/banner.png)
+
 # TradingViewBlazorApp
 
 > Embed TradingView charting widgets in a Blazor Server application.
