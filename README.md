@@ -35,6 +35,16 @@ cd botzilla
 dotnet run
 ```
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **net46**
+- CompareNETObjects
+- Newtonsoft.Json
+
+<!-- portfolio-techstack:end -->
+
 ## License
 MIT
 
