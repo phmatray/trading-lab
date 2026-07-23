@@ -2,6 +2,20 @@
 
 # TradingStrat - Hexagonal Architecture Trading System
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - TradingStrat](https://img.shields.io/static/v1?label=phmatray&message=TradingStrat&color=blue&logo=github)](https://github.com/phmatray/TradingStrat)
+![Top language](https://img.shields.io/github/languages/top/phmatray/TradingStrat)
+[![Stars](https://img.shields.io/github/stars/phmatray/TradingStrat?style=social)](https://github.com/phmatray/TradingStrat/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/TradingStrat?style=social)](https://github.com/phmatray/TradingStrat/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/TradingStrat)](https://github.com/phmatray/TradingStrat/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/TradingStrat)](https://github.com/phmatray/TradingStrat/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingStrat)](https://github.com/phmatray/TradingStrat/commits)
+<!-- portfolio-badges:end -->
+
+
 A sophisticated trading strategy backtesting and analysis system built with **Hexagonal Architecture** (Ports & Adapters pattern), featuring ML-powered predictions, comprehensive technical indicators, and full dependency injection.
 
 ## 🏗️ Architecture Overview
