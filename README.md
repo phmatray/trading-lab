@@ -2,6 +2,27 @@
 
 # TradingBot
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Database Schema](#database-schema)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [Risk Warning](#risk-warning)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Support](#support)
+
+<!-- portfolio-toc:end -->
+
+
 A powerful, extensible algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. Includes a modern web dashboard built with Blazor Server using Domain-Driven Design patterns.
 
 [![CI/CD](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml/badge.svg)](https://github.com/phmatray/TradingBot/actions/workflows/ci.yml)
