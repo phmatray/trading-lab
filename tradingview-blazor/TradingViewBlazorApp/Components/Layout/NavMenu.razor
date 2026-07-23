@@ -1,0 +1,42 @@
+﻿@rendermode InteractiveServer
+
+<div class="navmenu">
+    <input type="checkbox" id="navmenu-toggle" />
+    <nav class="sitenav" aria-labelledby="main-menu" onclick="document.getElementById('navmenu-toggle').click();">
+        <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="@Expanded">
+            <FluentNavLink 
+                Icon="@(new Icons.Regular.Size20.Home())"
+                Href="/"
+                Match="NavLinkMatch.All">
+                Welcome
+            </FluentNavLink>
+            
+            <FluentNavLink Href="/advanced-real-time-chart">Advanced Real-Time Chart</FluentNavLink>
+            <FluentNavLink Href="/technical-analysis">Technical Analysis</FluentNavLink>
+            <FluentNavLink Href="/market-overview">Market Overview</FluentNavLink>
+            <FluentNavLink Href="/market-data">Market Data</FluentNavLink>
+            <FluentNavLink Href="/stock-market">Stock Market</FluentNavLink>
+            <FluentNavLink Href="/economic-calendar">Economic Calendar</FluentNavLink>
+            <FluentNavLink Href="/ticker">Ticker</FluentNavLink>
+            <FluentNavLink Href="/ticker-tape">Ticker Tape</FluentNavLink>
+            <FluentNavLink Href="/single-ticker">Single Ticker</FluentNavLink>
+            <FluentNavLink Href="/mini-chart">Mini Chart</FluentNavLink>
+            <FluentNavLink Href="/symbol-overview">Symbol Overview</FluentNavLink>
+            <FluentNavLink Href="/symbol-info">Symbol Info</FluentNavLink>
+            <FluentNavLink Href="/forex-cross-rates">Forex Cross Rates</FluentNavLink>
+            <FluentNavLink Href="/forex-heat-map">Forex Heat Map</FluentNavLink>
+            <FluentNavLink Href="/screener">Screener</FluentNavLink>
+            <FluentNavLink Href="/cryptocurrency-market">Cryptocurrency Market</FluentNavLink>
+            <FluentNavLink Href="/fundamental-data">Fundamental Data</FluentNavLink>
+            <FluentNavLink Href="/company-profile">Company Profile</FluentNavLink>
+            <FluentNavLink Href="/timeline">Timeline</FluentNavLink>
+            <FluentNavLink Href="/stock-heatmap">Stock Heatmap</FluentNavLink>
+            <FluentNavLink Href="/crypto-coins-heatmap">Crypto Coins Heatmap</FluentNavLink>
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code
+{
+    bool Expanded { get; set; } = true;
+}

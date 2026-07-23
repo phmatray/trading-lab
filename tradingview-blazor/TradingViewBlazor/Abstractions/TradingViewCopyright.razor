@@ -1,0 +1,19 @@
+@if (ShowCopyright)
+{
+  <div class="tradingview-widget-copyright">
+    <a href="@Url" rel="noopener nofollow" target="_blank">
+      <span class="blue-text">
+        @CopyrightText
+      </span>
+    </a>
+  </div>
+}
+
+@code
+{
+  [Parameter] public bool ShowCopyright { get; set; } = true;
+  
+  [Parameter] public string CopyrightText { get; set; } = "Track all markets on TradingView";
+  
+  [Parameter] public string Url { get; set; } = "https://www.tradingview.com/";
+}

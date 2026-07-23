@@ -1,0 +1,140 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<FluentGrid>
+    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <Ticker Settings="@_settingsTicker"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <StockHeatmap Settings="@_settingsStockHeatmap"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <CryptoCoinsHeatmap Settings="@_settingsCryptoCoinsHeatmap"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <h1>NASDAQ:MSFT</h1>
+    </FluentGridItem>
+    <FluentGridItem xs="12" md="6">
+        <ErrorBoundary>
+            <FundamentalData Settings="@_settingsFundamentalData"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12" md="6">
+        <ErrorBoundary>
+            <MiniChart Settings="@_settingsMiniChart"/>
+        </ErrorBoundary>
+        <ErrorBoundary>
+            <TechnicalAnalysis Settings="@_settingsTechnicalAnalysis" style="margin-top: 24px;"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <ErrorBoundary>
+            <AdvancedRealTimeChart Settings="@_settingsAdvancedRealTimeChart"/>
+        </ErrorBoundary>
+    </FluentGridItem>
+</FluentGrid>
+
+<EditForm Model="@_settingsAdvancedRealTimeChart">
+    <div class="row">
+        <div class="col">
+            <label>Width</label>
+            <InputText @bind-Value="@_settingsAdvancedRealTimeChart!.Width" class="form-control"/>
+        </div>
+        <div class="col">
+            <label>Height</label>
+            <InputText @bind-Value="@_settingsAdvancedRealTimeChart.Height" class="form-control"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label>Theme</label>
+                <InputSelect @bind-Value="@_settingsAdvancedRealTimeChart.Theme" class="form-control">
+                    <option value="TradingViewTheme.Light">Light</option>
+                    <option value="TradingViewTheme.Dark">Dark</option>
+                </InputSelect>
+            </div>
+        </div>
+        <div class="col">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Default Interval</label>
+        <InputText @bind-Value="@_settingsAdvancedRealTimeChart.Interval" class="form-control"/>
+    </div>
+    @* <div class="form-group"> *@
+    @*     <label> *@
+    @*         Timezone *@
+    @*         <InputSelect @bind-Value="@settings.Timezone" class="form-control"> *@
+    @*             <option value="TimeZoneInfo.Utc">UTC</option> *@
+    @*             <option value="TimeZoneInfo.Local">Local</option> *@
+    @*         </InputSelect> *@
+    @*     </label> *@
+    @* </div> *@
+    <div class="form-group">
+        <label>
+            Locale:
+            <InputText @bind-Value="@_settingsAdvancedRealTimeChart.Locale" class="form-control"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Enable Publishing:
+            <InputCheckbox @bind-Value="@_settingsAdvancedRealTimeChart.EnablePublishing"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Allow Symbol Change:
+            <InputCheckbox @bind-Value="@_settingsAdvancedRealTimeChart.AllowSymbolChange"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            With Date Ranges:
+            <InputCheckbox @bind-Value="@_settingsAdvancedRealTimeChart.WithDateRanges"/>
+        </label>
+    </div>
+    <div class="form-group">
+        <label>
+            Hide Side Toolbar:
+            <InputCheckbox @bind-Value="@_settingsAdvancedRealTimeChart.HideSideToolbar"/>
+        </label>
+    </div>
+    <FluentButton Appearance="@Appearance.Accent" Type="ButtonType.Reset">Reset</FluentButton>
+    <FluentButton Appearance="@Appearance.Accent" Type="ButtonType.Submit">Apply</FluentButton>
+</EditForm>
+
+@code
+{
+    private AdvancedRealTimeChartSettings? _settingsAdvancedRealTimeChart;
+    private CryptoCoinsHeatmapSettings?    _settingsCryptoCoinsHeatmap;
+    private FundamentalDataSettings?       _settingsFundamentalData;
+    private MiniChartSettings?             _settingsMiniChart;
+    private StockHeatmapSettings?          _settingsStockHeatmap;
+    private TechnicalAnalysisSettings?     _settingsTechnicalAnalysis;
+    private TickerSettings?                _settingsTicker;
+    
+    protected override void OnInitialized()
+    {
+        const string symbol = "NASDAQ:MSFT";
+        const TradingViewTheme theme = TradingViewTheme.Dark;
+        
+        _settingsCryptoCoinsHeatmap    ??= new CryptoCoinsHeatmapSettings    { Height = "400" };
+        _settingsStockHeatmap          ??= new StockHeatmapSettings          { Height = "400" };
+
+        _settingsAdvancedRealTimeChart ??= new AdvancedRealTimeChartSettings { Symbol = symbol };
+        _settingsFundamentalData       ??= new FundamentalDataSettings       { Symbol = symbol };
+        _settingsMiniChart             ??= new MiniChartSettings             { Symbol = symbol };
+        _settingsTechnicalAnalysis     ??= new TechnicalAnalysisSettings     { Symbol = symbol };
+        _settingsTicker                ??= new TickerSettings();
+    }
+}

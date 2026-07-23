@@ -1,0 +1,33 @@
+@page "/advanced-real-time-chart"
+@using TradingViewBlazor.Models
+@rendermode InteractiveServer
+
+<PageTitle>AdvancedRealTimeChart</PageTitle>
+
+<h1>AdvancedRealTimeChart</h1>
+
+<FluentGrid>
+  <FluentGridItem xs="12">
+    <ErrorBoundary>
+      <AdvancedRealTimeChart Settings="@_settingsAdvancedRealTimeChart"/>
+    </ErrorBoundary>
+  </FluentGridItem>
+</FluentGrid>
+
+@code {
+  private AdvancedRealTimeChartSettings? _settingsAdvancedRealTimeChart;
+  
+  protected override void OnInitialized()
+  {
+    const string symbol = "NASDAQ:MSFT";
+    const TradingViewTheme theme = TradingViewTheme.Dark;
+
+    _settingsAdvancedRealTimeChart
+      ??= new AdvancedRealTimeChartSettings
+      {
+        Theme = theme,
+        Symbol = symbol,
+        Width = "100%"
+      };
+  }
+}
