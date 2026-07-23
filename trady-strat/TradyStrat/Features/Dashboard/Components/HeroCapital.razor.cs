@@ -1,0 +1,64 @@
+using TradyStrat.Application.Dashboard;
+using System.Globalization;
+using Microsoft.AspNetCore.Components;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Portfolio;
+using TradyStrat.Application.Formatting;
+
+namespace TradyStrat.Features.Dashboard.Components;
+
+public partial class HeroCapital : ComponentBase
+{
+    [Parameter, EditorRequired] public PortfolioSnapshot Snap { get; set; } = null!;
+    [Parameter, EditorRequired] public Goal Goal { get; set; } = null!;
+    [Parameter, EditorRequired] public DateOnly Today { get; set; }
+    [Parameter, EditorRequired] public GoalPaceVm GoalPace { get; set; } = null!;
+
+    private static readonly CultureInfo FrFr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private decimal Pct => Snap.ProgressPct;
+
+    // Cost basis of currently-held lots = principal still in market.
+    private decimal CostBasisEur => Snap.Shares * Snap.AvgCostEur.Amount;
+    private decimal Goal100 => Goal.Target.Amount <= 0m ? 1m : Goal.Target.Amount;
+
+    // All percentages are vs. goal so the bar adds up to ProgressPct.
+    private decimal CostBasisPct  => Clamp01(CostBasisEur / Goal100 * 100m);
+    private decimal RealizedPct   => Clamp01(Math.Max(0m, Snap.RealizedPnLEur.Amount) / Goal100 * 100m);
+    private decimal UnrealizedAbsPct => Clamp01(Math.Abs(Snap.UnrealizedPnLEur.Amount) / Goal100 * 100m);
+    private decimal CurrentPct    => Clamp01(Snap.CurrentValueEur.Amount / Goal100 * 100m);
+
+    // Where the required-CAGR plan says you should be today, as % of goal.
+    // Returns -1 when not applicable (no live pace) ⇒ caller skips rendering.
+    private decimal PlanPct =>
+        GoalPace.Mode == GoalPaceMode.Active
+            ? Clamp01((Snap.CurrentValueEur.Amount - GoalPace.VsPlanEur) / Goal100 * 100m)
+            : -1m;
+
+    // When unrealized < 0, principal segment must NOT extend past current —
+    // the "loss" hashed segment fills the gap from current back to cost.
+    private decimal PrincipalShownPct =>
+        Snap.UnrealizedPnLEur.Amount < 0m
+            ? Math.Max(0m, CostBasisPct - UnrealizedAbsPct)
+            : CostBasisPct;
+
+    private static decimal Clamp01(decimal pct) => Math.Max(0m, Math.Min(100m, pct));
+    private static string Fmt(decimal pct) => pct.ToString("F2", CultureInfo.InvariantCulture);
+
+    // Alarm thresholds — past these, the pace stats tint red and italicise
+    // because the path to goal is no longer plausible by ordinary means.
+    private bool IsAlarmingMonthly => GoalPace.MonthlyCompoundPct >= 15m;
+    private bool IsAlarmingCagr    => GoalPace.ImpliedCagrPct    >= 250m;
+
+    private string AriaSummary =>
+        $"Progress {NumberFormat.Pct(Pct)} — own capital {NumberFormat.Eur(CostBasisEur)}, " +
+        $"unrealized {NumberFormat.SignedEur(Snap.UnrealizedPnLEur.Amount)}, realized {NumberFormat.SignedEur(Snap.RealizedPnLEur.Amount)}";
+
+    private string? DaysLeft(DateOnly target)
+    {
+        var days = target.DayNumber - Today.DayNumber;
+        if (days < 0) return "past due";
+        if (days == 0) return "today";
+        return $"{days.ToString("N0", FrFr)} days left";
+    }
+}

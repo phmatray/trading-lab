@@ -1,0 +1,34 @@
+<section class="settings-section">
+    <h2>AI suggestion</h2>
+    <div class="grid">
+        <label class="field">
+            <span class="lbl">Model</span>
+            <input type="text" @bind="_model" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Max tokens</span>
+            <input type="number" min="1" max="100000" step="1" @bind="_maxTokens" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Thinking budget (tokens)</span>
+            <input type="number" min="1024" max="16000" step="64" @bind="_thinkingBudget" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Max parallel AI calls</span>
+            <input type="number" min="1" max="10" step="1"
+                   @bind="_maxParallel" @bind:after="OnChanged"
+                   title="How many Anthropic calls can run at once. Higher = faster dashboard, but Anthropic may rate-limit shared keys above 3." />
+        </label>
+    </div>
+    <div class="actions">
+        <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
+        @if (!string.IsNullOrEmpty(_msg))
+        {
+            <span class="msg @(_isError ? "err" : "ok")">@_msg</span>
+        }
+        @if (_lastUpdated is { } t)
+        {
+            <span class="meta">last updated @t.ToLocalTime().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)</span>
+        }
+    </div>
+</section>

@@ -1,0 +1,53 @@
+.sticky-cap {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: baseline; gap: 22px;
+    padding: 10px max(24px, calc((100vw - 1280px) / 2 + 56px));
+    background: rgba(14,13,10,0.92);
+    border-bottom: 1px solid var(--vault-rule);
+    backdrop-filter: blur(8px);
+    color: var(--vault-ivory); text-decoration: none;
+    transform: translateY(-100%); opacity: 0; pointer-events: none;
+    transition: transform 240ms ease, opacity 240ms ease;
+}
+.sticky-cap.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+.sc-brand {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-xs);
+    font-size: 12px;
+    color: var(--vault-gold);
+}
+.sc-cap {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+}
+.sc-cap .sc-euro { color: var(--vault-gold); font-size: 0.7em; margin-right: 3px; }
+.sc-pct {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+.sc-verb {
+    margin-left: auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 16px;
+}
+.sc-verb-hold    { color: var(--verb-color-hold); }
+.sc-verb-trim    { color: var(--verb-color-trim); }
+.sc-verb-wait    { color: var(--verb-color-wait); }
+.sc-verb-acquire { color: var(--verb-color-acquire); }
+
+@media (max-width: 560px) {
+    .sticky-cap { gap: 12px; padding: 8px 16px; }
+    .sc-pct { display: none; }
+    .sc-cap { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sticky-cap { transition: opacity 240ms ease; transform: none; }
+}

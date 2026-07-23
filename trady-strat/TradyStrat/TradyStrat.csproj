@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>tradystrat-local</UserSecretsId>
+    <RootNamespace>TradyStrat</RootNamespace>
+    <!-- CA1716: a few member/parameter names (e.g. `to`, `For`) clash with VB keywords. We don't target VB. -->
+    <NoWarn>$(NoWarn);CA1716</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Vendored TheAppManager v3 during the hexagonal refactor; swaps back to
+         <PackageReference Include="TheAppManager" /> once v3.0.0 is published. -->
+    <ProjectReference Include="..\TradyStrat.Hosting\TradyStrat.Hosting.csproj" />
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+    <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
+    <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />
+  </ItemGroup>
+  <!--
+    All EF / Anthropic / Ardalis / Atypical / Serilog / Resilience package refs
+    moved to TradyStrat.Infrastructure (or Application). Available here transitively
+    via the ProjectReferences above.
+  -->
+</Project>

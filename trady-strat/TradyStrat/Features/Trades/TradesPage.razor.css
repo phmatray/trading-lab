@@ -1,0 +1,75 @@
+.trades { padding: 36px 56px 60px; }
+.hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+.btn {
+    padding: 10px 16px; background: var(--vault-gold);
+    color: #1B1710; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600;
+}
+.btn.ghost { background: transparent; color: var(--vault-ivory); border: 1px solid var(--vault-rule); font-weight: 400; }
+.btn + .btn { margin-left: 6px; }
+
+.t { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.t th, .t td { padding: 12px 14px; border-bottom: 1px solid var(--vault-rule); text-align: left;
+               font-size: 14px; vertical-align: middle; }
+.t th { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+        letter-spacing: var(--tracking-xs); text-transform: uppercase;
+        color: var(--vault-gold); padding-bottom: 10px; }
+.t td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+.t td.ticker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+               color: var(--vault-ivory); }
+.t td.note { color: var(--ink-2); font-style: italic; max-width: 32ch;
+             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t tr:hover td { background: rgba(236,230,214,0.025); }
+
+/* Side pill — uppercase mono token, colored by direction. Compact so it
+   reads as metadata, not as a button. */
+.side {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: var(--tracking-xs); text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid currentColor;
+    border-radius: 1px;
+    line-height: 1.3;
+}
+.side.buy  { color: var(--vault-green); background: rgba(122,182,142,0.10); }
+.side.sell { color: var(--vault-red);   background: rgba(214,120,120,0.10); }
+
+.row-actions { white-space: nowrap; text-align: right; }
+.icon-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-size: 13px;
+    transition: color 140ms, border-color 140ms, background-color 140ms;
+}
+.icon-btn:hover {
+    color: var(--vault-gold);
+    border-color: var(--vault-rule);
+    background: rgba(236,230,214,0.03);
+}
+.icon-btn.danger:hover {
+    color: var(--vault-red);
+    border-color: rgba(214,120,120,0.4);
+}
+.t td.invested { color: var(--ink-3); }
+.err { color: var(--vault-red); margin-top: 12px; font-size: 13px; }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+         display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-body { background: var(--vault-bg-2); border: 1px solid var(--vault-rule);
+              padding: 32px; max-width: 600px; width: 90%; }
+.modal-body h3 { font-family: var(--font-display); font-style: italic;
+                 font-size: 28px; margin-bottom: 12px; }
+.modal-body textarea {
+    width: 100%; background: var(--vault-bg); color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule); padding: 8px;
+    font-family: var(--font-mono); font-size: 12px;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }

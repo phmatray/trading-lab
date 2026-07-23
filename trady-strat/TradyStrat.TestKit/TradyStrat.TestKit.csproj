@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>TradyStrat.TestKit</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TradyStrat.Domain\TradyStrat.Domain.csproj" />
+    <ProjectReference Include="..\TradyStrat.Application\TradyStrat.Application.csproj" />
+    <!-- TestKit needs Infrastructure because in-memory DbContext setup (InMemoryDb) and
+         several fakes touch EF types. Acceptable for a test-fixtures library. -->
+    <ProjectReference Include="..\TradyStrat.Infrastructure\TradyStrat.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+  </ItemGroup>
+</Project>

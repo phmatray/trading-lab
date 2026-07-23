@@ -1,0 +1,222 @@
+:root {
+  --vault-bg:     #0E0D0A;
+  --vault-bg-2:   #15140F;
+  --vault-ivory:  #ECE6D6;
+  --vault-gold:   #C49A56;
+  /* Slightly warmer + brighter so column dividers register without screaming. */
+  --vault-rule:   #3A3327;
+  --vault-green:  #7AB68E;
+  /* Slightly more saturated red for ↓ deltas (ratio ~5.8 vs prior 5.17). */
+  --vault-red:    #D67878;
+
+  /* Verb palette — referenced by TodaysCallCard, PortfolioRail, StickyCapitalBar.
+     One place to change "trim is amber, not red". */
+  --verb-color-hold:    var(--vault-ivory);
+  --verb-color-acquire: var(--vault-green);
+  --verb-color-trim:    var(--vault-red);
+  --verb-color-wait:    rgba(236, 230, 214, 0.6);
+
+  /* Muted-ivory tones — explicit named tokens replace ad-hoc rgba()
+     literals scattered through component styles. Chosen so each tier
+     has a discernible step on dark and clears WCAG AA at 11–14px. */
+  --ink-1:        rgba(236, 230, 214, 0.96);   /* primary body / verb */
+  --ink-2:        rgba(236, 230, 214, 0.82);   /* secondary body / reasoning */
+  --ink-3:        rgba(236, 230, 214, 0.70);   /* tertiary / labels under values */
+  --ink-4:        rgba(236, 230, 214, 0.55);   /* annotations only */
+
+  /* Display = Cormorant for hero numbers, italic verbs, the "vault" soul.
+     Body  = Newsreader, a sturdier text-grade serif tuned for screen
+              prose at 14–18px (reasoning paragraph, citations). */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body:    "Newsreader", "Cormorant Garamond", Georgia, serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+  --rule-soft:    1px solid var(--vault-rule);
+  --tracking-xs:  0.28em;
+  --tracking-md:  0.20em;
+
+  --focus-ring:   0 0 0 1px var(--vault-bg), 0 0 0 3px var(--vault-gold);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--vault-bg); color: var(--vault-ivory); min-height: 100vh; }
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern", "liga", "onum";
+}
+
+.num   { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.label { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+         letter-spacing: var(--tracking-xs); text-transform: uppercase;
+         color: var(--vault-gold); }
+.rule  { height: 1px; background: var(--vault-rule); }
+
+/* Editorial section marker — italic Cormorant numeral that precedes the
+   small-caps mono label. Reads like a chapter heading in a magazine.    */
+.section-roman {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--vault-gold);
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-right: 14px;
+    opacity: 0.85;
+}
+
+/* Section heading — semantic <h2> styled like the legacy .label/.rail-label divs.
+   Components keep their own positioning wrapper class for margins; this owns the
+   typography. Task 2.2 migrates each section to use it. */
+h2.section-heading {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* Keyboard focus — gold ring with a 1px dark inset so it reads on any bg. */
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 1px;
+}
+
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  border: 1px solid var(--vault-rule);
+  background: var(--vault-bg);
+  position: relative;
+  overflow: hidden;
+}
+main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 88% -8%, rgba(196,154,86,0.10), transparent 48%),
+    radial-gradient(circle at -5% 105%, rgba(196,154,86,0.06), transparent 42%);
+}
+main > * { position: relative; z-index: 1; }
+
+/* ---- Time-travel masthead ribbon -------------------------------------
+   One bordered group containing prev / date / next / entry-no / freshness.
+   Internal cells share borders so the whole thing reads as a single
+   continuous control rather than three separate pills.                  */
+
+.masthead .travel-ribbon {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--vault-rule);
+    border-radius: 4px;
+    background: var(--vault-bg-2);
+    overflow: hidden;
+    height: 28px;
+}
+
+.masthead .ribbon-step,
+.masthead .ribbon-date,
+.masthead .ribbon-meta {
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink-1);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1;
+    text-decoration: none;
+    user-select: none;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.masthead .ribbon-step {
+    width: 28px;
+    justify-content: center;
+    font-size: 18px;
+    border-right: 1px solid var(--vault-rule);
+}
+.masthead .ribbon-step:last-child,
+.masthead .ribbon-step + .ribbon-meta { /* nothing, just keeps specificity */ }
+
+.masthead .ribbon-step:hover { background: var(--vault-bg); color: var(--vault-gold); }
+
+.masthead .ribbon-step.disabled,
+.masthead .ribbon-step[aria-disabled="true"] {
+    opacity: 0.30;
+    pointer-events: none;
+    cursor: default;
+}
+
+.masthead .ribbon-date {
+    position: relative;
+    padding: 0 14px;
+    cursor: pointer;
+    border-right: 1px solid var(--vault-rule);
+}
+.masthead .ribbon-date:hover { background: var(--vault-bg); }
+
+.masthead .ribbon-date input[type="date"] {
+    /* Native picker, hidden visually but still focusable for the calendar UI. */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color-scheme: dark;
+}
+
+.masthead .ribbon-step + .ribbon-date { border-right: 1px solid var(--vault-rule); }
+
+.masthead .ribbon-meta {
+    padding: 0 14px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-md);
+    font-size: 10px;
+}
+.masthead .ribbon-meta .freshness {
+    color: var(--ink-4);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    margin-left: 2px;
+}
+
+.masthead .return-today {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-3);
+    text-decoration: none;
+    padding: 3px 10px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.masthead .return-today:hover {
+    color: var(--vault-gold);
+    border-color: var(--vault-rule);
+}
+
+/* ── Responsive: tablet + phone ───────────────────────────────── */
+@media (max-width: 860px) {
+  main { border-left: none; border-right: none; }
+}
+@media (max-width: 560px) {
+  main::before { background:
+    radial-gradient(circle at 100% -10%, rgba(196,154,86,0.08), transparent 55%); }
+}

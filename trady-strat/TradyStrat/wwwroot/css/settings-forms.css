@@ -1,0 +1,135 @@
+/* Shared styles for the per-feature forms on the Settings page
+   (AnthropicSettingsForm, PolymarketSettingsForm, FocusTickerForm). Each renders
+   <section class="settings-section">…</section>. This is a global stylesheet
+   (linked from App.razor) rather than per-component scoped CSS so the rules live
+   once; it mirrors the Goal section in SettingsPage.razor.css. */
+
+.settings-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--vault-rule);
+    max-width: 760px;
+}
+
+.settings-section h2 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 24px;
+    margin: 0 0 20px;
+    color: var(--vault-ivory);
+}
+
+.settings-section .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 14px 24px;
+}
+
+.settings-section .field {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    min-width: 0;
+}
+
+.settings-section .field .lbl {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-section .field .hint {
+    color: var(--ink-3);
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    font-style: italic;
+    font-weight: 400;
+    margin-left: 6px;
+}
+
+.settings-section .field input,
+.settings-section .field select {
+    background: var(--vault-bg);
+    color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule);
+    height: 40px;
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 160ms ease;
+    color-scheme: dark;
+    appearance: none;
+}
+.settings-section .field input:focus,
+.settings-section .field select:focus { border-color: var(--vault-gold); outline: none; }
+.settings-section .field input:disabled,
+.settings-section .field select:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.settings-section .actions {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.settings-section .btn {
+    padding: 11px 20px;
+    background: var(--vault-gold);
+    color: #1B1710;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    border: 0;
+    cursor: pointer;
+    transition: background 160ms ease, opacity 160ms ease;
+}
+.settings-section .btn:hover:not(:disabled) { background: var(--vault-ivory); }
+.settings-section .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.settings-section .msg { font-family: var(--font-mono); font-size: 12px; letter-spacing: var(--tracking-md); }
+.settings-section .msg.ok  { color: var(--vault-green); }
+.settings-section .msg.err { color: var(--vault-red); }
+
+.settings-section .meta {
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    margin-left: auto;
+}
+
+@media (max-width: 720px) {
+    .settings-section .grid { grid-template-columns: 1fr; }
+    .settings-section .meta { margin-left: 0; }
+}
+
+/* Gold caret for custom-styled <select>. */
+.settings-section .field select {
+    padding-right: 28px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--vault-gold) 50%),
+        linear-gradient(135deg, var(--vault-gold) 50%, transparent 50%);
+    background-position: calc(100% - 14px) center, calc(100% - 9px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+/* Tint the Chromium calendar icon to gold. */
+.settings-section .field input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(70%) sepia(40%) saturate(400%) hue-rotate(2deg);
+    cursor: pointer;
+}

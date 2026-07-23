@@ -1,0 +1,84 @@
+@using TradyStrat.Domain.Portfolio
+@page "/"
+@rendermode InteractiveServer
+@using TradyStrat.Application.Dashboard
+@using TradyStrat.Features.Dashboard.Components
+
+@if (_vm is null && _error is null)
+{
+    <p class="loading">Loading…</p>
+}
+else if (_error is not null)
+{
+    <div class="error">
+        <p class="error-title">
+            Could not load dashboard
+        </p>
+        <p class="error-message">
+            @_error
+        </p>
+        <p class="error-hint">
+            Common cause: no price bars for the focus instrument in the database. Run with internet so the price feed can warm the cache, then refresh.
+        </p>
+        <button class="btn error-action" @onclick="OnRefreshClicked" disabled="@_busy">
+            @(_busy ? "Refreshing…" : "Retry")
+        </button>
+    </div>
+}
+else
+{
+    var vm = _vm!;
+    var focusSug = _focusState is SuggestionState.Ready fr ? fr.Suggestion : null;
+    <StickyCapitalBar CurrentValueEur="vm.Portfolio.CurrentValueEur.Amount"
+                      TargetEur="vm.Goal.Target.Amount"
+                      ProgressPct="vm.Portfolio.ProgressPct"
+                      Action="focusSug?.Action" />
+    <div class="dash-stage">
+        <VaultMasthead Today="vm.Today" EntryNumber="vm.EntryNumber"
+                       PriceAsOfRelative="@vm.PriceAsOfRelative"
+                       PrevTradingDay="vm.PrevTradingDay"
+                       NextTradingDay="vm.NextTradingDay"
+                       EarliestTradingDay="vm.EarliestTradingDay"
+                       LatestTradingDay="vm.LatestTradingDay"
+                       IsHistorical="vm.IsHistorical"
+                       OnDateSelected="OnDateSelected" />
+        <GrowthChart Points="vm.Growth" Goal="vm.Goal" Portfolio="vm.Portfolio"
+                     Events="vm.CapitalEvents" />
+        <EventFootnoteRail Events="vm.CapitalEvents" />
+        <div class="hero-row">
+            <HeroCapital Snap="vm.Portfolio" Goal="vm.Goal" Today="vm.Today"
+                         GoalPace="vm.GoalPace" />
+            <TodaysCallCard State="_focusState" Today="vm.Today"
+                            CallAsOfRelative="@vm.CallAsOfRelative"
+                            BackfillStatus="vm.BackfillStatus"
+                            Historical="vm.IsHistorical"
+                            FocusLabel="@FocusLabelFor(vm.FocusTicker)"
+                            OnRerun="OnRerunRequested" OnLogTrade="OnLogTradeRequested"
+                            OnRetry="OnRetryStream" />
+        </div>
+        <MarketsRail Snapshot="_focusDerived.MarketSnapshot" />
+        @if (focusSug is not null)
+        {
+            <CitationsBlock Sug="focusSug" Today="vm.Today"
+                            CallDiff="_focusDerived.CallDiff"
+                            IndicatorHistories="_focusDerived.IndicatorHistories" />
+        }
+        <PositionsTable Rows="vm.Positions" />
+        <PortfolioRail Snap="vm.Portfolio" Tickers="vm.Tickers" CallStates="_tickerStates" />
+    </div>
+    <RefreshFab Busy="_busy" Historical="vm.IsHistorical" OnClick="OnRefreshClicked" />
+
+    @if (_showRerunConfirm)
+    {
+        <div class="modal" @onclick="() => _showRerunConfirm = false">
+            <div class="modal-body" @onclick:stopPropagation="true">
+                <h3>Re-run AI?</h3>
+                <p>This will use one Anthropic API call. Continue?</p>
+                <div class="modal-actions">
+                    <button class="btn" @onclick="ConfirmRerun">Confirm</button>
+                    <button class="btn ghost" @onclick="() => _showRerunConfirm = false">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+}

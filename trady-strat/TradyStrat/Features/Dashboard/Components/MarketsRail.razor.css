@@ -1,0 +1,129 @@
+/* Section block between Today's Call and Citations.
+   Auto-fitting tile grid; cited tiles get a gold accent matching the
+   citation row treatment in CitationsBlock. */
+
+.markets-rail {
+    padding: 26px 48px 32px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+
+.rail-label { margin: 0 0 18px; }
+
+.market-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.tile {
+    padding: 12px 14px 14px;
+    border: 1px dotted rgba(196, 154, 86, 0.18);
+    border-radius: 2px;
+    background: transparent;
+    font-family: var(--font-body);
+}
+
+.tile.cited {
+    background: linear-gradient(
+        180deg,
+        rgba(196, 154, 86, 0.08) 0%,
+        rgba(196, 154, 86, 0.02) 100%);
+    border-color: rgba(196, 154, 86, 0.42);
+}
+
+.tile .prob {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(236, 230, 214, 0.82);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.tile.cited .prob {
+    color: var(--vault-gold);
+}
+
+.tile .question {
+    margin-top: 6px;
+    color: var(--vault-ivory);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.tile .meta {
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.tile .claim {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dotted rgba(196, 154, 86, 0.18);
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(236, 230, 214, 0.92);
+}
+
+@media (max-width: 1024px) {
+    .market-tiles {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .markets-rail {
+        padding: 20px 24px 26px;
+    }
+    .market-tiles {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Three-band layout: cited tiles → ladder distribution → other tiles. */
+.market-tiles + .ladder,
+.ladder + .market-tiles.other,
+.market-tiles + .market-tiles.other { margin-top: 16px; }
+
+/* The ladder's separator is only meaningful when it follows another band —
+   if it's the first child it'd render as a floating line under the heading. */
+.ladder { padding: 12px 0; }
+.market-tiles + .ladder { border-top: 1px dotted rgba(196,154,86,0.18); }
+.ladder-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+.ladder-row {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: baseline;
+}
+.ladder-bucket {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+.ladder-bucket .lb-n {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-4);
+}
+.ladder-bucket.lead, .ladder-bucket.lead .lb-n { color: var(--vault-gold); }
+
+.market-tiles.other .tile { padding: 10px 12px 12px; }
+.market-tiles.other .tile .prob { font-size: 18px; }

@@ -1,0 +1,59 @@
+@using TradyStrat.Domain
+@using TradyStrat.Domain.Indicators
+@using TradyStrat.Application.Indicators
+
+@if (Sug.Citations.Count > 0)
+{
+    <section class="citations-block">
+        <header class="cit-head">
+            <h2 class="cit-label section-heading"><span class="section-roman">V.</span>Cited evidence · @Today.ToString("d MMMM", FrFr)</h2>
+            <span class="cit-count">@Sug.Citations.Count signals</span>
+        </header>
+
+        @{
+            var changedMap = CallDiff.ChangedCitations
+                .ToDictionary(c => c.Key.ToLowerInvariant());
+            var addedKeys  = CallDiff.AddedCitationKeys
+                .Select(k => k.ToLowerInvariant()).ToHashSet();
+        }
+
+        <ol class="cit-list">
+            @{ var citIdx = 0; }
+            @foreach (var c in Sug.Citations)
+            {
+                citIdx++;
+                var key = $"{c.Indicator}:{c.Ticker}".ToLowerInvariant();
+                var change   = changedMap.TryGetValue(key, out var ch) ? ch : null;
+                var isChanged = change is not null;
+                var isNew     = addedKeys.Contains(key);
+                var kind = IndicatorKindParser.From(c.Indicator);
+                IndicatorSeries? series = null;
+                if (kind is { } k && IndicatorHistories.TryGetValue((c.Ticker, k), out var s))
+                    series = s;
+                <li class="cit-row @(isChanged ? "is-changed" : "")">
+                    <span class="cit-roman">@RomanLowercase(citIdx).</span>
+                    <div class="cit-text">
+                        <div class="cit-name">
+                            <b>@c.Indicator</b>
+                            <span class="cit-ticker">@c.Ticker</span>
+                            @if (isNew)     { <span class="cit-chip cit-new">new</span> }
+                            else if (isChanged) { <span class="cit-chip cit-changed">Δ</span> }
+                        </div>
+                        <div class="cit-claim">@c.Claim</div>
+                        @if (change is not null)
+                        {
+                            <div class="cit-since num">since: @change.PriorValue</div>
+                        }
+                    </div>
+                    <div class="cit-value num">@c.Value</div>
+                    <div class="cit-spark">
+                        @if (series is not null && series.Values.Count >= 2)
+                        {
+                            @((MarkupString)RenderSparklineSvg(series))
+                        }
+                    </div>
+                </li>
+            }
+        </ol>
+    </section>
+}

@@ -1,0 +1,240 @@
+.call {
+    padding: 24px 48px 26px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.label { margin: 0 0 12px; }
+.freshness {
+    color: var(--ink-4);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.backfill-pill {
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: rgba(196,154,86,0.85);
+    text-transform: uppercase;
+}
+
+/* ── Verdict drop cap ──────────────────────────────────────────────
+   The verdict floats flush-left and the rationale paragraph wraps
+   around it. Dramatic editorial typography: oversized italic Cormorant
+   that anchors the journal entry. The "data-verb" attribute lets us
+   tighten "Acquire." (8 chars) without affecting "Hold." / "Trim." /
+   "Wait." (4-5 chars).                                              */
+.reasons {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink-1);
+    max-width: 56ch;
+    margin: 0;
+}
+.reasons::after { content: ""; display: block; clear: both; }
+
+.verb-drop {
+    float: left;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 86px;
+    line-height: 0.86;
+    color: var(--vault-ivory);
+    margin: 8px 18px 2px 0;
+    letter-spacing: -0.01em;
+    /* Slight tonal lift so the drop reads as ink-on-page, not painted on. */
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+    /* Tighter shape for narrow verbs so wrapping starts close to the glyph. */
+    shape-outside: margin-box;
+}
+.verb-drop[data-verb="acquire"] {
+    font-size: 64px;
+    margin-right: 14px;
+}
+.verb-drop[data-verb="hold"]    { color: var(--verb-color-hold); }
+.verb-drop[data-verb="trim"]    { color: var(--verb-color-trim); }
+.verb-drop[data-verb="wait"]    { color: var(--verb-color-wait); font-style: italic; }
+.verb-drop[data-verb="acquire"] { color: var(--verb-color-acquire); }
+
+.verb-tail {
+    /* Floats with the dropcap so the period sits at the same baseline
+       as the bottom of the giant glyph, not as part of the body prose. */
+    float: left;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--vault-ivory);
+    font-size: 86px;
+    line-height: 0.86;
+    margin: 8px 18px 2px -10px;
+    letter-spacing: -0.01em;
+}
+.verb-tail[data-verb="hold"]    { color: var(--verb-color-hold); }
+.verb-tail[data-verb="trim"]    { color: var(--verb-color-trim); }
+.verb-tail[data-verb="wait"]    { color: var(--verb-color-wait); }
+.verb-tail[data-verb="acquire"] { color: var(--verb-color-acquire); font-size: 64px; }
+
+@media (max-width: 720px) {
+    .call { padding: 22px 20px 24px; }
+    .verb-drop, .verb-tail { font-size: 64px; margin-right: 14px; }
+    .verb-drop[data-verb="acquire"],
+    .verb-tail[data-verb="acquire"] { font-size: 48px; }
+}
+
+.order {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--ink-2);
+    margin: 14px 0 0;
+    clear: both;
+}
+
+.actions { margin-top: 26px; display: flex; gap: 10px; clear: both; }
+.cta {
+    padding: 13px 18px;
+    background: var(--vault-gold);
+    color: #1B1710;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: background 150ms, border-color 150ms, color 150ms;
+}
+.cta:hover:not(:disabled) { background: var(--vault-ivory); }
+/* Disabled = "deliberately quiet", not broken. Same shape as ghost button. */
+.cta:disabled {
+    background: transparent;
+    color: var(--ink-4);
+    border: 1px solid var(--vault-rule);
+    cursor: not-allowed;
+    font-weight: 400;
+}
+.cta.ghost {
+    background: transparent;
+    color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule);
+    font-weight: 400;
+}
+.cta.ghost:hover { border-color: var(--vault-gold); color: var(--vault-gold); }
+
+/* 3-bullet TL;DR above the verb-drop rationale. Sits as a block above the
+   paragraph; the .verb-drop float starts inside .reasons so it doesn't
+   interact with this list. */
+.tldr {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+.tldr li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--ink-3);
+    padding-left: 14px;
+    position: relative;
+}
+.tldr li::before {
+    content: "·";
+    position: absolute;
+    left: 2px;
+    color: var(--vault-gold);
+}
+.tldr-k {
+    color: var(--ink-2);
+    letter-spacing: 0.06em;
+}
+.tldr-k em {
+    color: var(--vault-gold);
+    font-style: normal;
+}
+
+.actions-hint {
+    margin: 10px 0 0;
+    clear: both;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+}
+
+/* ── Skeleton (Pending) ─────────────────────────────────────────────
+   Shimmer placeholder sized to match the Ready card so the state flip
+   doesn't reflow the surrounding hero row. Line widths approximate the
+   visual mass of the corresponding Ready elements (verb-drop verdict,
+   conviction chip, multi-line rationale, citation row). */
+.call-card--skeleton {
+    padding: 4px 0 0;
+}
+.call-card--skeleton .skeleton-line {
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    background: linear-gradient(90deg,
+        rgba(236,230,214,0.06) 0%,
+        rgba(236,230,214,0.14) 50%,
+        rgba(236,230,214,0.06) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+}
+.call-card--skeleton .skeleton-action     { width: 30%; height: 1.75rem; }
+.call-card--skeleton .skeleton-conviction { width: 20%; height: 1rem; }
+.call-card--skeleton .skeleton-rationale  { width: 90%; height: 2.5rem; }
+.call-card--skeleton .skeleton-citation   { width: 60%; height: 0.85rem; }
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Error (Failed) ─────────────────────────────────────────────────
+   Compact alert row keyed off the project's vault palette so the band
+   reads as "deliberately quiet" rather than alarm-bell red. */
+.call-card--error {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-top: 8px;
+    color: var(--verb-color-trim, #b85);
+    background: rgba(176, 80, 60, 0.08);
+    border: 1px solid rgba(176, 80, 60, 0.35);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+.call-card--error .error-icon {
+    font-weight: 700;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.call-card--error .error-msg { flex: 1; }
+.call-card--error .retry {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--vault-ivory);
+    border: 1px solid var(--vault-rule);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 150ms, color 150ms;
+}
+.call-card--error .retry:hover {
+    border-color: var(--vault-gold);
+    color: var(--vault-gold);
+}

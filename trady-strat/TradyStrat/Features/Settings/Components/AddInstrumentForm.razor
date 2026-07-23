@@ -1,0 +1,107 @@
+@using TradyStrat.Infrastructure.Settings.UseCases
+@* TradyStrat/Features/Settings/Components/AddInstrumentForm.razor *@
+@using TradyStrat.Domain
+@using TradyStrat.Domain.SeedWork
+@using TradyStrat.Application.Settings.UseCases
+@inject ProbeInstrumentUseCase Probe
+@inject AddInstrumentUseCase Add
+
+<section class="settings-section add-instrument">
+    <h2>Add instrument</h2>
+    <div class="grid">
+        <label class="field">
+            <span class="lbl">Ticker</span>
+            <input value="@_ticker"
+                   @oninput="e => { _ticker = e.Value?.ToString() ?? string.Empty; _probed = null; _err = null; }"
+                   placeholder="e.g. ETHE.PA" />
+        </label>
+        <button class="btn" @onclick="DoProbe" disabled="@(_busy || string.IsNullOrWhiteSpace(_ticker))">
+            @(_busy && _probed is null ? "Probing…" : "Probe")
+        </button>
+    </div>
+
+    @if (_probed is { } meta)
+    {
+        <dl class="probe-result">
+            <dt>Found</dt>
+            <dd>@meta.Name</dd>
+            <dt>Currency</dt>
+            <dd>@meta.Currency.Code</dd>
+            <dt>Exchange</dt>
+            <dd>@meta.Exchange.Code</dd>
+            <dt>Timezone</dt>
+            <dd>@meta.Timezone.Value</dd>
+        </dl>
+        <div class="kind-pick">
+            <label><input type="radio" name="kind"
+                          checked="@(_kind == InstrumentKind.Held)"
+                          @onchange="@(() => _kind = InstrumentKind.Held)" /> Held</label>
+            <label><input type="radio" name="kind"
+                          checked="@(_kind == InstrumentKind.Watchlist)"
+                          @onchange="@(() => _kind = InstrumentKind.Watchlist)" /> Watchlist</label>
+        </div>
+        <div class="actions">
+            <button class="btn" @onclick="DoAdd" disabled="@_busy">@(_busy ? "Adding…" : "Add")</button>
+            <button class="btn ghost" @onclick="Reset">Cancel</button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(_err))
+    {
+        <p class="err">@_err</p>
+    }
+    @if (!string.IsNullOrEmpty(_ok))
+    {
+        <p class="ok">@_ok</p>
+    }
+</section>
+
+@code {
+    [Parameter] public EventCallback OnAdded { get; set; }
+
+    private string _ticker = "";
+    private Instrument? _probed;
+    private InstrumentKind _kind = InstrumentKind.Held;
+    private bool _busy;
+    private string? _err;
+    private string? _ok;
+
+    private async Task DoProbe()
+    {
+        _busy = true; _err = null; _ok = null;
+        try
+        {
+            _probed = await Probe.ExecuteAsync(
+                new ProbeInstrumentInput(_ticker, _kind), CancellationToken.None);
+        }
+        catch (TradyStratException ex) { _err = ex.Message; }
+        finally { _busy = false; }
+    }
+
+    private async Task DoAdd()
+    {
+        if (_probed is null) return;
+        _busy = true; _err = null; _ok = null;
+        try
+        {
+            // _probed already carries Kind from the probe — re-stamping happens
+            // upstream in ProbeInstrumentUseCase whenever the radio toggles.
+            var withKind = _probed.Kind == _kind
+                ? _probed
+                : await Probe.ExecuteAsync(
+                      new ProbeInstrumentInput(_ticker, _kind), CancellationToken.None);
+            var inst = await Add.ExecuteAsync(
+                new AddInstrumentInput(withKind), CancellationToken.None);
+            _ok = $"Added {inst.Ticker} as {inst.Kind}.";
+            Reset();
+            await OnAdded.InvokeAsync();
+        }
+        catch (TradyStratException ex) { _err = ex.Message; }
+        finally { _busy = false; }
+    }
+
+    private void Reset()
+    {
+        _ticker = ""; _probed = null; _kind = InstrumentKind.Held;
+    }
+}

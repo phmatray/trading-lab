@@ -1,0 +1,216 @@
+.hero {
+    /* Tightened again so the hero card no longer stretches to match the call
+       column. With align-items:start on .hero-row, this card now sizes to its
+       own content. */
+    padding: 32px 56px 26px;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.label { margin: 0 0 14px; }
+.amount {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(64px, 8.5vw, 92px);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+}
+/* Smaller € as a refined unit prefix, baseline-aligned, gold. */
+.amount .euro {
+    color: var(--vault-gold);
+    font-size: 0.62em;
+    margin-right: 6px;
+    vertical-align: baseline;
+    position: relative;
+    top: -0.18em;
+    font-weight: 400;
+}
+.amount .of {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 16px;
+}
+.amount .by {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin-top: 6px;
+}
+
+/* ── Segmented progress bar ─────────────────────────────────────
+   Track at 6px tall so segments register without screaming.
+   Segments are absolutely positioned slabs; each carries its own
+   surface treatment so the eye reads "principal vs. paper PnL".  */
+.progress { margin-top: 22px; display: flex; align-items: center; gap: 16px; }
+.bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(236, 230, 214, 0.06);
+    border: 1px solid var(--vault-rule);
+    position: relative;
+    border-radius: 1px;
+}
+.seg {
+    position: absolute; top: 0; bottom: 0;
+    left: var(--l);
+    width: var(--w);
+    transition: left 600ms ease-out, width 600ms ease-out;
+    pointer-events: none;
+}
+.seg.principal {
+    /* Muted gold — your principal: solid, present, unflashy. */
+    background: linear-gradient(180deg, #C49A56 0%, #A07F44 100%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+}
+.seg.realized {
+    /* Brighter gold accent for realized — booked, locked in. */
+    background: var(--vault-gold);
+    box-shadow: 0 0 10px rgba(196,154,86,0.55);
+}
+.seg.gain {
+    /* Unrealized gain — green, glowing softly above the rail. */
+    background: var(--vault-green);
+    box-shadow: 0 0 10px rgba(122,182,142,0.50);
+}
+.seg.loss {
+    /* Unrealized loss — red diagonal hatch occupying the gap that
+       principal would have filled if mark were par. */
+    background:
+        repeating-linear-gradient(
+            -38deg,
+            rgba(214, 120, 120, 0.85) 0 4px,
+            rgba(214, 120, 120, 0.35) 4px 8px
+        );
+    box-shadow: inset 0 0 0 1px rgba(214,120,120,0.5);
+}
+.tick.now {
+    position: absolute;
+    left: var(--l);
+    top: -3px; bottom: -3px;
+    width: 1px;
+    background: var(--vault-ivory);
+    box-shadow: 0 0 6px rgba(236,230,214,0.7);
+    transition: left 600ms ease-out;
+}
+.pct { font-size: 13px; letter-spacing: var(--tracking-md); color: var(--vault-gold); min-width: 4.5ch; text-align: right; }
+
+/* ── Legend ─────────────────────────────────────────────────────
+   Inline definition list; reads as one quiet line of accounting.   */
+.legend {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+}
+.legend > div { display: inline-flex; align-items: center; gap: 8px; }
+.legend dt {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-xs);
+    font-size: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.legend dd { color: var(--ink-1); }
+.legend dd.pos { color: var(--vault-green); }
+.legend dd.neg { color: var(--vault-red); }
+
+.swatch {
+    width: 10px; height: 10px;
+    border: 1px solid rgba(0,0,0,0.4);
+    border-radius: 1px;
+}
+.swatch.principal { background: linear-gradient(180deg, #C49A56 0%, #A07F44 100%); }
+.swatch.realized  { background: var(--vault-gold); }
+.swatch.gain      { background: var(--vault-green); }
+.swatch.loss      { background: repeating-linear-gradient(-38deg,
+                       rgba(214,120,120,0.85) 0 3px,
+                       rgba(214,120,120,0.35) 3px 6px); }
+
+/* ── Goal-pace line ─────────────────────────────────────────────────
+   One quiet line of accounting. Mono labels in ink-3, larger ivory values,
+   bullet separators. The CAGR/monthly-needed numbers tint red when they
+   exceed plausibility thresholds — a subtle alarm for "this is unreachable
+   by ordinary means." See HeroCapital.razor.cs IsAlarming* for thresholds. */
+.pace-line-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 18px;
+    border-top: 1px solid rgba(196,154,86,0.15);
+    padding-top: 12px;
+    margin-top: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+.pace-line-row .stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.pace-line-row .stat .k {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-4);
+    text-transform: uppercase;
+}
+.pace-line-row .stat .v {
+    font-size: 13px;
+    color: var(--vault-ivory);
+    font-feature-settings: "tnum";
+    letter-spacing: 0;
+}
+.pace-line-row .stat .v.neg   { color: var(--vault-red); }
+.pace-line-row .stat .v.pos   { color: var(--vault-green); }
+.pace-line-row .stat .v.alarm { color: var(--vault-red); font-style: italic; }
+.pace-line-row .sep {
+    color: var(--ink-4);
+    font-size: 11px;
+}
+.pace-line {
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(236,230,214,0.62);
+    margin-top: 14px;
+}
+
+.pace-line-row.pace-line-top {
+    margin-top: 18px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(196,154,86,0.18);
+    border-bottom: 1px solid rgba(196,154,86,0.18);
+}
+
+.tick.plan {
+    position: absolute;
+    left: var(--l);
+    top: -4px; bottom: -4px;
+    width: 1px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 5px rgba(196,154,86,0.6);
+    opacity: 0.85;
+    transition: left 600ms ease-out;
+}
+.tick.plan::after {
+    /* tiny caret above the bar so the two ticks are distinguishable */
+    content: "";
+    position: absolute;
+    left: -2px; top: -5px;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 4px solid var(--vault-gold);
+}
+
+@media (max-width: 720px) {
+  .hero { padding: 24px 20px 22px; }
+  .amount { font-size: clamp(44px, 13vw, 64px); }
+  .progress { gap: 10px; }
+  .pace-line-row { gap: 6px 12px; }
+}

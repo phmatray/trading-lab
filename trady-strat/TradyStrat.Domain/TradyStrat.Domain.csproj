@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TradyStrat.Domain</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Pure-compute indicator library. Phase 5 §10: explicitly allowed in Domain. -->
+    <PackageReference Include="Atypical.TechnicalAnalysis.Common" />
+    <PackageReference Include="Atypical.TechnicalAnalysis.Functions" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,129 @@
+using Shouldly;
+using TradyStrat.Domain;
+using TradyStrat.Domain.Goals;
+using TradyStrat.Domain.Goals.Events;
+using TradyStrat.Domain.Shared.Money;
+using Xunit;
+
+namespace TradyStrat.Domain.Tests.Goals;
+
+public class GoalTests
+{
+    private static readonly DateTime _now = new(2026, 5, 22, 12, 0, 0, DateTimeKind.Utc);
+
+    private sealed class FixedClock(DateTime now) : IClock
+    {
+        public DateTime UtcNow() => now;
+        public DateOnly TodayLocal() => DateOnly.FromDateTime(now);
+        public DateOnly TodayInExchangeTzFor(string ticker) => DateOnly.FromDateTime(now);
+    }
+
+    [Fact]
+    public void Initial_uses_singleton_id_and_default_one_million_target_no_deadline()
+    {
+        var goal = Goal.Initial(new FixedClock(_now));
+        goal.Id.ShouldBe(GoalId.Singleton);
+        goal.Target.ShouldBe(Money.Of(1_000_000m, Currency.Eur));
+        goal.HasDeadline.ShouldBeFalse();
+        goal.UpdatedAt.ShouldBe(_now);
+    }
+
+    [Fact]
+    public void RetargetAmount_updates_Target_and_UpdatedAt_only()
+    {
+        var goal = Goal.Initial(new FixedClock(_now));
+        var clock2 = new FixedClock(_now.AddDays(1));
+
+        goal.RetargetAmount(Money.Of(2_000_000m, Currency.Eur), clock2);
+
+        goal.Target.ShouldBe(Money.Of(2_000_000m, Currency.Eur));
+        goal.HasDeadline.ShouldBeFalse();
+        goal.UpdatedAt.ShouldBe(clock2.UtcNow());
+    }
+
+    [Fact]
+    public void RetargetAmount_rejects_non_positive_target()
+    {
+        var goal = Goal.Initial(new FixedClock(_now));
+        Should.Throw<GoalValidationException>(
+            () => goal.RetargetAmount(Money.Of(0m, Currency.Eur), new FixedClock(_now)));
+    }
+
+    [Fact]
+    public void RescheduleDeadline_sets_HasDeadline_true_for_future_date()
+    {
+        var goal = Goal.Initial(new FixedClock(_now));
+        var future = DateOnly.FromDateTime(_now).AddDays(90);
+
+        goal.RescheduleDeadline(future, new FixedClock(_now));
+
+        goal.HasDeadline.ShouldBeTrue();
+        goal.TargetDate.ShouldBe(future);
+    }
+
+    [Fact]
+    public void RescheduleDeadline_with_MinValue_clears_HasDeadline()
+    {
+        var goal = Goal.Initial(new FixedClock(_now));
+        goal.RescheduleDeadline(DateOnly.FromDateTime(_now).AddDays(90), new FixedClock(_now));
+
+        goal.RescheduleDeadline(DateOnly.MinValue, new FixedClock(_now.AddDays(1)));
+
+        goal.HasDeadline.ShouldBeFalse();
+        goal.TargetDate.ShouldBe(DateOnly.MinValue);
+    }
+
+    [Fact]
+    public void RescheduleDeadline_rejects_past_dates()
+    {
+        var clock = new FixedClock(_now);
+        var goal = Goal.Initial(clock);
+        var yesterday = DateOnly.FromDateTime(_now).AddDays(-1);
+
+        Should.Throw<GoalValidationException>(
+            () => goal.RescheduleDeadline(yesterday, clock));
+    }
+
+    [Fact]
+    public void Initial_raises_GoalCreated()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+
+        var evt = g.DomainEvents.OfType<GoalCreated>().ShouldHaveSingleItem();
+        evt.GoalId.ShouldBe(GoalId.Singleton);
+        evt.Target.ShouldBe(Money.Of(1_000_000m, Currency.Eur));
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
+    }
+
+    [Fact]
+    public void RetargetAmount_raises_GoalTargetChanged_with_old_and_new()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+        g.DequeueDomainEvents();   // discard GoalCreated
+
+        g.RetargetAmount(Money.Of(2_000_000m, Currency.Eur), clock);
+
+        var evt = g.DomainEvents.OfType<GoalTargetChanged>().ShouldHaveSingleItem();
+        evt.OldTarget.ShouldBe(Money.Of(1_000_000m, Currency.Eur));
+        evt.NewTarget.ShouldBe(Money.Of(2_000_000m, Currency.Eur));
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
+    }
+
+    [Fact]
+    public void RescheduleDeadline_raises_GoalDeadlineRescheduled_with_old_and_new()
+    {
+        var clock = new FixedClock(new DateTime(2026, 5, 25, 9, 0, 0, DateTimeKind.Utc));
+        var g = Goal.Initial(clock);
+        g.DequeueDomainEvents();
+
+        var newDate = new DateOnly(2030, 1, 1);
+        g.RescheduleDeadline(newDate, clock);
+
+        var evt = g.DomainEvents.OfType<GoalDeadlineRescheduled>().ShouldHaveSingleItem();
+        evt.OldDeadline.ShouldBe(DateOnly.MinValue);
+        evt.NewDeadline.ShouldBe(newDate);
+        evt.OccurredAt.ShouldBe(clock.UtcNow());
+    }
+}

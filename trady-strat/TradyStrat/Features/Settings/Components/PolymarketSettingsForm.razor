@@ -1,0 +1,32 @@
+<section class="settings-section">
+    <h2>Prediction markets</h2>
+    <div class="grid">
+        <label class="field">
+            <span class="lbl">Search queries <em class="hint">comma-separated; no commas inside a query</em></span>
+            <input type="text" @bind="_queriesText" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Max markets</span>
+            <input type="number" min="1" step="1" @bind="_maxMarkets" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Min volume (USD)</span>
+            <input type="number" min="0" step="1000" @bind="_minVolumeUsd" @bind:after="OnChanged" />
+        </label>
+        <label class="field">
+            <span class="lbl">Max horizon (days)</span>
+            <input type="number" min="1" step="1" @bind="_maxHorizonDays" @bind:after="OnChanged" />
+        </label>
+    </div>
+    <div class="actions">
+        <button class="btn" @onclick="SaveAsync" disabled="@_busy">@(_busy ? "Saving…" : "Save")</button>
+        @if (!string.IsNullOrEmpty(_msg))
+        {
+            <span class="msg @(_isError ? "err" : "ok")">@_msg</span>
+        }
+        @if (_lastUpdated is { } t)
+        {
+            <span class="meta">last updated @t.ToLocalTime().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)</span>
+        }
+    </div>
+</section>

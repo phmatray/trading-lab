@@ -1,0 +1,31 @@
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# IDE
+.idea/
+*.swp
+*.DotSettings
+*.DotSettings.user
+
+# Local data & logs
+*.db
+*.db-shm
+*.db-wal
+*.bak
+logs/
+
+# Brainstorming companion artefacts
+.superpowers/
+
+# Claude Code harness state (worktrees, etc.)
+.claude/
+.claire/
+.worktrees/
+
+# Debug/inspection artefacts
+.dashboard-*.png
+.audit-*.png

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TheAppManager</RootNamespace>
+    <AssemblyName>TheAppManager</AssemblyName>
+    <Description>Vendored TheAppManager v3.0.0 — temporary until the package is published.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

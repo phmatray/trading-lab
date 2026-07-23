@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TradyStrat — refined directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@300..700&display=swap">
+<style>
+:root{
+  --paper:#F1ECDF; --paper-2:#E8E2D3;
+  --ink:#14110D; --ink-2:#2A241D;
+  --rule:#C9C0A8; --oxblood:#6B1F2E; --gold:#A88240; --green:#2F6E45;
+  --vault-bg:#0E0D0A; --vault-bg-2:#15140F;
+  --vault-ivory:#ECE6D6; --vault-gold:#C49A56;
+  --vault-rule:#2C281F; --vault-green:#7AB68E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#1E1B17;color:var(--ink);font-family:'Newsreader',Georgia,serif;-webkit-font-smoothing:antialiased;font-feature-settings:'kern','liga','onum'}
+body{padding:48px 24px;min-height:100vh}
+.num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+
+.section-tag{
+  max-width:1280px;margin:48px auto 18px;padding:0 8px;
+  display:flex;align-items:baseline;justify-content:space-between;
+  font-family:'Fraunces',serif;letter-spacing:0.32em;text-transform:uppercase;
+  font-size:11px;color:#C5BEA9;
+}
+.section-tag .pick{font-family:'JetBrains Mono',monospace;letter-spacing:0.22em;color:#C49A56}
+
+/* ============== DIRECTION A — THE BROADSHEET ============== */
+.a-frame{
+  max-width:1280px;margin:0 auto;background:var(--paper);
+  border:1px solid var(--rule);
+  box-shadow:0 40px 100px -50px rgba(0,0,0,0.55), inset 0 0 120px rgba(168,130,64,0.04);
+  cursor:pointer;transition:transform 220ms ease, box-shadow 220ms ease;
+  position:relative;overflow:hidden;
+}
+.a-frame::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 80% 0%, rgba(107,31,46,0.05), transparent 55%),
+             radial-gradient(circle at 0% 100%, rgba(168,130,64,0.06), transparent 50%);
+}
+.a-frame:hover{transform:translateY(-3px);box-shadow:0 50px 110px -50px rgba(0,0,0,0.6)}
+.a-frame.selected{outline:2px solid var(--oxblood);outline-offset:6px}
+
+.a-masthead{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;
+  padding:18px 40px 14px;border-bottom:2px solid var(--ink);
+  font-family:'Fraunces',serif;font-size:11px;letter-spacing:0.34em;text-transform:uppercase;
+}
+.a-masthead .left{justify-self:start}
+.a-masthead .right{justify-self:end;font-family:'JetBrains Mono',monospace;letter-spacing:0.2em}
+.a-masthead .center{font-size:13px;font-weight:700}
+.a-headline{
+  padding:62px 40px 22px;text-align:center;
+  font-family:'Fraunces',serif;font-size:96px;line-height:0.94;letter-spacing:-0.025em;
+  font-variation-settings:'opsz' 144,'wght' 360,'SOFT' 40;
+}
+.a-headline em{
+  font-style:italic;color:var(--oxblood);
+  font-variation-settings:'opsz' 144,'wght' 320,'SOFT' 100;
+}
+.a-deck{
+  padding:0 40px 36px;text-align:center;font-family:'Newsreader',serif;font-style:italic;
+  font-size:18px;color:var(--ink-2);max-width:680px;margin:0 auto;
+  border-bottom:1px solid var(--rule);padding-bottom:32px;line-height:1.5;
+}
+
+.a-grid{display:grid;grid-template-columns:1.05fr 1fr;border-bottom:1px solid var(--rule)}
+.a-col{padding:36px 40px}
+.a-col + .a-col{border-left:1px solid var(--rule)}
+.col-label{
+  font-family:'Fraunces',serif;font-size:10px;letter-spacing:0.36em;text-transform:uppercase;
+  color:var(--oxblood);margin-bottom:18px;display:flex;align-items:center;gap:14px;
+}
+.col-label::after{content:"";flex:1;height:1px;background:var(--rule)}
+
+.verdict{
+  font-family:'Fraunces',serif;font-size:62px;line-height:1;letter-spacing:-0.012em;
+  font-variation-settings:'opsz' 144,'wght' 700;
+}
+.verdict .accent{color:var(--oxblood);font-style:italic;font-variation-settings:'opsz' 144,'wght' 600,'SOFT' 80}
+.verdict-detail{
+  margin-top:18px;font-size:17px;line-height:1.6;max-width:38ch;color:var(--ink-2);
+}
+.conviction{
+  margin-top:22px;display:flex;align-items:baseline;gap:14px;
+  font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--ink-2);
+}
+.conviction .marks{font-family:'Fraunces',serif;font-size:22px;color:var(--oxblood);letter-spacing:0.06em}
+.conviction .right{margin-left:auto;font-family:'Newsreader',serif;font-style:italic;color:var(--oxblood);text-transform:none;letter-spacing:normal;font-size:14px}
+
+.citations{margin-top:24px;padding-top:14px;border-top:1px dashed var(--rule);counter-reset:c}
+.citations li{
+  list-style:none;padding-left:30px;position:relative;margin-bottom:7px;
+  font-size:13.5px;line-height:1.6;color:var(--ink-2);
+}
+.citations li::before{
+  content:counter(c, lower-roman) ".";counter-increment:c;
+  position:absolute;left:0;top:0;font-family:'Fraunces',serif;font-style:italic;
+  color:var(--oxblood);font-size:14px;
+}
+.citations li b{font-weight:600;color:var(--ink);font-style:normal}
+
+.cta-row{margin-top:28px;display:flex;gap:8px}
+.cta{
+  padding:13px 22px;background:var(--ink);color:var(--paper);
+  font-family:'Fraunces',serif;font-size:11px;letter-spacing:0.34em;text-transform:uppercase;
+  border:none;cursor:pointer;transition:all 150ms;
+}
+.cta:hover{background:var(--oxblood)}
+.cta-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.cta-ghost:hover{background:var(--ink);color:var(--paper)}
+
+.progress-figure{
+  font-family:'Fraunces',serif;font-size:84px;line-height:0.95;letter-spacing:-0.025em;
+  font-variation-settings:'opsz' 144,'wght' 320;
+}
+.progress-figure .euro{color:var(--oxblood);margin-right:2px}
+.progress-figure .pct{font-size:22px;vertical-align:super;color:var(--ink-2);margin-left:12px;font-variation-settings:'opsz' 24,'wght' 500}
+.progress-of{margin-top:10px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-2)}
+.progress-of em{color:var(--oxblood);font-style:italic;text-transform:none;letter-spacing:normal;font-family:'Newsreader';font-size:14px}
+
+.progress-rule{margin-top:30px;height:1px;background:var(--rule);position:relative}
+.progress-rule::before{content:"";position:absolute;left:0;top:-4px;height:9px;width:17.4%;background:var(--oxblood)}
+.milestones{display:flex;justify-content:space-between;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--ink-2)}
+.eta{
+  margin-top:30px;font-family:'Newsreader',serif;font-size:14.5px;line-height:1.65;color:var(--ink-2);max-width:36ch;
+}
+.eta em{color:var(--oxblood);font-style:italic}
+
+.a-chart-wrap{padding:28px 40px 36px}
+.chart{width:100%;height:240px;display:block}
+.chart .grid line{stroke:var(--rule);stroke-dasharray:1 4}
+.chart .axis text{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--ink-2);letter-spacing:0.1em}
+.chart .area{fill:rgba(107,31,46,0.08)}
+.chart .line{stroke:var(--oxblood);stroke-width:1.6;fill:none}
+.chart .goal{stroke:var(--gold);stroke-width:1.2;stroke-dasharray:2 4;fill:none}
+.chart .marker{fill:var(--oxblood)}
+.chart .label{font-family:'Fraunces',serif;font-style:italic;font-size:12px;fill:var(--ink-2)}
+.chart .milestone{font-family:'JetBrains Mono',monospace;font-size:9px;fill:var(--ink-2);letter-spacing:0.12em}
+
+.a-strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--rule)}
+.a-tile{padding:22px 28px;border-right:1px solid var(--rule);display:flex;align-items:baseline;justify-content:space-between}
+.a-tile:last-child{border-right:none}
+.a-tile .tk{font-family:'Fraunces',serif;font-size:13px;letter-spacing:0.34em;text-transform:uppercase}
+.a-tile .px{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink)}
+.a-tile .delta{font-family:'JetBrains Mono',monospace;font-size:11px;margin-left:6px;color:var(--oxblood)}
+.a-tile .delta.up{color:var(--green)}
+
+/* ============== DIRECTION B — THE VAULT ============== */
+.b-frame{
+  max-width:1280px;margin:0 auto 60px;background:var(--vault-bg);color:var(--vault-ivory);
+  border:1px solid var(--vault-rule);
+  box-shadow:0 50px 120px -40px rgba(0,0,0,0.85);
+  cursor:pointer;transition:transform 220ms ease;
+  font-family:'Cormorant Garamond','Newsreader',serif;
+  position:relative;overflow:hidden;
+}
+.b-frame::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 88% -8%, rgba(196,154,86,0.10), transparent 48%),
+             radial-gradient(circle at -5% 105%, rgba(196,154,86,0.06), transparent 42%);
+}
+.b-frame::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.85 0 0 0 0 0.65 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity:0.5;mix-blend-mode:overlay;
+}
+.b-frame:hover{transform:translateY(-3px)}
+.b-frame.selected{outline:2px solid var(--vault-gold);outline-offset:6px}
+.b-frame > *{position:relative;z-index:1}
+
+.b-head{
+  padding:26px 56px 22px;display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--vault-rule);
+}
+.b-mark{font-family:'Cormorant Garamond',serif;font-size:14px;letter-spacing:0.42em;text-transform:uppercase;color:var(--vault-gold)}
+.b-mark .arc{font-style:italic;color:rgba(236,230,214,0.7);font-weight:300;letter-spacing:0;text-transform:none;margin-left:14px;font-size:14px;font-family:'Cormorant Garamond',serif}
+.b-meta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(236,230,214,0.55)}
+
+.b-hero{
+  padding:72px 56px 52px;display:grid;grid-template-columns:1.15fr 1fr;gap:60px;
+  align-items:end;border-bottom:1px solid var(--vault-rule);
+}
+.b-amount-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:var(--vault-gold);margin-bottom:24px}
+.b-amount{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:128px;line-height:0.9;letter-spacing:-0.035em}
+.b-amount .euro{color:var(--vault-gold);margin-right:2px;font-weight:300}
+.b-amount .of{display:block;font-size:13px;letter-spacing:0.34em;text-transform:uppercase;color:rgba(236,230,214,0.55);margin-top:20px;font-family:'JetBrains Mono',monospace}
+.b-progress{margin-top:18px;display:flex;align-items:center;gap:16px}
+.b-progress-bar{flex:1;height:2px;background:var(--vault-rule);position:relative}
+.b-progress-bar::before{content:"";position:absolute;left:0;top:-2px;height:6px;width:17.4%;background:var(--vault-gold);box-shadow:0 0 18px rgba(196,154,86,0.55)}
+.b-progress-pct{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.22em;color:var(--vault-gold)}
+
+.b-call{border-left:1px solid var(--vault-rule);padding:8px 0 0 40px}
+.b-call .label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:var(--vault-gold)}
+.b-call .verb{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:60px;line-height:1;margin:14px 0 8px;color:var(--vault-ivory)}
+.b-call .order{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.16em;color:rgba(236,230,214,0.78);margin-bottom:22px}
+.b-call .reasons{font-family:'Cormorant Garamond',serif;font-size:17px;line-height:1.6;color:rgba(236,230,214,0.78);max-width:36ch}
+.b-call .actions{margin-top:30px;display:flex;gap:10px}
+.b-cta{padding:13px 18px;background:var(--vault-gold);color:#1B1710;border:none;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.26em;text-transform:uppercase;cursor:pointer;transition:all 150ms;font-weight:600}
+.b-cta:hover{background:var(--vault-ivory)}
+.b-cta-ghost{background:transparent;color:var(--vault-ivory);border:1px solid var(--vault-rule);font-weight:400}
+.b-cta-ghost:hover{border-color:var(--vault-gold);color:var(--vault-gold)}
+
+.b-rail{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;border-bottom:1px solid var(--vault-rule)}
+.b-cell{padding:24px 28px;border-right:1px solid var(--vault-rule)}
+.b-cell:last-child{border-right:none}
+.b-cell .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:rgba(236,230,214,0.5)}
+.b-cell .val{margin-top:10px;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:30px;letter-spacing:-0.012em}
+.b-cell .tk{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;letter-spacing:0.04em;color:var(--vault-gold);margin-bottom:4px}
+.b-cell .delta{font-family:'JetBrains Mono',monospace;font-size:11px;margin-left:6px;color:var(--vault-green)}
+.b-cell .delta.dn{color:#C36A6A}
+.b-cell .sub{margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:rgba(236,230,214,0.55)}
+
+.b-chart-wrap{padding:38px 56px 60px}
+.b-chart-wrap .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--vault-gold);margin-bottom:22px}
+.b-chart{width:100%;height:240px;display:block}
+.b-chart .grid line{stroke:var(--vault-rule)}
+.b-chart .axis text{font-family:'JetBrains Mono',monospace;font-size:10px;fill:rgba(236,230,214,0.5);letter-spacing:0.1em}
+.b-chart .line{stroke:var(--vault-gold);stroke-width:1.4;fill:none;filter:drop-shadow(0 0 6px rgba(196,154,86,0.45))}
+.b-chart .goal{stroke:rgba(196,154,86,0.45);stroke-width:1;stroke-dasharray:2 4;fill:none}
+.b-chart .label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;fill:rgba(236,230,214,0.7)}
+
+.picker-note{
+  max-width:1280px;margin:0 auto 80px;padding:0 16px;
+  font-family:'Fraunces',serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;
+  color:#A8A294;text-align:center;
+}
+@media (max-width:980px){
+  .a-grid,.b-hero{grid-template-columns:1fr}
+  .a-col + .a-col{border-left:none;border-top:1px solid var(--rule)}
+  .b-call{border-left:none;border-top:1px solid var(--vault-rule);padding:36px 0 0 0;margin-top:36px}
+  .a-headline{font-size:64px}
+  .b-amount{font-size:88px}
+  .b-rail{grid-template-columns:1fr 1fr}
+  .b-cell{border-bottom:1px solid var(--vault-rule)}
+}
+</style>
+</head>
+<body>
+
+<!-- ============== DIRECTION A: THE BROADSHEET ============== -->
+<div class="section-tag">
+  <span>Direction A · The Broadsheet</span>
+  <span class="pick">Click frame to select →</span>
+</div>
+<div class="a-frame option" data-choice="a" onclick="toggleSelect(this)">
+  <div class="a-masthead">
+    <span class="left">Tradystrat</span>
+    <span class="center">The Ledger of Patience</span>
+    <span class="right">No. cxxiv · vi · v · mmxxvi</span>
+  </div>
+  <div class="a-headline">A million euros, <em>one share at a time.</em></div>
+  <div class="a-deck">A daily companion for the disciplined accumulation of CON3 — Coinbase's threefold leverage — observed against its parent and bitcoin, judged by indicator and prudence.</div>
+
+  <div class="a-grid">
+    <div class="a-col">
+      <div class="col-label">Today's Call · 6 May 2026</div>
+      <div class="verdict">Acquire <span class="accent">VIII</span> shares.</div>
+      <div class="verdict-detail">CON3 sits beneath its lower Bollinger band, RSI is curling up from 27, and the 50/200 SMA still leans constructive. Add a measured eight at or below €4.85.</div>
+      <div class="conviction">
+        Conviction <span class="marks">●●●●○</span>
+        <span class="right">≈ €38.40 commitment</span>
+      </div>
+      <ol class="citations">
+        <li><b>CON3</b> closed €4.79 — 1.4 σ below its 20-day mean.</li>
+        <li><b>RSI(14)</b> at 31, exiting oversold.</li>
+        <li><b>COIN</b> holding above its 50-day; <b>BTC</b> steady above $94k.</li>
+        <li><b>Ichimoku</b> cloud thinning — caution if breach below €4.50.</li>
+      </ol>
+      <div class="cta-row">
+        <button class="cta">Log this trade</button>
+        <button class="cta cta-ghost">Re-run AI</button>
+      </div>
+    </div>
+    <div class="a-col">
+      <div class="col-label">Progress to one million</div>
+      <div class="progress-figure"><span class="euro">€</span><span class="num">174,290</span><span class="pct">17.4%</span></div>
+      <div class="progress-of">of €1,000,000 · <em>36,180 sh · avg €4.10</em></div>
+      <div class="progress-rule"></div>
+      <div class="milestones"><span>0%</span><span>· 25 ·</span><span>· 50 ·</span><span>· 75 ·</span><span>100%</span></div>
+      <div class="eta">At the present cadence — two acquisitions per market week, averaging €184 — the goal is reached on <em>14 March 2030</em>. T+1,237 trading days.</div>
+    </div>
+  </div>
+
+  <div class="a-chart-wrap">
+    <div class="col-label">Capital growth · since November 2024</div>
+    <svg class="chart" viewBox="0 0 1200 240" preserveAspectRatio="none">
+      <g class="grid">
+        <line x1="0" y1="40" x2="1200" y2="40"/>
+        <line x1="0" y1="100" x2="1200" y2="100"/>
+        <line x1="0" y1="160" x2="1200" y2="160"/>
+        <line x1="0" y1="220" x2="1200" y2="220"/>
+      </g>
+      <path class="goal" d="M0,225 L1200,5"/>
+      <text class="label" x="1180" y="14" text-anchor="end">€1,000,000 — goal</text>
+      <path class="area" d="M0,225 C 100,222 180,212 260,210 S 420,198 520,182 S 700,160 820,150 S 960,134 1080,118 L1200,108 L1200,240 L0,240 Z"/>
+      <path class="line" d="M0,225 C 100,222 180,212 260,210 S 420,198 520,182 S 700,160 820,150 S 960,134 1080,118 L1200,108"/>
+      <circle class="marker" cx="1200" cy="108" r="4"/>
+      <text class="label" x="1188" y="100" text-anchor="end">€174,290 — today</text>
+      <g class="axis">
+        <text x="0" y="236">Nov 2024</text>
+        <text x="600" y="236" text-anchor="middle">Aug 2025</text>
+        <text x="1200" y="236" text-anchor="end">May 2026</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="a-strip">
+    <div class="a-tile"><span class="tk">CON3</span><span><span class="px">€4.82</span><span class="delta up num">+0.6%</span></span></div>
+    <div class="a-tile"><span class="tk">COIN</span><span><span class="px">$215.40</span><span class="delta num">−0.3%</span></span></div>
+    <div class="a-tile"><span class="tk">BTC</span><span><span class="px">$96,420</span><span class="delta up num">+1.1%</span></span></div>
+  </div>
+</div>
+
+<!-- ============== DIRECTION B: THE VAULT ============== -->
+<div class="section-tag" style="margin-top:80px">
+  <span>Direction B · The Vault</span>
+  <span class="pick">Click frame to select →</span>
+</div>
+<div class="b-frame option" data-choice="b" onclick="toggleSelect(this)">
+  <div class="b-head">
+    <div class="b-mark">Tradystrat <span class="arc">— a private chronicle of accumulation</span></div>
+    <div class="b-meta">06 · 05 · 2026 · entry no. 0412</div>
+  </div>
+
+  <div class="b-hero">
+    <div>
+      <div class="b-amount-label">Capital under accumulation</div>
+      <div class="b-amount"><span class="euro">€</span><span class="num">174,290</span><span class="of">— of one million —</span></div>
+      <div class="b-progress">
+        <div class="b-progress-bar"></div>
+        <div class="b-progress-pct">17.4 %</div>
+      </div>
+    </div>
+    <div class="b-call">
+      <div class="label">Today's call · 6 May</div>
+      <div class="verb">Acquire.</div>
+      <div class="order">8 sh CON3 · ≤ €4.85 · ≈ €38.40</div>
+      <div class="reasons">The instrument trades 1.4 σ below its 20-day mean, with momentum lifting from oversold and the parent unbroken. A modest addition is warranted; restraint, also.</div>
+      <div class="actions">
+        <button class="b-cta">Log trade</button>
+        <button class="b-cta b-cta-ghost">Re-run AI</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-rail">
+    <div class="b-cell">
+      <div class="lbl">Position</div>
+      <div class="val"><span class="num">36,180</span> sh</div>
+      <div class="sub">avg €4.10 · P&amp;L +17.6 %</div>
+    </div>
+    <div class="b-cell">
+      <div class="tk">CON3</div>
+      <div class="val"><span class="num">€4.82</span><span class="delta">+0.6%</span></div>
+    </div>
+    <div class="b-cell">
+      <div class="tk">COIN</div>
+      <div class="val"><span class="num">$215</span><span class="delta dn">−0.3%</span></div>
+    </div>
+    <div class="b-cell">
+      <div class="tk">BTC</div>
+      <div class="val"><span class="num">$96.4k</span><span class="delta">+1.1%</span></div>
+    </div>
+  </div>
+
+  <div class="b-chart-wrap">
+    <div class="lbl">Capital growth · trajectory toward goal</div>
+    <svg class="b-chart" viewBox="0 0 1200 240" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="vault-grad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#C49A56" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#C49A56" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g class="grid">
+        <line x1="0" y1="40" x2="1200" y2="40"/>
+        <line x1="0" y1="100" x2="1200" y2="100"/>
+        <line x1="0" y1="160" x2="1200" y2="160"/>
+        <line x1="0" y1="220" x2="1200" y2="220"/>
+      </g>
+      <path class="goal" d="M0,225 L1200,8"/>
+      <text class="label" x="1186" y="20" text-anchor="end">€1,000,000 — goal</text>
+      <path style="fill:url(#vault-grad)" d="M0,225 C 90,222 170,212 240,209 S 420,196 520,178 S 700,154 820,140 S 980,116 1080,100 L1200,88 L1200,240 L0,240 Z"/>
+      <path class="line" d="M0,225 C 90,222 170,212 240,209 S 420,196 520,178 S 700,154 820,140 S 980,116 1080,100 L1200,88"/>
+      <circle r="3.5" cx="1200" cy="88" fill="#C49A56" filter="drop-shadow(0 0 4px rgba(196,154,86,0.7))"/>
+      <text class="label" x="1186" y="80" text-anchor="end">€174,290 — today</text>
+      <g class="axis">
+        <text x="0" y="236">Nov 2024</text>
+        <text x="600" y="236" text-anchor="middle">Aug 2025</text>
+        <text x="1200" y="236" text-anchor="end">May 2026</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="picker-note">Click a frame to select — or tell me in the terminal what to push further: typography, density, color, motion, or content emphasis.</div>
+
+</body>
+</html>

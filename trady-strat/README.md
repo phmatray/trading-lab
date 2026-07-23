@@ -1,0 +1,241 @@
+![TradyStrat banner](.github/banner.png)
+
+# TradyStrat
+
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - TradyStrat](https://img.shields.io/static/v1?label=phmatray&message=TradyStrat&color=blue&logo=github)](https://github.com/phmatray/TradyStrat)
+![Top language](https://img.shields.io/github/languages/top/phmatray/TradyStrat)
+[![Stars](https://img.shields.io/github/stars/phmatray/TradyStrat?style=social)](https://github.com/phmatray/TradyStrat/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/TradyStrat?style=social)](https://github.com/phmatray/TradyStrat/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/commits)
+<!-- portfolio-badges:end -->
+
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Quick start (local)](#quick-start-local)
+- [File locations](#file-locations)
+- [Quick start (Docker / OrbStack)](#quick-start-docker--orbstack)
+- [MCP server (read-only, personal)](#mcp-server-read-only-personal)
+- [Tests](#tests)
+- [Project layout](#project-layout)
+- [Configuration](#configuration)
+- [Architecture (TL;DR)](#architecture-tldr)
+- [Out of scope](#out-of-scope)
+- [License](#license)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
+
+Personal Blazor Server dashboard tracking accumulation of **CON3.L** (Leverage Shares 3x Long Coinbase ETP, LSE, USD-quoted) toward **€1,000,000**. Daily Yahoo Finance prices for CON3.L / COIN / BTC-USD plus EUR/USD FX, technical-analysis zones (Bollinger / RSI / SMA / Ichimoku), and an Anthropic-generated cited daily suggestion — in "The Vault" UI.
+
+> **Spec:** [`docs/superpowers/specs/2026-05-06-tradystrat-dashboard-design.md`](docs/superpowers/specs/2026-05-06-tradystrat-dashboard-design.md)
+> **Visual reference:** [`docs/superpowers/specs/2026-05-06-tradystrat-vault-mockup.html`](docs/superpowers/specs/2026-05-06-tradystrat-vault-mockup.html)
+> **Implementation plan:** [`docs/superpowers/plans/2026-05-06-tradystrat-dashboard.md`](docs/superpowers/plans/2026-05-06-tradystrat-dashboard.md)
+
+## Features
+
+- **The Vault dashboard**: A Blazor Server page (masthead, hero capital, growth chart, positions table, markets rail) showing live progress toward the €1,000,000 goal for CON3.L, with COIN and BTC-USD as context tickers.
+- **Daily price & FX feed**: `PriceFeedHostedService` warms ~2 years of daily bars per ticker from Yahoo Finance plus EUR/USD FX at startup, served through `DailyPriceCache`/`DailyFxCache` decorators.
+- **Technical-analysis zones**: Bollinger Bands, RSI, SMA200 and Ichimoku indicators, each an `IZoneRule` strategy composed by `ZoneClassifier` into a single zone verdict.
+- **AI-generated daily suggestion**: `AiSnapshotService` builds a snapshot (goal, markets, portfolio, recent trades/suggestions) and calls Claude via `IChatClient` for a cited buy/hold/sell call, with day-over-day call diffing (`CallDiffBuilder`).
+- **Trade ledger & portfolio tracking**: Manual trade entry plus bulk CSV import (`CsvImportService`), with FIFO lot accounting driving the daily growth series toward the goal.
+- **Relevant prediction-market context**: `PolymarketRelevance`/`PolymarketFilter` surface only Polymarket questions tied to BTC/ETH price targets, Coinbase corporate events, ETF approvals or Fed rate decisions.
+- **Suggestion backfill & replay**: `SuggestionBackfillCoordinator` fills in missed days and `ReplaySuggestionsUseCase` replays/reports past suggestion runs for auditing.
+- **Read-only MCP server**: `TradyStrat.Cli mcp` exposes six stdio tools (`list_instruments`, `get_dashboard`, `query_suggestions`, `query_prices`, `get_portfolio`, `get_replay_report`) for Claude Desktop/Code.
+
+## Quick start (local)
+
+Requirements:
+- **.NET 10 SDK** — verify with `dotnet --list-sdks` (must show `10.0.x`).
+- An **Anthropic API key** for the daily suggestion feature (you can boot without it; the dashboard will surface a typed error and you skip the AI flow).
+
+```bash
+# 1. Restore the local dotnet-ef tool (one time)
+dotnet tool restore
+
+# 2. Set the Anthropic API key (one time, stored in user-secrets)
+dotnet user-secrets set "Anthropic:ApiKey" "sk-ant-…" --project TradyStrat
+
+# 3. Run
+dotnet run --project TradyStrat
+```
+
+Visit **http://127.0.0.1:5180**.
+
+The first run takes a moment: `PriceFeedHostedService` warms the daily caches by fetching ~2 years of bars per ticker from Yahoo plus the EUR/USD rate.
+
+> **Why `dotnet tool restore`?** The repo pins `dotnet-ef` 10.0.7 as a local manifest (`.config/dotnet-tools.json`) — necessary because the system-global `dotnet-ef` was older and root-owned in our setup. The local manifest avoids the conflict.
+
+> **Hot reload caveat:** `dotnet watch` does **not** apply changes to host-page Razor files (`Components/App.razor`). If you edit that file (or anything that affects the rendered HTML shell), restart the watch process to see the change.
+
+## File locations
+
+| | |
+|---|---|
+| **Database** | `~/Library/Application Support/TradyStrat/tradystrat.db` |
+| **Logs** | `~/Library/Application Support/TradyStrat/logs/tradystrat-yyyymmdd.log` (daily rolling, 14 retained) |
+
+Backup the DB by copying the file. Migrations apply automatically on startup; safe to delete the DB to start fresh.
+
+## Quick start (Docker / OrbStack)
+
+The image is for parity / portability; the local-only security model still applies via `127.0.0.1` port binding. Built and verified against [OrbStack](https://orbstack.dev) on macOS — the standard `docker` CLI commands work unchanged.
+
+```bash
+# Build (no secret baked in)
+docker build -t tradystrat:latest .
+
+# Run, mounting a host directory for the SQLite DB and logs,
+# and supplying the Anthropic key via env (NOT baked into the image)
+docker run --rm -it \
+  -p 127.0.0.1:5180:5180 \
+  -v "$HOME/Library/Application Support/TradyStrat":/data \
+  -e Anthropic__ApiKey="$ANTHROPIC_API_KEY" \
+  tradystrat:latest
+```
+
+Visit http://127.0.0.1:5180.
+
+## MCP server (read-only, personal)
+
+A read-only Model Context Protocol server is available as a subcommand of `TradyStrat.Cli`:
+
+```bash
+dotnet run --project TradyStrat.Cli -- mcp
+```
+
+This exposes six question-oriented tools (`list_instruments`, `get_dashboard`, `query_suggestions`, `query_prices`, `get_portfolio`, `get_replay_report`) over stdio for Claude Desktop or Claude Code. See [`docs/superpowers/specs/2026-05-18-mcp-server-design.md`](docs/superpowers/specs/2026-05-18-mcp-server-design.md) for the full design and reference-architecture conventions.
+
+The server is read-only and personal: no writes, no auth, stdio-only, single-user.
+
+To wire it up in Claude Desktop, add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```jsonc
+{
+  "mcpServers": {
+    "tradystrat": {
+      "command": "dotnet",
+      "args": ["run", "--project", "/absolute/path/to/TradyStrat.Cli", "--", "mcp"]
+    }
+  }
+}
+```
+
+## Tests
+
+```bash
+dotnet test
+```
+
+xunit.v3, Shouldly, in-memory EF for repository tests, captured Yahoo JSON fixtures for the parser. Live external services (Yahoo, Anthropic) are not exercised by tests.
+
+## Project layout
+
+Top-level folders inside `TradyStrat/`:
+
+| Folder | Responsibility |
+|---|---|
+| `Modules/` | `TheAppManager.IAppModule` per feature; `Program.cs` is one line. |
+| `Features/Dashboard/` | The Vault UI — page + six components. |
+| `Features/PriceFeed/` | Yahoo client + DailyPriceCache decorator + hosted warm-up. |
+| `Features/Fx/` | EUR/USD provider + cache + USD→EUR converter. |
+| `Features/Indicators/` | TaLibStandard wrappers + IZoneRule strategies + ZoneClassifier composite. |
+| `Features/Trades/` | Trade ledger UI + CSV import. |
+| `Features/AiSuggestion/` | AiSnapshotService + IChatClient-backed SuggestionService. |
+| `Features/Settings/` | Goal editor. |
+| `Features/Portfolio/` | FIFO lot accounting + daily growth series. |
+| `Application/UseCases/` | One class per command/query (`IUseCase<TIn,TOut>`). Razor pages depend on these, not on services. |
+| `Application/Abstractions/` | `IUseCase`, `UseCaseBase` (template method with logging), `Unit`. |
+| `Specifications/` | Ardalis spec classes (Trades / PriceBars / FxRates / Suggestions). |
+| `Shared/Domain/` | Entities + value records + computed types. |
+| `Shared/Exceptions/` | `TradyStratException` + 7 typed children. |
+| `Shared/Time/` | `IClock` + `SystemClock` (timezone-per-ticker). |
+| `Data/` | `AppDbContext` + `IEntityTypeConfiguration` + EF migrations. |
+
+`docs/superpowers/{specs,plans}/` contain the design + implementation plan that drove the project.
+
+## Configuration
+
+Non-secret config in `appsettings.json` (committed):
+
+```json
+{
+  "Anthropic": { "Model": "claude-opus-4-7", "MaxTokens": 1500 },
+  "Yahoo":     { "BaseUrl": "https://query1.finance.yahoo.com" },
+  "Tickers":   { "Focus": "CON3.L", "Context": ["COIN", "BTC-USD"] },
+  "Fx":        { "Pair": "EURUSD" },
+  "Database":  { "Path": "~/Library/Application Support/TradyStrat/tradystrat.db" }
+}
+```
+
+The Anthropic API key is the only secret. Local: `dotnet user-secrets`. Docker: `Anthropic__ApiKey` env var.
+
+## Architecture (TL;DR)
+
+```
+browser
+  └─► Razor page (DashboardPage / TradesPage / SettingsPage)
+        └─► UseCase  (LoadDashboard / LogTrade / GetTodaysSuggestion / …)
+              └─► Feature service  (IndicatorEngine / PortfolioService / SuggestionService / …)
+                    ├─► EF Core via Ardalis Specification
+                    └─► IChatClient (Anthropic.SDK adapter) for AI
+                                                        ↑
+PriceFeedHostedService warms DailyPriceCache + DailyFxCache from Yahoo at startup.
+TheAppManager modules wire everything in Program.cs (one line).
+```
+
+Design patterns called out in the spec (§17):
+
+- **Adapter** — TaLib wrappers, FxConverter
+- **Strategy + Composite** — `IZoneRule` implementations + `ZoneClassifier`
+- **Decorator** — `DailyPriceCache` / `DailyFxCache` wrap the raw providers
+- **Command + Template Method** — `IUseCase` + `UseCaseBase`
+- **Service-orchestrator** — `AiSnapshotService.CreateAsync` (10 collaborators; was naming-mislabelled as Factory Method through Phase 1)
+- **Saga (per-ticker fan-out)** — `GetAllTodaysSuggestionsUseCase` (swallow-and-continue) and `SuggestionBackfillCoordinator` (first-fail-stop) — same shape, deliberately distinct failure policies
+- **Specification** — Ardalis specs for all DB queries
+- **Facade** — `LoadDashboardUseCase`, `PortfolioService`
+
+## Out of scope
+
+- Multi-user, auth, reverse proxy, TLS.
+- Broker integration; trades are entered manually (CSV is the only bulk path).
+- Real-time prices or websockets — daily bars only.
+- Alerts, push notifications, scheduled emails.
+- Backtesting.
+- Mobile-specific layouts.
+- Tickers other than CON3.L / COIN / BTC-USD; currencies other than EUR/USD.
+
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/TradyStrat/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
+## License
+
+Personal use.
+
+---
+
+<!-- portfolio-sections:start -->
+
+## Contributing
+
+Contributions are welcome. Open an issue first to discuss any significant change.
+
+1. Fork the repository and create your branch (`git checkout -b feat/my-feature`)
+2. Commit your changes (`git commit -m 'feat: ...'`)
+3. Push the branch and open a Pull Request
+
+<!-- portfolio-sections:end -->

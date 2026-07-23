@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TradyStrat Dev" type="RunDotNetWatch" factoryName="RunDotNetWatch">
+    <option name="exePath" value="$PROJECT_DIR$/TradyStrat/bin/Debug/net10.0/TradyStrat" />
+    <option name="programParameters" value="" />
+    <option name="projectFilePath" value="$PROJECT_DIR$/TradyStrat/TradyStrat.csproj" />
+    <option name="projectTfm" value="net10.0" />
+    <option name="restartOnRudeEditEditor" value="true" />
+    <option name="terminalMode" value="Auto" />
+    <option name="watchParameters" value="" />
+    <option name="workingDirectory" value="$PROJECT_DIR$/TradyStrat" />
+    <method v="2" />
+  </configuration>
+</component>

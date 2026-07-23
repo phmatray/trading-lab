@@ -1,0 +1,90 @@
+.masthead {
+    padding: 22px 56px 18px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: center;
+    border-bottom: 1px solid var(--vault-rule);
+}
+.brand {
+    justify-self: start;
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--vault-gold);
+    margin: 0;
+}
+.nav {
+    justify-self: center;
+    display: flex;
+    gap: 28px;
+}
+/* NavLink renders its own anchor (child component), so we need ::deep. */
+.nav ::deep .nav-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-xs);
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 6px 0;
+    position: relative;
+    transition: color 180ms ease;
+}
+.nav ::deep .nav-link:hover { color: var(--vault-ivory); }
+
+/* Active route — gold underline. NavLink applies the `active` class
+   automatically based on the route match. */
+.nav ::deep .nav-link.active {
+    color: var(--vault-ivory);
+}
+.nav ::deep .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--vault-gold);
+    box-shadow: 0 0 8px rgba(196,154,86,0.45);
+}
+
+.head-right {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: var(--tracking-md);
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+.freshness {
+    color: var(--ink-4);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 860px) {
+  .masthead { grid-template-columns: 1fr; gap: 14px; padding: 18px 24px 14px; }
+  .brand { justify-self: start; }
+  .nav { justify-self: start; flex-wrap: wrap; gap: 18px 22px; }
+  .head-right { justify-self: start; flex-wrap: wrap; gap: 10px; }
+}
+@media (max-width: 560px) {
+  /* Ribbon cells share borders so they must stay 28px tall; let the trailing
+     meta cell wrap onto its own row inside the box. */
+  .masthead .travel-ribbon { flex-wrap: wrap; height: auto; }
+  .masthead .ribbon-step, .masthead .ribbon-date { height: 28px; }
+  .masthead .ribbon-date { border-right: 1px solid var(--vault-rule); }
+  .masthead .ribbon-meta {
+    flex-basis: 100%;
+    border-top: 1px solid var(--vault-rule);
+    padding: 6px 12px;
+    justify-content: flex-start;
+  }
+}

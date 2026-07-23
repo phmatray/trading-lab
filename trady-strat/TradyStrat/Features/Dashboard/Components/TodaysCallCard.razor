@@ -1,0 +1,82 @@
+@using TradyStrat.Application.Dashboard
+@using TradyStrat.Domain
+@using TradyStrat.Domain.Suggestions
+<div class="call">
+    <h2 class="label section-heading">
+        <span class="section-roman">III.</span>
+        <span>@(Historical ? $"Call for {Today.ToString("d MMMM", FrFr)}" : $"Today's call · {Today.ToString("d MMMM", FrFr)}")@if (!Historical && !string.IsNullOrEmpty(CallAsOfRelative))
+        {
+            <span class="freshness"> · @CallAsOfRelative</span>
+        }</span>
+    </h2>
+
+    @if (State is null)
+    {
+        <p class="reasons empty">No AI call recorded for @Today.ToString("d MMMM yyyy", FrFr).</p>
+    }
+    else if (State is SuggestionState.Pending)
+    {
+        <div class="call-card--skeleton" aria-busy="true" aria-label="Loading AI suggestion">
+            <div class="skeleton-line skeleton-action"></div>
+            <div class="skeleton-line skeleton-conviction"></div>
+            <div class="skeleton-line skeleton-rationale"></div>
+            <div class="skeleton-line skeleton-citation"></div>
+        </div>
+    }
+    else if (State is SuggestionState.Failed f)
+    {
+        <div class="call-card--error" role="alert">
+            <span class="error-icon" aria-hidden="true">!</span>
+            <span class="error-msg">AI call failed: @Truncate(f.Reason, 80)</span>
+            <button class="btn btn-sm retry" @onclick="OnRetry">Retry</button>
+        </div>
+    }
+    else if (State is SuggestionState.Ready ready)
+    {
+        var Sug = ready.Suggestion;
+
+        @if (_backfillLabel is not null)
+        {
+            <div class="backfill-pill">@_backfillLabel</div>
+        }
+
+        @if (Sug.Citations is { Count: > 0 })
+        {
+            <ul class="tldr">
+                @foreach (var c in Sug.Citations.Take(3))
+                {
+                    <li><span class="tldr-k">@c.Indicator <em>@c.Ticker</em></span> @c.Claim</li>
+                }
+            </ul>
+        }
+
+        <p class="reasons">
+            <span class="verb-drop" data-verb="@VerbStem">@Verb</span><span class="verb-tail" data-verb="@VerbStem">.</span> @Sug.Rationale
+        </p>
+
+        @if (Sug.Action == SuggestionAction.Acquire && Sug.QuantityHint.IsSpecified && !Sug.MaxPriceHint.IsEmpty)
+        {
+            var q  = Sug.QuantityHint.Value;
+            var mp = Sug.MaxPriceHint.PerUnit.Amount;
+            <div class="order num">
+                @q.ToString("F0", FrFr) sh @FocusLabel · ≤ €@mp.ToString("F2", FrFr)
+                · ≈ €@((q * mp).ToString("F2", FrFr))
+            </div>
+        }
+
+        @if (!Historical)
+        {
+            <div class="actions">
+                <button class="cta"
+                        disabled="@(Sug.Action != SuggestionAction.Acquire)"
+                        title="@(Sug.Action == SuggestionAction.Acquire ? "Log the suggested acquisition" : $"Disabled — today's call is \"{Verb}\", not an acquisition")"
+                        @onclick="OnLogTrade">Log trade</button>
+                <button class="cta ghost" @onclick="OnRerun">Re-run AI</button>
+            </div>
+            @if (Sug.Action != SuggestionAction.Acquire)
+            {
+                <p class="actions-hint">Logging is enabled only when the call is an acquisition.</p>
+            }
+        }
+    }
+</div>

@@ -1,0 +1,43 @@
+<div class="modal" @onclick="() => OnCancel.InvokeAsync()">
+    <div class="modal-body" @onclick:stopPropagation="true">
+        <h3>Add trade</h3>
+        @if (_heldInstruments.Count == 0)
+        {
+            <p class="err">No Held instruments configured. Add one in Settings → Held first.</p>
+            <div class="modal-actions">
+                <button class="btn" disabled>Save</button>
+                <button class="btn ghost" @onclick="() => OnCancel.InvokeAsync()">Cancel</button>
+            </div>
+        }
+        else
+        {
+            <div class="grid">
+                <label>Ticker
+                    <select @bind="_instrumentId">
+                        <option value="0" disabled selected>— pick a held instrument —</option>
+                        @foreach (var i in _heldInstruments)
+                        {
+                            <option value="@i.Id">@i.Ticker</option>
+                        }
+                    </select>
+                </label>
+                <label>Date<input type="date" @bind="_date" /></label>
+                <label>Side<select @bind="_side">
+                    <option value="Buy">Buy</option><option value="Sell">Sell</option>
+                </select></label>
+                <label>Quantity<input type="number" step="0.0001" @bind="_qty" /></label>
+                <label>Price (€)<input type="number" step="0.01" @bind="_price" /></label>
+                <label>Fees (€)<input type="number" step="0.01" @bind="_fees" /></label>
+                <label class="full">Note<input @bind="_note" /></label>
+            </div>
+            @if (!string.IsNullOrEmpty(_err))
+            {
+                <p class="err">@_err</p>
+            }
+            <div class="modal-actions">
+                <button class="btn" @onclick="DoSubmit">Save</button>
+                <button class="btn ghost" @onclick="() => OnCancel.InvokeAsync()">Cancel</button>
+            </div>
+        }
+    </div>
+</div>

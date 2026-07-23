@@ -1,0 +1,69 @@
+/* AddInstrument-specific styling. The base section / heading / field / button
+   styling comes from the shared wwwroot/css/settings-forms.css via the
+   `settings-section` class on the root <section>; this file only adds what
+   differs (the probe → result → kind-pick → add/cancel flow). */
+
+/* Ticker input + Probe button side by side, not two equal columns. */
+.add-instrument .grid { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* The Add / Cancel row sits closer to the kind picker above it. */
+.add-instrument .actions { margin-top: 16px; }
+
+.add-instrument .btn.ghost {
+    background: transparent;
+    color: var(--vault-gold);
+    border: 1px solid var(--vault-rule);
+}
+.add-instrument .btn.ghost:hover:not(:disabled) {
+    background: var(--vault-rule);
+    color: var(--vault-ivory);
+}
+
+.add-instrument .probe-result {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 16px;
+    margin: 20px 0 16px;
+    padding: 16px 20px;
+    background: var(--vault-bg);
+    border: 1px solid var(--vault-rule);
+    font-family: var(--font-mono);
+    font-size: 13px;
+}
+.add-instrument .probe-result dt {
+    color: var(--vault-gold);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-xs);
+}
+.add-instrument .probe-result dd { margin: 0; color: var(--vault-ivory); }
+
+.add-instrument .kind-pick {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--vault-ivory);
+}
+.add-instrument .kind-pick label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.add-instrument .kind-pick input[type="radio"] { accent-color: var(--vault-gold); }
+
+.add-instrument .err {
+    color: var(--vault-red);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: var(--tracking-md);
+    margin: 12px 0 0;
+}
+.add-instrument .ok {
+    color: var(--vault-green);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: var(--tracking-md);
+    margin: 12px 0 0;
+}
+
+@media (max-width: 720px) {
+    .add-instrument .grid { grid-template-columns: 1fr; }
+}
