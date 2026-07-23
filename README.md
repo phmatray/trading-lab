@@ -1,3 +1,5 @@
+![TradyStrat banner](.github/banner.png)
+
 # TradyStrat
 
 Personal Blazor Server dashboard tracking accumulation of **CON3.L** (Leverage Shares 3x Long Coinbase ETP, LSE, USD-quoted) toward **€1,000,000**. Daily Yahoo Finance prices for CON3.L / COIN / BTC-USD plus EUR/USD FX, technical-analysis zones (Bollinger / RSI / SMA / Ichimoku), and an Anthropic-generated cited daily suggestion — in "The Vault" UI.
