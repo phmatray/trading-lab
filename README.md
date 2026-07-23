@@ -2,6 +2,21 @@
 
 # MetaTrader5 Docker Image
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - MetaTrader5-Docker-Image](https://img.shields.io/static/v1?label=phmatray&message=MetaTrader5-Docker-Image&color=blue&logo=github)](https://github.com/phmatray/MetaTrader5-Docker-Image)
+![Top language](https://img.shields.io/github/languages/top/phmatray/MetaTrader5-Docker-Image)
+[![Stars](https://img.shields.io/github/stars/phmatray/MetaTrader5-Docker-Image?style=social)](https://github.com/phmatray/MetaTrader5-Docker-Image/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/MetaTrader5-Docker-Image?style=social)](https://github.com/phmatray/MetaTrader5-Docker-Image/network/members)
+[![License](https://img.shields.io/github/license/phmatray/MetaTrader5-Docker-Image)](https://github.com/phmatray/MetaTrader5-Docker-Image/blob/HEAD/LICENSE)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/MetaTrader5-Docker-Image)](https://github.com/phmatray/MetaTrader5-Docker-Image/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/MetaTrader5-Docker-Image)](https://github.com/phmatray/MetaTrader5-Docker-Image/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/MetaTrader5-Docker-Image)](https://github.com/phmatray/MetaTrader5-Docker-Image/commits)
+<!-- portfolio-badges:end -->
+
+
 This project provides a Docker image for running MetaTrader5 with remote access via VNC, based on the [KasmVNC](https://github.com/kasmtech/KasmVNC) project and [KasmVNC Base Images from LinuxServer](https://github.com/linuxserver/docker-baseimage-kasmvnc).
 
 ## Features
