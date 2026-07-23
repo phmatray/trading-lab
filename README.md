@@ -16,6 +16,20 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/MetaTrader5-Docker-Image)](https://github.com/phmatray/MetaTrader5-Docker-Image/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Contributions](#contributions)
+- [License](#license)
+
+<!-- portfolio-toc:end -->
+
+
 
 This project provides a Docker image for running MetaTrader5 with remote access via VNC, based on the [KasmVNC](https://github.com/kasmtech/KasmVNC) project and [KasmVNC Base Images from LinuxServer](https://github.com/linuxserver/docker-baseimage-kasmvnc).
 
