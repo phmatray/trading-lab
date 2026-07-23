@@ -187,3 +187,17 @@ Design patterns called out in the spec (§17):
 ## License
 
 Personal use.
+
+---
+
+<!-- portfolio-sections:start -->
+
+## Contributing
+
+Contributions are welcome. Open an issue first to discuss any significant change.
+
+1. Fork the repository and create your branch (`git checkout -b feat/my-feature`)
+2. Commit your changes (`git commit -m 'feat: ...'`)
+3. Push the branch and open a Pull Request
+
+<!-- portfolio-sections:end -->
