@@ -1,0 +1,43 @@
+services:
+  tradingstrat-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tradingstrat-web:latest
+    container_name: tradingstrat-web
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      # Override database path to use Docker volume
+      - Trading__Database__ConnectionString=Data Source=/app/data/trading.db
+      # AI Assistant configuration (set your Anthropic API key here)
+      - Trading__Assistant__ApiKey=${ANTHROPIC_API_KEY:-YOUR_ANTHROPIC_API_KEY_HERE}
+      - Trading__Assistant__Model=claude-sonnet-4-5-20250929
+      - Trading__Assistant__MaxTokens=2048
+      - Trading__Assistant__Temperature=0.7
+    volumes:
+      # Persist SQLite database
+      - tradingstrat-data:/app/data
+      # Persist logs
+      - tradingstrat-logs:/app/logs
+      # Persist exports
+      - tradingstrat-exports:/app/exports
+      # Optional: Mount custom appsettings (uncomment to override)
+      # - ./appsettings.Production.json:/app/appsettings.Production.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  tradingstrat-data:
+    driver: local
+  tradingstrat-logs:
+    driver: local
+  tradingstrat-exports:
+    driver: local

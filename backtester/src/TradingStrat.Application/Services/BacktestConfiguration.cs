@@ -1,0 +1,24 @@
+using TradingStrat.Domain.ValueObjects;
+
+namespace TradingStrat.Application.Services;
+
+public enum PositionSizingMode
+{
+    AllIn,
+    Fixed,
+    Percentage
+}
+
+public record BacktestConfiguration(
+    string Ticker,
+    DateTime StartDate,
+    DateTime EndDate,
+    decimal InitialCapital,
+    decimal CommissionPercentage,
+    decimal MinimumCommission,
+    TimeFrame TimeFrame,
+    PositionSizingMode PositionSizing = PositionSizingMode.AllIn,
+    int? FixedQuantity = null,
+    decimal? PositionPercentage = null,
+    TradingStyle? TradingStyle = null
+);

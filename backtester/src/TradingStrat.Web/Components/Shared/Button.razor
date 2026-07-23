@@ -1,0 +1,140 @@
+@using TradingStrat.Web.Components.UI.Buttons
+@* Wrapper around Catalyst UI Button with backward-compatible API *@
+
+<TradingStrat.Web.Components.UI.Buttons.Button
+    Color="@GetColor()"
+    Outline="@IsOutline()"
+    Type="@MapType()"
+    Disabled="@(Disabled || IsLoading)"
+    OnClick="@OnClick"
+    Class="@GetClasses()"
+    @attributes="GetFilteredAttributes()">
+
+    @* Loading spinner *@
+    @if (IsLoading)
+    {
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    }
+    @* Leading icon *@
+    else if (LeadingIcon is not null)
+    {
+        @LeadingIcon
+    }
+
+    @* Text content *@
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <span>@(IsLoading && !string.IsNullOrEmpty(LoadingText) ? LoadingText : Text)</span>
+    }
+    else if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+
+    @* Trailing icon *@
+    @if (TrailingIcon is not null && !IsLoading)
+    {
+        @TrailingIcon
+    }
+</TradingStrat.Web.Components.UI.Buttons.Button>
+
+@code {
+    // Preserve existing parameters (no breaking changes)
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool FullWidth { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? LoadingText { get; set; }
+    [Parameter] public RenderFragment? LeadingIcon { get; set; }
+    [Parameter] public RenderFragment? TrailingIcon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private ButtonColor GetColor() => Variant switch
+    {
+        ButtonVariant.Primary => ButtonColor.Blue,
+        ButtonVariant.Secondary => ButtonColor.Zinc,
+        ButtonVariant.Danger => ButtonColor.Red,
+        ButtonVariant.Success => ButtonColor.Green,
+        ButtonVariant.Info => ButtonColor.Cyan,
+        ButtonVariant.Ghost => ButtonColor.Zinc,
+        _ => ButtonColor.Blue
+    };
+
+    private bool IsOutline() => Variant == ButtonVariant.Secondary || Variant == ButtonVariant.Ghost;
+
+    private TradingStrat.Web.Components.UI.Buttons.ButtonType MapType() => Type switch
+    {
+        ButtonType.Submit => TradingStrat.Web.Components.UI.Buttons.ButtonType.Submit,
+        ButtonType.Reset => TradingStrat.Web.Components.UI.Buttons.ButtonType.Reset,
+        _ => TradingStrat.Web.Components.UI.Buttons.ButtonType.Button
+    };
+
+    private string GetClasses()
+    {
+        var classes = new List<string>();
+
+        // Add legacy variant class for backward compatibility with tests
+        classes.Add(Variant switch
+        {
+            ButtonVariant.Primary => "btn-primary",
+            ButtonVariant.Secondary => "btn-secondary",
+            ButtonVariant.Danger => "btn-danger",
+            ButtonVariant.Success => "btn-success",
+            ButtonVariant.Info => "btn-info",
+            ButtonVariant.Ghost => "btn-ghost",
+            _ => "btn-primary"
+        });
+
+        if (FullWidth) classes.Add("w-full");
+
+        // Add legacy size classes for backward compatibility
+        if (Size != ButtonSize.Medium)
+        {
+            classes.Add(Size switch
+            {
+                ButtonSize.Small => "!px-3 !py-1.5 text-sm",
+                ButtonSize.Large => "!px-6 !py-3 text-lg",
+                _ => ""
+            });
+        }
+
+        if (LeadingIcon is not null || TrailingIcon is not null || IsLoading)
+            classes.Add("inline-flex items-center");
+
+        // Add disabled/loading styling for backward compatibility with tests
+        if (Disabled || IsLoading)
+            classes.Add("opacity-50 cursor-not-allowed");
+
+        return string.Join(" ", classes);
+    }
+
+    private Dictionary<string, object>? GetFilteredAttributes()
+    {
+        Dictionary<string, object>? filtered = null;
+
+        // Start with AdditionalAttributes if provided
+        if (AdditionalAttributes is not null)
+        {
+            filtered = new Dictionary<string, object>(AdditionalAttributes);
+            filtered.Remove("class"); // We handle class separately in GetClasses()
+        }
+
+        // Add aria-label if provided (create dict if needed)
+        if (!string.IsNullOrEmpty(AriaLabel))
+        {
+            filtered ??= new Dictionary<string, object>();
+            filtered["aria-label"] = AriaLabel;
+        }
+
+        return filtered;
+    }
+}

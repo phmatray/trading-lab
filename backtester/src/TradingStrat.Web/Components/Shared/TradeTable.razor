@@ -1,0 +1,60 @@
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
+@using TradingStrat.Web.Components.UI.Typography
+
+@if (Trades is not null && Trades.Count > 0)
+{
+    <div class="card">
+        <Heading Level="3" Class="text-lg font-semibold mb-4">Trade History (@Trades.Count trades)</Heading>
+        <Table Striped="true" Dense="false">
+            <TableHead>
+                <TableRow>
+                    <TableHeader Class="text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Date</TableHeader>
+                    <TableHeader Class="text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Type</TableHeader>
+                    <TableHeader Class="text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Price</TableHeader>
+                    <TableHeader Class="text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Quantity</TableHeader>
+                    <TableHeader Class="text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Commission</TableHeader>
+                    <TableHeader Class="text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Net Amount</TableHeader>
+                    <TableHeader Class="text-right text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">P/L</TableHeader>
+                    <TableHeader Class="text-left text-xs font-medium text-gray-500 dark:text-dark-text-secondary uppercase tracking-wider">Reason</TableHeader>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                @foreach (var trade in DisplayedTrades)
+                {
+                    <TableRow>
+                        <TableCell Class="text-sm whitespace-nowrap">@trade.DateTime.ToString("yyyy-MM-dd")</TableCell>
+                        <TableCell Class="whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full @(trade.Type == TradeType.Buy ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400" : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400")">
+                                @trade.Type
+                            </span>
+                        </TableCell>
+                        <TableCell Class="text-sm text-right whitespace-nowrap">@trade.Price.ToString("C2")</TableCell>
+                        <TableCell Class="text-sm text-right whitespace-nowrap">@trade.Quantity</TableCell>
+                        <TableCell Class="text-sm text-right text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">@trade.Commission.ToString("C2")</TableCell>
+                        <TableCell Class="text-sm text-right whitespace-nowrap">@trade.NetAmount.ToString("C2")</TableCell>
+                        <TableCell Class="@GetProfitLossClass(trade)">
+                            @(trade.ProfitLoss?.ToString("C2") ?? "-")
+                        </TableCell>
+                        <TableCell Class="text-sm text-gray-600 dark:text-dark-text-secondary">
+                            <span class="line-clamp-2" title="@trade.Reason">@trade.Reason</span>
+                        </TableCell>
+                    </TableRow>
+                }
+            </TableBody>
+        </Table>
+        @if (Trades.Count > MaxDisplayTrades)
+        {
+            <div class="mt-4 text-center">
+                <Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@ToggleShowAll"
+                        Text="@(ShowAll ? $"Show Less ({MaxDisplayTrades} trades)" : $"Show All ({Trades.Count} trades)")"></Button>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card">
+        <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">No trades executed.</TradingStrat.Web.Components.UI.Typography.Text>
+    </div>
+}

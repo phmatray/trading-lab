@@ -1,0 +1,109 @@
+@using TradingStrat.Web.Components.UI
+
+@* Catalyst UI Kit - Alert Component *@
+
+@if (IsOpen)
+{
+    <div class="relative z-50">
+        @* Backdrop *@
+        <div class="dialog-backdrop fixed inset-0 bg-black/15 dark:bg-zinc-950/50"
+             data-closed="@(!IsOpen ? "true" : "false")"
+             @onclick="HandleBackdropClick">
+        </div>
+
+        @* Dialog container *@
+        <div class="fixed inset-0 overflow-y-auto pt-6 sm:pt-0">
+            <div class="grid min-h-full grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr] sm:p-4">
+                @* Dialog panel *@
+                <div class="@GetPanelClasses()"
+                     data-closed="@(!IsOpen ? "true" : "false")"
+                     @onclick:stopPropagation>
+                    @ChildContent
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Whether the alert is open/visible.
+    /// </summary>
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    /// <summary>
+    /// Alert size variant.
+    /// </summary>
+    [Parameter]
+    public AlertSize Size { get; set; } = AlertSize.Medium;
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Alert content (AlertTitle, AlertBody, AlertActions).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the alert is closed.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private string GetPanelClasses()
+    {
+        List<string> classes =
+        [
+            "dialog-panel",
+            "row-start-2",
+            "w-full",
+            "min-w-0",
+            "rounded-t-3xl",
+            "bg-white",
+            "p-[calc(theme(spacing.8))]",
+            "shadow-lg",
+            "ring-1",
+            "ring-zinc-950/10",
+            "sm:mb-auto",
+            "sm:rounded-2xl",
+            "dark:bg-zinc-900",
+            "dark:ring-white/10",
+            "[forced-colors:outline]"
+        ];
+
+        // Add size-specific class
+        string sizeClass = Size switch
+        {
+            AlertSize.XS => CatalystStyles.DialogSizeXS,
+            AlertSize.Small => CatalystStyles.DialogSizeSmall,
+            AlertSize.Medium => CatalystStyles.DialogSizeMedium,
+            AlertSize.Large => CatalystStyles.DialogSizeLarge,
+            AlertSize.XL => CatalystStyles.DialogSizeXL,
+            AlertSize.XL2 => CatalystStyles.DialogSize2XL,
+            AlertSize.XL3 => CatalystStyles.DialogSize3XL,
+            AlertSize.XL4 => CatalystStyles.DialogSize4XL,
+            AlertSize.XL5 => CatalystStyles.DialogSize5XL,
+            _ => CatalystStyles.DialogSizeMedium
+        };
+
+        classes.Add(sizeClass);
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleBackdropClick()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

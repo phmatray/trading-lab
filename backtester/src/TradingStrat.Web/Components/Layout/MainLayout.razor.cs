@@ -1,0 +1,165 @@
+using Microsoft.AspNetCore.Components;
+using TradingStrat.Application.Ports.Inbound;
+using TradingStrat.Application.Ports.Outbound;
+using TradingStrat.Domain.Common;
+using TradingStrat.Domain.ValueObjects;
+using TradingStrat.Web.Services;
+using TradingStrat.Web.Services.State;
+
+namespace TradingStrat.Web.Components.Layout;
+
+public partial class MainLayout : LayoutComponentBase, IAsyncDisposable
+{
+    [Inject] private LocalStorageService LocalStorage { get; set; } = null!;
+    [Inject] private AiInsightsService AiInsights { get; set; } = null!;
+    [Inject] private PortfolioStateService PortfolioState { get; set; } = null!;
+    [Inject] private IPortfolioPort PortfolioPort { get; set; } = null!;
+    [Inject] private IGetPortfolioTopBarMetricsUseCase GetTopBarMetricsUseCase { get; set; } = null!;
+
+    // Layout state
+    private bool _sidebarCollapsed;
+    private bool _rightPanelCollapsed;
+
+    // TopBar data
+    private string? _selectedPortfolioName;
+    private decimal? _portfolioValue;
+    private decimal? _todayReturnDollars;
+    private decimal? _todayReturnPercentage;
+    private decimal? _winRatePercentage;
+
+    // AI Panel data
+    private readonly string? _currentTicker = null;
+    private readonly string? _currentContext = null;
+    private string _currentRegime = "NEUTRAL";
+    private string? _currentRecommendation;
+    private int? _confidence;
+    private List<string>? _reasons;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Load collapse states from localStorage (must be in OnAfterRenderAsync for JS interop)
+            bool? sidebarState = await LocalStorage.GetItemAsync<bool?>("layout_sidebar_collapsed");
+            if (sidebarState.HasValue && sidebarState.Value != _sidebarCollapsed)
+            {
+                _sidebarCollapsed = sidebarState.Value;
+                StateHasChanged();
+            }
+
+            // Note: RightPanel manages its own collapse state via RightPanelStateService
+            // We only track collapse state here for margin calculation
+
+            // Load portfolio data and AI insights
+            await LoadPortfolioDataAsync();
+            await LoadAiInsightsAsync();
+
+            // Subscribe to portfolio changes to refresh AI insights
+            PortfolioState.OnPortfolioChanged += OnPortfolioChanged;
+        }
+    }
+
+    private async void OnPortfolioChanged(object? sender, EventArgs e)
+    {
+        await LoadPortfolioDataAsync();
+        await LoadAiInsightsAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadPortfolioDataAsync()
+    {
+        try
+        {
+            int? portfolioId = await PortfolioState.GetSelectedPortfolioIdAsync();
+            if (portfolioId.HasValue)
+            {
+                // Load portfolio for name
+                Domain.Entities.Portfolio? portfolio = await PortfolioPort.GetPortfolioByIdAsync(portfolioId.Value);
+                if (portfolio is not null)
+                {
+                    _selectedPortfolioName = portfolio.Name;
+
+                    // Load TopBar metrics using the use case
+                    Result<TopBarMetrics> metricsResult = await GetTopBarMetricsUseCase.ExecuteAsync(portfolioId.Value);
+                    if (metricsResult.IsSuccess)
+                    {
+                        TopBarMetrics metrics = metricsResult.Value;
+                        _portfolioValue = metrics.TotalValue;
+                        _todayReturnDollars = metrics.TodayReturnDollars;
+                        _todayReturnPercentage = metrics.TodayReturnPercentage;
+                        _winRatePercentage = metrics.WinRatePercentage;
+                    }
+                    else
+                    {
+                        // Metrics calculation failed, show portfolio value only
+                        _portfolioValue = portfolio.Cash; // Fallback to cash only
+                        _todayReturnDollars = null;
+                        _todayReturnPercentage = null;
+                        _winRatePercentage = null;
+                    }
+                }
+            }
+            else
+            {
+                _selectedPortfolioName = null;
+                _portfolioValue = null;
+                _todayReturnDollars = null;
+                _todayReturnPercentage = null;
+                _winRatePercentage = null;
+            }
+        }
+        catch
+        {
+            _selectedPortfolioName = null;
+            _portfolioValue = null;
+            _todayReturnDollars = null;
+            _todayReturnPercentage = null;
+            _winRatePercentage = null;
+        }
+    }
+
+    private async Task LoadAiInsightsAsync()
+    {
+        try
+        {
+            // Load market regime
+            MarketRegime regime = await AiInsights.GetCurrentRegimeAsync();
+            _currentRegime = regime.Regime;
+
+            // Load recommendation
+            PortfolioRecommendation recommendation = await AiInsights.GetCurrentRecommendationAsync();
+            _currentRecommendation = recommendation.Action;
+            _confidence = recommendation.Confidence;
+            _reasons = recommendation.Reasons;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            _currentRegime = "NEUTRAL";
+            _currentRecommendation = null;
+            _confidence = null;
+            _reasons = null;
+        }
+    }
+
+    private async Task OnSidebarCollapsedChanged(bool value)
+    {
+        _sidebarCollapsed = value;
+        await LocalStorage.SetItemAsync("layout_sidebar_collapsed", _sidebarCollapsed);
+    }
+
+    private async Task OnRightPanelCollapsedChanged(bool value)
+    {
+        _rightPanelCollapsed = value;
+        // Note: RightPanelStateService handles localStorage persistence
+        await Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Unsubscribe from portfolio changes
+        PortfolioState.OnPortfolioChanged -= OnPortfolioChanged;
+        await Task.CompletedTask;
+    }
+}

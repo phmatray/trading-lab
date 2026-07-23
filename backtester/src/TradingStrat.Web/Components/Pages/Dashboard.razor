@@ -1,0 +1,138 @@
+@page "/dashboard"
+@using TradingStrat.Web.Components.Base
+@using TradingStrat.Web.Components.UI.Buttons
+@using TradingStrat.Web.Components.UI.Typography
+@inherits BaseComponent
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <PageHeader Title="Dashboard"
+                Description="Strategy research command center">
+        <Actions>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@LoadDashboardDataAsync"
+                    IsLoading="@_isLoading"
+                    Text="Refresh"
+                    LoadingText="Refreshing...">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </Actions>
+    </PageHeader>
+
+    @if (_isLoading)
+    {
+        <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading dashboard...</TradingStrat.Web.Components.UI.Typography.Text>
+            </div>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <div class="card-elevated bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <TradingStrat.Web.Components.UI.Typography.Text Class="text-red-800 dark:text-red-400">@_errorMessage</TradingStrat.Web.Components.UI.Typography.Text>
+        </div>
+    }
+    else
+    {
+        <!-- Stats Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div style="animation-delay: 0ms;">
+                <DashboardStatsCard
+                    Title="Strategies"
+                    Value="@(_stats?.TotalStrategies.ToString() ?? "0")"
+                    Icon="layers"
+                    OnClick="@(() => NavigateToPage("/strategies/library"))" />
+            </div>
+
+            <div style="animation-delay: 100ms;">
+                <DashboardStatsCard
+                    Title="Backtests"
+                    Value="@(_stats?.TotalBacktests.ToString() ?? "0")"
+                    Icon="chart"
+                    Subtitle="@(_stats?.LastBacktestDate is not null ? $"Last: {_stats.LastBacktestDate:MMM d}" : "")"
+                    OnClick="@(() => NavigateToPage("/backtests"))" />
+            </div>
+
+            <div style="animation-delay: 200ms;">
+                <DashboardStatsCard
+                    Title="Portfolios"
+                    Value="@(_stats?.TotalPortfolios.ToString() ?? "0")"
+                    Icon="wallet"
+                    OnClick="@(() => NavigateToPage("/portfolios"))" />
+            </div>
+
+            <div style="animation-delay: 300ms;">
+                <DashboardStatsCard
+                    Title="Securities"
+                    Value="@(_stats?.TotalSecurities.ToString() ?? "0")"
+                    Icon="database"
+                    Subtitle="@($"{_stats?.DataCoveragePercentage ?? 0:F0}% coverage")"
+                    OnClick="@(() => NavigateToPage("/data"))" />
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-lg font-semibold mb-4">Quick Actions</Heading>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Blue"
+                    OnClick="@(() => NavigateToPage("/backtest"))">
+                    New Backtest
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/strategies/builder"))">
+                    Create Strategy
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/data"))">
+                    Import Data
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+                <TradingStrat.Web.Components.UI.Buttons.Button
+                    Color="ButtonColor.Zinc"
+                    OnClick="@(() => NavigateToPage("/strategies/compare"))">
+                    Compare Strategies
+                </TradingStrat.Web.Components.UI.Buttons.Button>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Top Strategies -->
+            <div class="card-elevated">
+                <div class="flex items-center justify-between mb-4">
+                    <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                        Top Strategies
+                    </Heading>
+                    <TradingStrat.Web.Components.UI.Buttons.Button
+                        Plain="true"
+                        OnClick="@(() => NavigateToPage("/strategies/compare"))">
+                        View All →
+                    </TradingStrat.Web.Components.UI.Buttons.Button>
+                </div>
+                <TopStrategyTable Strategies="@_topStrategies" />
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card-elevated">
+                <div class="flex items-center justify-between mb-4">
+                    <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                        Recent Activity
+                    </Heading>
+                </div>
+                <ActivityFeedList Activities="@_recentActivity" />
+            </div>
+        </div>
+    }
+</div>

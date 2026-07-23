@@ -1,0 +1,66 @@
+@* Blazor Server Reconnection Modal - Tailwind CSS v4 *@
+<script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" data-nosnippet class="group dialog-fullscreen">
+    <div class="mt-[20vh] max-w-sm w-full mx-4
+                bg-zinc-800
+                rounded-2xl shadow-2xl
+                p-6
+                flex flex-col items-center gap-3">
+
+        @* Loading Animation - Dual Ring Spinner *@
+        <div class="relative w-12 h-12 hidden
+                    group-[.components-reconnect-show]:block
+                    group-[.components-reconnect-retrying]:block"
+             aria-hidden="true">
+            <div class="absolute inset-0 border-[4px] border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div class="absolute inset-0 border-[4px] border-blue-300 border-t-transparent rounded-full animate-spin [animation-duration:1.5s] [animation-direction:reverse]"></div>
+        </div>
+
+        @* First Reconnect Attempt *@
+        <p class="hidden group-[.components-reconnect-show]:block
+                  text-center text-base font-medium text-white m-0">
+            Rejoining the server...
+        </p>
+
+        @* Repeated Reconnect Attempts with Countdown *@
+        <p class="hidden group-[.components-reconnect-retrying]:block
+                  text-center text-base text-white m-0">
+            Rejoin failed... trying again in <span id="components-seconds-to-next-attempt" class="font-bold text-blue-400"></span> seconds.
+        </p>
+
+        @* Reconnect Failed State *@
+        <p class="hidden group-[.components-reconnect-failed]:block
+                  text-center text-base text-white m-0">
+            Failed to rejoin.<br/>Please retry or reload the page.
+        </p>
+        <button id="components-reconnect-button"
+                class="hidden group-[.components-reconnect-failed]:block
+                       px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+                       text-white text-sm font-semibold rounded-lg border-0
+                       transition-colors duration-200 cursor-pointer
+                       shadow-sm hover:shadow-md">
+            Retry
+        </button>
+
+        @* Session Paused State *@
+        <p class="hidden group-[.components-reconnect-paused]:block
+                  text-center text-base text-white m-0">
+            The session has been paused by the server.
+        </p>
+        <button id="components-resume-button"
+                class="hidden group-[.components-reconnect-paused]:block
+                       px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+                       text-white text-sm font-semibold rounded-lg border-0
+                       transition-colors duration-200 cursor-pointer
+                       shadow-sm hover:shadow-md">
+            Resume
+        </button>
+
+        @* Resume Failed State *@
+        <p class="hidden group-[.components-reconnect-resume-failed]:block
+                  text-center text-base text-white m-0">
+            Failed to resume the session.<br/>Please reload the page.
+        </p>
+    </div>
+</dialog>

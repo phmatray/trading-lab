@@ -1,0 +1,28 @@
+<th
+    scope="col"
+    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+    @onclick="HandleClick"
+    role="button"
+    tabindex="0"
+    @onkeydown="HandleKeyDown"
+    aria-label="@($"Sort by {Label}")"
+>
+    <div class="flex items-center gap-2">
+        <span>@Label</span>
+        @if (CurrentSortColumn == Column)
+        {
+            @if (CurrentSortDirection == SortDirection.Ascending)
+            {
+                <Icon Name="chevron-up" Size="IconSize.Small" Class="text-blue-600 dark:text-blue-400" />
+            }
+            else
+            {
+                <Icon Name="chevron-down" Size="IconSize.Small" Class="text-blue-600 dark:text-blue-400" />
+            }
+        }
+        else
+        {
+            <Icon Name="chevron-up-down" Size="IconSize.Small" Class="text-gray-400 dark:text-gray-500" />
+        }
+    </div>
+</th>

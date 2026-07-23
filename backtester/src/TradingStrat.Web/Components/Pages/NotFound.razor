@@ -1,0 +1,17 @@
+@page "/not-found"
+@layout MainLayout
+@inject NavigationManager Navigation
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
+
+<PageTitle>Not found</PageTitle>
+
+<div class="mx-auto max-w-2xl mt-8 space-y-4">
+    <Heading Level="1" Class="text-3xl font-bold">Page Not Found</Heading>
+    <Text>Sorry, there's nothing at this address.</Text>
+    <TradingStrat.Web.Components.UI.Buttons.Button
+        Color="ButtonColor.Blue"
+        OnClick="@(() => Navigation.NavigateTo("/"))">
+        Go to Home
+    </TradingStrat.Web.Components.UI.Buttons.Button>
+</div>

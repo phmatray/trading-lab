@@ -1,0 +1,14 @@
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="card-elevated animate-scale-in @GetAlertClass()" role="alert">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+                <ColoredIcon Icon="@GetIconName()"
+                             CustomColor="currentColor"
+                             Size="IconSize.Medium"
+                             AriaLabel="@Type.ToString()" />
+            </div>
+            <p class="text-sm font-medium">@Message</p>
+        </div>
+    </div>
+}

@@ -1,0 +1,150 @@
+<div class="card">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Strategy Configuration</h3>
+
+    <div class="space-y-4">
+        <!-- Strategy Type Selection -->
+        <div>
+            <label for="strategy-select" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Strategy Type</label>
+            <select id="strategy-select"
+                    @bind="SelectedStrategy"
+                    @bind:after="OnStrategyChanged"
+                    class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                <option value="ma">Moving Average Crossover</option>
+                <option value="rsi">RSI Strategy</option>
+                <option value="macd">MACD Strategy</option>
+                <option value="ml">ML FastTree</option>
+                <option value="ichimoku">Ichimoku Cloud</option>
+            </select>
+        </div>
+
+        <!-- Dynamic Parameter Inputs based on strategy -->
+        @if (SelectedStrategy == "ma")
+        {
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="fast-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Fast Period</label>
+                    <input type="number" id="fast-period" @bind="FastPeriod" min="1" max="200"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="slow-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Slow Period</label>
+                    <input type="number" id="slow-period" @bind="SlowPeriod" min="1" max="200"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        }
+        else if (SelectedStrategy == "rsi")
+        {
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label for="rsi-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Period</label>
+                    <input type="number" id="rsi-period" @bind="RSIPeriod" min="1" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="oversold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Oversold Level</label>
+                    <input type="number" id="oversold" @bind="OversoldLevel" min="0" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="overbought" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Overbought Level</label>
+                    <input type="number" id="overbought" @bind="OverboughtLevel" min="0" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        }
+        else if (SelectedStrategy == "macd")
+        {
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label for="macd-fast" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Fast Period</label>
+                    <input type="number" id="macd-fast" @bind="MACDFast" min="1" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="macd-slow" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Slow Period</label>
+                    <input type="number" id="macd-slow" @bind="MACDSlow" min="1" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="macd-signal" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Signal Period</label>
+                    <input type="number" id="macd-signal" @bind="MACDSignal" min="1" max="100"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        }
+        else if (SelectedStrategy == "ml")
+        {
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="buy-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Buy Threshold (%)</label>
+                    <input type="number" id="buy-threshold" @bind="BuyThreshold" min="0" max="10" step="0.1"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+                <div>
+                    <label for="sell-threshold" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Sell Threshold (%)</label>
+                    <input type="number" id="sell-threshold" @bind="SellThreshold" min="-10" max="0" step="0.1"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        }
+        else if (SelectedStrategy == "ichimoku")
+        {
+            <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label for="tenkan-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Tenkan Period</label>
+                        <input type="number" id="tenkan-period" @bind="TenkanPeriod" @bind:after="NotifyParametersChanged" min="1" max="100"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                    <div>
+                        <label for="kijun-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Kijun Period</label>
+                        <input type="number" id="kijun-period" @bind="KijunPeriod" @bind:after="NotifyParametersChanged" min="1" max="100"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                    <div>
+                        <label for="senkou-b-period" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Senkou B Period</label>
+                        <input type="number" id="senkou-b-period" @bind="SenkouBPeriod" @bind:after="NotifyParametersChanged" min="1" max="200"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="displacement" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Displacement</label>
+                        <input type="number" id="displacement" @bind="Displacement" @bind:after="NotifyParametersChanged" min="1" max="100"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                    <div>
+                        <label for="cross-lookback" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Cross Lookback Days</label>
+                        <input type="number" id="cross-lookback" @bind="CrossLookbackDays" @bind:after="NotifyParametersChanged" min="1" max="20"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label for="exit-mode" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Exit Mode</label>
+                        <select id="exit-mode" @bind="IchimokuExitMode" @bind:after="NotifyParametersChanged"
+                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                            <option value="CloseBelowKijun">Close Below Kijun</option>
+                            <option value="PriceIntoKumo">Price Into Kumo</option>
+                            <option value="TenkanKijunBearishCross">Bearish Cross</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="entry-mode" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Entry Mode</label>
+                        <select id="entry-mode" @bind="IchimokuEntryMode" @bind:after="NotifyParametersChanged"
+                                class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                            <option value="AllConditionsOnly">All Conditions</option>
+                            <option value="RequireRecentCross">Recent Cross Required</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="risk-percentage" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Risk Per Trade (%)</label>
+                        <input type="number" id="risk-percentage" @bind="RiskPercentage" @bind:after="NotifyParametersChanged" min="0.1" max="10" step="0.1"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

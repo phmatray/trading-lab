@@ -1,0 +1,32 @@
+@using TradingStrat.Web.Components.UI.Typography
+
+@* EmptyState Component - Standardized empty state with icon, message, and optional actions *@
+
+<div class="card-elevated animate-scale-in" data-testid="empty-state">
+    <div class="text-center py-12">
+        <!-- Icon -->
+        <div class="flex justify-center mb-4">
+            <ColoredIcon Icon="@Icon"
+                         Size="@GetIconSize()"
+                         CustomColor="rgb(156 163 175)"
+                         AriaLabel="@Title" />
+        </div>
+
+        <!-- Title -->
+        <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">@Title</Heading>
+
+        <!-- Description -->
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">@Description</TradingStrat.Web.Components.UI.Typography.Text>
+        }
+
+        <!-- Actions -->
+        @if (Actions is not null)
+        {
+            <div class="mt-6">
+                @Actions
+            </div>
+        }
+    </div>
+</div>

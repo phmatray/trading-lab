@@ -1,0 +1,187 @@
+<div class="rule-list">
+    @if (!Rules.Any())
+    {
+        <div class="empty-state text-center py-8">
+            <p class="text-gray-500 dark:text-gray-400 mb-4">
+                @EmptyStateMessage
+            </p>
+            <Button Variant="@ButtonVariant.Primary"
+                    OnClick="@AddRule"
+                    Text="Add First Rule">
+                <LeadingIcon>
+                    <span class="mr-2">+</span>
+                </LeadingIcon>
+            </Button>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @for (int i = 0; i < Rules.Count; i++)
+            {
+                int index = i; // Capture for lambda
+                var rule = Rules[index];
+                var indicator = IndicatorService.GetIndicator(rule.IndicatorName);
+                bool isLastRule = index == Rules.Count - 1;
+
+                <div class="rule-item border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div class="grid grid-cols-12 gap-3 items-start">
+                        <!-- Indicator Selection -->
+                        <div class="col-span-12 md:col-span-3">
+                            <label class="block text-sm font-medium mb-1">Indicator</label>
+                            <select class="input-field w-full"
+                                    data-testid="rule-@index-indicator"
+                                    value="@rule.IndicatorName"
+                                    @onchange="e => OnIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
+                                <option value="">Select indicator...</option>
+                                @foreach (KeyValuePair<string, List<IndicatorMetadata>> category in IndicatorService.GetIndicatorsByCategory())
+                                {
+                                    <optgroup label="@category.Key">
+                                        @foreach (var ind in category.Value)
+                                        {
+                                            <option value="@ind.Name">@ind.DisplayName</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Indicator Parameters (Dynamic) -->
+                        @if (indicator?.Parameters.Any() == true)
+                        {
+                            <div class="col-span-12 md:col-span-2">
+                                <label class="block text-sm font-medium mb-1">
+                                    @indicator.Parameters[0].DisplayName
+                                </label>
+                                <input type="number"
+                                       class="input-field w-full"
+                                       value="@GetParameterValue(rule, indicator.Parameters[0].Name)"
+                                       min="@indicator.Parameters[0].MinValue"
+                                       max="@indicator.Parameters[0].MaxValue"
+                                       @onchange="e => OnParameterChanged(index, indicator.Parameters[0].Name, e.Value)" />
+                            </div>
+                        }
+
+                        <!-- Comparison Operator -->
+                        <div class="col-span-12 md:col-span-2">
+                            <label class="block text-sm font-medium mb-1">Operator</label>
+                            <select class="input-field w-full"
+                                    data-testid="rule-@index-operator"
+                                    value="@rule.Operator.ToString()"
+                                    @onchange="e => OnOperatorChanged(index, e.Value?.ToString() ?? string.Empty)">
+                                <option value="@ComparisonOperator.GreaterThan">&gt;</option>
+                                <option value="@ComparisonOperator.GreaterThanOrEqual">&gt;=</option>
+                                <option value="@ComparisonOperator.LessThan">&lt;</option>
+                                <option value="@ComparisonOperator.LessThanOrEqual">&lt;=</option>
+                                <option value="@ComparisonOperator.Equal">=</option>
+                                <option value="@ComparisonOperator.CrossesAbove">Crosses Above</option>
+                                <option value="@ComparisonOperator.CrossesBelow">Crosses Below</option>
+                            </select>
+                        </div>
+
+                        <!-- Value Type -->
+                        <div class="col-span-12 md:col-span-2">
+                            <label class="block text-sm font-medium mb-1">Compare To</label>
+                            <select class="input-field w-full"
+                                    data-testid="rule-@index-value-type"
+                                    value="@rule.ValueType.ToString()"
+                                    @onchange="e => OnValueTypeChanged(index, e.Value?.ToString() ?? string.Empty)">
+                                <option value="@RuleValueType.Constant">Number</option>
+                                <option value="@RuleValueType.Price">Price</option>
+                                <option value="@RuleValueType.Indicator">Indicator</option>
+                            </select>
+                        </div>
+
+                        <!-- Value Input (Dynamic based on ValueType) -->
+                        <div class="col-span-12 md:col-span-2">
+                            <label class="block text-sm font-medium mb-1">Value</label>
+                            @if (rule.ValueType == RuleValueType.Constant)
+                            {
+                                <input type="number"
+                                       step="0.01"
+                                       class="input-field w-full"
+                                       data-testid="rule-@index-value"
+                                       value="@rule.ConstantValue"
+                                       @onchange="e => OnConstantValueChanged(index, e.Value)" />
+                            }
+                            else if (rule.ValueType == RuleValueType.Price)
+                            {
+                                <input type="text"
+                                       class="input-field w-full bg-gray-100 dark:bg-gray-700"
+                                       value="Current Price"
+                                       disabled />
+                            }
+                            else if (rule.ValueType == RuleValueType.Indicator)
+                            {
+                                <select class="input-field w-full"
+                                        data-testid="rule-@index-second-indicator"
+                                        value="@(rule.SecondIndicatorName ?? string.Empty)"
+                                        @onchange="e => OnSecondIndicatorChanged(index, e.Value?.ToString() ?? string.Empty)">
+                                    <option value="">Select...</option>
+                                    @foreach (KeyValuePair<string, List<IndicatorMetadata>> category in IndicatorService.GetIndicatorsByCategory())
+                                    {
+                                        <optgroup label="@category.Key">
+                                            @foreach (var ind in category.Value)
+                                            {
+                                                <option value="@ind.Name">@ind.DisplayName</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                </select>
+                            }
+                        </div>
+
+                        <!-- Remove Button -->
+                        <div class="col-span-12 md:col-span-1 flex items-end">
+                            <Button Variant="@ButtonVariant.Danger"
+                                    OnClick="@(() => RemoveRule(index))"
+                                    AriaLabel="Remove rule"
+                                    AdditionalAttributes="@(new Dictionary<string, object> { { "title", "Remove rule" }, { "class", "w-full md:w-auto" } })">
+                                <ChildContent>
+                                    <span class="text-lg">×</span>
+                                </ChildContent>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <!-- Logical Operator (AND/OR) - only show if not last rule -->
+                    @if (!isLastRule)
+                    {
+                        <div class="mt-3 flex items-center justify-center">
+                            <div class="flex gap-2">
+                                <label class="inline-flex items-center">
+                                    <input type="radio"
+                                           name="logical-@index"
+                                           value="@LogicalOperator.And"
+                                           checked="@(rule.LogicalOperator == LogicalOperator.And)"
+                                           @onchange="() => OnLogicalOperatorChanged(index, LogicalOperator.And)"
+                                           class="mr-1" />
+                                    <span class="font-semibold text-blue-600 dark:text-blue-400">AND</span>
+                                </label>
+                                <label class="inline-flex items-center ml-4">
+                                    <input type="radio"
+                                           name="logical-@index"
+                                           value="@LogicalOperator.Or"
+                                           checked="@(rule.LogicalOperator == LogicalOperator.Or)"
+                                           @onchange="() => OnLogicalOperatorChanged(index, LogicalOperator.Or)"
+                                           class="mr-1" />
+                                    <span class="font-semibold text-green-600 dark:text-green-400">OR</span>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@AddRule"
+                    Text="Add Another Rule">
+                <LeadingIcon>
+                    <span class="mr-2">+</span>
+                </LeadingIcon>
+            </Button>
+        </div>
+    }
+</div>

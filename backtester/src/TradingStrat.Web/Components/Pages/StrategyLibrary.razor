@@ -1,0 +1,125 @@
+@page "/strategies/library"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.Buttons
+@using TradingStrat.Web.Components.UI.DataDisplay
+@using TradingStrat.Web.Components.UI
+
+<PageTitle>Strategy Library | TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Strategy Library"
+                Description="Browse built-in strategies or create your own custom trading strategies">
+        <Actions>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@NavigateToBuilder">
+                <span class="mr-2">+</span> Create Strategy
+            </TradingStrat.Web.Components.UI.Buttons.Button>
+        </Actions>
+    </PageHeader>
+
+    <!-- Tabs -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex space-x-8">
+            <button type="button"
+                    class="@GetTabClass(StrategyTab.BuiltIn)"
+                    @onclick="() => SetActiveTab(StrategyTab.BuiltIn)">
+                Built-in Strategies
+                <Badge Color="BadgeColor.Gray" Class="ml-2">5</Badge>
+            </button>
+            <button type="button"
+                    class="@GetTabClass(StrategyTab.Custom)"
+                    @onclick="() => SetActiveTab(StrategyTab.Custom)">
+                My Strategies
+                <Badge Color="BadgeColor.Gray" Class="ml-2">@_customStrategies.Count</Badge>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Loading State -->
+    @if (_isLoading)
+    {
+        <LoadingState Message="Loading strategies..." />
+    }
+    else
+    {
+        <!-- Built-in Strategies Tab -->
+        @if (_activeTab == StrategyTab.BuiltIn)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var strategy in _builtInStrategies)
+                {
+                    <BuiltInStrategyCard
+                        Name="@strategy.Name"
+                        Description="@strategy.Description"
+                        Category="@strategy.Category"
+                        StrategyKey="@strategy.Key"
+                        DefaultParameters="@strategy.DefaultParameters.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value)"
+                        OnRunBacktest="@(() => NavigateToBacktest(strategy.Key))" />
+                }
+            </div>
+        }
+
+        <!-- Custom Strategies Tab -->
+        @if (_activeTab == StrategyTab.Custom)
+        {
+            @if (!_customStrategies.Any())
+            {
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">📊</div>
+                    <Heading Level="3" Class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        No Custom Strategies Yet
+                    </Heading>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-600 dark:text-gray-400 mb-6">
+                        Create your first custom strategy to get started
+                    </TradingStrat.Web.Components.UI.Typography.Text>
+                    <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Blue" OnClick="@NavigateToBuilder">
+                        <span class="mr-2">+</span> Create Your First Strategy
+                    </TradingStrat.Web.Components.UI.Buttons.Button>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach (var strategy in _customStrategies)
+                    {
+                        <CustomStrategyCard
+                            Name="@strategy.Name"
+                            Description="@strategy.Description"
+                            Category="@strategy.Category"
+                            Author="@strategy.Author"
+                            LastUpdatedAt="@strategy.LastUpdatedAt"
+                            EntryRulesCount="@(strategy.Definition?.EntryRules.Count ?? 0)"
+                            ExitRulesCount="@(strategy.Definition?.ExitRules.Count ?? 0)"
+                            TimesUsed="@strategy.TimesUsed"
+                            LastBacktestReturn="@strategy.LastBacktestReturn"
+                            OnEdit="@(() => NavigateToEdit(strategy.Id))"
+                            OnClone="@(() => CloneStrategy(strategy.Id))"
+                            OnOptimize="@(() => NavigateToOptimize(strategy.Id))"
+                            OnTest="@(() => NavigateToBacktestWithCustom(strategy.Id))"
+                            OnDelete="@(() => ShowDeleteDialog(strategy.Id, strategy.Name))" />
+                    }
+                </div>
+            }
+        }
+    }
+
+    @* Delete Confirmation Dialog *@
+    <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog IsOpen="_showDeleteDialog" IsOpenChanged="@((isOpen) => _showDeleteDialog = isOpen)" Size="DialogSize.Small">
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogTitle>Delete Strategy</TradingStrat.Web.Components.UI.Overlays.Dialog.DialogTitle>
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogDescription>
+            Are you sure you want to delete '<strong>@_strategyToDeleteName</strong>'? This action cannot be undone.
+        </TradingStrat.Web.Components.UI.Overlays.Dialog.DialogDescription>
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.DialogActions>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Zinc" Outline="true" OnClick="@CancelDelete">
+                Cancel
+            </TradingStrat.Web.Components.UI.Buttons.Button>
+            <TradingStrat.Web.Components.UI.Buttons.Button Color="ButtonColor.Red" OnClick="@ConfirmDelete">
+                Delete
+            </TradingStrat.Web.Components.UI.Buttons.Button>
+        </TradingStrat.Web.Components.UI.Overlays.Dialog.DialogActions>
+    </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
+</div>

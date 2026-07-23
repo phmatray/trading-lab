@@ -1,0 +1,39 @@
+@* Catalyst UI Kit - SwitchGroup Component *@
+
+<div class="@GetClasses()" data-slot="control">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Group content (multiple switches).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            // Basic groups
+            "space-y-3",
+            "**:data-[slot=label]:font-normal",
+            // With descriptions
+            "has-[data-slot=description]:space-y-6",
+            "has-[data-slot=description]:**:data-[slot=label]:font-medium"
+        ];
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+}

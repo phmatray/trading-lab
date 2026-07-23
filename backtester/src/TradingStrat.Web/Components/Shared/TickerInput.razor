@@ -1,0 +1,27 @@
+@* TickerInput Component - Specialized input for ticker symbols with auto-uppercase *@
+
+<div data-testid="ticker-input">
+    <label for="@_inputId" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">
+        @Label @(Required ? "*" : "")
+    </label>
+
+    <input type="text"
+           id="@_inputId"
+           value="@CurrentValue"
+           @oninput="HandleInput"
+           placeholder="@Placeholder"
+           required="@Required"
+           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue uppercase"
+           aria-label="@Label" />
+
+    @if (ShowValidation && For is not null)
+    {
+        <ValidationMessage For="@For" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+    }
+
+    @if (!string.IsNullOrEmpty(HelpText))
+    {
+        <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">@HelpText</p>
+    }
+</div>
+

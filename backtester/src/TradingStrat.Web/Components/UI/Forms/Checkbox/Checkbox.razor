@@ -1,0 +1,151 @@
+@using TradingStrat.Web.Components.UI
+
+@* Catalyst UI Kit - Checkbox Component *@
+
+<label class="group inline-flex focus:outline-hidden cursor-pointer">
+    <span class="checkbox-base @GetColorClass()">
+        <input type="checkbox"
+               checked="@Checked"
+               disabled="@Disabled"
+               @onchange="HandleChange"
+               @attributes="AdditionalAttributes"
+               class="sr-only" />
+
+        <svg class="@GetIconClass()"
+             viewBox="0 0 14 14"
+             fill="none">
+            @* Checkmark icon *@
+            <path class="@(Indeterminate ? "opacity-0" : "opacity-100")"
+                  d="M3 8L6 11L11 3.5"
+                  stroke="var(--checkbox-check)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+            @* Indeterminate icon *@
+            <path class="@(Indeterminate ? "opacity-100" : "opacity-0")"
+                  d="M3 7H11"
+                  stroke="var(--checkbox-check)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+        </svg>
+    </span>
+    @ChildContent
+</label>
+
+@code {
+    /// <summary>
+    /// Whether the checkbox is checked.
+    /// </summary>
+    [Parameter]
+    public bool Checked { get; set; }
+
+    /// <summary>
+    /// Checked changed callback for two-way binding.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CheckedChanged { get; set; }
+
+    /// <summary>
+    /// Whether the checkbox is in indeterminate state.
+    /// </summary>
+    [Parameter]
+    public bool Indeterminate { get; set; }
+
+    /// <summary>
+    /// If true, disables the checkbox.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Checkbox color variant.
+    /// </summary>
+    [Parameter]
+    public CheckboxColor Color { get; set; } = CheckboxColor.DarkZinc;
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Checkbox label content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetColorClass()
+    {
+        string colorClass = Color switch
+        {
+            CheckboxColor.DarkZinc => CatalystStyles.CheckboxDarkZinc,
+            CheckboxColor.DarkWhite => CatalystStyles.CheckboxDarkWhite,
+            CheckboxColor.White => CatalystStyles.CheckboxWhite,
+            CheckboxColor.Dark => CatalystStyles.CheckboxDark,
+            CheckboxColor.Zinc => CatalystStyles.CheckboxZinc,
+            CheckboxColor.Blue => CatalystStyles.CheckboxBlue,
+            CheckboxColor.Red => CatalystStyles.CheckboxRed,
+            CheckboxColor.Green => CatalystStyles.CheckboxGreen,
+            CheckboxColor.Orange => CatalystStyles.CheckboxOrange,
+            CheckboxColor.Amber => CatalystStyles.CheckboxAmber,
+            CheckboxColor.Yellow => CatalystStyles.CheckboxYellow,
+            CheckboxColor.Lime => CatalystStyles.CheckboxLime,
+            CheckboxColor.Emerald => CatalystStyles.CheckboxEmerald,
+            CheckboxColor.Teal => CatalystStyles.CheckboxTeal,
+            CheckboxColor.Cyan => CatalystStyles.CheckboxCyan,
+            CheckboxColor.Sky => CatalystStyles.CheckboxSky,
+            CheckboxColor.Indigo => CatalystStyles.CheckboxIndigo,
+            CheckboxColor.Violet => CatalystStyles.CheckboxViolet,
+            CheckboxColor.Purple => CatalystStyles.CheckboxPurple,
+            CheckboxColor.Fuchsia => CatalystStyles.CheckboxFuchsia,
+            CheckboxColor.Pink => CatalystStyles.CheckboxPink,
+            CheckboxColor.Rose => CatalystStyles.CheckboxRose,
+            _ => CatalystStyles.CheckboxDarkZinc
+        };
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            return $"{colorClass} {Class}";
+        }
+
+        return colorClass;
+    }
+
+    private string GetIconClass()
+    {
+        List<string> classes = ["size-4", "sm:h-3.5", "sm:w-3.5"];
+
+        if (!Checked && !Indeterminate)
+        {
+            classes.Add("opacity-0");
+        }
+        else
+        {
+            classes.Add("opacity-100");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        bool newValue = e.Value as bool? ?? false;
+        if (CheckedChanged.HasDelegate)
+        {
+            await CheckedChanged.InvokeAsync(newValue);
+        }
+    }
+}

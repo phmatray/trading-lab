@@ -1,0 +1,22 @@
+<span class="@GetClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</span>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "ml-2.5",
+            "truncate",
+            "first:ml-0",
+            "sm:ml-2",
+            "sm:first:ml-0"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

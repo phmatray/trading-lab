@@ -1,0 +1,188 @@
+@inject NotificationService Notifications
+@inject NavigationManager Navigation
+
+<div class="space-y-6">
+    @if (Strategy is null || TestResult is null)
+    {
+        <div class="card text-center py-12">
+            <p class="text-gray-600 dark:text-dark-text-secondary">
+                Complete a backtest first to deploy your strategy.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="card-elevated">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                Deploy Strategy
+            </h2>
+            <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
+                Choose how to deploy <strong>@Strategy.Name</strong> based on your backtest results.
+            </p>
+
+            <!-- Deployment Summary -->
+            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-6">
+                <h3 class="font-semibold text-blue-900 dark:text-blue-400 mb-2">Backtest Performance Summary</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span class="text-blue-700 dark:text-blue-300">Total Return:</span>
+                        <span class="ml-2 font-semibold @(TestResult.Metrics.TotalReturnPercentage >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                            @TestResult.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 dark:text-blue-300">Sharpe Ratio:</span>
+                        <span class="ml-2 font-semibold text-blue-900 dark:text-blue-400">@TestResult.Metrics.SharpeRatio.ToString("F2")</span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 dark:text-blue-300">Win Rate:</span>
+                        <span class="ml-2 font-semibold text-blue-900 dark:text-blue-400">@TestResult.Metrics.WinRate.ToString("F1%")</span>
+                    </div>
+                    <div>
+                        <span class="text-blue-700 dark:text-blue-300">Total Trades:</span>
+                        <span class="ml-2 font-semibold text-blue-900 dark:text-blue-400">@TestResult.Trades.Count</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployment Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Create Portfolio -->
+                <div class="p-6 border-2 border-gray-200 dark:border-dark-border rounded-lg hover:border-trading-blue dark:hover:border-dark-accent-blue transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                                Create Live Portfolio
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
+                                Start a portfolio based on this strategy with real capital allocation.
+                            </p>
+                            <Button Variant="@ButtonVariant.Primary"
+                                    FullWidth="@true"
+                                    OnClick="@CreatePortfolio"
+                                    Text="Create Portfolio"></Button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Results -->
+                <div class="p-6 border-2 border-gray-200 dark:border-dark-border rounded-lg hover:border-trading-blue dark:hover:border-dark-accent-blue transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <svg class="w-6 h-6 text-trading-blue dark:text-dark-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                                Export Results
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
+                                Download backtest results as CSV or JSON for further analysis.
+                            </p>
+                            <div class="flex gap-2">
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        OnClick="@ExportCSV"
+                                        AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                                        Text="Export CSV"></Button>
+                                <Button Variant="@ButtonVariant.Secondary"
+                                        OnClick="@ExportJSON"
+                                        AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                                        Text="Export JSON"></Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compare with Others -->
+                <div class="p-6 border-2 border-gray-200 dark:border-dark-border rounded-lg hover:border-trading-blue dark:hover:border-dark-accent-blue transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                                Compare Strategies
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
+                                Run side-by-side comparison with other strategies.
+                            </p>
+                            <Button Variant="@ButtonVariant.Secondary"
+                                    FullWidth="@true"
+                                    OnClick="@CompareStrategies"
+                                    Text="Open Comparison"></Button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save to Archive -->
+                <div class="p-6 border-2 border-gray-200 dark:border-dark-border rounded-lg hover:border-trading-blue dark:hover:border-dark-accent-blue transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+                                View in Archive
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
+                                This backtest is automatically saved. View all historical runs.
+                            </p>
+                            <Button Variant="@ButtonVariant.Secondary"
+                                    FullWidth="@true"
+                                    OnClick="@ViewArchive"
+                                    Text="View Archive"></Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public CustomStrategy? Strategy { get; set; }
+    [Parameter] public BacktestResult? TestResult { get; set; }
+
+    private void CreatePortfolio()
+    {
+        Navigation.NavigateTo("/portfolios");
+    }
+
+    private async Task ExportCSV()
+    {
+        await Notifications.AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Info,
+            "Coming Soon",
+            "CSV export will be available in a future update");
+    }
+
+    private async Task ExportJSON()
+    {
+        await Notifications.AddNotificationAsync(
+            NotificationType.System,
+            NotificationSeverity.Info,
+            "Coming Soon",
+            "JSON export will be available in a future update");
+    }
+
+    private void CompareStrategies()
+    {
+        Navigation.NavigateTo("/strategies/compare");
+    }
+
+    private void ViewArchive()
+    {
+        Navigation.NavigateTo("/backtests");
+    }
+}

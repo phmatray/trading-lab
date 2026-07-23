@@ -1,0 +1,380 @@
+@page "/strategies/optimize"
+@rendermode InteractiveServer
+
+@using TradingStrat.Web.Components.UI.Typography
+<PageTitle>Optimize Strategy | TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Strategy Optimization"
+                Description="Find optimal parameters for your custom strategies using grid search or genetic algorithms" />
+
+    @if (_isLoadingStrategies)
+    {
+        <LoadingState Message="Loading custom strategies..." />
+    }
+    else if (!_customStrategies.Any())
+    {
+        <div class="card text-center py-12">
+            <div class="text-6xl mb-4">📊</div>
+            <Heading Level="3" Class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No Custom Strategies Found
+            </Heading>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Create a custom strategy first to use the optimization feature.
+            </p>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                    OnClick="@NavigateToBuilder"
+                    Text="Create Strategy"></TradingStrat.Web.Components.Shared.Button>
+        </div>
+    }
+    else
+    {
+        <EditForm Model="_model" OnValidSubmit="HandleOptimize" FormName="optimization-form">
+            <DataAnnotationsValidator />
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Configuration Panel -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Strategy Selection -->
+                    <div class="card-elevated">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            1. Select Strategy
+                        </Heading>
+
+                        <div class="form-group">
+                            <label for="strategy" class="form-label">Custom Strategy</label>
+                            <select id="strategy"
+                                    class="form-control"
+                                    @bind="_model.CustomStrategyId"
+                                    @bind:after="LoadStrategyParameters">
+                                <option value="0">-- Select a strategy --</option>
+                                @foreach (var strategy in _customStrategies)
+                                {
+                                    <option value="@strategy.Id">@strategy.Name</option>
+                                }
+                            </select>
+                            <ValidationMessage For="() => _model.CustomStrategyId" />
+                        </div>
+
+                        @if (_selectedStrategy is not null)
+                        {
+                            <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    <strong>Description:</strong> @_selectedStrategy.Description
+                                </p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Parameter Ranges -->
+                    @if (_model.ParameterRanges.Any())
+                    {
+                        <div class="card-elevated">
+                            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                                2. Configure Parameter Ranges
+                            </Heading>
+
+                            <div class="space-y-4">
+                                @foreach (var param in _model.ParameterRanges)
+                                {
+                                    <div class="p-4 bg-gray-50 dark:bg-dark-elevated rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center">
+                                                <input type="checkbox"
+                                                       id="enable-@param.ParameterName"
+                                                       @bind="param.IsEnabled"
+                                                       class="form-checkbox" />
+                                                <label for="enable-@param.ParameterName"
+                                                       class="ml-2 font-medium text-gray-900 dark:text-white">
+                                                    @param.ParameterName
+                                                </label>
+                                            </div>
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                                Current: @param.CurrentValue
+                                            </span>
+                                        </div>
+
+                                        @if (param.IsEnabled)
+                                        {
+                                            <div class="grid grid-cols-3 gap-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Min</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Min"
+                                                           class="form-control" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Max</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Max"
+                                                           class="form-control" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Step</label>
+                                                    <input type="number"
+                                                           step="any"
+                                                           @bind="param.Step"
+                                                           class="form-control" />
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                                                Will test @CalculateStepCount(param) values
+                                            </p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Backtest Settings -->
+                    <div class="card-elevated">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            3. Backtest Configuration
+                        </Heading>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">Ticker</label>
+                                <input type="text" @bind="_model.Ticker" class="form-control" />
+                                <ValidationMessage For="() => _model.Ticker" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Initial Capital</label>
+                                <input type="number" @bind="_model.InitialCapital" class="form-control" />
+                                <ValidationMessage For="() => _model.InitialCapital" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" @bind="_model.StartDate" class="form-control" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" @bind="_model.EndDate" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="space-y-6">
+                    <!-- Algorithm Settings -->
+                    <div class="card-elevated">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Optimization Settings
+                        </Heading>
+
+                        <div class="form-group">
+                            <label class="form-label">Algorithm</label>
+                            <select @bind="_model.OptimizationType" class="form-control">
+                                <option value="@OptimizationType.GridSearch">Grid Search (Exhaustive)</option>
+                                <option value="@OptimizationType.Genetic">Genetic Algorithm</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Objective</label>
+                            <select @bind="_model.Objective" class="form-control">
+                                <option value="@OptimizationObjective.MaximizeTotalReturn">Maximize Total Return</option>
+                                <option value="@OptimizationObjective.MaximizeSharpeRatio">Maximize Sharpe Ratio</option>
+                                <option value="@OptimizationObjective.MinimizeDrawdown">Minimize Drawdown</option>
+                                <option value="@OptimizationObjective.MaximizeWinRate">Maximize Win Rate</option>
+                                <option value="@OptimizationObjective.MaximizeProfitFactor">Maximize Profit Factor</option>
+                            </select>
+                        </div>
+
+                        @if (_model.OptimizationType == OptimizationType.Genetic)
+                        {
+                            <div class="mt-4 space-y-3">
+                                <Heading Level="3" Class="text-sm font-medium text-gray-900 dark:text-white">Genetic Settings</Heading>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Population Size</label>
+                                    <input type="number" @bind="_model.PopulationSize" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Generations</label>
+                                    <input type="number" @bind="_model.Generations" class="form-control" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label text-sm">Mutation Rate</label>
+                                    <input type="number" step="0.01" @bind="_model.MutationRate" class="form-control" />
+                                </div>
+                            </div>
+                        }
+
+                        @if (_estimatedIterations > 0)
+                        {
+                            <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    <strong>Estimated iterations:</strong> @_estimatedIterations
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    This may take several minutes
+                                </p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Start Button -->
+                    <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            FullWidth="@true"
+                            IsLoading="@_isOptimizing"
+                            Text="Start Optimization"
+                            LoadingText="Optimizing..."></TradingStrat.Web.Components.Shared.Button>
+
+                    @if (_isOptimizing && _optimizationProgress is not null)
+                    {
+                        <div class="card-elevated">
+                            <Heading Level="3" Class="text-sm font-medium text-gray-900 dark:text-white mb-2">Progress</Heading>
+                            <div class="progress-bar mb-2">
+                                <div class="progress-bar-fill" style="width: @_optimizationProgress.PercentComplete%"></div>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                @_optimizationProgress.Message
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </EditForm>
+
+        <!-- Results -->
+        @if (_optimizationResult is not null)
+        {
+            <div class="card mt-6">
+                <Heading Level="2" Class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Optimization Results
+                </Heading>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="metric-card">
+                        <div class="metric-label">Best Score</div>
+                        <div class="metric-value">@_optimizationResult.BestScore.ToString("F2")</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Iterations</div>
+                        <div class="metric-value">@_optimizationResult.TotalIterations</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Duration</div>
+                        <div class="metric-value">@_optimizationResult.Duration.TotalSeconds.ToString("F1")s</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Objective</div>
+                        <div class="metric-value text-sm">@_optimizationResult.Objective.ToString()</div>
+                    </div>
+                </div>
+
+                <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Best Parameters</Heading>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    @foreach (KeyValuePair<string, decimal> param in _optimizationResult.BestParameters)
+                    {
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <div class="text-xs text-gray-600 dark:text-gray-400">@param.Key</div>
+                            <div class="text-lg font-semibold text-gray-900 dark:text-white">@param.Value</div>
+                        </div>
+                    }
+                </div>
+
+                <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top 5 Results</Heading>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Score</th>
+                                <th>Return</th>
+                                <th>Sharpe</th>
+                                <th>Drawdown</th>
+                                <th>Trades</th>
+                                <th>Parameters</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var iteration in _optimizationResult.GetTopIterations(5).Select((it, idx) => new { it, rank = idx + 1 }))
+                            {
+                                <tr>
+                                    <td>@iteration.rank</td>
+                                    <td class="font-semibold">@iteration.it.Score.ToString("F2")</td>
+                                    <td class="@(iteration.it.TotalReturn >= 0 ? "metric-positive" : "metric-negative")">
+                                        @iteration.it.TotalReturn.ToString("F2")%
+                                    </td>
+                                    <td>@iteration.it.SharpeRatio.ToString("F2")</td>
+                                    <td class="metric-negative">@iteration.it.MaxDrawdown.ToString("F2")%</td>
+                                    <td>@iteration.it.TradeCount</td>
+                                    <td class="text-xs">
+                                        @string.Join(", ", iteration.it.Parameters.Select(p => $"{p.Key}={p.Value}"))
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card mt-6">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</Heading>
+                    <div class="flex flex-wrap gap-3">
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                                OnClick="@ApplyBestParameters"
+                                Text="Apply Best Parameters">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@NavigateToBacktest"
+                                Text="Run Backtest with Best">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CreatePortfolioFromStrategy"
+                                Text="Create Portfolio">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CompareVariations"
+                                Text="Compare Variations">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@SaveAsNewStrategy"
+                                Text="Save as New Strategy">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

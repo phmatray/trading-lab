@@ -1,0 +1,122 @@
+@page "/portfolios"
+@rendermode InteractiveServer
+
+<PageTitle>Portfolios - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <PageHeader Title="Portfolios"
+                Description="Manage your investment portfolios and track performance.">
+        <Actions>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                    OnClick="@OpenCreateDialog"
+                    Text="Create Portfolio">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </Actions>
+    </PageHeader>
+
+    <!-- Form Wrapper for messages -->
+    <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
+    </FormWrapper>
+
+    <!-- Loading State -->
+    @if (_isLoading)
+    {
+        <LoadingState Message="Loading portfolios..." />
+    }
+    else if (_portfolios is null || !_portfolios.Any())
+    {
+        <!-- Empty State -->
+        <EmptyState Icon="portfolio"
+                    Title="No portfolios"
+                    Description="Get started by creating a new portfolio.">
+            <Actions>
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                        OnClick="@OpenCreateDialog"
+                        Text="Create Portfolio"></TradingStrat.Web.Components.Shared.Button>
+            </Actions>
+        </EmptyState>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var portfolio in _portfolios)
+            {
+                <PortfolioCard
+                    Name="@portfolio.Name"
+                    Description="@portfolio.Description"
+                    Cash="@portfolio.Cash"
+                    PositionCount="@portfolio.Positions.Count"
+                    CreatedAt="@portfolio.CreatedAt"
+                    OnClick="@(() => NavigateToPortfolio(portfolio.Id))"
+                    OnDelete="@((e) => ConfirmDelete(portfolio.Id, portfolio.Name, e))" />
+            }
+        </div>
+    }
+</div>
+
+<!-- Create Portfolio Dialog -->
+<Dialog IsOpen="@_showCreateDialog"
+        OnClose="@CloseCreateDialog"
+        Title="Create New Portfolio">
+    <ChildContent>
+        <EditForm Model="@_createFormModel" OnValidSubmit="@HandleCreatePortfolio" class="space-y-4">
+            <DataAnnotationsValidator />
+
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Portfolio Name *</label>
+                <InputText id="name" @bind-Value="_createFormModel.Name"
+                           class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                <ValidationMessage For="@(() => _createFormModel.Name)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Description</label>
+                <InputTextArea id="description" @bind-Value="_createFormModel.Description"
+                               rows="3"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                <ValidationMessage For="@(() => _createFormModel.Description)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+            </div>
+
+            <div>
+                <label for="initialCash" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Initial Cash *</label>
+                <InputNumber id="initialCash" @bind-Value="_createFormModel.InitialCash"
+                             class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                <ValidationMessage For="@(() => _createFormModel.InitialCash)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+            </div>
+
+            <div class="flex space-x-3 pt-4">
+                <button type="button" @onclick="CloseCreateDialog" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-elevated text-gray-700 dark:text-dark-text-primary rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" disabled="@_isCreating" class="flex-1 btn-primary">
+                    @if (_isCreating)
+                    {
+                        <span>Creating...</span>
+                    }
+                    else
+                    {
+                        <span>Create</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    </ChildContent>
+</Dialog>
+
+<!-- Delete Confirmation Dialog -->
+<ConfirmDialog IsOpen="@_showDeleteDialog"
+               OnConfirm="@HandleDeletePortfolio"
+               OnCancel="@CloseDeleteDialog"
+               Title="Delete Portfolio"
+               Message="@($"Are you sure you want to delete \"{_portfolioToDelete}\"? This will also delete all positions in this portfolio. This action cannot be undone.")"
+               ConfirmText="Delete"
+               ProcessingText="Deleting..."
+               Type="ConfirmDialog.ConfirmType.Danger"
+               IsProcessing="@_isDeleting" />
+

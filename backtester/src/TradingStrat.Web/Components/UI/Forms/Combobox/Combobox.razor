@@ -1,0 +1,317 @@
+@typeparam TItem
+
+<div class="relative" @ref="_containerRef" @attributes="AdditionalAttributes">
+    <span class="@GetControlClasses()">
+        <input type="text"
+               @ref="_inputRef"
+               value="@_query"
+               @oninput="HandleInput"
+               @onfocus="HandleFocus"
+               @onkeydown="HandleKeyDown"
+               placeholder="@Placeholder"
+               aria-label="@AriaLabel"
+               disabled="@Disabled"
+               class="@GetInputClasses()" />
+
+        <button type="button"
+                class="group absolute inset-y-0 right-0 flex items-center px-2"
+                @onclick="ToggleDropdown"
+                disabled="@Disabled">
+            <svg class="@GetChevronClasses()" viewBox="0 0 16 16" aria-hidden="true" fill="none">
+                <path d="M5.75 10.75L8 13L10.25 10.75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.25 5.25L8 3L5.75 5.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+    </span>
+
+    @if (_isOpen && FilteredOptions.Any())
+    {
+        <div class="@GetOptionsClasses()">
+            @foreach ((TItem option, int index) in FilteredOptions.Select((o, i) => (o, i)))
+            {
+                <div @key="option"
+                     class="@GetOptionClasses(option, index)"
+                     @onclick="() => SelectOption(option)"
+                     @onmouseenter="() => _focusedIndex = index">
+                    @OptionTemplate(option)
+
+                    @if (EqualityComparer<TItem>.Default.Equals(option, Value))
+                    {
+                        <svg class="relative col-start-2 size-5 self-center stroke-current sm:size-4"
+                             viewBox="0 0 16 16"
+                             fill="none"
+                             aria-hidden="true">
+                            <path d="M4 8.5l3 3L12 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference _containerRef;
+    private ElementReference _inputRef;
+    private string _query = string.Empty;
+    private bool _isOpen;
+    private int _focusedIndex = -1;
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    [Parameter] public TItem? Value { get; set; }
+    [Parameter] public EventCallback<TItem?> ValueChanged { get; set; }
+    [Parameter] public IReadOnlyList<TItem> Options { get; set; } = Array.Empty<TItem>();
+    [Parameter] public Func<TItem, string> DisplayValue { get; set; } = item => item?.ToString() ?? string.Empty;
+    [Parameter] public Func<TItem, string, bool>? Filter { get; set; }
+    [Parameter] public RenderFragment<TItem> OptionTemplate { get; set; } = item => builder => builder.AddContent(0, item?.ToString());
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private List<TItem> FilteredOptions
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_query))
+                return Options.ToList();
+
+            return Options.Where(option =>
+            {
+                if (Filter != null)
+                    return Filter(option, _query);
+
+                var displayText = DisplayValue(option);
+                return displayText?.Contains(_query, StringComparison.OrdinalIgnoreCase) ?? false;
+            }).ToList();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Value != null && string.IsNullOrEmpty(_query))
+        {
+            _query = DisplayValue(Value);
+        }
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? string.Empty;
+        _isOpen = true;
+        _focusedIndex = -1;
+    }
+
+    private void HandleFocus()
+    {
+        _isOpen = true;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!_isOpen)
+        {
+            if (e.Key == "ArrowDown" || e.Key == "ArrowUp")
+            {
+                _isOpen = true;
+                await InvokeAsync(StateHasChanged);
+            }
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                _focusedIndex = Math.Min(_focusedIndex + 1, FilteredOptions.Count - 1);
+                await InvokeAsync(StateHasChanged);
+                break;
+
+            case "ArrowUp":
+                _focusedIndex = Math.Max(_focusedIndex - 1, 0);
+                await InvokeAsync(StateHasChanged);
+                break;
+
+            case "Enter":
+                if (_focusedIndex >= 0 && _focusedIndex < FilteredOptions.Count)
+                {
+                    await SelectOption(FilteredOptions[_focusedIndex]);
+                }
+                break;
+
+            case "Escape":
+                await CloseDropdown();
+                break;
+        }
+    }
+
+    private async Task SelectOption(TItem option)
+    {
+        Value = option;
+        _query = DisplayValue(option);
+        _isOpen = false;
+        _focusedIndex = -1;
+
+        await ValueChanged.InvokeAsync(option);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleDropdown()
+    {
+        if (!Disabled)
+        {
+            _isOpen = !_isOpen;
+        }
+    }
+
+    private async Task CloseDropdown()
+    {
+        _isOpen = false;
+        _focusedIndex = -1;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetControlClasses()
+    {
+        var classes = new List<string>
+        {
+            "relative",
+            "block",
+            "w-full",
+            "before:absolute",
+            "before:inset-px",
+            "before:rounded-[calc(--radius-lg-1px)]",
+            "before:bg-white",
+            "before:shadow-sm",
+            "dark:before:hidden",
+            "after:pointer-events-none",
+            "after:absolute",
+            "after:inset-0",
+            "after:rounded-lg",
+            "after:ring-transparent",
+            "after:ring-inset",
+            "sm:focus-within:after:ring-2",
+            "sm:focus-within:after:ring-blue-500"
+        };
+
+        if (Disabled)
+        {
+            classes.Add("opacity-50");
+            classes.Add("before:bg-zinc-950/5");
+            classes.Add("before:shadow-none");
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetInputClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "relative",
+            "block",
+            "w-full",
+            "appearance-none",
+            "rounded-lg",
+            "py-[calc(theme(spacing.2\\.5)-1px)]",
+            "sm:py-[calc(theme(spacing.1\\.5)-1px)]",
+            "pr-[calc(theme(spacing.10)-1px)]",
+            "pl-[calc(theme(spacing.3\\.5)-1px)]",
+            "sm:pr-[calc(theme(spacing.9)-1px)]",
+            "sm:pl-[calc(theme(spacing.3)-1px)]",
+            "text-base/6",
+            "text-zinc-950",
+            "placeholder:text-zinc-500",
+            "sm:text-sm/6",
+            "dark:text-white",
+            "border",
+            "border-zinc-950/10",
+            "hover:border-zinc-950/20",
+            "dark:border-white/10",
+            "dark:hover:border-white/20",
+            "bg-transparent",
+            "dark:bg-white/5",
+            "focus:outline-hidden",
+            "disabled:border-zinc-950/20",
+            "dark:disabled:border-white/15",
+            "dark:disabled:bg-white/2.5"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    private string GetChevronClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "size-5",
+            "stroke-zinc-500",
+            "group-disabled:stroke-zinc-600",
+            "group-hover:stroke-zinc-700",
+            "sm:size-4",
+            "dark:stroke-zinc-400",
+            "dark:group-hover:stroke-zinc-300"
+        });
+    }
+
+    private string GetOptionsClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "absolute",
+            "z-10",
+            "mt-2",
+            "w-full",
+            "min-w-[calc(var(--input-width)+8px)]",
+            "scroll-py-1",
+            "rounded-xl",
+            "p-1",
+            "isolate",
+            "overflow-y-auto",
+            "max-h-60",
+            "bg-white/75",
+            "backdrop-blur-xl",
+            "dark:bg-zinc-800/75",
+            "shadow-lg",
+            "ring-1",
+            "ring-zinc-950/10",
+            "dark:ring-white/10",
+            "dark:ring-inset"
+        });
+    }
+
+    private string GetOptionClasses(TItem option, int index)
+    {
+        var classes = new List<string>
+        {
+            "group/option",
+            "grid",
+            "w-full",
+            "cursor-default",
+            "grid-cols-[1fr_theme(spacing.5)]",
+            "items-baseline",
+            "gap-x-2",
+            "rounded-lg",
+            "py-2.5",
+            "pr-2",
+            "pl-3.5",
+            "sm:grid-cols-[1fr_theme(spacing.4)]",
+            "sm:py-1.5",
+            "sm:pr-2",
+            "sm:pl-3",
+            "text-base/6",
+            "text-zinc-950",
+            "sm:text-sm/6",
+            "dark:text-white",
+            "outline-hidden"
+        };
+
+        if (index == _focusedIndex || EqualityComparer<TItem>.Default.Equals(option, Value))
+        {
+            classes.Add("bg-blue-500");
+            classes.Add("text-white");
+        }
+
+        return string.Join(" ", classes);
+    }
+}

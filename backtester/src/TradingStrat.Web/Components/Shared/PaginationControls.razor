@@ -1,0 +1,54 @@
+@if (TotalPages > 0)
+{
+    <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6" aria-label="Pagination">
+        <div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+                Page
+                <span class="font-medium">@CurrentPage</span>
+                of
+                <span class="font-medium">@TotalPages</span>
+            </p>
+        </div>
+
+        <div class="flex flex-1 justify-between sm:justify-end gap-4">
+            <!-- Page Size Selector -->
+            <div class="flex items-center gap-2">
+                <label for="page-size" class="text-sm text-gray-700 dark:text-gray-300">
+                    Items per page:
+                </label>
+                <select
+                    id="page-size"
+                    class="px-3 py-1 text-sm border border-gray-300 rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value="@PageSize"
+                    @onchange="HandlePageSizeChanged"
+                >
+                    @foreach (int size in PageSizeOptions)
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Pagination Buttons -->
+            <div class="flex gap-2">
+                <Button
+                    Text="Previous"
+                    OnClick="HandlePreviousPage"
+                    Disabled="@(CurrentPage <= 1)"
+                    Variant="ButtonVariant.Secondary"
+                    Size="ButtonSize.Small"
+                    AriaLabel="Previous page"
+                />
+
+                <Button
+                    Text="Next"
+                    OnClick="HandleNextPage"
+                    Disabled="@(CurrentPage >= TotalPages)"
+                    Variant="ButtonVariant.Secondary"
+                    Size="ButtonSize.Small"
+                    AriaLabel="Next page"
+                />
+            </div>
+        </div>
+    </nav>
+}

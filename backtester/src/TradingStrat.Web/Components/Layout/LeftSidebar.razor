@@ -1,0 +1,87 @@
+@using TradingStrat.Web.Components.UI.Navigation.Sidebar
+@* LeftSidebar Component - Vertical icon-based navigation with Catalyst components *@
+
+<aside class="@GetSidebarClasses() sidebar-transition"
+       data-testid="left-sidebar"
+       role="navigation"
+       aria-label="Main navigation">
+    <div class="h-full flex flex-col bg-white dark:bg-dark-card border-r-2 border-gray-200 dark:border-dark-border shadow-lg dark:shadow-dark-xl bg-texture-noise">
+        <!-- Navigation Items -->
+        <Sidebar Class="flex-1 py-4 px-2 overflow-y-auto">
+            @{
+                IEnumerable<IGrouping<string, NavItem>> groups = _navItems.GroupBy(i => i.Group);
+                bool isFirstGroup = true;
+            }
+
+            @foreach (IGrouping<string, NavItem> group in groups)
+            {
+                @* Group divider (collapsed) or header (expanded) *@
+                @if (!isFirstGroup)
+                {
+                    <SidebarDivider Class="my-2" />
+                }
+
+                <SidebarSection>
+                    @if (!IsCollapsed)
+                    {
+                        <SidebarHeading Class="px-2">
+                            @group.Key
+                        </SidebarHeading>
+                    }
+
+                    @* Menu items *@
+                    @foreach (var item in group)
+                    {
+                        @if (IsCollapsed)
+                        {
+                            <Tooltip Text="@GetTooltipText(item)" Position="TooltipPosition.Right">
+                                <SidebarItem Href="@item.Href"
+                                           Current="@IsCurrentRoute(item.Href, item.Match)"
+                                           aria-label="@GetTooltipText(item)">
+                                    <ColoredIcon Icon="@item.Icon"
+                                                 Category="@item.Category"
+                                                 Size="IconSize.Medium"
+                                                 AriaLabel="@item.Label" />
+                                </SidebarItem>
+                            </Tooltip>
+                        }
+                        else
+                        {
+                            <SidebarItem Href="@item.Href"
+                                       Current="@IsCurrentRoute(item.Href, item.Match)"
+                                       title="@GetTooltipText(item)"
+                                       aria-label="@GetTooltipText(item)">
+                                <ColoredIcon Icon="@item.Icon"
+                                             Category="@item.Category"
+                                             Size="IconSize.Medium"
+                                             AriaLabel="@item.Label" />
+                                <span>@item.Label</span>
+                            </SidebarItem>
+                        }
+                    }
+                </SidebarSection>
+
+                isFirstGroup = false;
+            }
+        </Sidebar>
+
+        <!-- Toggle Button -->
+        <SidebarFooter Class="collapse-footer">
+            <div class="flex @(IsCollapsed ? "justify-center" : "justify-between") items-center">
+                @if (!IsCollapsed)
+                {
+                    <span class="text-sm text-gray-600 dark:text-dark-text-secondary font-medium">Navigation</span>
+                }
+                <button @onclick="ToggleCollapse"
+                        class="collapse-button"
+                        aria-label="@(IsCollapsed ? "Expand sidebar" : "Collapse sidebar")"
+                        title="@(IsCollapsed ? "Expand" : "Collapse")"
+                        type="button">
+                    <svg class="w-4 h-4 collapse-icon @(IsCollapsed ? "" : "rotate-180")" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+            </div>
+        </SidebarFooter>
+    </div>
+</aside>

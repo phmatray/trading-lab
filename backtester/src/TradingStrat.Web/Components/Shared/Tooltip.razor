@@ -1,0 +1,50 @@
+@* Tooltip Component with positioning logic *@
+
+<div class="tooltip-wrapper"
+     @onmouseenter="Show"
+     @onmouseleave="Hide"
+     @onfocus="Show"
+     @onblur="Hide">
+    @ChildContent
+
+    @if (_isVisible && !string.IsNullOrEmpty(Text))
+    {
+        <div class="@GetTooltipClasses()"
+             role="tooltip"
+             data-testid="tooltip">
+            @Text
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = string.Empty;
+
+    [Parameter]
+    public TooltipPosition Position { get; set; } = TooltipPosition.Right;
+
+    private bool _isVisible = false;
+
+    private void Show() => _isVisible = true;
+    private void Hide() => _isVisible = false;
+
+    private string GetTooltipClasses()
+    {
+        var baseClasses = "absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-900 dark:bg-dark-elevated rounded-lg shadow-xl dark:shadow-dark-2xl whitespace-nowrap animate-tooltip-fade-in pointer-events-none";
+
+        var positionClasses = Position switch
+        {
+            TooltipPosition.Right => "left-full top-1/2 -translate-y-1/2 ml-2",
+            TooltipPosition.Left => "right-full top-1/2 -translate-y-1/2 mr-2",
+            TooltipPosition.Top => "bottom-full left-1/2 -translate-x-1/2 mb-2",
+            TooltipPosition.Bottom => "top-full left-1/2 -translate-x-1/2 mt-2",
+            _ => "left-full top-1/2 -translate-y-1/2 ml-2"
+        };
+
+        return $"{baseClasses} {positionClasses}";
+    }
+}

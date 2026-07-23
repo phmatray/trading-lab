@@ -1,0 +1,26 @@
+<span class="@GetClasses()" @attributes="AdditionalAttributes">
+    <span class="flex-1 truncate">@ChildContent</span>
+</span>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "flex",
+            "flex-1",
+            "overflow-hidden",
+            "text-zinc-500",
+            "group-data-focus/option:text-white",
+            "before:w-2",
+            "before:min-w-0",
+            "before:shrink",
+            "dark:text-zinc-400"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

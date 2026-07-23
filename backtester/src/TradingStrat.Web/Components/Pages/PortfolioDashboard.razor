@@ -1,0 +1,260 @@
+@page "/portfolio/{portfolioId:int}"
+@rendermode InteractiveServer
+
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
+<PageTitle>@(_snapshot?.PortfolioName ?? "Portfolio") - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <PageHeader Title="@(_snapshot?.PortfolioName ?? "Loading...")"
+                Description="@(_portfolio?.Description)"
+                OnBack="NavigateBack">
+        <Actions>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@RefreshPrices"
+                    Disabled="@ProgressService.IsProcessing"
+                    Text="Refresh Prices">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                    OnClick="@OpenAddPositionDialog"
+                    Text="Add Position">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </Actions>
+    </PageHeader>
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="@ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
+        @if (_isLoading)
+        {
+            <LoadingState Message="Loading portfolio..." />
+        }
+        else if (_snapshot is null)
+        {
+            <EmptyState Icon="alert"
+                        Title="Portfolio not found"
+                        Description="The portfolio you're looking for doesn't exist.">
+                <Actions>
+                    <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                            OnClick="@NavigateBack"
+                            Text="Back to Portfolios"></TradingStrat.Web.Components.Shared.Button>
+                </Actions>
+            </EmptyState>
+        }
+    else
+    {
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Value -->
+            <div class="card-elevated">
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Total Value</Heading>
+                <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.TotalValue.ToString("C2")</p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Cash + Positions
+                </p>
+            </div>
+
+            <!-- Cash Balance -->
+            <div class="card-elevated">
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Cash Balance</Heading>
+                <p class="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">@_snapshot.Cash.ToString("C2")</p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    @((_snapshot.Cash / _snapshot.TotalValue * 100).ToString("F1"))% allocation
+                </p>
+            </div>
+
+            <!-- Unrealized Gain/Loss -->
+            <div class="card-elevated">
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Unrealized Gain/Loss</Heading>
+                <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
+                    @_snapshot.UnrealizedGainLoss.ToString("C2")
+                </p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Total cost: @_snapshot.TotalCost.ToString("C2")
+                </p>
+            </div>
+
+            <!-- Return Percentage -->
+            <div class="card-elevated">
+                <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Return %</Heading>
+                <p class="text-2xl font-bold @(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                    @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                </p>
+                <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                    Since inception
+                </p>
+            </div>
+        </div>
+
+        <!-- Positions Table -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Positions</Heading>
+
+            @if (!_snapshot.Positions.Any())
+            {
+                <EmptyState Icon="document"
+                            Title="No positions"
+                            Description="Add your first position to start tracking your investments.">
+                    <Actions>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                                OnClick="@OpenAddPositionDialog"
+                                Text="Add Position"></TradingStrat.Web.Components.Shared.Button>
+                    </Actions>
+                </EmptyState>
+            }
+            else
+            {
+                <Table Dense>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeader>Ticker</TableHeader>
+                            <TableHeader Class="text-right">Quantity</TableHeader>
+                            <TableHeader Class="text-right">Entry Price</TableHeader>
+                            <TableHeader Class="text-right">Current Price</TableHeader>
+                            <TableHeader Class="text-right">Market Value</TableHeader>
+                            <TableHeader Class="text-right">Gain/Loss</TableHeader>
+                            <TableHeader Class="text-right">Return %</TableHeader>
+                            <TableHeader Class="text-right">Allocation</TableHeader>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (var position in _snapshot.Positions)
+                        {
+                            <TableRow>
+                                <TableCell Class="font-medium text-gray-900 dark:text-dark-text-primary">
+                                    @position.Ticker
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.Quantity.ToString("N0")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.EntryPrice.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.CurrentPrice.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right font-medium">
+                                    @position.MarketValue.ToString("C2")
+                                </TableCell>
+                                <TableCell Class="text-right">
+                                    <span class="@(position.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                        @((position.UnrealizedGainLoss >= 0 ? "+" : "") + position.UnrealizedGainLoss.ToString("C2"))
+                                    </span>
+                                </TableCell>
+                                <TableCell Class="text-right">
+                                    <span class="@(position.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative") font-medium">
+                                        @position.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                    </span>
+                                </TableCell>
+                                <TableCell Class="text-gray-900 dark:text-dark-text-primary text-right">
+                                    @position.AllocationPercentage.ToString("F1")%
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                    <tfoot class="bg-gray-50 dark:bg-dark-elevated">
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                Total (@_snapshot.Positions.Count position@(_snapshot.Positions.Count == 1 ? "" : "s"))
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-dark-text-primary text-right">
+                                @_snapshot.Positions.Sum(p => p.MarketValue).ToString("C2")
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                <span class="@(_snapshot.UnrealizedGainLoss >= 0 ? "metric-positive" : "metric-negative")">
+                                    @((_snapshot.UnrealizedGainLoss >= 0 ? "+" : "") + _snapshot.UnrealizedGainLoss.ToString("C2"))
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right">
+                                <span class="@(_snapshot.UnrealizedGainLossPercentage >= 0 ? "metric-positive" : "metric-negative")">
+                                    @_snapshot.UnrealizedGainLossPercentage.ToString("+0.00;-0.00;0.00")%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-dark-text-primary text-right">
+                                100.0%
+                            </td>
+                        </tr>
+                    </tfoot>
+                </Table>
+            }
+        </div>
+        }
+    </FormWrapper>
+</div>
+
+<!-- Add Position Dialog -->
+<Dialog IsOpen="@_showAddPositionDialog" OnClose="@CloseAddPositionDialog" Title="Add New Position">
+    <ChildContent>
+        <EditForm Model="@_addPositionFormModel" OnValidSubmit="@HandleAddPosition" class="space-y-4">
+                <DataAnnotationsValidator />
+
+                <div>
+                    <label for="ticker" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Ticker Symbol *</label>
+                    <InputText id="ticker" @bind-Value="_addPositionFormModel.Ticker"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.Ticker)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Quantity *</label>
+                        <InputNumber id="quantity" @bind-Value="_addPositionFormModel.Quantity"
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _addPositionFormModel.Quantity)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+                    <div>
+                        <label for="entryPrice" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Entry Price *</label>
+                        <InputNumber id="entryPrice" @bind-Value="_addPositionFormModel.EntryPrice"
+                                     class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <ValidationMessage For="@(() => _addPositionFormModel.EntryPrice)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="entryDate" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Entry Date *</label>
+                    <InputDate id="entryDate" @bind-Value="_addPositionFormModel.EntryDate"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.EntryDate)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Notes</label>
+                    <InputTextArea id="notes" @bind-Value="_addPositionFormModel.Notes"
+                                   rows="3"
+                                   class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <ValidationMessage For="@(() => _addPositionFormModel.Notes)" class="text-sm text-red-600 dark:text-dark-danger mt-1" />
+                </div>
+
+        </EditForm>
+    </ChildContent>
+    <Footer>
+        <div class="flex space-x-3">
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@CloseAddPositionDialog"
+                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                    Text="Cancel"></TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                    Variant="@ButtonVariant.Primary"
+                    OnClick="@HandleAddPosition"
+                    IsLoading="@_isAddingPosition"
+                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "flex-1" } })"
+                    Text="Add Position"
+                    LoadingText="Adding..."></TradingStrat.Web.Components.Shared.Button>
+        </div>
+    </Footer>
+</Dialog>

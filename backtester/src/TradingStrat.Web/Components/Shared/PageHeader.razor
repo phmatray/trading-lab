@@ -1,0 +1,34 @@
+@using TradingStrat.Web.Components.UI.Typography
+
+@* PageHeader Component - Standardized page title, description, and action buttons *@
+
+<div class="flex items-center justify-between" data-testid="page-header">
+    <div class="flex items-center gap-4">
+        @if (OnBack.HasDelegate)
+        {
+            <button @onclick="OnBack"
+                    class="inline-flex items-center justify-center p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-dark-text-secondary dark:hover:text-dark-text-primary dark:hover:bg-dark-surface-tertiary transition-colors"
+                    aria-label="Go back">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+        }
+        <div>
+            <Heading Level="1" Class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Title</Heading>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-600 dark:text-dark-text-secondary">
+                    @Description
+                </TradingStrat.Web.Components.UI.Typography.Text>
+            }
+        </div>
+    </div>
+
+    @if (Actions is not null)
+    {
+        <div class="flex items-center gap-3">
+            @Actions
+        </div>
+    }
+</div>

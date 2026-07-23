@@ -1,0 +1,107 @@
+@implements IAsyncDisposable
+
+@* Catalyst UI Kit - Dropdown Component (Wrapper) *@
+
+<div class="@Class" id="@_dropdownId">
+    <CascadingValue Value="this" IsFixed="false">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    private readonly string _dropdownId = $"dropdown-{Guid.NewGuid():N}";
+    private DotNetObjectReference<Dropdown>? _dotNetRef;
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Dropdown content (button + menu).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Whether the dropdown is currently open.
+    /// </summary>
+    public bool IsOpen { get; private set; }
+
+    /// <summary>
+    /// Button element ID (set by DropdownButton).
+    /// </summary>
+    internal string? ButtonId { get; set; }
+
+    /// <summary>
+    /// Menu element ID (set by DropdownMenu).
+    /// </summary>
+    internal string? MenuId { get; set; }
+
+    /// <summary>
+    /// Anchor position (set by DropdownMenu).
+    /// </summary>
+    internal string Anchor { get; set; } = "bottom";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ButtonId != null && MenuId != null)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("catalyst.initializeDropdown",
+                _dropdownId, ButtonId, MenuId, Anchor, _dotNetRef);
+        }
+    }
+
+    /// <summary>
+    /// Open the dropdown menu.
+    /// </summary>
+    public async Task OpenAsync()
+    {
+        if (IsOpen) return;
+
+        IsOpen = true;
+        await JSRuntime.InvokeVoidAsync("catalyst.openDropdown", _dropdownId);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Close the dropdown menu (called from JavaScript).
+    /// </summary>
+    [JSInvokable]
+    public async Task CloseDropdown()
+    {
+        if (!IsOpen) return;
+
+        IsOpen = false;
+        await JSRuntime.InvokeVoidAsync("catalyst.closeDropdown", _dropdownId);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Toggle the dropdown menu.
+    /// </summary>
+    public async Task ToggleAsync()
+    {
+        if (IsOpen)
+        {
+            await CloseDropdown();
+        }
+        else
+        {
+            await OpenAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            await JSRuntime.InvokeVoidAsync("catalyst.disposeDropdown", _dropdownId);
+            _dotNetRef.Dispose();
+        }
+    }
+}

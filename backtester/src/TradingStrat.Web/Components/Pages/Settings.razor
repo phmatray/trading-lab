@@ -1,0 +1,149 @@
+@page "/settings"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+
+<PageTitle>Settings - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Settings"
+                Description="Configure your preferences and application defaults." />
+
+    <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
+        <EditForm Model="@_preferences" OnValidSubmit="@HandleSaveSettings" class="space-y-6">
+        <DataAnnotationsValidator />
+
+        <!-- Appearance -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Appearance</Heading>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="theme" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Theme</label>
+                    <InputSelect id="theme" @bind-Value="_preferences.Theme"
+                                 class="w-full md:w-64 rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System</option>
+                    </InputSelect>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Choose your preferred color theme</TradingStrat.Web.Components.UI.Typography.Text>
+                </div>
+            </div>
+        </div>
+
+        <!-- Default Ticker -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Default Ticker</Heading>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="defaultTicker" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Ticker Symbol</label>
+                    <InputText id="defaultTicker" @bind-Value="_preferences.DefaultTicker"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Default ticker symbol for all forms</TradingStrat.Web.Components.UI.Typography.Text>
+                </div>
+
+                <div>
+                    <label for="defaultIsin" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">ISIN (Optional)</label>
+                    <InputText id="defaultIsin" @bind-Value="_preferences.DefaultIsin"
+                               class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">International Securities Identification Number</TradingStrat.Web.Components.UI.Typography.Text>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backtest Defaults -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Backtest Defaults</Heading>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="initialCapital" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Initial Capital</label>
+                    <InputNumber id="initialCapital" @bind-Value="_preferences.BacktestDefaults.InitialCapital"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div>
+                    <label for="preferredStrategy" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Preferred Strategy</label>
+                    <InputSelect id="preferredStrategy" @bind-Value="_preferences.BacktestDefaults.PreferredStrategy"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="ma">Moving Average Crossover</option>
+                        <option value="rsi">RSI</option>
+                        <option value="macd">MACD</option>
+                        <option value="ml">Machine Learning</option>
+                        <option value="ichimoku">Ichimoku Cloud</option>
+                    </InputSelect>
+                </div>
+
+                <div>
+                    <label for="commissionPercentage" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Commission (%)</label>
+                    <InputNumber id="commissionPercentage" @bind-Value="_preferences.BacktestDefaults.CommissionPercentage"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+
+                <div>
+                    <label for="minimumCommission" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Minimum Commission</label>
+                    <InputNumber id="minimumCommission" @bind-Value="_preferences.BacktestDefaults.MinimumCommission"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Preferences -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Chart Preferences</Heading>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <InputCheckbox @bind-Value="_preferences.ChartPreferences.ShowVolume"
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Show Volume</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <InputCheckbox @bind-Value="_preferences.ChartPreferences.ShowIndicators"
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Show Indicators</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label for="defaultInterval" class="block text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-1">Default Interval</label>
+                    <InputSelect id="defaultInterval" @bind-Value="_preferences.ChartPreferences.DefaultInterval"
+                                 class="w-full rounded-lg border-gray-300 dark:border-dark-border bg-white dark:bg-dark-elevated text-gray-900 dark:text-dark-text-primary focus:border-trading-blue dark:focus:border-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue">
+                        <option value="D">Daily</option>
+                        <option value="W">Weekly</option>
+                        <option value="M">Monthly</option>
+                    </InputSelect>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-elevated">
+            <div class="flex flex-wrap gap-4">
+                <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                        Variant="@ButtonVariant.Primary"
+                        IsLoading="@_isSaving"
+                        Text="Save Settings"
+                        LoadingText="Saving..."></TradingStrat.Web.Components.Shared.Button>
+
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@HandleResetToDefaults"
+                        Text="Reset to Defaults"></TradingStrat.Web.Components.Shared.Button>
+
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Danger"
+                        OnClick="@HandleClearAllData"
+                        Text="Clear All Data"></TradingStrat.Web.Components.Shared.Button>
+            </div>
+        </div>
+        </EditForm>
+    </FormWrapper>
+</div>
+

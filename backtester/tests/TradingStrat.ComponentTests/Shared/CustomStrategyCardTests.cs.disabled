@@ -1,0 +1,346 @@
+using Bunit;
+using Microsoft.AspNetCore.Components;
+using Shouldly;
+using TradingStrat.ComponentTests.Infrastructure;
+using TradingStrat.Web.Components.Shared;
+using Xunit;
+
+namespace TradingStrat.ComponentTests.Shared;
+
+/// <summary>
+/// Tests for the CustomStrategyCard component.
+/// </summary>
+public class CustomStrategyCardTests : BunitTestContext
+{
+    [Fact]
+    public void CustomStrategyCard_WithRequiredProps_RendersCorrectly()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "My Custom Strategy")
+            .Add(p => p.Category, "Custom")
+            .Add(p => p.Author, "John Doe")
+            .Add(p => p.LastUpdatedAt, new DateTime(2024, 12, 25))
+            .Add(p => p.EntryRulesCount, 3)
+            .Add(p => p.ExitRulesCount, 2));
+
+        // Assert
+        cut.Find("h3").TextContent.ShouldBe("My Custom Strategy");
+        cut.Markup.ShouldContain("Custom");
+        cut.Markup.ShouldContain("John Doe");
+        cut.Markup.ShouldContain("Dec 25, 2024");
+        cut.Markup.ShouldContain("3"); // Entry rules
+        cut.Markup.ShouldContain("2"); // Exit rules
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithDescription_RendersDescription()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Description, "My strategy description")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        cut.Markup.ShouldContain("My strategy description");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithoutDescription_DoesNotRenderDescriptionElement()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Description, (string?)null)
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        // Should not have description paragraph
+        var paragraphs = cut.FindAll("p");
+        paragraphs.ShouldNotContain(p => p.ClassList.Contains("min-h-[3rem]"));
+    }
+
+    [Fact]
+    public void CustomStrategyCard_Badge_ShowsGreenBadge()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Momentum")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        var badge = cut.FindComponent<TradingStrat.Web.Components.UI.DataDisplay.Badge>();
+        badge.Instance.Color.ShouldBe(TradingStrat.Web.Components.UI.BadgeColor.Green);
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithTimesUsed_DisplaysTimesUsed()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.TimesUsed, 5));
+
+        // Assert
+        cut.Markup.ShouldContain("Times Used:");
+        cut.Markup.ShouldContain("5");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithoutTimesUsed_DoesNotDisplayTimesUsed()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.TimesUsed, 0));
+
+        // Assert
+        cut.Markup.ShouldNotContain("Times Used:");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithPositiveReturn_DisplaysPositiveReturn()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.LastBacktestReturn, 0.1550m));
+
+        // Assert
+        cut.Markup.ShouldContain("Last Return:");
+        cut.Markup.ShouldContain("15.50%");
+        cut.Markup.ShouldContain("metric-positive");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithNegativeReturn_DisplaysNegativeReturn()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.LastBacktestReturn, -0.0825m));
+
+        // Assert
+        cut.Markup.ShouldContain("Last Return:");
+        cut.Markup.ShouldContain("-8.25%");
+        cut.Markup.ShouldContain("metric-negative");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_WithoutReturn_DoesNotDisplayReturn()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.LastBacktestReturn, (decimal?)null));
+
+        // Assert
+        cut.Markup.ShouldNotContain("Last Return:");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_EditButton_InvokesCallback()
+    {
+        // Arrange
+        bool editClicked = false;
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.OnEdit, EventCallback.Factory.Create(this, () => editClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Edit')");
+        button.Click();
+
+        // Assert
+        editClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void CustomStrategyCard_CloneButton_InvokesCallback()
+    {
+        // Arrange
+        bool cloneClicked = false;
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.OnClone, EventCallback.Factory.Create(this, () => cloneClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Clone')");
+        button.Click();
+
+        // Assert
+        cloneClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void CustomStrategyCard_OptimizeButton_InvokesCallback()
+    {
+        // Arrange
+        bool optimizeClicked = false;
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.OnOptimize, EventCallback.Factory.Create(this, () => optimizeClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Optimize')");
+        button.Click();
+
+        // Assert
+        optimizeClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void CustomStrategyCard_TestButton_InvokesCallback()
+    {
+        // Arrange
+        bool testClicked = false;
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.OnTest, EventCallback.Factory.Create(this, () => testClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Test')");
+        button.Click();
+
+        // Assert
+        testClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void CustomStrategyCard_DeleteButton_InvokesCallback()
+    {
+        // Arrange
+        bool deleteClicked = false;
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1)
+            .Add(p => p.OnDelete, EventCallback.Factory.Create(this, () => deleteClicked = true)));
+
+        // Act
+        var button = cut.Find("button:has-text('Delete')");
+        button.Click();
+
+        // Assert
+        deleteClicked.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void CustomStrategyCard_HasCorrectStyling()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        var card = cut.Find(".bg-white");
+        var classes = card.GetAttribute("class");
+
+        classes.ShouldContain("dark:bg-zinc-900");
+        classes.ShouldContain("rounded-lg");
+        classes.ShouldContain("border");
+        classes.ShouldContain("hover:border-gray-300");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_ActionButtons_LayoutIn2x2Grid()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        var grid = cut.Find(".grid.grid-cols-2");
+        grid.ShouldNotBeNull();
+        grid.GetAttribute("class").ShouldContain("gap-3");
+    }
+
+    [Fact]
+    public void CustomStrategyCard_DeleteButton_IsFullWidth()
+    {
+        // Arrange & Act
+        var cut = RenderComponent<CustomStrategyCard>(parameters => parameters
+            .Add(p => p.Name, "Test")
+            .Add(p => p.Category, "Test")
+            .Add(p => p.Author, "Test")
+            .Add(p => p.LastUpdatedAt, DateTime.Now)
+            .Add(p => p.EntryRulesCount, 1)
+            .Add(p => p.ExitRulesCount, 1));
+
+        // Assert
+        var buttons = cut.FindComponents<TradingStrat.Web.Components.UI.Buttons.Button>();
+        var deleteButton = buttons.First(b => b.Instance.Color == TradingStrat.Web.Components.UI.ButtonColor.Red);
+        deleteButton.Instance.Class.ShouldContain("w-full");
+    }
+}

@@ -1,0 +1,58 @@
+@using TradingStrat.Web.Components.UI.Overlays.Dialog
+
+@* Wrapper around Catalyst UI Dialog with backward-compatible API *@
+
+@if (IsOpen)
+{
+    <div data-testid="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" @onclick="HandleBackdropClick">
+        <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog
+            IsOpen="@IsOpen"
+            IsOpenChanged="@HandleIsOpenChanged"
+            Size="@MapSize()">
+
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <DialogTitle Class="text-lg font-medium dark:text-dark-text-primary">
+                    <div class="flex justify-between items-center w-full">
+                        <span>@Title</span>
+                        @if (HeaderActions is not null)
+                        {
+                            <div class="flex items-center gap-2">
+                                @HeaderActions
+                            </div>
+                        }
+                        else
+                        {
+                            <button @onclick="HandleClose"
+                                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                    aria-label="Close dialog"
+                                    type="button">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        }
+                    </div>
+                </DialogTitle>
+            }
+
+            <div data-testid="dialog-content" @onclick:stopPropagation class="@Width">
+                @if (ChildContent is not null)
+                {
+                    <DialogBody>
+                        @ChildContent
+                    </DialogBody>
+                }
+
+                @if (Footer is not null)
+                {
+                    <div class="dialog-footer">
+                        <DialogActions>
+                            @Footer
+                        </DialogActions>
+                    </div>
+                }
+            </div>
+        </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
+    </div>
+}

@@ -1,0 +1,130 @@
+@* Equity curve overlay chart showing all strategies *@
+
+<div class="relative" style="height: 400px;">
+    @if (!ComparisonResult.Strategies.Any())
+    {
+        <div class="flex items-center justify-center h-full">
+            <p class="text-gray-500 dark:text-dark-text-tertiary">No data to display</p>
+        </div>
+    }
+    else
+    {
+        <!-- Chart Legend -->
+        <div class="flex flex-wrap gap-4 mb-4">
+            @for (int i = 0; i < ComparisonResult.Strategies.Count; i++)
+            {
+                var strategy = ComparisonResult.Strategies[i];
+                var color = GetStrategyColor(i);
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full" style="background-color: @color;"></div>
+                    <span class="text-sm text-gray-700 dark:text-dark-text-secondary">
+                        @strategy.StrategyName
+                    </span>
+                </div>
+            }
+        </div>
+
+        <!-- Simple text-based chart placeholder -->
+        <!-- TODO: Integrate ApexCharts or Chart.js for production -->
+        <div class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-gray-50 dark:bg-dark-elevated">
+            <div class="space-y-4">
+                @foreach (var strategy in ComparisonResult.Strategies)
+                {
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-dark-text-secondary">
+                                @strategy.StrategyName
+                            </span>
+                            <span class="text-sm @GetPerformanceClass(strategy.Metrics.TotalReturnPercentage)">
+                                @strategy.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
+                            </span>
+                        </div>
+
+                        <!-- Simple progress bar showing final equity -->
+                        @{
+                            var finalEquity = strategy.EquityCurve.Any() ? strategy.EquityCurve.Last().Equity : 0m;
+                            var initialCapital = 10000m; // From comparison command
+                            var returnPct = (finalEquity / initialCapital - 1) * 100;
+                            var barWidth = Math.Max(0, Math.Min(100, 50 + returnPct)); // Center at 50%
+                        }
+                        <div class="relative w-full bg-gray-200 dark:bg-dark-border rounded-full h-2">
+                            <div class="absolute left-1/2 top-0 bottom-0 w-px bg-gray-400 dark:bg-gray-600"></div>
+                            <div class="@GetBarColorClass(strategy.Metrics.TotalReturnPercentage) h-2 rounded-full transition-all"
+                                 style="width: @barWidth.ToString("F1")%"></div>
+                        </div>
+
+                        <div class="mt-1 text-xs text-gray-500 dark:text-dark-text-tertiary">
+                            @strategy.EquityCurve.Count points |
+                            @strategy.TotalTrades trades
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-sm text-blue-800 dark:text-blue-400">
+                    <strong>Note:</strong> Advanced equity curve charting will be available in a future update.
+                    The bars above show relative performance with the center line representing the initial capital.
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public MultiStrategyComparisonResult ComparisonResult { get; set; } = null!;
+
+    private string GetStrategyColor(int index)
+    {
+        string[] colors = new[]
+        {
+            "#3b82f6", // blue
+            "#10b981", // green
+            "#f59e0b", // amber
+            "#ef4444", // red
+            "#8b5cf6", // purple
+            "#ec4899", // pink
+            "#14b8a6", // teal
+            "#f97316"  // orange
+        };
+
+        return colors[index % colors.Length];
+    }
+
+    private string GetPerformanceClass(decimal value)
+    {
+        if (value == 0)
+        {
+            return "text-gray-600 dark:text-dark-text-secondary";
+        }
+
+        return value > 0
+            ? "text-green-600 dark:text-green-400 font-semibold"
+            : "text-red-600 dark:text-red-400 font-semibold";
+    }
+
+    private string GetBarColorClass(decimal returnPercentage)
+    {
+        if (returnPercentage >= 20)
+        {
+            return "bg-green-600 dark:bg-green-500";
+        }
+        if (returnPercentage >= 10)
+        {
+            return "bg-green-500 dark:bg-green-400";
+        }
+        if (returnPercentage > 0)
+        {
+            return "bg-green-400 dark:bg-green-300";
+        }
+        if (returnPercentage > -10)
+        {
+            return "bg-red-400 dark:bg-red-300";
+        }
+        if (returnPercentage > -20)
+        {
+            return "bg-red-500 dark:bg-red-400";
+        }
+        return "bg-red-600 dark:bg-red-500";
+    }
+}

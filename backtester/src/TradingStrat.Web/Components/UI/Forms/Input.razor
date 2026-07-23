@@ -1,0 +1,125 @@
+@* Catalyst UI Kit - Input Component *@
+
+<input type="@Type"
+       class="@GetClasses()"
+       value="@Value"
+       placeholder="@Placeholder"
+       disabled="@Disabled"
+       @oninput="HandleInput"
+       @attributes="AdditionalAttributes" />
+
+@code {
+    /// <summary>
+    /// Input type (text, number, email, password, date, etc.).
+    /// </summary>
+    [Parameter]
+    public string Type { get; set; } = "text";
+
+    /// <summary>
+    /// Current value.
+    /// </summary>
+    [Parameter]
+    public string? Value { get; set; }
+
+    /// <summary>
+    /// Value changed callback for two-way binding.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Placeholder text.
+    /// </summary>
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    /// <summary>
+    /// If true, renders in invalid state (error styling).
+    /// </summary>
+    [Parameter]
+    public bool Invalid { get; set; }
+
+    /// <summary>
+    /// If true, disables the input.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            "block",
+            "w-full",
+            "rounded-lg",
+            "border",
+            "px-[calc(theme(spacing.3)-1px)]",
+            "py-[calc(theme(spacing.2)-1px)]",
+            "text-base/6",
+            "sm:text-sm/6"
+        ];
+
+        // Default border and focus states
+        if (Invalid)
+        {
+            classes.Add(CatalystStyles.InputInvalid);
+        }
+        else
+        {
+            classes.Add("border-zinc-950/10");
+            classes.Add("data-[hover]:border-zinc-950/20");
+            classes.Add("dark:border-white/10");
+            classes.Add("dark:data-[hover]:border-white/20");
+        }
+
+        // Background and text
+        classes.Add("bg-transparent");
+        classes.Add("dark:bg-white/5");
+        classes.Add("text-zinc-950");
+        classes.Add("placeholder:text-zinc-500");
+        classes.Add("dark:text-white");
+        classes.Add("dark:placeholder:text-zinc-400");
+
+        // Focus state
+        classes.Add("focus:outline");
+        classes.Add("focus:outline-2");
+        classes.Add("focus:-outline-offset-1");
+        classes.Add("focus:outline-blue-500");
+
+        // Disabled state
+        if (Disabled)
+        {
+            classes.Add("disabled:border-zinc-950/20");
+            classes.Add("dark:disabled:border-white/15");
+            classes.Add("dark:disabled:bg-white/[2.5%]");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        string? newValue = e.Value?.ToString();
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(newValue);
+        }
+    }
+}

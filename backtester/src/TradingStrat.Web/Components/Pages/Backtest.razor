@@ -1,0 +1,188 @@
+@page "/backtest"
+@rendermode InteractiveServer
+@inherits BaseDataPage<BacktestFormModel, BacktestResult>
+@using TradingStrat.Web.Components.UI.Typography
+
+<PageTitle>Backtest - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Strategy Backtest"
+                Description="Test trading strategies on historical data and analyze performance metrics." />
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="@ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@ErrorMessage" Type="AlertType.Error" />
+    <AlertMessage Message="@SuccessMessage" Type="AlertType.Success" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Configuration Form -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="card-elevated">
+                <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
+
+                <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-4">
+                    <DataAnnotationsValidator />
+
+                    <FormInputGroup Label="Ticker Symbol"
+                                    ValidationFor="@(() => FormModel.Ticker)">
+                        <InputText id="ticker" @bind-Value="FormModel.Ticker"
+                                   @oninput="@(async e => { FormModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
+                                   class="@TailwindStyles.InputText" />
+                    </FormInputGroup>
+
+                    <FormInputGroup Label="Initial Capital"
+                                    ValidationFor="@(() => FormModel.InitialCapital)">
+                        <InputNumber id="capital" @bind-Value="FormModel.InitialCapital"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
+                                     class="@TailwindStyles.InputNumber" />
+                    </FormInputGroup>
+
+                    <DateRangeInput @bind-StartDate="FormModel.StartDate"
+                                    @bind-EndDate="FormModel.EndDate" />
+
+                    <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                            Variant="@ButtonVariant.Primary"
+                            FullWidth="@true"
+                            IsLoading="@ProgressService.IsProcessing"
+                            Text="Run Backtest"
+                            LoadingText="Running Backtest..."></TradingStrat.Web.Components.Shared.Button>
+                </EditForm>
+            </div>
+
+            @if (_customStrategy is not null)
+            {
+                <!-- Custom Strategy Information -->
+                <div class="card-elevated">
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Custom Strategy</Heading>
+
+                    <div class="space-y-3">
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Name</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.Name</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Type</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.StrategyType</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <div>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Description</TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-secondary">@_customStrategy.Description</TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        @if (_customStrategy.StrategyType == TradingStrat.Domain.Entities.CustomStrategyType.Python && !string.IsNullOrEmpty(_customStrategy.PythonCode))
+                        {
+                            <div>
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-700 dark:text-dark-text-primary mb-2">Python Code Preview</TradingStrat.Web.Components.UI.Typography.Text>
+                                <div class="bg-gray-50 dark:bg-dark-card rounded-lg p-3 text-xs font-mono overflow-x-auto max-h-40 overflow-y-auto">
+                                    <pre class="text-gray-800 dark:text-dark-text-secondary">@_customStrategy.PythonCode.Substring(0, Math.Min(500, _customStrategy.PythonCode.Length))@(_customStrategy.PythonCode.Length > 500 ? "..." : "")</pre>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <StrategyForm @ref="_strategyForm"
+                              SelectedStrategy="@GetStrategyKey(FormModel.StrategyType)"
+                              SelectedStrategyChanged="@OnStrategyTypeChanged"
+                              ParametersChanged="@OnStrategyParametersChanged" />
+            }
+        </div>
+
+        <!-- Results -->
+        <div class="lg:col-span-2 space-y-6">
+            @if (Result is not null)
+            {
+                <div class="card-elevated">
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                        @Result.StrategyName
+                    </Heading>
+                    <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-600 dark:text-dark-text-secondary mb-4">@Result.StrategyDescription</TradingStrat.Web.Components.UI.Typography.Text>
+                    <div class="text-sm text-gray-500 dark:text-dark-text-secondary">
+                        <TradingStrat.Web.Components.UI.Typography.Text>Period: @Result.StartDate.ToString("yyyy-MM-dd") to @Result.EndDate.ToString("yyyy-MM-dd")</TradingStrat.Web.Components.UI.Typography.Text>
+                        <TradingStrat.Web.Components.UI.Typography.Text>Initial Capital: @Result.InitialCapital.ToString("C2")</TradingStrat.Web.Components.UI.Typography.Text>
+                    </div>
+                </div>
+
+                <MetricsGrid Metrics="@Result.Metrics" />
+
+                <StrategyAnalysisPanel
+                    Ticker="@Result.Ticker"
+                    StrategyType="@GetStrategyType(Result.StrategyName)"
+                    StrategyParameters="@Result.StrategyParameters" />
+
+                <EquityChart EquityCurve="@Result.EquityCurve" />
+
+                <TradeTable Trades="@Result.Trades" />
+
+                <div class="card-elevated">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Quick Actions</Heading>
+                    <div class="flex flex-wrap gap-3">
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CreatePortfolioFromStrategy"
+                                Text="Create Portfolio">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@CompareWithOthers"
+                                Text="Compare Strategies">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@OptimizeParameters"
+                                Text="Optimize Parameters">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                        <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                                OnClick="@ViewInArchive"
+                                Text="View in Archive">
+                            <LeadingIcon>
+                                <Icon Size="@IconSize.Small" CustomClasses="mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                </Icon>
+                            </LeadingIcon>
+                        </TradingStrat.Web.Components.Shared.Button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card-elevated">
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No backtest results</Heading>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your strategy and run a backtest to see results here.</TradingStrat.Web.Components.UI.Typography.Text>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Result is not null)
+    {
+        <TradingViewWidget Ticker="@Result.Ticker" />
+    }
+</div>

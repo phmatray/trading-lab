@@ -1,0 +1,19 @@
+<thead class="@GetClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</thead>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "text-zinc-500",
+            "dark:text-zinc-400"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

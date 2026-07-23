@@ -1,0 +1,121 @@
+<div class="card mt-6">
+    @if (_recommendation is null && !_isAnalyzing && _error is null)
+    {
+        <div class="text-center">
+            <h3 class="text-lg font-semibold mb-3 dark:text-dark-text-primary">AI Strategy Analysis</h3>
+            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">Get AI-powered insights and recommendations for this strategy</p>
+            <button @onclick="AnalyzeStrategyAsync"
+                    class="bg-trading-blue dark:bg-dark-accent-blue hover:bg-blue-700 dark:hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 w-full md:w-auto"
+                    data-testid="analyze-button">
+                🤖 Get AI Strategy Analysis
+            </button>
+        </div>
+    }
+    else if (_isAnalyzing)
+    {
+        <ProgressIndicator IsVisible="true" CurrentMessage="Analyzing strategy with AI..." />
+    }
+    else if (_error is not null)
+    {
+        <AlertMessage Message="@_error" Type="AlertType.Error" />
+        <button @onclick="ResetPanel"
+                class="mt-3 text-sm text-trading-blue dark:text-dark-accent-blue hover:text-blue-700 dark:hover:text-blue-500 underline">
+            Try Again
+        </button>
+    }
+    else if (_recommendation is not null)
+    {
+        <div class="space-y-4">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold dark:text-dark-text-primary">AI Strategy Analysis</h3>
+                <button @onclick="ResetPanel"
+                        class="text-sm text-gray-500 dark:text-dark-text-secondary hover:text-gray-700 dark:hover:text-dark-text-primary underline">
+                    New Analysis
+                </button>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="bg-blue-50 dark:bg-dark-elevated border border-blue-200 dark:border-dark-border rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-dark-accent-blue mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-blue-900 dark:text-dark-accent-blue mb-1">Summary</h4>
+                        <p class="text-sm text-blue-800 dark:text-dark-text-primary">@_recommendation.Ticker - @_recommendation.StrategyType.ToUpperInvariant()</p>
+                        <p class="text-sm text-gray-700 dark:text-dark-text-secondary mt-2">@_recommendation.Summary</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Card -->
+            <div class="@GetRecommendationCardClass() rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <svg class="w-6 h-6 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold mb-2">Recommendation</h4>
+                        <p class="text-base font-medium mb-3">@_recommendation.Recommendation</p>
+
+                        <!-- Confidence Score -->
+                        <div class="mt-3">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-medium">Confidence Score</span>
+                                <span class="text-xs font-semibold" data-testid="confidence-score">@_recommendation.Confidence.ToString("F0")%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-dark-border rounded-full h-2">
+                                <div class="@GetConfidenceBarClass() h-2 rounded-full transition-all duration-300"
+                                     style="width: @(_recommendation.Confidence)%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button (appears for high-confidence bullish recommendations) -->
+                        @if (_recommendation.Confidence >= 70 && _recommendation.Recommendation.Contains("BUY", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <Button Variant="@ButtonVariant.Success"
+                                    FullWidth="@true"
+                                    AdditionalAttributes="@(new Dictionary<string, object> { { "class", "mt-4" } })"
+                                    Text="📈 PLACE BUY ORDER"></Button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Items -->
+            @if (_recommendation.ActionItems.Any())
+            {
+                <details class="border border-gray-200 dark:border-dark-border rounded-lg" open>
+                    <summary class="cursor-pointer bg-gray-50 dark:bg-dark-elevated hover:bg-gray-100 dark:hover:bg-gray-700 p-4 rounded-lg font-semibold text-sm dark:text-dark-text-primary transition-colors">
+                        Action Items (@_recommendation.ActionItems.Count)
+                    </summary>
+                    <div class="p-4 space-y-3">
+                        @foreach (var item in _recommendation.ActionItems)
+                        {
+                            <div class="flex items-start space-x-3 pb-3 border-b border-gray-100 dark:border-dark-border last:border-0 last:pb-0">
+                                <span class="@GetPriorityBadgeClass(item.Priority) text-xs font-semibold px-2 py-1 rounded flex-shrink-0 mt-0.5">
+                                    @item.Priority
+                                </span>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-800 dark:text-dark-text-primary">@item.Description</p>
+                                    @if (item.ConfidenceLevel.HasValue)
+                                    {
+                                        <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">
+                                            Confidence: @((item.ConfidenceLevel.Value * 100).ToString("F0"))%
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </details>
+            }
+
+            <!-- Timestamp -->
+            <p class="text-xs text-gray-500 dark:text-dark-text-secondary text-right">
+                Generated at @_recommendation.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
+            </p>
+        </div>
+    }
+</div>

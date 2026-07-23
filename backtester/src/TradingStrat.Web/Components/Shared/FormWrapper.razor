@@ -1,0 +1,30 @@
+@* FormWrapper Component - Form container with error/success handling and progress indicator *@
+
+<div data-testid="form-wrapper">
+    <!-- Error Message -->
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <AlertMessage Message="@ErrorMessage" Type="AlertType.Error" />
+    }
+
+    <!-- Warning Message -->
+    @if (!string.IsNullOrEmpty(WarningMessage))
+    {
+        <AlertMessage Message="@WarningMessage" Type="AlertType.Warning" />
+    }
+
+    <!-- Success Message -->
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <AlertMessage Message="@SuccessMessage" Type="AlertType.Success" />
+    }
+
+    <!-- Progress Indicator -->
+    @if (ShowProgressIndicator)
+    {
+        <ProgressIndicator />
+    }
+
+    <!-- Form Content -->
+    @ChildContent
+</div>

@@ -1,0 +1,52 @@
+@* Catalyst UI Kit - RadioField Component *@
+
+<div class="@GetClasses()" data-slot="field">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Field content (radio, label, description).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            // Base grid layout (radio is slightly larger than checkbox)
+            "grid",
+            "grid-cols-[1.1875rem_1fr]",
+            "gap-x-4",
+            "gap-y-1",
+            "sm:grid-cols-[1.0625rem_1fr]",
+            // Control layout (radio in first column)
+            "*:[data-slot=control]:col-start-1",
+            "*:[data-slot=control]:row-start-1",
+            "*:[data-slot=control]:mt-0.75",
+            "sm:*:[data-slot=control]:mt-1",
+            // Label layout (second column, first row)
+            "*:[data-slot=label]:col-start-2",
+            "*:[data-slot=label]:row-start-1",
+            // Description layout (second column, second row)
+            "*:[data-slot=description]:col-start-2",
+            "*:[data-slot=description]:row-start-2",
+            // Font weight when description present
+            "has-[data-slot=description]:**:[data-slot=label]:font-medium"
+        ];
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+}

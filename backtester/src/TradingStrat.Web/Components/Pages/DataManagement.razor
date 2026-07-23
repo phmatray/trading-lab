@@ -1,0 +1,250 @@
+@page "/data"
+@rendermode InteractiveServer
+
+@using TradingStrat.Web.Components.UI.Typography
+<PageTitle>Data Management - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <PageHeader Title="Data Management"
+                Description="Fetch and manage historical market data from Yahoo Finance." />
+
+    <!-- Timeframe Selector -->
+    <div class="card-elevated">
+        <TimeFrameSelector
+            Label="Global Timeframe:"
+            SelectedTimeFrame="@_selectedTimeFrame"
+            OnTimeFrameChanged="@HandleTimeFrameChanged" />
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button
+                type="button"
+                @onclick="@(() => _activeTab = TabType.SingleTicker)"
+                class="@GetTabClasses(TabType.SingleTicker)"
+                aria-current="@(_activeTab == TabType.SingleTicker ? "page" : null)">
+                <Icon Name="document" Size="IconSize.Small" Class="mr-2" />
+                Single Ticker
+            </button>
+            <button
+                type="button"
+                @onclick="@(() => _activeTab = TabType.BulkFetch)"
+                class="@GetTabClasses(TabType.BulkFetch)"
+                aria-current="@(_activeTab == TabType.BulkFetch ? "page" : null)">
+                <Icon Name="document-duplicate" Size="IconSize.Small" Class="mr-2" />
+                Bulk Fetch
+            </button>
+        </nav>
+    </div>
+
+    <!-- Progress Indicator -->
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="@ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <!-- Single Ticker Tab -->
+    @if (_activeTab == TabType.SingleTicker)
+    {
+        <FormWrapper ErrorMessage="@_errorMessage" SuccessMessage="@_successMessage">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Form -->
+                <div class="card-elevated">
+                    <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Fetch Historical Data</Heading>
+
+                    <EditForm Model="@_formModel" OnValidSubmit="@HandleFetchData" class="space-y-4">
+                        <DataAnnotationsValidator />
+
+                        <div>
+                            <TickerInput @bind-Value="_formModel.Ticker"
+                                         Label="Ticker Symbol *"
+                                         For="@(() => _formModel.Ticker)"
+                                         OnInputChanged="@(async () => await OnFormFieldChanged())" />
+                        </div>
+
+                        <FormInputGroup Label="ISIN"
+                                        IsOptional="true"
+                                        HelpText="International Securities Identification Number for ticker resolution">
+                            <InputText id="isin" @bind-Value="_formModel.ISIN"
+                                       @oninput="@(async e => { _formModel.ISIN = e.Value?.ToString(); await OnFormFieldChanged(); })"
+                                       class="@TailwindStyles.InputText" />
+                        </FormInputGroup>
+
+                        <DateRangeInput @bind-StartDate="_formModel.StartDate"
+                                        @bind-EndDate="_formModel.EndDate" />
+
+                        <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                                Variant="@ButtonVariant.Primary"
+                                FullWidth="@true"
+                                IsLoading="@ProgressService.IsProcessing"
+                                Text="Fetch Data"
+                                LoadingText="Fetching Data..."></TradingStrat.Web.Components.Shared.Button>
+                    </EditForm>
+                </div>
+
+                <!-- Results -->
+                <DataSummaryCard Summary="@_result" />
+            </div>
+
+            @if (_result is not null)
+            {
+                <TradingViewWidget Ticker="@_result.Ticker" />
+            }
+
+            @if (_result is not null)
+            {
+                <AiDataAnalysisPanel DataSummary="_result" />
+            }
+        </FormWrapper>
+    }
+
+    <!-- Bulk Fetch Tab -->
+    @if (_activeTab == TabType.BulkFetch)
+    {
+        <FormWrapper ErrorMessage="@_bulkErrorMessage" SuccessMessage="@_bulkSuccessMessage">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Bulk Fetch Form -->
+                <div class="card space-y-4">
+                    <div class="flex items-center justify-between">
+                        <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary">Bulk Fetch Tickers</Heading>
+                        <TradingStrat.Web.Components.Shared.Button
+                            Text="Import CSV"
+                            OnClick="@(() => _showCsvDialog = true)"
+                            Variant="ButtonVariant.Secondary"
+                            Size="ButtonSize.Small"
+                            IconName="arrow-up-tray"
+                        />
+                    </div>
+
+                    <EditForm Model="@_bulkFormModel" OnValidSubmit="@HandleBulkFetchData" class="space-y-4">
+                        <DataAnnotationsValidator />
+
+                        <FormInputGroup Label="Ticker List *"
+                                        HelpText="Enter tickers separated by commas or one per line (e.g., AAPL, GOOGL, MSFT)">
+                            <InputTextArea id="ticker-list"
+                                           @bind-Value="_bulkFormModel.TickerList"
+                                           rows="8"
+                                           class="@TailwindStyles.InputText"
+                                           placeholder="AAPL&#10;GOOGL&#10;MSFT" />
+                        </FormInputGroup>
+
+                        <!-- Recent Tickers -->
+                        @if (_recentTickers.Any())
+                        {
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Recent Tickers
+                                </label>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach (string ticker in _recentTickers.Take(10))
+                                    {
+                                        <button
+                                            type="button"
+                                            @onclick="@(() => AddTickerToList(ticker))"
+                                            class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                                            @ticker
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <DateRangeInput @bind-StartDate="_bulkFormModel.StartDate"
+                                        @bind-EndDate="_bulkFormModel.EndDate" />
+
+                        <div class="flex items-center">
+                            <input id="skip-existing"
+                                   type="checkbox"
+                                   @bind="_bulkFormModel.SkipExisting"
+                                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
+                            <label for="skip-existing" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                                Skip tickers with existing data
+                            </label>
+                        </div>
+
+                        <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                                Variant="@ButtonVariant.Primary"
+                                FullWidth="@true"
+                                IsLoading="@_isBulkFetching"
+                                Text="@($"Fetch {ParsedTickerCount} Tickers")"
+                                LoadingText="Fetching..."></TradingStrat.Web.Components.Shared.Button>
+                    </EditForm>
+                </div>
+
+                <!-- Bulk Progress & Results -->
+                <div class="card-elevated">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                        Progress & Results
+                    </Heading>
+
+                    @if (_bulkResult is not null)
+                    {
+                        <!-- Summary Cards -->
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                                <p class="text-xs text-green-600 dark:text-green-400 font-medium">Success</p>
+                                <p class="text-2xl font-bold text-green-700 dark:text-green-300">@_bulkResult.SuccessfulTickers</p>
+                            </div>
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                                <p class="text-xs text-red-600 dark:text-red-400 font-medium">Failed</p>
+                                <p class="text-2xl font-bold text-red-700 dark:text-red-300">@_bulkResult.FailedTickers</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">Skipped</p>
+                                <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">@_bulkResult.SkippedTickers</p>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Results -->
+                        <div class="max-h-96 overflow-y-auto space-y-2">
+                            @foreach (KeyValuePair<string, DataSummaryResult> tickerResult in _bulkResult.SuccessfulResults.OrderBy(r => r.Key))
+                            {
+                                <div class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/10 rounded border border-green-200 dark:border-green-800">
+                                    <div class="flex items-center gap-2">
+                                        <Icon Name="check-circle" Size="IconSize.Small" Class="text-green-600 dark:text-green-400" />
+                                        <span class="font-medium text-gray-900 dark:text-white">@tickerResult.Key</span>
+                                    </div>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                                        @tickerResult.Value.NewRecords new records
+                                    </span>
+                                </div>
+                            }
+
+                            @foreach (KeyValuePair<string, string> tickerError in _bulkResult.FailedResults.OrderBy(e => e.Key))
+                            {
+                                <div class="p-2 bg-red-50 dark:bg-red-900/10 rounded border border-red-200 dark:border-red-800">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <Icon Name="x-circle" Size="IconSize.Small" Class="text-red-600 dark:text-red-400" />
+                                        <span class="font-medium text-gray-900 dark:text-white">@tickerError.Key</span>
+                                    </div>
+                                    <p class="text-xs text-red-600 dark:text-red-400 ml-6">@tickerError.Value</p>
+                                </div>
+                            }
+
+                            @foreach (string skipped in _bulkResult.SkippedResults.OrderBy(s => s))
+                            {
+                                <div class="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+                                    <Icon Name="minus-circle" Size="IconSize.Small" Class="text-gray-400" />
+                                    <span class="text-gray-600 dark:text-gray-400">@skipped (already up to date)</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <Icon Name="inbox" Size="IconSize.Large" Class="mx-auto mb-2 text-gray-400" />
+                            <p class="text-sm">Enter tickers above and click "Fetch" to begin</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </FormWrapper>
+    }
+</div>
+
+<!-- CSV Import Dialog -->
+<CsvImportDialog
+    IsOpen="@_showCsvDialog"
+    OnTickersImported="@HandleCsvImported"
+    OnClose="@(() => _showCsvDialog = false)" />

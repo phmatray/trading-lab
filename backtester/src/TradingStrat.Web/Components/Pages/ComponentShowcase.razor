@@ -1,0 +1,371 @@
+@page "/component-showcase"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI
+@using TradingStrat.Web.Components.UI.Forms.Checkbox
+@using TradingStrat.Web.Components.UI.Forms.Radio
+@using TradingStrat.Web.Components.UI.Forms.Switch
+@using TradingStrat.Web.Components.UI.Overlays.Dialog
+
+<PageTitle>Component Showcase - TradingStrat</PageTitle>
+
+<div class="space-y-8 p-6">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary mb-2">Component Showcase</h1>
+        <p class="text-gray-600 dark:text-dark-text-secondary">Interactive demonstration of Phase 2 UI components</p>
+    </div>
+
+    <!-- Checkbox Section -->
+    <section class="card-elevated" data-testid="checkbox-section">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Checkbox Components</h2>
+
+        <div class="space-y-6">
+            <!-- Single Checkbox -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Single Checkbox</h3>
+                <Checkbox @bind-Checked="_acceptTerms" data-testid="accept-terms-checkbox">
+                    I accept the terms and conditions
+                </Checkbox>
+                <p class="text-sm text-gray-500 mt-2">Selected: @_acceptTerms</p>
+            </div>
+
+            <!-- Checkbox Group -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Checkbox Group</h3>
+                <CheckboxGroup>
+                    <Checkbox @bind-Checked="_features.EnableNotifications" data-testid="enable-notifications">
+                        Enable notifications
+                    </Checkbox>
+                    <Checkbox @bind-Checked="_features.EnableDarkMode" data-testid="enable-darkmode">
+                        Enable dark mode
+                    </Checkbox>
+                    <Checkbox @bind-Checked="_features.EnableAutoSave" data-testid="enable-autosave">
+                        Enable auto-save
+                    </Checkbox>
+                </CheckboxGroup>
+                <p class="text-sm text-gray-500 mt-2" data-testid="features-status">
+                    Notifications: @_features.EnableNotifications, Dark Mode: @_features.EnableDarkMode, Auto-save: @_features.EnableAutoSave
+                </p>
+            </div>
+
+            <!-- Checkbox with Colors -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Colored Checkboxes</h3>
+                <CheckboxGroup>
+                    <Checkbox @bind-Checked="_colorOptions.Blue" Color="CheckboxColor.Blue" data-testid="checkbox-blue">
+                        Blue checkbox
+                    </Checkbox>
+                    <Checkbox @bind-Checked="_colorOptions.Red" Color="CheckboxColor.Red" data-testid="checkbox-red">
+                        Red checkbox
+                    </Checkbox>
+                    <Checkbox @bind-Checked="_colorOptions.Green" Color="CheckboxColor.Green" data-testid="checkbox-green">
+                        Green checkbox
+                    </Checkbox>
+                </CheckboxGroup>
+            </div>
+
+            <!-- Disabled Checkbox -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Disabled Checkbox</h3>
+                <Checkbox Checked="true" Disabled="true" data-testid="disabled-checkbox">
+                    Disabled checkbox (checked)
+                </Checkbox>
+            </div>
+        </div>
+    </section>
+
+    <!-- Radio Section -->
+    <section class="card-elevated" data-testid="radio-section">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Radio Components</h2>
+
+        <div class="space-y-6">
+            <!-- Radio Group -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Payment Method</h3>
+                <RadioGroup>
+                    <Radio Name="payment" Value="card" @bind-Checked="_paymentCard" data-testid="radio-card">
+                        Credit Card
+                    </Radio>
+                    <Radio Name="payment" Value="paypal" @bind-Checked="_paymentPaypal" data-testid="radio-paypal">
+                        PayPal
+                    </Radio>
+                    <Radio Name="payment" Value="bank" @bind-Checked="_paymentBank" data-testid="radio-bank">
+                        Bank Transfer
+                    </Radio>
+                </RadioGroup>
+                <p class="text-sm text-gray-500 mt-2" data-testid="payment-status">
+                    Selected: @GetSelectedPayment()
+                </p>
+            </div>
+
+            <!-- Colored Radios -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Priority Level</h3>
+                <RadioGroup>
+                    <Radio Name="priority" Value="low" @bind-Checked="_priorityLow" Color="RadioColor.Green" data-testid="priority-low">
+                        Low Priority
+                    </Radio>
+                    <Radio Name="priority" Value="medium" @bind-Checked="_priorityMedium" Color="RadioColor.Blue" data-testid="priority-medium">
+                        Medium Priority
+                    </Radio>
+                    <Radio Name="priority" Value="high" @bind-Checked="_priorityHigh" Color="RadioColor.Red" data-testid="priority-high">
+                        High Priority
+                    </Radio>
+                </RadioGroup>
+            </div>
+
+            <!-- Disabled Radio -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Disabled Radio</h3>
+                <Radio Name="disabled" Checked="true" Disabled="true" data-testid="disabled-radio">
+                    Disabled radio (checked)
+                </Radio>
+            </div>
+        </div>
+    </section>
+
+    <!-- Switch Section -->
+    <section class="card-elevated" data-testid="switch-section">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Switch Components</h2>
+
+        <div class="space-y-6">
+            <!-- Single Switch -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Enable Feature</h3>
+                <Switch @bind-Checked="_featureEnabled" data-testid="feature-switch" />
+                <p class="text-sm text-gray-500 mt-2">Feature: @(_featureEnabled ? "Enabled" : "Disabled")</p>
+            </div>
+
+            <!-- Switch Group -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Settings</h3>
+                <SwitchGroup>
+                    <SwitchField>
+                        <label>Enable analytics</label>
+                        <Switch @bind-Checked="_settings.EnableAnalytics" data-testid="analytics-switch" />
+                    </SwitchField>
+                    <SwitchField>
+                        <label>Enable marketing emails</label>
+                        <Switch @bind-Checked="_settings.EnableMarketing" data-testid="marketing-switch" />
+                    </SwitchField>
+                    <SwitchField>
+                        <label>Enable push notifications</label>
+                        <Switch @bind-Checked="_settings.EnablePushNotifications" data-testid="push-switch" />
+                    </SwitchField>
+                </SwitchGroup>
+                <p class="text-sm text-gray-500 mt-2" data-testid="settings-status">
+                    Analytics: @_settings.EnableAnalytics, Marketing: @_settings.EnableMarketing, Push: @_settings.EnablePushNotifications
+                </p>
+            </div>
+
+            <!-- Colored Switches -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Colored Switches</h3>
+                <SwitchGroup>
+                    <SwitchField>
+                        <label>Blue switch</label>
+                        <Switch @bind-Checked="_switchColors.Blue" Color="SwitchColor.Blue" data-testid="switch-blue" />
+                    </SwitchField>
+                    <SwitchField>
+                        <label>Red switch</label>
+                        <Switch @bind-Checked="_switchColors.Red" Color="SwitchColor.Red" data-testid="switch-red" />
+                    </SwitchField>
+                    <SwitchField>
+                        <label>Green switch</label>
+                        <Switch @bind-Checked="_switchColors.Green" Color="SwitchColor.Green" data-testid="switch-green" />
+                    </SwitchField>
+                </SwitchGroup>
+            </div>
+
+            <!-- Disabled Switch -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">Disabled Switch</h3>
+                <Switch Checked="true" Disabled="true" data-testid="disabled-switch" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Dialog Section -->
+    <section class="card-elevated" data-testid="dialog-section">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Dialog Components</h2>
+
+        <div class="space-y-4">
+            <button @onclick="OpenSimpleDialog"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    data-testid="open-simple-dialog">
+                Open Simple Dialog
+            </button>
+
+            <button @onclick="OpenLargeDialog"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    data-testid="open-large-dialog">
+                Open Large Dialog
+            </button>
+
+            <button @onclick="OpenSmallDialog"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    data-testid="open-small-dialog">
+                Open Small Dialog
+            </button>
+
+            <p class="text-sm text-gray-500" data-testid="dialog-result">
+                Last dialog action: @_dialogResult
+            </p>
+        </div>
+    </section>
+
+    <!-- Simple Dialog -->
+    <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog IsOpen="_showSimpleDialog"
+              IsOpenChanged="(value) => _showSimpleDialog = value"
+              data-testid="simple-dialog">
+        <DialogTitle>Simple Dialog</DialogTitle>
+        <DialogDescription>
+            This is a simple dialog with title, description, and actions.
+        </DialogDescription>
+        <DialogBody>
+            <p>Dialog content goes here. You can add any content you want.</p>
+        </DialogBody>
+        <DialogActions>
+            <button @onclick="CloseSimpleDialog"
+                    class="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300"
+                    data-testid="simple-dialog-cancel">
+                Cancel
+            </button>
+            <button @onclick="ConfirmSimpleDialog"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    data-testid="simple-dialog-confirm">
+                Confirm
+            </button>
+        </DialogActions>
+    </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
+
+    <!-- Large Dialog -->
+    <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog IsOpen="_showLargeDialog"
+              IsOpenChanged="(value) => _showLargeDialog = value"
+              Size="DialogSize.XL"
+              data-testid="large-dialog">
+        <DialogTitle>Large Dialog</DialogTitle>
+        <DialogDescription>
+            This dialog uses the XL size variant.
+        </DialogDescription>
+        <DialogBody>
+            <p>This is a larger dialog for more content.</p>
+        </DialogBody>
+        <DialogActions>
+            <button @onclick="() => _showLargeDialog = false"
+                    class="px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300"
+                    data-testid="large-dialog-close">
+                Close
+            </button>
+        </DialogActions>
+    </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
+
+    <!-- Small Dialog -->
+    <TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog IsOpen="_showSmallDialog"
+              IsOpenChanged="(value) => _showSmallDialog = value"
+              Size="DialogSize.Small"
+              data-testid="small-dialog">
+        <DialogTitle>Small Dialog</DialogTitle>
+        <DialogBody>
+            <p>Compact dialog for quick actions.</p>
+        </DialogBody>
+        <DialogActions>
+            <button @onclick="() => _showSmallDialog = false"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    data-testid="small-dialog-ok">
+                OK
+            </button>
+        </DialogActions>
+    </TradingStrat.Web.Components.UI.Overlays.Dialog.Dialog>
+</div>
+
+@code {
+    // Checkbox state
+    private bool _acceptTerms;
+    private FeaturesModel _features = new();
+    private ColorOptionsModel _colorOptions = new();
+
+    // Radio state
+    private bool _paymentCard = true;
+    private bool _paymentPaypal;
+    private bool _paymentBank;
+    private bool _priorityLow;
+    private bool _priorityMedium = true;
+    private bool _priorityHigh;
+
+    // Switch state
+    private bool _featureEnabled;
+    private SettingsModel _settings = new();
+    private SwitchColorsModel _switchColors = new();
+
+    // Dialog state
+    private bool _showSimpleDialog;
+    private bool _showLargeDialog;
+    private bool _showSmallDialog;
+    private string _dialogResult = "None";
+
+    private string GetSelectedPayment()
+    {
+        if (_paymentCard) return "Credit Card";
+        if (_paymentPaypal) return "PayPal";
+        if (_paymentBank) return "Bank Transfer";
+        return "None";
+    }
+
+    private void OpenSimpleDialog()
+    {
+        _showSimpleDialog = true;
+        _dialogResult = "Opened simple dialog";
+    }
+
+    private void OpenLargeDialog()
+    {
+        _showLargeDialog = true;
+        _dialogResult = "Opened large dialog";
+    }
+
+    private void OpenSmallDialog()
+    {
+        _showSmallDialog = true;
+        _dialogResult = "Opened small dialog";
+    }
+
+    private void CloseSimpleDialog()
+    {
+        _showSimpleDialog = false;
+        _dialogResult = "Cancelled";
+    }
+
+    private void ConfirmSimpleDialog()
+    {
+        _showSimpleDialog = false;
+        _dialogResult = "Confirmed";
+    }
+
+    private class FeaturesModel
+    {
+        public bool EnableNotifications { get; set; }
+        public bool EnableDarkMode { get; set; } = true;
+        public bool EnableAutoSave { get; set; }
+    }
+
+    private class ColorOptionsModel
+    {
+        public bool Blue { get; set; }
+        public bool Red { get; set; }
+        public bool Green { get; set; }
+    }
+
+    private class SettingsModel
+    {
+        public bool EnableAnalytics { get; set; } = true;
+        public bool EnableMarketing { get; set; }
+        public bool EnablePushNotifications { get; set; } = true;
+    }
+
+    private class SwitchColorsModel
+    {
+        public bool Blue { get; set; }
+        public bool Red { get; set; }
+        public bool Green { get; set; }
+    }
+}

@@ -1,0 +1,42 @@
+@if (Metrics is not null)
+{
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <MetricCard Label="Total Return"
+                    Value="@($"{Metrics.TotalReturnPercentage:F2}%")"
+                    IsPositive="@(Metrics.TotalReturnPercentage > 0)" />
+
+        <MetricCard Label="Annualized Return"
+                    Value="@($"{Metrics.AnnualizedReturn:F2}%")"
+                    IsPositive="@(Metrics.AnnualizedReturn > 0)" />
+
+        <MetricCard Label="Sharpe Ratio"
+                    Value="@Metrics.SharpeRatio.ToString("F2")"
+                    IsPositive="@(Metrics.SharpeRatio > 1)" />
+
+        <MetricCard Label="Max Drawdown"
+                    Value="@($"{Metrics.MaxDrawdownPercentage:F2}%")"
+                    IsPositive="false" />
+
+        <MetricCard Label="Win Rate"
+                    Value="@($"{Metrics.WinRate:F2}%")"
+                    IsPositive="@(Metrics.WinRate > 50)" />
+
+        <MetricCard Label="Total Trades"
+                    Value="@Metrics.TotalTrades.ToString()"
+                    IsPositive="null" />
+
+        <MetricCard Label="Profit Factor"
+                    Value="@Metrics.ProfitFactor.ToString("F2")"
+                    IsPositive="@(Metrics.ProfitFactor > 1)" />
+
+        <MetricCard Label="Volatility"
+                    Value="@($"{Metrics.Volatility:F2}%")"
+                    IsPositive="null" />
+    </div>
+}
+else
+{
+    <div class="card">
+        <p class="text-gray-500">No performance metrics available.</p>
+    </div>
+}

@@ -1,0 +1,30 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TradingStrat.Application/TradingStrat.Application.csproj" />
+    <Project Path="src/TradingStrat.Domain/TradingStrat.Domain.csproj" />
+    <Project Path="src/TradingStrat.Infrastructure/TradingStrat.Infrastructure.csproj" />
+    <Project Path="src/TradingStrat.Web/TradingStrat.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TradingStrat.Application.Tests/TradingStrat.Application.Tests.csproj" />
+    <Project Path="tests/TradingStrat.ComponentTests/TradingStrat.ComponentTests.csproj" />
+    <Project Path="tests/TradingStrat.Domain.Tests/TradingStrat.Domain.Tests.csproj" />
+    <Project Path="tests/TradingStrat.Infrastructure.Tests/TradingStrat.Infrastructure.Tests.csproj" />
+    <Project Path="tests/TradingStrat.UI.Tests/TradingStrat.UI.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/Documentation/">
+    <File Path="README.md" />
+    <File Path="CLAUDE.md" />
+    <File Path="DOCKER.md" />
+  </Folder>
+  <Folder Name="/Solution Items/Configuration/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/Solution Items/Docker/">
+    <File Path="docker-compose.yml" />
+    <File Path=".env.example" />
+  </Folder>
+</Solution>

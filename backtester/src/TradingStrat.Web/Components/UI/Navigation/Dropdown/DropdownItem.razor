@@ -1,0 +1,143 @@
+@* Catalyst UI Kit - DropdownItem Component *@
+
+@if (!string.IsNullOrWhiteSpace(Href))
+{
+    <NavLink href="@Href"
+             class="@GetClasses()"
+             @attributes="AdditionalAttributes"
+             role="menuitem"
+             tabindex="0"
+             @onclick="HandleClick">
+        @ChildContent
+    </NavLink>
+}
+else
+{
+    <button type="button"
+            class="@GetClasses()"
+            disabled="@Disabled"
+            @attributes="AdditionalAttributes"
+            role="menuitem"
+            tabindex="0"
+            @onclick="HandleClick">
+        @ChildContent
+    </button>
+}
+
+@code {
+    [CascadingParameter] private Dropdown? Dropdown { get; set; }
+
+    /// <summary>
+    /// Optional href for link-style items.
+    /// </summary>
+    [Parameter]
+    public string? Href { get; set; }
+
+    /// <summary>
+    /// Whether the item is disabled.
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Click event callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    /// <summary>
+    /// Item content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            // Base styles
+            "group",
+            "cursor-default",
+            "rounded-lg",
+            "px-3.5",
+            "py-2.5",
+            "sm:px-3",
+            "sm:py-1.5",
+            "focus:outline-hidden",
+            // Text styles
+            "text-left",
+            "text-base/6",
+            "sm:text-sm/6",
+            "text-zinc-950",
+            "dark:text-white",
+            // Focus state
+            "focus:bg-blue-500",
+            "focus:text-white",
+            // Grid layout for icons/avatars
+            "col-span-full",
+            "grid",
+            "grid-cols-[auto_1fr_1.5rem_0.5rem_auto]",
+            "items-center",
+            "supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
+            // Icons
+            "*:[data-slot=icon]:col-start-1",
+            "*:[data-slot=icon]:row-start-1",
+            "*:[data-slot=icon]:mr-2.5",
+            "*:[data-slot=icon]:-ml-0.5",
+            "*:[data-slot=icon]:size-5",
+            "sm:*:[data-slot=icon]:mr-2",
+            "sm:*:[data-slot=icon]:size-4",
+            "*:[data-slot=icon]:text-zinc-500",
+            "focus:*:[data-slot=icon]:text-white",
+            "dark:*:[data-slot=icon]:text-zinc-400",
+            "dark:focus:*:[data-slot=icon]:text-white",
+            // Avatar
+            "*:[data-slot=avatar]:mr-2.5",
+            "*:[data-slot=avatar]:-ml-1",
+            "*:[data-slot=avatar]:size-6",
+            "sm:*:[data-slot=avatar]:mr-2",
+            "sm:*:[data-slot=avatar]:size-5"
+        ];
+
+        if (Disabled)
+        {
+            classes.Add("opacity-50");
+            classes.Add("cursor-not-allowed");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (Disabled) return;
+
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+
+        // Close dropdown after click
+        if (Dropdown != null)
+        {
+            await Dropdown.CloseDropdown();
+        }
+    }
+}

@@ -1,0 +1,110 @@
+@* Catalyst UI Kit - Avatar Component *@
+
+<span class="@GetContainerClasses()">
+    @if (!string.IsNullOrWhiteSpace(Src))
+    {
+        <img src="@Src" alt="@Alt" class="@GetImageClasses()" />
+    }
+    else if (!string.IsNullOrWhiteSpace(Initials))
+    {
+        <svg class="@GetSvgClasses()"
+             viewBox="0 0 48 48"
+             width="100%"
+             height="100%"
+             fill="none"
+             aria-hidden="true">
+            <text x="50%"
+                  y="50%"
+                  alignment-baseline="middle"
+                  dominant-baseline="middle"
+                  text-anchor="middle"
+                  dy=".125em"
+                  fill="currentColor"
+                  font-family="system-ui, sans-serif"
+                  font-size="20"
+                  font-weight="500">
+                @Initials
+            </text>
+        </svg>
+    }
+</span>
+
+@code {
+    /// <summary>
+    /// Image source URL. If provided, displays an image avatar.
+    /// </summary>
+    [Parameter]
+    public string? Src { get; set; }
+
+    /// <summary>
+    /// Initials to display. Used when Src is not provided.
+    /// </summary>
+    [Parameter]
+    public string? Initials { get; set; }
+
+    /// <summary>
+    /// Alt text for the image.
+    /// </summary>
+    [Parameter]
+    public string? Alt { get; set; }
+
+    /// <summary>
+    /// If true, renders as a square instead of a circle.
+    /// </summary>
+    [Parameter]
+    public bool Square { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes to apply to the container.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string GetContainerClasses()
+    {
+        List<string> classes =
+        [
+            "inline-grid",
+            "align-middle",
+            "*:col-start-1",
+            "*:row-start-1"
+        ];
+
+        if (Square)
+        {
+            classes.Add("rounded-[20%]");
+            classes.Add("*:rounded-[20%]");
+        }
+        else
+        {
+            classes.Add("rounded-full");
+            classes.Add("*:rounded-full");
+        }
+
+        classes.Add("size-10");
+        classes.Add("outline");
+        classes.Add("outline-1");
+        classes.Add("-outline-offset-1");
+        classes.Add("outline-black/[--avatar-border]");
+        classes.Add("dark:outline-white/[--avatar-border]");
+        classes.Add("[--avatar-radius:20%]");
+        classes.Add("[--avatar-border:0.25]");
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+
+    private string GetImageClasses()
+    {
+        return "aspect-square h-full w-full object-cover";
+    }
+
+    private string GetSvgClasses()
+    {
+        return "select-none fill-current text-zinc-500 dark:text-zinc-400";
+    }
+}

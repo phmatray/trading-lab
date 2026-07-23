@@ -1,0 +1,266 @@
+@page "/backtests"
+@using TradingStrat.Web.Components.Base
+@inherits BaseComponent
+@using TradingStrat.Web.Components.UI.Typography
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
+@rendermode InteractiveServer
+
+<PageTitle>Backtest Archive - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Backtest Archive"
+                Description="History of all backtest runs with filtering and sorting">
+        <Actions>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@LoadArchiveAsync"
+                    IsLoading="@_isLoading"
+                    Text="Refresh"
+                    LoadingText="Refreshing...">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                    OnClick="@NavigateToBacktest"
+                    Text="New Backtest">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </Actions>
+    </PageHeader>
+
+    @if (_isLoading)
+    {
+        <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+                <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading backtest archive...</p>
+            </div>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <div class="card bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
+        </div>
+    }
+    else if (_archiveResult is not null)
+    {
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Total Backtests</p>
+                <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@_archiveResult.TotalCount</p>
+            </div>
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Most Recent Run</p>
+                <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    @(_archiveResult.MostRecentDate?.ToString("MMM dd, yyyy HH:mm") ?? "N/A")
+                </p>
+            </div>
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Top Performer</p>
+                @if (_archiveResult.TopPerformer is not null)
+                {
+                    <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                        @_archiveResult.TopPerformer.StrategyName
+                    </p>
+                    <p class="text-sm @GetPerformanceClass(_archiveResult.TopPerformer.SharpeRatio)">
+                        Sharpe: @(_archiveResult.TopPerformer.SharpeRatio?.ToString("F2") ?? "N/A")
+                    </p>
+                }
+                else
+                {
+                    <p class="mt-2 text-sm text-gray-500 dark:text-dark-text-tertiary">No data yet</p>
+                }
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Filters</Heading>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                        Ticker
+                    </label>
+                    <input type="text"
+                           @bind="_filterTicker"
+                           @bind:event="oninput"
+                           placeholder="e.g., AAPL"
+                           class="input w-full" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                        Strategy
+                    </label>
+                    <select @bind="_filterStrategy" class="input w-full">
+                        <option value="">All Strategies</option>
+                        <option value="ma">MA Crossover</option>
+                        <option value="rsi">RSI</option>
+                        <option value="macd">MACD</option>
+                        <option value="ml">ML FastTree</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                        Start Date
+                    </label>
+                    <input type="date"
+                           @bind="_filterStartDate"
+                           class="input w-full" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                        End Date
+                    </label>
+                    <input type="date"
+                           @bind="_filterEndDate"
+                           class="input w-full" />
+                </div>
+            </div>
+            <div class="mt-4 flex gap-3">
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                        OnClick="@ApplyFiltersAsync"
+                        Text="Apply Filters"></TradingStrat.Web.Components.Shared.Button>
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                        OnClick="@ClearFiltersAsync"
+                        Text="Clear Filters"></TradingStrat.Web.Components.Shared.Button>
+            </div>
+        </div>
+
+        @if (_archiveResult.BacktestRuns.Any())
+        {
+            <!-- Backtest Results Table -->
+            <div class="card-elevated">
+                <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
+                    Backtest Results (@_archiveResult.BacktestRuns.Count)
+                </Heading>
+                <Table Dense Striped>
+                    <TableHead>
+                        <TableRow>
+                            <TableHeader Class="cursor-pointer" @onclick="@(async () => await ChangeSortAsync("ExecutedAt"))">
+                                Date @GetSortIcon("ExecutedAt")
+                            </TableHeader>
+                            <TableHeader>Ticker</TableHeader>
+                            <TableHeader>Strategy</TableHeader>
+                            <TableHeader Class="cursor-pointer" @onclick="@(async () => await ChangeSortAsync("TotalReturn"))">
+                                Return @GetSortIcon("TotalReturn")
+                            </TableHeader>
+                            <TableHeader Class="cursor-pointer" @onclick="@(async () => await ChangeSortAsync("SharpeRatio"))">
+                                Sharpe @GetSortIcon("SharpeRatio")
+                            </TableHeader>
+                            <TableHeader Class="cursor-pointer" @onclick="@(async () => await ChangeSortAsync("TotalTrades"))">
+                                Trades @GetSortIcon("TotalTrades")
+                            </TableHeader>
+                            <TableHeader>Status</TableHeader>
+                            <TableHeader>Actions</TableHeader>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (var backtest in _archiveResult.BacktestRuns)
+                        {
+                            <TableRow>
+                                <!-- Date -->
+                                <TableCell>
+                                    <div class="text-sm text-gray-900 dark:text-dark-text-primary">
+                                        @backtest.ExecutedAt.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-dark-text-tertiary">
+                                        @backtest.ExecutedAt.ToString("HH:mm:ss")
+                                    </div>
+                                </TableCell>
+
+                                <!-- Ticker -->
+                                <TableCell>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                                        @backtest.Ticker
+                                    </span>
+                                </TableCell>
+
+                                <!-- Strategy -->
+                                <TableCell>
+                                    <div class="text-sm text-gray-900 dark:text-dark-text-primary">
+                                        @backtest.StrategyName
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-dark-text-tertiary">
+                                        @backtest.ExecutionTimeMs ms
+                                    </div>
+                                </TableCell>
+
+                                <!-- Total Return -->
+                                <TableCell>
+                                    <span class="text-sm font-medium @GetPerformanceClass(backtest.TotalReturnPercentage)">
+                                        @(backtest.TotalReturnPercentage?.ToString("+0.00%;-0.00%;0.00%") ?? "N/A")
+                                    </span>
+                                </TableCell>
+
+                                <!-- Sharpe Ratio -->
+                                <TableCell>
+                                    <span class="text-sm @GetPerformanceClass(backtest.SharpeRatio)">
+                                        @(backtest.SharpeRatio?.ToString("F2") ?? "N/A")
+                                    </span>
+                                </TableCell>
+
+                                <!-- Total Trades -->
+                                <TableCell>
+                                    <span class="text-sm text-gray-900 dark:text-dark-text-primary">
+                                        @(backtest.TotalTrades?.ToString() ?? "N/A")
+                                    </span>
+                                </TableCell>
+
+                                <!-- Status -->
+                                <TableCell>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @GetStatusBadgeClass(backtest.Status)">
+                                        @backtest.Status
+                                    </span>
+                                </TableCell>
+
+                                <!-- Actions -->
+                                <TableCell Class="text-sm">
+                                    <button @onclick="() => ViewBacktestDetails(backtest.Id)"
+                                            class="text-trading-blue dark:text-dark-accent-blue hover:underline">
+                                        View
+                                    </button>
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="card text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-gray-400 dark:text-dark-text-tertiary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <Heading Level="3" Class="text-lg font-medium text-gray-900 dark:text-dark-text-primary mb-2">No Backtests Found</Heading>
+                <p class="text-gray-600 dark:text-dark-text-secondary mb-6">
+                    @if (!string.IsNullOrEmpty(_filterTicker) || !string.IsNullOrEmpty(_filterStrategy) || _filterStartDate is not null || _filterEndDate is not null)
+                    {
+                        <span>No backtests match your filters. Try adjusting or clearing them.</span>
+                    }
+                    else
+                    {
+                        <span>You haven't run any backtests yet. Start by running your first backtest.</span>
+                    }
+                </p>
+                <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                        OnClick="@NavigateToBacktest"
+                        Text="Run First Backtest"></TradingStrat.Web.Components.Shared.Button>
+            </div>
+        }
+    }
+</div>

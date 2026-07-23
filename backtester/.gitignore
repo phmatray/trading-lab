@@ -1,0 +1,56 @@
+# Build results
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+trading.db*
+
+# Export files
+trading_*.csv
+trading_*.json
+backtest_*.json
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# User-specific files
+*.rsuser
+
+# Test results
+[Tt]est[Rr]esult*/
+
+# Logs
+*.log
+
+# Playwright E2E Tests
+tests/TradingStrat.UI.Tests/Screenshots/
+tests/TradingStrat.UI.Tests/bin/Debug/**/playwright.ps1
+tests/TradingStrat.UI.Tests/bin/Release/**/playwright.ps1
+.playwright/.env
+
+# Environment variables with secrets
+.env
+
+# Node.js dependencies
+node_modules/
+
+# Temporary files
+catalyst-ui-kit/
+.playwright-mcp/

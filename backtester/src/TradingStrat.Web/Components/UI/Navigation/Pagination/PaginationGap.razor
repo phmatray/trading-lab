@@ -1,0 +1,30 @@
+<span aria-hidden="true" class="@GetClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</span>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "w-9",
+            "text-center",
+            "text-sm/6",
+            "font-semibold",
+            "text-zinc-950",
+            "select-none",
+            "dark:text-white"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    protected override void OnInitialized()
+    {
+        // Default to ellipsis character if no content provided
+        ChildContent ??= builder => builder.AddMarkupContent(0, "&hellip;");
+    }
+}

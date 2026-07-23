@@ -1,0 +1,223 @@
+@page "/analysis"
+@rendermode InteractiveServer
+@using TradingStrat.Web.Components.UI.Typography
+@inherits BaseDataPage<AnalysisFormModel, LiveAnalysisResult>
+
+<PageTitle>Live Analysis - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Live Market Analysis"
+                Description="Get ML-based predictions and technical analysis for current market positions." />
+
+    <ProgressIndicator IsVisible="ProgressService.IsProcessing"
+                       CurrentMessage="@ProgressService.CurrentMessage"
+                       Progress="ProgressService.CurrentProgress" />
+
+    <AlertMessage Message="@ErrorMessage" Type="AlertType.Error" />
+    <AlertMessage Message="@_warningMessage" Type="AlertType.Warning" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Configuration -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-xl font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
+
+            <EditForm Model="@FormModel" OnValidSubmit="@HandleSubmitAsync" class="space-y-4">
+                <DataAnnotationsValidator />
+
+                <FormInputGroup Label="Ticker Symbol"
+                                ValidationFor="@(() => FormModel.Ticker)">
+                    <InputText id="ticker" @bind-Value="FormModel.Ticker"
+                               @oninput="@(async e => { FormModel.Ticker = e.Value?.ToString() ?? string.Empty; await OnFormFieldChanged(); })"
+                               class="@TailwindStyles.InputText" />
+                </FormInputGroup>
+
+                <div>
+                    <label class="flex items-center space-x-2">
+                        <InputCheckbox @bind-Value="FormModel.FetchFreshData"
+                                       @onchange="@(async () => await OnFormFieldChanged())"
+                                       class="rounded border-gray-300 dark:border-dark-border text-trading-blue dark:text-dark-accent-blue focus:ring-trading-blue dark:focus:ring-dark-accent-blue" />
+                        <span class="text-sm font-medium text-gray-700 dark:text-dark-text-primary">Fetch Fresh Data</span>
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-1">Download latest prices from Yahoo Finance</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <FormInputGroup Label="Buy Threshold (%)"
+                                    ValidationFor="@(() => FormModel.BuyThreshold)">
+                        <InputNumber id="buy-threshold" @bind-Value="FormModel.BuyThreshold"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
+                                     class="@TailwindStyles.InputNumber" />
+                    </FormInputGroup>
+
+                    <FormInputGroup Label="Sell Threshold (%)"
+                                    ValidationFor="@(() => FormModel.SellThreshold)">
+                        <InputNumber id="sell-threshold" @bind-Value="FormModel.SellThreshold"
+                                     @oninput="@(async () => await OnFormFieldChanged())"
+                                     class="@TailwindStyles.InputNumber" />
+                    </FormInputGroup>
+                </div>
+
+                <TradingStrat.Web.Components.Shared.Button Type="@ButtonType.Submit"
+                        Variant="@ButtonVariant.Primary"
+                        FullWidth="@true"
+                        IsLoading="@ProgressService.IsProcessing"
+                        Text="Analyze Position"
+                        LoadingText="Analyzing..."></TradingStrat.Web.Components.Shared.Button>
+            </EditForm>
+        </div>
+
+        <!-- Results -->
+        <div class="lg:col-span-2 space-y-6">
+            @if (Result is not null)
+            {
+                <!-- Current Price & Prediction -->
+                <div class="card-elevated">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">Current Price</Heading>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Result.CurrentPrice.ToString("C2")</p>
+                            <p class="text-sm @(Result.DailyChangePercent >= 0 ? "metric-positive" : "metric-negative") mt-1">
+                                @(Result.DailyChangePercent >= 0 ? "+" : "")@Result.DailyChangePercent.ToString("F2")%
+                                (@(Result.DailyChange >= 0 ? "+" : "")@Result.DailyChange.ToString("C2"))
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-2">As of @Result.LatestDataDate.ToString("yyyy-MM-dd")</p>
+                        </div>
+
+                        <div>
+                            <Heading Level="3" Class="text-sm font-medium text-gray-500 dark:text-dark-text-secondary mb-2">ML Prediction</Heading>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl font-bold @SignalUIHelper.GetSignalColorClass(Result.PredictedSignal)">
+                                    @Result.PredictedSignal
+                                </span>
+                                <span class="text-2xl">@SignalUIHelper.GetSignalEmoji(Result.PredictedSignal)</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary mt-2">
+                                Predicted Return: @(Result.PredictedReturn >= 0 ? "+" : "")@(Result.PredictedReturn * 100).ToString("F2")%
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-dark-text-secondary mt-2">@Result.PredictionReason</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Indicators -->
+                <div class="card-elevated">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Technical Indicators (26 Features)</Heading>
+
+                    <div class="space-y-4">
+                        <!-- Price-based -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Price-Based Indicators (5)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Daily Return:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.DailyReturn.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Log Return:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.LogReturn.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">High-Low Range:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.HighLowRange.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Open-Close Range:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.OpenCloseRange.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Price Position:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.PricePosition.ToString("F4")</span></div>
+                            </div>
+                        </details>
+
+                        <!-- Moving Averages -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Moving Averages (6)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 5:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.SMA_5.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 10:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.SMA_10.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">SMA 20:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.SMA_20.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">EMA 12:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.EMA_12.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">EMA 26:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.EMA_26.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Price to SMA20:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.PriceToSMA20.ToString("F4")</span></div>
+                            </div>
+                        </details>
+
+                        <!-- Momentum -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Momentum Indicators (4)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">RSI 14:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.RSI_14.ToString("F2")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Momentum 5:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.Momentum_5.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">ROC 10:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.ROC_10.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Stochastic RSI:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.StochRSI.ToString("F4")</span></div>
+                            </div>
+                        </details>
+
+                        <!-- MACD -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">MACD Indicators (3)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">MACD Line:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.MACD.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Signal Line:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.MACDSignal.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Histogram:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.MACDHistogram.ToString("F4")</span></div>
+                            </div>
+                        </details>
+
+                        <!-- Volatility -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Volatility Indicators (4)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">StdDev 10:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.StdDev_10.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">StdDev 20:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.StdDev_20.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">ATR 14:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.ATR_14.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Bollinger Position:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.BollingerPosition.ToString("F4")</span></div>
+                            </div>
+                        </details>
+
+                        <!-- Volume -->
+                        <details class="border border-gray-200 dark:border-dark-border rounded-lg p-4 bg-white dark:bg-dark-elevated">
+                            <summary class="font-medium text-gray-900 dark:text-dark-text-primary cursor-pointer">Volume Indicators (4)</summary>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Volume Change:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.VolumeChange.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Volume MA 10:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.VolumeMA_10.ToString("F0")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Volume Ratio:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.VolumeRatio.ToString("F4")</span></div>
+                                <div><span class="text-gray-600 dark:text-dark-text-secondary">Price-Volume Corr:</span> <span class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.CurrentFeatures.PriceVolumeCorrelation.ToString("F4")</span></div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Model Info -->
+                <div class="card-elevated">
+                    <Heading Level="3" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Model Information</Heading>
+                    <dl class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Algorithm</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">FastTree Gradient Boosting</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Training Data Points</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.TrainingDataPoints.ToString("N0")</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Training Period</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">@Result.OldestTrainingDate.ToString("yyyy-MM-dd") to @Result.LatestDataDate.ToString("yyyy-MM-dd")</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-600 dark:text-dark-text-secondary">Features Used</dt>
+                            <dd class="font-semibold text-gray-900 dark:text-dark-text-primary">26 Technical Indicators</dd>
+                        </div>
+                    </dl>
+                </div>
+            }
+            else
+            {
+                <div class="card-elevated">
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        <Heading Level="3" Class="mt-2 text-sm font-medium text-gray-900 dark:text-dark-text-primary">No analysis results</Heading>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-dark-text-secondary">Configure your analysis and click "Analyze Position" to see ML predictions.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Result is not null)
+    {
+        <TradingViewWidget Ticker="@Result.Ticker" />
+    }
+</div>

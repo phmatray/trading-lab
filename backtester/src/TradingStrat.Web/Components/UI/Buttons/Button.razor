@@ -1,0 +1,40 @@
+@* Catalyst UI Kit - Button Component *@
+
+@if (Href != null)
+{
+    <a href="@Href"
+       class="@GetButtonClasses()"
+       data-focus="@_isFocused"
+       data-hover="@_isHovered"
+       data-active="@_isActive"
+       data-disabled="@Disabled"
+       @attributes="AdditionalAttributes"
+       @onfocus="HandleFocus"
+       @onblur="HandleBlur"
+       @onmouseenter="HandleMouseEnter"
+       @onmouseleave="HandleMouseLeave"
+       @onmousedown="HandleMouseDown"
+       @onmouseup="HandleMouseUp">
+        <TouchTarget>@ChildContent</TouchTarget>
+    </a>
+}
+else
+{
+    <button type="@(Type == ButtonType.Submit ? "submit" : Type == ButtonType.Reset ? "reset" : "button")"
+            class="@GetButtonClasses()"
+            disabled="@Disabled"
+            data-focus="@_isFocused"
+            data-hover="@_isHovered"
+            data-active="@_isActive"
+            data-disabled="@Disabled"
+            @attributes="AdditionalAttributes"
+            @onclick="HandleClick"
+            @onfocus="HandleFocus"
+            @onblur="HandleBlur"
+            @onmouseenter="HandleMouseEnter"
+            @onmouseleave="HandleMouseLeave"
+            @onmousedown="HandleMouseDown"
+            @onmouseup="HandleMouseUp">
+        <TouchTarget>@ChildContent</TouchTarget>
+    </button>
+}

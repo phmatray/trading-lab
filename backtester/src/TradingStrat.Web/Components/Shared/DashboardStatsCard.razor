@@ -1,0 +1,19 @@
+@using TradingStrat.Web.Components.UI.Typography
+
+@* Reusable statistics card for dashboard *@
+
+<div @onclick="HandleClick" class="@GetCardClasses()">
+    <div class="flex items-start justify-between">
+        <div class="flex-1">
+            <TradingStrat.Web.Components.UI.Typography.Text Class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">@Title</TradingStrat.Web.Components.UI.Typography.Text>
+            <Heading Level="2" Class="mt-2 text-3xl font-bold text-gray-900 dark:text-dark-text-primary">@Value</Heading>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <TradingStrat.Web.Components.UI.Typography.Text Class="mt-1 text-xs text-gray-500 dark:text-dark-text-tertiary">@Subtitle</TradingStrat.Web.Components.UI.Typography.Text>
+            }
+        </div>
+        <div class="flex-shrink-0 ml-4">
+            <ColoredIcon Icon="@Icon" Category="@GetIconCategory()" Size="IconSize.Large" AriaLabel="@Title" />
+        </div>
+    </div>
+</div>

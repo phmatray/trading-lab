@@ -1,0 +1,22 @@
+<nav class="@GetClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</nav>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "flex",
+            "flex-1",
+            "items-center",
+            "gap-4",
+            "py-2.5"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

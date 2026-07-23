@@ -1,0 +1,62 @@
+@* LoadingState Component - Standardized loading state with spinner or skeleton *@
+
+<div class="card" data-testid="loading-state">
+    <div class="text-center py-12">
+        @if (Style == LoadingStyle.Spinner)
+        {
+            <!-- Spinner -->
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-trading-blue dark:border-dark-accent-blue"></div>
+            <TradingStrat.Web.Components.UI.Typography.Text Class="mt-4 text-gray-600 dark:text-dark-text-secondary">@Message</TradingStrat.Web.Components.UI.Typography.Text>
+        }
+        else
+        {
+            <!-- Skeleton Loader -->
+            <div class="animate-pulse space-y-4">
+                @if (SkeletonType == "card")
+                {
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto"></div>
+                    <div class="grid grid-cols-3 gap-4 mt-6">
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                }
+                else if (SkeletonType == "table")
+                {
+                    <div class="space-y-3">
+                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                }
+                else if (SkeletonType == "list")
+                {
+                    <div class="space-y-4">
+                        @for (int i = 0; i < 4; i++)
+                        {
+                            <div class="flex space-x-4">
+                                <div class="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (SkeletonType == "chart")
+                {
+                    <div class="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div class="grid grid-cols-4 gap-4 mt-4">
+                        <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

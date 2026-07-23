@@ -1,0 +1,114 @@
+@using System.Globalization
+@using TradingStrat.Web.Components.UI.Navigation.Dropdown
+@using TradingStrat.Web.Components.UI.Typography
+@* TopBar Component - Fixed top bar with portfolio info and quick actions *@
+
+<div class="h-16 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border fixed top-0 left-0 right-0 z-40"
+     data-testid="top-bar"
+     role="banner">
+    <div class="h-full px-4 flex items-center justify-between">
+        <!-- Left: App Title + Portfolio Selector -->
+        <div class="flex items-center gap-6">
+            <!-- App Title -->
+            <Heading Level="1" Class="text-xl font-bold text-trading-blue dark:text-dark-accent-blue whitespace-nowrap">
+                TradingStrat AI
+            </Heading>
+
+            <!-- Portfolio Selector Dropdown -->
+            <Dropdown Class="relative">
+                <DropdownButton Plain="true"
+                               Class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-elevated rounded-lg transition-colors">
+                    @if (string.IsNullOrEmpty(SelectedPortfolioName))
+                    {
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">
+                            Select Portfolio
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    }
+                    else
+                    {
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-900 dark:text-dark-text-primary">
+                            @SelectedPortfolioName
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    }
+                    <svg class="w-4 h-4 text-gray-500 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </DropdownButton>
+
+                <DropdownMenu Anchor="bottom start">
+                    @if (_portfolios.Any())
+                    {
+                        @foreach (var portfolio in _portfolios)
+                        {
+                            <DropdownItem OnClick="@(() => HandlePortfolioSelection(portfolio.Id))">
+                                <TradingStrat.Web.Components.UI.Typography.Text Class="font-medium">
+                                    @portfolio.Name
+                                </TradingStrat.Web.Components.UI.Typography.Text>
+                            </DropdownItem>
+                        }
+                    }
+                    else
+                    {
+                        <DropdownItem Disabled="true">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-gray-500 dark:text-dark-text-secondary">
+                                No portfolios available
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </DropdownItem>
+                    }
+                </DropdownMenu>
+            </Dropdown>
+        </div>
+
+        <!-- Right: Metrics + Actions -->
+        <div class="flex items-center gap-6">
+            <!-- Portfolio Metrics (3-section layout) -->
+            @if (!string.IsNullOrEmpty(SelectedPortfolioName) && PortfolioValue.HasValue)
+            {
+                <div class="hidden md:flex items-center gap-4 text-sm">
+                    <!-- Section 1: Portfolio Value -->
+                    <div class="flex flex-col">
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                            Portfolio Value
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                        <TradingStrat.Web.Components.UI.Typography.Text Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                            @PortfolioValue.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US"))
+                        </TradingStrat.Web.Components.UI.Typography.Text>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-8 w-px bg-gray-300 dark:bg-dark-border"></div>
+
+                    <!-- Section 2: Today's Return -->
+                    @if (TodayReturnDollars.HasValue && TodayReturnPercentage.HasValue)
+                    {
+                        <div class="flex flex-col">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                                Today's Return
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="@GetTodayReturnClass()">
+                                @(TodayReturnDollars.Value >= 0 ? "+" : "")@TodayReturnDollars.Value.ToString("C0", CultureInfo.GetCultureInfo("en-US"))
+                                (@(TodayReturnPercentage.Value >= 0 ? "+" : "")@TodayReturnPercentage.Value.ToString("F2", CultureInfo.InvariantCulture)%)
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-8 w-px bg-gray-300 dark:bg-dark-border"></div>
+                    }
+
+                    <!-- Section 3: Win Rate -->
+                    @if (WinRatePercentage.HasValue)
+                    {
+                        <div class="flex flex-col">
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="text-xs text-gray-500 dark:text-dark-text-secondary">
+                                Win Rate
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                            <TradingStrat.Web.Components.UI.Typography.Text Class="@GetWinRateClass()">
+                                @WinRatePercentage.Value.ToString("F1", CultureInfo.InvariantCulture)%
+                            </TradingStrat.Web.Components.UI.Typography.Text>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

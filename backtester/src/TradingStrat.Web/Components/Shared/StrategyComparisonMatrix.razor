@@ -1,0 +1,118 @@
+@* Performance comparison matrix table showing all strategy metrics *@
+@using TradingStrat.Web.Components.UI.DataDisplay.Table
+
+<Table Dense Grid>
+    <TableHead>
+        <TableRow>
+            <TableHeader>Strategy</TableHeader>
+            <TableHeader Class="text-right">Total Return</TableHeader>
+            <TableHeader Class="text-right">Sharpe Ratio</TableHeader>
+            <TableHeader Class="text-right">Max Drawdown</TableHeader>
+            <TableHeader Class="text-right">Win Rate</TableHeader>
+            <TableHeader Class="text-right">Total Trades</TableHeader>
+            <TableHeader Class="text-right">Profit Factor</TableHeader>
+        </TableRow>
+    </TableHead>
+    <TableBody>
+        @foreach (var strategy in ComparisonResult.Strategies)
+        {
+            <TableRow>
+                <!-- Strategy Name -->
+                <TableCell>
+                    <div class="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
+                        @strategy.StrategyName
+                    </div>
+                </TableCell>
+
+                <!-- Total Return -->
+                <TableCell Class="text-right">
+                    <span class="text-sm font-medium @GetPerformanceClass(strategy.Metrics.TotalReturnPercentage)">
+                        @strategy.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
+                        @if (IsBestByReturn(strategy))
+                        {
+                            <span class="ml-1 text-yellow-500">★</span>
+                        }
+                    </span>
+                </TableCell>
+
+                <!-- Sharpe Ratio -->
+                <TableCell Class="text-right">
+                    <span class="text-sm @GetPerformanceClass(strategy.Metrics.SharpeRatio)">
+                        @strategy.Metrics.SharpeRatio.ToString("F2")
+                        @if (IsBestBySharpe(strategy))
+                        {
+                            <span class="ml-1 text-yellow-500">★</span>
+                        }
+                    </span>
+                </TableCell>
+
+                <!-- Max Drawdown -->
+                <TableCell Class="text-right">
+                    <span class="text-sm text-red-600 dark:text-red-400">
+                        @strategy.Metrics.MaxDrawdown.ToString("F2%")
+                        @if (IsBestByDrawdown(strategy))
+                        {
+                            <span class="ml-1 text-yellow-500">★</span>
+                        }
+                    </span>
+                </TableCell>
+
+                <!-- Win Rate -->
+                <TableCell Class="text-right">
+                    <span class="text-sm text-gray-900 dark:text-dark-text-primary">
+                        @strategy.Metrics.WinRate.ToString("F1%")
+                    </span>
+                </TableCell>
+
+                <!-- Total Trades -->
+                <TableCell Class="text-right">
+                    <span class="text-sm text-gray-900 dark:text-dark-text-primary">
+                        @strategy.TotalTrades
+                    </span>
+                    <div class="text-xs text-gray-500 dark:text-dark-text-tertiary">
+                        @strategy.WinningTrades W / @strategy.LosingTrades L
+                    </div>
+                </TableCell>
+
+                <!-- Profit Factor -->
+                <TableCell Class="text-right">
+                    <span class="text-sm @GetPerformanceClass(strategy.Metrics.ProfitFactor - 1)">
+                        @strategy.Metrics.ProfitFactor.ToString("F2")
+                    </span>
+                </TableCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+@code {
+    [Parameter] public MultiStrategyComparisonResult ComparisonResult { get; set; } = null!;
+
+
+    private string GetPerformanceClass(decimal value)
+    {
+        if (value == 0)
+        {
+            return "text-gray-600 dark:text-dark-text-secondary";
+        }
+
+        return value > 0
+            ? "text-green-600 dark:text-green-400"
+            : "text-red-600 dark:text-red-400";
+    }
+
+    private bool IsBestByReturn(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestByReturn?.StrategyName == strategy.StrategyName;
+    }
+
+    private bool IsBestBySharpe(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestBySharpe?.StrategyName == strategy.StrategyName;
+    }
+
+    private bool IsBestByDrawdown(StrategyComparisonItem strategy)
+    {
+        return ComparisonResult.BestByDrawdown?.StrategyName == strategy.StrategyName;
+    }
+}

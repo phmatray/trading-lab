@@ -1,0 +1,104 @@
+<span class="@GetWrapperClasses()">
+    @if (Current)
+    {
+        <span class="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white transition-all duration-200"></span>
+    }
+
+    @if (!string.IsNullOrEmpty(Href))
+    {
+        <TradingStrat.Web.Components.UI.Typography.Link Href="@Href"
+              Class="@GetItemClasses()"
+              AdditionalAttributes="@GetMergedAttributes()">
+            <TradingStrat.Web.Components.UI.Buttons.TouchTarget>
+                @ChildContent
+            </TradingStrat.Web.Components.UI.Buttons.TouchTarget>
+        </TradingStrat.Web.Components.UI.Typography.Link>
+    }
+    else
+    {
+        <button type="button"
+                @onclick="OnClick"
+                class="@GetItemClasses() cursor-default"
+                @attributes="GetMergedAttributes()">
+            <TradingStrat.Web.Components.UI.Buttons.TouchTarget>
+                @ChildContent
+            </TradingStrat.Web.Components.UI.Buttons.TouchTarget>
+        </button>
+    }
+</span>
+
+@code {
+    [Parameter] public bool Current { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetWrapperClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "relative"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    private string GetItemClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "relative",
+            "flex",
+            "min-w-0",
+            "items-center",
+            "gap-3",
+            "rounded-lg",
+            "p-2",
+            "text-left",
+            "text-base/6",
+            "font-medium",
+            "text-zinc-950",
+            "sm:text-sm/5",
+            "*:data-[slot=icon]:size-6",
+            "*:data-[slot=icon]:shrink-0",
+            "*:data-[slot=icon]:fill-zinc-500",
+            "sm:*:data-[slot=icon]:size-5",
+            "*:not-nth-2:last:data-[slot=icon]:ml-auto",
+            "*:not-nth-2:last:data-[slot=icon]:size-5",
+            "sm:*:not-nth-2:last:data-[slot=icon]:size-4",
+            "*:data-[slot=avatar]:-m-0.5",
+            "*:data-[slot=avatar]:size-7",
+            "sm:*:data-[slot=avatar]:size-6",
+            "hover:bg-zinc-950/5",
+            "hover:*:data-[slot=icon]:fill-zinc-950",
+            "active:bg-zinc-950/5",
+            "active:*:data-[slot=icon]:fill-zinc-950",
+            "dark:text-white",
+            "dark:*:data-[slot=icon]:fill-zinc-400",
+            "dark:hover:bg-white/5",
+            "dark:hover:*:data-[slot=icon]:fill-white",
+            "dark:active:bg-white/5",
+            "dark:active:*:data-[slot=icon]:fill-white"
+        });
+    }
+
+    private Dictionary<string, object> GetMergedAttributes()
+    {
+        var merged = new Dictionary<string, object>(AdditionalAttributes ?? new Dictionary<string, object>());
+
+        // Add data-current attribute if Current is true
+        if (Current)
+        {
+            merged["data-current"] = "true";
+        }
+
+        // Add onclick handler if OnClick has a delegate
+        if (OnClick.HasDelegate)
+        {
+            merged["onclick"] = EventCallback.Factory.Create(this, OnClick);
+        }
+
+        return merged;
+    }
+}

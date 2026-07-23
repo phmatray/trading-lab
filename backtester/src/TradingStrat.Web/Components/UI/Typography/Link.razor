@@ -1,0 +1,78 @@
+@* Catalyst UI Kit - Link Component *@
+
+@if (External)
+{
+    <a href="@Href"
+       target="@Target"
+       class="@GetClasses()"
+       @attributes="AdditionalAttributes">
+        @ChildContent
+    </a>
+}
+else
+{
+    <NavLink href="@Href"
+             class="@GetClasses()"
+             @attributes="AdditionalAttributes">
+        @ChildContent
+    </NavLink>
+}
+
+@code {
+    /// <summary>
+    /// Link destination URL.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Href { get; set; } = "";
+
+    /// <summary>
+    /// If true, renders a regular anchor instead of NavLink (for external links).
+    /// </summary>
+    [Parameter]
+    public bool External { get; set; }
+
+    /// <summary>
+    /// Target attribute (e.g., "_blank" for new tab). Only used when External=true.
+    /// </summary>
+    [Parameter]
+    public string? Target { get; set; }
+
+    /// <summary>
+    /// Additional CSS classes to apply.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Link content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        List<string> classes =
+        [
+            "text-zinc-950",
+            "underline",
+            "decoration-zinc-950/50",
+            "data-[hover]:decoration-zinc-950",
+            "dark:text-white",
+            "dark:decoration-white/50",
+            "dark:data-[hover]:decoration-white"
+        ];
+
+        if (!string.IsNullOrWhiteSpace(Class))
+        {
+            classes.Add(Class);
+        }
+
+        return string.Join(" ", classes);
+    }
+}

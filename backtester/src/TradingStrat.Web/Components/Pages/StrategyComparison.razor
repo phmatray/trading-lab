@@ -1,0 +1,247 @@
+@page "/strategies/compare"
+@using TradingStrat.Web.Components.Base
+@inherits BaseComponent
+@using TradingStrat.Web.Components.UI.Typography
+@rendermode InteractiveServer
+
+<PageTitle>Strategy Comparison - TradingStrat</PageTitle>
+
+<div class="space-y-6">
+    <!-- Breadcrumb Navigation -->
+    <BreadcrumbNav Breadcrumbs="@_breadcrumbs" />
+
+    <!-- Page Header -->
+    <PageHeader Title="Strategy Comparison"
+                Description="Compare up to 5 trading strategies side-by-side with performance metrics" />
+
+    <!-- Configuration Form -->
+    <div class="card-elevated">
+        <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Configuration</Heading>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Ticker -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    Ticker
+                </label>
+                <input type="text"
+                       @bind="_ticker"
+                       placeholder="e.g., AAPL"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+
+            <!-- Start Date -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    Start Date
+                </label>
+                <input type="date"
+                       @bind="_startDate"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+
+            <!-- End Date -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    End Date
+                </label>
+                <input type="date"
+                       @bind="_endDate"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Initial Capital -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    Initial Capital ($)
+                </label>
+                <input type="number"
+                       @bind="_initialCapital"
+                       step="1000"
+                       min="100"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+
+            <!-- Commission % -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    Commission (%)
+                </label>
+                <input type="number"
+                       @bind="_commissionPercentage"
+                       step="0.01"
+                       min="0"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+
+            <!-- Minimum Commission -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                    Minimum Commission ($)
+                </label>
+                <input type="number"
+                       @bind="_minimumCommission"
+                       step="0.1"
+                       min="0"
+                       class="input w-full"
+                       disabled="@_isLoading" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategy Selection -->
+    <div class="card-elevated">
+        <div class="flex items-center justify-between mb-4">
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                Selected Strategies (@_selectedStrategies.Count/@MaxStrategies)
+            </Heading>
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Secondary"
+                    OnClick="@AddStrategy"
+                    Disabled="@(_selectedStrategies.Count >= MaxStrategies || _isLoading)"
+                    Text="Add Strategy">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </div>
+
+        @if (!_selectedStrategies.Any())
+        {
+            <p class="text-gray-600 dark:text-dark-text-secondary text-center py-8">
+                No strategies selected. Click "Add Strategy" to begin.
+            </p>
+        }
+        else
+        {
+            <div class="space-y-4">
+                @foreach (var strategy in _selectedStrategies)
+                {
+                    <div class="p-4 border border-gray-200 dark:border-dark-border rounded-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+                                    Strategy Type
+                                </label>
+                                <select @onchange="@(e => OnStrategyTypeChanged(strategy.Id, e.Value?.ToString() ?? ""))"
+                                        value="@strategy.StrategyType.ToString()"
+                                        class="input w-full"
+                                        disabled="@_isLoading">
+                                    <option value="MovingAverageCrossover">MA Crossover</option>
+                                    <option value="RSI">RSI</option>
+                                    <option value="MACD">MACD</option>
+                                    <option value="MachineLearning">ML FastTree</option>
+                                </select>
+                            </div>
+
+                            <div class="flex-shrink-0 pt-7">
+                                <button @onclick="@(() => RemoveStrategy(strategy.Id))"
+                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                        disabled="@_isLoading">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Strategy Parameters (simplified for now) -->
+                        <div class="mt-4 text-sm text-gray-600 dark:text-dark-text-secondary">
+                            @GetStrategyDisplayName(strategy)
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Run Comparison Button -->
+        <div class="mt-6">
+            <TradingStrat.Web.Components.Shared.Button Variant="@ButtonVariant.Primary"
+                    FullWidth="@true"
+                    OnClick="@RunComparisonAsync"
+                    IsLoading="@_isLoading"
+                    Disabled="@(_selectedStrategies.Count < 2)"
+                    Text="Run Comparison"
+                    LoadingText="Running Comparison...">
+                <LeadingIcon>
+                    <Icon Size="@IconSize.Medium" CustomClasses="mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </Icon>
+                </LeadingIcon>
+            </TradingStrat.Web.Components.Shared.Button>
+        </div>
+
+        @if (_errorMessage is not null)
+        {
+            <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p class="text-red-800 dark:text-red-400">@_errorMessage</p>
+            </div>
+        }
+    </div>
+
+    <!-- Comparison Results -->
+    @if (_comparisonResult is not null)
+    {
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Return</p>
+                <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    @_comparisonResult.BestByReturn?.StrategyName ?? "N/A"
+                </p>
+                @if (_comparisonResult.BestByReturn is not null)
+                {
+                    <p class="text-sm text-green-600 dark:text-green-400">
+                        @_comparisonResult.BestByReturn.Metrics.TotalReturnPercentage.ToString("+0.00%;-0.00%;0.00%")
+                    </p>
+                }
+            </div>
+
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Sharpe</p>
+                <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    @_comparisonResult.BestBySharpe?.StrategyName ?? "N/A"
+                </p>
+                @if (_comparisonResult.BestBySharpe is not null)
+                {
+                    <p class="text-sm text-gray-600 dark:text-dark-text-secondary">
+                        Sharpe: @_comparisonResult.BestBySharpe.Metrics.SharpeRatio.ToString("F2")
+                    </p>
+                }
+            </div>
+
+            <div class="card-elevated">
+                <p class="text-sm font-medium text-gray-600 dark:text-dark-text-secondary">Best by Drawdown</p>
+                <p class="mt-2 text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+                    @_comparisonResult.BestByDrawdown?.StrategyName ?? "N/A"
+                </p>
+                @if (_comparisonResult.BestByDrawdown is not null)
+                {
+                    <p class="text-sm text-gray-600 dark:text-dark-text-secondary">
+                        Max DD: @_comparisonResult.BestByDrawdown.Metrics.MaxDrawdown.ToString("F2%")
+                    </p>
+                }
+            </div>
+        </div>
+
+        <!-- Performance Matrix -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Performance Matrix</Heading>
+            <StrategyComparisonMatrix ComparisonResult="@_comparisonResult" />
+        </div>
+
+        <!-- Equity Curve Chart -->
+        <div class="card-elevated">
+            <Heading Level="2" Class="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">Equity Curves</Heading>
+            <EquityOverlayChart ComparisonResult="@_comparisonResult" />
+        </div>
+    }
+</div>

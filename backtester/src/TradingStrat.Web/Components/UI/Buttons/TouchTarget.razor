@@ -1,0 +1,16 @@
+@*
+    Catalyst UI Kit - TouchTarget Component
+    Expands the hit area to at least 44×44px on touch devices (WCAG 2.1 Level AA compliance).
+    This invisible layer ensures all interactive elements meet minimum touch target requirements.
+*@
+
+<span class="@CatalystStyles.TouchTarget" aria-hidden="true"></span>
+@ChildContent
+
+@code {
+    /// <summary>
+    /// Content to wrap with expanded touch target.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

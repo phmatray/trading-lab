@@ -1,0 +1,26 @@
+@* FormInputGroup - Standardized form field wrapper with label and validation *@
+
+<div class="@ContainerClass">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label for="@Id" class="@TailwindStyles.Label">
+            @Label
+            @if (IsOptional)
+            {
+                <span class="@TailwindStyles.LabelOptional">(optional)</span>
+            }
+        </label>
+    }
+
+    @ChildContent
+
+    @if (ValidationFor is not null)
+    {
+        <ValidationMessage For="ValidationFor" class="@TailwindStyles.ValidationError" />
+    }
+
+    @if (!string.IsNullOrWhiteSpace(HelpText))
+    {
+        <TradingStrat.Web.Components.UI.Typography.Text Class="@GetHelpTextClass()">@HelpText</TradingStrat.Web.Components.UI.Typography.Text>
+    }
+</div>

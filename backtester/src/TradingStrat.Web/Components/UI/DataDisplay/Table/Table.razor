@@ -1,0 +1,45 @@
+<CascadingValue Value="@Config">
+    <div class="flow-root">
+        <div class="@GetOuterClasses()" @attributes="AdditionalAttributes">
+            <div class="@GetInnerClasses()">
+                <table class="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">
+                    @ChildContent
+                </table>
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public bool Bleed { get; set; }
+    [Parameter] public bool Dense { get; set; }
+    [Parameter] public bool Grid { get; set; }
+    [Parameter] public bool Striped { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private TableConfig Config => new(Bleed, Dense, Grid, Striped);
+
+    private string GetOuterClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "-mx-(--gutter)",
+            "overflow-x-auto",
+            "whitespace-nowrap"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    private string GetInnerClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            "inline-block",
+            "min-w-full",
+            "align-middle",
+            !Bleed ? "sm:px-(--gutter)" : null
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}

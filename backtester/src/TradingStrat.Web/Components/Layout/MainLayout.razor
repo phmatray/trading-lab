@@ -1,0 +1,50 @@
+@inherits LayoutComponentBase
+
+<!-- Skip to main content link for screen readers -->
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 dark:focus:bg-dark-accent-blue focus:text-white focus:rounded">
+    Skip to main content
+</a>
+
+<div class="min-h-screen bg-gray-50 dark dark:bg-dark-bg bg-texture-grid flex flex-col">
+    <!-- Top Bar (64px fixed) -->
+    <TopBar SelectedPortfolioName="@_selectedPortfolioName"
+            PortfolioValue="@_portfolioValue"
+            TodayReturnDollars="@_todayReturnDollars"
+            TodayReturnPercentage="@_todayReturnPercentage"
+            WinRatePercentage="@_winRatePercentage" />
+
+    <!-- Main Container (below TopBar) -->
+    <div class="flex flex-1 overflow-hidden pt-16">
+        <!-- Left Sidebar -->
+        <LeftSidebar IsCollapsed="_sidebarCollapsed"
+                     IsCollapsedChanged="OnSidebarCollapsedChanged" />
+
+        <!-- Main Content Area (flexible width) -->
+        <main id="main-content"
+              class="flex-1 overflow-y-auto p-6 sidebar-transition"
+              style="margin-left: @(_sidebarCollapsed ? "4rem" : "16rem"); margin-right: @(_rightPanelCollapsed ? "3rem" : "24rem");"
+              role="main"
+              aria-label="Main content">
+            @Body
+        </main>
+
+        <!-- Right Panel (replaces AiPanel) -->
+        <RightPanel CurrentTicker="@_currentTicker"
+                    CurrentContext="@_currentContext"
+                    CurrentRegime="@_currentRegime"
+                    CurrentRecommendation="@_currentRecommendation"
+                    Confidence="@_confidence"
+                    Reasons="@_reasons"
+                    OnCollapsedChanged="OnRightPanelCollapsedChanged" />
+    </div>
+
+    <!-- Notification Toast Container (preserved) -->
+    <NotificationToastContainer />
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+

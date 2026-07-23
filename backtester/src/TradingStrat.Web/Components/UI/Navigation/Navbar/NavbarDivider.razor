@@ -1,0 +1,18 @@
+<div aria-hidden="true" class="@GetClasses()" @attributes="AdditionalAttributes"></div>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetClasses()
+    {
+        return string.Join(" ", new[]
+        {
+            Class,
+            "h-6",
+            "w-px",
+            "bg-zinc-950/10",
+            "dark:bg-white/10"
+        }.Where(c => !string.IsNullOrEmpty(c)));
+    }
+}
