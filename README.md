@@ -1,3 +1,5 @@
+![MetaTrader5-Docker-Image banner](.github/banner.png)
+
 # MetaTrader5 Docker Image
 
 This project provides a Docker image for running MetaTrader5 with remote access via VNC, based on the [KasmVNC](https://github.com/kasmtech/KasmVNC) project and [KasmVNC Base Images from LinuxServer](https://github.com/linuxserver/docker-baseimage-kasmvnc).
