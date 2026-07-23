@@ -1,3 +1,5 @@
+![trading-lab banner](.github/banner.png)
+
 # Trading Lab
 
 <!-- portfolio-badges:start -->
