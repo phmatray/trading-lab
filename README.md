@@ -48,6 +48,14 @@ pip install -r requirements.txt
 jupyter notebook
 ```
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/algoTrad/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 ## License
 MIT
 
