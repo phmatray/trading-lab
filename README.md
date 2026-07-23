@@ -1,3 +1,5 @@
+![TradingStrat banner](.github/banner.png)
+
 # TradingStrat - Hexagonal Architecture Trading System
 
 A sophisticated trading strategy backtesting and analysis system built with **Hexagonal Architecture** (Ports & Adapters pattern), featuring ML-powered predictions, comprehensive technical indicators, and full dependency injection.
