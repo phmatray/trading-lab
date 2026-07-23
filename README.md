@@ -203,6 +203,14 @@ Design patterns called out in the spec (§17):
 - Mobile-specific layouts.
 - Tickers other than CON3.L / COIN / BTC-USD; currencies other than EUR/USD.
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/TradyStrat/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 ## License
 
 Personal use.
