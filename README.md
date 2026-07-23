@@ -15,6 +15,25 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Non-negotiable principles](#non-negotiable-principles)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [What the report shows](#what-the-report-shows)
+- [Solution layout](#solution-layout)
+- [Configuration](#configuration)
+- [Tests](#tests)
+- [Out of scope (not built)](#out-of-scope-not-built)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [License](#license)
+
+<!-- portfolio-toc:end -->
+
+
 
 A .NET 10 proof-of-concept that generates BUY/SELL/HOLD signals for a single crypto asset
 using a locally-hosted LLM (LM Studio), and validates those signals through a **walk-forward
