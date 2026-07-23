@@ -18,6 +18,13 @@
 
 <!-- portfolio-toc:start -->
 
+
+## Features
+
+- **A workbench of trading approaches** — platform, backtester, signal PoC, charting, bots and experiments
+- **.NET and Python** side by side
+- **Indicators live separately** in TaLibStandard — these projects consume that kind of library
+
 ## Table of Contents
 
 - [Projects](#projects)
