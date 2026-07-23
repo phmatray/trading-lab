@@ -35,6 +35,27 @@
 
 <!-- portfolio-toc:end -->
 
+<!-- portfolio-getstarted:start -->
+
+## Getting Started
+
+### Prerequisites
+
+- [.NET SDK](https://dotnet.microsoft.com/download)
+
+### Run
+
+```bash
+git clone https://github.com/phmatray/trading-lab.git
+cd trading-lab
+dotnet restore
+dotnet build
+dotnet run --project botzilla/Botzilla/Botzilla.csproj
+```
+
+<!-- portfolio-getstarted:end -->
+
+
 
 
 > A workbench of **algorithmic-trading** experiments, bots, strategies and tooling
