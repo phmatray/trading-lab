@@ -1,3 +1,5 @@
+![botzilla banner](.github/banner.png)
+
 # botzilla
 
 > An automated cryptocurrency trading bot for the Bittrex exchange.
