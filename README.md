@@ -66,6 +66,14 @@ Now you can access MetaTrader5 via a web browser at localhost:3000.
 ## Configuration
 The port configuration can be adjusted as per the instructions in the KasmVNC repository. Any additional configuration or environment variables needed to customize MetaTrader5 and KasmVNC running settings should be described here.
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/MetaTrader5-Docker-Image/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 ## Contributions
 Feel free to contribute to this project. All contributions are welcome. Open an issue or create a pull request.
 
