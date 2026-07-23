@@ -1,5 +1,20 @@
 # Trading Lab
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - trading-lab](https://img.shields.io/static/v1?label=phmatray&message=trading-lab&color=blue&logo=github)](https://github.com/phmatray/trading-lab)
+![Top language](https://img.shields.io/github/languages/top/phmatray/trading-lab)
+[![Stars](https://img.shields.io/github/stars/phmatray/trading-lab?style=social)](https://github.com/phmatray/trading-lab/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/trading-lab?style=social)](https://github.com/phmatray/trading-lab/network/members)
+[![License](https://img.shields.io/github/license/phmatray/trading-lab)](https://github.com/phmatray/trading-lab/blob/HEAD/LICENSE)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/trading-lab)](https://github.com/phmatray/trading-lab/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/trading-lab)](https://github.com/phmatray/trading-lab/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/trading-lab)](https://github.com/phmatray/trading-lab/commits)
+<!-- portfolio-badges:end -->
+
+
 > A workbench of **algorithmic-trading** experiments, bots, strategies and tooling
 > — consolidated from several separate repositories (full git history preserved).
 
