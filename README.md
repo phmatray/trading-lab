@@ -77,6 +77,14 @@ Planned work and known limitations are tracked in the [open issues](https://gith
 ## Contributions
 Feel free to contribute to this project. All contributions are welcome. Open an issue or create a pull request.
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **Dockerfile**
+
+<!-- portfolio-techstack:end -->
+
 ## License
 
 This project is licensed under the terms of the [MIT license](https://opensource.org/license/mit/). 
