@@ -1,3 +1,5 @@
+![TradingSignalPoc banner](.github/banner.png)
+
 # TradingSignalPoc
 
 A .NET 10 proof-of-concept that generates BUY/SELL/HOLD signals for a single crypto asset
