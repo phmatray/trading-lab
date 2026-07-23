@@ -33,6 +33,21 @@
 
 <!-- portfolio-toc:end -->
 
+<!-- portfolio-features:start -->
+
+## Features
+
+- **BUY/SELL/HOLD signals** — generates trading signals for a single crypto asset from OHLC candles
+- **Binance market data** — fetches klines via a pluggable `IMarketDataSource` with CSV caching
+- **Feature engineering** — a `FeatureEngine` turns raw candles into indicator feature sets
+- **LLM call strategy** — pluggable `ILlmCallStrategy` with few-shot memory and a response cache
+- **Deterministic gate** — a fixed-threshold gate and deterministic signal generator for reproducible runs
+- **Backtesting** — backtest options and buy-and-hold metrics to evaluate a strategy
+- **Clean architecture** — abstractions/interfaces throughout (`src/`), with a matching test suite
+
+<!-- portfolio-features:end -->
+
+
 
 
 A .NET 10 proof-of-concept that generates BUY/SELL/HOLD signals for a single crypto asset
