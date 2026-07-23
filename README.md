@@ -2,6 +2,20 @@
 
 # TradyStrat
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - TradyStrat](https://img.shields.io/static/v1?label=phmatray&message=TradyStrat&color=blue&logo=github)](https://github.com/phmatray/TradyStrat)
+![Top language](https://img.shields.io/github/languages/top/phmatray/TradyStrat)
+[![Stars](https://img.shields.io/github/stars/phmatray/TradyStrat?style=social)](https://github.com/phmatray/TradyStrat/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/TradyStrat?style=social)](https://github.com/phmatray/TradyStrat/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/TradyStrat)](https://github.com/phmatray/TradyStrat/commits)
+<!-- portfolio-badges:end -->
+
+
 Personal Blazor Server dashboard tracking accumulation of **CON3.L** (Leverage Shares 3x Long Coinbase ETP, LSE, USD-quoted) toward **€1,000,000**. Daily Yahoo Finance prices for CON3.L / COIN / BTC-USD plus EUR/USD FX, technical-analysis zones (Bollinger / RSI / SMA / Ichimoku), and an Anthropic-generated cited daily suggestion — in "The Vault" UI.
 
 > **Spec:** [`docs/superpowers/specs/2026-05-06-tradystrat-dashboard-design.md`](docs/superpowers/specs/2026-05-06-tradystrat-dashboard-design.md)
