@@ -2,6 +2,20 @@
 
 # TradingSignalPoc
 
+<!-- portfolio-badges:start -->
+<!-- Identity -->
+[![phmatray - TradingSignalPoc](https://img.shields.io/static/v1?label=phmatray&message=TradingSignalPoc&color=blue&logo=github)](https://github.com/phmatray/TradingSignalPoc)
+![Top language](https://img.shields.io/github/languages/top/phmatray/TradingSignalPoc)
+[![Stars](https://img.shields.io/github/stars/phmatray/TradingSignalPoc?style=social)](https://github.com/phmatray/TradingSignalPoc/stargazers)
+[![Forks](https://img.shields.io/github/forks/phmatray/TradingSignalPoc?style=social)](https://github.com/phmatray/TradingSignalPoc/network/members)
+
+<!-- Activity -->
+[![Issues](https://img.shields.io/github/issues/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/pulls)
+[![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingSignalPoc)](https://github.com/phmatray/TradingSignalPoc/commits)
+<!-- portfolio-badges:end -->
+
+
 A .NET 10 proof-of-concept that generates BUY/SELL/HOLD signals for a single crypto asset
 using a locally-hosted LLM (LM Studio), and validates those signals through a **walk-forward
 backtest** with two stacked adaptation mechanisms:
