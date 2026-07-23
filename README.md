@@ -14,6 +14,19 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/trading-lab)](https://github.com/phmatray/trading-lab/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Projects](#projects)
+- [History](#history)
+- [Tech Stack](#tech-stack)
+- [License](#license)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
 
 > A workbench of **algorithmic-trading** experiments, bots, strategies and tooling
 > — consolidated from several separate repositories (full git history preserved).
