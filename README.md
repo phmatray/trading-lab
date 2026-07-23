@@ -15,6 +15,20 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/TradingViewBlazorApp)](https://github.com/phmatray/TradingViewBlazorApp/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Description](#description)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Tech Stack](#tech-stack)
+- [License](#license)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
 
 > Embed TradingView charting widgets in a Blazor Server application.
 
