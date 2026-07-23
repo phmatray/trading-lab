@@ -41,6 +41,22 @@ library rather than replace it.
 Each folder was merged with **full git history preserved** (`git subtree`). The
 original repositories are archived and redirect here.
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **.NET 10**
+- Microsoft.Extensions.DependencyInjection.Abstractions
+- Microsoft.Extensions.Options.ConfigurationExtensions
+- Microsoft.ML
+- Anthropic
+- Anthropic.SDK
+- CsvHelper
+- Microsoft.EntityFrameworkCore
+- Microsoft.EntityFrameworkCore.Sqlite
+
+<!-- portfolio-techstack:end -->
+
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
