@@ -1,0 +1,10 @@
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+node_modules/
+*.user
+.vs/
+.idea/
+.ipynb_checkpoints/
+__pycache__/
