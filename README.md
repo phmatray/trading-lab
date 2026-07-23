@@ -27,6 +27,19 @@
 
 <!-- portfolio-toc:end -->
 
+<!-- portfolio-features:start -->
+
+## Features
+
+- **Algorithmic-trading experiments** — a set of Jupyter notebooks prototyping trading ideas in Python
+- **Market data** — `datareader.ipynb` for pulling and exploring price data
+- **Derivatives** — dedicated `futures.ipynb` and `options.ipynb` explorations
+- **Pandas / NumPy stack** — analysis built on the standard Python data toolkit (`requirements.txt`)
+- **Sandbox** — a scratch space for strategy prototyping, not a packaged product
+
+<!-- portfolio-features:end -->
+
+
 
 
 > Algorithmic trading experiments and strategies using Python and Jupyter Notebooks.
