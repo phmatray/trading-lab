@@ -537,6 +537,14 @@ public ProgramMenu(
 }
 ```
 
+<!-- portfolio-roadmap:start -->
+
+## Roadmap
+
+Planned work and known limitations are tracked in the [open issues](https://github.com/phmatray/TradingStrat/issues). Contributions toward them are welcome.
+
+<!-- portfolio-roadmap:end -->
+
 ## 🤝 Contributing
 
 When adding new features:
