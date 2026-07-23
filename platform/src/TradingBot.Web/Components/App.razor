@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base href="/"/>
+    @* <link rel="stylesheet" href="@Assets["TradingBot.Web.styles.css"]" /> *@
+    <link rel="stylesheet" href="@Assets["css/app.css"]"/>
+    <ImportMap/>
+    <link rel="icon" type="image/png" href="favicon.png"/>
+    <HeadOutlet/>
+</head>
+
+<body>
+<Routes @rendermode="InteractiveServer"/>
+<script src="_framework/blazor.web.js" autostart="false"></script>
+<script src="js/download.js"></script>
+<script src="js/keyboard-shortcuts.js"></script>
+<script>
+    Blazor.start({
+        reconnectionOptions: {
+            maxRetries: 10,
+            retryIntervalMilliseconds: 3000
+        },
+        configureSignalR: function (builder) {
+            builder.withAutomaticReconnect({
+                nextRetryDelayInMilliseconds: retryContext => {
+                    // Exponential backoff: 0, 2, 4, 8, 16, 30, 30, 30...
+                    if (retryContext.previousRetryCount === 0) {
+                        return 0;
+                    }
+                    return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount - 1), 30000);
+                }
+            });
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,202 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-and-upload:
+    name: Build and Upload ${{ matrix.platform }}
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win-x64
+            artifact_name: tradingbot-win-x64.zip
+            executable: TradingBot.Web.exe
+          - os: ubuntu-latest
+            platform: linux-x64
+            artifact_name: tradingbot-linux-x64.tar.gz
+            executable: TradingBot.Web
+          - os: macos-latest
+            platform: osx-x64
+            artifact_name: tradingbot-osx-x64.tar.gz
+            executable: TradingBot.Web
+          - os: macos-latest
+            platform: osx-arm64
+            artifact_name: tradingbot-osx-arm64.tar.gz
+            executable: TradingBot.Web
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run tests
+        run: dotnet test --no-restore --configuration Release --verbosity normal
+
+      - name: Publish ${{ matrix.platform }}
+        run: |
+          dotnet publish src/TradingBot.Web/TradingBot.Web.csproj \
+            -c Release \
+            -r ${{ matrix.platform }} \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishTrimmed=true \
+            -p:PublishReadyToRun=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:Version=${{ needs.create-release.outputs.version }} \
+            -o artifacts/${{ matrix.platform }}
+
+      - name: Create archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd artifacts/${{ matrix.platform }}
+          7z a ../../${{ matrix.artifact_name }} *
+          cd ../..
+
+      - name: Create archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cd artifacts/${{ matrix.platform }}
+          tar -czf ../../${{ matrix.artifact_name }} *
+          cd ../..
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: ${{ matrix.artifact_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact (for testing)
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.platform }}
+          path: ${{ matrix.artifact_name }}
+          retention-days: 7
+
+  verify-releases:
+    name: Verify Release Assets
+    needs: [create-release, build-and-upload]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: |
+          echo "Release artifacts:"
+          find artifacts -type f -exec ls -lh {} \;
+
+      - name: Verify file sizes
+        run: |
+          echo "Checking minimum file sizes..."
+          for file in $(find artifacts -name "*.tar.gz" -o -name "*.zip"); do
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+            echo "$file: $size bytes"
+            if [ "$size" -lt 10485760 ]; then  # 10 MB
+              echo "Warning: $file is smaller than 10 MB"
+            fi
+          done
+
+  create-checksums:
+    name: Create Checksums
+    needs: [create-release, build-and-upload]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          for dir in */; do
+            cd "$dir"
+            for file in *; do
+              sha256sum "$file" >> ../SHA256SUMS.txt
+            done
+            cd ..
+          done
+          cat SHA256SUMS.txt
+
+      - name: Upload checksums
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: artifacts/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: Send Notifications
+    needs: [create-release, build-and-upload, verify-releases, create-checksums]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Release Status
+        run: |
+          echo "Release v${{ needs.create-release.outputs.version }} completed!"
+          echo "Status: ${{ job.status }}"
+          echo "Download URL: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.create-release.outputs.version }}"

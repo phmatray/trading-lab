@@ -1,0 +1,216 @@
+@using System.ComponentModel.DataAnnotations
+@using ConfigurationRiskSettings = TradingBot.Core.Models.Configuration.RiskSettings
+
+<div class="space-y-6">
+    <EditForm Model="@_formModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Max Position Size -->
+            <div>
+                <label for="maxPositionSize" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Max Position Size (%)
+                    <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1 - 100.0)</span>
+                </label>
+                <InputNumber @bind-Value="_formModel.MaxPositionSizePercent"
+                            id="maxPositionSize"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
+                            step="0.1"
+                            min="0.1"
+                            max="100.0" />
+                <ValidationMessage For="@(() => _formModel.MaxPositionSizePercent)" class="text-red-600 text-sm mt-1" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Maximum percentage of account equity per position.
+                </p>
+            </div>
+
+            <!-- Max Open Positions -->
+            <div>
+                <label for="maxOpenPositions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Max Open Positions
+                    <span class="text-gray-500 dark:text-gray-400 font-normal">(1 - 100)</span>
+                </label>
+                <InputNumber @bind-Value="_formModel.MaxOpenPositions"
+                            id="maxOpenPositions"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
+                            min="1"
+                            max="100" />
+                <ValidationMessage For="@(() => _formModel.MaxOpenPositions)" class="text-red-600 text-sm mt-1" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Maximum number of concurrent open positions.
+                </p>
+            </div>
+
+            <!-- Stop Loss Percent -->
+            <div>
+                <label for="stopLoss" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Stop Loss (%)
+                    <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1 - 50.0)</span>
+                </label>
+                <InputNumber @bind-Value="_formModel.StopLossPercent"
+                            id="stopLoss"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
+                            step="0.1"
+                            min="0.1"
+                            max="50.0" />
+                <ValidationMessage For="@(() => _formModel.StopLossPercent)" class="text-red-600 text-sm mt-1" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Default stop-loss percentage below entry price.
+                </p>
+            </div>
+
+            <!-- Take Profit Percent -->
+            <div>
+                <label for="takeProfit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Take Profit (%)
+                    <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1 - 100.0)</span>
+                </label>
+                <InputNumber @bind-Value="_formModel.TakeProfitPercent"
+                            id="takeProfit"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
+                            step="0.1"
+                            min="0.1"
+                            max="100.0" />
+                <ValidationMessage For="@(() => _formModel.TakeProfitPercent)" class="text-red-600 text-sm mt-1" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Default take-profit percentage above entry price.
+                </p>
+            </div>
+
+            <!-- Max Daily Loss Percent -->
+            <div>
+                <label for="maxDailyLoss" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Max Daily Loss (%)
+                    <span class="text-gray-500 dark:text-gray-400 font-normal">(0.1 - 100.0)</span>
+                </label>
+                <InputNumber @bind-Value="_formModel.MaxDailyLossPercent"
+                            id="maxDailyLoss"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600"
+                            step="0.1"
+                            min="0.1"
+                            max="100.0" />
+                <ValidationMessage For="@(() => _formModel.MaxDailyLossPercent)" class="text-red-600 text-sm mt-1" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Maximum daily loss limit as percentage of account equity.
+                </p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_validationError))
+        {
+            <div class="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="flex">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-red-800 dark:text-red-300">@_validationError</p>
+                </div>
+            </div>
+        }
+
+        <div class="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <TbButton Type="button"
+                     Variant="@ButtonVariant.Secondary"
+                     OnClick="HandleReset"
+                     Disabled="@IsLoading">
+                Reset to Defaults
+            </TbButton>
+
+            <TbButton Type="submit"
+                     Variant="@ButtonVariant.Primary"
+                     Disabled="@IsLoading">
+                @if (IsLoading)
+                {
+                    <span class="flex items-center">
+                        <TbSpinner Size="@SpinnerSize.Small" Class="mr-2" />
+                        Saving...
+                    </span>
+                }
+                else
+                {
+                    <span>Save Settings</span>
+                }
+            </TbButton>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public ConfigurationRiskSettings? Settings { get; set; }
+
+    [Parameter]
+    public EventCallback<ConfigurationRiskSettings> OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnReset { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private RiskSettingsFormModel _formModel = new();
+    private string? _validationError;
+
+    protected override void OnParametersSet()
+    {
+        if (Settings != null)
+        {
+            _formModel = new RiskSettingsFormModel
+            {
+                MaxPositionSizePercent = Settings.MaxPositionSizePercent,
+                StopLossPercent = Settings.StopLossPercent,
+                TakeProfitPercent = Settings.TakeProfitPercent,
+                MaxOpenPositions = Settings.MaxOpenPositions,
+                MaxDailyLossPercent = Settings.MaxDailyLossPercent
+            };
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        _validationError = null;
+
+        var settings = new ConfigurationRiskSettings
+        {
+            Id = Settings?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            MaxPositionSizePercent = _formModel.MaxPositionSizePercent,
+            StopLossPercent = _formModel.StopLossPercent,
+            TakeProfitPercent = _formModel.TakeProfitPercent,
+            MaxOpenPositions = _formModel.MaxOpenPositions,
+            MaxDailyLossPercent = _formModel.MaxDailyLossPercent,
+            LastModified = DateTime.UtcNow,
+            CreatedAt = Settings?.CreatedAt ?? DateTime.UtcNow
+        };
+
+        await OnSave.InvokeAsync(settings);
+    }
+
+    private async Task HandleReset()
+    {
+        _validationError = null;
+        await OnReset.InvokeAsync();
+    }
+
+    private sealed class RiskSettingsFormModel
+    {
+        [Required(ErrorMessage = "Max position size is required")]
+        [Range(0.1, 100.0, ErrorMessage = "Max position size must be between 0.1% and 100%")]
+        public decimal MaxPositionSizePercent { get; set; } = 10.0m;
+
+        [Required(ErrorMessage = "Stop loss percentage is required")]
+        [Range(0.1, 50.0, ErrorMessage = "Stop loss must be between 0.1% and 50%")]
+        public decimal StopLossPercent { get; set; } = 2.0m;
+
+        [Required(ErrorMessage = "Take profit percentage is required")]
+        [Range(0.1, 100.0, ErrorMessage = "Take profit must be between 0.1% and 100%")]
+        public decimal TakeProfitPercent { get; set; } = 5.0m;
+
+        [Required(ErrorMessage = "Max open positions is required")]
+        [Range(1, 100, ErrorMessage = "Max open positions must be between 1 and 100")]
+        public int MaxOpenPositions { get; set; } = 5;
+
+        [Required(ErrorMessage = "Max daily loss percentage is required")]
+        [Range(0.1, 100.0, ErrorMessage = "Max daily loss must be between 0.1% and 100%")]
+        public decimal MaxDailyLossPercent { get; set; } = 5.0m;
+    }
+}

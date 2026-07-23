@@ -1,0 +1,276 @@
+@* <copyright file="Index.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@page "/"
+@inject IDashboardService DashboardService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@implements IAsyncDisposable
+
+<PageTitle>Dashboard - TradingBot</PageTitle>
+
+<TbPageHeader Title="Trading Dashboard"
+            Description="Monitor your trading performance and account status in real-time" />
+
+<!-- Loading State -->
+@if (_isLoading)
+{
+    <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+        </div>
+    </div>
+}
+else if (_dashboardData is not null)
+{
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Account Summary -->
+        <TbAccountSummaryCard Account="@_dashboardData.Account" LastUpdated="@_lastUpdated"/>
+
+        <!-- Performance Metrics -->
+        <TbPerformanceMetricsCard Metrics="@_dashboardData.PerformanceMetrics" LastUpdated="@_lastUpdated"/>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        @* TODO: Migrate RiskSettingsCard component *@
+        @* <TbRiskSettingsCard Settings="@_dashboardData.RiskSettings"/> *@
+
+        <!-- Active Strategies -->
+        <TbActiveStrategiesCard Strategies="@_dashboardData.ActiveStrategies"/>
+    </div>
+
+    @* TODO: Migrate PositionList component *@
+    @* <!-- Positions List -->
+    <div class="mb-6">
+        <TbPositionList Positions="@_dashboardData.OpenPositions" LastUpdated="@_lastUpdated"/>
+    </div> *@
+
+    <!-- Recent Trades -->
+    <div class="mb-6">
+        <TbRecentTradesCard Trades="@_dashboardData.RecentTrades" LastUpdated="@_lastUpdated"/>
+    </div>
+}
+else if (_errorMessage is not null)
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex items-center">
+            <svg class="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"/>
+            </svg>
+            <p class="text-red-800 dark:text-red-200">@_errorMessage</p>
+        </div>
+    </div>
+}
+
+@code {
+    private HubConnection? _hubConnection;
+    private DashboardViewModel? _dashboardData;
+    private DateTime? _lastUpdated;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardDataAsync();
+        await InitializeSignalRConnection();
+    }
+
+    private async Task LoadDashboardDataAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _errorMessage = null;
+            _dashboardData = await DashboardService.GetDashboardDataAsync();
+            _lastUpdated = DateTime.Now;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load dashboard data: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // Register SignalR event handlers
+            _hubConnection.On<Account>("ReceiveAccountUpdate", HandleAccountUpdate);
+            _hubConnection.On<Position>("ReceivePositionUpdate", HandlePositionUpdate);
+            _hubConnection.On<Trade>("ReceiveTradeUpdate", HandleTradeUpdate);
+
+            // New event handlers for real-time updates
+            _hubConnection.On<Position>("OnPositionOpened", HandlePositionOpened);
+            _hubConnection.On<Guid, Trade>("OnPositionClosed", HandlePositionClosed);
+            _hubConnection.On<decimal, decimal, decimal>("OnEquityUpdated", HandleEquityUpdated);
+
+            // Connection lifecycle events
+            _hubConnection.Closed += OnConnectionClosed;
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to connect to real-time updates: {ex.Message}";
+        }
+    }
+
+    private void HandleAccountUpdate(Account account)
+    {
+        if (_dashboardData is not null)
+        {
+            _dashboardData.Account = account;
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void HandlePositionUpdate(Position position)
+    {
+        if (_dashboardData is not null)
+        {
+            // Update the position in the list
+            var existingPosition = _dashboardData.OpenPositions.FirstOrDefault(p => p.Id == position.Id);
+            if (existingPosition is not null)
+            {
+                var index = _dashboardData.OpenPositions.IndexOf(existingPosition);
+                _dashboardData.OpenPositions[index] = position;
+            }
+
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void HandleTradeUpdate(Trade trade)
+    {
+        if (_dashboardData is not null)
+        {
+            // Add new trade to recent trades and keep only the last 5
+            _dashboardData.RecentTrades.Insert(0, trade);
+            _dashboardData.RecentTrades = _dashboardData.RecentTrades.Take(5).ToList();
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void HandlePositionOpened(Position position)
+    {
+        if (_dashboardData is not null)
+        {
+            // Add new position to the list
+            _dashboardData.OpenPositions.Insert(0, position);
+            _dashboardData.OpenPositions = _dashboardData.OpenPositions.Take(10).ToList();
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void HandlePositionClosed(Guid positionId, Trade trade)
+    {
+        if (_dashboardData is not null)
+        {
+            // Remove closed position
+            var position = _dashboardData.OpenPositions.FirstOrDefault(p => p.Id == positionId);
+            if (position is not null)
+            {
+                _dashboardData.OpenPositions.Remove(position);
+            }
+
+            // Add trade to recent trades
+            _dashboardData.RecentTrades.Insert(0, trade);
+            _dashboardData.RecentTrades = _dashboardData.RecentTrades.Take(5).ToList();
+
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void HandleEquityUpdated(decimal totalEquity, decimal unrealizedPnL, decimal realizedPnL)
+    {
+        if (_dashboardData is not null)
+        {
+            // Update account equity values
+            _dashboardData.Account.Equity = totalEquity;
+            _dashboardData.Account.UnrealizedPnL = unrealizedPnL;
+            _dashboardData.Account.RealizedPnL = realizedPnL;
+
+            _lastUpdated = DateTime.Now;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private Task OnConnectionClosed(Exception? exception)
+    {
+        // Notify user that connection was lost
+        InvokeAsync(() =>
+        {
+            ToastService.ShowWarning("Real-time updates disconnected. Attempting to reconnect...", "Connection Lost");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        // Notify user that we're attempting to reconnect
+        InvokeAsync(() =>
+        {
+            ToastService.ShowInfo("Reconnecting to real-time updates...", "Reconnecting");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        // Notify user that connection was restored
+        InvokeAsync(async () =>
+        {
+            ToastService.ShowSuccess("Real-time updates reconnected successfully!", "Connected");
+            await LoadDashboardDataAsync();
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Closed -= OnConnectionClosed;
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+}

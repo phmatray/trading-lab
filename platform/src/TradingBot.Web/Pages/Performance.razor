@@ -1,0 +1,149 @@
+@* <copyright file="Performance.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+
+@page "/performance"
+@inject IPerformanceService PerformanceService
+@inject ILogger<Performance> Logger
+
+<PageTitle>Performance Analytics - TradingBot</PageTitle>
+
+<div class="space-y-6">
+    <TbPageHeader Title="Performance Analytics"
+                Description="Analyze your trading performance with detailed metrics and visualizations">
+        <Actions>
+            <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Date Range:</label>
+            <select @bind="_selectedDateRange" @bind:after="OnDateRangeChanged"
+                    class="rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">Last Year</option>
+                <option value="0">All Time</option>
+            </select>
+        </Actions>
+    </TbPageHeader>
+
+    @if (_isLoading)
+    {
+        <div class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+    }
+    else if (_hasNoData)
+    {
+        <!-- Empty State -->
+        <div class="bg-gray-800 rounded-lg shadow-sm p-12 text-center border border-gray-700">
+            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-white">No trading data available</h3>
+            <p class="mt-2 text-sm text-gray-400">Start trading to see your performance metrics and equity curve</p>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <!-- Error State -->
+        <div class="bg-red-900/50 border border-red-500 rounded-lg p-4">
+            <div class="flex">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-300">Error loading performance data</h3>
+                    <p class="mt-1 text-sm text-red-400">@_errorMessage</p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Performance Metrics Grid -->
+        <TbPerformanceMetricsGrid Metrics="_performanceMetrics"/>
+
+        <!-- Trading Statistics -->
+        <TbTradingStatistics Metrics="_performanceMetrics"/>
+
+        <!-- Equity Curve Chart -->
+        <div class="bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-700">
+            <h2 class="text-xl font-semibold text-white mb-4">Portfolio Value Over Time</h2>
+            @if (_equityCurveData.Any())
+            {
+                <TbEquityCurveChart Data="_equityCurveData"/>
+            }
+            else
+            {
+                <div class="text-center py-8 text-gray-400">
+                    <p>Not enough data to display equity curve</p>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private bool _hasNoData;
+    private string? _errorMessage;
+    private int _selectedDateRange = 30; // Default to last 30 days
+
+    private PerformanceMetrics _performanceMetrics = null!;
+    private List<EquityCurveDataPoint> _equityCurveData = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPerformanceDataAsync();
+    }
+
+    private async Task OnDateRangeChanged()
+    {
+        await LoadPerformanceDataAsync();
+    }
+
+    private async Task LoadPerformanceDataAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _errorMessage = null;
+            _hasNoData = false;
+            StateHasChanged();
+
+            // Calculate date range
+            DateTime? startDate = _selectedDateRange > 0
+                ? DateTime.UtcNow.AddDays(-_selectedDateRange)
+                : null;
+
+            // Load performance metrics
+            _performanceMetrics = await PerformanceService.GetCurrentMetricsAsync();
+
+            // Check if we have any data
+            if (_performanceMetrics.TotalTrades == 0)
+            {
+                _hasNoData = true;
+                return;
+            }
+
+            // Load equity curve data
+            _equityCurveData = await PerformanceService.GetEquityCurveAsync(startDate);
+
+            Logger.LogInformation(
+                "Loaded performance data: {TotalTrades} trades, {TotalReturn:P2} return",
+                _performanceMetrics.TotalTrades,
+                _performanceMetrics.TotalReturn / 100m);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+            Logger.LogError(ex, "Error loading performance data");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+}

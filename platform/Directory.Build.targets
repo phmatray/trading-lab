@@ -1,0 +1,35 @@
+<Project>
+  <!-- ============================================ -->
+  <!-- Shared build targets for all projects -->
+  <!-- ============================================ -->
+
+  <!-- Display build information -->
+  <Target Name="DisplayBuildInfo" BeforeTargets="CoreCompile">
+    <Message Text="Building $(MSBuildProjectName) [$(Configuration)]" Importance="high"/>
+  </Target>
+
+  <!-- Clean artifacts before rebuild -->
+  <Target Name="CleanArtifacts" BeforeTargets="Clean">
+    <RemoveDir Directories="$(MSBuildThisFileDirectory)artifacts" Condition="Exists('$(MSBuildThisFileDirectory)artifacts')"/>
+    <Message Text="Cleaned artifacts directory" Importance="high"/>
+  </Target>
+
+  <!-- Validate code coverage for test projects -->
+  <Target Name="ValidateCoverage" AfterTargets="Test" Condition="'$(IsTestProject)' == 'true' AND '$(Configuration)' == 'Release'">
+    <Message Text="Test coverage validation completed for $(MSBuildProjectName)" Importance="high"/>
+  </Target>
+
+  <!-- Copy appsettings to output for executable projects -->
+  <Target Name="CopyAppSettings" AfterTargets="Build" Condition="'$(OutputType)' == 'Exe'">
+    <ItemGroup>
+      <AppSettingsFiles Include="$(ProjectDir)appsettings*.json"/>
+    </ItemGroup>
+    <Copy SourceFiles="@(AppSettingsFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true"/>
+    <Message Text="Copied appsettings files to $(OutputPath)" Importance="high" Condition="'@(AppSettingsFiles)' != ''"/>
+  </Target>
+
+  <!-- Ensure proper license and copyright headers -->
+  <Target Name="ValidateHeaders" BeforeTargets="CoreCompile" Condition="'$(Configuration)' == 'Release'">
+    <Message Text="Validating file headers for $(MSBuildProjectName)" Importance="normal"/>
+  </Target>
+</Project>

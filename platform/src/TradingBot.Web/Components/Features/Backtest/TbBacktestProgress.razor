@@ -1,0 +1,116 @@
+@* <copyright file="TbBacktestProgress.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Features.Backtest
+
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                @if (IsComplete)
+                {
+                    <span>Backtest Complete</span>
+                }
+                else if (IsFailed)
+                {
+                    <span>Backtest Failed</span>
+                }
+                else
+                {
+                    <span>Running Backtest...</span>
+                }
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">@StatusMessage</p>
+        </div>
+        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">@Progress%</div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div class="@GetProgressBarClass()"
+             style="width: @Progress%; transition: width 0.5s ease-in-out;">
+        </div>
+    </div>
+
+    <!-- Status Icon -->
+    <div class="flex items-center justify-center py-4">
+        @if (IsComplete)
+        {
+            <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        }
+        else if (IsFailed)
+        {
+            <svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        }
+        else
+        {
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+        }
+    </div>
+
+    <!-- Cancel Button -->
+    @if (!IsComplete && !IsFailed && OnCancel.HasDelegate)
+    {
+        <div class="flex justify-center">
+            <TbButton OnClick="@OnCancel"
+                     Variant="@ButtonVariant.Secondary"
+                     Size="@ButtonSize.Small">
+                Cancel Backtest
+            </TbButton>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the current progress percentage (0-100).
+    /// </summary>
+    [Parameter]
+    public int Progress { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current status message.
+    /// </summary>
+    [Parameter]
+    public string StatusMessage { get; set; } = "Initializing...";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the backtest is complete.
+    /// </summary>
+    [Parameter]
+    public bool IsComplete { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the backtest has failed.
+    /// </summary>
+    [Parameter]
+    public bool IsFailed { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback when the cancel button is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private string GetProgressBarClass()
+    {
+        if (IsFailed)
+        {
+            return "h-full bg-red-500 dark:bg-red-600";
+        }
+
+        if (IsComplete)
+        {
+            return "h-full bg-green-500 dark:bg-green-600";
+        }
+
+        return "h-full bg-blue-600 dark:bg-blue-500";
+    }
+}

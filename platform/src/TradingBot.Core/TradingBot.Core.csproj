@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ============================================ -->
+  <!-- Core Domain Project -->
+  <!-- Contains domain models, interfaces, and SmartEnums -->
+  <!-- No dependencies except SmartEnum -->
+  <!-- ============================================ -->
+
+  <ItemGroup Label="Domain Dependencies">
+    <PackageReference Include="Ardalis.GuardClauses" />
+    <PackageReference Include="Ardalis.SmartEnum" />
+    <PackageReference Include="Ardalis.Specification" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+</Project>

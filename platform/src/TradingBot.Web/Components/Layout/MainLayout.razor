@@ -1,0 +1,233 @@
+@inherits LayoutComponentBase
+@inject UIStateService UIState
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<TbThemeProvider>
+    <TbNotificationCenter/>
+
+    <!-- Navigation Sidebar -->
+    <TbNavigationSidebar/>
+
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 @GetContentMarginClass()">
+    <!-- Header -->
+    <header
+        class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-[72px]">
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Web Dashboard</span>
+                </div>
+
+                <!-- Connection Status Indicator -->
+                <div class="flex items-center space-x-2">
+                    <span class="relative flex h-3 w-3">
+                        @if (_connectionStatus == "connected")
+                        {
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        }
+                        else if (_connectionStatus == "reconnecting")
+                        {
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                        }
+                        else
+                        {
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        }
+                    </span>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                        @_connectionStatus
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-6 sm:px-6 lg:px-8 transition-all duration-300">
+        <div class="max-w-7xl mx-auto">
+            @Body
+        </div>
+    </main>
+    </div>
+</TbThemeProvider>
+
+@code {
+    private HubConnection? _hubConnection;
+    private string _connectionStatus = "disconnected";
+    private int _reconnectAttempts;
+    private const int MaxReconnectAttempts = 5;
+    private const int ReconnectDelayMs = 2000;
+    private DotNetObjectReference<MainLayout>? _dotNetHelper;
+
+    protected override void OnInitialized()
+    {
+        UIState.OnStateChanged += StateHasChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitializeSignalRConnection();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeKeyboardShortcuts();
+        }
+    }
+
+    private async Task InitializeKeyboardShortcuts()
+    {
+        _dotNetHelper = DotNetObjectReference.Create(this);
+        await JSRuntime.InvokeVoidAsync("keyboardShortcuts.initialize", _dotNetHelper);
+    }
+
+    [JSInvokable]
+    public void NavigateToRoute(string route)
+    {
+        NavigationManager.NavigateTo(route);
+    }
+
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // Connection lifecycle events
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+            _hubConnection.Closed += OnClosed;
+
+            await _hubConnection.StartAsync();
+            _connectionStatus = "connected";
+            _reconnectAttempts = 0;
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+            _connectionStatus = "disconnected";
+            StateHasChanged();
+
+            // Attempt manual reconnection
+            await AttemptReconnection();
+        }
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        _connectionStatus = "reconnecting";
+        InvokeAsync(StateHasChanged);
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        _connectionStatus = "connected";
+        _reconnectAttempts = 0;
+        InvokeAsync(StateHasChanged);
+        return Task.CompletedTask;
+    }
+
+    private Task OnClosed(Exception? exception)
+    {
+        _connectionStatus = "disconnected";
+        InvokeAsync(StateHasChanged);
+
+        // Attempt manual reconnection
+        InvokeAsync(AttemptReconnection);
+
+        return Task.CompletedTask;
+    }
+
+    private async Task AttemptReconnection()
+    {
+        if (_reconnectAttempts >= MaxReconnectAttempts)
+        {
+            return;
+        }
+
+        _reconnectAttempts++;
+        _connectionStatus = "reconnecting";
+        StateHasChanged();
+
+        // Exponential backoff
+        var delay = ReconnectDelayMs * (int)Math.Pow(2, _reconnectAttempts - 1);
+        await Task.Delay(delay);
+
+        try
+        {
+            if (_hubConnection is not null)
+            {
+                await _hubConnection.StartAsync();
+                _connectionStatus = "connected";
+                _reconnectAttempts = 0;
+            }
+        }
+        catch
+        {
+            // Recursive retry
+            await AttemptReconnection();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        UIState.OnStateChanged -= StateHasChanged;
+
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            _hubConnection.Closed -= OnClosed;
+
+            await _hubConnection.DisposeAsync();
+        }
+
+        // Dispose keyboard shortcuts
+        if (_dotNetHelper is not null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("keyboardShortcuts.dispose");
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or JSDisconnectedException)
+            {
+                // JS interop not available during static rendering or disposal
+                // Circuit may have already disconnected
+            }
+
+            _dotNetHelper.Dispose();
+        }
+    }
+
+    private string GetContentMarginClass()
+    {
+        // Responsive margin: adjusts based on sidebar state and screen size
+        // Default: ml-64 (expanded) or ml-16 (collapsed)
+        // lg breakpoint: ml-56 (expanded) or ml-16 (collapsed) for smaller screens
+        return UIState.SidebarCollapsed
+            ? "ml-16 lg:ml-16"  // Consistent icon-only width
+            : "ml-64 lg:ml-56"; // Slightly less margin on lg to match sidebar width
+    }
+
+}

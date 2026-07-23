@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Light theme (default) */
+    --color-background: 255 255 255;
+    --color-foreground: 0 0 0;
+    --color-primary: 59 130 246; /* blue-500 */
+    --color-success: 34 197 94; /* green-500 */
+    --color-warning: 234 179 8; /* yellow-500 */
+    --color-danger: 239 68 68; /* red-500 */
+  }
+
+  .dark {
+    /* Dark theme */
+    --color-background: 17 24 39; /* gray-900 */
+    --color-foreground: 243 244 246; /* gray-100 */
+    --color-primary: 96 165 250; /* blue-400 */
+    --color-success: 74 222 128; /* green-400 */
+    --color-warning: 250 204 21; /* yellow-400 */
+    --color-danger: 248 113 113; /* red-400 */
+  }
+
+  /* Smooth theme transitions */
+  * {
+    @apply transition-colors duration-200;
+  }
+}
+
+@theme {
+  --color-trading-green: #10b981;
+  --color-trading-red: #ef4444;
+  --color-trading-yellow: #f59e0b;
+}
+
+@layer components {
+  .card-trading {
+    @apply bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700;
+  }
+
+  .stat-card {
+    @apply bg-gray-700/50 rounded-lg p-4 border border-gray-600;
+  }
+
+  .stat-label {
+    @apply text-sm font-medium text-gray-400 mb-1;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold mb-1;
+  }
+
+  .stat-sublabel {
+    @apply text-xs text-gray-500;
+  }
+
+  .stat-positive {
+    @apply text-trading-green font-semibold;
+  }
+
+  .stat-negative {
+    @apply text-trading-red font-semibold;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-trading-red text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+}

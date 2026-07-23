@@ -1,0 +1,138 @@
+@* <copyright file="TbPerformanceMetricsCard.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@namespace TradingBot.Web.Components.Features.Dashboard
+
+<TbCard>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Performance Metrics</h2>
+        @if (LastUpdated.HasValue)
+        {
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+                Updated: @LastUpdated.Value.ToString("HH:mm:ss")
+            </span>
+        }
+    </div>
+
+    @if (Metrics is not null)
+    {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total Return</p>
+                <p class="text-xl font-bold @GetPnLColorClass(Metrics.TotalReturn)">
+                    @Metrics.TotalReturn.ToString("N2")%
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Win Rate</p>
+                <p class="text-xl font-bold @GetWinRateColorClass(Metrics.WinRate)">
+                    @Metrics.WinRate.ToString("N2")%
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Sharpe Ratio</p>
+                <p class="text-xl font-bold @GetRatioColorClass(Metrics.SharpeRatio)">
+                    @Metrics.SharpeRatio.ToString("N2")
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Sortino Ratio</p>
+                <p class="text-xl font-bold @GetRatioColorClass(Metrics.SortinoRatio)">
+                    @Metrics.SortinoRatio.ToString("N2")
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Calmar Ratio</p>
+                <p class="text-xl font-bold @GetRatioColorClass(Metrics.CalmarRatio)">
+                    @Metrics.CalmarRatio.ToString("N2")
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Max Drawdown</p>
+                <p class="text-xl font-bold stat-negative">
+                    @Metrics.MaxDrawdown.ToString("N2")%
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Profit Factor</p>
+                <p class="text-xl font-bold @GetProfitFactorColorClass(Metrics.ProfitFactor)">
+                    @Metrics.ProfitFactor.ToString("N2")
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total Trades</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    @Metrics.TotalTrades
+                </p>
+            </div>
+
+            <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Avg Win</p>
+                <p class="text-xl font-bold @GetPnLColorClass(Metrics.AverageWin)">
+                    @Metrics.AverageWin.ToString("C2")
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="flex items-center justify-center py-8">
+            <p class="text-gray-500 dark:text-gray-400">Loading performance data...</p>
+        </div>
+    }
+</TbCard>
+
+@code {
+    [Parameter] public PerformanceMetrics? Metrics { get; set; }
+
+    [Parameter] public DateTime? LastUpdated { get; set; }
+
+    private string GetPnLColorClass(decimal value)
+    {
+        return value switch
+        {
+            > 0 => "stat-positive",
+            < 0 => "stat-negative",
+            _ => "text-gray-900 dark:text-gray-100"
+        };
+    }
+
+    private string GetWinRateColorClass(decimal winRate)
+    {
+        return winRate switch
+        {
+            >= 50 => "stat-positive",
+            >= 40 => "text-yellow-600 dark:text-yellow-400",
+            _ => "stat-negative"
+        };
+    }
+
+    private string GetRatioColorClass(decimal ratio)
+    {
+        return ratio switch
+        {
+            >= 1.0m => "stat-positive",
+            >= 0.5m => "text-yellow-600 dark:text-yellow-400",
+            _ => "stat-negative"
+        };
+    }
+
+    private string GetProfitFactorColorClass(decimal profitFactor)
+    {
+        return profitFactor switch
+        {
+            >= 1.5m => "stat-positive",
+            >= 1.0m => "text-yellow-600 dark:text-yellow-400",
+            _ => "stat-negative"
+        };
+    }
+
+}

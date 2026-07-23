@@ -1,0 +1,1282 @@
+{
+  "TradingBot.Core.dll": {
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Order.cs": {
+      "TradingBot.Core.Models.Trading.Order": {
+        "System.Guid TradingBot.Core.Models.Trading.Order::get_Id()": {
+          "Lines": {
+            "17": 10
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Order::get_Symbol()": {
+          "Lines": {
+            "22": 10
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderType TradingBot.Core.Models.Trading.Order::get_Type()": {
+          "Lines": {
+            "27": 11
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Order::get_Side()": {
+          "Lines": {
+            "32": 10
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_Quantity()": {
+          "Lines": {
+            "37": 12
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Order::get_LimitPrice()": {
+          "Lines": {
+            "42": 4
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Order::get_StopPrice()": {
+          "Lines": {
+            "47": 4
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderStatus TradingBot.Core.Models.Trading.Order::get_Status()": {
+          "Lines": {
+            "52": 15
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Order::get_CreatedAt()": {
+          "Lines": {
+            "57": 10
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Trading.Order::get_SubmittedAt()": {
+          "Lines": {
+            "62": 6
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Trading.Order::get_FilledAt()": {
+          "Lines": {
+            "67": 2
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_FilledQuantity()": {
+          "Lines": {
+            "72": 7
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_AverageFillPrice()": {
+          "Lines": {
+            "77": 3
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Order::get_Commission()": {
+          "Lines": {
+            "82": 3
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Order::get_StrategyName()": {
+          "Lines": {
+            "87": 10
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Guid> TradingBot.Core.Models.Trading.Order::get_SignalId()": {
+          "Lines": {
+            "92": 2
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Position.cs": {
+      "TradingBot.Core.Models.Trading.Position": {
+        "System.Guid TradingBot.Core.Models.Trading.Position::get_Id()": {
+          "Lines": {
+            "17": 11
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Position::get_Symbol()": {
+          "Lines": {
+            "22": 11
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Position::get_Side()": {
+          "Lines": {
+            "27": 21
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_Quantity()": {
+          "Lines": {
+            "32": 17
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_EntryPrice()": {
+          "Lines": {
+            "37": 26
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_CurrentPrice()": {
+          "Lines": {
+            "42": 22
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Position::get_OpenedAt()": {
+          "Lines": {
+            "47": 11
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Position::get_StopLoss()": {
+          "Lines": {
+            "52": 4
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Position::get_TakeProfit()": {
+          "Lines": {
+            "57": 4
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Position::get_StrategyName()": {
+          "Lines": {
+            "62": 11
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_UnrealizedPnL()": {
+          "Lines": {
+            "68": 5,
+            "69": 5,
+            "70": 5
+          },
+          "Branches": [
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 2
+            },
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 38,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 3
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_UnrealizedPnLPercent()": {
+          "Lines": {
+            "76": 5,
+            "77": 5,
+            "78": 5
+          },
+          "Branches": [
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 2
+            },
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 50,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 3
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Position::get_PositionValue()": {
+          "Lines": {
+            "83": 1
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Signal.cs": {
+      "TradingBot.Core.Models.Trading.Signal": {
+        "System.Guid TradingBot.Core.Models.Trading.Signal::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Signal::get_StrategyName()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Signal::get_Symbol()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.SignalType TradingBot.Core.Models.Trading.Signal::get_Type()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Signal::get_Timestamp()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Signal::get_Confidence()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Decimal> TradingBot.Core.Models.Trading.Signal::get_SuggestedPrice()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.Object> TradingBot.Core.Models.Trading.Signal::get_Metadata()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/Trade.cs": {
+      "TradingBot.Core.Models.Trading.Trade": {
+        "System.Guid TradingBot.Core.Models.Trading.Trade::get_Id()": {
+          "Lines": {
+            "17": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Trade::get_Symbol()": {
+          "Lines": {
+            "22": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Enums.OrderSide TradingBot.Core.Models.Trading.Trade::get_Side()": {
+          "Lines": {
+            "27": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_Quantity()": {
+          "Lines": {
+            "32": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_EntryPrice()": {
+          "Lines": {
+            "37": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_ExitPrice()": {
+          "Lines": {
+            "42": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Trade::get_EntryTime()": {
+          "Lines": {
+            "47": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.Trade::get_ExitTime()": {
+          "Lines": {
+            "52": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_Commission()": {
+          "Lines": {
+            "57": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Trading.Trade::get_StrategyName()": {
+          "Lines": {
+            "62": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_RealizedPnL()": {
+          "Lines": {
+            "68": 0,
+            "69": 0,
+            "70": 0
+          },
+          "Branches": [
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 68,
+              "Offset": 6,
+              "EndOffset": 49,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.Trade::get_RealizedPnLPercent()": {
+          "Lines": {
+            "76": 0,
+            "77": 0,
+            "78": 0
+          },
+          "Branches": [
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 8,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 76,
+              "Offset": 6,
+              "EndOffset": 50,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.TimeSpan TradingBot.Core.Models.Trading.Trade::get_Duration()": {
+          "Lines": {
+            "83": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Trading.Trade::get_IsWinner()": {
+          "Lines": {
+            "88": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Trading/TrailingStop.cs": {
+      "TradingBot.Core.Models.Trading.TrailingStop": {
+        "System.Guid TradingBot.Core.Models.Trading.TrailingStop::get_PositionId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Guid TradingBot.Core.Models.Trading.TrailingStop::get_StopOrderId()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_TrailingPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_CurrentStopPrice()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_HighestPrice()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Trading.TrailingStop::get_LowestPrice()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Trading.TrailingStop::get_IsLong()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.TrailingStop::get_CreatedAt()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Trading.TrailingStop::get_LastUpdated()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Strategy/StrategyConfig.cs": {
+      "TradingBot.Core.Models.Strategy.StrategyConfig": {
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Name()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Type()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Strategy.StrategyConfig::get_Enabled()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyList`1<System.String> TradingBot.Core.Models.Strategy.StrategyConfig::get_Symbols()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Strategy.StrategyConfig::get_Timeframe()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.IReadOnlyDictionary`2<System.String,System.Object> TradingBot.Core.Models.Strategy.StrategyConfig::get_Parameters()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Risk/RiskParameters.cs": {
+      "TradingBot.Core.Models.Risk.RiskParameters": {
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxLeverage()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxPositionSizePercent()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_DefaultStopLossPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_DefaultTakeProfitPercent()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxDailyLossPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskParameters::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Risk/RiskSettings.cs": {
+      "TradingBot.Core.Models.Risk.RiskSettings": {
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_Leverage()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_StopLossPercent()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_TakeProfitPercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_DailyLossLimit()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Risk.RiskSettings::get_MaxPositionSizePercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Risk.RiskSettings::get_RiskLimitsEnabled()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Risk.RiskSettings::get_LastUpdated()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/Account.cs": {
+      "TradingBot.Core.Models.Portfolio.Account": {
+        "System.String TradingBot.Core.Models.Portfolio.Account::get_AccountId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Cash()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_PositionValue()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_BuyingPower()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_Leverage()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_UnrealizedPnL()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_RealizedPnL()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.Account::get_TotalPnL()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/EquityPoint.cs": {
+      "TradingBot.Core.Models.Portfolio.EquityPoint": {
+        "System.DateTime TradingBot.Core.Models.Portfolio.EquityPoint::get_Timestamp()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.EquityPoint::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.EquityPoint::get_CumulativeReturn()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Portfolio/PerformanceMetrics.cs": {
+      "TradingBot.Core.Models.Portfolio.PerformanceMetrics": {
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_TotalReturn()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AnnualizedReturn()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_SharpeRatio()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_SortinoRatio()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_CalmarRatio()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_MaxDrawdown()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_TotalTrades()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_WinningTrades()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_LosingTrades()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_WinRate()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": [
+            {
+              "Line": 60,
+              "Offset": 7,
+              "EndOffset": 9,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 60,
+              "Offset": 7,
+              "EndOffset": 16,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AverageWin()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_AverageLoss()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Portfolio.PerformanceMetrics::get_ProfitFactor()": {
+          "Lines": {
+            "75": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/Candle.cs": {
+      "TradingBot.Core.Models.MarketData.Candle": {
+        "System.String TradingBot.Core.Models.MarketData.Candle::get_Symbol()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.MarketData.Candle::get_Timestamp()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Open()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_High()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Low()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Close()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Int64 TradingBot.Core.Models.MarketData.Candle::get_Volume()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.Candle::get_Timeframe()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.MarketData.Candle::get_IsBullish()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_BodySize()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_Range()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Candle::get_TypicalPrice()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/Quote.cs": {
+      "TradingBot.Core.Models.MarketData.Quote": {
+        "System.String TradingBot.Core.Models.MarketData.Quote::get_Symbol()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.MarketData.Quote::get_Timestamp()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Price()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Bid()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Ask()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Int64 TradingBot.Core.Models.MarketData.Quote::get_Volume()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Change()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_ChangePercent()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_Spread()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.Quote::get_MidPrice()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/MarketData/SymbolInfo.cs": {
+      "TradingBot.Core.Models.MarketData.SymbolInfo": {
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Symbol()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Name()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Exchange()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_AssetType()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.MarketData.SymbolInfo::get_Currency()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.SymbolInfo::get_TickSize()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.MarketData.SymbolInfo::get_LotSize()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.MarketData.SymbolInfo::get_IsTradable()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/BacktestConfiguration.cs": {
+      "TradingBot.Core.Models.Backtest.BacktestConfiguration": {
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_BacktestId()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_StrategyName()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestConfiguration::get_Symbol()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestConfiguration::get_StartDate()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestConfiguration::get_EndDate()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_InitialCapital()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_CommissionPerTrade()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestConfiguration::get_SlippagePercent()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Backtest.BacktestConfiguration::get_EnableTransactionCosts()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/BacktestResult.cs": {
+      "TradingBot.Core.Models.Backtest.BacktestResult": {
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_BacktestId()": {
+          "Lines": {
+            "18": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_StrategyName()": {
+          "Lines": {
+            "23": 0
+          },
+          "Branches": []
+        },
+        "System.String TradingBot.Core.Models.Backtest.BacktestResult::get_Symbol()": {
+          "Lines": {
+            "28": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_StartDate()": {
+          "Lines": {
+            "33": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_EndDate()": {
+          "Lines": {
+            "38": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_InitialCapital()": {
+          "Lines": {
+            "43": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_FinalEquity()": {
+          "Lines": {
+            "48": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_TotalReturn()": {
+          "Lines": {
+            "53": 0,
+            "54": 0,
+            "55": 0
+          },
+          "Branches": [
+            {
+              "Line": 53,
+              "Offset": 16,
+              "EndOffset": 18,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 53,
+              "Offset": 16,
+              "EndOffset": 25,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 0
+            }
+          ]
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.BacktestResult::get_TotalPnL()": {
+          "Lines": {
+            "60": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<TradingBot.Core.Models.Trading.Trade> TradingBot.Core.Models.Backtest.BacktestResult::get_Trades()": {
+          "Lines": {
+            "65": 0
+          },
+          "Branches": []
+        },
+        "System.Collections.Generic.List`1<System.ValueTuple`2<System.DateTime,System.Decimal>> TradingBot.Core.Models.Backtest.BacktestResult::get_EquityCurve()": {
+          "Lines": {
+            "70": 0
+          },
+          "Branches": []
+        },
+        "TradingBot.Core.Models.Portfolio.PerformanceMetrics TradingBot.Core.Models.Backtest.BacktestResult::get_Performance()": {
+          "Lines": {
+            "75": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Backtest.BacktestResult::get_CreatedAt()": {
+          "Lines": {
+            "80": 0
+          },
+          "Branches": []
+        },
+        "System.TimeSpan TradingBot.Core.Models.Backtest.BacktestResult::get_Duration()": {
+          "Lines": {
+            "85": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/TransactionCostBreakdown.cs": {
+      "TradingBot.Core.Models.Backtest.TransactionCostBreakdown": {
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Commission()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Slippage()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_Spread()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostBreakdown::get_TotalCost()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Backtest/TransactionCostModel.cs": {
+      "TradingBot.Core.Models.Backtest.TransactionCostModel": {
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_CommissionPerTrade()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_CommissionPerShare()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_SlippagePercent()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Backtest.TransactionCostModel::get_SpreadPercent()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Backtest.TransactionCostModel::get_Enabled()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Analytics/DrawdownPeriod.cs": {
+      "TradingBot.Core.Models.Analytics.DrawdownPeriod": {
+        "System.DateTime TradingBot.Core.Models.Analytics.DrawdownPeriod::get_StartDate()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.DateTime TradingBot.Core.Models.Analytics.DrawdownPeriod::get_EndDate()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.DateTime> TradingBot.Core.Models.Analytics.DrawdownPeriod::get_RecoveryDate()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_PeakEquity()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_TroughEquity()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.DrawdownPeriod::get_MaxDrawdownPercent()": {
+          "Lines": {
+            "40": 0
+          },
+          "Branches": []
+        },
+        "System.Int32 TradingBot.Core.Models.Analytics.DrawdownPeriod::get_DurationDays()": {
+          "Lines": {
+            "45": 0
+          },
+          "Branches": []
+        },
+        "System.Nullable`1<System.Int32> TradingBot.Core.Models.Analytics.DrawdownPeriod::get_RecoveryDays()": {
+          "Lines": {
+            "50": 0
+          },
+          "Branches": []
+        },
+        "System.Boolean TradingBot.Core.Models.Analytics.DrawdownPeriod::get_IsRecovered()": {
+          "Lines": {
+            "55": 0
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/Users/phmatray/Repositories/github-phm/TradingBot/src/TradingBot.Core/Models/Analytics/EquityPoint.cs": {
+      "TradingBot.Core.Models.Analytics.EquityPoint": {
+        "System.DateTime TradingBot.Core.Models.Analytics.EquityPoint::get_Timestamp()": {
+          "Lines": {
+            "15": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Equity()": {
+          "Lines": {
+            "20": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Drawdown()": {
+          "Lines": {
+            "25": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_Peak()": {
+          "Lines": {
+            "30": 0
+          },
+          "Branches": []
+        },
+        "System.Decimal TradingBot.Core.Models.Analytics.EquityPoint::get_ReturnPercent()": {
+          "Lines": {
+            "35": 0
+          },
+          "Branches": []
+        }
+      }
+    }
+  }
+}

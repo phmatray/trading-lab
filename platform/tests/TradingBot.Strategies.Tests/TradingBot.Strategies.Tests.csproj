@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ============================================ -->
+  <!-- Strategies Tests Project -->
+  <!-- Unit tests for TradingBot.Strategies -->
+  <!-- ============================================ -->
+
+  <PropertyGroup Label="Test Project Configuration">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup Label="Project References">
+    <ProjectReference Include="..\..\src\TradingBot.Core\TradingBot.Core.csproj" />
+    <ProjectReference Include="..\..\src\TradingBot.Strategies\TradingBot.Strategies.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test Framework">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test Helpers">
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="FakeItEasy" />
+    <PackageReference Include="FakeItEasy.Analyzer.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Label="Code Coverage">
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="coverlet.msbuild" />
+  </ItemGroup>
+
+  <ItemGroup Label="Global Usings">
+    <Using Include="Xunit" />
+    <Using Include="Shouldly" />
+    <Using Include="FakeItEasy" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,208 @@
+@* <copyright file="TbConfirmDialog.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Molecules
+
+<div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="dialog-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        @* Background overlay *@
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+             @onclick="HandleCancel"></div>
+
+        @* Center dialog *@
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        @* Dialog panel *@
+        <div
+            class="inline-block align-bottom bg-white dark:bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white dark:bg-gray-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    @if (IconContent != null || Variant != ConfirmDialogVariant.Info)
+                    {
+                        <div
+                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full @GetIconBackgroundClass() sm:mx-0 sm:h-10 sm:w-10">
+                            @if (IconContent != null)
+                            {
+                                @IconContent
+                            }
+                            else
+                            {
+                                @GetDefaultIcon()
+                            }
+                        </div>
+                    }
+                    <div class="mt-3 text-center sm:mt-0 @(IconContent != null || Variant != ConfirmDialogVariant.Info ? "sm:ml-4" : "") sm:text-left flex-1">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="dialog-title">
+                            @Title
+                        </h3>
+                        @if (Message != null || ChildContent != null)
+                        {
+                            <div class="mt-2">
+                                @if (Message != null)
+                                {
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        @Message
+                                    </p>
+                                }
+                                @if (ChildContent != null)
+                                {
+                                    @ChildContent
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                <TbButton
+                    Variant="@GetConfirmButtonVariant()"
+                    OnClick="HandleConfirm"
+                    IsDisabled="@IsConfirming"
+                    IsLoading="@IsConfirming"
+                    Class="w-full sm:w-auto">
+                    @ConfirmButtonText
+                </TbButton>
+                <TbButton
+                    Variant="ButtonVariant.Secondary"
+                    OnClick="HandleCancel"
+                    IsDisabled="@IsConfirming"
+                    Class="w-full sm:w-auto mt-3 sm:mt-0">
+                    @CancelButtonText
+                </TbButton>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the dialog title.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Confirm Action";
+
+    /// <summary>
+    /// Gets or sets the dialog message.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Gets or sets the child content (alternative to Message for complex content).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the custom icon content.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? IconContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the dialog variant (Info, Warning, Danger).
+    /// </summary>
+    [Parameter]
+    public ConfirmDialogVariant Variant { get; set; } = ConfirmDialogVariant.Warning;
+
+    /// <summary>
+    /// Gets or sets the confirm button text.
+    /// </summary>
+    [Parameter]
+    public string ConfirmButtonText { get; set; } = "Confirm";
+
+    /// <summary>
+    /// Gets or sets the cancel button text.
+    /// </summary>
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the confirm action is in progress.
+    /// </summary>
+    [Parameter]
+    public bool IsConfirming { get; set; }
+
+    /// <summary>
+    /// Gets or sets the confirm event callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cancel event callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task HandleConfirm()
+    {
+        if (!IsConfirming)
+        {
+            await OnConfirm.InvokeAsync();
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        if (!IsConfirming)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+    private string GetIconBackgroundClass()
+    {
+        return Variant switch
+        {
+            ConfirmDialogVariant.Info => "bg-blue-100 dark:bg-blue-900",
+            ConfirmDialogVariant.Warning => "bg-yellow-100 dark:bg-yellow-900",
+            ConfirmDialogVariant.Danger => "bg-red-100 dark:bg-red-900",
+            _ => "bg-gray-100 dark:bg-gray-800"
+        };
+    }
+
+    private ButtonVariant GetConfirmButtonVariant()
+    {
+        return Variant switch
+        {
+            ConfirmDialogVariant.Info => ButtonVariant.Primary,
+            ConfirmDialogVariant.Warning => ButtonVariant.Primary,
+            ConfirmDialogVariant.Danger => ButtonVariant.Danger,
+            _ => ButtonVariant.Primary
+        };
+    }
+
+    private RenderFragment GetDefaultIcon()
+    {
+        return Variant switch
+        {
+            ConfirmDialogVariant.Info => __builder =>
+            {
+                <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            },
+            ConfirmDialogVariant.Warning => __builder =>
+            {
+                <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" xmlns="http://www.w3.org/2000/svg"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            },
+            ConfirmDialogVariant.Danger => __builder =>
+            {
+                <svg class="h-6 w-6 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            },
+            _ => __builder => { }
+        };
+    }
+}

@@ -1,0 +1,119 @@
+@using ApexCharts
+
+@if (EquityCurve is not null && EquityCurve.Any())
+{
+    <ApexChart TItem="EquityPoint"
+               Title="Portfolio Value Over Time"
+               Options="@chartOptions">
+        <ApexPointSeries TItem="EquityPoint"
+                         Items="@GetEquityPoints()"
+                         Name="Equity"
+                         SeriesType="SeriesType.Line"
+                         XValue="@(e => e.Date)"
+                         YValue="@(e => (decimal?)e.Equity)"
+                         OrderByDescending="e => e.X"/>
+    </ApexChart>
+}
+else
+{
+    <div class="flex items-center justify-center py-12">
+        <p class="text-gray-500 dark:text-gray-400">No equity curve data available</p>
+    </div>
+}
+
+@code {
+    [Parameter] public List<(DateTime Date, decimal Equity)>? EquityCurve { get; set; }
+
+    private List<EquityPoint> GetEquityPoints()
+    {
+        return EquityCurve?
+            .Select(e => new EquityPoint { Date = e.Date, Equity = e.Equity })
+            .ToList() ?? new List<EquityPoint>();
+    }
+
+    private sealed class EquityPoint
+    {
+        public DateTime Date { get; set; }
+        public decimal Equity { get; set; }
+    }
+
+    private readonly ApexChartOptions<EquityPoint> chartOptions = new ApexChartOptions<EquityPoint>
+    {
+        Chart = new Chart
+        {
+            Type = ChartType.Line,
+            Height = 350,
+            Toolbar = new Toolbar
+            {
+                Show = true,
+                Tools = new Tools
+                {
+                    Download = true,
+                    Selection = true,
+                    Zoom = true,
+                    Zoomin = true,
+                    Zoomout = true,
+                    Pan = true,
+                    Reset = true
+                }
+            },
+            Zoom = new Zoom
+            {
+                Enabled = true
+            }
+        },
+        Stroke = new Stroke
+        {
+            Curve = Curve.Smooth,
+            Width = 2
+        },
+        Colors = new List<string> { "#3b82f6" },
+        Xaxis = new XAxis
+        {
+            Type = XAxisType.Datetime,
+            Labels = new XAxisLabels
+            {
+                Format = "MMM dd"
+            }
+        },
+        Yaxis = new List<YAxis>
+        {
+            new YAxis
+            {
+                Labels = new YAxisLabels
+                {
+                    Formatter = "function(value) { return '$' + value.toLocaleString(); }"
+                },
+                Title = new AxisTitle
+                {
+                    Text = "Portfolio Value"
+                }
+            }
+        },
+        Tooltip = new Tooltip
+        {
+            X = new TooltipX
+            {
+                Format = "MMM dd, yyyy"
+            },
+            Y = new TooltipY
+            {
+                Formatter = "function(value) { return '$' + value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }",
+                Title = new TooltipYTitle
+                {
+                    Formatter = "function() { return 'Equity'; }"
+                }
+            }
+        },
+        Grid = new Grid
+        {
+            BorderColor = "#e5e7eb",
+            StrokeDashArray = 4
+        },
+        Theme = new Theme
+        {
+            Mode = Mode.Light
+        }
+    };
+
+}

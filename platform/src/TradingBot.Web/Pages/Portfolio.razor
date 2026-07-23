@@ -1,0 +1,387 @@
+@* <copyright file="Portfolio.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@page "/portfolio"
+@inject IPortfolioService PortfolioService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@implements IAsyncDisposable
+
+<PageTitle>Portfolio - TradingBot</PageTitle>
+
+<TbPageHeader Title="Portfolio Management"
+            Description="View trade history, manage positions, and export data" />
+
+@* Trade History Filter Section *@
+<div class="mb-6">
+    <TbTradeHistoryFilter OnFilterChanged="HandleFilterChanged"/>
+</div>
+
+@* Trade History Table Section *@
+<TbCard Title="Trade History" CssClass="mb-6">
+    <HeaderActions>
+        <button
+            @onclick="ExportTradeHistory"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled="@_isExporting">
+            @if (_isExporting)
+            {
+                <span>Exporting...</span>
+            }
+            else
+            {
+                <span>📥 Export CSV</span>
+            }
+        </button>
+    </HeaderActions>
+    <ChildContent>
+        @if (_isLoadingTrades)
+        {
+            <div class="flex items-center justify-center py-12">
+                <div class="text-gray-500 dark:text-gray-400">Loading trade history...</div>
+            </div>
+        }
+        else if (_tradeHistory != null && _tradeHistory.Any())
+        {
+            <TbTradeHistoryTable
+                Trades="@_tradeHistory"
+                CurrentPage="@_currentPage"
+                TotalPages="@_totalPages"
+                OnPageChanged="HandlePageChanged"/>
+        }
+        else
+        {
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No trade history yet</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                    Your trade history will appear here once you execute a trading strategy. Try different filters or start a new strategy to see trades.
+                </p>
+            </div>
+        }
+    </ChildContent>
+</TbCard>
+
+@* Open Positions Section *@
+<TbCard Title="Open Positions">
+
+    @if (_isLoadingPositions)
+    {
+        <div class="flex items-center justify-center py-8">
+            <div class="text-gray-500 dark:text-gray-400">Loading positions...</div>
+        </div>
+    }
+    else if (_openPositions != null && _openPositions.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var position in _openPositions)
+            {
+                <TbPositionCard
+                    Position="@position"
+                    OnCloseRequested="() => ShowTbClosePositionModal(position)"/>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="flex flex-col items-center justify-center py-8 text-center">
+            <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No open positions</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                You currently have no open positions. Execute a trading strategy to see positions here.
+            </p>
+        </div>
+    }
+</TbCard>
+
+@* Success/Error Notifications *@
+@if (!string.IsNullOrEmpty(_notificationMessage))
+{
+    <div
+        class="fixed bottom-4 right-4 @(_notificationIsError ? "bg-red-500" : "bg-green-500") text-white px-6 py-3 rounded-lg shadow-lg">
+        @_notificationMessage
+    </div>
+}
+
+@* Close Position Modal *@
+@if (_showCloseModal && _selectedPosition != null)
+{
+    <TbClosePositionModal
+        Position="@_selectedPosition"
+        OnConfirm="HandleClosePosition"
+        OnCancel="HideTbClosePositionModal"/>
+}
+
+@code {
+    private HubConnection? _hubConnection;
+    private List<Trade> _tradeHistory = new();
+    private List<Position> _openPositions = new();
+    private PortfolioHistoryFilter _currentFilter = new();
+    private Position? _selectedPosition;
+
+    private bool _isLoadingTrades = true;
+    private bool _isLoadingPositions = true;
+    private bool _isExporting;
+    private bool _showCloseModal;
+
+    private string? _notificationMessage;
+    private bool _notificationIsError;
+
+    private int _currentPage = 1;
+    private int _totalPages = 1;
+    private const int PageSize = 20;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+        await InitializeSignalRConnection();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        await Task.WhenAll(
+            LoadTradeHistoryAsync(),
+            LoadOpenPositionsAsync()
+        );
+    }
+
+    private async Task LoadTradeHistoryAsync()
+    {
+        try
+        {
+            _isLoadingTrades = true;
+            var result = await PortfolioService.GetTradeHistoryAsync(
+                _currentFilter.StartDate,
+                _currentFilter.EndDate,
+                _currentFilter.Symbol,
+                _currentFilter.StrategyName,
+                CancellationToken.None);
+
+            _tradeHistory = result.ToList();
+            _totalPages = (int)Math.Ceiling((double)_tradeHistory.Count / PageSize);
+            _currentPage = Math.Min(_currentPage, Math.Max(1, _totalPages));
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Error loading trade history: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            _isLoadingTrades = false;
+        }
+    }
+
+    private async Task LoadOpenPositionsAsync()
+    {
+        try
+        {
+            _isLoadingPositions = true;
+            _openPositions = (await PortfolioService.GetOpenPositionsAsync(CancellationToken.None)).ToList();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Error loading positions: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            _isLoadingPositions = false;
+        }
+    }
+
+    private async Task HandleFilterChanged(PortfolioHistoryFilter filter)
+    {
+        _currentFilter = filter;
+        _currentPage = 1;
+        await LoadTradeHistoryAsync();
+    }
+
+    private void HandlePageChanged(int newPage)
+    {
+        _currentPage = newPage;
+        StateHasChanged();
+    }
+
+    private void ShowTbClosePositionModal(Position position)
+    {
+        _selectedPosition = position;
+        _showCloseModal = true;
+    }
+
+    private void HideTbClosePositionModal()
+    {
+        _showCloseModal = false;
+        _selectedPosition = null;
+    }
+
+    private async Task HandleClosePosition()
+    {
+        if (_selectedPosition == null) return;
+
+        try
+        {
+            await PortfolioService.ClosePositionAsync(_selectedPosition.Id, CancellationToken.None);
+            ShowNotification($"Position {_selectedPosition.Symbol} closed successfully", isError: false);
+
+            // Reload positions after closing
+            await LoadOpenPositionsAsync();
+
+            HideTbClosePositionModal();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Failed to close position: {ex.Message}", isError: true);
+        }
+    }
+
+    private async Task ExportTradeHistory()
+    {
+        try
+        {
+            _isExporting = true;
+            var csvData = await PortfolioService.ExportTradeHistoryAsync(
+                _currentFilter.StartDate,
+                _currentFilter.EndDate,
+                _currentFilter.Symbol,
+                _currentFilter.StrategyName,
+                CancellationToken.None);
+
+            await JS.InvokeVoidAsync("downloadFile", "trade-history.csv", "text/csv", csvData);
+            ShowNotification("Trade history exported successfully", isError: false);
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Export failed: {ex.Message}", isError: true);
+        }
+        finally
+        {
+            _isExporting = false;
+        }
+    }
+
+    private void ShowNotification(string message, bool isError)
+    {
+        _notificationMessage = message;
+        _notificationIsError = isError;
+        StateHasChanged();
+
+        // Auto-hide notification after 5 seconds
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            _notificationMessage = null;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // Register SignalR event handlers for position events
+            _hubConnection.On<Position>("OnPositionOpened", HandlePositionOpened);
+            _hubConnection.On<Guid, Trade>("OnPositionClosed", HandlePositionClosedEvent);
+
+            // Connection lifecycle events
+            _hubConnection.Closed += OnConnectionClosed;
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Failed to connect to real-time updates: {ex.Message}", isError: true);
+        }
+    }
+
+    private void HandlePositionOpened(Position position)
+    {
+        // Add new position to the list
+        _openPositions.Insert(0, position);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandlePositionClosedEvent(Guid positionId, Trade trade)
+    {
+        // Remove closed position from list
+        var position = _openPositions.FirstOrDefault(p => p.Id == positionId);
+        if (position is not null)
+        {
+            _openPositions.Remove(position);
+        }
+
+        // Add trade to history
+        _tradeHistory.Insert(0, trade);
+        _tradeHistory = _tradeHistory.Take(PageSize * _totalPages).ToList();
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnConnectionClosed(Exception? exception)
+    {
+        // Notify user that connection was lost
+        InvokeAsync(() =>
+        {
+            ToastService.ShowWarning("Real-time portfolio updates disconnected. Attempting to reconnect...", "Connection Lost");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        // Notify user that we're attempting to reconnect
+        InvokeAsync(() =>
+        {
+            ToastService.ShowInfo("Reconnecting to real-time updates...", "Reconnecting");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        // Notify user that connection was restored
+        InvokeAsync(async () =>
+        {
+            ToastService.ShowSuccess("Real-time portfolio updates reconnected successfully!", "Connected");
+            await LoadDataAsync();
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Closed -= OnConnectionClosed;
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            await _hubConnection.DisposeAsync();
+        }
+    }
+
+}

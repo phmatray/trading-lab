@@ -1,0 +1,181 @@
+@page "/risk-settings"
+@implements IAsyncDisposable
+@inject IRiskSettingsService RiskSettingsService
+@inject IToastService ToastService
+@inject ILogger<RiskSettingsPage> Logger
+@inject HubConnection HubConnection
+
+<PageTitle>Risk Settings - TradingBot</PageTitle>
+
+<TbPageHeader Title="Risk Management Settings"
+            Description="Configure risk parameters to protect your trading account" />
+
+@if (_isLoading)
+{
+    <div class="flex items-center justify-center py-12">
+        <TbSpinner Size="@SpinnerSize.Large" />
+    </div>
+}
+else if (_currentSettings is not null)
+{
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Risk Settings Form -->
+        <div class="lg:col-span-2">
+            <TbCard Title="Risk Parameters">
+                <TbRiskSettingsForm
+                    Settings="@_currentSettings"
+                    OnSave="@HandleSaveAsync"
+                    OnReset="@HandleResetAsync"
+                    IsLoading="@_isSaving"/>
+            </TbCard>
+        </div>
+
+        <!-- Risk Info -->
+        <div class="lg:col-span-1">
+            <TbCard Title="Current Settings">
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Position Size</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxPositionSizePercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Open Positions</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxOpenPositions</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Stop Loss</p>
+                        <p class="text-lg font-semibold">@_currentSettings.StopLossPercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Take Profit</p>
+                        <p class="text-lg font-semibold">@_currentSettings.TakeProfitPercent%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Max Daily Loss</p>
+                        <p class="text-lg font-semibold">@_currentSettings.MaxDailyLossPercent%</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Last modified</p>
+                        <p class="text-sm">@_currentSettings.LastModified.ToLocalTime().ToString("g")</p>
+                    </div>
+                </div>
+            </TbCard>
+        </div>
+    </div>
+}
+else
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex">
+            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-red-800 dark:text-red-300">Failed to load risk settings. Please try again.</p>
+        </div>
+    </div>
+}
+
+@code {
+    private RiskSettings? _currentSettings;
+    private bool _isLoading = true;
+    private bool _isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRiskSettingsAsync();
+
+        // Subscribe to SignalR risk settings updates
+        HubConnection.On<RiskSettings>("ReceiveRiskSettingsUpdate", async (settings) =>
+        {
+            _currentSettings = settings;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        if (HubConnection.State != HubConnectionState.Connected)
+        {
+            await HubConnection.StartAsync();
+        }
+    }
+
+    private async Task LoadRiskSettingsAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _currentSettings = await RiskSettingsService.GetRiskSettingsAsync();
+            Logger.LogInformation("Risk settings loaded successfully");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load risk settings");
+            ToastService.ShowError("Failed to load risk settings");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleSaveAsync(RiskSettings updatedSettings)
+    {
+        try
+        {
+            _isSaving = true;
+
+            var success = await RiskSettingsService.SaveRiskSettingsAsync(updatedSettings);
+
+            if (success)
+            {
+                _currentSettings = updatedSettings;
+                ToastService.ShowSuccess("Risk settings saved successfully!");
+                Logger.LogInformation("Risk settings updated: MaxPositionSize={MaxPositionSize}%, StopLoss={StopLoss}%, TakeProfit={TakeProfit}%",
+                    updatedSettings.MaxPositionSizePercent, updatedSettings.StopLossPercent, updatedSettings.TakeProfitPercent);
+            }
+            else
+            {
+                ToastService.ShowError("Failed to save risk settings. Please check your values and try again.");
+                Logger.LogWarning("Risk settings validation failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to save risk settings");
+            ToastService.ShowError("An error occurred while saving risk settings");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task HandleResetAsync()
+    {
+        try
+        {
+            _isSaving = true;
+
+            var defaultSettings = await RiskSettingsService.ResetToDefaultsAsync();
+            _currentSettings = defaultSettings;
+
+            ToastService.ShowSuccess("Risk settings reset to defaults!");
+            Logger.LogInformation("Risk settings reset to defaults");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to reset risk settings");
+            ToastService.ShowError("An error occurred while resetting risk settings");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        HubConnection.Remove("ReceiveRiskSettingsUpdate");
+        return ValueTask.CompletedTask;
+    }
+}

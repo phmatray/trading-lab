@@ -1,0 +1,184 @@
+@* <copyright file="TbStrategyParameterInput.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+
+<div class="space-y-2">
+    <label for="@InputId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        @Parameter.DisplayName
+        @if (Parameter.MinValue != null && Parameter.MaxValue != null)
+        {
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+                (@Parameter.MinValue - @Parameter.MaxValue)
+            </span>
+        }
+    </label>
+
+    @if (!string.IsNullOrEmpty(Parameter.Description))
+    {
+        <p class="text-xs text-gray-500 dark:text-gray-400">@Parameter.Description</p>
+    }
+
+    @switch (Parameter.ParameterType)
+    {
+        case "int":
+            <input
+                type="number"
+                id="@InputId"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                value="@CurrentValue"
+                min="@Parameter.MinValue"
+                max="@Parameter.MaxValue"
+                step="1"
+                @onchange="HandleIntChange" />
+            break;
+
+        case "decimal":
+            <input
+                type="number"
+                id="@InputId"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                value="@CurrentValue"
+                min="@Parameter.MinValue"
+                max="@Parameter.MaxValue"
+                step="0.1"
+                @onchange="HandleDecimalChange" />
+            break;
+
+        case "bool":
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input
+                    type="checkbox"
+                    id="@InputId"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    checked="@((bool)CurrentValue)"
+                    @onchange="HandleBoolChange" />
+                <span class="text-sm text-gray-700 dark:text-gray-300">Enable</span>
+            </label>
+            break;
+
+        default:
+            <input
+                type="text"
+                id="@InputId"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                value="@CurrentValue?.ToString()"
+                @onchange="HandleStringChange" />
+            break;
+    }
+
+    @if (!string.IsNullOrEmpty(ValidationError))
+    {
+        <p class="text-xs text-red-600 dark:text-red-400">@ValidationError</p>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the parameter metadata.
+    /// </summary>
+    [Parameter]
+    public required StrategyParameterDto Parameter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current value.
+    /// </summary>
+    [Parameter]
+    public object CurrentValue { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the value changed callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback<object> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the validation error message.
+    /// </summary>
+    public string? ValidationError { get; set; }
+
+    private string InputId => $"param-{Parameter.ParameterName}";
+
+    private async Task HandleIntChange(ChangeEventArgs e)
+    {
+        ValidationError = null;
+
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            if (!ValidateNumericBounds(value))
+            {
+                return;
+            }
+
+            CurrentValue = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+        else
+        {
+            ValidationError = "Please enter a valid integer";
+        }
+    }
+
+    private async Task HandleDecimalChange(ChangeEventArgs e)
+    {
+        ValidationError = null;
+
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+        {
+            if (!ValidateNumericBounds(value))
+            {
+                return;
+            }
+
+            CurrentValue = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+        else
+        {
+            ValidationError = "Please enter a valid number";
+        }
+    }
+
+    private async Task HandleBoolChange(ChangeEventArgs e)
+    {
+        ValidationError = null;
+
+        if (bool.TryParse(e.Value?.ToString(), out var value))
+        {
+            CurrentValue = value;
+            await ValueChanged.InvokeAsync(value);
+        }
+    }
+
+    private async Task HandleStringChange(ChangeEventArgs e)
+    {
+        ValidationError = null;
+        var value = e.Value?.ToString() ?? string.Empty;
+        CurrentValue = value;
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    private bool ValidateNumericBounds<T>(T value) where T : IComparable
+    {
+        if (Parameter.MinValue != null)
+        {
+            var min = (T)Convert.ChangeType(Parameter.MinValue, typeof(T));
+            if (value.CompareTo(min) < 0)
+            {
+                ValidationError = $"Value must be at least {Parameter.MinValue}";
+                return false;
+            }
+        }
+
+        if (Parameter.MaxValue != null)
+        {
+            var max = (T)Convert.ChangeType(Parameter.MaxValue, typeof(T));
+            if (value.CompareTo(max) > 0)
+            {
+                ValidationError = $"Value must not exceed {Parameter.MaxValue}";
+                return false;
+            }
+        }
+
+        return true;
+    }
+}

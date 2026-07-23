@@ -1,0 +1,467 @@
+@page "/backtest"
+@using TradingBot.Core.Models.Backtest
+@inject IBacktestService BacktestService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject ILogger<Backtest> Logger
+@implements IAsyncDisposable
+
+<PageTitle>Backtest - TradingBot</PageTitle>
+
+<TbPageHeader Title="Backtest"
+            Description="Run backtests and analyze historical strategy performance" />
+
+@* Run New Backtest Section *@
+<div class="mb-6">
+    <TbBacktestRunner OnBacktestSubmit="@HandleRunBacktest"
+                     OnBacktestCancel="@HandleCancelBacktest"
+                     CurrentBacktestId="@_currentBacktestId"
+                     CurrentProgress="@_currentProgress"
+                     CurrentStatusMessage="@_currentStatusMessage"
+                     IsRunning="@_isRunningBacktest"
+                     IsComplete="@_isBacktestComplete"
+                     IsFailed="@_isBacktestFailed" />
+</div>
+
+@* Backtest Results Section *@
+@if (_isLoading)
+{
+    <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div class="flex">
+            <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-red-800 dark:text-red-300">@_errorMessage</p>
+        </div>
+    </div>
+}
+else if (_backtestResults is null || !_backtestResults.Any())
+{
+    <TbCard ContentClass="p-12">
+        <div class="text-center">
+            <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No backtest results available</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Run a backtest using the form above to see results here</p>
+        </div>
+    </TbCard>
+}
+else
+{
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Backtest Results List -->
+        <div class="lg:col-span-1">
+            <TbBacktestResultsList
+                Results="@_backtestResults"
+                SelectedBacktestId="@_selectedBacktestId"
+                OnBacktestSelected="@HandleBacktestSelected"
+                ComparisonMode="@_comparisonMode"
+                SelectedForComparison="@_selectedForComparison"
+                OnToggleComparison="@HandleToggleComparison"/>
+        </div>
+
+        <!-- Backtest Detail -->
+        <div class="lg:col-span-2">
+            @if (_selectedBacktest is not null)
+            {
+                <TbBacktestDetail
+                    Backtest="@_selectedBacktest"
+                    ShowComparison="@ShowComparisonTable"
+                    ComparisonResults="@GetComparisonResults()"/>
+            }
+            else
+            {
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Select a backtest to view
+                        details</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Choose a backtest from the list on the left</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (_comparisonMode && _selectedForComparison.Count > 1)
+    {
+        <div class="mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Comparison
+                    (@_selectedForComparison.Count selected)</h2>
+                <button @onclick="@ClearComparison"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+                    Clear Selection
+                </button>
+            </div>
+            <!-- Comparison table will be rendered by TbBacktestDetail when ShowComparison is true -->
+        </div>
+    }
+}
+
+@code {
+    private HubConnection? _hubConnection;
+    private List<BacktestResult>? _backtestResults;
+    private BacktestResult? _selectedBacktest;
+    private string? _selectedBacktestId;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private bool _comparisonMode;
+    private readonly HashSet<string> _selectedForComparison = new();
+
+    // Backtest execution state
+    private string? _currentBacktestId;
+    private int _currentProgress;
+    private string _currentStatusMessage = string.Empty;
+    private bool _isRunningBacktest;
+    private bool _isBacktestComplete;
+    private bool _isBacktestFailed;
+
+    private bool ShowComparisonTable => _comparisonMode && _selectedForComparison.Count > 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBacktestResultsAsync();
+        await InitializeSignalRConnection();
+    }
+
+    private async Task LoadBacktestResultsAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            _errorMessage = null;
+            _backtestResults = await BacktestService.GetBacktestResultsAsync();
+            Logger.LogInformation("Loaded {Count} backtest results", _backtestResults?.Count ?? 0);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load backtest results");
+            _errorMessage = "Failed to load backtest results. Please try again.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleBacktestSelected(string backtestId)
+    {
+        try
+        {
+            _selectedBacktestId = backtestId;
+            _selectedBacktest = await BacktestService.GetBacktestByIdAsync(backtestId);
+            Logger.LogInformation("Selected backtest {BacktestId}", backtestId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load backtest details for {BacktestId}", backtestId);
+            _errorMessage = "Failed to load backtest details. Please try again.";
+        }
+    }
+
+    private void HandleToggleComparison(string backtestId)
+    {
+        if (_selectedForComparison.Contains(backtestId))
+        {
+            _selectedForComparison.Remove(backtestId);
+        }
+        else
+        {
+            _selectedForComparison.Add(backtestId);
+        }
+
+        _comparisonMode = _selectedForComparison.Count > 0;
+        StateHasChanged();
+    }
+
+    private void ClearComparison()
+    {
+        _selectedForComparison.Clear();
+        _comparisonMode = false;
+        StateHasChanged();
+    }
+
+    private List<BacktestResult> GetComparisonResults()
+    {
+        if (_backtestResults is null)
+        {
+            return new List<BacktestResult>();
+        }
+
+        return _backtestResults
+            .Where(b => _selectedForComparison.Contains(b.BacktestId))
+            .ToList();
+    }
+
+    // T103: Wire up HandleRunBacktest
+    private async Task HandleRunBacktest(BacktestRequest request)
+    {
+        try
+        {
+            Logger.LogInformation("Starting backtest for strategy {Strategy} on symbol {Symbol}", request.StrategyName, request.Symbol);
+
+            // Reset state
+            _isRunningBacktest = true;
+            _isBacktestComplete = false;
+            _isBacktestFailed = false;
+            _currentProgress = 0;
+            _currentStatusMessage = "Submitting backtest request...";
+
+            // Run the backtest
+            _currentBacktestId = await BacktestService.RunBacktestAsync(request);
+
+            ToastService.ShowInfo($"Backtest {_currentBacktestId} started successfully", "Backtest Started");
+            Logger.LogInformation("Backtest {BacktestId} submitted successfully", _currentBacktestId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to start backtest");
+            ToastService.ShowError($"Failed to start backtest: {ex.Message}", "Backtest Failed");
+
+            _isRunningBacktest = false;
+            _isBacktestFailed = true;
+            _currentStatusMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task HandleCancelBacktest(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Cancelling backtest {BacktestId}", backtestId);
+
+            var success = await BacktestService.CancelBacktestAsync(backtestId);
+
+            if (success)
+            {
+                ToastService.ShowInfo("Backtest cancelled successfully", "Cancelled");
+                _isRunningBacktest = false;
+                _isBacktestFailed = true;
+                _currentStatusMessage = "Cancelled by user";
+            }
+            else
+            {
+                ToastService.ShowWarning("Backtest not found or already completed", "Cancel Failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to cancel backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to cancel backtest: {ex.Message}", "Error");
+        }
+    }
+
+    // T109: Add export trades to CSV button handler
+    private async Task HandleExportTrades(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Exporting trades for backtest {BacktestId}", backtestId);
+
+            var csvData = await BacktestService.ExportBacktestTradesToCsvAsync(backtestId);
+
+            if (string.IsNullOrEmpty(csvData))
+            {
+                ToastService.ShowWarning("No trades found to export", "Export");
+                return;
+            }
+
+            await JS.InvokeVoidAsync("downloadFile", $"backtest-{backtestId}-trades.csv", "text/csv", csvData);
+            ToastService.ShowSuccess("Trades exported successfully", "Export Complete");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to export trades for backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to export trades: {ex.Message}", "Export Failed");
+        }
+    }
+
+    private async Task HandleDeleteBacktest(string backtestId)
+    {
+        try
+        {
+            Logger.LogInformation("Deleting backtest {BacktestId}", backtestId);
+
+            var success = await BacktestService.DeleteBacktestAsync(backtestId);
+
+            if (success)
+            {
+                ToastService.ShowSuccess("Backtest deleted successfully", "Deleted");
+
+                // Refresh the list
+                await LoadBacktestResultsAsync();
+
+                // Clear selection if the deleted backtest was selected
+                if (_selectedBacktestId == backtestId)
+                {
+                    _selectedBacktest = null;
+                    _selectedBacktestId = null;
+                }
+            }
+            else
+            {
+                ToastService.ShowWarning("Backtest not found", "Delete Failed");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete backtest {BacktestId}", backtestId);
+            ToastService.ShowError($"Failed to delete backtest: {ex.Message}", "Delete Failed");
+        }
+    }
+
+    // T104, T105, T106, T110: SignalR integration and IAsyncDisposable
+    private async Task InitializeSignalRConnection()
+    {
+        try
+        {
+            var hubUrl = NavigationManager.ToAbsoluteUri("/hubs/trading");
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl)
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(0),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
+
+            // T104: Subscribe to OnBacktestProgress SignalR event
+            _hubConnection.On<string, int, string>("OnBacktestProgress", HandleBacktestProgress);
+
+            // T105: Subscribe to OnBacktestCompleted SignalR event
+            _hubConnection.On<string, BacktestResult>("OnBacktestCompleted", HandleBacktestCompleted);
+
+            // T106: Subscribe to OnBacktestFailed SignalR event
+            _hubConnection.On<string, string>("OnBacktestFailed", HandleBacktestFailed);
+
+            // Connection lifecycle events
+            _hubConnection.Closed += OnConnectionClosed;
+            _hubConnection.Reconnecting += OnReconnecting;
+            _hubConnection.Reconnected += OnReconnected;
+
+            await _hubConnection.StartAsync();
+            Logger.LogInformation("SignalR connection established for backtest page");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to connect to SignalR hub");
+            ToastService.ShowError("Failed to connect to real-time updates", "Connection Error");
+        }
+    }
+
+    private void HandleBacktestProgress(string backtestId, int progressPercent, string statusMessage)
+    {
+        if (_currentBacktestId == backtestId)
+        {
+            _currentProgress = progressPercent;
+            _currentStatusMessage = statusMessage;
+            InvokeAsync(StateHasChanged);
+            Logger.LogDebug("Backtest {BacktestId} progress: {Progress}% - {Status}", backtestId, progressPercent, statusMessage);
+        }
+    }
+
+    private void HandleBacktestCompleted(string backtestId, BacktestResult result)
+    {
+        if (_currentBacktestId == backtestId)
+        {
+            _currentProgress = 100;
+            _currentStatusMessage = "Backtest completed successfully";
+            _isBacktestComplete = true;
+            _isRunningBacktest = false;
+
+            ToastService.ShowSuccess(
+                $"Backtest completed! Total Return: {result.TotalReturn:F2}%, Sharpe Ratio: {result.SharpeRatio:F2}",
+                "Backtest Complete");
+
+            // Refresh results list and select the new backtest
+            InvokeAsync(async () =>
+            {
+                await LoadBacktestResultsAsync();
+                await HandleBacktestSelected(backtestId);
+                StateHasChanged();
+            });
+
+            Logger.LogInformation("Backtest {BacktestId} completed successfully", backtestId);
+        }
+    }
+
+    private void HandleBacktestFailed(string backtestId, string errorMessage)
+    {
+        if (_currentBacktestId == backtestId)
+        {
+            _currentStatusMessage = $"Error: {errorMessage}";
+            _isBacktestFailed = true;
+            _isRunningBacktest = false;
+
+            ToastService.ShowError($"Backtest failed: {errorMessage}", "Backtest Failed");
+            InvokeAsync(StateHasChanged);
+
+            Logger.LogError("Backtest {BacktestId} failed: {Error}", backtestId, errorMessage);
+        }
+    }
+
+    private Task OnConnectionClosed(Exception? exception)
+    {
+        InvokeAsync(() =>
+        {
+            ToastService.ShowWarning("Real-time updates disconnected. Attempting to reconnect...", "Connection Lost");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnecting(Exception? exception)
+    {
+        InvokeAsync(() =>
+        {
+            ToastService.ShowInfo("Reconnecting to real-time updates...", "Reconnecting");
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnReconnected(string? connectionId)
+    {
+        InvokeAsync(async () =>
+        {
+            ToastService.ShowSuccess("Real-time updates reconnected successfully!", "Connected");
+            await LoadBacktestResultsAsync();
+            StateHasChanged();
+        });
+
+        return Task.CompletedTask;
+    }
+
+    // T110: Implement IAsyncDisposable
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            _hubConnection.Closed -= OnConnectionClosed;
+            _hubConnection.Reconnecting -= OnReconnecting;
+            _hubConnection.Reconnected -= OnReconnected;
+            await _hubConnection.DisposeAsync();
+            Logger.LogInformation("SignalR connection disposed for backtest page");
+        }
+    }
+}

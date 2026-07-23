@@ -1,0 +1,149 @@
+@* <copyright file="StrategyStateCard.razor" company="TradingBot">
+Copyright (c) TradingBot. All rights reserved.
+</copyright> *@
+
+@using Microsoft.AspNetCore.SignalR.Client
+@using TradingBot.Web.Models
+@namespace TradingBot.Web.Components.Features.WeeklyCashStrategy
+@implements IAsyncDisposable
+
+<TbCard>
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">@StrategyName</h2>
+            @if (State?.IsEnabled == true)
+            {
+                <span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:text-green-100 dark:bg-green-800 rounded-full">
+                    Active
+                </span>
+            }
+            else
+            {
+                <span class="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 dark:text-gray-100 dark:bg-gray-800 rounded-full">
+                    Inactive
+                </span>
+            }
+        </div>
+        <div class="flex items-center gap-2">
+            @if (IsConnected)
+            {
+                <span class="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Live
+                </span>
+            }
+            else
+            {
+                <span class="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                    <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                    Disconnected
+                </span>
+            }
+            @if (LastUpdated.HasValue)
+            {
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                    @LastUpdated.Value.ToString("HH:mm:ss")
+                </span>
+            }
+        </div>
+    </div>
+
+    @if (State is not null)
+    {
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Left Column -->
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">@State.UnderlyingSymbol Price</p>
+                    <div class="flex items-baseline gap-2">
+                        <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            @(State.CurrentUnderlyingPrice?.ToString("C2") ?? "N/A")
+                        </p>
+                        @if (State.IsBullish)
+                        {
+                            <span class="text-xs text-green-600 dark:text-green-400">↑ Bullish</span>
+                        }
+                        else
+                        {
+                            <span class="text-xs text-red-600 dark:text-red-400">↓ Bearish</span>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">@State.EtpSymbol Price</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        @(State.CurrentEtpPrice?.ToString("C2") ?? "N/A")
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">MA20</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        @(State.CurrentMA20?.ToString("C2") ?? "N/A")
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Days Below MA20</p>
+                    <p class="text-lg font-semibold @GetDaysBelowColorClass(State.DaysBelowMA20)">
+                        @State.DaysBelowMA20 days
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Cash Ratio</p>
+                    <div class="flex items-baseline gap-2">
+                        <p class="text-lg font-semibold @GetCashRatioColorClass()">
+                            @(State.CurrentCashRatio.HasValue ? State.CurrentCashRatio.Value.ToString("P1") : "N/A")
+                        </p>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            (@State.MinCashRatio.ToString("P0")-@State.MaxCashRatio.ToString("P0"))
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Buy Condition</p>
+                    <p class="text-sm font-medium @(State.IsBuyConditionMet ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400")">
+                        @(State.IsBuyConditionMet ? "✓ Met" : "✗ Not Met")
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Sell Condition</p>
+                    <p class="text-sm font-medium @(State.IsSellConditionMet ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-gray-400")">
+                        @(State.IsSellConditionMet ? "✓ Met" : "✗ Not Met")
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Next Execution</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        @(State.NextScheduledExecution.HasValue ?
+                            State.NextScheduledExecution.Value.ToString("ddd, MMM dd 'at' HH:mm 'UTC'") :
+                            "Not scheduled")
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if (State.LastExecutionTimestamp.HasValue)
+        {
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Last Execution: @State.LastExecutionTimestamp.Value.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
+                </p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="flex items-center justify-center py-8">
+            <p class="text-gray-500 dark:text-gray-400">Loading strategy data...</p>
+        </div>
+    }
+</TbCard>

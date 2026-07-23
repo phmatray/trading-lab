@@ -1,0 +1,230 @@
+@* <copyright file="TbStrategyConfigForm.razor" company="TradingBot">
+   Copyright (c) TradingBot. All rights reserved.
+   </copyright> *@
+@inject IStrategyManagementService StrategyService
+@inject ILogger<TbStrategyConfigForm> Logger
+
+<div class="space-y-6">
+    @if (IsLoading)
+    {
+        <div class="flex items-center justify-center py-8">
+            <TbSpinner Size="SpinnerSize.Large" />
+            <span class="ml-3 text-gray-600 dark:text-gray-400">Loading parameters...</span>
+        </div>
+    }
+    else if (Parameters.Count == 0)
+    {
+        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>No configurable parameters found for this strategy.</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Configure @StrategyName
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach (var param in Parameters)
+                {
+                    <TbStrategyParameterInput
+                        Parameter="@param"
+                        CurrentValue="@GetCurrentValue(param.ParameterName)"
+                        ValueChanged="@(value => HandleParameterChanged(param.ParameterName, value))" />
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p class="text-sm text-red-800 dark:text-red-200">@ErrorMessage</p>
+                </div>
+            }
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled="@IsSaving"
+                    @onclick="HandleReset">
+                    Reset to Defaults
+                </button>
+
+                <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium text-white dark:text-gray-300 bg-gray-500 dark:bg-gray-600 border border-transparent rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled="@IsSaving"
+                    @onclick="@(() => OnCancel.InvokeAsync())">
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    disabled="@IsSaving"
+                    @onclick="HandleSave">
+                    @if (IsSaving)
+                    {
+                        <TbSpinner Size="SpinnerSize.Small" />
+                    }
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the strategy name.
+    /// </summary>
+    [Parameter]
+    public required string StrategyName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the save callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Dictionary<string, object>> OnSave { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reset callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnReset { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cancel callback.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private List<StrategyParameterDto> Parameters { get; set; } = new();
+    private Dictionary<string, object> CurrentValues { get; set; } = new();
+    private bool IsLoading { get; set; }
+    private bool IsSaving { get; set; }
+    private string? ErrorMessage { get; set; }
+
+    /// <inheritdoc/>
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadParameters();
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        // Reload parameters when strategy name changes
+        if (!IsLoading && Parameters.Count == 0)
+        {
+            await LoadParameters();
+        }
+    }
+
+    private async Task LoadParameters()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            Logger.LogInformation("Loading parameters for strategy: {StrategyName}", StrategyName);
+
+            Parameters = await StrategyService.GetStrategyParametersAsync(StrategyName);
+
+            // Initialize current values from parameters
+            CurrentValues = Parameters.ToDictionary(
+                p => p.ParameterName,
+                p => p.CurrentValue);
+
+            Logger.LogInformation("Loaded {Count} parameters", Parameters.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading parameters for strategy: {StrategyName}", StrategyName);
+            ErrorMessage = "Failed to load strategy parameters. Please try again.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private object GetCurrentValue(string parameterName)
+    {
+        return CurrentValues.TryGetValue(parameterName, out var value) ? value : 0;
+    }
+
+    private void HandleParameterChanged(string parameterName, object newValue)
+    {
+        CurrentValues[parameterName] = newValue;
+        ErrorMessage = null;
+        Logger.LogDebug("Parameter {ParameterName} changed to {Value}", parameterName, newValue);
+    }
+
+    private async Task HandleSave()
+    {
+        IsSaving = true;
+        ErrorMessage = null;
+
+        try
+        {
+            Logger.LogInformation("Saving configuration for strategy: {StrategyName}", StrategyName);
+
+            await OnSave.InvokeAsync(CurrentValues);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error in save callback");
+            ErrorMessage = "Failed to save configuration. Please try again.";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task HandleReset()
+    {
+        if (!await ConfirmReset())
+        {
+            return;
+        }
+
+        IsSaving = true;
+        ErrorMessage = null;
+
+        try
+        {
+            Logger.LogInformation("Resetting strategy to defaults: {StrategyName}", StrategyName);
+
+            await OnReset.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error in reset callback");
+            ErrorMessage = "Failed to reset configuration. Please try again.";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private Task<bool> ConfirmReset()
+    {
+        // In a real implementation, this would show a confirmation dialog
+        // For now, we'll just return true
+        return Task.FromResult(true);
+    }
+
+    /// <summary>
+    /// Reloads the parameters from the service.
+    /// </summary>
+    public async Task ReloadParameters()
+    {
+        await LoadParameters();
+        StateHasChanged();
+    }
+}

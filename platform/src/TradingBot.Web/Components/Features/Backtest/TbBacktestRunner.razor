@@ -1,0 +1,91 @@
+@* <copyright file="TbBacktestRunner.razor" company="TradingBot">
+ Copyright (c) TradingBot. All rights reserved.
+ </copyright> *@
+
+@namespace TradingBot.Web.Components.Features.Backtest
+
+<TbCard Title="Run New Backtest" ContentClass="p-6">
+    @if (isRunning)
+    {
+        <TbBacktestProgress Progress="@currentProgress"
+                           StatusMessage="@currentStatusMessage"
+                           IsComplete="@isComplete"
+                           IsFailed="@isFailed"
+                           OnCancel="@HandleCancelBacktest" />
+    }
+    else
+    {
+        <TbBacktestForm OnSubmit="@HandleSubmit"
+                       IsLoading="@isRunning"
+                       IsDisabled="@isRunning" />
+    }
+</TbCard>
+
+@code {
+    /// <summary>
+    /// Gets or sets the event callback when a backtest is submitted.
+    /// </summary>
+    [Parameter]
+    public EventCallback<BacktestRequest> OnBacktestSubmit { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback when a backtest is cancelled.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnBacktestCancel { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current backtest ID.
+    /// </summary>
+    [Parameter]
+    public string? CurrentBacktestId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current progress percentage.
+    /// </summary>
+    [Parameter]
+    public int CurrentProgress { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current status message.
+    /// </summary>
+    [Parameter]
+    public string CurrentStatusMessage { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a backtest is currently running.
+    /// </summary>
+    [Parameter]
+    public bool IsRunning { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the backtest is complete.
+    /// </summary>
+    [Parameter]
+    public bool IsComplete { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the backtest has failed.
+    /// </summary>
+    [Parameter]
+    public bool IsFailed { get; set; }
+
+    private bool isRunning => IsRunning;
+    private int currentProgress => CurrentProgress;
+    private string currentStatusMessage => CurrentStatusMessage;
+    private bool isComplete => IsComplete;
+    private bool isFailed => IsFailed;
+
+    private async Task HandleSubmit(BacktestRequest request)
+    {
+        await OnBacktestSubmit.InvokeAsync(request);
+    }
+
+    private async Task HandleCancelBacktest()
+    {
+        if (!string.IsNullOrEmpty(CurrentBacktestId))
+        {
+            await OnBacktestCancel.InvokeAsync(CurrentBacktestId);
+        }
+    }
+}
