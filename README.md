@@ -157,6 +157,22 @@ If either ever fails, the backtest's verdict is invalid.
 
 ---
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **C#**
+- Microsoft.Extensions.Logging.Abstractions
+- Microsoft.ML
+- Microsoft.Extensions.Configuration.Json
+- Microsoft.Extensions.Hosting
+- Serilog.Extensions.Hosting
+- Serilog.Settings.Configuration
+- Serilog.Sinks.Console
+- Binance.Net
+
+<!-- portfolio-techstack:end -->
+
 <!-- portfolio-sections:start -->
 
 ## Contributing
