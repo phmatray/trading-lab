@@ -1,3 +1,5 @@
+![TradingBot banner](.github/banner.png)
+
 # TradingBot
 
 A powerful, extensible algorithmic trading platform built with .NET 10, featuring automated strategy execution, risk management, and comprehensive order handling. Includes a modern web dashboard built with Blazor Server using Domain-Driven Design patterns.
