@@ -15,6 +15,19 @@
 [![Last commit](https://img.shields.io/github/last-commit/phmatray/algoTrad)](https://github.com/phmatray/algoTrad/commits)
 <!-- portfolio-badges:end -->
 
+<!-- portfolio-toc:start -->
+
+## Table of Contents
+
+- [Description](#description)
+- [Stack / Tech](#stack--tech)
+- [Getting Started](#getting-started)
+- [License](#license)
+- [Contributing](#contributing)
+
+<!-- portfolio-toc:end -->
+
+
 
 > Algorithmic trading experiments and strategies using Python and Jupyter Notebooks.
 
