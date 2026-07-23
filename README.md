@@ -40,6 +40,18 @@ docker build -t tradingview-blazor .
 docker run -p 8080:8080 tradingview-blazor
 ```
 
+<!-- portfolio-techstack:start -->
+
+## Tech Stack
+
+- **.NET 10**
+- Microsoft.AspNetCore.Components.Web
+- Microsoft.FluentUI.AspNetCore.Components
+- Microsoft.FluentUI.AspNetCore.Components.Emoji
+- Microsoft.FluentUI.AspNetCore.Components.Icons
+
+<!-- portfolio-techstack:end -->
+
 ## License
 MIT
 
