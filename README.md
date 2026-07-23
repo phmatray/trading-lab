@@ -1,3 +1,5 @@
+![algoTrad banner](.github/banner.png)
+
 # algoTrad
 
 > Algorithmic trading experiments and strategies using Python and Jupyter Notebooks.
