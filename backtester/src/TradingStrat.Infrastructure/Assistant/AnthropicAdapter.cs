@@ -32,7 +32,7 @@ public class AnthropicAdapter : IAssistantPort
         }
 
         // Create Anthropic client with API key
-        var anthropicClient = new AnthropicClient { APIKey = _config.ApiKey };
+        var anthropicClient = new AnthropicClient { ApiKey = _config.ApiKey };
 
         // Expose as IChatClient with specified model
         _chatClient = anthropicClient.AsIChatClient(_config.Model);
