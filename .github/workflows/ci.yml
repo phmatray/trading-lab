@@ -46,8 +46,15 @@ jobs:
         include:
           - name: platform (TradingBot)
             solution: platform/TradingBot.sln
+            # TradingBot.Web has an MSBuild target (BuildTailwindCSS) that shells out
+            # to `npm run css:build` -> `npx @tailwindcss/cli`. npx only auto-installs
+            # the CLI itself, not the project's own package.json dependencies (no
+            # lockfile is committed - node_modules/package-lock.json are gitignored),
+            # so `tailwindcss` fails to resolve unless we `npm install` first.
+            npm_dir: platform/src/TradingBot.Web
           - name: tradingview-blazor
             solution: tradingview-blazor/TradingViewBlazorApp.sln
+            npm_dir: ""
 
     steps:
       - name: Checkout
@@ -59,9 +66,15 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Setup Node.js
+        if: matrix.npm_dir != ''
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Install npm dependencies
+        if: matrix.npm_dir != ''
+        working-directory: ${{ matrix.npm_dir }}
+        run: npm install
 
       - name: Restore
         run: dotnet restore "${{ matrix.solution }}"
