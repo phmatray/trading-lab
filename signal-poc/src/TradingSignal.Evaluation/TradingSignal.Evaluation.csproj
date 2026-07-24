@@ -6,5 +6,12 @@
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
+    <!-- Transitive vulnerability pin: Microsoft.Data.Sqlite pulls in SQLitePCLRaw.lib.e_sqlite3
+         2.1.11 (NU1903, GHSA-2m69-gcr7-jv3q). Direct override raises the resolved version
+         past the known-vulnerable one; no CPM in this solution, so pinned per-project. -->
+    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.12" />
   </ItemGroup>
 </Project>
