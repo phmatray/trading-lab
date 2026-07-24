@@ -6,6 +6,12 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.FluentUI.AspNetCore.Components
+@* NavMenu.razor references icons as "Icons.Regular.Size20.Home()". "Icons" is a nested
+   namespace (Microsoft.FluentUI.AspNetCore.Components.Icons), not a type, so a plain
+   "@using Microsoft.FluentUI.AspNetCore.Components.Icons" does not bring the bare name
+   "Icons" into scope (C# does not expose nested namespaces through a parent using). An
+   alias is required to make the existing "Icons.Regular...." usage resolve. *@
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
 @using Microsoft.JSInterop
 @using TradingViewBlazorApp
 @using TradingViewBlazorApp.Components

@@ -1,0 +1,83 @@
+name: CI
+
+# Root CI for the trading-lab monorepo.
+#
+# Matrix covers only the .sln/.slnx solutions confirmed to build clean with
+# `dotnet build -c Release`. Everything else is deliberately excluded, with
+# the reason documented below (see also the PR description that introduced
+# this workflow):
+#
+#   - backtester/TradingStrat.slnx     - NU1902/NU1903: SQLitePCLRaw.lib.e_sqlite3
+#                                         (GHSA-2m69-gcr7-jv3q) and AngleSharp are
+#                                         resolved as known-vulnerable and fail the
+#                                         audit-as-error build. Same package family
+#                                         as the platform/ fix in this PR, but out
+#                                         of this PR's scope - needs its own patch.
+#   - trady-strat/TradyStrat.slnx      - Pre-existing compile errors (CS0115/CS0534):
+#                                         TradyStrat.Cli's McpCommand/ReplayCommand
+#                                         override Spectre.Console.Cli's AsyncCommand
+#                                         with the old ExecuteAsync(CommandContext)
+#                                         signature; the resolved Spectre.Console.Cli
+#                                         version requires a CancellationToken
+#                                         parameter. Unrelated to this PR.
+#   - signal-poc/TradingSignalPoc.slnx - Same NU1902/NU1903 SQLitePCLRaw advisory as
+#                                         backtester above.
+#   - botzilla/Botzilla.sln            - Legacy net461, Windows-only. Not CI-able on
+#                                         ubuntu-latest by design; intentionally left
+#                                         out.
+#
+# python-notebooks/ and mt5-docker/ are non-.NET and out of scope for this workflow.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: platform (TradingBot)
+            solution: platform/TradingBot.sln
+            # TradingBot.Web has an MSBuild target (BuildTailwindCSS) that shells out
+            # to `npm run css:build` -> `npx @tailwindcss/cli`. npx only auto-installs
+            # the CLI itself, not the project's own package.json dependencies (no
+            # lockfile is committed - node_modules/package-lock.json are gitignored),
+            # so `tailwindcss` fails to resolve unless we `npm install` first.
+            npm_dir: platform/src/TradingBot.Web
+          - name: tradingview-blazor
+            solution: tradingview-blazor/TradingViewBlazorApp.sln
+            npm_dir: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Setup Node.js
+        if: matrix.npm_dir != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install npm dependencies
+        if: matrix.npm_dir != ''
+        working-directory: ${{ matrix.npm_dir }}
+        run: npm install
+
+      - name: Restore
+        run: dotnet restore "${{ matrix.solution }}"
+
+      - name: Build (Release)
+        run: dotnet build "${{ matrix.solution }}" -c Release --no-restore

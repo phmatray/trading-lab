@@ -26,8 +26,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingBot.Analytics.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingBot.Web", "src\TradingBot.Web\TradingBot.Web.csproj", "{83D1BFBA-044A-4AC8-BFAF-8317A8E528C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingBot.Web.Tests", "tests\TradingBot.Web.Tests\TradingBot.Web.Tests.csproj", "{93CC0F1C-518C-43C1-9609-4E18AD935E00}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,10 +76,6 @@ Global
 		{83D1BFBA-044A-4AC8-BFAF-8317A8E528C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83D1BFBA-044A-4AC8-BFAF-8317A8E528C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83D1BFBA-044A-4AC8-BFAF-8317A8E528C8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{93CC0F1C-518C-43C1-9609-4E18AD935E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{93CC0F1C-518C-43C1-9609-4E18AD935E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{93CC0F1C-518C-43C1-9609-4E18AD935E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{93CC0F1C-518C-43C1-9609-4E18AD935E00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +92,5 @@ Global
 		{E57DCD81-725F-450F-B64E-731E17D6BAE1} = {16F01272-AE7D-4FD2-8DC4-C9F3CDACE13F}
 		{7B35F69B-7CC3-4FD6-9C16-B31A613F80C3} = {16F01272-AE7D-4FD2-8DC4-C9F3CDACE13F}
 		{83D1BFBA-044A-4AC8-BFAF-8317A8E528C8} = {EA2E37C3-76C8-4F5D-88C0-B533DACDEBAD}
-		{93CC0F1C-518C-43C1-9609-4E18AD935E00} = {16F01272-AE7D-4FD2-8DC4-C9F3CDACE13F}
 	EndGlobalSection
 EndGlobal
