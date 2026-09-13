@@ -3,6 +3,6 @@
     <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Skender.Stock.Indicators" Version="2.7.1" />
+    <PackageReference Include="Skender.Stock.Indicators" Version="2.7.3" />
   </ItemGroup>
 </Project>
