@@ -15,48 +15,48 @@
     <PackageVersion Include="Ardalis.Specification" Version="9.3.1" />
     <PackageVersion Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <PackageVersion Include="Blazor-ApexCharts" Version="6.1.0" />
-    <PackageVersion Include="bUnit" Version="2.7.2" />
-    <PackageVersion Include="MediatR" Version="14.1.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.10" />
+    <PackageVersion Include="bUnit" Version="2.10.3" />
+    <PackageVersion Include="MediatR" Version="14.2.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-    <PackageVersion Include="Spectre.Console" Version="0.55.2" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
-    <PackageVersion Include="Spectre.Console.Testing" Version="0.55.2" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.57.2" />
   </ItemGroup>
   <ItemGroup Label="Data Access - Entity Framework Core">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup Label="Configuration">
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
     <PackageVersion Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup Label="Dependency Injection and Hosting">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup Label="Logging - Serilog">
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
-    <PackageVersion Include="Serilog" Version="4.3.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup Label="Domain - SmartEnum">
     <PackageVersion Include="Ardalis.SmartEnum" Version="8.2.0" />
@@ -66,16 +66,16 @@
     <PackageVersion Include="YahooFinanceApi" Version="2.3.3" />
   </ItemGroup>
   <ItemGroup Label="Resilience and Rate Limiting">
-    <PackageVersion Include="Polly" Version="8.6.6" />
-    <PackageVersion Include="Polly.Extensions" Version="8.6.6" />
-    <PackageVersion Include="Polly.RateLimiting" Version="8.6.6" />
+    <PackageVersion Include="Polly" Version="8.7.0" />
+    <PackageVersion Include="Polly.Extensions" Version="8.7.0" />
+    <PackageVersion Include="Polly.RateLimiting" Version="8.7.0" />
   </ItemGroup>
   <ItemGroup Label="Math and Statistics">
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup Label="Background Jobs">
     <PackageVersion Include="NCrontab" Version="3.4.0" />
-    <PackageVersion Include="TickerQ" Version="10.3.0" />
+    <PackageVersion Include="TickerQ" Version="10.4.0" />
   </ItemGroup>
   <ItemGroup Label="Security Patches - Transitive Vulnerability Pins">
     <!-- These packages are not referenced directly by any project; they are pulled in
@@ -85,14 +85,14 @@
          the resolved transitive version past the known-vulnerable one without a direct
          PackageReference in any csproj. See PR description for the advisory -> version map. -->
     <PackageVersion Include="MessagePack" Version="2.5.302" />
-    <PackageVersion Include="AngleSharp" Version="1.5.2" />
-    <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.12" />
-    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
-    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
-    <PackageVersion Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.12" />
+    <PackageVersion Include="AngleSharp" Version="1.8.1" />
+    <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.13" />
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
+    <PackageVersion Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
   <ItemGroup Label="Source Link for Debugging">
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.202">
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -101,7 +101,7 @@
   <!-- Testing Packages -->
   <!-- ============================================ -->
   <ItemGroup Label="Testing - Framework">
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
@@ -130,7 +130,7 @@
   <!-- Code Analysis and Quality -->
   <!-- ============================================ -->
   <ItemGroup Label="Code Analyzers">
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.202">
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.401">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -138,11 +138,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0">
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.16.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.23.0.137933">
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.34.0.3385">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>

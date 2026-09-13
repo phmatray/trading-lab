@@ -6,18 +6,18 @@
     <ProjectReference Include="..\TradingSignal.Core\TradingSignal.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.6.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
-    <PackageReference Include="OpenAI" Version="2.10.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.10.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.10.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="OpenAI" Version="2.13.0" />
     <!-- Transitive vulnerability pin: Microsoft.Data.Sqlite pulls in SQLitePCLRaw.lib.e_sqlite3
          2.1.11 (NU1903, GHSA-2m69-gcr7-jv3q). Direct override raises the resolved version
          past the known-vulnerable one; no CPM in this solution, so pinned per-project. -->
-    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.12" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
-    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.13" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.13" />
+    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.13" />
   </ItemGroup>
 </Project>
